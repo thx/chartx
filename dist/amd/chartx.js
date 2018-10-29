@@ -8950,13 +8950,19 @@ define(function () { 'use strict';
 	            //get xxx OfPos的时候，要先来这里做一次寻找
 	            this.dataSectionLayout = [];
 	            _$9.each(this.dataSection, function (val, i) {
+
+	                var ind = i;
+	                if (me.layoutType == "proportion") {
+	                    ind = me.getIndexOfVal(val);
+	                }
+	                var pos = parseInt(me.getPosOf({
+	                    ind: i,
+	                    val: val
+	                }), 10);
 	                me.dataSectionLayout.push({
 	                    val: val,
-	                    ind: me.getIndexOfVal(val),
-	                    pos: parseInt(me.getPosOf({
-	                        ind: i,
-	                        val: val
-	                    }), 10)
+	                    ind: ind,
+	                    pos: pos
 	                });
 	            });
 	        }
@@ -9241,11 +9247,15 @@ define(function () { 'use strict';
 	    }, {
 	        key: "getPosOfVal",
 	        value: function getPosOfVal(val) {
+
+	            /* val可能会重复，so 这里得到的会有问题，先去掉
 	            //先检查下 dataSectionLayout 中有没有对应的记录
-	            var _pos = this._getLayoutDataOf({ val: val }).pos;
-	            if (_pos != undefined) {
+	            var _pos = this._getLayoutDataOf({ val : val }).pos;
+	            if( _pos != undefined ){
 	                return _pos;
-	            }
+	            };
+	            */
+
 	            return this.getPosOf({
 	                val: val
 	            });
@@ -9309,7 +9319,13 @@ define(function () { 'use strict';
 	                            pos = valInd / (cellCount - 1) * this.axisLength;
 	                        }                        if (this.layoutType == "peak") {
 	                            //bar的xaxis就是 peak
-	                            pos = this.axisLength / cellCount * (valInd + 1) - this.axisLength / cellCount / 2;
+	                            /*
+	                            pos = (this.axisLength/cellCount) 
+	                                  * (valInd+1) 
+	                                  - (this.axisLength/cellCount)/2;
+	                            */
+	                            var _cellLength = this.getCellLength();
+	                            pos = _cellLength * (valInd + 1) - _cellLength / 2;
 	                        }                    }                }            }
 	            !pos && (pos = 0);
 
@@ -9401,11 +9417,15 @@ define(function () { 'use strict';
 	    }, {
 	        key: "getIndexOfVal",
 	        value: function getIndexOfVal(val) {
+
+	            /* val可能会重复，so 这里得到的会有问题，先去掉
 	            //先检查下 dataSectionLayout 中有没有对应的记录
-	            var _ind = this._getLayoutDataOf({ val: val }).ind;
-	            if (_ind != undefined) {
+	            var _ind = this._getLayoutDataOf({ val : val }).ind;
+	            if( _ind != undefined ){
 	                return _ind;
-	            }
+	            };
+	            */
+
 	            var valInd = -1;
 	            if (this.layoutType == "proportion") {
 	                //因为在proportion中index 就是 pos
@@ -9448,7 +9468,8 @@ define(function () { 'use strict';
 	                            cellLength = axisLength / 2;
 	                        } else {
 	                            cellLength = axisLength / (cellCount - 1);
-	                        }                    }                    if (this.posParseToInt) {
+	                        }                    }
+	                    if (this.posParseToInt) {
 	                        cellLength = parseInt(cellLength);
 	                    }                }
 	            }
@@ -11300,6 +11321,7 @@ define(function () { 'use strict';
 
 	            //根据opt中得Graphs配置，来设置 coord.yAxis
 	            if (opts.graphs) {
+
 	                //有graphs的就要用找到这个graphs.field来设置coord.yAxis
 	                for (var i = 0; i < opts.graphs.length; i++) {
 	                    var graphs = opts.graphs[i];
@@ -14813,17 +14835,17 @@ define(function () { 'use strict';
 	                            id: "scat_text_" + iNode,
 	                            context: {}
 	                        });
-	                        _labelContext = me._getTextContext(_label, _nodeElement);
+	                        _labelContext = me._getTextContext(_label, _context);
 	                        //_label.animate( _labelContext );
 	                        _$22.extend(_label.context, _labelContext);
 	                        me._textsp.addChild(_label);
 	                    } else {
 	                        _label.resetText(nodeData.label);
-	                        _labelContext = me._getTextContext(_label, _nodeElement);
+	                        _labelContext = me._getTextContext(_label, _context);
 	                        _label.animate(_labelContext);
 	                    }
 	                    //图形节点和text文本相互引用
-	                    _nodeElement._label = _label;
+	                    _nodeElement.labelElement = _label;
 	                    _label.nodeElement = _nodeElement;
 	                }            });
 	        }
@@ -14869,19 +14891,19 @@ define(function () { 'use strict';
 	        }
 	    }, {
 	        key: "_getTextContext",
-	        value: function _getTextContext(_label, _nodeElement) {
-	            var textPoint = this._getTextPosition(_label, _nodeElement.context);
+	        value: function _getTextContext(_label, _context) {
+	            var textPoint = this._getTextPosition(_label, _context);
 
 	            var fontSize = this.label.fontSize;
-	            if (_label.getTextWidth() > _nodeElement.context.r * 2) {
+	            if (_label.getTextWidth() > _context.r * 2) {
 	                fontSize -= 2;
 	            }
 	            var ctx = {
 	                x: textPoint.x,
 	                y: textPoint.y,
-	                fillStyle: this.label.fontColor || _nodeElement.context.fillStyle,
+	                fillStyle: this.label.fontColor || _context.fillStyle,
 	                fontSize: fontSize,
-	                strokeStyle: this.label.strokeStyle || _nodeElement.context.fillStyle,
+	                strokeStyle: this.label.strokeStyle || _context.fillStyle,
 	                lineWidth: this.label.lineWidth,
 	                textAlign: this.label.align,
 	                textBaseline: this.label.verticalAlign
@@ -14950,10 +14972,10 @@ define(function () { 'use strict';
 	                    r: nodeData.radius
 	                }, {
 	                    onUpdate: function onUpdate(opt) {
-	                        if (this._label && this._label.context) {
-	                            var _textPoint = me._getTextPosition(this._label, opt);
-	                            this._label.context.x = _textPoint.x;
-	                            this._label.context.y = _textPoint.y;
+	                        if (this.labelElement && this.labelElement.context) {
+	                            var _textPoint = me._getTextPosition(this.labelElement, opt);
+	                            this.labelElement.context.x = _textPoint.x;
+	                            this.labelElement.context.y = _textPoint.y;
 	                        }                        if (this._line && this._line.context) {
 	                            this._line.context.start.y = opt.y + opt.r;
 	                        }                    },

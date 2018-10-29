@@ -106,17 +106,24 @@ export default class axis
         
         this._originTrans = this._getOriginTrans( this.origin );
         this.originPos = this.getPosOfVal( this.origin );
-
+        
         //get xxx OfPos的时候，要先来这里做一次寻找
         this.dataSectionLayout = [];
         _.each( this.dataSection, function( val, i ){
+            
+            var ind = i;
+            if( me.layoutType == "proportion" ){
+                ind = me.getIndexOfVal( val );
+            };
+            
+            var pos = parseInt(me.getPosOf({
+                ind : i,
+                val : val
+            }), 10);
             me.dataSectionLayout.push( {
                 val : val,
-                ind : me.getIndexOfVal( val ),
-                pos : parseInt(me.getPosOf({
-                    ind : i,
-                    val : val
-                }), 10)
+                ind : ind,
+                pos : pos
             } );
         } );
         
@@ -447,11 +454,14 @@ export default class axis
     }
 
     getPosOfVal( val ){
+        
+        /* val可能会重复，so 这里得到的会有问题，先去掉
         //先检查下 dataSectionLayout 中有没有对应的记录
         var _pos = this._getLayoutDataOf({ val : val }).pos;
         if( _pos != undefined ){
             return _pos;
         };
+        */
 
         return this.getPosOf({
             val : val
@@ -518,9 +528,13 @@ export default class axis
                     };
                     if( this.layoutType == "peak" ){
                         //bar的xaxis就是 peak
+                        /*
                         pos = (this.axisLength/cellCount) 
                               * (valInd+1) 
                               - (this.axisLength/cellCount)/2;
+                        */
+                        var _cellLength = this.getCellLength();
+                        pos = _cellLength * (valInd+1) - _cellLength/2;
                     };
                 };
             };
@@ -622,11 +636,14 @@ export default class axis
     }
 
     getIndexOfVal( val ){
+        
+        /* val可能会重复，so 这里得到的会有问题，先去掉
         //先检查下 dataSectionLayout 中有没有对应的记录
         var _ind = this._getLayoutDataOf({ val : val }).ind;
         if( _ind != undefined ){
             return _ind;
         };
+        */
 
         var valInd = -1;
         if( this.layoutType == "proportion" ){
@@ -674,6 +691,7 @@ export default class axis
                         cellLength = axisLength / ( cellCount - 1 )
                     };
                 };
+                
                 if( this.posParseToInt ){
                     cellLength = parseInt( cellLength );
                 };

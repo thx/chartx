@@ -411,19 +411,19 @@ export default class ScatGraphs extends GraphsBase
                         id: "scat_text_"+iNode,
                         context: {}
                     });
-                    _labelContext = me._getTextContext( _label, _nodeElement );
+                    _labelContext = me._getTextContext( _label, _context );
                     //_label.animate( _labelContext );
                     _.extend( _label.context , _labelContext );
                     me._textsp.addChild( _label );
                     
                 } else {
                     _label.resetText(  nodeData.label );
-                    _labelContext = me._getTextContext( _label, _nodeElement );
+                    _labelContext = me._getTextContext( _label, _context );
                     _label.animate( _labelContext );
                 };
 
                 //图形节点和text文本相互引用
-                _nodeElement._label = _label;
+                _nodeElement.labelElement = _label;
                 _label.nodeElement = _nodeElement;
             };
         
@@ -472,21 +472,21 @@ export default class ScatGraphs extends GraphsBase
         return point;
     }
 
-    _getTextContext( _label, _nodeElement )
+    _getTextContext( _label, _context )
     {
-        var textPoint = this._getTextPosition( _label, _nodeElement.context );
+        var textPoint = this._getTextPosition( _label, _context );
 
         var fontSize = this.label.fontSize;
-        if( _label.getTextWidth() > _nodeElement.context.r*2 ){
+        if( _label.getTextWidth() > _context.r*2 ){
             fontSize -= 2;
         };
         
         var ctx = {
             x: textPoint.x,
             y: textPoint.y,
-            fillStyle: this.label.fontColor || _nodeElement.context.fillStyle,
+            fillStyle: this.label.fontColor || _context.fillStyle,
             fontSize: fontSize,
-            strokeStyle : this.label.strokeStyle || _nodeElement.context.fillStyle,
+            strokeStyle : this.label.strokeStyle || _context.fillStyle,
             lineWidth : this.label.lineWidth,
             textAlign : this.label.align,
             textBaseline : this.label.verticalAlign
@@ -557,10 +557,10 @@ export default class ScatGraphs extends GraphsBase
                 r : nodeData.radius
             }, {
                 onUpdate: function( opt ){
-                    if( this._label && this._label.context ){
-                        var _textPoint = me._getTextPosition( this._label, opt );
-                        this._label.context.x = _textPoint.x;
-                        this._label.context.y = _textPoint.y;
+                    if( this.labelElement && this.labelElement.context ){
+                        var _textPoint = me._getTextPosition( this.labelElement, opt );
+                        this.labelElement.context.x = _textPoint.x;
+                        this.labelElement.context.y = _textPoint.y;
                     };
                     if( this._line && this._line.context ){
                         this._line.context.start.y = opt.y+opt.r;

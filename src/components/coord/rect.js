@@ -47,6 +47,7 @@ export default class Rect extends CoordBase
 
         //根据opt中得Graphs配置，来设置 coord.yAxis
         if( opts.graphs ){
+            
             //有graphs的就要用找到这个graphs.field来设置coord.yAxis
             for( var i=0; i<opts.graphs.length; i++ ){
                 var graphs = opts.graphs[i];
