@@ -128,6 +128,10 @@ class chartxReact extends React.Component {
     };
   }
 
+  getOptions( chartPark_cid , options ){
+    return Chartx.getOptions( chartPark_cid , options );
+  }
+
 }
 
 export default chartxReact;
