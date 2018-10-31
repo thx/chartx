@@ -57,8 +57,6 @@ export default class axis
         this._min = null; 
         this._max = null;
 
-        
-
         //"asc" 排序，默认从小到大, desc为从大到小
         //之所以不设置默认值为asc，是要用 null 来判断用户是否进行了配置
         this.sort = null; 
@@ -438,7 +436,7 @@ export default class axis
             pos = -(groupLength - pos);
         };
 
-        return pos;
+        return parseInt(pos);
     }
 
     //opt { val ind pos } 一次只能传一个
@@ -554,7 +552,7 @@ export default class axis
             
         !pos && (pos = 0);
 
-        pos += this._originTrans;
+        pos = Number( pos.toFixed(1) ) + this._originTrans;
         
         return Math.abs(pos);
     }
@@ -705,9 +703,7 @@ export default class axis
                 if( this.posParseToInt ){
                     cellLength = parseInt( cellLength );
                 };
-
             }
-
         };
 
         this._cellLength = cellLength;

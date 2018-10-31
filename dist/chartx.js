@@ -7870,15 +7870,13 @@ var Chartx = (function () {
 	    //填充好total的data并且把属于yAxis的设置为number
 	    for (var a = 1, al = data.length; a < al; a++) {
 	        for (var b = 0, bl = data[a].length; b < bl; b++) {
-
-	            /*
 	            var _val = data[a][b];
-	            if( !isNaN( _val ) ){
-	                _val = Number( _val );
-	            };
-	            */
-
-	            total[b].data.push(data[a][b]);
+	            //如果用户传入的数据是个number，那么就转换为真正的Number吧
+	            //‘223’ --》 223
+	            if (!isNaN(_val) && _val !== "" && _val !== null) {
+	                _val = Number(_val);
+	            }            total[b].data.push(_val);
+	            //total[b].data.push( data[a][b] );
 	        }
 	    }
 	    //会按照$field的格式转换成对应一一对应的 org 的结构
@@ -9225,7 +9223,7 @@ var Chartx = (function () {
 	                //如果是倒序的
 	                pos = -(groupLength - pos);
 	            }
-	            return pos;
+	            return parseInt(pos);
 	        }
 
 	        //opt { val ind pos } 一次只能传一个
@@ -9337,7 +9335,7 @@ var Chartx = (function () {
 	                        }                    }                }            }
 	            !pos && (pos = 0);
 
-	            pos += this._originTrans;
+	            pos = Number(pos.toFixed(1)) + this._originTrans;
 
 	            return Math.abs(pos);
 	        }
