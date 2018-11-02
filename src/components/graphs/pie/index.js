@@ -152,7 +152,7 @@ export default class PieGraphs extends GraphsBase
         var dataFrame = me.dataFrame;
         
         for( var i=0,l=dataFrame.length; i<l; i++ ){
-            var rowData = dataFrame.getRowData(i);
+            var rowData = dataFrame.getRowDataAt(i);
             var color = me.root.getTheme( i );
             var layoutData = {
                 rowData       : rowData,//把这一行数据给到layoutData引用起来

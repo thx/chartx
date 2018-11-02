@@ -132,7 +132,7 @@ export default class FunnelGraphs extends GraphsBase
             var ld = {
                 type    : "funnel",
                 field   : me.field,
-                rowData : me.dataFrame.getRowData(i),
+                rowData : me.dataFrame.getRowDataAt(i),
                 value   : num,
                 width   : me._getNodeWidth( num ),
                 color   : me.root.getTheme(i),//默认从皮肤中获取

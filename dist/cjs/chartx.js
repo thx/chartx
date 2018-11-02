@@ -7816,7 +7816,8 @@ function DataFrame (data, opt) {
         length: 0,
         org: [], //最原始的数据，一定是个行列式，因为如果发现是json格式数据，会自动转换为行列式
         data: [], //最原始的数据转化后的数据格式：[o,o,o] o={field:'val1',index:0,data:[1,2,3]}
-        getRowData: _getRowData,
+        getRowDataAt: _getRowDataAt,
+        getRowDataOf: _getRowDataOf,
         getFieldData: _getFieldData,
         getDataOrg: getDataOrg,
         fields: [],
@@ -7923,12 +7924,38 @@ function DataFrame (data, opt) {
     /*
      * 获取某一行数据
     */
-    function _getRowData(index) {
+    function _getRowDataAt(index) {
         var o = {};
         var data = dataFrame.data;
         for (var a = 0; a < data.length; a++) {
             o[data[a].field] = data[a].data[dataFrame.range.start + index];
         }        return o;
+    }
+
+    /**
+     * obj => {uv: 100, pv: 10 ...}
+     */
+    function _getRowDataOf(obj) {
+        !obj && (obj = {});
+        var arr = [];
+
+        var expCount = 0;
+        for (var p in obj) {
+            expCount++;
+        }
+        if (expCount) {
+            for (var i = dataFrame.range.start; i < dataFrame.range.end; i++) {
+                var matchNum = 0;
+                _$4.each(dataFrame.data, function (fd) {
+                    if (fd.field in obj && fd.data[i] == obj[fd.field]) {
+                        matchNum++;
+                    }
+                });
+                if (matchNum == expCount) {
+                    //说明这条数据是完全和查询
+                    arr.push(_getRowDataAt(i));
+                }            }        }
+        return arr;
     }
 
     function _getFieldData(field) {
@@ -11684,7 +11711,7 @@ var polarComponent = function (_coorBase) {
 
         _this.aAxis = {
             field: null,
-            layoutType: "average", // average 弧度均分， proportion 和直角坐标中的一样
+            layoutType: "proportion", // proportion 弧度均分， proportion 和直角坐标中的一样
             data: [],
             angleList: [], //对应layoutType下的角度list
             beginAngle: -90,
@@ -11764,7 +11791,7 @@ var polarComponent = function (_coorBase) {
                 }, this);
 
                 if (this.aAxis.enabled) {
-                    this._drawAAxisScale();
+                    this._drawAAxis();
                 }
                 this._initInduce();
             }        }
@@ -12103,7 +12130,7 @@ var polarComponent = function (_coorBase) {
             me.aAxis.angleList = [];
 
             var aAxisArr = this.aAxis.data;
-            if (this.aAxis.layoutType == "average") {
+            if (this.aAxis.layoutType == "proportion") {
                 aAxisArr = [];
                 for (var i = 0, l = this.aAxis.data.length; i < l; i++) {
                     aAxisArr.push(i);
@@ -12113,7 +12140,7 @@ var polarComponent = function (_coorBase) {
 
             var min = 0;
             var max = _$16.max(aAxisArr);
-            if (this.aAxis.layoutType == "average") {
+            if (this.aAxis.layoutType == "proportion") {
                 max++;
             }
             _$16.each(aAxisArr, function (p) {
@@ -12123,8 +12150,8 @@ var polarComponent = function (_coorBase) {
             });
         }
     }, {
-        key: "_drawAAxisScale",
-        value: function _drawAAxisScale() {
+        key: "_drawAAxis",
+        value: function _drawAAxis() {
             //绘制aAxis刻度尺
             var me = this;
             var r = me.getROfNum(_$16.max(this.rAxis.dataSection));
@@ -13014,7 +13041,7 @@ var BarGraphs = function (_GraphsBase) {
             }            if (_$19.isFunction(me.select.fillStyle)) {
                 _groupRegionStyle = me.select.fillStyle.apply(this, [{
                     iNode: iNode,
-                    rowData: me.dataFrame.getRowData(iNode)
+                    rowData: me.dataFrame.getRowDataAt(iNode)
                 }]);
             }            if (_groupRegionStyle === undefined || _groupRegionStyle === null) {
                 return me.select._fillStyle;
@@ -13161,7 +13188,7 @@ var BarGraphs = function (_GraphsBase) {
                             isLeaf: true,
                             xAxis: _xAxis.getNodeInfoOfX(_x),
                             iNode: i,
-                            rowData: me.dataFrame.getRowData(i),
+                            rowData: me.dataFrame.getRowDataAt(i),
                             color: null
                         };
 
@@ -13374,7 +13401,7 @@ var BarGraphs = function (_GraphsBase) {
 
             _$19.each(me.select.inds, function (ind) {
                 var index = ind - me.dataFrame.range.start;
-                rowDatas.push(me.dataFrame.getRowData(index));
+                rowDatas.push(me.dataFrame.getRowDataAt(index));
             });
 
             return rowDatas;
@@ -14298,7 +14325,7 @@ var LineGraphs = function (_GraphsBase) {
                         value: _lineData[b],
                         x: x,
                         y: y,
-                        rowData: me.dataFrame.getRowData(b),
+                        rowData: me.dataFrame.getRowDataAt(b),
                         color: fieldMap.color
                     };
 
@@ -14609,7 +14636,7 @@ var ScatGraphs = function (_GraphsBase) {
 
             for (var i = 0; i < dataLen; i++) {
 
-                var rowData = this.dataFrame.getRowData(i);
+                var rowData = this.dataFrame.getRowDataAt(i);
                 var xValue = rowData[xField];
                 var yValue = rowData[this.field];
 
@@ -15847,7 +15874,7 @@ var PieGraphs = function (_GraphsBase) {
             var dataFrame = me.dataFrame;
 
             for (var i = 0, l = dataFrame.length; i < l; i++) {
-                var rowData = dataFrame.getRowData(i);
+                var rowData = dataFrame.getRowDataAt(i);
                 var color = me.root.getTheme(i);
                 var layoutData = {
                     rowData: rowData, //把这一行数据给到layoutData引用起来
@@ -16352,7 +16379,7 @@ var RadarGraphs = function (_GraphsBase) {
                     arr.push({
                         field: field,
                         iNode: i,
-                        rowData: me.dataFrame.getRowData(i),
+                        rowData: me.dataFrame.getRowDataAt(i),
                         focused: false,
                         value: dataOrg[i],
                         point: point,
@@ -17049,7 +17076,7 @@ var CloudGraphs = function (_GraphsBase) {
             }
 
             var layout = cloud().size([me.width, me.height]).words(me.dataFrame.getFieldData(me.field).map(function (d, ind) {
-                var rowData = me.root.dataFrame.getRowData(me.getDaraFrameIndOfVal(d)); //这里不能直接用i去从dataFrame里查询,因为cloud layout后，可能会扔掉渲染不下的部分
+                var rowData = me.root.dataFrame.getRowDataAt(me.getDaraFrameIndOfVal(d)); //这里不能直接用i去从dataFrame里查询,因为cloud layout后，可能会扔掉渲染不下的部分
                 var tag = {
                     rowData: rowData,
                     field: me.field,
@@ -17307,7 +17334,7 @@ var PlanetGroup = function () {
             var dataLen = this.dataFrame.length;
             for (var i = 0; i < dataLen; i++) {
 
-                var rowData = this.dataFrame.getRowData(i);
+                var rowData = this.dataFrame.getRowDataAt(i);
                 var planetLayoutData = {
                     groupLen: this.groupLen,
                     iGroup: me.iGroup,
@@ -18390,7 +18417,7 @@ var FunnelGraphs = function (_GraphsBase) {
                 var ld = {
                     type: "funnel",
                     field: me.field,
-                    rowData: me.dataFrame.getRowData(i),
+                    rowData: me.dataFrame.getRowDataAt(i),
                     value: num,
                     width: me._getNodeWidth(num),
                     color: me.root.getTheme(i), //默认从皮肤中获取
@@ -19961,7 +19988,7 @@ var VennGraphs = function (_GraphsBase) {
             var me = this;
 
             for (var i = 0, l = this.dataFrame.length; i < l; i++) {
-                var rowData = me.dataFrame.getRowData(i);
+                var rowData = me.dataFrame.getRowDataAt(i);
 
                 var obj = {
                     iNode: i,

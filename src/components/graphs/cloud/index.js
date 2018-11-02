@@ -153,7 +153,7 @@ export default class CloudGraphs extends GraphsBase
         var layout = cloudLayout()
             .size([me.width, me.height])
             .words(me.dataFrame.getFieldData( me.field ).map(function(d, ind) {
-                var rowData  = me.root.dataFrame.getRowData( me.getDaraFrameIndOfVal( d ) );//这里不能直接用i去从dataFrame里查询,因为cloud layout后，可能会扔掉渲染不下的部分
+                var rowData  = me.root.dataFrame.getRowDataAt( me.getDaraFrameIndOfVal( d ) );//这里不能直接用i去从dataFrame里查询,因为cloud layout后，可能会扔掉渲染不下的部分
                 var tag = {
                     rowData : rowData,
                     field   : me.field,

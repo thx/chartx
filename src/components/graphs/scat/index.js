@@ -159,7 +159,7 @@ export default class ScatGraphs extends GraphsBase
 
         for( var i=0; i<dataLen; i++ ){
             
-            var rowData = this.dataFrame.getRowData(i);
+            var rowData = this.dataFrame.getRowDataAt(i);
             var xValue = rowData[ xField ];
             var yValue = rowData[ this.field ];
 

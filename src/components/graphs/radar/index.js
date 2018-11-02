@@ -251,7 +251,7 @@ export default class RadarGraphs extends GraphsBase
                 arr.push( {
                     field   : field,
                     iNode   : i,
-                    rowData : me.dataFrame.getRowData(i),
+                    rowData : me.dataFrame.getRowDataAt(i),
                     focused : false,
                     value   : dataOrg[i],
                     point   : point,

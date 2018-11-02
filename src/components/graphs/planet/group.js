@@ -142,7 +142,7 @@ export default class PlanetGroup
         var dataLen  = this.dataFrame.length;
         for( var i=0; i<dataLen; i++ ){  
             
-            var rowData = this.dataFrame.getRowData(i);
+            var rowData = this.dataFrame.getRowDataAt(i);
             var planetLayoutData = {
                 groupLen    : this.groupLen,
                 iGroup      : me.iGroup,

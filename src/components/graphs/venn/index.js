@@ -172,7 +172,7 @@ export default class VennGraphs extends GraphsBase
         let me = this;
 
         for( var i=0,l=this.dataFrame.length; i< l; i++ ){
-            var rowData = me.dataFrame.getRowData( i );
+            var rowData = me.dataFrame.getRowDataAt( i );
 
             let obj = {
                 iNode: i,

@@ -32,7 +32,7 @@ export default class polarComponent extends coorBase
 
         this.aAxis = {
             field : null,
-            layoutType : "average", // average 弧度均分， proportion 和直角坐标中的一样
+            layoutType : "proportion", // proportion 弧度均分， proportion 和直角坐标中的一样
             data : [],
             angleList : [], //对应layoutType下的角度list
             beginAngle : -90,
@@ -111,7 +111,7 @@ export default class polarComponent extends coorBase
             } , this);
 
             if( this.aAxis.enabled ){
-                this._drawAAxisScale();
+                this._drawAAxis();
             };
     
             this._initInduce();
@@ -488,7 +488,7 @@ export default class polarComponent extends coorBase
         me.aAxis.angleList = [];
 
         var aAxisArr = this.aAxis.data;
-        if( this.aAxis.layoutType == "average" ){
+        if( this.aAxis.layoutType == "proportion" ){
             aAxisArr = [];
             for( var i=0, l=this.aAxis.data.length; i<l; i++ ){
                 aAxisArr.push( i );
@@ -499,7 +499,7 @@ export default class polarComponent extends coorBase
 
         var min = 0;
         var max = _.max( aAxisArr );
-        if( this.aAxis.layoutType == "average" ){
+        if( this.aAxis.layoutType == "proportion" ){
             max ++;
         };
 
@@ -511,7 +511,7 @@ export default class polarComponent extends coorBase
         
     }
 
-    _drawAAxisScale()
+    _drawAAxis()
     {
         //绘制aAxis刻度尺
         var me = this;

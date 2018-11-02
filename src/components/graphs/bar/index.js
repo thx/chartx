@@ -555,7 +555,7 @@ export default class BarGraphs extends GraphsBase
         if (_.isFunction( me.select.fillStyle )) {
             _groupRegionStyle = me.select.fillStyle.apply(this, [ {
                 iNode : iNode,
-                rowData : me.dataFrame.getRowData( iNode )
+                rowData : me.dataFrame.getRowDataAt( iNode )
             } ]);
         };
         if( _groupRegionStyle === undefined || _groupRegionStyle === null ){
@@ -711,7 +711,7 @@ export default class BarGraphs extends GraphsBase
                         isLeaf  : true,
                         xAxis   : _xAxis.getNodeInfoOfX( _x ),
                         iNode   : i,
-                        rowData : me.dataFrame.getRowData( i ),
+                        rowData : me.dataFrame.getRowDataAt( i ),
                         color   : null
                     };
 
@@ -928,7 +928,7 @@ export default class BarGraphs extends GraphsBase
 
         _.each( me.select.inds, function( ind ){
             var index = ind - me.dataFrame.range.start;
-            rowDatas.push( me.dataFrame.getRowData( index ) )
+            rowDatas.push( me.dataFrame.getRowDataAt( index ) )
         } );
 
         return rowDatas;

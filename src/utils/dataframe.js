@@ -18,7 +18,8 @@ export default function( data, opt ){
         length        : 0,
         org           : [],   //最原始的数据，一定是个行列式，因为如果发现是json格式数据，会自动转换为行列式
         data          : [],   //最原始的数据转化后的数据格式：[o,o,o] o={field:'val1',index:0,data:[1,2,3]}
-        getRowData    : _getRowData,
+        getRowDataAt  : _getRowDataAt,
+        getRowDataOf  : _getRowDataOf,
         getFieldData  : _getFieldData,
         getDataOrg    : getDataOrg,
         fields        : [],
@@ -141,13 +142,43 @@ export default function( data, opt ){
     /*
      * 获取某一行数据
     */ 
-    function _getRowData(index){
+    function _getRowDataAt(index){
         var o = {}
         var data = dataFrame.data
         for(var a = 0; a < data.length; a++){
             o[data[a].field] = data[a].data[ dataFrame.range.start + index ]
         };
         return o
+    }
+
+    /**
+     * obj => {uv: 100, pv: 10 ...}
+     */
+    function _getRowDataOf( obj ){
+        !obj && (obj={});
+        var arr = [];
+
+        var expCount = 0;
+        for( var p in obj ){
+            expCount++;
+        };
+
+        if( expCount ){
+            for( var i=dataFrame.range.start; i< dataFrame.range.end; i++ ){
+                var matchNum = 0;
+                _.each( dataFrame.data, function( fd ){
+                    if( fd.field in obj && fd.data[i] == obj[ fd.field ] ){
+                        matchNum++;
+                    }
+                } );
+                if( matchNum == expCount ){
+                    //说明这条数据是完全和查询
+                    arr.push( _getRowDataAt(i) );
+                };
+            };
+        };
+
+        return arr;
     }
 
     function _getFieldData( field ){
