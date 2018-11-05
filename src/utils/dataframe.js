@@ -13,6 +13,9 @@ import Canvax from "canvax"
 const _ = Canvax._;
 
 export default function( data, opt ){
+
+    //数据做一份拷贝，避免污染源数据
+    data = JSON.parse( JSON.stringify( data ) );
     
     var dataFrame  = {        //数据框架集合
         length        : 0,

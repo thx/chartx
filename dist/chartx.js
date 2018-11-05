@@ -7813,6 +7813,9 @@ var Chartx = (function () {
 
 	function DataFrame (data, opt) {
 
+	    //数据做一份拷贝，避免污染源数据
+	    data = JSON.parse(JSON.stringify(data));
+
 	    var dataFrame = { //数据框架集合
 	        length: 0,
 	        org: [], //最原始的数据，一定是个行列式，因为如果发现是json格式数据，会自动转换为行列式
