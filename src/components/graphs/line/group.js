@@ -1,6 +1,7 @@
 import Canvax from "canvax"
 import {getPath} from "../../../utils/tools"
 import ColorFormat from "../../../utils/colorformat"
+import { _ } from "mmvis"
 
 const AnimationFrame = Canvax.AnimationFrame;
 const BrokenLine = Canvax.Shapes.BrokenLine;
@@ -8,7 +9,6 @@ const Rect = Canvax.Shapes.Rect;
 const Circle = Canvax.Shapes.Circle;
 const Path = Canvax.Shapes.Path;
  
-const _ = Canvax._;
 
 export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
 {
@@ -59,7 +59,7 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
             shapeType : "path",
             enabled   :1,
             fillStyle : null,
-            alpha     : 0.3
+            alpha     : 0.2
         };
 
         this.data = []; 

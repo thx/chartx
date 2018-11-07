@@ -1,8 +1,7 @@
 import Canvax from "canvax"
 import Pie from "./pie"
 import GraphsBase from "../index"
-
-const _ = Canvax._;
+import { _ } from "mmvis"
 
 export default class PieGraphs extends GraphsBase
 {

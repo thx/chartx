@@ -16,9 +16,7 @@
 import coorBase from "../ui_coord_base"
 import Canvax from "canvax"
 import Grid from "./grid"
-import DataSection from "../../../utils/datasection"
-
-const _ = Canvax._;
+import { dataSection,_ } from "mmvis"
 
 export default class polarComponent extends coorBase
 {
@@ -221,7 +219,7 @@ export default class polarComponent extends coorBase
                 arr = arr.concat( me.root.dataFrame.getFieldData( field ) );
             } );
             
-            var _dataSection = DataSection.section(arr, 3);
+            var _dataSection = dataSection.section(arr, 3);
 
             return _dataSection;
         }

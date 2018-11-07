@@ -1,6 +1,6 @@
 
 import global from "./global";
-import canvax from "canvax";
+import { cloneOptions,cloneData,getEl } from "./utils/tools"
 
 //图表皮肤
 import globalTheme from "./theme";
@@ -74,18 +74,16 @@ if( projectTheme && projectTheme.length ){
 };
 //皮肤设定end -----------------
 
-
 var chartx = {
-    canvax : canvax,
     create : function( el, _data, _opt ){
         var chart = null;
         var me = this;
 
-        var data = canvax._.clone( _data );
-        var opt = canvax._.extend( true, {}, _opt );
+        var data = cloneData( _data );
+        var opt  = cloneOptions( _opt );  
 
         //这个el如果之前有绘制过图表，那么就要在instances中找到图表实例，然后销毁
-        var chart_id = canvax.$.query(el).getAttribute("chart_id");
+        var chart_id = getEl(el).getAttribute("chart_id");
         if( chart_id != undefined ){
             var _chart = me.instances[ chart_id ];
             if( _chart ){

@@ -1,8 +1,8 @@
 import Component from "../component"
 import Canvax from "canvax"
+import { _ } from "mmvis"
 
 const Circle = Canvax.Shapes.Circle
-const _ = Canvax._;
 
 export default class Legend extends Component
 {

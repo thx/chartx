@@ -1,9 +1,7 @@
 import Canvax from "canvax"
-import { getEl,parse2MatrixData } from "./utils/tools"
-import DataFrame from "./utils/dataframe"
+import { getEl } from "./utils/tools"
 import theme from "./theme"
-
-const _ = Canvax._;
+import { _ , dataFrame} from "mmvis"
 
 const _padding = 20;
 
@@ -16,12 +14,7 @@ export default class Chart extends Canvax.Event.EventDispatcher
         this.Canvax = Canvax;
      
         this._node = node;
-        //不管传入的是data = [ ['xfield','yfield'] , ['2016', 111]]
-        //还是 data = [ {xfiled, 2016, yfield: 1111} ]，这样的格式，
-        //通过parse2MatrixData最终转换的是data = [ ['xfield','yfield'] , ['2016', 111]] 这样 chartx的数据格式
-        //后面有些地方比如 一些graphs中会使用dataFrame.org，， 那么这个dataFrame.org和_data的区别是，
-        //_data是全量数据， dataFrame.org是_data经过dataZoom运算过后的子集
-        this._data = parse2MatrixData(data);
+        this._data = data;
         this._opt = opt;
 
         this.el = getEl(node) //chart 在页面里面的容器节点，也就是要把这个chart放在哪个节点里
@@ -205,7 +198,7 @@ export default class Chart extends Canvax.Event.EventDispatcher
         _.extend(true, this , opt);
 
         if( data ) {
-            this._data = parse2MatrixData(data);
+            this._data = data;
         };
 
         this.dataFrame = this.initData( this._data, opt );
@@ -225,7 +218,7 @@ export default class Chart extends Canvax.Event.EventDispatcher
     resetData(data , dataTrigger)
     {
         if( data ){
-            this._data = parse2MatrixData( data );
+            this._data = data;
             this.dataFrame = this.initData( this._data );
         };
         this._resetData && this._resetData( dataTrigger );
@@ -235,7 +228,7 @@ export default class Chart extends Canvax.Event.EventDispatcher
    
     initData()
     {
-        return DataFrame.apply(this, arguments);
+        return dataFrame.apply(this, arguments);
     }
 
 

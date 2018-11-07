@@ -3,8 +3,8 @@ import Canvax from "canvax"
 import xAxisConstructor from "./xaxis"
 import yAxisConstructor from "./yaxis"
 import Grid from "./grid"
+import { _ } from "mmvis"
 
-const _ = Canvax._;
 const Rect = Canvax.Shapes.Rect;
 
 export default class Rect_Component extends coorBase

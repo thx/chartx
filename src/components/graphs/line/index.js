@@ -2,8 +2,8 @@ import Canvax from "canvax"
 import Group from "./group"
 import {getDisMinATArr} from "../../../utils/tools"
 import GraphsBase from "../index"
+import { _ } from "mmvis"
 
-const _ = Canvax._;
 const Rect = Canvax.Shapes.Rect;
 
 export default class LineGraphs extends GraphsBase

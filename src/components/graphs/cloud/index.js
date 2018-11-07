@@ -1,8 +1,8 @@
 import Canvax from "canvax"
 import GraphsBase from "../index"
 import cloudLayout from "../../../layout/cloud"
+import { _ } from "mmvis"
 
-const _ = Canvax._;
 const Text = Canvax.Display.Text;
 
 export default class CloudGraphs extends GraphsBase

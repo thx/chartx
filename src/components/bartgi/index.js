@@ -1,8 +1,8 @@
 import Component from "../component"
 import Canvax from "canvax"
+import { _ } from "mmvis"
 
 const Line = Canvax.Shapes.Line
-const _ = Canvax._;
 
 export default class barTgi extends Component
 {

@@ -1,10 +1,10 @@
 import Component from "../component"
 import Canvax from "canvax"
+import { _ } from "mmvis"
 
 
 const Line = Canvax.Shapes.Line;
 const Rect = Canvax.Shapes.Rect;
-const _ = Canvax._;
 
 const defaultProps = {
     height : 26,
@@ -314,7 +314,7 @@ export default class dataZoom extends Component
     {
         var _cloneChart = this._cloneChart.thumbChart
 
-        this.dataLen = _cloneChart._data.length - 1;
+        this.dataLen = _cloneChart.dataFrame.length;
         this.count = this.axisLayoutType == "rule" ? this.dataLen-1 : this.dataLen;
         
         if(!this.range.max || this.range.max > this.count){

@@ -1,7 +1,5 @@
 import Chart from "../../chart"
-import Canvax from "canvax"
-
-const _ = Canvax._;
+import { _ } from "mmvis"
 
 /**
  * 所有坐标系的基类，一些坐标系中复用的代码，沉淀在这里

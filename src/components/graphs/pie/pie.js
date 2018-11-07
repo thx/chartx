@@ -1,13 +1,13 @@
 //单环pie
 
 import Canvax from "canvax"
+import { _ } from "mmvis"
 
 
 const Sector = Canvax.Shapes.Sector
 const Path = Canvax.Shapes.Path
 const Rect = Canvax.Shapes.Rect
 const AnimationFrame = Canvax.AnimationFrame
-const _ = Canvax._;
 
 
 export default class Pie extends Canvax.Event.EventDispatcher

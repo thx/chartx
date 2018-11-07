@@ -2,9 +2,9 @@
  * 水印组件
  */
 import Canvax from "canvax"
+import { _ } from "mmvis"
 
 const Text = Canvax.Display.Text;
-const _ = Canvax._;
 
 export default class waterMark
 {

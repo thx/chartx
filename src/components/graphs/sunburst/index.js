@@ -4,8 +4,8 @@
 import Canvax from "canvax"
 import GraphsBase from "../index"
 import Partition from "../../../layout/partition"
+import { _ } from "mmvis"
 
-const _ = Canvax._;
 const Sector = Canvax.Shapes.Sector;
 const Circle = Canvax.Shapes.Circle;
 

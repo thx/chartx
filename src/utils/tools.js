@@ -1,40 +1,4 @@
-import Canvax from "canvax"
-
-const _ = Canvax._;
-
-//如果应用传入的数据是[{name:name, sex:sex ...} , ...] 这样的数据，就自动转换为chartx需要的矩阵格式数据
-export function parse2MatrixData( list )
-{
-    if( list === undefined || list === null ){
-        list = [];
-    };
-    //检测第一个数据是否为一个array, 否就是传入了一个json格式的数据
-    if( list.length > 0 && !_.isArray( list[0] ) ){
-        var newArr = [];
-        var fields = [];
-        var fieldNum = 0;
-        for( var i=0,l=list.length ; i<l ; i++ ){
-            var row = list[i];
-            if( i == 0 ){
-                for( var f in row ){
-                    fields.push( f ); 
-                };
-                newArr.push( fields );
-                fieldNum = fields.length;
-            };
-            var _rowData = [];
-            for( var ii=0 ; ii<fieldNum ; ii++ ){
-                _rowData.push( row[ fields[ii] ] );
-            };
-            newArr.push( _rowData );
-        };
-        
-        return newArr;
-    } else {
-        return list
-    }
-} 
-
+import { _ } from "mmvis"
 
 /**
  * 数字千分位加','号
@@ -124,3 +88,52 @@ export function getPath($arr){
     // s += ' ' + Z
     return s
 }
+
+
+export function cloneOptions( opt ){
+    //保存function的标识
+    var JsonSerialize = {
+        prefix: '[[JSON_FUN_PREFIX_',
+        suffix: '_JSON_FUN_SUFFIX]]'
+    };
+
+    /**
+	 * chartOption 转成可保存的字符串（支持function）
+	 */
+	var stringify = function(obj){
+		return JSON.stringify(obj, function(key, value){
+			if(typeof value === 'function'){
+				return JsonSerialize.prefix + value.toString() + JsonSerialize.suffix;
+			}
+		    return value;
+		});
+    }
+    
+	/**
+	 * 获取已保存的chartOption（包含function）转成对象
+	 */
+	var parse = function(string){
+		try{
+			return JSON.parse( string ,function(key, value){
+				if((typeof value === 'string') && 
+				   (value.indexOf(JsonSerialize.suffix) > 0) && 
+				   (value.indexOf(JsonSerialize.prefix) == 0)
+				){
+					return (new Function('return ' + value.replace(JsonSerialize.prefix, '').replace(JsonSerialize.suffix, '')))();
+				}
+				
+				return value;
+			})||{};
+		} catch(e){
+            return {};
+		};
+    }
+    
+    return parse( stringify( opt ) );
+
+}
+
+export function cloneData( data ){
+    return JSON.parse( JSON.stringify( data ) );
+}
+

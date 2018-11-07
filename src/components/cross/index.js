@@ -1,10 +1,10 @@
 import Component from "../component"
 import Canvax from "canvax"
+import { _ } from "mmvis"
 
 const Line = Canvax.Shapes.Line;
 const Sprite = Canvax.Display.Sprite;
 const Text = Canvax.Display.Text;
-const _ = Canvax._;
 
 export default class MarkLine extends Component
 {

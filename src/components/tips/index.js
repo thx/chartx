@@ -1,8 +1,8 @@
 import Component from "../component"
 import Canvax from "canvax"
 import { numAddSymbol } from "../../utils/tools"
+import { _ } from "mmvis"
 
-const _ = Canvax._;
 const Rect = Canvax.Shapes.Rect;
 const Line = Canvax.Shapes.Line;
 

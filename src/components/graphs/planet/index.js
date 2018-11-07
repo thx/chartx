@@ -1,9 +1,8 @@
 import Canvax from "canvax"
 import GraphsBase from "../index"
-import DataFrame from "../../../utils/dataframe"
 import Group from "./group"
+import { dataFrame,_ } from "mmvis"
 
-const _ = Canvax._;
 const Text = Canvax.Display.Text;
 const Circle = Canvax.Shapes.Circle;
 const Line = Canvax.Shapes.Line;
@@ -330,7 +329,7 @@ export default class PlanetGraphs extends GraphsBase
             } );
 
             for( var r in _dmap ){
-                this.groupDataFrames.push( DataFrame( _dmap[r] ) );
+                this.groupDataFrames.push( dataFrame( _dmap[r] ) );
             };
         } else {
             //如果分组字段不存在，则认为数据不需要分组，直接全部作为 group 的一个子集合

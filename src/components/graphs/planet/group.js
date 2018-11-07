@@ -1,6 +1,6 @@
 import Canvax from "canvax"
+import { _ } from "mmvis"
 
-const _ = Canvax._;
 const Text = Canvax.Display.Text;
 const Circle = Canvax.Shapes.Circle;
 

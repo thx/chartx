@@ -1,8 +1,8 @@
 import Canvax from "canvax"
 import GraphsBase from "../index"
 import {numAddSymbol} from "../../../utils/tools"
+import { _ } from "mmvis"
 
-const _ = Canvax._;
 const Text = Canvax.Display.Text;
 const Polygon = Canvax.Shapes.Polygon;
 

@@ -1,11 +1,11 @@
 import Canvax from "canvax"
 import {numAddSymbol} from "../../../utils/tools"
 import GraphsBase from "../index"
+import { _ } from "mmvis"
 
 const AnimationFrame = Canvax.AnimationFrame;
 const BrokenLine = Canvax.Shapes.BrokenLine;
 const Rect = Canvax.Shapes.Rect;
-const _ = Canvax._;
 
 export default class BarGraphs extends GraphsBase
 {
@@ -75,6 +75,7 @@ export default class BarGraphs extends GraphsBase
 
         this.txtsSp = null;
 
+        debugger
         _.extend(true, this, opt);
 
         this.init();
@@ -450,7 +451,7 @@ export default class BarGraphs extends GraphsBase
                     //nodeData, nodeElement ， data和图形之间互相引用的属性约定
                     rectEl.nodeData = rectData;
                     rectData.nodeElement = rectEl;
-
+debugger
                     me.node.filter && me.node.filter.apply( rectEl, [ rectData , me] );
 
                     //label begin ------------------------------

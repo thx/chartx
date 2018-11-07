@@ -31,12 +31,13 @@
     "rollup-plugin-babel": "^3.0.4",
     "rollup-plugin-commonjs": "^9.1.3",
     "rollup-plugin-node-resolve": "^3.3.0",
-    "rollup-plugin-uglify": "^3.0.0"
+    "rollup-plugin-uglify": "^3.0.0",
+    "rollup-watch": "4.3.1"
   },
   "dependencies": {
-    "rollup-watch": "4.3.1",
     "canvax": "^2.0.7",
-    "fmin": "0.0.2"
+    "fmin": "0.0.2",
+    "mmvis": "^0.0.2"
   },
   "scripts": {
     "rollup": "node rollup.config.js",

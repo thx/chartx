@@ -1,6 +1,6 @@
 import Canvax from "canvax"
+import { _ } from "mmvis"
 
-const _ = Canvax._;
 
 export default class coorBase extends Canvax.Event.EventDispatcher
 {

@@ -44,7 +44,7 @@ var colorHex = function( rgb ){
             strHex = that;    
         }  
         return strHex;  
-    }else if(reg.test(that)){  
+    } else if (reg.test(that)){  
         var aNum = that.replace(/#/,"").split("");  
         if(aNum.length === 6){  
             return that;      
@@ -55,7 +55,7 @@ var colorHex = function( rgb ){
             }  
             return numHex;  
         }  
-    }else{  
+    } else {  
         return that;      
     }  
 };
@@ -81,6 +81,7 @@ var colorLuminance=function(hex, lum) {
     }
     return rgb;
 }
+
 /**
  * HSL颜色值转换为RGB.
  * 换算公式改编自 http://en.wikipedia.org/wiki/HSL_color_space.
@@ -92,7 +93,7 @@ var colorLuminance=function(hex, lum) {
  * @param   Number  l       亮度
  * @return  Array           RGB色值数值
  */
-var  hslToRgb=function(h, s, l){
+var hslToRgb=function(h, s, l){
     var r, g, b;
 
     if(s == 0){

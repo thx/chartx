@@ -1,9 +1,9 @@
 import Canvax from "canvax"
 import GraphsBase from "../index"
+import { _ } from "mmvis"
 
 const Polygon = Canvax.Shapes.Polygon;
 const Circle = Canvax.Shapes.Circle;
-const _ = Canvax._;
 
 export default class RadarGraphs extends GraphsBase
 {

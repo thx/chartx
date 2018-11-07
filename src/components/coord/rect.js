@@ -1,10 +1,6 @@
 import CoordBase from "./index"
-import Canvax from "canvax"
-import {parse2MatrixData} from "../../utils/tools"
-import DataFrame from "../../utils/dataframe"
 import CoordComponents from "./ui_rect/index"
-
-const _ = Canvax._;
+import { _ } from "mmvis"
 
 export default class Rect extends CoordBase
 {

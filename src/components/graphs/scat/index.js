@@ -1,10 +1,10 @@
 import Canvax from "canvax"
 import GraphsBase from "../index"
+import { _ } from "mmvis"
 
 const Circle = Canvax.Shapes.Circle;
 const Rect = Canvax.Shapes.Rect;
 const Line = Canvax.Shapes.Line;
-const _ = Canvax._;
 
 export default class ScatGraphs extends GraphsBase
 {

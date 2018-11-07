@@ -1,6 +1,5 @@
 import Canvax from "canvax"
-
-const _ = Canvax._;
+import { _ } from "mmvis"
 
 export default class GraphsBase extends Canvax.Event.EventDispatcher
 {

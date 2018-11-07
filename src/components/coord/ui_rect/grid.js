@@ -1,8 +1,8 @@
 import Canvax from "canvax"
+import { _ } from "mmvis"
 
 const Line = Canvax.Shapes.Line;
 const Rect = Canvax.Shapes.Rect;
-const _ = Canvax._;
 
 export default class descartesGrid extends Canvax.Event.EventDispatcher
 {

@@ -4,8 +4,8 @@
 import Canvax from "canvax"
 import GraphsBase from "../index"
 import sankeyLayout from "../../../layout/sankey/index"
+import { _ } from "mmvis"
 
-const _ = Canvax._;
 const Path = Canvax.Shapes.Path;
 const Rect = Canvax.Shapes.Rect;
 

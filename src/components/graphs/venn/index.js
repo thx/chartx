@@ -4,8 +4,8 @@ import GraphsBase from "../index"
 import {venn, lossFunction, normalizeSolution, scaleSolution} from "../../../layout/venn/layout";
 import {intersectionArea, distance, getCenter} from "../../../layout/venn/circleintersection";
 import {nelderMead} from "fmin";
+import { _ } from "mmvis"
 
-const _ = Canvax._;
 const Text = Canvax.Display.Text;
 const Path = Canvax.Shapes.Path;
 const Circle = Canvax.Shapes.Circle;

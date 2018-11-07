@@ -1,11 +1,10 @@
 import Canvax from "canvax"
 import {numAddSymbol} from "../../../utils/tools"
-import Axis from "../axis"
+import {axis,_} from "mmvis"
 
 const Line = Canvax.Shapes.Line;
-const _ = Canvax._;
 
-export default class yAxis extends Axis
+export default class yAxis extends axis
 {
 	constructor( opt, data, _coord){
 
