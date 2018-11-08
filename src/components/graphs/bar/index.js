@@ -75,7 +75,6 @@ export default class BarGraphs extends GraphsBase
 
         this.txtsSp = null;
 
-        debugger
         _.extend(true, this, opt);
 
         this.init();
@@ -451,7 +450,7 @@ export default class BarGraphs extends GraphsBase
                     //nodeData, nodeElement ， data和图形之间互相引用的属性约定
                     rectEl.nodeData = rectData;
                     rectData.nodeElement = rectEl;
-debugger
+
                     me.node.filter && me.node.filter.apply( rectEl, [ rectData , me] );
 
                     //label begin ------------------------------

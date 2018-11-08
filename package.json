@@ -37,7 +37,7 @@
   "dependencies": {
     "canvax": "^2.0.7",
     "fmin": "0.0.2",
-    "mmvis": "^0.0.2"
+    "mmvis": "file:../mmvis"
   },
   "scripts": {
     "rollup": "node rollup.config.js",

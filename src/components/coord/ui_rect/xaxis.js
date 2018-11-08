@@ -248,7 +248,6 @@ export default class xAxis extends axis
         }
     }
     
-
     getNodeInfoOfX( x ){
         
         var ind = this.getIndexOfPos( x );
@@ -320,7 +319,6 @@ export default class xAxis extends axis
         var me = this;
         var arr = this.layoutData;
         
-
         if (this._title) {
             this._title.context.y = this.height - this._title.getTextHeight() / 2;
             this._title.context.x = this.width / 2;
