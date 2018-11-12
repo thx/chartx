@@ -21,19 +21,6 @@ export function numAddSymbol($n,$s)
     }   
 }
 
-export function getEl(el){
-    if(_.isString(el)){
-       return document.getElementById(el)
-    }
-    if(el.nodeType == 1){
-       //则为一个element本身
-       return el
-    }
-    if(el.length){
-       return el[0]
-    }
-    return null;
-}
 
 //在一个数组中 返回比对$arr中的值离$n最近的值的索引
 export function getDisMinATArr($n, $arr) {
@@ -87,53 +74,5 @@ export function getPath($arr){
     
     // s += ' ' + Z
     return s
-}
-
-
-export function cloneOptions( opt ){
-    //保存function的标识
-    var JsonSerialize = {
-        prefix: '[[JSON_FUN_PREFIX_',
-        suffix: '_JSON_FUN_SUFFIX]]'
-    };
-
-    /**
-	 * chartOption 转成可保存的字符串（支持function）
-	 */
-	var stringify = function(obj){
-		return JSON.stringify(obj, function(key, value){
-			if(typeof value === 'function'){
-				return JsonSerialize.prefix + value.toString() + JsonSerialize.suffix;
-			}
-		    return value;
-		});
-    }
-    
-	/**
-	 * 获取已保存的chartOption（包含function）转成对象
-	 */
-	var parse = function(string){
-		try{
-			return JSON.parse( string ,function(key, value){
-				if((typeof value === 'string') && 
-				   (value.indexOf(JsonSerialize.suffix) > 0) && 
-				   (value.indexOf(JsonSerialize.prefix) == 0)
-				){
-					return (new Function('return ' + value.replace(JsonSerialize.prefix, '').replace(JsonSerialize.suffix, '')))();
-				}
-				
-				return value;
-			})||{};
-		} catch(e){
-            return {};
-		};
-    }
-    
-    return parse( stringify( opt ) );
-
-}
-
-export function cloneData( data ){
-    return JSON.parse( JSON.stringify( data ) );
 }
 

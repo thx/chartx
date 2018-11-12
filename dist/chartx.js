@@ -1438,12 +1438,136 @@ var Chartx = (function () {
       return dataFrame;
   }
 
+  var RESOLUTION = window.devicePixelRatio || 1;
+
+  var addOrRmoveEventHand = function addOrRmoveEventHand(domHand, ieHand) {
+      if (document[domHand]) {
+          var eventDomFn = function eventDomFn(el, type, fn) {
+              if (el.length) {
+                  for (var i = 0; i < el.length; i++) {
+                      eventDomFn(el[i], type, fn);
+                  }
+              } else {
+                  el[domHand](type, fn, false);
+              }
+          };
+          return eventDomFn;
+      } else {
+          var eventFn = function eventFn(el, type, fn) {
+              if (el.length) {
+                  for (var i = 0; i < el.length; i++) {
+                      eventFn(el[i], type, fn);
+                  }
+              } else {
+                  el[ieHand]("on" + type, function () {
+                      return fn.call(el, window.event);
+                  });
+              }
+          };
+          return eventFn;
+      }
+  };
+
+  var dom = {
+      // dom操作相关代码
+      query: function query(el) {
+          if (_$1.isString(el)) {
+              return document.getElementById(el);
+          }
+          if (el.nodeType == 1) {
+              //则为一个element本身
+              return el;
+          }
+          if (el.length) {
+              return el[0];
+          }
+          return null;
+      },
+      offset: function offset(el) {
+          var box = el.getBoundingClientRect(),
+              doc = el.ownerDocument,
+              body = doc.body,
+              docElem = doc.documentElement,
+
+
+          // for ie  
+          clientTop = docElem.clientTop || body.clientTop || 0,
+              clientLeft = docElem.clientLeft || body.clientLeft || 0,
+
+
+          // In Internet Explorer 7 getBoundingClientRect property is treated as physical, 
+          // while others are logical. Make all logical, like in IE8. 
+          zoom = 1;
+          if (body.getBoundingClientRect) {
+              var bound = body.getBoundingClientRect();
+              zoom = (bound.right - bound.left) / body.clientWidth;
+          }
+          if (zoom > 1) {
+              clientTop = 0;
+              clientLeft = 0;
+          }
+          var top = box.top / zoom + (window.pageYOffset || docElem && docElem.scrollTop / zoom || body.scrollTop / zoom) - clientTop,
+              left = box.left / zoom + (window.pageXOffset || docElem && docElem.scrollLeft / zoom || body.scrollLeft / zoom) - clientLeft;
+
+          return {
+              top: top,
+              left: left
+          };
+      },
+      addEvent: addOrRmoveEventHand("addEventListener", "attachEvent"),
+      removeEvent: addOrRmoveEventHand("removeEventListener", "detachEvent"),
+      pageX: function pageX(e) {
+          if (e.pageX) return e.pageX;else if (e.clientX) return e.clientX + (document.documentElement.scrollLeft ? document.documentElement.scrollLeft : document.body.scrollLeft);else return null;
+      },
+      pageY: function pageY(e) {
+          if (e.pageY) return e.pageY;else if (e.clientY) return e.clientY + (document.documentElement.scrollTop ? document.documentElement.scrollTop : document.body.scrollTop);else return null;
+      },
+      /**
+       * 创建dom
+       * @param {string} id dom id 待用
+       * @param {string} type : dom type， such as canvas, div etc.
+       */
+      createCanvas: function createCanvas(_width, _height, id) {
+          var canvas = document.createElement("canvas");
+          canvas.style.position = 'absolute';
+          canvas.style.width = _width + 'px';
+          canvas.style.height = _height + 'px';
+          canvas.style.left = 0;
+          canvas.style.top = 0;
+          canvas.setAttribute('width', _width * RESOLUTION);
+          canvas.setAttribute('height', _height * RESOLUTION);
+          canvas.setAttribute('id', id);
+          return canvas;
+      },
+      createView: function createView(_width, _height, id) {
+          var view = document.createElement("div");
+          view.className = "canvax-view";
+          view.style.cssText += "position:relative;width:100%;height:100%;";
+
+          var stageView = document.createElement("div");
+          stageView.style.cssText += "position:absolute;width:" + _width + "px;height:" + _height + "px;";
+
+          //用来存放一些dom元素
+          var domView = document.createElement("div");
+          domView.style.cssText += "position:absolute;width:" + _width + "px;height:" + _height + "px;";
+
+          view.appendChild(stageView);
+          view.appendChild(domView);
+
+          return {
+              view: view,
+              stageView: stageView,
+              domView: domView
+          };
+      }
+      //dom相关代码结束
+  };
+
   /**
    * 系统皮肤
    */
-
   var _colors = ["#ff8533", "#73ace6", "#82d982", "#e673ac", "#cd6bed", "#8282d9", "#c0e650", "#e6ac73", "#6bcded", "#73e6ac", "#ed6bcd", "#9966cc"];
-  var theme = {
+  var globalTheme = {
       colors: _colors,
       set: function set(colors) {
           this.colors = colors;
@@ -1464,10 +1588,10 @@ var Chartx = (function () {
 
   var global$1 = {
       setGlobalTheme: function setGlobalTheme(colors) {
-          theme.set(colors);
+          globalTheme.set(colors);
       },
       getGlobalTheme: function getGlobalTheme() {
-          return theme.get();
+          return globalTheme.get();
       },
 
       instances: {},
@@ -1488,7 +1612,7 @@ var Chartx = (function () {
           }
           if (!options[chartPark_cid]) {
               return;
-          }        var JsonSerialize = {
+          }var JsonSerialize = {
               prefix: '[[JSON_FUN_PREFIX_',
               suffix: '_JSON_FUN_SUFFIX]]'
           };
@@ -1506,85 +1630,199 @@ var Chartx = (function () {
       }
   };
 
-  /**
-   * 数字千分位加','号
-   * @param  {[Number]} $n [数字]
-   * @param  {[type]} $s [千分位上的符号]
-   * @return {[String]}    [根据$s提供的值 对千分位进行分隔 并且小数点上自动加上'.'号  组合成字符串]
+  //十六进制颜色值的正则表达式 
+  var reg = /^#([0-9a-fA-f]{3}|[0-9a-fA-f]{6})$/;
+
+  /*16进制颜色转为RGB格式*/
+  function colorRgb(hex) {
+      var sColor = hex.toLowerCase();
+      if (sColor && reg.test(sColor)) {
+          if (sColor.length === 4) {
+              var sColorNew = "#";
+              for (var i = 1; i < 4; i += 1) {
+                  sColorNew += sColor.slice(i, i + 1).concat(sColor.slice(i, i + 1));
+              }
+              sColor = sColorNew;
+          }
+          //处理六位的颜色值  
+          var sColorChange = [];
+          for (var i = 1; i < 7; i += 2) {
+              sColorChange.push(parseInt("0x" + sColor.slice(i, i + 2)));
+          }
+          return "RGB(" + sColorChange.join(",") + ")";
+      } else {
+          return sColor;
+      }
+  }
+  function colorRgba(hex, a) {
+      return colorRgb(hex).replace(')', ',' + a + ')').replace('RGB', 'RGBA');
+  }
+  /*RGB颜色转换为16进制*/
+  function colorHex(rgb) {
+      var that = rgb;
+      if (/^(rgb|RGB)/.test(that)) {
+          var aColor = that.replace(/(?:||rgb|RGB)*/g, "").split(",");
+          var strHex = "#";
+          for (var i = 0; i < aColor.length; i++) {
+              var hex = Number(aColor[i]).toString(16);
+              if (hex === "0") {
+                  hex += hex;
+              }
+              strHex += hex;
+          }
+          if (strHex.length !== 7) {
+              strHex = that;
+          }
+          return strHex;
+      } else if (reg.test(that)) {
+          var aNum = that.replace(/#/, "").split("");
+          if (aNum.length === 6) {
+              return that;
+          } else if (aNum.length === 3) {
+              var numHex = "#";
+              for (var i = 0; i < aNum.length; i += 1) {
+                  numHex += aNum[i] + aNum[i];
+              }
+              return numHex;
+          }
+      } else {
+          return that;
+      }
+  }
+  /**增加颜色的明亮度
+   *hex: #ff00ff
+   *lum: 0.1 颜色#ff00ff明亮度增加0.1,-0.2明亮度减少0.2
    */
-  function numAddSymbol($n, $s) {
-      var s = Number($n);
-      var symbol = $s ? $s : ',';
-      if (!s) {
-          return String($n);
-      }    if (s >= 1000) {
-          var num = parseInt(s / 1000);
-          return String($n.toString().replace(num, num + symbol));
-      } else {
-          return String($n);
+  function colorLuminance(hex, lum) {
+      // Validate hex string
+      hex = String(hex).replace(/[^0-9a-f]/gi, "");
+      if (hex.length < 6) {
+          hex = hex.replace(/(.)/g, '$1$1');
       }
-  }
-
-  function getEl(el) {
-      if (_$1.isString(el)) {
-          return document.getElementById(el);
+      lum = lum || 0;
+      // Convert to decimal and change luminosity
+      var rgb = "#",
+          c;
+      for (var i = 0; i < 3; ++i) {
+          c = parseInt(hex.substr(i * 2, 2), 16);
+          c = Math.round(Math.min(Math.max(0, c + c * lum), 255)).toString(16);
+          rgb += ("00" + c).substr(c.length);
       }
-      if (el.nodeType == 1) {
-          //则为一个element本身
-          return el;
-      }
-      if (el.length) {
-          return el[0];
-      }
-      return null;
+      return rgb;
   }
 
   /**
-  * 获取一个path路径
-  * @param  {[Array]} $arr    [数组]
-  * @return {[String]}        [path字符串]
-  */
-  function getPath($arr) {
-      var M = 'M',
-          L = 'L',
-          Z = 'z';
-      var s = '';
-      var start = {
-          x: 0,
-          y: 0
-      };
-      if (_$1.isArray($arr[0])) {
-          start.x = $arr[0][0];
-          start.y = $arr[0][1];
-          s = M + $arr[0][0] + ' ' + $arr[0][1];
+   * HSL颜色值转换为RGB.
+   * 换算公式改编自 http://en.wikipedia.org/wiki/HSL_color_space.
+   * h, s, 和 l 设定在 [0, 1] 之间
+   * 返回的 r, g, 和 b 在 [0, 255]之间
+   *
+   * @param   Number  h       色相
+   * @param   Number  s       饱和度
+   * @param   Number  l       亮度
+   * @return  Array           RGB色值数值
+   */
+  function hslToRgb(h, s, l) {
+      var r, g, b;
+
+      if (s == 0) {
+          r = g = b = l; // achromatic
       } else {
-          start = $arr[0];
-          s = M + $arr[0].x + ' ' + $arr[0].y;
-      }
-      for (var a = 1, al = $arr.length; a < al; a++) {
-          var x = 0,
-              y = 0,
-              item = $arr[a];
-          if (_$1.isArray(item)) {
-              x = item[0];
-              y = item[1];
-          } else {
-              x = item.x;
-              y = item.y;
-          }
-          //s += ' ' + L + x + ' ' + y
-          if (x == start.x && y == start.y) {
-              s += ' ' + Z;
-          } else {
-              s += ' ' + L + x + ' ' + y;
-          }
+          var hue2rgb = function hue2rgb(p, q, t) {
+              if (t < 0) t += 1;
+              if (t > 1) t -= 1;
+              if (t < 1 / 6) return p + (q - p) * 6 * t;
+              if (t < 1 / 2) return q;
+              if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+              return p;
+          };
+
+          var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+          var p = 2 * l - q;
+          r = hue2rgb(p, q, h + 1 / 3);
+          g = hue2rgb(p, q, h);
+          b = hue2rgb(p, q, h - 1 / 3);
       }
 
-      // s += ' ' + Z
-      return s;
+      return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
   }
 
-  function cloneOptions(opt) {
+  /**
+   * RGB 颜色值转换为 HSL.
+   * 转换公式参考自 http://en.wikipedia.org/wiki/HSL_color_space.
+   * r, g, 和 b 需要在 [0, 255] 范围内
+   * 返回的 h, s, 和 l 在 [0, 1] 之间
+   *
+   * @param   Number  r       红色色值
+   * @param   Number  g       绿色色值
+   * @param   Number  b       蓝色色值
+   * @return  Array           HSL各值数组
+   */
+  function rgbToHsl(r, g, b) {
+      r /= 255, g /= 255, b /= 255;
+      var max = Math.max(r, g, b),
+          min = Math.min(r, g, b);
+      var h,
+          s,
+          l = (max + min) / 2;
+
+      if (max == min) {
+          h = s = 0; // achromatic
+      } else {
+          var d = max - min;
+          s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+          switch (max) {
+              case r:
+                  h = (g - b) / d + (g < b ? 6 : 0);break;
+              case g:
+                  h = (b - r) / d + 2;break;
+              case b:
+                  h = (r - g) / d + 4;break;
+          }
+          h /= 6;
+      }
+
+      return [h, s, l];
+  }
+
+  function hexTorgb(hex, out) {
+      //hex可能是“#ff0000” 也可能是 0xff0000
+      if (hex.replace) {
+          hex = parseInt(hex.replace("#", "0X"), 16);
+      }
+      out = out || [];
+
+      out[0] = (hex >> 16 & 0xFF) / 255;
+      out[1] = (hex >> 8 & 0xFF) / 255;
+      out[2] = (hex & 0xFF) / 255;
+
+      return out;
+  }
+
+  function hexTostring(hex) {
+      hex = hex.toString(16);
+      hex = '000000'.substr(0, 6 - hex.length) + hex;
+
+      return "#" + hex;
+  }
+
+  function rgbTohex(rgb) {
+      return (rgb[0] * 255 << 16) + (rgb[1] * 255 << 8) + rgb[2] * 255;
+  }
+
+  var color = /*#__PURE__*/Object.freeze({
+      colorRgb: colorRgb,
+      colorRgba: colorRgba,
+      colorHex: colorHex,
+      colorLuminance: colorLuminance,
+      hslToRgb: hslToRgb,
+      rgbToHsl: rgbToHsl,
+      hexTorgb: hexTorgb,
+      hexTostring: hexTostring,
+      rgbTohex: rgbTohex
+  });
+
+  var cloneOptions = function cloneOptions(opt) {
       //保存function的标识
       var JsonSerialize = {
           prefix: '[[JSON_FUN_PREFIX_',
@@ -1617,14 +1855,15 @@ var Chartx = (function () {
               }) || {};
           } catch (e) {
               return {};
-          }    };
+          }
+      };
 
       return parse(stringify(opt));
-  }
+  };
 
-  function cloneData(data) {
+  var cloneData = function cloneData(data) {
       return JSON.parse(JSON.stringify(data));
-  }
+  };
 
   var commonjsGlobal = typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
@@ -2167,7 +2406,7 @@ var Chartx = (function () {
 
   };
 
-  var addOrRmoveEventHand = function addOrRmoveEventHand(domHand, ieHand) {
+  var addOrRmoveEventHand$1 = function addOrRmoveEventHand(domHand, ieHand) {
       if (document[domHand]) {
           var _ret = function () {
               var eventDomFn = function eventDomFn(el, type, fn) {
@@ -2257,8 +2496,8 @@ var Chartx = (function () {
               left: left
           };
       },
-      addEvent: addOrRmoveEventHand("addEventListener", "attachEvent"),
-      removeEvent: addOrRmoveEventHand("removeEventListener", "detachEvent"),
+      addEvent: addOrRmoveEventHand$1("addEventListener", "attachEvent"),
+      removeEvent: addOrRmoveEventHand$1("removeEventListener", "detachEvent"),
       pageX: function pageX(e) {
           if (e.pageX) return e.pageX;else if (e.clientX) return e.clientX + (document.documentElement.scrollLeft ? document.documentElement.scrollLeft : document.body.scrollLeft);else return null;
       },
@@ -9321,7 +9560,7 @@ var Chartx = (function () {
           _this._data = data;
           _this._opt = opt;
 
-          _this.el = getEl(node); //chart 在页面里面的容器节点，也就是要把这个chart放在哪个节点里
+          _this.el = dom.query(node); //chart 在页面里面的容器节点，也就是要把这个chart放在哪个节点里
           _this.width = parseInt(_this.el.offsetWidth); //图表区域宽
           _this.height = parseInt(_this.el.offsetHeight); //图表区域高
 
@@ -9358,7 +9597,7 @@ var Chartx = (function () {
           _this.inited = false;
           _this.dataFrame = null; //每个图表的数据集合 都 存放在dataFrame中。
 
-          _this._theme = _$1.extend([], theme.colors); //theme.colors;  //皮肤对象，opts里面可能有theme皮肤组件
+          _this._theme = _$1.extend([], globalTheme.get()); //皮肤对象，opts里面可能有theme皮肤组件
 
           _this.init.apply(_this, arguments);
 
@@ -10023,6 +10262,70 @@ var Chartx = (function () {
       }]);
       return coorBase;
   }(canvax.Event.EventDispatcher);
+
+  /**
+   * 数字千分位加','号
+   * @param  {[Number]} $n [数字]
+   * @param  {[type]} $s [千分位上的符号]
+   * @return {[String]}    [根据$s提供的值 对千分位进行分隔 并且小数点上自动加上'.'号  组合成字符串]
+   */
+  function numAddSymbol($n, $s) {
+      var s = Number($n);
+      var symbol = $s ? $s : ',';
+      if (!s) {
+          return String($n);
+      }    if (s >= 1000) {
+          var num = parseInt(s / 1000);
+          return String($n.toString().replace(num, num + symbol));
+      } else {
+          return String($n);
+      }
+  }
+
+  /**
+  * 获取一个path路径
+  * @param  {[Array]} $arr    [数组]
+  * @return {[String]}        [path字符串]
+  */
+  function getPath($arr) {
+      var M = 'M',
+          L = 'L',
+          Z = 'z';
+      var s = '';
+      var start = {
+          x: 0,
+          y: 0
+      };
+      if (_$1.isArray($arr[0])) {
+          start.x = $arr[0][0];
+          start.y = $arr[0][1];
+          s = M + $arr[0][0] + ' ' + $arr[0][1];
+      } else {
+          start = $arr[0];
+          s = M + $arr[0].x + ' ' + $arr[0].y;
+      }
+      for (var a = 1, al = $arr.length; a < al; a++) {
+          var x = 0,
+              y = 0,
+              item = $arr[a];
+          if (_$1.isArray(item)) {
+              x = item[0];
+              y = item[1];
+          } else {
+              x = item.x;
+              y = item.y;
+          }
+          //s += ' ' + L + x + ' ' + y
+          if (x == start.x && y == start.y) {
+              s += ' ' + Z;
+          } else {
+              s += ' ' + L + x + ' ' + y;
+          }
+      }
+
+      // s += ' ' + Z
+      return s;
+  }
 
   var Line$1 = canvax.Shapes.Line;
 
@@ -12155,11 +12458,11 @@ var Chartx = (function () {
           }
       }, {
           key: "_getStyle",
-          value: function _getStyle(color, i) {
-              if (_$1.isArray(color)) {
-                  return color[i % color.length];
+          value: function _getStyle(color$$1, i) {
+              if (_$1.isArray(color$$1)) {
+                  return color$$1[i % color$$1.length];
               }
-              return color;
+              return color$$1;
           }
       }]);
       return polarGrid;
@@ -13130,22 +13433,22 @@ var Chartx = (function () {
               var field = rectData.field;
 
               var fieldMap = this.root._coord.getFieldMapOf(field);
-              var color;
+              var color$$1;
 
               //field对应的索引，， 取颜色这里不要用i
               if (_$1.isString(c)) {
-                  color = c;
+                  color$$1 = c;
               }            if (_$1.isArray(c)) {
-                  color = _$1.flatten(c)[_$1.indexOf(_flattenField, field)];
+                  color$$1 = _$1.flatten(c)[_$1.indexOf(_flattenField, field)];
               }            if (_$1.isFunction(c)) {
-                  color = c.apply(this, [rectData]);
+                  color$$1 = c.apply(this, [rectData]);
               }
-              if (color === undefined || color === null) {
+              if (color$$1 === undefined || color$$1 === null) {
                   //只有undefined(用户配置了function),null才会认为需要还原皮肤色
                   //“”都会认为是用户主动想要设置的，就为是用户不想他显示
-                  color = fieldMap.color;
+                  color$$1 = fieldMap.color;
               }
-              return color;
+              return color$$1;
           }
       }, {
           key: "_getBarWidth",
@@ -13875,173 +14178,6 @@ var Chartx = (function () {
       return BarGraphs;
   }(GraphsBase);
 
-  //十六进制颜色值的正则表达式 
-  var reg = /^#([0-9a-fA-f]{3}|[0-9a-fA-f]{6})$/;
-
-  /*16进制颜色转为RGB格式*/
-  var colorRgb = function colorRgb(hex) {
-      var sColor = hex.toLowerCase();
-      if (sColor && reg.test(sColor)) {
-          if (sColor.length === 4) {
-              var sColorNew = "#";
-              for (var i = 1; i < 4; i += 1) {
-                  sColorNew += sColor.slice(i, i + 1).concat(sColor.slice(i, i + 1));
-              }
-              sColor = sColorNew;
-          }
-          //处理六位的颜色值  
-          var sColorChange = [];
-          for (var i = 1; i < 7; i += 2) {
-              sColorChange.push(parseInt("0x" + sColor.slice(i, i + 2)));
-          }
-          return "RGB(" + sColorChange.join(",") + ")";
-      } else {
-          return sColor;
-      }
-  };
-
-  var colorRgba = function colorRgba(hex, a) {
-      return colorRgb(hex).replace(')', ',' + a + ')').replace('RGB', 'RGBA');
-  };
-
-  /*RGB颜色转换为16进制*/
-  var colorHex = function colorHex(rgb) {
-      var that = rgb;
-      if (/^(rgb|RGB)/.test(that)) {
-          var aColor = that.replace(/(?:||rgb|RGB)*/g, "").split(",");
-          var strHex = "#";
-          for (var i = 0; i < aColor.length; i++) {
-              var hex = Number(aColor[i]).toString(16);
-              if (hex === "0") {
-                  hex += hex;
-              }
-              strHex += hex;
-          }
-          if (strHex.length !== 7) {
-              strHex = that;
-          }
-          return strHex;
-      } else if (reg.test(that)) {
-          var aNum = that.replace(/#/, "").split("");
-          if (aNum.length === 6) {
-              return that;
-          } else if (aNum.length === 3) {
-              var numHex = "#";
-              for (var i = 0; i < aNum.length; i += 1) {
-                  numHex += aNum[i] + aNum[i];
-              }
-              return numHex;
-          }
-      } else {
-          return that;
-      }
-  };
-
-  /**增加颜色的明亮度
-   *hex: #ff00ff
-   *lum: 0.1 颜色#ff00ff明亮度增加0.1,-0.2明亮度减少0.2
-   */
-  var colorLuminance = function colorLuminance(hex, lum) {
-      // Validate hex string
-      hex = String(hex).replace(/[^0-9a-f]/gi, "");
-      if (hex.length < 6) {
-          hex = hex.replace(/(.)/g, '$1$1');
-      }
-      lum = lum || 0;
-      // Convert to decimal and change luminosity
-      var rgb = "#",
-          c;
-      for (var i = 0; i < 3; ++i) {
-          c = parseInt(hex.substr(i * 2, 2), 16);
-          c = Math.round(Math.min(Math.max(0, c + c * lum), 255)).toString(16);
-          rgb += ("00" + c).substr(c.length);
-      }
-      return rgb;
-  };
-
-  /**
-   * HSL颜色值转换为RGB.
-   * 换算公式改编自 http://en.wikipedia.org/wiki/HSL_color_space.
-   * h, s, 和 l 设定在 [0, 1] 之间
-   * 返回的 r, g, 和 b 在 [0, 255]之间
-   *
-   * @param   Number  h       色相
-   * @param   Number  s       饱和度
-   * @param   Number  l       亮度
-   * @return  Array           RGB色值数值
-   */
-  var hslToRgb = function hslToRgb(h, s, l) {
-      var r, g, b;
-
-      if (s == 0) {
-          r = g = b = l; // achromatic
-      } else {
-          var hue2rgb = function hue2rgb(p, q, t) {
-              if (t < 0) t += 1;
-              if (t > 1) t -= 1;
-              if (t < 1 / 6) return p + (q - p) * 6 * t;
-              if (t < 1 / 2) return q;
-              if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
-              return p;
-          };
-
-          var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-          var p = 2 * l - q;
-          r = hue2rgb(p, q, h + 1 / 3);
-          g = hue2rgb(p, q, h);
-          b = hue2rgb(p, q, h - 1 / 3);
-      }
-
-      return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
-  };
-
-  /**
-   * RGB 颜色值转换为 HSL.
-   * 转换公式参考自 http://en.wikipedia.org/wiki/HSL_color_space.
-   * r, g, 和 b 需要在 [0, 255] 范围内
-   * 返回的 h, s, 和 l 在 [0, 1] 之间
-   *
-   * @param   Number  r       红色色值
-   * @param   Number  g       绿色色值
-   * @param   Number  b       蓝色色值
-   * @return  Array           HSL各值数组
-   */
-  var rgbToHsl = function rgbToHsl(r, g, b) {
-      r /= 255, g /= 255, b /= 255;
-      var max = Math.max(r, g, b),
-          min = Math.min(r, g, b);
-      var h,
-          s,
-          l = (max + min) / 2;
-
-      if (max == min) {
-          h = s = 0; // achromatic
-      } else {
-          var d = max - min;
-          s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-          switch (max) {
-              case r:
-                  h = (g - b) / d + (g < b ? 6 : 0);break;
-              case g:
-                  h = (b - r) / d + 2;break;
-              case b:
-                  h = (r - g) / d + 4;break;
-          }
-          h /= 6;
-      }
-
-      return [h, s, l];
-  };
-
-  var ColorFormat = {
-      colorRgb: colorRgb,
-      colorRgba: colorRgba,
-      colorHex: colorHex,
-      colorBrightness: colorLuminance,
-      hslToRgb: hslToRgb,
-      rgbToHsl: rgbToHsl
-  };
-
   var AnimationFrame$2 = canvax.AnimationFrame;
   var BrokenLine$2 = canvax.Shapes.BrokenLine;
   var Rect$5 = canvax.Shapes.Rect;
@@ -14159,17 +14295,17 @@ var Chartx = (function () {
       }, {
           key: "_getColor",
           value: function _getColor(s, iNode) {
-              var color = this._getProp(s, iNode);
-              if (color === undefined || color === null) {
+              var color$$1 = this._getProp(s, iNode);
+              if (color$$1 === undefined || color$$1 === null) {
                   //这个时候可以先取线的style，和线保持一致
-                  color = this._getLineStrokeStyle();
+                  color$$1 = this._getLineStrokeStyle();
 
                   //因为_getLineStrokeStyle返回的可能是个渐变对象，所以要用isString过滤掉
-                  if (!color || !_$1.isString(color)) {
+                  if (!color$$1 || !_$1.isString(color$$1)) {
                       //那么最后，取this.fieldMap.color
-                      color = this.fieldMap.color;
+                      color$$1 = this.fieldMap.color;
                   }
-              }            return color;
+              }            return color$$1;
           }
       }, {
           key: "_getProp",
@@ -14177,7 +14313,10 @@ var Chartx = (function () {
               if (_$1.isArray(s)) {
                   return s[this.iGroup];
               }            if (_$1.isFunction(s)) {
-                  return s.apply(this, [this.getNodeInfoAt(iNode)]);
+                  var _nodesInfo = [];
+                  if (iNode != undefined) {
+                      _nodesInfo.push(this.getNodeInfoAt(iNode));
+                  }                return s.apply(this, _nodesInfo);
               }            return s;
           }
 
@@ -14435,7 +14574,7 @@ var Chartx = (function () {
                   //创建一个线性渐变
                   fill_gradient = me.ctx.createLinearGradient(topP[0], topP[1], topP[0], 0);
 
-                  var rgb = ColorFormat.colorRgb(_fillStyle);
+                  var rgb = color.colorRgb(_fillStyle);
                   var rgba0 = rgb.replace(')', ', ' + me._getProp(me.area.alpha[0]) + ')').replace('RGB', 'RGBA');
                   fill_gradient.addColorStop(0, rgba0);
 
@@ -14472,7 +14611,6 @@ var Chartx = (function () {
                   if (topP[0] === undefined || topP[1] === undefined || bottomP[1] === undefined) {
                       return null;
                   }
-
                   //var bottomP = [ 0 , 0 ];
                   //创建一个线性渐变
                   //console.log( topP[0] + "|"+ topP[1]+ "|"+  topP[0]+ "|"+ bottomP[1] )
@@ -16334,7 +16472,7 @@ var Chartx = (function () {
 
               for (var i = 0, l = dataFrame$$1.length; i < l; i++) {
                   var rowData = dataFrame$$1.getRowDataAt(i);
-                  var color = me.root.getTheme(i);
+                  var color$$1 = me.root.getTheme(i);
                   var layoutData = {
                       rowData: rowData, //把这一行数据给到layoutData引用起来
                       focused: false, //是否获取焦点，外扩
@@ -16346,8 +16484,8 @@ var Chartx = (function () {
                       selectedAlpha: me.node.select.alpha,
                       enabled: true, //是否启用，显示在列表中
 
-                      fillStyle: color,
-                      color: color, //加个color属性是为了给tips用
+                      fillStyle: color$$1,
+                      color: color$$1, //加个color属性是为了给tips用
 
                       value: rowData[me.field],
                       label: rowData[me.groupField || me.label.field || me.field],
@@ -17507,19 +17645,19 @@ var Chartx = (function () {
       }, {
           key: "_getFontColor",
           value: function _getFontColor(nodeData) {
-              var color;
+              var color$$1;
               if (_$1.isString(this.node.fontColor)) {
-                  color = this.node.fontColor;
+                  color$$1 = this.node.fontColor;
               }
               if (_$1.isFunction(this.node.fontColor)) {
-                  color = this.node.fontColor(nodeData);
+                  color$$1 = this.node.fontColor(nodeData);
               }
 
-              if (color === undefined || color === null) {
+              if (color$$1 === undefined || color$$1 === null) {
                   //只有undefined才会认为需要一个抄底色
                   //“”都会认为是用户主动想要设置的，就为是用户不想他显示
-                  color = "#ccc";
-              }            return color;
+                  color$$1 = "#ccc";
+              }            return color$$1;
           }
       }, {
           key: "_drawGraphs",
@@ -20485,20 +20623,20 @@ var Chartx = (function () {
       }, {
           key: "_getStyle",
           value: function _getStyle(style, ind, nodeData, defColor) {
-              var color;
+              var color$$1;
               if (_$1.isString(style)) {
-                  color = style;
+                  color$$1 = style;
               }
               if (_$1.isFunction(style)) {
-                  color = style(nodeData);
+                  color$$1 = style(nodeData);
               }
-              if (!color && ind != undefined) {
-                  color = this.root.getTheme(ind);
+              if (!color$$1 && ind != undefined) {
+                  color$$1 = this.root.getTheme(ind);
               }
-              if (!color && defColor != undefined) {
-                  color = defColor;
+              if (!color$$1 && defColor != undefined) {
+                  color$$1 = defColor;
               }
-              return color;
+              return color$$1;
           }
       }, {
           key: "_widget",
@@ -22108,17 +22246,17 @@ var Chartx = (function () {
           key: "_getColor",
           value: function _getColor(style, node, ind) {
               var me = this;
-              var color = style;
-              if (_$1.isArray(color)) {
-                  color = color[ind];
+              var color$$1 = style;
+              if (_$1.isArray(color$$1)) {
+                  color$$1 = color$$1[ind];
               }
-              if (_$1.isFunction(color)) {
-                  color = color(node);
+              if (_$1.isFunction(color$$1)) {
+                  color$$1 = color$$1(node);
               }
-              if (!color) {
-                  color = me.root.getTheme(ind);
+              if (!color$$1) {
+                  color$$1 = me.root.getTheme(ind);
               }
-              return color;
+              return color$$1;
           }
       }, {
           key: "_drawNodes",
@@ -24385,12 +24523,13 @@ var Chartx = (function () {
       barTgi: barTgi,
       waterMark: waterMark,
       cross: MarkLine$1
+  };
 
-      //皮肤设定begin ---------------
-      //如果数据库中有项目皮肤
-  };var projectTheme = []; //从数据库中查询出来设计师设置的项目皮肤
+  //皮肤设定begin ---------------
+  //如果数据库中有项目皮肤
+  var projectTheme = []; //从数据库中查询出来设计师设置的项目皮肤
   if (projectTheme && projectTheme.length) {
-      theme.set(projectTheme);
+      global$1.setGlobalTheme(projectTheme);
   }//皮肤设定end -----------------
 
   var chartx = {
@@ -24401,12 +24540,18 @@ var Chartx = (function () {
           var data = cloneData(_data);
           var opt = cloneOptions(_opt);
 
+          var _destroy = function _destroy() {
+              me.instances[chart.id] = null;
+              delete me.instances[chart.id];
+          };
+
           //这个el如果之前有绘制过图表，那么就要在instances中找到图表实例，然后销毁
-          var chart_id = getEl(el).getAttribute("chart_id");
+          var chart_id = dom.query(el).getAttribute("chart_id");
           if (chart_id != undefined) {
               var _chart = me.instances[chart_id];
               if (_chart) {
                   _chart.destroy();
+                  _chart.off("destroy", _destroy);
               }            delete me.instances[chart_id];
           }
           var Coord$$1 = Coord;
@@ -24418,10 +24563,7 @@ var Chartx = (function () {
               chart.draw();
 
               me.instances[chart.id] = chart;
-              chart.on("destroy", function () {
-                  me.instances[chart.id] = null;
-                  delete me.instances[chart.id];
-              });
+              chart.on("destroy", _destroy);
           }        //} catch(err){
           //    throw "Chatx Error：" + err
           //};

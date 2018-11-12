@@ -1,7 +1,5 @@
 import Canvax from "canvax"
-import { getEl } from "./utils/tools"
-import theme from "./theme"
-import { _ , dataFrame} from "mmvis"
+import { _ , dataFrame, dom , theme } from "mmvis"
 
 const _padding = 20;
 
@@ -17,7 +15,7 @@ export default class Chart extends Canvax.Event.EventDispatcher
         this._data = data;
         this._opt = opt;
 
-        this.el = getEl(node) //chart 在页面里面的容器节点，也就是要把这个chart放在哪个节点里
+        this.el = dom.query(node) //chart 在页面里面的容器节点，也就是要把这个chart放在哪个节点里
         this.width = parseInt(this.el.offsetWidth) //图表区域宽
         this.height = parseInt(this.el.offsetHeight) //图表区域高
 
@@ -56,7 +54,7 @@ export default class Chart extends Canvax.Event.EventDispatcher
         this.inited = false;
         this.dataFrame = null; //每个图表的数据集合 都 存放在dataFrame中。
 
-        this._theme = _.extend( [], theme.colors ); //theme.colors;  //皮肤对象，opts里面可能有theme皮肤组件
+        this._theme = _.extend( [], theme.get() ); //皮肤对象，opts里面可能有theme皮肤组件
 
         this.init.apply(this, arguments);
 

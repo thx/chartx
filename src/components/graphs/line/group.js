@@ -1,7 +1,6 @@
 import Canvax from "canvax"
 import {getPath} from "../../../utils/tools"
-import { color } from "mmvis"
-import { _ } from "mmvis"
+import { _ , color } from "mmvis"
 
 const AnimationFrame = Canvax.AnimationFrame;
 const BrokenLine = Canvax.Shapes.BrokenLine;
