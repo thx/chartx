@@ -82,12 +82,18 @@ var chartx = {
         var data = cloneData( _data );
         var opt  = cloneOptions( _opt );  
 
+        var _destroy = function(){
+            me.instances[ chart.id ] = null;
+            delete me.instances[ chart.id ];
+        }
+
         //这个el如果之前有绘制过图表，那么就要在instances中找到图表实例，然后销毁
         var chart_id = getEl(el).getAttribute("chart_id");
         if( chart_id != undefined ){
             var _chart = me.instances[ chart_id ];
             if( _chart ){
                 _chart.destroy();
+                _chart.off("destroy" , _destroy)
             };
             delete me.instances[ chart_id ];
         };
@@ -102,10 +108,7 @@ var chartx = {
                 chart.draw();
                 
                 me.instances[ chart.id ] = chart;
-                chart.on("destroy" , function(){
-                    me.instances[ chart.id ] = null;
-                    delete me.instances[ chart.id ];
-                });
+                chart.on("destroy" , _destroy);
             };
         //} catch(err){
         //    throw "Chatx Error：" + err

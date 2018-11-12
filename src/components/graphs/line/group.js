@@ -1,6 +1,6 @@
 import Canvax from "canvax"
 import {getPath} from "../../../utils/tools"
-import ColorFormat from "../../../utils/colorformat"
+import { color } from "mmvis"
 import { _ } from "mmvis"
 
 const AnimationFrame = Canvax.AnimationFrame;
@@ -135,14 +135,18 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
             return s[ this.iGroup ]
         };
         if (_.isFunction(s)) {
-            return s.apply( this , [ this.getNodeInfoAt( iNode ) ] );
+            var _nodesInfo = [];
+            if( iNode != undefined ){
+                _nodesInfo.push( this.getNodeInfoAt( iNode ) );
+            };
+            return s.apply( this , _nodesInfo );
         };
         return s
     }
 
 
     //这个是tips需要用到的 
-    getNodeInfoAt($index)
+    getNodeInfoAt( $index )
     {
         var o = this.data[ $index ];
         return o;
@@ -415,7 +419,7 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
             //创建一个线性渐变
             fill_gradient = me.ctx.createLinearGradient(topP[0], topP[1], topP[0], 0);
 
-            var rgb = ColorFormat.colorRgb( _fillStyle );
+            var rgb = color.colorRgb( _fillStyle );
             var rgba0 = rgb.replace(')', ', ' + me._getProp(me.area.alpha[0]) + ')').replace('RGB', 'RGBA');
             fill_gradient.addColorStop(0, rgba0);
 
@@ -443,10 +447,10 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
             !pointList && ( pointList = this._bline.context.pointList );
             
             var topP = _.min(pointList, function(p) {
-                return p[1]
+                return p[1];
             });
             var bottomP = _.max(pointList, function(p) {
-                return p[1]
+                return p[1];
             });
             if( from == "fillStyle" ){
                 bottomP = [ 0 , 0 ];
@@ -454,7 +458,7 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
 
             if( topP[0] === undefined || topP[1] === undefined || bottomP[1] === undefined ){
                 return null;
-            }
+            };
        
             //var bottomP = [ 0 , 0 ];
             //创建一个线性渐变

@@ -13419,7 +13419,7 @@
                           //nodeData, nodeElement ， data和图形之间互相引用的属性约定
                           rectEl.nodeData = rectData;
                           rectData.nodeElement = rectEl;
-                          debugger;
+
                           me.node.filter && me.node.filter.apply(rectEl, [rectData, me]);
 
                           //label begin ------------------------------
