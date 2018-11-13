@@ -147,9 +147,7 @@ export default class xAxis extends axis
         //首次渲染从 直角坐标系组件中会传入 opt,包含了width，origin等， 所有这个时候才能计算layoutData
         opt && _.extend(true, this, opt);
 
-        this.axisLength = this.width; //width来自opt坐标系传入
-
-        this.calculateProps();
+        this.setAxisLength( this.width );
         
         this._trimXAxis();
 

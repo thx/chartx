@@ -5,7 +5,6 @@ import { _ } from "mmvis"
 export default class Rect extends CoordBase
 {
     constructor( node, data, opts, graphsMap, componentsMap ){
-
         super( node, data, opts, graphsMap, componentsMap );
         //坐标系统
         this.CoordComponents = CoordComponents;

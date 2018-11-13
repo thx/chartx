@@ -1,5 +1,5 @@
 import Canvax from "canvax"
-import { _ , dataFrame, dom , theme } from "mmvis"
+import { _ , dataFrame, dom , global } from "mmvis"
 
 const _padding = 20;
 
@@ -54,10 +54,10 @@ export default class Chart extends Canvax.Event.EventDispatcher
         this.inited = false;
         this.dataFrame = null; //每个图表的数据集合 都 存放在dataFrame中。
 
-        this._theme = _.extend( [], theme.get() ); //皮肤对象，opts里面可能有theme皮肤组件
+        //先从全局皮肤里拿一组全局皮肤作为默认皮肤
+        this._theme = _.extend( [], global.getGlobalTheme() );
 
         this.init.apply(this, arguments);
-
     }
 
     init()
@@ -215,10 +215,19 @@ export default class Chart extends Canvax.Event.EventDispatcher
      */
     resetData(data , dataTrigger)
     {
+        var preDataLenth = this.dataFrame.length;
         if( data ){
             this._data = data;
             this.dataFrame = this.initData( this._data );
         };
+
+        if( !preDataLenth ){
+            //如果之前的数据为空， 那么我们应该这里就直接重绘吧
+            this._clean();
+            this.draw( this._opt );
+            return;
+        };
+        
         this._resetData && this._resetData( dataTrigger );
         this.fire("resetData");
     }

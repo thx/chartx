@@ -89,7 +89,7 @@ var chartx = {
             var _chart = me.instances[ chart_id ];
             if( _chart ){
                 _chart.destroy();
-                _chart.off("destroy" , _destroy)
+                _chart.off && _chart.off("destroy" , _destroy)
             };
             delete me.instances[ chart_id ];
         };
