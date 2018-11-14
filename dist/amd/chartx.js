@@ -9366,6 +9366,21 @@ define(function () { 'use strict';
     };
   }();
 
+  var defineProperty = function (obj, key, value) {
+    if (key in obj) {
+      Object.defineProperty(obj, key, {
+        value: value,
+        enumerable: true,
+        configurable: true,
+        writable: true
+      });
+    } else {
+      obj[key] = value;
+    }
+
+    return obj;
+  };
+
   var inherits$1 = function (subClass, superClass) {
     if (typeof superClass !== "function" && superClass !== null) {
       throw new TypeError("Super expression must either be null or a function, not " + typeof superClass);
@@ -13280,9 +13295,10 @@ define(function () { 'use strict';
           }
       }, {
           key: "_getColor",
-          value: function _getColor(c, rectData, _flattenField) {
-              var value = rectData.value;
-              var field = rectData.field;
+          value: function _getColor(c, nodeData, _flattenField) {
+              var me = this;
+              var value = nodeData.value;
+              var field = nodeData.field;
 
               var fieldMap = this.root._coord.getFieldMapOf(field);
               var color$$1;
@@ -13293,7 +13309,15 @@ define(function () { 'use strict';
               }            if (_$1.isArray(c)) {
                   color$$1 = _$1.flatten(c)[_$1.indexOf(_flattenField, field)];
               }            if (_$1.isFunction(c)) {
-                  color$$1 = c.apply(this, [rectData]);
+                  color$$1 = c.apply(this, [nodeData]);
+              }
+              if (c && c.lineargradient) {
+
+                  var _style = me.ctx.createLinearGradient(nodeData.x, nodeData.fromY + nodeData.rectHeight, nodeData.x, nodeData.fromY);
+                  _$1.each(c.lineargradient, function (item, i) {
+                      _style.addColorStop(item.position, item.color);
+                  });
+                  color$$1 = _style;
               }
               if (color$$1 === undefined || color$$1 === null) {
                   //只有undefined(用户配置了function),null才会认为需要还原皮肤色
@@ -13504,37 +13528,47 @@ define(function () { 'use strict';
                           me.node._count++;
 
                           //单个的bar，从纵向的底部开始堆叠矩形
-                          var rectData = me.data[h_group[v]][h];
+                          var nodeData = me.data[h_group[v]][h];
 
-                          rectData.iGroup = i, rectData.iNode = h, rectData.iLay = v;
+                          nodeData.iGroup = i, nodeData.iNode = h, nodeData.iLay = v;
 
-                          var fillStyle = me._getColor(me.node.fillStyle, rectData, _flattenField);
+                          var rectHeight = nodeData.y - nodeData.fromY;
 
-                          rectData.color = fillStyle;
-
-                          var rectH = rectData.y - rectData.fromY;
-
-                          if (isNaN(rectH)) {
-                              rectH = 0;
+                          if (isNaN(rectHeight)) {
+                              rectHeight = 0;
                           } else {
-                              if (Math.abs(rectH) < me.node.minHeight) {
-                                  rectH = me.node.minHeight;
+                              if (Math.abs(rectHeight) < me.node.minHeight) {
+                                  rectHeight = me.node.minHeight;
                               }
                           }
+                          nodeData.rectHeight = rectHeight;
+
+                          var fillStyle = me._getColor(me.node.fillStyle, nodeData, _flattenField);
+                          nodeData.color = fillStyle;
+
+                          //如果用户配置了渐变， 那么tips里面就取对应的中间位置的颜色
+                          if (fillStyle instanceof CanvasGradient) {
+                              if (me.node.fillStyle.lineargradient) {
+                                  var _middleStyle = me.node.fillStyle.lineargradient[parseInt(me.node.fillStyle.lineargradient.length / 2)];
+                                  if (_middleStyle) {
+                                      nodeData.color = _middleStyle.color;
+                                  }                            }
+                          }
+
                           var finalPos = {
-                              x: Math.round(rectData.x),
-                              y: rectData.fromY,
+                              x: Math.round(nodeData.x),
+                              y: nodeData.fromY,
                               width: me.node._width,
-                              height: rectH,
+                              height: rectHeight,
                               fillStyle: fillStyle,
                               fillAlpha: me.node.fillAlpha,
                               scaleY: -1
                           };
-                          rectData.width = finalPos.width;
+                          nodeData.width = finalPos.width;
 
                           var rectCtx = {
                               x: finalPos.x,
-                              y: rectData.yOriginPoint.y, //0,
+                              y: nodeData.yOriginPoint.y, //0,
                               width: finalPos.width,
                               height: finalPos.height,
                               fillStyle: finalPos.fillStyle,
@@ -13542,8 +13576,8 @@ define(function () { 'use strict';
                               scaleY: 0
                           };
 
-                          if (!!me.node.radius && rectData.isLeaf && !me.proportion) {
-                              var radiusR = Math.min(me.node._width / 2, Math.abs(rectH));
+                          if (!!me.node.radius && nodeData.isLeaf && !me.proportion) {
+                              var radiusR = Math.min(me.node._width / 2, Math.abs(rectHeight));
                               radiusR = Math.min(radiusR, me.node.radius);
                               rectCtx.radius = [radiusR, radiusR, 0, 0];
                           }
@@ -13552,7 +13586,7 @@ define(function () { 'use strict';
                               rectCtx.y = finalPos.y;
                           }
                           var rectEl = null;
-                          var barId = "bar_" + h + "_" + rectData.field;
+                          var barId = "bar_" + h + "_" + nodeData.field;
                           if (h <= preDataLen - 1) {
                               rectEl = groupH.getChildById(barId);
                           }                        if (rectEl) {
@@ -13562,24 +13596,24 @@ define(function () { 'use strict';
                                   id: barId,
                                   context: rectCtx
                               });
-                              rectEl.field = rectData.field;
+                              rectEl.field = nodeData.field;
                               groupH.addChild(rectEl);
                           }
                           rectEl.finalPos = finalPos;
                           rectEl.iGroup = i, rectEl.iNode = h, rectEl.iLay = v;
 
                           //nodeData, nodeElement ， data和图形之间互相引用的属性约定
-                          rectEl.nodeData = rectData;
-                          rectData.nodeElement = rectEl;
+                          rectEl.nodeData = nodeData;
+                          nodeData.nodeElement = rectEl;
 
-                          me.node.filter && me.node.filter.apply(rectEl, [rectData, me]);
+                          me.node.filter && me.node.filter.apply(rectEl, [nodeData, me]);
 
                           //label begin ------------------------------
                           if (me.label.enabled) {
 
-                              var value = rectData.value;
+                              var value = nodeData.value;
                               if (_$1.isFunction(me.label.format)) {
-                                  var _formatc = me.label.format(value, rectData);
+                                  var _formatc = me.label.format(value, nodeData);
                                   if (_formatc !== undefined || _formatc !== null) {
                                       value = _formatc;
                                   }
@@ -13600,14 +13634,14 @@ define(function () { 'use strict';
                                   rotation: me.label.rotation
                               };
                               //然后根据position, offset确定x,y
-                              var _textPos = me._getTextPos(finalPos, rectData);
+                              var _textPos = me._getTextPos(finalPos, nodeData);
                               textCtx.x = _textPos.x;
                               textCtx.y = _textPos.y;
-                              textCtx.textAlign = me._getTextAlign(finalPos, rectData);
+                              textCtx.textAlign = me._getTextAlign(finalPos, nodeData);
 
                               //文字
                               var textEl = null;
-                              var textId = "text_" + h + "_" + rectData.field;
+                              var textId = "text_" + h + "_" + nodeData.field;
                               if (h <= preDataLen - 1) {
                                   textEl = txtGroupH.getChildById(textId);
                               }                            if (textEl) {
@@ -13620,7 +13654,7 @@ define(function () { 'use strict';
                                       id: textId,
                                       context: textCtx
                                   });
-                                  textEl.field = rectData.field;
+                                  textEl.field = nodeData.field;
                                   txtGroupH.addChild(textEl);
                               }                        }
                           //label end ------------------------------
@@ -13827,9 +13861,9 @@ define(function () { 'use strict';
           }
       }, {
           key: "_getTextAlign",
-          value: function _getTextAlign(bar, rectData) {
+          value: function _getTextAlign(bar, nodeData) {
               var align = this.label.align;
-              if (rectData.value < rectData.yOriginPoint.value) {
+              if (nodeData.value < nodeData.yOriginPoint.value) {
                   if (align == "left") {
                       align = "right";
                   } else if (align == "right") {
@@ -13839,7 +13873,7 @@ define(function () { 'use strict';
           }
       }, {
           key: "_getTextPos",
-          value: function _getTextPos(bar, rectData) {
+          value: function _getTextPos(bar, nodeData) {
 
               var me = this;
               var point = {
@@ -13887,7 +13921,7 @@ define(function () { 'use strict';
               }            x -= me.label.offsetX;
 
               var i = 1;
-              if (rectData.value < rectData.yOriginPoint.value) {
+              if (nodeData.value < nodeData.yOriginPoint.value) {
                   i = -1;
               }            y -= i * me.label.offsetY;
               point.x = x;
@@ -13933,11 +13967,11 @@ define(function () { 'use strict';
                   for (var h = 0; h < me._dataLen; h++) {
                       for (var v = 0; v < vLen; v++) {
 
-                          var rectData = me.data[h_group[v]][h];
+                          var nodeData = me.data[h_group[v]][h];
 
                           var group = me.barsSp.getChildById("barGroup_" + h);
 
-                          var bar = group.getChildById("bar_" + h + "_" + rectData.field);
+                          var bar = group.getChildById("bar_" + h + "_" + nodeData.field);
 
                           if (optsions.duration == 0) {
                               bar.context.scaleY = sy;
@@ -13946,6 +13980,7 @@ define(function () { 'use strict';
                               bar.context.width = bar.finalPos.width;
                               bar.context.height = bar.finalPos.height;
                           } else {
+
                               if (bar._tweenObj) {
                                   AnimationFrame$1.destroyTween(bar._tweenObj);
                               }                            bar._tweenObj = bar.animate({
@@ -23729,11 +23764,15 @@ define(function () { 'use strict';
                   if (!node.value && node.value !== 0) {
                       return;
                   }                var style = node.color || node.fillStyle || node.strokeStyle;
+                  var name = node.name || node.field;
                   var value = _typeof$2(node.value) == "object" ? JSON.stringify(node.value) : numAddSymbol(node.value);
                   str += "<div style='line-height:1.5;font-size:12px;padding:0 4px;'>";
                   if (style) {
-                      str += "<span style='background:" + style + ";margin-right:8px;margin-top:5px;float:left;width:8px;height:8px;border-radius:4px;overflow:hidden;font-size:0;'></span>";
-                  }                str += value + "</div>";
+                      str += "<span style='background:" + style + ";margin-right:8px;margin-top:7px;float:left;width:8px;height:8px;border-radius:4px;overflow:hidden;font-size:0;'></span>";
+                  }                if (name) {
+                      str += "<span style='margin-right:5px;'>" + name + "：</span>";
+                  }
+                  str += value + "</div>";
               });
               return str;
           }
@@ -24073,6 +24112,148 @@ define(function () { 'use strict';
       return barTgi;
   }(component);
 
+  var barGuide = function (_Component) {
+      inherits$1(barGuide, _Component);
+
+      function barGuide(opt, root) {
+          classCallCheck$2(this, barGuide);
+
+          var _this = possibleConstructorReturn$1(this, (barGuide.__proto__ || Object.getPrototypeOf(barGuide)).call(this));
+
+          _this._opt = opt;
+          _this.root = root;
+
+          _this.field = null;
+          _this.barField = null;
+
+          _this.data = null;
+          _this.barDatas = null;
+          _this._yAxis = null;
+
+          _this.yAxisAlign = "left";
+
+          _this.sprite = null;
+
+          _this.origin = {
+              x: 0,
+              y: 0
+          };
+          _this.node = defineProperty({
+              lineWidth: 3,
+              shapeType: "circle",
+              r: 10,
+
+              strokeStyle: "#000"
+          }, "lineWidth", 2);
+          _this.label = {
+              fontSize: 14,
+              fontColor: "#ccc",
+
+              strokeStyle: "#000",
+              lineWidth: 2
+          };
+
+          _$1.extend(true, _this, opt);
+
+          _this._yAxis = _this.root._coord._yAxis[_this.yAxisAlign == "left" ? 0 : 1];
+          _this.sprite = new canvax.Display.Sprite({
+              id: "barGuideSprite",
+              context: {
+                  x: _this.origin.x,
+                  y: _this.origin.y
+              }
+          });
+          return _this;
+      }
+
+      createClass$2(barGuide, [{
+          key: "reset",
+          value: function reset(opt) {
+              _$1.extend(true, this, opt);
+              this.barDatas = null;
+              this.data = null;
+              this.sprite.removeAllChildren();
+              this.draw();
+          }
+      }, {
+          key: "draw",
+          value: function draw() {
+              var me = this;
+
+              _$1.each(me.root._graphs, function (_g) {
+                  if (_g.type == "bar" && _g.data[me.barField]) {
+                      me.barDatas = _g.data[me.barField];
+                      return false;
+                  }
+              });
+              this.data = _$1.flatten(me.root.dataFrame.getDataOrg(me.field));
+
+              if (!this.barDatas) {
+                  return;
+              }
+
+              _$1.each(this.data, function (tgi, i) {
+                  var y = -me._yAxis.getPosOfVal(tgi);
+                  var barData = me.barDatas[i];
+
+                  var _node = new canvax.Shapes.Circle({
+                      context: {
+                          x: barData.x,
+                          y: y,
+                          r: 10,
+                          fillStyle: "red"
+                      }
+                  });
+
+                  me.sprite.addChild(_node);
+              });
+          }
+      }, {
+          key: "_getProp",
+          value: function _getProp(val, tgi, i) {
+              var res = val;
+              if (_$1.isFunction(val)) {
+                  res = val.apply(this, [tgi, i]);
+              }
+              return res;
+          }
+      }], [{
+          key: "register",
+          value: function register(opt, app) {
+
+              if (!_$1.isArray(opt)) {
+                  opt = [opt];
+              }
+              var barGuideConstructor = this;
+
+              _$1.each(opt, function (barGuideOpt, i) {
+                  app.components.push({
+                      type: "once",
+                      plug: {
+                          draw: function draw() {
+
+                              barGuideOpt = _$1.extend(true, {
+                                  origin: {
+                                      x: app._coord.origin.x,
+                                      y: app._coord.origin.y
+                                  }
+                              }, barGuideOpt);
+
+                              var _barGuide = new barGuideConstructor(barGuideOpt, app);
+                              app.components.push({
+                                  type: "barGuide",
+                                  plug: _barGuide
+                              });
+                              app.graphsSprite.addChild(_barGuide.sprite);
+                          }
+                      }
+                  });
+              });
+          }
+      }]);
+      return barGuide;
+  }(component);
+
   /**
    * 皮肤组件，不是一个具体的ui组件
    */
@@ -24372,7 +24553,10 @@ define(function () { 'use strict';
       dataZoom: dataZoom,
       markLine: MarkLine,
       tips: Tips,
+
       barTgi: barTgi,
+      bar_guide: barGuide,
+
       waterMark: waterMark,
       cross: MarkLine$1
   };

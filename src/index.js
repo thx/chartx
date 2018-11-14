@@ -27,6 +27,7 @@ import DataZoom from "./components/datazoom/index"
 import MarkLine from "./components/markline/index"
 import Tips from "./components/tips/index"
 import BarTgi from "./components/bartgi/index"
+import BarGuide from "./components/bar_guide/index"
 import Theme from "./components/theme/index"
 import WaterMark from "./components/watermark/index"
 import Cross from "./components/cross/index"
@@ -56,7 +57,10 @@ var components = {
     dataZoom  : DataZoom,
     markLine  : MarkLine,
     tips      : Tips,
+
     barTgi    : BarTgi,
+    bar_guide : BarGuide,
+    
     waterMark : WaterMark,
     cross     : Cross
 };

@@ -134,10 +134,11 @@ export default class BarGraphs extends GraphsBase
         }
     }
 
-    _getColor(c, rectData, _flattenField)
+    _getColor(c, nodeData, _flattenField)
     {
-        var value = rectData.value;
-        var field = rectData.field;
+        var me = this;
+        var value = nodeData.value;
+        var field = nodeData.field;
 
         var fieldMap = this.root._coord.getFieldMapOf(field);
         var color;
@@ -150,7 +151,17 @@ export default class BarGraphs extends GraphsBase
             color = _.flatten(c)[ _.indexOf( _flattenField, field ) ];
         };
         if (_.isFunction(c)) {
-            color = c.apply(this, [ rectData ]);
+            color = c.apply(this, [ nodeData ]);
+        };
+
+        if( c && c.lineargradient ){
+
+            var _style = me.ctx.createLinearGradient( nodeData.x, (nodeData.fromY+nodeData.rectHeight), nodeData.x, nodeData.fromY );
+            _.each( c.lineargradient , function( item , i ){
+                _style.addColorStop( item.position , item.color);
+            });
+            color = _style;
+
         };
 
         if( color === undefined || color === null ){
@@ -378,47 +389,58 @@ export default class BarGraphs extends GraphsBase
                     me.node._count ++;
 
                     //单个的bar，从纵向的底部开始堆叠矩形
-                    var rectData = me.data[h_group[v]][h];
+                    var nodeData = me.data[h_group[v]][h];
 
-                    rectData.iGroup = i, rectData.iNode = h, rectData.iLay = v;
+                    nodeData.iGroup = i, nodeData.iNode = h, nodeData.iLay = v;
 
-                    var fillStyle = me._getColor(me.node.fillStyle, rectData, _flattenField);
+                    var rectHeight = nodeData.y - nodeData.fromY;
 
-                    rectData.color = fillStyle;
-
-                    var rectH = rectData.y - rectData.fromY;
-
-                    if( isNaN(rectH) ){
-                        rectH = 0;
+                    if( isNaN(rectHeight) ){
+                        rectHeight = 0;
                     } else {
-                        if( Math.abs(rectH) < me.node.minHeight ){
-                            rectH = me.node.minHeight;
+                        if( Math.abs(rectHeight) < me.node.minHeight ){
+                            rectHeight = me.node.minHeight;
                         }
                     };
 
+                    nodeData.rectHeight = rectHeight;
+
+                    var fillStyle = me._getColor(me.node.fillStyle, nodeData, _flattenField);
+                    nodeData.color = fillStyle;
+
+                    //如果用户配置了渐变， 那么tips里面就取对应的中间位置的颜色
+                    if( fillStyle instanceof CanvasGradient ){
+                        if( me.node.fillStyle.lineargradient ){
+                            var _middleStyle = me.node.fillStyle.lineargradient[ parseInt( me.node.fillStyle.lineargradient.length / 2 ) ];
+                            if( _middleStyle ){
+                                nodeData.color = _middleStyle.color
+                            };
+                        }
+                    }
+
                     var finalPos = {
-                        x         : Math.round(rectData.x),
-                        y         : rectData.fromY, 
+                        x         : Math.round(nodeData.x),
+                        y         : nodeData.fromY, 
                         width     : me.node._width,
-                        height    : rectH,
+                        height    : rectHeight,
                         fillStyle : fillStyle,
                         fillAlpha : me.node.fillAlpha,
                         scaleY    : -1
                     };
-                    rectData.width = finalPos.width;
+                    nodeData.width = finalPos.width;
                     
                     var rectCtx = {
-                        x: finalPos.x,
-                        y: rectData.yOriginPoint.y,//0,
-                        width: finalPos.width,
-                        height: finalPos.height,
-                        fillStyle: finalPos.fillStyle,
-                        fillAlpha: me.node.fillAlpha,
-                        scaleY: 0
+                        x         : finalPos.x,
+                        y         : nodeData.yOriginPoint.y,//0,
+                        width     : finalPos.width,
+                        height    : finalPos.height,
+                        fillStyle : finalPos.fillStyle,
+                        fillAlpha : me.node.fillAlpha,
+                        scaleY    : 0
                     };
                     
-                    if ( !!me.node.radius && rectData.isLeaf && !me.proportion ) {
-                        var radiusR = Math.min(me.node._width / 2, Math.abs(rectH));
+                    if ( !!me.node.radius && nodeData.isLeaf && !me.proportion ) {
+                        var radiusR = Math.min(me.node._width / 2, Math.abs(rectHeight));
                         radiusR = Math.min(radiusR, me.node.radius);
                         rectCtx.radius = [radiusR, radiusR, 0, 0];
                     };
@@ -429,7 +451,7 @@ export default class BarGraphs extends GraphsBase
                     };
 
                     var rectEl = null;
-                    var barId = "bar_"+h+"_"+rectData.field;
+                    var barId = "bar_"+h+"_"+nodeData.field;
                     if (h <= preDataLen - 1) {
                         rectEl = groupH.getChildById( barId );
                     };
@@ -440,7 +462,7 @@ export default class BarGraphs extends GraphsBase
                             id: barId,
                             context: rectCtx
                         });
-                        rectEl.field = rectData.field;
+                        rectEl.field = nodeData.field;
                         groupH.addChild(rectEl);
                     };
 
@@ -448,17 +470,17 @@ export default class BarGraphs extends GraphsBase
                     rectEl.iGroup = i, rectEl.iNode = h, rectEl.iLay = v;
 
                     //nodeData, nodeElement ， data和图形之间互相引用的属性约定
-                    rectEl.nodeData = rectData;
-                    rectData.nodeElement = rectEl;
+                    rectEl.nodeData = nodeData;
+                    nodeData.nodeElement = rectEl;
 
-                    me.node.filter && me.node.filter.apply( rectEl, [ rectData , me] );
+                    me.node.filter && me.node.filter.apply( rectEl, [ nodeData , me] );
 
                     //label begin ------------------------------
                     if ( me.label.enabled ) {
 
-                        var value = rectData.value;
+                        var value = nodeData.value;
                         if ( _.isFunction(me.label.format) ) {
-                            var _formatc = me.label.format(value, rectData);
+                            var _formatc = me.label.format(value, nodeData);
                             if( _formatc !== undefined || _formatc !== null ){
                                 value = _formatc
                             }
@@ -482,14 +504,14 @@ export default class BarGraphs extends GraphsBase
                             rotation      : me.label.rotation
                         };
                         //然后根据position, offset确定x,y
-                        var _textPos = me._getTextPos( finalPos , rectData );
+                        var _textPos = me._getTextPos( finalPos , nodeData );
                         textCtx.x = _textPos.x;
                         textCtx.y = _textPos.y;
-                        textCtx.textAlign = me._getTextAlign(  finalPos , rectData  );
+                        textCtx.textAlign = me._getTextAlign(  finalPos , nodeData  );
 
                         //文字
                         var textEl = null;
-                        var textId = "text_" + h + "_" + rectData.field;
+                        var textId = "text_" + h + "_" + nodeData.field;
                         if (h <= preDataLen - 1) {
                             textEl = txtGroupH.getChildById( textId );
                         }; 
@@ -504,7 +526,7 @@ export default class BarGraphs extends GraphsBase
                                 id: textId,
                                 context: textCtx
                             });
-                            textEl.field = rectData.field;
+                            textEl.field = nodeData.field;
                             txtGroupH.addChild( textEl );
                         };
 
@@ -731,9 +753,9 @@ export default class BarGraphs extends GraphsBase
         //return tmpData;
     }
 
-    _getTextAlign( bar , rectData ){
+    _getTextAlign( bar , nodeData ){
         var align = this.label.align;
-        if( rectData.value < rectData.yOriginPoint.value ){
+        if( nodeData.value < nodeData.yOriginPoint.value ){
             if( align == "left" ){
                 align = "right"
             } else if( align == "right" ){
@@ -743,7 +765,7 @@ export default class BarGraphs extends GraphsBase
         return align;
     }
     
-    _getTextPos( bar , rectData ){
+    _getTextPos( bar , nodeData ){
 
         var me = this;
         var point = {
@@ -791,7 +813,7 @@ export default class BarGraphs extends GraphsBase
         x -= me.label.offsetX;
 
         var i = 1;
-        if( rectData.value < rectData.yOriginPoint.value ){
+        if( nodeData.value < nodeData.yOriginPoint.value ){
             i = -1;
         };
         y -= i * me.label.offsetY;
@@ -839,11 +861,11 @@ export default class BarGraphs extends GraphsBase
             for (var h = 0; h < me._dataLen; h++) {
                 for (var v = 0; v < vLen; v++) {
 
-                    var rectData = me.data[h_group[v]][h];
+                    var nodeData = me.data[h_group[v]][h];
 
                     var group = me.barsSp.getChildById("barGroup_" + h);
 
-                    var bar = group.getChildById("bar_" + h + "_" + rectData.field);
+                    var bar = group.getChildById("bar_" + h + "_" + nodeData.field);
 
                     if ( optsions.duration == 0 ) {
                         bar.context.scaleY = sy;
@@ -852,6 +874,7 @@ export default class BarGraphs extends GraphsBase
                         bar.context.width = bar.finalPos.width;
                         bar.context.height = bar.finalPos.height;
                     } else {
+
                         if ( bar._tweenObj ) {
                             AnimationFrame.destroyTween(bar._tweenObj);
                         };
@@ -881,6 +904,7 @@ export default class BarGraphs extends GraphsBase
                             },
                             id: bar.id
                         });
+
                     };
 
                 };

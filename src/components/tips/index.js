@@ -207,11 +207,16 @@ export default class Tips extends Component {
                 return;
             }; 
             var style = node.color || node.fillStyle || node.strokeStyle;
+            var name = node.name || node.field;
             var value = typeof(node.value) == "object" ? JSON.stringify(node.value) : numAddSymbol(node.value);
             str += "<div style='line-height:1.5;font-size:12px;padding:0 4px;'>"
             if( style ){
-                str += "<span style='background:" + style + ";margin-right:8px;margin-top:5px;float:left;width:8px;height:8px;border-radius:4px;overflow:hidden;font-size:0;'></span>";
+                str += "<span style='background:" + style + ";margin-right:8px;margin-top:7px;float:left;width:8px;height:8px;border-radius:4px;overflow:hidden;font-size:0;'></span>";
             };
+            if( name ){
+                str += "<span style='margin-right:5px;'>"+name+"：</span>";
+            };
+            
             str += value + "</div>";
         });
         return str;
