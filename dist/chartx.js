@@ -24143,15 +24143,19 @@ var Chartx = (function () {
               lineWidth: 3,
               shapeType: "circle",
               r: 10,
-
-              strokeStyle: "#000"
+              fillStyle: "#19dea1",
+              strokeStyle: "#fff"
           }, "lineWidth", 2);
           _this.label = {
-              fontSize: 14,
-              fontColor: "#ccc",
-
-              strokeStyle: "#000",
-              lineWidth: 2
+              fontSize: 12,
+              fontColor: "#19dea1",
+              verticalAlign: "bottom",
+              align: "center",
+              strokeStyle: "#fff",
+              lineWidth: 0,
+              format: function format(value, nodeData) {
+                  return value;
+              }
           };
 
           _$1.extend(true, _this, opt);
@@ -24199,14 +24203,30 @@ var Chartx = (function () {
 
                   var _node = new canvax.Shapes.Circle({
                       context: {
-                          x: barData.x,
+                          x: barData.x + barData.width / 2,
                           y: y,
-                          r: 10,
-                          fillStyle: "red"
+                          r: me.node.r,
+                          fillStyle: me.node.fillStyle,
+                          strokeStyle: me.node.strokeStyle,
+                          lineWidth: me.node.lineWidth
+                      }
+                  });
+
+                  var _txt = new canvax.Display.Text(me.label.format(barData.value, barData), {
+                      context: {
+                          x: barData.x + barData.width / 2,
+                          y: y - me.node.r - 1,
+                          fillStyle: me.label.fontColor,
+                          lineWidth: me.label.lineWidth,
+                          strokeStyle: me.label.strokeStyle,
+                          fontSize: me.label.fontSize,
+                          textAlign: me.label.align,
+                          textBaseline: me.label.verticalAlign
                       }
                   });
 
                   me.sprite.addChild(_node);
+                  me.sprite.addChild(_txt);
               });
           }
       }, {
