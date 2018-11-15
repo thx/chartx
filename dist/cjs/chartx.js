@@ -24141,7 +24141,7 @@ var barGuide = function (_Component) {
         _this.node = defineProperty({
             lineWidth: 3,
             shapeType: "circle",
-            r: 10,
+            radius: 10,
             fillStyle: "#19dea1",
             strokeStyle: "#fff"
         }, "lineWidth", 2);
@@ -24204,7 +24204,7 @@ var barGuide = function (_Component) {
                     context: {
                         x: barData.x + barData.width / 2,
                         y: y,
-                        r: me.node.r,
+                        r: me.node.radius,
                         fillStyle: me.node.fillStyle,
                         strokeStyle: me.node.strokeStyle,
                         lineWidth: me.node.lineWidth
@@ -24214,7 +24214,7 @@ var barGuide = function (_Component) {
                 var _txt = new canvax.Display.Text(me.label.format(barData.value, barData), {
                     context: {
                         x: barData.x + barData.width / 2,
-                        y: y - me.node.r - 1,
+                        y: y - me.node.radius - 1,
                         fillStyle: me.label.fontColor,
                         lineWidth: me.label.lineWidth,
                         strokeStyle: me.label.strokeStyle,
