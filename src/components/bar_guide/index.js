@@ -30,7 +30,7 @@ export default class barGuide extends Component
         this.node = {
             lineWidth : 3,
             shapeType : "circle",
-            radius : 10,
+            radius : 6,
             fillStyle : "#19dea1",
             strokeStyle : "#fff",
             lineWidth : 2,

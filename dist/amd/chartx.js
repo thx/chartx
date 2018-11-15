@@ -24141,7 +24141,7 @@ define(function () { 'use strict';
           _this.node = defineProperty({
               lineWidth: 3,
               shapeType: "circle",
-              radius: 10,
+              radius: 6,
               fillStyle: "#19dea1",
               strokeStyle: "#fff"
           }, "lineWidth", 2);
