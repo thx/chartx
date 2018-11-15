@@ -114,14 +114,15 @@ export default class barGuide extends Component
                 return false;
             }
         } );
+        
         this.data = _.flatten( me.root.dataFrame.getDataOrg( me.field ) );
 
         if( !this.barDatas ) {
             return;
-        }
+        };
 
-        _.each( this.data, function( tgi, i ){
-            var y = -me._yAxis.getPosOfVal( tgi );
+        _.each( this.data, function( val, i ){
+            var y = -me._yAxis.getPosOfVal( val );
             var barData = me.barDatas[ i ];
 
             var _node = new Canvax.Shapes.Circle({
@@ -135,9 +136,9 @@ export default class barGuide extends Component
                 }
             });
 
-            var _txt = new Canvax.Display.Text( me.label.format(barData.value, barData) , {
+            var _txt = new Canvax.Display.Text( me.label.format( val, barData) , {
                 context : {
-                    x : barData.x + barData.width/2  ,
+                    x : barData.x + barData.width/2,
                     y : y - me.node.radius - 1,
                     fillStyle : me.label.fontColor,
                     lineWidth : me.label.lineWidth,

@@ -24194,14 +24194,14 @@
                       return false;
                   }
               });
+
               this.data = _$1.flatten(me.root.dataFrame.getDataOrg(me.field));
 
               if (!this.barDatas) {
                   return;
               }
-
-              _$1.each(this.data, function (tgi, i) {
-                  var y = -me._yAxis.getPosOfVal(tgi);
+              _$1.each(this.data, function (val, i) {
+                  var y = -me._yAxis.getPosOfVal(val);
                   var barData = me.barDatas[i];
 
                   var _node = new canvax.Shapes.Circle({
@@ -24215,7 +24215,7 @@
                       }
                   });
 
-                  var _txt = new canvax.Display.Text(me.label.format(barData.value, barData), {
+                  var _txt = new canvax.Display.Text(me.label.format(val, barData), {
                       context: {
                           x: barData.x + barData.width / 2,
                           y: y - me.node.radius - 1,
