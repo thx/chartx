@@ -10,6 +10,8 @@ export default class yAxis extends axis
 
         super(opt, data.org);
 
+        this.type = "yAxis";
+
         this._opt = opt;
         
         this.width   = null; //第一次计算后就会有值

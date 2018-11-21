@@ -541,7 +541,7 @@ var Chartx = (function () {
           classCallCheck(this, axis);
 
           //super();
-          this.layoutType = "proportion"; // rule , peak, proportion
+          this.layoutType = opt.layoutType || "proportion"; // rule , peak, proportion
 
           //源数据
           //这个是一个一定会有两层数组的数据结构，是一个标准的dataFrame数据
@@ -554,6 +554,7 @@ var Chartx = (function () {
           //        [1,2,3] 
           //    ]   
           // ]
+          this._opt = _$1.clone(opt);
           this.dataOrg = dataOrg || [];
           this.dataSection = []; //从原数据 dataOrg 中 结果 datasection 重新计算后的数据
           this.dataSectionLayout = []; //和dataSection一一对应的，每个值的pos，//get xxx OfPos的时候，要先来这里做一次寻找
@@ -660,12 +661,18 @@ var Chartx = (function () {
               });
           }
       }, {
+          key: "getDataSection",
+          value: function getDataSection() {
+              //对外返回的dataSection
+              return this.dataSection;
+          }
+      }, {
           key: "setDataSection",
-          value: function setDataSection() {
+          value: function setDataSection(_dataSection) {
               var me = this;
 
               //如果用户没有配置dataSection，或者用户传了，但是传了个空数组，则自己组装dataSection
-              if (!this._opt.dataSection || this._opt.dataSection && !this._opt.dataSection.length) {
+              if (_$1.isEmpty(_dataSection) && _$1.isEmpty(this._opt.dataSection)) {
                   if (this.layoutType == "proportion") {
 
                       var arr = this._getDataSection();
@@ -722,7 +729,7 @@ var Chartx = (function () {
                       this.dataSection = _$1.flatten(this.dataOrg); //this._getDataSection();
                       this.dataSectionGroup = [this.dataSection];
                   }            } else {
-                  this.dataSection = this._opt.dataSection;
+                  this.dataSection = _dataSection || this._opt.dataSection;
                   this.dataSectionGroup = [this.dataSection];
               }        }
       }, {
@@ -1585,13 +1592,11 @@ var Chartx = (function () {
           }
       },
 
-      getOptions: function getOptions(chartPark_cid, options) {
+      //第二个参数是用户要用来覆盖chartpark中的配置的options
+      getOptions: function getOptions(chartPark_cid, userOptions) {
           //chartPark_cid,chartpark中的图表id
-          if (!options) {
-              options = this.options;
-          }
-          if (!options[chartPark_cid]) {
-              return;
+          if (!this.options[chartPark_cid]) {
+              return userOptions || {};
           }        var JsonSerialize = {
               prefix: '[[JSON_FUN_PREFIX_',
               suffix: '_JSON_FUN_SUFFIX]]'
@@ -1600,13 +1605,13 @@ var Chartx = (function () {
               return JSON.parse(string, function (key, value) {
                   if (typeof value === 'string' && value.indexOf(JsonSerialize.suffix) > 0 && value.indexOf(JsonSerialize.prefix) == 0) {
                       return new Function('return ' + value.replace(JsonSerialize.prefix, '').replace(JsonSerialize.suffix, ''))();
-                  }
-
-                  return value;
+                  }                return value;
               }) || {};
           };
-          var opt = parse(decodeURIComponent(options[chartPark_cid] || {}));
-          return opt;
+          var opt = parse(decodeURIComponent(this.options[chartPark_cid] || {}));
+          if (userOptions) {
+              opt = _.extend(true, opt, userOptions);
+          }        return opt;
       }
   };
 
@@ -9731,6 +9736,35 @@ var Chartx = (function () {
           //插件相关代码end
 
 
+          //从graphs里面去根据opt做一一对比，比对成功为true
+          //getGraphsByType,getGraphById 可以逐渐淘汰
+          //count为要查询的数量， 如果为1，则
+
+      }, {
+          key: "getGraph",
+          value: function getGraph(opt) {
+              var graphs = this.getGraphs(opt);
+              return graphs[0];
+          }
+      }, {
+          key: "getGraphs",
+          value: function getGraphs(opt) {
+              var arr = [];
+              var expCount = 0;
+              for (var p in opt) {
+                  expCount++;
+              }
+              _$1.each(this._graphs, function (g) {
+                  for (var p in opt) {
+                      if (JSON.stringify(g[p]) == JSON.stringify(opt[p])) {
+                          expCount--;
+                      }                }                if (!expCount) {
+                      arr.push(g);
+                  }            });
+
+              return arr;
+          }
+
           //获取graphs列表根据type
 
       }, {
@@ -9758,6 +9792,15 @@ var Chartx = (function () {
                   }
               });
               return _g;
+          }
+
+          //从coord里面去根据opt做一一对比，比对成功为true
+          //目前没有多个坐标系的图表，所以不需要 getCoords 
+
+      }, {
+          key: "getCoord",
+          value: function getCoord(opt) {
+              return this._coord;
           }
       }]);
       return Chart;
@@ -10006,6 +10049,9 @@ var Chartx = (function () {
                   _g.tipsPointerHideOf(e);
               });
           }
+      }, {
+          key: "getAxis",
+          value: function getAxis(opt) {}
       }]);
       return Coord;
   }(Chart);
@@ -10206,6 +10252,8 @@ var Chartx = (function () {
           classCallCheck$2(this, xAxis);
 
           var _this = possibleConstructorReturn$1(this, (xAxis.__proto__ || Object.getPrototypeOf(xAxis)).call(this, opt, data.org));
+
+          _this.type = "xAxis";
 
           _this._opt = opt;
 
@@ -10784,6 +10832,8 @@ var Chartx = (function () {
           classCallCheck$2(this, yAxis);
 
           var _this = possibleConstructorReturn$1(this, (yAxis.__proto__ || Object.getPrototypeOf(yAxis)).call(this, opt, data.org));
+
+          _this.type = "yAxis";
 
           _this._opt = opt;
 
@@ -11946,6 +11996,32 @@ var Chartx = (function () {
                       e.eventInfo.xAxis = xNode;
                   }            }
               return obj;
+          }
+      }, {
+          key: "getAxis",
+          value: function getAxis(opt) {
+              var axiss = this.getAxiss(opt);
+              return axiss[0];
+          }
+      }, {
+          key: "getAxiss",
+          value: function getAxiss(opt) {
+              var axiss = _$1.flatten([this._xAxis, this._yAxis]);
+
+              var arr = [];
+              var expCount = 0;
+              for (var p in opt) {
+                  expCount++;
+              }
+              _$1.each(axiss, function (item) {
+                  for (var p in opt) {
+                      if (JSON.stringify(item[p]) == JSON.stringify(opt[p])) {
+                          expCount--;
+                      }                }                if (!expCount) {
+                      arr.push(item);
+                  }            });
+
+              return arr;
           }
       }]);
       return Rect_Component;
@@ -14530,7 +14606,6 @@ var Chartx = (function () {
                       this._circles = new canvax.Display.Sprite({});
                       this.sprite.addChild(this._circles);
                   }
-
                   var iNode = 0; //这里不能和下面的a对等，以为list中有很多无效的节点
                   for (var a = 0, al = list.length; a < al; a++) {
                       var _point = me._currPointList[a];

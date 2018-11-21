@@ -325,6 +325,35 @@ export default class Chart extends Canvax.Event.EventDispatcher
     //插件相关代码end
 
 
+    //从graphs里面去根据opt做一一对比，比对成功为true
+    //getGraphsByType,getGraphById 可以逐渐淘汰
+    //count为要查询的数量， 如果为1，则
+    getGraph( opt ){
+        var graphs = this.getGraphs( opt );
+        return graphs[0];
+    }
+
+    getGraphs( opt ){
+        var arr = [];
+        var expCount = 0;
+        for( var p in opt ){
+            expCount++;
+        };
+
+        _.each( this._graphs, function( g ){
+            for( var p in opt ){
+                if( JSON.stringify( g[p] ) == JSON.stringify( opt[p] ) ){
+                    expCount--
+                };
+            };
+            if( !expCount ){
+                arr.push( g );
+            };
+        } );
+        
+        return arr;
+    }
+
     //获取graphs列表根据type
     getGraphsByType( type )
     {
@@ -349,5 +378,15 @@ export default class Chart extends Canvax.Event.EventDispatcher
         } );
         return _g;
     }
+
+
+    //从coord里面去根据opt做一一对比，比对成功为true
+    //目前没有多个坐标系的图表，所以不需要 getCoords 
+    getCoord( opt )
+    {
+        return this._coord;
+    }
+
+    
 
 }

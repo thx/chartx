@@ -10,6 +10,8 @@ export default class xAxis extends axis
     {
         super(opt, data.org);
 
+        this.type = "xAxis";
+
         this._opt = opt;
 
         this._coord = _coord || {};
@@ -60,12 +62,10 @@ export default class xAxis extends axis
             this.label.rotation = 90;
         };
 
-
         this.pos = {
             x: 0,
             y: 0
         };
-
 
         this._formatTextSection = []; //dataSection的值format后一一对应的值
         this._textElements = []; //_formatTextSection中每个文本对应的canvax.shape.Text对象

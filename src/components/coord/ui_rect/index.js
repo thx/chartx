@@ -536,4 +536,33 @@ export default class Rect_Component extends coorBase
 
         return obj;
     }
+
+    getAxis( opt ){
+        var axiss = this.getAxiss( opt );
+        return axiss[0];
+    }
+
+    getAxiss( opt ){
+        var axiss = _.flatten(  [ this._xAxis, this._yAxis ] );
+
+        var arr = [];
+        var expCount = 0;
+        for( var p in opt ){
+            expCount++;
+        };
+
+        _.each( axiss, function( item ){
+            for( var p in opt ){
+                if( JSON.stringify( item[p] ) == JSON.stringify( opt[p] ) ){
+                    expCount--
+                };
+            };
+            if( !expCount ){
+                arr.push( item );
+            };
+        } );
+        
+        return arr;
+    }
+
 }

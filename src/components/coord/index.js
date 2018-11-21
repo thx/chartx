@@ -248,4 +248,9 @@ export default class Coord extends Chart
         });
     }
 
+
+    getAxis( opt ){
+
+    }
+
 }

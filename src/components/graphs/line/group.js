@@ -491,7 +491,7 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
             if( !this._circles ){
                 this._circles = new Canvax.Display.Sprite({});
                 this.sprite.addChild(this._circles);
-            }
+            };
             
             var iNode = 0; //这里不能和下面的a对等，以为list中有很多无效的节点
             for (var a = 0, al = list.length; a < al; a++) {
