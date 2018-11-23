@@ -231,7 +231,7 @@ export default class dataZoom extends Component
             delete opt.coord.horizontal;
         };
 
-        var thumbChart = new chartConstructor(cloneEl, app._data, opt, app.graphsMap, app.componentsMap);
+        var thumbChart = new chartConstructor(cloneEl, app._data, opt, app.componentModules);
         thumbChart.draw();
 
         return {
@@ -274,7 +274,6 @@ export default class dataZoom extends Component
         return dataZoomOpt
     }
     //datazoom end
-
 
     draw()
     {

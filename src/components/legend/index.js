@@ -111,7 +111,6 @@ export default class Legend extends Component
             legendData = app.getLegendData();
         };
         
-        //var _legend = new app.componentsMap.legend( legendData, legendOpt, this );
         var _legend = new this( legendData, legendOpt, app );
         
         if( _legend.direction == "h" ){

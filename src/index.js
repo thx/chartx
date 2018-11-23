@@ -1,5 +1,5 @@
 
-import { global, cloneOptions, cloneData, dom } from "mmvis"
+import { global } from "mmvis"
 
 //空坐标系，当一些非坐标系图表，就直接创建在emptyCoord上面
 import emptyCoord from "./components/coord/index"
@@ -32,39 +32,32 @@ import Theme from "./components/theme/index"
 import WaterMark from "./components/watermark/index"
 import Cross from "./components/cross/index"
 
-var coord = {
-    rect : Rect,
-    polar : Polar
-}
 
-var graphs = {
-    bar      : Bar,
-    line     : Line,
-    scat     : Scat,
-    pie      : Pie,
-    radar    : Radar,
-    cloud    : Cloud,
-    planet   : Planet,
-    funnel   : Funnel,
-    venn     : Venn,
-    sunburst : Sunburst,
-    sankey   : Sankey
-};
+global.registerComponent( emptyCoord, 'coord' );
+global.registerComponent( Rect, 'coord', 'rect' );
+global.registerComponent( Polar, 'coord', 'polar' );
 
-var components = {
-    theme     : Theme,
-    legend    : Legend,
-    dataZoom  : DataZoom,
-    markLine  : MarkLine,
-    tips      : Tips,
+global.registerComponent( Bar, 'graphs', 'bar' );
+global.registerComponent( Line, 'graphs', 'line' );
+global.registerComponent( Scat, 'graphs', 'scat' );
+global.registerComponent( Pie, 'graphs', 'pie' );
+global.registerComponent( Radar, 'graphs', 'radar' );
+global.registerComponent( Cloud, 'graphs', 'cloud' );
+global.registerComponent( Planet, 'graphs', 'planet' );
+global.registerComponent( Funnel, 'graphs', 'funnel' );
+global.registerComponent( Venn, 'graphs', 'venn' );
+global.registerComponent( Sunburst, 'graphs', 'sunburst' );
+global.registerComponent( Sankey, 'graphs', 'sankey' );
 
-    barTgi    : BarTgi,
-    bar_guide : BarGuide,
-    
-    waterMark : WaterMark,
-    cross     : Cross
-};
-
+global.registerComponent( Theme, 'theme' );
+global.registerComponent( Legend, 'legend' );
+global.registerComponent( DataZoom, 'dataZoom' );
+global.registerComponent( MarkLine, 'markLine' );
+global.registerComponent( Tips, 'tips' );
+global.registerComponent( BarTgi, 'barTgi' );
+global.registerComponent( BarGuide, 'bar_guide' );
+global.registerComponent( WaterMark, 'waterMark' );
+global.registerComponent( Cross, 'cross' );
 
 //皮肤设定begin ---------------
 //如果数据库中有项目皮肤
@@ -75,46 +68,6 @@ if( projectTheme && projectTheme.length ){
 //皮肤设定end -----------------
 
 var chartx = {
-    create : function( el, _data, _opt ){
-        var chart = null;
-        var me = this;
-
-        var data = cloneData( _data );
-        var opt  = cloneOptions( _opt );  
-
-        var _destroy = function(){
-            me.instances[ chart.id ] = null;
-            delete me.instances[ chart.id ];
-        }
-
-        //这个el如果之前有绘制过图表，那么就要在instances中找到图表实例，然后销毁
-        var chart_id = dom.query(el).getAttribute("chart_id");
-        if( chart_id != undefined ){
-            var _chart = me.instances[ chart_id ];
-            if( _chart ){
-                _chart.destroy();
-                _chart.off && _chart.off("destroy" , _destroy)
-            };
-            delete me.instances[ chart_id ];
-        };
-
-        var Coord = emptyCoord;
-        if( opt.coord && opt.coord.type ){
-            Coord = coord[ opt.coord.type ];
-        };
-        //try {
-            chart = new Coord( el, data, opt, graphs, components );
-            if( chart ){
-                chart.draw();
-                
-                me.instances[ chart.id ] = chart;
-                chart.on("destroy" , _destroy);
-            };
-        //} catch(err){
-        //    throw "Chatx Error：" + err
-        //};
-        return chart;
-    },
     options : {}
 };
 

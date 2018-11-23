@@ -7,11 +7,11 @@ import { _ } from "mmvis"
  */
 export default class Coord extends Chart
 {
-    constructor( node, data, opt, graphsMap, componentsMap )
+    constructor( node, data, opt, componentModules )
     {
         super( node, data, opt );
-        this.graphsMap = graphsMap;
-        this.componentsMap = componentsMap;
+
+        this.componentModules = componentModules;
 
         //这里不要直接用data，而要用 this._data
         this.dataFrame = this.initData( this._data , opt );
@@ -58,7 +58,7 @@ export default class Coord extends Chart
                 this._opt.theme = [this._opt.theme];
             };
 
-            var _theme = new this.componentsMap.theme( this._opt.theme, this );
+            var _theme = new this.componentModules.getComponentModule("theme")( this._opt.theme, this );
             this._theme = _theme.get(); //如果用户有设置图表皮肤组件，那么就全部用用户自己设置的，不再用merge
             
         };
@@ -70,13 +70,12 @@ export default class Coord extends Chart
             this.drawBeginHorizontal && this.drawBeginHorizontal();
         };
 
-        this.startDraw( opt ); //开始绘图，包括坐标系和graphs 和 components
+        this.startDraw( opt );
 
         if( this._coord && this._coord.horizontal ){
             this.drawEndHorizontal && this.drawEndHorizontal();
         };
 
-      
     }
 
     initModule(opt)
@@ -89,7 +88,8 @@ export default class Coord extends Chart
         };
 
         _.each( this.graphs , function( graphs ){
-            var _g = new me.graphsMap[ graphs.type ]( graphs, me );
+            var graphsModule = me.componentModules.getComponentModule("graphs", graphs.type);
+            var _g = new graphsModule( graphs, me );
             me._graphs.push( _g );
             me.graphsSprite.addChild( _g.sprite );
         } );

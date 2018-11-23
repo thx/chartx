@@ -246,17 +246,23 @@ export default class Chart extends Canvax.Event.EventDispatcher
         //TODO: theme 组件优先级最高，在registerComponents之前已经加载过
         var notComponents = [ "coord", "graphs" , "theme" ];
         for( var _p in this._opt ){
-            
+            //非coord graphs theme，其实后面也可以统一的
             if( _.indexOf( notComponents, _p ) == -1 ){
                 var _comp = this._opt[ _p ];
+
+                //所有的组件都按照数组方式处理，这里，组件里面就不需要再这样处理了
                 if( ! _.isArray( _comp ) ){
                     _comp = [ _comp ];
                 };
+
                 _.each( _comp, function( compOpt ){
-                    var compConstructor = me.componentsMap[ _p ];
+                    //这里开始mount组件进来
+                    
+                    var compConstructor = me.componentModules.getComponentModule( _p, compOpt.type );
                     if( compConstructor && compConstructor.register ){
                         compConstructor.register( compOpt, me );
                     };
+                    
                 } );
                 
             }

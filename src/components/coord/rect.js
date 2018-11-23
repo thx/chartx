@@ -4,8 +4,8 @@ import { _ } from "mmvis"
 
 export default class Rect extends CoordBase
 {
-    constructor( node, data, opts, graphsMap, componentsMap ){
-        super( node, data, opts, graphsMap, componentsMap );
+    constructor( node, data, opts, componentModules ){
+        super( node, data, opts, componentModules );
         //坐标系统
         this.CoordComponents = CoordComponents;
         this._coord = null;

@@ -5,33 +5,33 @@
 }(this, (function () { 'use strict';
 
   var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
-    return typeof obj;
+      return typeof obj;
   } : function (obj) {
-    return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+      return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
   };
 
   var classCallCheck = function (instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
+      if (!(instance instanceof Constructor)) {
+          throw new TypeError("Cannot call a class as a function");
+      }
   };
 
   var createClass = function () {
-    function defineProperties(target, props) {
-      for (var i = 0; i < props.length; i++) {
-        var descriptor = props[i];
-        descriptor.enumerable = descriptor.enumerable || false;
-        descriptor.configurable = true;
-        if ("value" in descriptor) descriptor.writable = true;
-        Object.defineProperty(target, descriptor.key, descriptor);
+      function defineProperties(target, props) {
+          for (var i = 0; i < props.length; i++) {
+              var descriptor = props[i];
+              descriptor.enumerable = descriptor.enumerable || false;
+              descriptor.configurable = true;
+              if ("value" in descriptor) descriptor.writable = true;
+              Object.defineProperty(target, descriptor.key, descriptor);
+          }
       }
-    }
 
-    return function (Constructor, protoProps, staticProps) {
-      if (protoProps) defineProperties(Constructor.prototype, protoProps);
-      if (staticProps) defineProperties(Constructor, staticProps);
-      return Constructor;
-    };
+      return function (Constructor, protoProps, staticProps) {
+          if (protoProps) defineProperties(Constructor.prototype, protoProps);
+          if (staticProps) defineProperties(Constructor, staticProps);
+          return Constructor;
+      };
   }();
 
   var _$1 = {};
@@ -60,322 +60,322 @@
       nativeBind = FuncProto.bind;
 
   var shallowProperty = function shallowProperty(key) {
-    return function (obj) {
-      return obj == null ? void 0 : obj[key];
-    };
+      return function (obj) {
+          return obj == null ? void 0 : obj[key];
+      };
   };
   var MAX_ARRAY_INDEX = Math.pow(2, 53) - 1;
   var getLength = shallowProperty('length');
   var isArrayLike = function isArrayLike(collection) {
-    var length = getLength(collection);
-    return typeof length == 'number' && length >= 0 && length <= MAX_ARRAY_INDEX;
+      var length = getLength(collection);
+      return typeof length == 'number' && length >= 0 && length <= MAX_ARRAY_INDEX;
   };
 
   _$1.values = function (obj) {
-    var keys = _$1.keys(obj);
-    var length = keys.length;
-    var values = new Array(length);
-    for (var i = 0; i < length; i++) {
-      values[i] = obj[keys[i]];
-    }
-    return values;
+      var keys = _$1.keys(obj);
+      var length = keys.length;
+      var values = new Array(length);
+      for (var i = 0; i < length; i++) {
+          values[i] = obj[keys[i]];
+      }
+      return values;
   };
 
   _$1.keys = nativeKeys || function (obj) {
-    if (obj !== Object(obj)) throw new TypeError('Invalid object');
-    var keys = [];
-    for (var key in obj) {
-      if (_$1.has(obj, key)) keys.push(key);
-    }return keys;
+      if (obj !== Object(obj)) throw new TypeError('Invalid object');
+      var keys = [];
+      for (var key in obj) {
+          if (_$1.has(obj, key)) keys.push(key);
+      }return keys;
   };
 
   _$1.has = function (obj, key) {
-    return hasOwnProperty.call(obj, key);
+      return hasOwnProperty.call(obj, key);
   };
 
   var each = _$1.each = _$1.forEach = function (obj, iterator, context) {
-    if (obj == null) return;
-    if (nativeForEach && obj.forEach === nativeForEach) {
-      obj.forEach(iterator, context);
-    } else if (obj.length === +obj.length) {
-      for (var i = 0, length = obj.length; i < length; i++) {
-        if (iterator.call(context, obj[i], i, obj) === breaker) return;
+      if (obj == null) return;
+      if (nativeForEach && obj.forEach === nativeForEach) {
+          obj.forEach(iterator, context);
+      } else if (obj.length === +obj.length) {
+          for (var i = 0, length = obj.length; i < length; i++) {
+              if (iterator.call(context, obj[i], i, obj) === breaker) return;
+          }
+      } else {
+          var keys = _$1.keys(obj);
+          for (var i = 0, length = keys.length; i < length; i++) {
+              if (iterator.call(context, obj[keys[i]], keys[i], obj) === breaker) return;
+          }
       }
-    } else {
-      var keys = _$1.keys(obj);
-      for (var i = 0, length = keys.length; i < length; i++) {
-        if (iterator.call(context, obj[keys[i]], keys[i], obj) === breaker) return;
-      }
-    }
   };
 
   _$1.compact = function (array) {
-    return _$1.filter(array, _$1.identity);
+      return _$1.filter(array, _$1.identity);
   };
 
   _$1.filter = _$1.select = function (obj, iterator, context) {
-    var results = [];
-    if (obj == null) return results;
-    if (nativeFilter && obj.filter === nativeFilter) return obj.filter(iterator, context);
-    each(obj, function (value, index, list) {
-      if (iterator.call(context, value, index, list)) results.push(value);
-    });
-    return results;
+      var results = [];
+      if (obj == null) return results;
+      if (nativeFilter && obj.filter === nativeFilter) return obj.filter(iterator, context);
+      each(obj, function (value, index, list) {
+          if (iterator.call(context, value, index, list)) results.push(value);
+      });
+      return results;
   };
 
   each(['Arguments', 'Function', 'String', 'Number', 'Date', 'RegExp'], function (name) {
-    _$1['is' + name] = function (obj) {
-      return toString.call(obj) == '[object ' + name + ']';
-    };
+      _$1['is' + name] = function (obj) {
+          return toString.call(obj) == '[object ' + name + ']';
+      };
   });
 
   //if (!_.isArguments(arguments)) {
   _$1.isArguments = function (obj) {
-    return !!(obj && _$1.has(obj, 'callee'));
+      return !!(obj && _$1.has(obj, 'callee'));
   };
   //}
 
   {
-    _$1.isFunction = function (obj) {
-      return typeof obj === 'function';
-    };
+      _$1.isFunction = function (obj) {
+          return typeof obj === 'function';
+      };
   }
   _$1.isFinite = function (obj) {
-    return isFinite(obj) && !isNaN(parseFloat(obj));
+      return isFinite(obj) && !isNaN(parseFloat(obj));
   };
 
   _$1.isNaN = function (obj) {
-    return _$1.isNumber(obj) && obj != +obj;
+      return _$1.isNumber(obj) && obj != +obj;
   };
 
   _$1.isBoolean = function (obj) {
-    return obj === true || obj === false || toString.call(obj) == '[object Boolean]';
+      return obj === true || obj === false || toString.call(obj) == '[object Boolean]';
   };
 
   _$1.isNull = function (obj) {
-    return obj === null;
+      return obj === null;
   };
 
   _$1.isEmpty = function (obj) {
-    if (obj == null) return true;
-    if (_$1.isArray(obj) || _$1.isString(obj)) return obj.length === 0;
-    for (var key in obj) {
-      if (_$1.has(obj, key)) return false;
-    }return true;
+      if (obj == null) return true;
+      if (_$1.isArray(obj) || _$1.isString(obj)) return obj.length === 0;
+      for (var key in obj) {
+          if (_$1.has(obj, key)) return false;
+      }return true;
   };
 
   _$1.isElement = function (obj) {
-    return !!(obj && obj.nodeType === 1);
+      return !!(obj && obj.nodeType === 1);
   };
 
   _$1.isArray = nativeIsArray || function (obj) {
-    return toString.call(obj) == '[object Array]';
+      return toString.call(obj) == '[object Array]';
   };
 
   _$1.isObject = function (obj) {
-    return obj === Object(obj);
+      return obj === Object(obj);
   };
 
   _$1.identity = function (value) {
-    return value;
+      return value;
   };
 
   _$1.indexOf = function (array, item, isSorted) {
-    if (array == null) return -1;
-    var i = 0,
-        length = array.length;
-    if (isSorted) {
-      if (typeof isSorted == 'number') {
-        i = isSorted < 0 ? Math.max(0, length + isSorted) : isSorted;
-      } else {
-        i = _$1.sortedIndex(array, item);
-        return array[i] === item ? i : -1;
+      if (array == null) return -1;
+      var i = 0,
+          length = array.length;
+      if (isSorted) {
+          if (typeof isSorted == 'number') {
+              i = isSorted < 0 ? Math.max(0, length + isSorted) : isSorted;
+          } else {
+              i = _$1.sortedIndex(array, item);
+              return array[i] === item ? i : -1;
+          }
       }
-    }
-    if (nativeIndexOf && array.indexOf === nativeIndexOf) return array.indexOf(item, isSorted);
-    for (; i < length; i++) {
-      if (array[i] === item) return i;
-    }return -1;
+      if (nativeIndexOf && array.indexOf === nativeIndexOf) return array.indexOf(item, isSorted);
+      for (; i < length; i++) {
+          if (array[i] === item) return i;
+      }return -1;
   };
 
   _$1.isWindow = function (obj) {
-    return obj != null && obj == obj.window;
+      return obj != null && obj == obj.window;
   };
 
   // Internal implementation of a recursive `flatten` function.
   var flatten = function flatten(input, shallow, output) {
-    if (shallow && _$1.every(input, _$1.isArray)) {
-      return concat.apply(output, input);
-    }
-    each(input, function (value) {
-      if (_$1.isArray(value) || _$1.isArguments(value)) {
-        shallow ? push.apply(output, value) : flatten(value, shallow, output);
-      } else {
-        output.push(value);
+      if (shallow && _$1.every(input, _$1.isArray)) {
+          return concat.apply(output, input);
       }
-    });
-    return output;
+      each(input, function (value) {
+          if (_$1.isArray(value) || _$1.isArguments(value)) {
+              shallow ? push.apply(output, value) : flatten(value, shallow, output);
+          } else {
+              output.push(value);
+          }
+      });
+      return output;
   };
 
   // Flatten out an array, either recursively (by default), or just one level.
   _$1.flatten = function (array, shallow) {
-    return flatten(array, shallow, []);
+      return flatten(array, shallow, []);
   };
 
   _$1.every = _$1.all = function (obj, iterator, context) {
-    iterator || (iterator = _$1.identity);
-    var result = true;
-    if (obj == null) return result;
-    if (nativeEvery && obj.every === nativeEvery) return obj.every(iterator, context);
-    each(obj, function (value, index, list) {
-      if (!(result = result && iterator.call(context, value, index, list))) return breaker;
-    });
-    return !!result;
+      iterator || (iterator = _$1.identity);
+      var result = true;
+      if (obj == null) return result;
+      if (nativeEvery && obj.every === nativeEvery) return obj.every(iterator, context);
+      each(obj, function (value, index, list) {
+          if (!(result = result && iterator.call(context, value, index, list))) return breaker;
+      });
+      return !!result;
   };
 
   // Return the minimum element (or element-based computation).
   _$1.min = function (obj, iterator, context) {
-    if (!iterator && _$1.isArray(obj) && obj[0] === +obj[0] && obj.length < 65535) {
-      return Math.min.apply(Math, obj);
-    }
-    if (!iterator && _$1.isEmpty(obj)) return Infinity;
-    var result = { computed: Infinity, value: Infinity };
-    each(obj, function (value, index, list) {
-      var computed = iterator ? iterator.call(context, value, index, list) : value;
-      computed < result.computed && (result = { value: value, computed: computed });
-    });
-    return result.value;
+      if (!iterator && _$1.isArray(obj) && obj[0] === +obj[0] && obj.length < 65535) {
+          return Math.min.apply(Math, obj);
+      }
+      if (!iterator && _$1.isEmpty(obj)) return Infinity;
+      var result = { computed: Infinity, value: Infinity };
+      each(obj, function (value, index, list) {
+          var computed = iterator ? iterator.call(context, value, index, list) : value;
+          computed < result.computed && (result = { value: value, computed: computed });
+      });
+      return result.value;
   };
   // Return the maximum element or (element-based computation).
   // Can't optimize arrays of integers longer than 65,535 elements.
   // See [WebKit Bug 80797](https://bugs.webkit.org/show_bug.cgi?id=80797)
   _$1.max = function (obj, iterator, context) {
-    if (!iterator && _$1.isArray(obj) && obj[0] === +obj[0] && obj.length < 65535) {
-      return Math.max.apply(Math, obj);
-    }
-    if (!iterator && _$1.isEmpty(obj)) return -Infinity;
-    var result = { computed: -Infinity, value: -Infinity };
-    each(obj, function (value, index, list) {
-      var computed = iterator ? iterator.call(context, value, index, list) : value;
-      computed > result.computed && (result = { value: value, computed: computed });
-    });
-    return result.value;
+      if (!iterator && _$1.isArray(obj) && obj[0] === +obj[0] && obj.length < 65535) {
+          return Math.max.apply(Math, obj);
+      }
+      if (!iterator && _$1.isEmpty(obj)) return -Infinity;
+      var result = { computed: -Infinity, value: -Infinity };
+      each(obj, function (value, index, list) {
+          var computed = iterator ? iterator.call(context, value, index, list) : value;
+          computed > result.computed && (result = { value: value, computed: computed });
+      });
+      return result.value;
   };
 
   // Return the first value which passes a truth test. Aliased as `detect`.
   _$1.find = _$1.detect = function (obj, iterator, context) {
-    var result;
-    any(obj, function (value, index, list) {
-      if (iterator.call(context, value, index, list)) {
-        result = value;
-        return true;
-      }
-    });
-    return result;
+      var result;
+      any(obj, function (value, index, list) {
+          if (iterator.call(context, value, index, list)) {
+              result = value;
+              return true;
+          }
+      });
+      return result;
   };
   // Determine if at least one element in the object matches a truth test.
   // Delegates to **ECMAScript 5**'s native `some` if available.
   // Aliased as `any`.
   var any = _$1.some = _$1.any = function (obj, iterator, context) {
-    iterator || (iterator = _$1.identity);
-    var result = false;
-    if (obj == null) return result;
-    if (nativeSome && obj.some === nativeSome) return obj.some(iterator, context);
-    each(obj, function (value, index, list) {
-      if (result || (result = iterator.call(context, value, index, list))) return breaker;
-    });
-    return !!result;
+      iterator || (iterator = _$1.identity);
+      var result = false;
+      if (obj == null) return result;
+      if (nativeSome && obj.some === nativeSome) return obj.some(iterator, context);
+      each(obj, function (value, index, list) {
+          if (result || (result = iterator.call(context, value, index, list))) return breaker;
+      });
+      return !!result;
   };
   // Return a version of the array that does not contain the specified value(s).
   _$1.without = function (array) {
-    return _$1.difference(array, slice.call(arguments, 1));
+      return _$1.difference(array, slice.call(arguments, 1));
   };
   // Take the difference between one array and a number of other arrays.
   // Only the elements present in just the first array will remain.
   _$1.difference = function (array) {
-    var rest = concat.apply(ArrayProto, slice.call(arguments, 1));
-    return _$1.filter(array, function (value) {
-      return !_$1.contains(rest, value);
-    });
+      var rest = concat.apply(ArrayProto, slice.call(arguments, 1));
+      return _$1.filter(array, function (value) {
+          return !_$1.contains(rest, value);
+      });
   };
   // Produce a duplicate-free version of the array. If the array has already
   // been sorted, you have the option of using a faster algorithm.
   // Aliased as `unique`.
   _$1.uniq = _$1.unique = function (array, isSorted, iterator, context) {
-    if (_$1.isFunction(isSorted)) {
-      context = iterator;
-      iterator = isSorted;
-      isSorted = false;
-    }
-    var initial = iterator ? _$1.map(array, iterator, context) : array;
-    var results = [];
-    var seen = [];
-    each(initial, function (value, index) {
-      if (isSorted ? !index || seen[seen.length - 1] !== value : !_$1.contains(seen, value)) {
-        seen.push(value);
-        results.push(array[index]);
+      if (_$1.isFunction(isSorted)) {
+          context = iterator;
+          iterator = isSorted;
+          isSorted = false;
       }
-    });
-    return results;
+      var initial = iterator ? _$1.map(array, iterator, context) : array;
+      var results = [];
+      var seen = [];
+      each(initial, function (value, index) {
+          if (isSorted ? !index || seen[seen.length - 1] !== value : !_$1.contains(seen, value)) {
+              seen.push(value);
+              results.push(array[index]);
+          }
+      });
+      return results;
   };
   // Return the results of applying the iterator to each element.
   // Delegates to **ECMAScript 5**'s native `map` if available.
   _$1.map = _$1.collect = function (obj, iterator, context) {
-    var results = [];
-    if (obj == null) return results;
-    if (nativeMap && obj.map === nativeMap) return obj.map(iterator, context);
-    each(obj, function (value, index, list) {
-      results.push(iterator.call(context, value, index, list));
-    });
-    return results;
+      var results = [];
+      if (obj == null) return results;
+      if (nativeMap && obj.map === nativeMap) return obj.map(iterator, context);
+      each(obj, function (value, index, list) {
+          results.push(iterator.call(context, value, index, list));
+      });
+      return results;
   };
   // Determine if the array or object contains a given value (using `===`).
   // Aliased as `include`.
   _$1.contains = _$1.include = function (obj, target) {
-    if (obj == null) return false;
-    if (nativeIndexOf && obj.indexOf === nativeIndexOf) return obj.indexOf(target) != -1;
-    return any(obj, function (value) {
-      return value === target;
-    });
+      if (obj == null) return false;
+      if (nativeIndexOf && obj.indexOf === nativeIndexOf) return obj.indexOf(target) != -1;
+      return any(obj, function (value) {
+          return value === target;
+      });
   };
 
   // Convenience version of a common use case of `map`: fetching a property.
   _$1.pluck = function (obj, key) {
-    return _$1.map(obj, function (value) {
-      return value[key];
-    });
+      return _$1.map(obj, function (value) {
+          return value[key];
+      });
   };
 
   // Return a random integer between min and max (inclusive).
   _$1.random = function (min, max) {
-    if (max == null) {
-      max = min;
-      min = 0;
-    }
-    return min + Math.floor(Math.random() * (max - min + 1));
+      if (max == null) {
+          max = min;
+          min = 0;
+      }
+      return min + Math.floor(Math.random() * (max - min + 1));
   };
 
   // Shuffle a collection.
   _$1.shuffle = function (obj) {
-    return _$1.sample(obj, Infinity);
+      return _$1.sample(obj, Infinity);
   };
 
   _$1.sample = function (obj, n, guard) {
-    if (n == null || guard) {
-      if (!isArrayLike(obj)) obj = _$1.values(obj);
-      return obj[_$1.random(obj.length - 1)];
-    }
-    var sample = isArrayLike(obj) ? _$1.clone(obj) : _$1.values(obj);
-    var length = getLength(sample);
-    n = Math.max(Math.min(n, length), 0);
-    var last = length - 1;
-    for (var index = 0; index < n; index++) {
-      var rand = _$1.random(index, last);
-      var temp = sample[index];
-      sample[index] = sample[rand];
-      sample[rand] = temp;
-    }
-    return sample.slice(0, n);
+      if (n == null || guard) {
+          if (!isArrayLike(obj)) obj = _$1.values(obj);
+          return obj[_$1.random(obj.length - 1)];
+      }
+      var sample = isArrayLike(obj) ? _$1.clone(obj) : _$1.values(obj);
+      var length = getLength(sample);
+      n = Math.max(Math.min(n, length), 0);
+      var last = length - 1;
+      for (var index = 0; index < n; index++) {
+          var rand = _$1.random(index, last);
+          var temp = sample[index];
+          sample[index] = sample[rand];
+          sample[rand] = temp;
+      }
+      return sample.slice(0, n);
   };
 
   /**
@@ -383,45 +383,46 @@
   *如果是深度extend，第一个参数就设置为true
   */
   _$1.extend = function () {
-    var options,
-        name,
-        src,
-        copy,
-        target = arguments[0] || {},
-        i = 1,
-        length = arguments.length,
-        deep = false;
-    if (typeof target === "boolean") {
-      deep = target;
-      target = arguments[1] || {};
-      i = 2;
-    }  if ((typeof target === 'undefined' ? 'undefined' : _typeof(target)) !== "object" && !_$1.isFunction(target)) {
-      target = {};
-    }  if (length === i) {
-      target = this;
-      --i;
-    }  for (; i < length; i++) {
-      if ((options = arguments[i]) != null) {
-        for (name in options) {
-          src = target[name];
-          copy = options[name];
-          if (target === copy) {
-            continue;
+      var options,
+          name,
+          src,
+          copy,
+          target = arguments[0] || {},
+          i = 1,
+          length = arguments.length,
+          deep = false;
+      if (typeof target === "boolean") {
+          deep = target;
+          target = arguments[1] || {};
+          i = 2;
+      }if ((typeof target === 'undefined' ? 'undefined' : _typeof(target)) !== "object" && !_$1.isFunction(target)) {
+          target = {};
+      }if (length === i) {
+          target = this;
+          --i;
+      }for (; i < length; i++) {
+          if ((options = arguments[i]) != null) {
+              for (name in options) {
+                  src = target[name];
+                  copy = options[name];
+                  if (target === copy) {
+                      continue;
+                  }
+                  //if( deep && copy && _.isObject( copy ) &&  && !_.isArray( copy ) && !_.isFunction( copy ) ){
+                  if (deep && copy && _$1.isObject(copy) && copy.constructor === Object) {
+                      target[name] = _$1.extend(deep, src, copy);
+                  } else {
+                      target[name] = copy;
+                  }
+              }
           }
-          //if( deep && copy && _.isObject( copy ) &&  && !_.isArray( copy ) && !_.isFunction( copy ) ){
-          if (deep && copy && _$1.isObject(copy) && copy.constructor === Object) {
-            target[name] = _$1.extend(deep, src, copy);
-          } else {
-            target[name] = copy;
-          }      }
       }
-    }
-    return target;
+      return target;
   };
 
   _$1.clone = function (obj) {
-    if (!_$1.isObject(obj)) return obj;
-    return _$1.isArray(obj) ? obj.slice() : _$1.extend(true, {}, obj);
+      if (!_$1.isObject(obj)) return obj;
+      return _$1.isArray(obj) ? obj.slice() : _$1.extend(true, {}, obj);
   };
 
   function normalizeTickInterval(interval, magnitude) {
@@ -628,7 +629,7 @@
 
                   if (this._min == null) {
                       this._min = _$1.min(this.dataSection);
-                  }                if (this._max == null) {
+                  }if (this._max == null) {
                       this._max = _$1.max(this.dataSection);
                   }
                   //默认情况下 origin 就是datasection的最小值
@@ -637,9 +638,10 @@
                       this.origin = 0; //this.dataSection[0];//_.min( this.dataSection );
                       if (_$1.max(this.dataSection) < 0) {
                           this.origin = _$1.max(this.dataSection);
-                      }                    if (_$1.min(this.dataSection) > 0) {
+                      }if (_$1.min(this.dataSection) > 0) {
                           this.origin = _$1.min(this.dataSection);
-                      }                }
+                      }
+                  }
                   this._originTrans = this._getOriginTrans(this.origin);
                   this.originPos = this.getPosOfVal(this.origin);
               }
@@ -697,14 +699,16 @@
                               arr.push(Math.abs(_min));
                           } else {
                               arr.push(-Math.abs(_max));
-                          }                    }
+                          }
+                      }
                       for (var ai = 0, al = arr.length; ai < al; ai++) {
                           arr[ai] = Number(arr[ai]);
                           if (isNaN(arr[ai])) {
                               arr.splice(ai, 1);
                               ai--;
                               al--;
-                          }                    }
+                          }
+                      }
                       this.dataSection = dataSection.section(arr, 3);
 
                       if (this.symmetric) {
@@ -715,7 +719,8 @@
                               this.dataSection.push(Math.abs(_min));
                           } else {
                               this.dataSection.unshift(-Math.abs(_max));
-                          }                    }
+                          }
+                      }
                       //如果还是0
                       if (this.dataSection.length == 0) {
                           this.dataSection = [0];
@@ -731,10 +736,12 @@
                       //非proportion 也就是 rule peak 模式下面
                       this.dataSection = _$1.flatten(this.dataOrg); //this._getDataSection();
                       this.dataSectionGroup = [this.dataSection];
-                  }            } else {
+                  }
+              } else {
                   this.dataSection = _dataSection || this._opt.dataSection;
                   this.dataSectionGroup = [this.dataSection];
-              }        }
+              }
+          }
       }, {
           key: "_getDataSection",
           value: function _getDataSection() {
@@ -749,9 +756,10 @@
 
               if (vLen == 1) {
                   return this._oneDimensional();
-              }            if (vLen > 1) {
+              }if (vLen > 1) {
                   return this._twoDimensional();
-              }        }
+              }
+          }
       }, {
           key: "_oneDimensional",
           value: function _oneDimensional() {
@@ -809,7 +817,7 @@
                       }
                       up_i && varr.push(up_count);
                       down_i && varr.push(down_count);
-                  }                arr.push(varr);
+                  }arr.push(varr);
               });
               arr.push(min);
               return _$1.flatten(arr);
@@ -827,7 +835,8 @@
                   //waterLine不再当前section的区间内，需要重新计算整个datasection    
                   this.setDataSection();
                   this.calculateProps();
-              }        }
+              }
+          }
       }, {
           key: "_sort",
           value: function _sort() {
@@ -843,7 +852,9 @@
                       });
                       this.dataSectionGroup.reverse();
                       //dataSectionGroup reverse end
-                  }            }        }
+                  }
+              }
+          }
       }, {
           key: "_getSortType",
           value: function _getSortType() {
@@ -875,13 +886,13 @@
                       var preMiddleweight = dMin;
                       if (i > 0) {
                           preMiddleweight = this.middleweight[i - 1];
-                      }                    var middleVal = preMiddleweight + parseInt((this.middleweight[i] - preMiddleweight) / 2);
+                      }var middleVal = preMiddleweight + parseInt((this.middleweight[i] - preMiddleweight) / 2);
 
                       newDS.push(middleVal);
                       newDS.push(this.middleweight[i]);
 
                       newDSG.push([preMiddleweight, middleVal, this.middleweight[i]]);
-                  }                var lastMW = this.middleweight.slice(-1)[0];
+                  }var lastMW = this.middleweight.slice(-1)[0];
 
                   if (dMax > lastMW) {
                       newDS.push(lastMW + (dMax - lastMW) / 2);
@@ -892,7 +903,8 @@
                   //好了。 到这里用简单的规则重新拼接好了新的 dataSection
                   this.dataSection = newDS;
                   this.dataSectionGroup = newDSG;
-              }        }
+              }
+          }
 
           //origin 对应 this.origin 的值
 
@@ -917,7 +929,8 @@
                       if (origin >= min && origin <= max) {
                           pos = (origin - min) / amountABS * groupLength + i * groupLength;
                           break;
-                      }                }
+                      }
+                  }
               }
               if (this.sort == "desc") {
                   //如果是倒序的
@@ -943,7 +956,8 @@
               _$1.each(this.dataSectionLayout, function (item) {
                   if (item[prop] === opt[prop]) {
                       layoutData = item;
-                  }            });
+                  }
+              });
 
               return layoutData || {};
           }
@@ -998,7 +1012,7 @@
                           //如果 origin 并不在这个区间
                           if (_origin < min || _origin > max) {
                               _origin = min;
-                          }                        var maxGroupDisABS = Math.max(Math.abs(max - _origin), Math.abs(_origin - min));
+                          }var maxGroupDisABS = Math.max(Math.abs(max - _origin), Math.abs(_origin - min));
                           var amountABS = Math.abs(max - min);
                           var h = maxGroupDisABS / amountABS * groupLength;
                           pos = (val - _origin) / maxGroupDisABS * h + i * groupLength;
@@ -1023,7 +1037,7 @@
                           if (this.layoutType == "rule") {
                               //line 的xaxis就是 rule
                               pos = valInd / (cellCount - 1) * this.axisLength;
-                          }                        if (this.layoutType == "peak") {
+                          }if (this.layoutType == "peak") {
                               //bar的xaxis就是 peak
                               /*
                               pos = (this.axisLength/cellCount) 
@@ -1032,7 +1046,10 @@
                               */
                               var _cellLength = this.getCellLength();
                               pos = _cellLength * (valInd + 1) - _cellLength / 2;
-                          }                    }                }            }
+                          }
+                      }
+                  }
+              }
               !pos && (pos = 0);
 
               pos = Number(pos.toFixed(1)) + this._originTrans;
@@ -1089,7 +1106,7 @@
                   });
               } else {
                   val = org[ind];
-              }            return val;
+              }return val;
           }
       }, {
           key: "getIndexOfPos",
@@ -1122,7 +1139,8 @@
                           //如果只有一个数据
                           ind = 0;
                       }
-                  }            }
+                  }
+              }
               return ind;
           }
       }, {
@@ -1146,7 +1164,8 @@
                           var _ind = _$1.indexOf(list, val);
                           if (_ind != -1) {
                               valInd = _ind;
-                          }                    });
+                          }
+                      });
                   });
               }
 
@@ -1177,10 +1196,12 @@
                               cellLength = axisLength / 2;
                           } else {
                               cellLength = axisLength / (cellCount - 1);
-                          }                    }
+                          }
+                      }
                       if (this.posParseToInt) {
                           cellLength = parseInt(cellLength);
-                      }                }
+                      }
+                  }
               }
               this._cellLength = cellLength;
 
@@ -1216,7 +1237,8 @@
               } else {
                   if (this.dataOrg.length && this.dataOrg[0].length && this.dataOrg[0][0].length) {
                       cellCount = this.dataOrg[0][0].length;
-                  }            }            this._cellCount = cellCount;
+                  }
+              }this._cellCount = cellCount;
               return cellCount;
           }
       }]);
@@ -1237,7 +1259,7 @@
   function parse2MatrixData(list) {
       if (list === undefined || list === null) {
           list = [];
-      }    //检测第一个数据是否为一个array, 否就是传入了一个json格式的数据
+      } //检测第一个数据是否为一个array, 否就是传入了一个json格式的数据
       if (list.length > 0 && !_$1.isArray(list[0])) {
           var newArr = [];
           var fields = [];
@@ -1247,12 +1269,12 @@
               if (i == 0) {
                   for (var f in row) {
                       fields.push(f);
-                  }                newArr.push(fields);
+                  }newArr.push(fields);
                   fieldNum = fields.length;
-              }            var _rowData = [];
+              }var _rowData = [];
               for (var ii = 0; ii < fieldNum; ii++) {
                   _rowData.push(row[fields[ii]]);
-              }            newArr.push(_rowData);
+              }newArr.push(_rowData);
           }
           return newArr;
       } else {
@@ -1260,7 +1282,7 @@
       }
   }
 
-  function dataFrame (data, opt) {
+  function dataFrame(data, opt) {
 
       //数据做一份拷贝，避免污染源数据
       data = JSON.parse(JSON.stringify(data));
@@ -1318,7 +1340,7 @@
           o.index = a;
           o.data = [];
           total.push(o);
-      }    dataFrame.data = total;
+      }dataFrame.data = total;
 
       //填充好total的data并且把属于yAxis的设置为number
       for (var a = 1, al = data.length; a < al; a++) {
@@ -1328,7 +1350,7 @@
               //‘223’ --》 223
               if (!isNaN(_val) && _val !== "" && _val !== null) {
                   _val = Number(_val);
-              }            total[b].data.push(_val);
+              }total[b].data.push(_val);
               //total[b].data.push( data[a][b] );
           }
       }
@@ -1349,7 +1371,7 @@
           function _format(data) {
               for (var i = 0, l = data.length; i < l; i++) {
                   data[i] = format(data[i]);
-              }            return data;
+              }return data;
           }
           if (!_$1.isArray($field)) {
               $field = [$field];
@@ -1364,14 +1386,16 @@
                   var _fieldData = newData;
                   if (!lev) {
                       _fieldData = [];
-                  }                for (var ii = 0, iil = arr.length; ii < iil; ii++) {
+                  }for (var ii = 0, iil = arr.length; ii < iil; ii++) {
                       if ($field[i] == arr[ii].field) {
                           _fieldData.push(_format(arr[ii].data.slice(dataFrame.range.start, dataFrame.range.end + 1)));
                           break;
                       }
-                  }                if (!lev) {
+                  }if (!lev) {
                       newData.push(_fieldData);
-                  }            }        }
+                  }
+              }
+          }
           return newData;
       }
       /*
@@ -1382,7 +1406,7 @@
           var data = dataFrame.data;
           for (var a = 0; a < data.length; a++) {
               o[data[a].field] = data[a].data[dataFrame.range.start + index];
-          }        return o;
+          }return o;
       }
 
       /**
@@ -1407,7 +1431,9 @@
                   if (matchNum == expCount) {
                       //说明这条数据是完全和查询
                       arr.push(_getRowDataAt(i));
-                  }            }        }
+                  }
+              }
+          }
           return arr;
       }
 
@@ -1574,9 +1600,68 @@
       }
   };
 
+  var cloneOptions = function cloneOptions(opt) {
+      return _$1.clone(opt);
+  };
+
+  var cloneData = function cloneData(data) {
+      return JSON.parse(JSON.stringify(data));
+  };
+
+  var is3dOpt = function is3dOpt(opt) {
+      var chartx3dCoordTypes = ["box"];
+      return opt.coord && opt.coord.type && chartx3dCoordTypes.indexOf(opt.coord.type) > -1;
+  };
+
   //图表皮肤
 
   var global$1 = {
+      create: function create(el, _data, _opt) {
+          var chart = null;
+          var me = this;
+
+          var data = cloneData(_data);
+          var opt = cloneOptions(_opt);
+
+          var _destroy = function _destroy() {
+              me.instances[chart.id] = null;
+              delete me.instances[chart.id];
+          };
+
+          //这个el如果之前有绘制过图表，那么就要在instances中找到图表实例，然后销毁
+          var chart_id = dom.query(el).getAttribute("chart_id");
+          if (chart_id != undefined) {
+              var _chart = me.instances[chart_id];
+              if (_chart) {
+                  _chart.destroy();
+                  _chart.off && _chart.off("destroy", _destroy);
+              }delete me.instances[chart_id];
+          }
+          //图表维度
+          var dimension = 2;
+          if (is3dOpt(_opt)) {
+              dimension = 3;
+          }
+          var componentModules = me.getComponentModules(dimension);
+
+          //如果用户没有配置coord，说明这个图表是一个默认目标系的图表，比如标签云
+          var coordConstructor = me.getComponentModule('coord', dimension);
+          if (opt.coord && opt.coord.type) {
+              coordConstructor = me.getComponentModule('coord', opt.coord.type, dimension);
+          }
+          //try {
+          chart = new coordConstructor(el, data, opt, componentModules);
+          if (chart) {
+              chart.draw();
+
+              me.instances[chart.id] = chart;
+              chart.on("destroy", _destroy);
+          } //} catch(err){
+          //    throw "Chatx Error：" + err
+          //};
+
+          return chart;
+      },
       setGlobalTheme: function setGlobalTheme(colors) {
           globalTheme.set(colors);
       },
@@ -1600,7 +1685,7 @@
           //chartPark_cid,chartpark中的图表id
           if (!this.options[chartPark_cid]) {
               return userOptions || {};
-          }        var JsonSerialize = {
+          }var JsonSerialize = {
               prefix: '[[JSON_FUN_PREFIX_',
               suffix: '_JSON_FUN_SUFFIX]]'
           };
@@ -1608,13 +1693,118 @@
               return JSON.parse(string, function (key, value) {
                   if (typeof value === 'string' && value.indexOf(JsonSerialize.suffix) > 0 && value.indexOf(JsonSerialize.prefix) == 0) {
                       return new Function('return ' + value.replace(JsonSerialize.prefix, '').replace(JsonSerialize.suffix, ''))();
-                  }                return value;
+                  }return value;
               }) || {};
           };
           var opt = parse(decodeURIComponent(this.options[chartPark_cid] || {}));
           if (userOptions) {
-              opt = _.extend(true, opt, userOptions);
-          }        return opt;
+              opt = _$1.extend(true, opt, userOptions);
+          }return opt;
+      },
+
+      components: {
+          c_2d: {
+              /*
+              modules:{
+                  coord : {
+                      empty : ..,
+                      rect  : ..,
+                      ...
+                  },
+                  graphs : {
+                      //empty : .., //一般只有coord才会有empty
+                      bar   : ..,
+                      ...
+                  }
+              },
+              getComponentModule: function( name, type ){}
+              */
+          },
+          c_3d: {
+              //所有3d组件,同上
+          }
+      },
+      getComponentModules: function getComponentModules(dimension) {
+          var comps = this.components.c_2d;
+          if (dimension == "3d") {
+              comps = this.components.c_3d;
+          }if (!comps.modules) {
+              comps.modules = {};
+          }if (!comps.getComponentModule) {
+              comps.getComponentModule = function (name, type) {
+                  if (!type) {
+                      type = "empty";
+                  }return comps.modules[name][type];
+              };
+          }return comps;
+      },
+
+      /**
+       * @param {compModule} 要注册进去的模块名称
+       * @param {name} 要获取的comp名称
+       * @param { dimension,type } 后面可以传传两个参数 
+       * @param { dimension } 如果有四个参数，那么第三个肯定是type，第四个肯定是dimension 
+       */
+      registerComponent: function registerComponent(compModule, name) {
+          var dimension = "2d";
+          var type = "empty";
+
+          if (arguments.length == 3) {
+              var arg2 = arguments[2];
+              if (_$1.isNumber(arg2)) {
+                  if (arg2 == 3) {
+                      dimension = "3d";
+                  }
+              }if (_$1.isString(arg2)) {
+                  type = arg2;
+              }
+          }if (arguments.length == 4) {
+              //那么肯定是有传 type  dimension 两个值
+              type = arguments[2];
+              if (arguments[3] == 3) {
+                  dimension = "3d";
+              }
+          }
+          var comps = this.getComponentModules(dimension).modules;
+
+          var _comp = comps[name];
+          if (!_comp) {
+              _comp = comps[name] = {};
+          }if (!_comp[type]) {
+              _comp[type] = compModule;
+          }return comps;
+      },
+
+      /**
+       * 
+       * @param {name} 要获取的comp名称
+       * @param { dimension,type } 后面可以传传两个参数 
+       * @param { dimension } 如果有三个参数，那么第二个肯定是type，第三个肯定是dimension 
+       */
+      getComponentModule: function getComponentModule(name) {
+          var dimension = "2d";
+          var type = "empty";
+
+          if (arguments.length == 2) {
+              var arg1 = arguments[1];
+              if (_$1.isNumber(arg1)) {
+                  if (arg1 == 3) {
+                      dimension = "3d";
+                  }
+              }if (_$1.isString(arg1)) {
+                  type = arg1;
+              }
+          }if (arguments.length == 3) {
+              //那么肯定是有传 type  dimension 两个值
+              type = arguments[1];
+              if (arguments[2] == 3) {
+                  dimension = "3d";
+              }
+          }
+          var comps = this.getComponentModules(dimension).modules;
+          var _comp = comps[name];
+
+          return _comp[type];
       }
   };
 
@@ -1671,54 +1861,12 @@
   }
 
   var color = /*#__PURE__*/Object.freeze({
-    colorRgb: colorRgb,
-    colorRgba: colorRgba,
-    hexTorgb: hexTorgb,
-    hexTostring: hexTostring,
-    rgbTohex: rgbTohex
+      colorRgb: colorRgb,
+      colorRgba: colorRgba,
+      hexTorgb: hexTorgb,
+      hexTostring: hexTostring,
+      rgbTohex: rgbTohex
   });
-
-  var cloneOptions = function cloneOptions(opt) {
-  	//保存function的标识
-  	var JsonSerialize = {
-  		prefix: '[[JSON_FUN_PREFIX_',
-  		suffix: '_JSON_FUN_SUFFIX]]'
-  	};
-
-  	/**
-   * chartOption 转成可保存的字符串（支持function）
-   */
-  	var stringify = function stringify(obj) {
-  		return JSON.stringify(obj, function (key, value) {
-  			if (typeof value === 'function') {
-  				return JsonSerialize.prefix + value.toString() + JsonSerialize.suffix;
-  			}
-  			return value;
-  		});
-  	};
-
-  	/**
-    * 获取已保存的chartOption（包含function）转成对象
-    */
-  	var parse = function parse(string) {
-  		try {
-  			return JSON.parse(string, function (key, value) {
-  				if (typeof value === 'string' && value.indexOf(JsonSerialize.suffix) > 0 && value.indexOf(JsonSerialize.prefix) == 0) {
-  					return new Function('return ' + value.replace(JsonSerialize.prefix, '').replace(JsonSerialize.suffix, ''))();
-  				}
-
-  				return value;
-  			}) || {};
-  		} catch (e) {
-  			return {};
-  		}	};
-
-  	return parse(stringify(opt));
-  };
-
-  var cloneData = function cloneData(data) {
-  	return JSON.parse(JSON.stringify(data));
-  };
 
   var commonjsGlobal = typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
@@ -9662,13 +9810,18 @@
               //TODO: theme 组件优先级最高，在registerComponents之前已经加载过
               var notComponents = ["coord", "graphs", "theme"];
               for (var _p in this._opt) {
-
+                  //非coord graphs theme，其实后面也可以统一的
                   if (_$1.indexOf(notComponents, _p) == -1) {
                       var _comp = this._opt[_p];
+
+                      //所有的组件都按照数组方式处理，这里，组件里面就不需要再这样处理了
                       if (!_$1.isArray(_comp)) {
                           _comp = [_comp];
-                      }                    _$1.each(_comp, function (compOpt) {
-                          var compConstructor = me.componentsMap[_p];
+                      }
+                      _$1.each(_comp, function (compOpt) {
+                          //这里开始mount组件进来
+
+                          var compConstructor = me.componentModules.getComponentModule(_p, compOpt.type);
                           if (compConstructor && compConstructor.register) {
                               compConstructor.register(compOpt, me);
                           }                    });
@@ -9817,13 +9970,12 @@
   var Coord = function (_Chart) {
       inherits$1(Coord, _Chart);
 
-      function Coord(node, data, opt, graphsMap, componentsMap) {
+      function Coord(node, data, opt, componentModules) {
           classCallCheck$2(this, Coord);
 
           var _this = possibleConstructorReturn$1(this, (Coord.__proto__ || Object.getPrototypeOf(Coord)).call(this, node, data, opt));
 
-          _this.graphsMap = graphsMap;
-          _this.componentsMap = componentsMap;
+          _this.componentModules = componentModules;
 
           //这里不要直接用data，而要用 this._data
           _this.dataFrame = _this.initData(_this._data, opt);
@@ -9872,7 +10024,7 @@
                   if (!_$1.isArray(this._opt.theme)) {
                       this._opt.theme = [this._opt.theme];
                   }
-                  var _theme = new this.componentsMap.theme(this._opt.theme, this);
+                  var _theme = new this.componentModules.getComponentModule("theme")(this._opt.theme, this);
                   this._theme = _theme.get(); //如果用户有设置图表皮肤组件，那么就全部用用户自己设置的，不再用merge
               }
               this.initModule(opt); //初始化模块  
@@ -9881,7 +10033,7 @@
               if (this._coord && this._coord.horizontal) {
                   this.drawBeginHorizontal && this.drawBeginHorizontal();
               }
-              this.startDraw(opt); //开始绘图，包括坐标系和graphs 和 components
+              this.startDraw(opt);
 
               if (this._coord && this._coord.horizontal) {
                   this.drawEndHorizontal && this.drawEndHorizontal();
@@ -9896,7 +10048,8 @@
                   this.coordSprite.addChild(this._coord.sprite);
               }
               _$1.each(this.graphs, function (graphs) {
-                  var _g = new me.graphsMap[graphs.type](graphs, me);
+                  var graphsModule = me.componentModules.getComponentModule("graphs", graphs.type);
+                  var _g = new graphsModule(graphs, me);
                   me._graphs.push(_g);
                   me.graphsSprite.addChild(_g.sprite);
               });
@@ -12033,11 +12186,11 @@
   var Rect$3 = function (_CoordBase) {
       inherits$1(Rect, _CoordBase);
 
-      function Rect(node, data, opts, graphsMap, componentsMap) {
+      function Rect(node, data, opts, componentModules) {
           classCallCheck$2(this, Rect);
 
           //坐标系统
-          var _this = possibleConstructorReturn$1(this, (Rect.__proto__ || Object.getPrototypeOf(Rect)).call(this, node, data, opts, graphsMap, componentsMap));
+          var _this = possibleConstructorReturn$1(this, (Rect.__proto__ || Object.getPrototypeOf(Rect)).call(this, node, data, opts, componentModules));
 
           _this.CoordComponents = Rect_Component;
           _this._coord = null;
@@ -13055,11 +13208,11 @@
   var Polar = function (_CoordBase) {
       inherits$1(Polar, _CoordBase);
 
-      function Polar(node, data, opt, graphsMap, componentsMap) {
+      function Polar(node, data, opt, componentModules) {
           classCallCheck$2(this, Polar);
 
           //坐标系统
-          var _this = possibleConstructorReturn$1(this, (Polar.__proto__ || Object.getPrototypeOf(Polar)).call(this, node, data, opt, graphsMap, componentsMap));
+          var _this = possibleConstructorReturn$1(this, (Polar.__proto__ || Object.getPrototypeOf(Polar)).call(this, node, data, opt, componentModules));
 
           _this.CoordComponents = polarComponent;
           _this._coord = null;
@@ -22636,7 +22789,6 @@
               } else {
                   legendData = app.getLegendData();
               }
-              //var _legend = new app.componentsMap.legend( legendData, legendOpt, this );
               var _legend = new this(legendData, legendOpt, app);
 
               if (_legend.direction == "h") {
@@ -22800,7 +22952,6 @@
           key: "draw",
 
           //datazoom end
-
 
           value: function draw() {
               //这个组件可以在init的时候就绘制好
@@ -23317,7 +23468,7 @@
               if (opt.coord.horizontal) {
                   delete opt.coord.horizontal;
               }
-              var thumbChart = new chartConstructor(cloneEl, app._data, opt, app.graphsMap, app.componentsMap);
+              var thumbChart = new chartConstructor(cloneEl, app._data, opt, app.componentModules);
               thumbChart.draw();
 
               return {
@@ -24627,38 +24778,31 @@
       return MarkLine;
   }(component);
 
-  var coord = {
-      rect: Rect$3,
-      polar: Polar
-  };
+  global$1.registerComponent(Coord, 'coord');
+  global$1.registerComponent(Rect$3, 'coord', 'rect');
+  global$1.registerComponent(Polar, 'coord', 'polar');
 
-  var graphs = {
-      bar: BarGraphs,
-      line: LineGraphs,
-      scat: ScatGraphs,
-      pie: PieGraphs,
-      radar: RadarGraphs,
-      cloud: CloudGraphs,
-      planet: PlanetGraphs,
-      funnel: FunnelGraphs,
-      venn: VennGraphs,
-      sunburst: sunburstGraphs,
-      sankey: sankeyGraphs
-  };
+  global$1.registerComponent(BarGraphs, 'graphs', 'bar');
+  global$1.registerComponent(LineGraphs, 'graphs', 'line');
+  global$1.registerComponent(ScatGraphs, 'graphs', 'scat');
+  global$1.registerComponent(PieGraphs, 'graphs', 'pie');
+  global$1.registerComponent(RadarGraphs, 'graphs', 'radar');
+  global$1.registerComponent(CloudGraphs, 'graphs', 'cloud');
+  global$1.registerComponent(PlanetGraphs, 'graphs', 'planet');
+  global$1.registerComponent(FunnelGraphs, 'graphs', 'funnel');
+  global$1.registerComponent(VennGraphs, 'graphs', 'venn');
+  global$1.registerComponent(sunburstGraphs, 'graphs', 'sunburst');
+  global$1.registerComponent(sankeyGraphs, 'graphs', 'sankey');
 
-  var components = {
-      theme: themeComponent,
-      legend: Legend,
-      dataZoom: dataZoom,
-      markLine: MarkLine,
-      tips: Tips,
-
-      barTgi: barTgi,
-      bar_guide: barGuide,
-
-      waterMark: waterMark,
-      cross: MarkLine$1
-  };
+  global$1.registerComponent(themeComponent, 'theme');
+  global$1.registerComponent(Legend, 'legend');
+  global$1.registerComponent(dataZoom, 'dataZoom');
+  global$1.registerComponent(MarkLine, 'markLine');
+  global$1.registerComponent(Tips, 'tips');
+  global$1.registerComponent(barTgi, 'barTgi');
+  global$1.registerComponent(barGuide, 'bar_guide');
+  global$1.registerComponent(waterMark, 'waterMark');
+  global$1.registerComponent(MarkLine$1, 'cross');
 
   //皮肤设定begin ---------------
   //如果数据库中有项目皮肤
@@ -24668,42 +24812,6 @@
   }//皮肤设定end -----------------
 
   var chartx = {
-      create: function create(el, _data, _opt) {
-          var chart = null;
-          var me = this;
-
-          var data = cloneData(_data);
-          var opt = cloneOptions(_opt);
-
-          var _destroy = function _destroy() {
-              me.instances[chart.id] = null;
-              delete me.instances[chart.id];
-          };
-
-          //这个el如果之前有绘制过图表，那么就要在instances中找到图表实例，然后销毁
-          var chart_id = dom.query(el).getAttribute("chart_id");
-          if (chart_id != undefined) {
-              var _chart = me.instances[chart_id];
-              if (_chart) {
-                  _chart.destroy();
-                  _chart.off && _chart.off("destroy", _destroy);
-              }            delete me.instances[chart_id];
-          }
-          var Coord$$1 = Coord;
-          if (opt.coord && opt.coord.type) {
-              Coord$$1 = coord[opt.coord.type];
-          }        //try {
-          chart = new Coord$$1(el, data, opt, graphs, components);
-          if (chart) {
-              chart.draw();
-
-              me.instances[chart.id] = chart;
-              chart.on("destroy", _destroy);
-          }        //} catch(err){
-          //    throw "Chatx Error：" + err
-          //};
-          return chart;
-      },
       options: {}
   };
 

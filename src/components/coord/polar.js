@@ -4,9 +4,9 @@ import { _ } from "mmvis"
 
 export default class Polar extends CoordBase
 {
-    constructor( node, data, opt, graphsMap, componentsMap )
+    constructor( node, data, opt, componentModules )
     {
-        super( node, data, opt, graphsMap, componentsMap );
+        super( node, data, opt, componentModules );
 
         //坐标系统
         this.CoordComponents = CoordComponents;
