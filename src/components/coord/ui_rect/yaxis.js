@@ -14,14 +14,14 @@ export default class yAxis extends axis
 
         this._opt = opt;
         
-        this.width   = null; //第一次计算后就会有值
-        this.yMaxHeight = 0; //y轴最大高
-        this.height = 0; //y轴第一条线到原点的高
+        this.width       = null; //第一次计算后就会有值
+        this.yMaxHeight  = 0;//y轴最大高
+        this.height      = 0;//y轴第一条线到原点的高
 
-        this.maxW    = 0;    //最大文本的 width
-        this.field   = [];   //这个 轴 上面的 field 不需要主动配置。可以从graphs中拿
+        this.maxW        = 0;//最大文本的 width
+        this.field       = [];//这个 轴 上面的 field 不需要主动配置。可以从graphs中拿
 
-        this.title   = {
+        this.title       = {
             text         : "",
             shapeType    : "text",
             fontColor    : '#999',
@@ -32,29 +32,29 @@ export default class yAxis extends axis
             strokeStyle  : null,
             lineHeight   : 0
         };
-        this._title = null; //this.label对应的文本对象
+        this._title      = null;//this.label对应的文本对象
 
-        this.enabled = true;
-        this.tickLine= {//刻度线
+        this.enabled     = true;
+        this.tickLine    = {//刻度线
             enabled      : 1,
-            lineWidth    : 1, //线宽
-            lineLength   : 4, //线长
+            lineWidth    : 1,//线宽
+            lineLength   : 4,//线长
             strokeStyle  : '#cccccc',
             distance     : 2
         };
-        this.axisLine = {//轴线
-            position     : "default",  //位置，default默认在min，可选 "center" 和 具体的值
+        this.axisLine    = {//轴线
+            position     : "default",//位置，default默认在min，可选 "center" 和 具体的值
             enabled      : 1,     
             lineWidth    : 1,
             strokeStyle  : '#cccccc'
         };
-        this.label = {
+        this.label       = {
             enabled      : 1,
             fontColor    : '#999',
             fontSize     : 12,
             format       : null,
             rotation     : 0,
-            distance     : 3, //和刻度线的距离,
+            distance     : 3,//和刻度线的距离,
             textAlign    : null,//"right",
             lineHeight   : 1
         };
@@ -158,7 +158,7 @@ export default class yAxis extends axis
     }
 
     //目前和xAxis一样
-    _getTitle() 
+    _getTitle()
     {
         if ( this.title.text ) {
             if( !this._title ){
