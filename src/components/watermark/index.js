@@ -11,6 +11,7 @@ export default class waterMark extends Component
 {
     constructor( opt , app )
     {
+        super();
         this.app = app;
         this.width = app.width;
         this.height = app.height;

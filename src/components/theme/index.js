@@ -7,6 +7,7 @@ export default class themeComponent extends Component
 {
     constructor( theme , app )
     {
+        super();
         this.app = app;
         this.colors = theme || [];
     }

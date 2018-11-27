@@ -24411,12 +24411,17 @@ var barGuide = function (_Component) {
  * 皮肤组件，不是一个具体的ui组件
  */
 
-var themeComponent = function () {
+var themeComponent = function (_Component) {
+    inherits$1(themeComponent, _Component);
+
     function themeComponent(theme, app) {
         classCallCheck$2(this, themeComponent);
 
-        this.app = app;
-        this.colors = theme || [];
+        var _this = possibleConstructorReturn$1(this, (themeComponent.__proto__ || Object.getPrototypeOf(themeComponent)).call(this));
+
+        _this.app = app;
+        _this.colors = theme || [];
+        return _this;
     }
 
     createClass$2(themeComponent, [{
@@ -24446,7 +24451,7 @@ var themeComponent = function () {
         }
     }]);
     return themeComponent;
-}();
+}(component);
 
 /**
  * 水印组件
@@ -24454,28 +24459,33 @@ var themeComponent = function () {
 
 var Text$7 = canvax.Display.Text;
 
-var waterMark = function () {
+var waterMark = function (_Component) {
+    inherits$1(waterMark, _Component);
+
     function waterMark(opt, app) {
         classCallCheck$2(this, waterMark);
 
-        this.app = app;
-        this.width = app.width;
-        this.height = app.height;
+        var _this = possibleConstructorReturn$1(this, (waterMark.__proto__ || Object.getPrototypeOf(waterMark)).call(this));
 
-        this.text = "chartx";
-        this.fontSize = 20;
-        this.fontColor = "#ccc";
-        this.strokeStyle = "#ccc";
-        this.lineWidth = 0;
-        this.alpha = 0.2;
-        this.rotation = 45;
+        _this.app = app;
+        _this.width = app.width;
+        _this.height = app.height;
 
-        _$1.extend(true, this, opt);
+        _this.text = "chartx";
+        _this.fontSize = 20;
+        _this.fontColor = "#ccc";
+        _this.strokeStyle = "#ccc";
+        _this.lineWidth = 0;
+        _this.alpha = 0.2;
+        _this.rotation = 45;
 
-        this.spripte = new canvax.Display.Sprite({
+        _$1.extend(true, _this, opt);
+
+        _this.spripte = new canvax.Display.Sprite({
             id: "watermark"
         });
-        this.draw();
+        _this.draw();
+        return _this;
     }
 
     createClass$2(waterMark, [{
@@ -24523,7 +24533,7 @@ var waterMark = function () {
         }
     }]);
     return waterMark;
-}();
+}(component);
 
 var Line$10 = canvax.Shapes.Line;
 var Sprite$2 = canvax.Display.Sprite;
