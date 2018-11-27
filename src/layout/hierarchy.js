@@ -13,12 +13,12 @@ var Hierarchy = function () {
         children = layout_hierarchyChildren,
         value = layout_hierarchyValue;
 
-    function hierarchy(root) {
-        var stack = [root],
+    function hierarchy(app) {
+        var stack = [app],
             nodes = [],
             node;
 
-        root.depth = 0;
+        app.depth = 0;
 
         while ((node = stack.pop()) != null) {
             nodes.push(node);
@@ -44,7 +44,7 @@ var Hierarchy = function () {
             }
         }
 
-        layout_hierarchyVisitAfter(root, function (node) {
+        layout_hierarchyVisitAfter(app, function (node) {
             var childs, parent;
             if (sort && (childs = node.children)) childs.sort(sort);
             if (value && (parent = node.parent)) parent.value += node.value;
@@ -78,12 +78,12 @@ var Hierarchy = function () {
     };
 
     // Re-evaluates the `value` property for the specified hierarchy.
-    hierarchy.revalue = function (root) {
+    hierarchy.revalue = function (app) {
         if (value) {
-            layout_hierarchyVisitBefore(root, function (node) {
+            layout_hierarchyVisitBefore(app, function (node) {
                 if (node.children) node.value = 0;
             });
-            layout_hierarchyVisitAfter(root, function (node) {
+            layout_hierarchyVisitAfter(app, function (node) {
                 var parent;
                 if (!node.children) node.value = +value.call(hierarchy, node, node.depth) || 0;
                 if (parent = node.parent) parent.value += node.value;
@@ -95,7 +95,7 @@ var Hierarchy = function () {
 
             });
         }
-        return root;
+        return app;
     };
 
     return hierarchy;

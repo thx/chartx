@@ -5,12 +5,12 @@ import { _ } from "mmvis"
 export default class barGuide extends Component
 {
 
-    constructor( opt, root )
+    constructor( opt, app )
     {
         super();
 
         this._opt = opt;
-        this.root = root;
+        this.app = app;
 
         this.field = null;
         this.barField = null;
@@ -49,7 +49,7 @@ export default class barGuide extends Component
         
         _.extend(true, this , opt );
         
-        this._yAxis = this.root._coord._yAxis[ this.yAxisAlign=="left"?0:1 ];
+        this._yAxis = this.app._coord._yAxis[ this.yAxisAlign=="left"?0:1 ];
         this.sprite  = new Canvax.Display.Sprite({
             id : "barGuideSprite",
             context : {
@@ -108,14 +108,14 @@ export default class barGuide extends Component
     {
         var me = this;
 
-        _.each( me.root._graphs, function( _g ){
+        _.each( me.app._graphs, function( _g ){
             if( _g.type == "bar" && _g.data[ me.barField ] ){
                 me.barDatas = _g.data[ me.barField ];
                 return false;
             }
         } );
         
-        this.data = _.flatten( me.root.dataFrame.getDataOrg( me.field ) );
+        this.data = _.flatten( me.app.dataFrame.getDataOrg( me.field ) );
 
         if( !this.barDatas ) {
             return;

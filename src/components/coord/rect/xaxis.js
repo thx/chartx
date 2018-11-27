@@ -523,8 +523,8 @@ export default class xAxis extends axis
     {
         //找到paddingRight,在最后一个文本右移的时候需要用到
         var rootPaddingRight = 0;
-        if( this._coord._root ){
-            rootPaddingRight = this._coord._root.padding.right;
+        if( this._coord.app ){
+            rootPaddingRight = this._coord.app.padding.right;
         }
         return rootPaddingRight;
     }

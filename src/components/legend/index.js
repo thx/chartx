@@ -6,11 +6,11 @@ const Circle = Canvax.Shapes.Circle
 
 export default class Legend extends Component
 {
-    constructor(data, opt, root)
+    constructor(data, opt, app)
     {
         super();
 
-        this.root = root;
+        this.app = app;
         /* data的数据结构为
         [
             //descartes中用到的时候还会带入yAxis
@@ -179,8 +179,8 @@ export default class Legend extends Component
     {
         var me = this;
 
-        var viewWidth = this.root.width - this.root.padding.left - this.root.padding.right;
-        var viewHeight = this.root.height - this.root.padding.top - this.root.padding.bottom;
+        var viewWidth = this.app.width - this.app.padding.left - this.app.padding.right;
+        var viewHeight = this.app.height - this.app.padding.top - this.app.padding.bottom;
 
         var maxItemWidth = 0;
         var width=0,height=0;

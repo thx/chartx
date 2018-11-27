@@ -9,11 +9,11 @@ const Text = Canvax.Display.Text;
 export default class MarkLine extends Component
 {
 
-    constructor(opt , root)
+    constructor(opt , app)
     {
         super(opt);
 
-        this.root = root;
+        this.app = app;
 
         this.width  = opt.width || 0;
         this.height = opt.height || 0;

@@ -8,9 +8,9 @@ const Rect = Canvax.Shapes.Rect;
 
 export default class LineGraphs extends GraphsBase
 {
-    constructor(opt, root)
+    constructor(opt, app)
     {
-        super( opt, root );
+        super( opt, app );
 
         this.type = "line";
 
@@ -76,14 +76,14 @@ export default class LineGraphs extends GraphsBase
     setEnabledField()
     {
         //要根据自己的 field，从enabledFields中根据enabled数据，计算一个 enabled版本的field子集
-        this.enabledField = this.root._coord.getEnabledFields( this.field );
+        this.enabledField = this.app._coord.getEnabledFields( this.field );
     }
 
     //_yAxis, dataFrame
     _trimGraphs()
     {
         var me = this;
-        var _coor = this.root._coord;
+        var _coor = this.app._coord;
         
         //{"uv":{}.. ,"click": "pv":]}
         //这样按照字段摊平的一维结构
@@ -96,7 +96,7 @@ export default class LineGraphs extends GraphsBase
         _.each( _.flatten( me.enabledField ) , function( field, i ){
             //var maxValue = 0;
 
-            var fieldMap = me.root._coord.getFieldMapOf( field );
+            var fieldMap = me.app._coord.getFieldMapOf( field );
 
             //单条line的全部data数据
             var _lineData = me.dataFrame.getFieldData(field);
@@ -105,7 +105,7 @@ export default class LineGraphs extends GraphsBase
             var _data = [];
 
             for (var b = 0, bl = _lineData.length; b < bl; b++) {
-                var _xAxis = me.root._coord ? me.root._coord._xAxis : me.root._xAxis;
+                var _xAxis = me.app._coord ? me.app._coord._xAxis : me.app._xAxis;
 
                 var x = _xAxis.getPosOfInd( b );
                 
@@ -236,7 +236,7 @@ export default class LineGraphs extends GraphsBase
                 return;
             };
 
-            var fieldMap = me.root._coord.getFieldMapOf( field );
+            var fieldMap = me.app._coord.getFieldMapOf( field );
             
             //iGroup 是这条group在本graphs中的ind，而要拿整个图表层级的index， 就是fieldMap.ind
             var iGroup = _.indexOf( _flattenField, field );

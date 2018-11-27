@@ -5,9 +5,9 @@ import { _ } from "mmvis"
 
 export default class PieGraphs extends GraphsBase
 {
-    constructor( opt, root )
+    constructor( opt, app )
     {
-        super( opt, root );
+        super( opt, app );
 
         this.type = "pie";
 
@@ -27,7 +27,7 @@ export default class PieGraphs extends GraphsBase
             minRadius : 10,//outRadius - innerRadius ， 也就是radius的最小值
             moveDis : 15, //要预留moveDis位置来hover sector 的时候外扩
 
-            fillStyle : null, //this.root.getTheme(),
+            fillStyle : null, //this.app.getTheme(),
             focus : {
                 enabled : true,
             },
@@ -145,14 +145,14 @@ export default class PieGraphs extends GraphsBase
     _dataHandle()
     {
         var me = this;
-        var _coor = me.root._coord;
+        var _coor = me.app._coord;
 
         var data = [];
         var dataFrame = me.dataFrame;
         
         for( var i=0,l=dataFrame.length; i<l; i++ ){
             var rowData = dataFrame.getRowDataAt(i);
-            var color = me.root.getTheme( i );
+            var color = me.app.getTheme( i );
             var layoutData = {
                 rowData       : rowData,//把这一行数据给到layoutData引用起来
                 focused       : false,  //是否获取焦点，外扩

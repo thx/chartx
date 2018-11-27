@@ -13,16 +13,16 @@
 //应用场景中一般需要用到的属性有
 //width, height, origin(默认为width/2,height/2)
 
-import coorBase from "../ui_coord_base"
+import coorBase from "../index"
 import Canvax from "canvax"
 import Grid from "./grid"
 import { dataSection,_ } from "mmvis"
 
 export default class polarComponent extends coorBase
 {
-    constructor( opt , root )
+    constructor( opt , app )
     {
-        super( opt , root );
+        super( opt , app );
 
         this.type  = "polar";
         
@@ -95,7 +95,7 @@ export default class polarComponent extends coorBase
         this._computeAttr();
 
         this.rAxis.dataSection = this._getRDataSection();
-        this.aAxis.data = this.root.dataFrame.getFieldData( this.aAxis.field );
+        this.aAxis.data = this.app.dataFrame.getFieldData( this.aAxis.field );
 
         this._setAAxisAngleList();
 
@@ -122,7 +122,7 @@ export default class polarComponent extends coorBase
         this.setFieldEnabled( field );
 
         this.rAxis.dataSection = this._getRDataSection();
-        this.aAxis.data = this.root.dataFrame.getFieldData( this.aAxis.field );
+        this.aAxis.data = this.app.dataFrame.getFieldData( this.aAxis.field );
 
         if( this.grid.enabled ){
 
@@ -193,7 +193,7 @@ export default class polarComponent extends coorBase
                     clone_fields[i] = {
                         field : fields[i],
                         enabled : true,
-                        color : me.root.getTheme( fieldInd ),
+                        color : me.app.getTheme( fieldInd ),
                         ind : fieldInd++,
                         group : null //这个field对应的ui分组
                     }
@@ -216,7 +216,7 @@ export default class polarComponent extends coorBase
         if( !this._opt.rAxis.dataSection ){
             var arr = [];
             _.each( _.flatten( [me.rAxis.field] ), function( field ){
-                arr = arr.concat( me.root.dataFrame.getFieldData( field ) );
+                arr = arr.concat( me.app.dataFrame.getFieldData( field ) );
             } );
             
             var _dataSection = dataSection.section(arr, 3);
@@ -241,9 +241,9 @@ export default class polarComponent extends coorBase
 
     _computeAttr()
     {
-        var _padding = this.root.padding;
-        var rootWidth = this.root.width;
-        var rootHeight = this.root.height;
+        var _padding = this.app.padding;
+        var rootWidth = this.app.width;
+        var rootHeight = this.app.height;
 
         if( !("width" in this._opt) ){
             this.width = rootWidth - _padding.left - _padding.right;
@@ -309,7 +309,7 @@ export default class polarComponent extends coorBase
             //下面的坐标点都是已经origin为原点的坐标系统里
 
             //矩形的4边框线段
-            var _padding = this.root.padding;
+            var _padding = this.app.padding;
             
             //这个origin 是相对在width，height矩形范围内的圆心，
             //而this.origin 是在整个画布的位置
@@ -663,7 +663,7 @@ export default class polarComponent extends coorBase
         me.induce && me.induce.on("panstart mouseover panmove mousemove panend mouseout tap click dblclick", function(e) {
             me.fire( e.type, e );
             //图表触发，用来处理Tips
-            me.root.fire( e.type, e );
+            me.app.fire( e.type, e );
         });
     }
 

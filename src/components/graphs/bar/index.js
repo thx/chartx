@@ -9,9 +9,9 @@ const Rect = Canvax.Shapes.Rect;
 
 export default class BarGraphs extends GraphsBase
 {
-    constructor(opt, root)
+    constructor(opt, app)
     {
-        super(opt, root);
+        super(opt, app);
 
         this.type = "bar";
 
@@ -19,7 +19,7 @@ export default class BarGraphs extends GraphsBase
         this.enabledField = null;
  
         this.yAxisAlign = "left"; //默认设置为左y轴
-        this._xAxis = this.root._coord._xAxis;
+        this._xAxis = this.app._coord._xAxis;
 
         //trimGraphs的时候是否需要和其他的 bar graphs一起并排计算，true的话这个就会和别的重叠
         //和css中得absolute概念一致，脱离文档流的绝对定位
@@ -140,7 +140,7 @@ export default class BarGraphs extends GraphsBase
         var value = nodeData.value;
         var field = nodeData.field;
 
-        var fieldMap = this.root._coord.getFieldMapOf(field);
+        var fieldMap = this.app._coord.getFieldMapOf(field);
         var color;
        
         //field对应的索引，， 取颜色这里不要用i
@@ -345,7 +345,7 @@ export default class BarGraphs extends GraphsBase
                             };
 
                             //触发root统一设置e.eventInfo.nodes,所以上面不需要设置
-                            me.root.fire( e.type, e );
+                            me.app.fire( e.type, e );
 
                             if( me.select.enabled && e.type == me.select.triggerEventType ){
                                 //如果开启了图表的选中交互
@@ -564,7 +564,7 @@ export default class BarGraphs extends GraphsBase
     setEnabledField()
     {
         //要根据自己的 field，从enabledFields中根据enabled数据，计算一个 enabled版本的field子集
-        this.enabledField = this.root._coord.getEnabledFields( this.field );
+        this.enabledField = this.app._coord.getEnabledFields( this.field );
     }
 
     _getGroupRegionStyle( iNode )
@@ -591,7 +591,7 @@ export default class BarGraphs extends GraphsBase
     {
         var me = this;
         var _xAxis = this._xAxis;
-        var _coord = this.root._coord;
+        var _coord = this.app._coord;
 
         //用来计算下面的hLen
         this.setEnabledField();
@@ -603,7 +603,7 @@ export default class BarGraphs extends GraphsBase
         var _preHLenOver = false;
 
         if( !this.absolute ){
-            _.each( this.root._graphs , function( _g ){
+            _.each( this.app._graphs , function( _g ){
                 if( !_g.absolute && _g.type == "bar" ) {
                     if( _g === me ){
                         _preHLenOver = true;

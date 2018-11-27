@@ -1,17 +1,17 @@
-import Canvax from "canvax"
+import Component from "../component"
 import { _ } from "mmvis"
 
-export default class GraphsBase extends Canvax.Event.EventDispatcher
+export default class GraphsBase extends Component
 {
-    constructor(opt, root)
+    constructor(opt, app)
     {
-        super( opt, root );
+        super( opt, app );
 
         //这里所有的opts都要透传给 group
         this._opt = opt || {};
-        this.root = root;
-        this.ctx = root.stage.canvas.getContext("2d");
-        this.dataFrame = root.dataFrame; //root.dataFrame的引用
+        this.app = app;
+        this.ctx = app.stage.canvas.getContext("2d");
+        this.dataFrame = app.dataFrame; //app.dataFrame的引用
 
         this.data   = null; //没个graphs中自己_trimGraphs的数据
         

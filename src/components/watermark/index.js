@@ -3,16 +3,17 @@
  */
 import Canvax from "canvax"
 import { _ } from "mmvis"
+import Component from "../component"
 
 const Text = Canvax.Display.Text;
 
-export default class waterMark
+export default class waterMark extends Component
 {
-    constructor( opt , root )
+    constructor( opt , app )
     {
-        this.root = root;
-        this.width = root.width;
-        this.height = root.height;
+        this.app = app;
+        this.width = app.width;
+        this.height = app.height;
 
         this.text = "chartx";
         this.fontSize = 20;

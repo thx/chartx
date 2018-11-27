@@ -8,9 +8,9 @@ const Line = Canvax.Shapes.Line;
 
 export default class ScatGraphs extends GraphsBase
 {
-    constructor(opt, root)
+    constructor(opt, app)
     {
-        super( opt, root );
+        super( opt, app );
 
         this.type = "scat";
 
@@ -150,7 +150,7 @@ export default class ScatGraphs extends GraphsBase
         var tmplData = [];
 
         var dataLen  = this.dataFrame.length;
-        var xField = this.root._coord._xAxis.field;
+        var xField = this.app._coord._xAxis.field;
 
         ////计算半径的时候需要用到， 每次执行_trimGraphs都必须要初始化一次
         this._rData = null;
@@ -163,10 +163,10 @@ export default class ScatGraphs extends GraphsBase
             var xValue = rowData[ xField ];
             var yValue = rowData[ this.field ];
 
-            var xPos = this.root._coord._xAxis.getPosOfVal( xValue );
-            var yPos = -this.root._coord._getYaxisOfField( this.field ).getPosOfVal( yValue );
+            var xPos = this.app._coord._xAxis.getPosOfVal( xValue );
+            var yPos = -this.app._coord._getYaxisOfField( this.field ).getPosOfVal( yValue );
 
-            var fieldMap = this.root._coord.getFieldMapOf( this.field );
+            var fieldMap = this.app._coord.getFieldMapOf( this.field );
 
             var nodeLayoutData = {
                 rowData  : rowData,
@@ -348,7 +348,7 @@ export default class ScatGraphs extends GraphsBase
                      };
             
                      //fire到root上面去的是为了让root去处理tips
-                     me.root.fire( e.type, e );
+                     me.app.fire( e.type, e );
                      me.triggerEvent( me.node , e );
                  });
 
@@ -504,8 +504,8 @@ export default class ScatGraphs extends GraphsBase
             ctx.y = 0;
         };
         if( this.aniOrigin == "origin" ){
-            ctx.x = this.root._coord._yAxis[0]._axisLine.context.x;//0;
-            ctx.y = this.root._coord._xAxis._axisLine.context.y;//0;
+            ctx.x = this.app._coord._yAxis[0]._axisLine.context.x;//0;
+            ctx.y = this.app._coord._xAxis._axisLine.context.y;//0;
         };
         if( this.aniOrigin == "center" ){
             ctx.x = this.width/2;

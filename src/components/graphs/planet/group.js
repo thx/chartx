@@ -13,8 +13,8 @@ export default class PlanetGroup
         this._opt = opt;
         this.dataFrame = dataFrame;
         this._graphs = _graphs;
-        this.root = _graphs.root;
-        this._coord = this.root._coord;
+        this.app = _graphs.app;
+        this._coord = this.app._coord;
 
         this.field = null;
 
@@ -446,7 +446,7 @@ export default class PlanetGroup
                     };
             
                      //fire到root上面去的是为了让root去处理tips
-                     me.root.fire( e.type, e );
+                     me.app.fire( e.type, e );
 
                      if( me.node.select.enabled && e.type == me.node.select.triggerEventType ){
                         //如果开启了图表的选中交互

@@ -11,9 +11,9 @@ const Rect = Canvax.Shapes.Rect;
 
 export default class sankeyGraphs extends GraphsBase
 {
-    constructor(opt, root)
+    constructor(opt, app)
     {
-        super( opt, root );
+        super( opt, app );
 
         this.type = "sankey";
 
@@ -167,7 +167,7 @@ export default class sankeyGraphs extends GraphsBase
             color = color( node );
         }
         if( !color ){
-            color = me.root.getTheme( ind );
+            color = me.app.getTheme( ind );
         }
         return color;
     }
@@ -233,7 +233,7 @@ export default class sankeyGraphs extends GraphsBase
                 };
     
                 //fire到root上面去的是为了让root去处理tips
-                me.root.fire( e.type, e );
+                me.app.fire( e.type, e );
                 me.triggerEvent( me.node , e );
              });
 

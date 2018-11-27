@@ -12,9 +12,9 @@ const Circle = Canvax.Shapes.Circle;
 
 export default class VennGraphs extends GraphsBase
 {
-    constructor(opt, root)
+    constructor(opt, app)
     {
-        super( opt, root );
+        super( opt, app );
 
         this.type = "venn";
 
@@ -93,8 +93,8 @@ export default class VennGraphs extends GraphsBase
 
         this._widget();
         
-        this.sprite.context.x = this.root.padding.left;
-        this.sprite.context.y = this.root.padding.top;
+        this.sprite.context.x = this.app.padding.left;
+        this.sprite.context.y = this.app.padding.top;
 
         this.fire("complete");
     }
@@ -227,7 +227,7 @@ export default class VennGraphs extends GraphsBase
             color = style( nodeData );
         }
         if( !color && ind != undefined ){
-            color = this.root.getTheme( ind );
+            color = this.app.getTheme( ind );
         }
         if( !color && defColor != undefined ){
             color = defColor;
@@ -341,7 +341,7 @@ export default class VennGraphs extends GraphsBase
                         };
         
                         //fire到root上面去的是为了让root去处理tips
-                        me.root.fire( e.type, e );
+                        me.app.fire( e.type, e );
                         me.triggerEvent( me.node , e );
                     });
                 };

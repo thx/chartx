@@ -7,13 +7,13 @@ const Polygon = Canvax.Shapes.Polygon;
 
 export default class polarGrid extends Canvax.Event.EventDispatcher
 {
-    constructor( opt, root )
+    constructor( opt, app )
     {
-        super( opt, root);
+        super( opt, app);
 
         this.width   = 0;   
         this.height  = 0;
-        this.root    = root; //该组件被添加到的目标图表项目，
+        this.app    = app; //该组件被添加到的目标图表项目，
 
         this.pos     = {
             x : 0,
@@ -93,8 +93,8 @@ export default class polarGrid extends Canvax.Event.EventDispatcher
         _.each( this.dataSection, function( num, i ){
             
             if( num ) {
-                var r = me.root.getROfNum( num );
-                var points = me.root.getPointsOfR( r );
+                var r = me.app.getROfNum( num );
+                var points = me.app.getPointsOfR( r );
 
                 var ctx = {
                     //lineType : me.ring.lineType,

@@ -10,9 +10,9 @@ const Rect = Canvax.Shapes.Rect;
 
 export default class PlanetGraphs extends GraphsBase
 {
-    constructor(opt, root)
+    constructor(opt, app)
     {
-        super( opt, root );
+        super( opt, app );
 
         this.type = "planet";
 
@@ -138,7 +138,7 @@ export default class PlanetGraphs extends GraphsBase
 
         var groupRStart = this.center.radius + this.center.margin;
         
-        var maxR = me.root._coord.maxR - me.center.radius - me.center.margin;
+        var maxR = me.app._coord.maxR - me.center.radius - me.center.margin;
         var _circleMaxR = this._getMaxR();
 
         _.each( this.groupDataFrames , function( df , i ){
@@ -225,8 +225,8 @@ export default class PlanetGraphs extends GraphsBase
             var _scale = me.grid.rings.section[i];
             me.gridSp.addChild( new Circle({
                 context : {
-                    x : me.root._coord.origin.x,
-                    y : me.root._coord.origin.y,
+                    x : me.app._coord.origin.x,
+                    y : me.app._coord.origin.y,
                     r : _scale.radius,
                     lineWidth : me._getBackProp( me.grid.rings.lineWidth , i),
                     strokeStyle : me._getBackProp( me.grid.rings.strokeStyle , i),
@@ -238,10 +238,10 @@ export default class PlanetGraphs extends GraphsBase
         
         //如果back.rays.count非0， 则绘制从圆心出发的射线
         if( me.grid.rays.count > 1 ){
-            var cx = this.root._coord.origin.x;
-            var cy = this.root._coord.origin.y;
+            var cx = this.app._coord.origin.x;
+            var cy = this.app._coord.origin.y;
             var itemAng = 360 / me.grid.rays.count;
-            var _r = me.root._coord.maxR; //Math.max( me.w, me.h );
+            var _r = me.app._coord.maxR; //Math.max( me.w, me.h );
 
             if( me.grid.rings.section.length ){
                 _r = me.grid.rings.section.slice(-1)[0].radius
@@ -273,9 +273,9 @@ export default class PlanetGraphs extends GraphsBase
         var _clipRect = new Rect({
             name: "clipRect",
             context : {
-                x : me.root._coord.origin.x-me.root.width/2,
-                y : me.root._coord.origin.y-me.height/2,
-                width : me.root.width,
+                x : me.app._coord.origin.x-me.app.width/2,
+                y : me.app._coord.origin.y-me.height/2,
+                width : me.app.width,
                 height : me.height
             }
         });

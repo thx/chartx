@@ -1,4 +1,4 @@
-import coorBase from "../ui_coord_base"
+import coorBase from "../index"
 import Canvax from "canvax"
 import xAxisConstructor from "./xaxis"
 import yAxisConstructor from "./yaxis"
@@ -9,9 +9,9 @@ const Rect = Canvax.Shapes.Rect;
 
 export default class Rect_Component extends coorBase
 {
-    constructor( opt, root )
+    constructor( opt, app )
     {
-        super( opt, root );
+        super( opt, app );
 
         this.type = "rect";
         
@@ -108,10 +108,10 @@ export default class Rect_Component extends coorBase
 
         !opt && (opt ={});
         
-        var _padding = this.root.padding;
+        var _padding = this.app.padding;
 
-        var h = opt.height || this.root.height;
-        var w = opt.width || this.root.width;
+        var h = opt.height || this.app.height;
+        var w = opt.width || this.app.width;
         if( this.horizontal ){
             //如果是横向的坐标系统，也就是xy对调，那么高宽也要对调
             var _num = w;
@@ -196,7 +196,7 @@ export default class Rect_Component extends coorBase
             });
 
             /*
-            var _padding = this.root.padding;
+            var _padding = this.app.padding;
             this.width = this._yAxis[0].height;
             this.height = this._xAxis.width;
             this.origin.x = this._xAxis.height + _padding.left;
@@ -249,7 +249,7 @@ export default class Rect_Component extends coorBase
             origin : this.origin
         };
         if( this.horizontal ){
-            var _padding = this.root.padding;
+            var _padding = this.app.padding;
             //因为在drawBeginHorizontal中
             //横向了之后， 要把4个padding值轮换换过了
             //top,right 对调 ， bottom,left 对调
@@ -462,7 +462,7 @@ export default class Rect_Component extends coorBase
                         field : fields[i],
                         enabled : true,
                         yAxis : me._getYaxisOfField( fields[i] ),
-                        color : me.root.getTheme(fieldInd),
+                        color : me.app.getTheme(fieldInd),
                         ind : fieldInd++
                     }
                     
@@ -502,7 +502,7 @@ export default class Rect_Component extends coorBase
             //e.eventInfo = me._getInfoHandler(e);
             me.fire( e.type, e );
             //图表触发，用来处理Tips
-            me.root.fire( e.type, e );
+            me.app.fire( e.type, e );
         })
     }
 

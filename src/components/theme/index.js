@@ -1,12 +1,13 @@
 /**
  * 皮肤组件，不是一个具体的ui组件
  */
+import Component from "../component"
 
-export default class themeComponent
+export default class themeComponent extends Component
 {
-    constructor( theme , root )
+    constructor( theme , app )
     {
-        this._root = root;
+        this.app = app;
         this.colors = theme || [];
     }
 

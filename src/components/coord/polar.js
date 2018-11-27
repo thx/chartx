@@ -1,5 +1,5 @@
 import CoordBase from "./index"
-import CoordComponents from "./ui_polar/index"
+import CoordComponents from "./polar/index"
 import { _ } from "mmvis"
 
 export default class Polar extends CoordBase
@@ -17,18 +17,18 @@ export default class Polar extends CoordBase
     //设置这个坐标系下面特有的 opt 默认值
     //以及往this上面写部分默认数据
     //在CoordBase中被调用
-    setDefaultOpts( opt )
+    static setDefaultOpt( opt )
     {
-        var me = this;
-        this.coord = {
+      
+        var coord = {
             rAxis : {
                 field : []
             }
         };
 
-        //根据graphs.field 来 配置 this.coord.rAxis.field -------------------
-        if( !_.isArray( this.coord.rAxis.field ) ){
-            this.coord.rAxis.field = [this.coord.rAxis.field ];
+        //根据graphs.field 来 配置 coord.rAxis.field -------------------
+        if( !_.isArray( coord.rAxis.field ) ){
+            coord.rAxis.field = [ coord.rAxis.field ];
         };
         if( opt.graphs ){
             //有graphs的就要用找到这个graphs.field来设置coord.rAxis
@@ -44,7 +44,9 @@ export default class Polar extends CoordBase
                 };
             } );
         };
-        this.coord.rAxis.field = this.coord.rAxis.field.concat( arrs );
+        coord.rAxis.field = coord.rAxis.field.concat( arrs );
+
+        opt.coord = _.extend( true, coord, opt.coord );
 
         return opt
     }

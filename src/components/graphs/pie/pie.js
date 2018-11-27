@@ -26,7 +26,7 @@ export default class Pie extends Canvax.Event.EventDispatcher
         //这个pie所属的graphs对象
         this._graphs = _graphs;
 
-        this.domContainer = _graphs.root.canvax.domView;
+        this.domContainer = _graphs.app.canvax.domView;
 
         this.data = data;
 
@@ -152,7 +152,7 @@ export default class Pie extends Canvax.Event.EventDispatcher
                     };
 
                     //图表触发，用来处理Tips
-                    me._graphs.root.fire( e.type, e );
+                    me._graphs.app.fire( e.type, e );
                     me._graphs.triggerEvent( me._graphs.node , e );
 
                 });
@@ -452,7 +452,7 @@ export default class Pie extends Canvax.Event.EventDispatcher
             var globalX = currentX + me.origin.x;
             var globalY = currentY + me.origin.y;
 
-            if( globalX > me._graphs.root.width || globalY < 0 || globalY > me._graphs.root.height ){
+            if( globalX > me._graphs.app.width || globalY < 0 || globalY > me._graphs.app.height ){
                 return;
             };
 

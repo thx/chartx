@@ -1,8 +1,10 @@
 
 import { global } from "mmvis"
 
+import Chart from "./chart"
+
 //空坐标系，当一些非坐标系图表，就直接创建在emptyCoord上面
-import emptyCoord from "./components/coord/index"
+//import emptyCoord from "./components/coord/index"
 
 //坐标系
 import Rect from "./components/coord/rect"
@@ -32,8 +34,9 @@ import Theme from "./components/theme/index"
 import WaterMark from "./components/watermark/index"
 import Cross from "./components/cross/index"
 
+global.registerComponent( Chart, 'chart' );
 
-global.registerComponent( emptyCoord, 'coord' );
+//global.registerComponent( emptyCoord, 'coord' );
 global.registerComponent( Rect, 'coord', 'rect' );
 global.registerComponent( Polar, 'coord', 'polar' );
 

@@ -10,7 +10,7 @@ export default class Tips extends Component {
     constructor(opt, app) {
         super();
 
-        this.root = app;
+        this.app = app;
 
         this.tipDomContainer = app.canvax.domView;
         this.cW = 0;  //容器的width
@@ -258,7 +258,7 @@ export default class Tips extends Component {
 
 
     _tipsPointerShow(e) {
-        var _coord = this.root._coord;
+        var _coord = this.app._coord;
 
         //目前只实现了直角坐标系的tipsPointer
         if (!_coord || _coord.type != 'rect') return;
@@ -315,7 +315,7 @@ export default class Tips extends Component {
                 });
             };
 
-            this.root.graphsSprite.addChild(el, 0);
+            this.app.graphsSprite.addChild(el, 0);
             this._tipsPointer = el;
         } else {
             if (this.pointerAnim && _coord._xAxis.layoutType != "proportion") {
@@ -336,7 +336,7 @@ export default class Tips extends Component {
     }
 
     _tipsPointerHide() {
-        var _coord = this.root._coord;
+        var _coord = this.app._coord;
         //目前只实现了直角坐标系的tipsPointer
         if (!_coord || _coord.type != 'rect') return;
 
@@ -348,7 +348,7 @@ export default class Tips extends Component {
 
     _tipsPointerMove(e) {
 
-        var _coord = this.root._coord;
+        var _coord = this.app._coord;
 
         //目前只实现了直角坐标系的tipsPointer
         if (!_coord || _coord.type != 'rect') return;

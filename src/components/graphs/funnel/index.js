@@ -8,9 +8,9 @@ const Polygon = Canvax.Shapes.Polygon;
 
 export default class FunnelGraphs extends GraphsBase
 {
-    constructor(opt, root)
+    constructor(opt, app)
     {
-        super( opt, root );
+        super( opt, app );
 
         this.type = "funnel";
 
@@ -135,7 +135,7 @@ export default class FunnelGraphs extends GraphsBase
                 rowData : me.dataFrame.getRowDataAt(i),
                 value   : num,
                 width   : me._getNodeWidth( num ),
-                color   : me.root.getTheme(i),//默认从皮肤中获取
+                color   : me.app.getTheme(i),//默认从皮肤中获取
                 cursor  : "pointer",
                
                 //下面得都在layoutData的循环中计算
@@ -230,7 +230,7 @@ export default class FunnelGraphs extends GraphsBase
                 };
 
                 //fire到root上面去的是为了让root去处理tips
-                me.root.fire( e.type, e );
+                me.app.fire( e.type, e );
                 me.triggerEvent( me.node , e );
             });
 

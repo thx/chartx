@@ -11,9 +11,9 @@ const Circle = Canvax.Shapes.Circle;
 
 export default class sunburstGraphs extends GraphsBase
 {
-    constructor(opt, root)
+    constructor(opt, app)
     {
-        super( opt, root );
+        super( opt, app );
 
         this.type = "sunburst";
 
@@ -171,7 +171,7 @@ export default class sunburstGraphs extends GraphsBase
                     startAngle : layoutData.x * 180 / Math.PI,
                     endAngle   : (layoutData.x + layoutData.dx) * 180 / Math.PI, //secc.endAngle,
                     
-                    fillStyle  : layoutData.color || me.root.getTheme( layoutData.iNode ),
+                    fillStyle  : layoutData.color || me.app.getTheme( layoutData.iNode ),
                     strokeStyle: me.node.strokeStyle,
                     lineWidth  : me.node.lineWidth,
                     globalAlpha: 0
@@ -198,7 +198,7 @@ export default class sunburstGraphs extends GraphsBase
                     e.eventInfo = {
                         iNode : layoutData.iNode
                     };
-                    me.root.fire( e.type, e );
+                    me.app.fire( e.type, e );
                     me.triggerEvent( me.node , e );
                 });
 

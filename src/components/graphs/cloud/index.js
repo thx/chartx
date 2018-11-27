@@ -7,9 +7,9 @@ const Text = Canvax.Display.Text;
 
 export default class CloudGraphs extends GraphsBase
 {
-    constructor(opt, root)
+    constructor(opt, app)
     {
-        super( opt, root );
+        super( opt, app );
 
         this.type = "cloud";
 
@@ -21,7 +21,7 @@ export default class CloudGraphs extends GraphsBase
         this.node = {
             fontFamily  : "Impact",
             fontColor   : function( nodeData ){
-                return me.root.getTheme( nodeData.iNode )
+                return me.app.getTheme( nodeData.iNode )
             },
             fontSize    : function(){
                 //fontSize默认12-50的随机值
@@ -153,7 +153,7 @@ export default class CloudGraphs extends GraphsBase
         var layout = cloudLayout()
             .size([me.width, me.height])
             .words(me.dataFrame.getFieldData( me.field ).map(function(d, ind) {
-                var rowData  = me.root.dataFrame.getRowDataAt( me.getDaraFrameIndOfVal( d ) );//这里不能直接用i去从dataFrame里查询,因为cloud layout后，可能会扔掉渲染不下的部分
+                var rowData  = me.app.dataFrame.getRowDataAt( me.getDaraFrameIndOfVal( d ) );//这里不能直接用i去从dataFrame里查询,因为cloud layout后，可能会扔掉渲染不下的部分
                 var tag = {
                     rowData : rowData,
                     field   : me.field,
@@ -230,7 +230,7 @@ export default class CloudGraphs extends GraphsBase
                     };
     
                     //fire到root上面去的是为了让root去处理tips
-                    me.root.fire( e.type, e );
+                    me.app.fire( e.type, e );
                     me.triggerEvent( me.node , e );
                 });
             });

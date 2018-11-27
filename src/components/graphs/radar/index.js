@@ -7,9 +7,9 @@ const Circle = Canvax.Shapes.Circle;
 
 export default class RadarGraphs extends GraphsBase
 {
-    constructor(opt, root)
+    constructor(opt, app)
     {
-        super( opt, root );
+        super( opt, app );
 
         this.type  = "radar";
         
@@ -74,7 +74,7 @@ export default class RadarGraphs extends GraphsBase
     _widget()
     {
         var me = this;
-        var _coord = this.root._coord;
+        var _coord = this.app._coord;
 
         var iGroup = 0;
         _.each( this.data, function( list , field ){
@@ -122,7 +122,7 @@ export default class RadarGraphs extends GraphsBase
                 
                 me.fire( e.type, e );
                 //图表触发，用来处理Tips
-                me.root.fire( e.type, e );
+                me.app.fire( e.type, e );
             });
             
             if( me.node.enabled ){
@@ -155,7 +155,7 @@ export default class RadarGraphs extends GraphsBase
                         e.eventInfo = {
                             nodes : [ this.nodeData ]
                         };
-                        me.root.fire( e.type, e );
+                        me.app.fire( e.type, e );
                     });
                     _nodes.push( _node );
                 } );
@@ -233,10 +233,10 @@ export default class RadarGraphs extends GraphsBase
     _trimGraphs()
     {
         var me = this;
-        var _coord = this.root._coord;
+        var _coord = this.app._coord;
 
         //用来计算下面的hLen
-        this.enabledField = this.root._coord.getEnabledFields( this.field );
+        this.enabledField = this.app._coord.getEnabledFields( this.field );
         
         var data = {}
         _.each( this.enabledField, function( field ){

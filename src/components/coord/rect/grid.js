@@ -6,13 +6,13 @@ const Rect = Canvax.Shapes.Rect;
 
 export default class descartesGrid extends Canvax.Event.EventDispatcher
 {
-    constructor( opt, root )
+    constructor( opt, app )
     {
-        super( opt, root);
+        super( opt, app);
 
         this.width  = 0;   
         this.height = 0;
-        this.root   = root; //该组件被添加到的目标图表项目，
+        this.app   = app; //该组件被添加到的目标图表项目，
 
         this.pos    = {
             x : 0,
@@ -97,9 +97,9 @@ export default class descartesGrid extends Canvax.Event.EventDispatcher
             return
         };
 
-        var _yAxis = self.root._yAxis[ 0 ];
+        var _yAxis = self.app._yAxis[ 0 ];
         
-        if( self.fill.enabled && self.root && _yAxis && _yAxis.dataSectionGroup && _yAxis.dataSectionGroup.length>1 ){
+        if( self.fill.enabled && self.app && _yAxis && _yAxis.dataSectionGroup && _yAxis.dataSectionGroup.length>1 ){
             self.yGroupSp  = new Canvax.Display.Sprite(),  self.sprite.addChild(self.yGroupSp);
             for( var g = 0 , gl=_yAxis.dataSectionGroup.length ; g < gl ; g++ ){
                 var yGroupHeight = _yAxis.height / gl ;
