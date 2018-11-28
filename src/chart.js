@@ -146,9 +146,13 @@ export default class Chart extends Canvax.Event.EventDispatcher
                     //这里开始mount组件进来
                     
                     var compConstructor = me.componentModules.getComponentModule( _p, compOpt.type );
+                    var _comp = new compConstructor( compOpt, me );
+                    me.components.push( _comp );
+                    /*
                     if( compConstructor && compConstructor.register ){
                         compConstructor.register( compOpt, me );
                     };
+                    */
                     
                 } );
                 
@@ -209,6 +213,9 @@ export default class Chart extends Canvax.Event.EventDispatcher
         //绘制除开coord graphs 以外的所有组件
         for( var i=0,l=this.components.length; i<l; i++ ){
             var p = this.components[i];
+            p.draw( opt );
+
+            /*
             p.plug && p.plug.draw && p.plug.draw(  );
             p.plug.app = this;
             if( p.type == "once" ){
@@ -217,6 +224,7 @@ export default class Chart extends Canvax.Event.EventDispatcher
                 //l--; l重新计算p.plug.draw 可能会改变components
             }
             l = this.components.length;
+            */
         };
 
         this._bindEvent();
@@ -562,7 +570,7 @@ export default class Chart extends Canvax.Event.EventDispatcher
     {
         var me   = this;
         var data = [];
-        debugger
+        
         _.each( _.flatten(me._coord.fieldsMap) , function( map , i ){
             //因为yAxis上面是可以单独自己配置field的，所以，这部分要过滤出 legend data
             var isGraphsField = false;

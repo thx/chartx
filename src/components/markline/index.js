@@ -211,6 +211,7 @@ export default class MarkLine extends Component
 
     draw()
     {
+        return;
         var me = this;
 
         var y = this._getYPos();

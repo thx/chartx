@@ -9698,9 +9698,14 @@ var Chartx = (function () {
                           //这里开始mount组件进来
 
                           var compConstructor = me.componentModules.getComponentModule(_p, compOpt.type);
-                          if (compConstructor && compConstructor.register) {
-                              compConstructor.register(compOpt, me);
-                          }                    });
+                          var _comp = new compConstructor(compOpt, me);
+                          me.components.push(_comp);
+                          /*
+                          if( compConstructor && compConstructor.register ){
+                              compConstructor.register( compOpt, me );
+                          };
+                          */
+                      });
                   }
               }        }
       }, {
@@ -9753,14 +9758,18 @@ var Chartx = (function () {
               //绘制除开coord graphs 以外的所有组件
               for (var i = 0, l = this.components.length; i < l; i++) {
                   var p = this.components[i];
-                  p.plug && p.plug.draw && p.plug.draw();
+                  p.draw(opt);
+
+                  /*
+                  p.plug && p.plug.draw && p.plug.draw(  );
                   p.plug.app = this;
-                  if (p.type == "once") {
-                      this.components.splice(i, 1);
+                  if( p.type == "once" ){
+                      this.components.splice( i, 1 );
                       i--;
                       //l--; l重新计算p.plug.draw 可能会改变components
                   }
                   l = this.components.length;
+                  */
               }
               this._bindEvent();
 
@@ -10108,7 +10117,7 @@ var Chartx = (function () {
           value: function getLegendData() {
               var me = this;
               var data = [];
-              debugger;
+
               _$1.each(_$1.flatten(me._coord.fieldsMap), function (map, i) {
                   //因为yAxis上面是可以单独自己配置field的，所以，这部分要过滤出 legend data
                   var isGraphsField = false;
@@ -10230,14 +10239,16 @@ var Chartx = (function () {
   var component = function (_Canvax$Event$EventDi) {
       inherits$1(component, _Canvax$Event$EventDi);
 
-      function component(opt, data) {
+      function component(opt, app) {
           classCallCheck$2(this, component);
 
-          var _this = possibleConstructorReturn$1(this, (component.__proto__ || Object.getPrototypeOf(component)).call(this, opt, data));
+          var _this = possibleConstructorReturn$1(this, (component.__proto__ || Object.getPrototypeOf(component)).call(this, opt, app));
 
           _this.enabled = false; //是否加载该组件
-          _this.app = null; //这个组件挂在哪个app上面（图表）
-          _this.cid = canvax.utils.createId("comp_");
+          _this._opt = opt;
+          _this.app = app; //这个组件挂在哪个app上面（图表）
+          _this.__cid = canvax.utils.createId("comp_");
+
           return _this;
       }
 
@@ -22427,20 +22438,20 @@ var Chartx = (function () {
   var Legend = function (_Component) {
       inherits$1(Legend, _Component);
 
-      function Legend(data, opt, app) {
+      function Legend(opt, app) {
           classCallCheck$2(this, Legend);
 
-          var _this = possibleConstructorReturn$1(this, (Legend.__proto__ || Object.getPrototypeOf(Legend)).call(this));
+          var _this = possibleConstructorReturn$1(this, (Legend.__proto__ || Object.getPrototypeOf(Legend)).call(this, opt, app));
 
-          _this.app = app;
+          _this.type = 'legend';
+
           /* data的数据结构为
           [
               //descartes中用到的时候还会带入yAxis
               {name: "uv", color: "#ff8533", field: '' ...如果手动传入数据只需要前面这三个 enabled: true, ind: 0, } //外部只需要传field和fillStyle就行了 activate是内部状态
           ]
           */
-
-          _this.data = data || [];
+          _this.data = _this._getLegendData(opt);
 
           _this.width = 0;
           _this.height = 0;
@@ -22477,45 +22488,93 @@ var Chartx = (function () {
           //this.onUnChecked=function(){};
 
           _this._labelColor = "#999";
-
           _this.position = "top"; //图例所在的方向top,right,bottom,left
-
           _this.direction = "h"; //横向 top,bottom --> h left,right -- >v
 
-          _this.sprite = null;
-
-          if (opt) {
-              _$1.extend(true, _this, opt);
-
-              if (!opt.direction && opt.position) {
-                  if (_this.position == "left" || _this.position == "right") {
-                      _this.direction = 'v';
-                  } else {
-                      _this.direction = 'h';
-                  }            }        }
+          _$1.extend(true, _this, {
+              icon: {
+                  onChecked: function onChecked(obj) {
+                      app.show(obj.name, obj);
+                      app.componentsReset({ name: "legend" });
+                  },
+                  onUnChecked: function onUnChecked(obj) {
+                      app.hide(obj.name, obj);
+                      app.componentsReset({ name: "legend" });
+                  }
+              }
+          }, opt);
+          debugger;
+          _this._layout();
           _this.sprite = new canvax.Display.Sprite({
-              id: "LegendSprite"
+              id: "LegendSprite",
+              context: {
+                  x: _this.pos.x,
+                  y: _this.pos.y
+              }
           });
+          _this.widget();
 
-          _this._draw();
           return _this;
       }
 
       createClass$2(Legend, [{
-          key: "pos",
-          value: function pos(_pos) {
-              _pos.x && (this.sprite.context.x = _pos.x + this.icon.radius);
-              _pos.y && (this.sprite.context.y = _pos.y);
+          key: "_getLegendData",
+          value: function _getLegendData(opt) {
+              var legendData = opt.data;
+              if (legendData) {
+                  _$1.each(legendData, function (item, i) {
+                      item.enabled = true;
+                      item.ind = i;
+                  });
+                  delete opt.data;
+              } else {
+                  legendData = this.app.getLegendData();
+              }            return legendData || [];
+          }
+      }, {
+          key: "_layout",
+          value: function _layout() {
+              var app = this.app;
+              if (!this._opt.direction && this._opt.position) {
+                  if (this.position == "left" || this.position == "right") {
+                      this.direction = 'v';
+                  } else {
+                      this.direction = 'h';
+                  }            }
+              if (this.direction == "h") {
+                  app.padding[this.position] += this.height;
+              } else {
+                  app.padding[this.position] += this.width;
+              }
+              //default right
+              var pos = {
+                  x: app.width - app.padding.right,
+                  y: app.padding.top
+              };
+              if (this.position == "left") {
+                  pos.x = app.padding.left - this.width;
+              }            if (this.position == "top") {
+                  pos.x = app.padding.left;
+                  pos.y = app.padding.top - this.height;
+              }            if (this.position == "bottom") {
+                  pos.x = app.padding.left;
+                  //TODO: this.icon.height 这里要后续拿到单个图例的高，现在默认26
+                  pos.y = app.height - app.padding.bottom + 26 / 2;
+              }
+              this.pos = pos;
           }
       }, {
           key: "draw",
           value: function draw() {
-              //图例组件运行开始运行的时候就需要计算好自己的高宽 所以早就在_draw中渲染好了， 
-              //组件统一调用draw的时候就不需要做任何处理了
-          }
+              if (this.app._coord && this.app._coord.type == 'rect') {
+                  if (this.position == "top" || this.position == "bottom") {
+                      var x = this.app._coord.getSizeAndOrigin().origin.x;
+                      this.sprite.context.x = x + this.icon.radius;
+                  }
+              }        }
       }, {
-          key: "_draw",
-          value: function _draw() {
+          key: "widget",
+          value: function widget() {
               var me = this;
 
               var viewWidth = this.app.width - this.app.padding.left - this.app.padding.right;
@@ -22666,79 +22725,6 @@ var Chartx = (function () {
                   }]
               };
           }
-      }], [{
-          key: "register",
-          value: function register(opt, app) {
-              //设置legendOpt
-              var legendOpt = _$1.extend(true, {
-                  icon: {
-                      onChecked: function onChecked(obj) {
-                          app.show(obj.name, obj);
-                          app.componentsReset({ name: "legend" });
-                      },
-                      onUnChecked: function onUnChecked(obj) {
-                          app.hide(obj.name, obj);
-                          app.componentsReset({ name: "legend" });
-                      }
-                  }
-              }, opt);
-
-              var legendData = opt.data;
-              if (legendData) {
-                  _$1.each(legendData, function (item, i) {
-                      item.enabled = true;
-                      item.ind = i;
-                  });
-                  delete opt.data;
-              } else {
-                  legendData = app.getLegendData();
-              }
-              var _legend = new this(legendData, legendOpt, app);
-
-              if (_legend.direction == "h") {
-                  app.padding[_legend.position] += _legend.height;
-              } else {
-                  app.padding[_legend.position] += _legend.width;
-              }
-              if (app._coord && app._coord.type == 'rect') {
-                  if (_legend.position == "top" || _legend.position == "bottom") {
-                      app.components.push({
-                          type: "once",
-                          plug: {
-                              draw: function draw() {
-                                  _legend.pos({
-                                      x: app._coord.getSizeAndOrigin().origin.x
-                                  });
-                              }
-                          }
-                      });
-                  }
-              }
-
-              //default right
-              var pos = {
-                  x: app.width - app.padding.right,
-                  y: app.padding.top
-              };
-              if (_legend.position == "left") {
-                  pos.x = app.padding.left - _legend.width;
-              }            if (_legend.position == "top") {
-                  pos.x = app.padding.left;
-                  pos.y = app.padding.top - _legend.height;
-              }            if (_legend.position == "bottom") {
-                  pos.x = app.padding.left;
-                  //TODO: this.icon.height 这里要后续拿到单个图例的高，现在默认26
-                  pos.y = app.height - app.padding.bottom + 26 / 2;
-              }
-              _legend.pos(pos);
-
-              app.components.push({
-                  type: "legend",
-                  plug: _legend
-              });
-
-              app.stage.addChild(_legend.sprite);
-          }
       }]);
       return Legend;
   }(component);
@@ -22803,16 +22789,16 @@ var Chartx = (function () {
   var dataZoom = function (_Component) {
       inherits$1(dataZoom, _Component);
 
-      function dataZoom(opt, cloneChart) {
+      function dataZoom(opt, app) {
           classCallCheck$2(this, dataZoom);
 
-          var _this = possibleConstructorReturn$1(this, (dataZoom.__proto__ || Object.getPrototypeOf(dataZoom)).call(this, opt, cloneChart));
+          var _this = possibleConstructorReturn$1(this, (dataZoom.__proto__ || Object.getPrototypeOf(dataZoom)).call(this, opt, app));
 
-          _this._cloneChart = cloneChart;
+          _this._cloneChart = null;
 
           _this.count = 1; //把w 均为为多少个区间， 同样多节点的line 和  bar， 这个count相差一
           _this.dataLen = 1;
-          _this.axisLayoutType = cloneChart.thumbChart._coord._xAxis.layoutType; //和line bar等得xAxis.layoutType 一一对应
+          _this.axisLayoutType = null; //和line bar等得xAxis.layoutType 一一对应
 
           _this.dragIng = function () {};
           _this.dragEnd = function () {};
@@ -22823,8 +22809,9 @@ var Chartx = (function () {
           _this._btnRight = null;
           _this._underline = null;
 
-          opt && _$1.extend(true, _this, opt);
-          _this._computeAttrs(opt);
+          //预设默认的opt.dataZoom
+          _$1.extend(true, _this, defaultProps, opt);
+          _this._layout();
 
           _this.sprite = new canvax.Display.Sprite({
               id: "dataZoom",
@@ -22843,9 +22830,8 @@ var Chartx = (function () {
           _this.sprite.addChild(_this.dataZoomBg);
           _this.sprite.addChild(_this.dataZoomBtns);
 
-          _this.widget();
-          _this._setLines();
-          _this.setZoomBg();
+          app.stage.addChild(_this.sprite);
+
           return _this;
       }
 
@@ -22853,12 +22839,163 @@ var Chartx = (function () {
 
 
       createClass$2(dataZoom, [{
-          key: "draw",
+          key: "_layout",
+          value: function _layout() {
+              var app = this.app;
+              if (this.position == "bottom") {
+                  //目前dataZoom是固定在bottom位置的
+                  //_getDataZoomOpt中会矫正x
+                  this.pos = {
+                      x: 0, //x在 _getDataZoomOpt 中计算
+                      y: app.height - (this.height + app.padding.bottom + this.margin.bottom)
+                  };
+                  app.padding.bottom += this.height + this.margin.top + this.margin.bottom;
+              }
+              if (this.position == "top") {
+                  this.pos = {
+                      x: 0, //x在 _getDataZoomOpt 中计算
+                      y: app.padding.top + this.margin.top
+                  };
+                  app.padding.top += this.height + this.margin.top + this.margin.bottom;
+              }        }
+      }, {
+          key: "_getCloneChart",
+          value: function _getCloneChart() {
+              var app = this.app;
+              var chartConstructor = app.constructor; //(barConstructor || Bar);
+              var cloneEl = app.el.cloneNode();
+              cloneEl.innerHTML = "";
+              cloneEl.id = app.el.id + "_currclone";
+              cloneEl.style.position = "absolute";
+              cloneEl.style.width = app.el.offsetWidth + "px";
+              cloneEl.style.height = app.el.offsetHeight + "px";
+              cloneEl.style.top = "10000px";
+              document.body.appendChild(cloneEl);
 
+              //var opt = _.extend(true, {}, me._opt);
+              //_.extend(true, opt, me.getCloneChart() );
+
+              //clone的chart只需要coord 和 graphs 配置就可以了
+              //因为画出来后也只需要拿graphs得sprite去贴图
+              var graphsOpt = [];
+              _$1.each(app._graphs, function (_g) {
+                  var _field = _g.enabledField || _g.field;
+
+                  if (_$1.flatten([_field]).length) {
+
+                      var _opt = _$1.extend(true, {}, _g._opt);
+
+                      _opt.field = _field;
+                      if (_g.type == "bar") {
+                          _$1.extend(true, _opt, {
+                              node: {
+                                  fillStyle: "#ececec",
+                                  radius: 0
+                              },
+                              animation: false,
+                              eventEnabled: false,
+                              label: {
+                                  enabled: false
+                              }
+                          });
+                      }
+                      if (_g.type == "line") {
+                          _$1.extend(true, _opt, {
+                              line: {
+                                  //lineWidth: 1,
+                                  strokeStyle: "#ececec"
+                              },
+                              node: {
+                                  enabled: false
+                              },
+                              area: {
+                                  alpha: 1,
+                                  fillStyle: "#ececec"
+                              },
+                              animation: false,
+                              eventEnabled: false,
+                              label: {
+                                  enabled: false
+                              }
+                          });
+                      }
+                      if (_g.type == "scat") {
+                          _$1.extend(true, _opt, {
+                              node: {
+                                  fillStyle: "#ececec"
+                              }
+                          });
+                      }
+
+                      graphsOpt.push(_opt);
+                  }
+              });
+              var opt = {
+                  coord: app._opt.coord,
+                  graphs: graphsOpt
+              };
+
+              if (opt.coord.horizontal) {
+                  delete opt.coord.horizontal;
+              }
+              var thumbChart = new chartConstructor(cloneEl, app._data, opt, app.componentModules);
+              thumbChart.draw();
+
+              return {
+                  thumbChart: thumbChart,
+                  cloneEl: cloneEl
+              };
+          }
+      }, {
+          key: "_setDataZoomOpt",
+          value: function _setDataZoomOpt() {
+
+              var app = this.app;
+              var coordInfo = app._coord.getSizeAndOrigin();
+
+              //初始化 datazoom 模块
+              _$1.extend(true, this, {
+                  width: parseInt(coordInfo.width), //app._coord.width,
+                  pos: {
+                      x: coordInfo.origin.x //app._coord.origin.x,
+                      //y: 0 // opt中有传入  app._coord.origin.y + app._coord._xAxis.height
+                  },
+                  dragIng: function dragIng(range) {
+                      var trigger = {
+                          name: "dataZoom",
+                          left: app.dataFrame.range.start - range.start,
+                          right: range.end - app.dataFrame.range.end
+                      };
+
+                      _$1.extend(app.dataFrame.range, range);
+
+                      //不想要重新构造dataFrame，所以第一个参数为null
+                      app.resetData(null, trigger);
+                      app.fire("dataZoomDragIng");
+                  },
+                  dragEnd: function dragEnd(range) {
+                      app.updateChecked && app.updateChecked();
+                      app.fire("dataZoomDragEnd");
+                  }
+              });
+          }
           //datazoom end
 
-          value: function draw() {
+      }, {
+          key: "draw",
+          value: function draw(opt) {
+
+              this._setDataZoomOpt();
+
+              this._cloneChart = this._getCloneChart();
+              this.axisLayoutType = this._cloneChart.thumbChart._coord._xAxis.layoutType; //和line bar等得xAxis.layoutType 一一对应
+
+              this._computeAttrs();
+
               //这个组件可以在init的时候就绘制好
+              this.widget();
+              this._setLines();
+              this.setZoomBg();
           }
       }, {
           key: "destroy",
@@ -22876,7 +23013,7 @@ var Chartx = (function () {
               var _preEnd = this.range.end;
 
               opt && _$1.extend(true, this, opt);
-              this._cloneChart = dataZoom._getCloneChart(opt, this.app); //cloneChart;
+              this._cloneChart = dataZoom._getCloneChart(); //cloneChart;
               this._computeAttrs(opt);
 
               if (_preCount != this.count || opt.range && (opt.range.start != _preStart || opt.range.end != _preEnd)) {
@@ -22885,11 +23022,12 @@ var Chartx = (function () {
               }
               this.setZoomBg();
           }
+
           //计算属性
 
       }, {
           key: "_computeAttrs",
-          value: function _computeAttrs(opt) {
+          value: function _computeAttrs() {
               var _cloneChart = this._cloneChart.thumbChart;
 
               this.dataLen = _cloneChart.dataFrame.length;
@@ -22901,7 +23039,7 @@ var Chartx = (function () {
                   this.range.end = this.dataLen - 1;
               }
               //如果用户没有配置layoutType但是配置了position
-              if (!opt.direction && opt.position) {
+              if (!this.direction && this.position) {
                   if (this.position == "left" || this.position == "right") {
                       this.direction = 'v';
                   } else {
@@ -23251,169 +23389,6 @@ var Chartx = (function () {
               this._cloneChart.thumbChart.destroy();
               this._cloneChart.cloneEl.parentNode.removeChild(this._cloneChart.cloneEl);
           }
-      }], [{
-          key: "register",
-          value: function register(opt, app) {
-
-              var me = this;
-
-              //预设默认的opt.dataZoom
-              opt = _$1.extend(true, defaultProps, opt);
-
-              if (opt.position == "bottom") {
-
-                  //目前dataZoom是固定在bottom位置的
-                  //_getDataZoomOpt中会矫正x
-                  opt.pos = {
-                      x: 0, //x在 _getDataZoomOpt 中计算
-                      y: app.height - (opt.height + app.padding.bottom + opt.margin.bottom)
-                  };
-                  app.padding.bottom += opt.height + opt.margin.top + opt.margin.bottom;
-              }
-              if (opt.position == "top") {
-                  opt.pos = {
-                      x: 0, //x在 _getDataZoomOpt 中计算
-                      y: app.padding.top + opt.margin.top
-                  };
-                  app.padding.top += opt.height + opt.margin.top + opt.margin.bottom;
-              }
-              app.components.push({
-                  type: "once",
-                  plug: {
-                      draw: function draw() {
-                          //这个时候才能拿到_coord.width _coord.height等尺寸信息， 这个时候_coord也才绘制完成了
-                          var _dataZoom = new me(me._getDataZoomOpt(opt, app), me._getCloneChart(opt, app));
-                          app.components.push({
-                              type: "dataZoom",
-                              plug: _dataZoom
-                          });
-                          //app.graphsSprite.addChild( _dataZoom.sprite );
-                          app.stage.addChild(_dataZoom.sprite);
-                      }
-                  }
-              });
-          }
-      }, {
-          key: "_getCloneChart",
-          value: function _getCloneChart(opt, app) {
-              var chartConstructor = app.constructor; //(barConstructor || Bar);
-              var cloneEl = app.el.cloneNode();
-              cloneEl.innerHTML = "";
-              cloneEl.id = app.el.id + "_currclone";
-              cloneEl.style.position = "absolute";
-              cloneEl.style.width = app.el.offsetWidth + "px";
-              cloneEl.style.height = app.el.offsetHeight + "px";
-              cloneEl.style.top = "10000px";
-              document.body.appendChild(cloneEl);
-
-              //var opt = _.extend(true, {}, me._opt);
-              //_.extend(true, opt, me.getCloneChart() );
-
-              //clone的chart只需要coord 和 graphs 配置就可以了
-              //因为画出来后也只需要拿graphs得sprite去贴图
-              var graphsOpt = [];
-              _$1.each(app._graphs, function (_g) {
-                  var _field = _g.enabledField || _g.field;
-
-                  if (_$1.flatten([_field]).length) {
-
-                      var _opt = _$1.extend(true, {}, _g._opt);
-
-                      _opt.field = _field;
-                      if (_g.type == "bar") {
-                          _$1.extend(true, _opt, {
-                              node: {
-                                  fillStyle: "#ececec",
-                                  radius: 0
-                              },
-                              animation: false,
-                              eventEnabled: false,
-                              label: {
-                                  enabled: false
-                              }
-                          });
-                      }
-                      if (_g.type == "line") {
-                          _$1.extend(true, _opt, {
-                              line: {
-                                  //lineWidth: 1,
-                                  strokeStyle: "#ececec"
-                              },
-                              node: {
-                                  enabled: false
-                              },
-                              area: {
-                                  alpha: 1,
-                                  fillStyle: "#ececec"
-                              },
-                              animation: false,
-                              eventEnabled: false,
-                              label: {
-                                  enabled: false
-                              }
-                          });
-                      }
-                      if (_g.type == "scat") {
-                          _$1.extend(true, _opt, {
-                              node: {
-                                  fillStyle: "#ececec"
-                              }
-                          });
-                      }
-
-                      graphsOpt.push(_opt);
-                  }
-              });
-              var opt = {
-                  coord: app._opt.coord,
-                  graphs: graphsOpt
-              };
-
-              if (opt.coord.horizontal) {
-                  delete opt.coord.horizontal;
-              }
-              var thumbChart = new chartConstructor(cloneEl, app._data, opt, app.componentModules);
-              thumbChart.draw();
-
-              return {
-                  thumbChart: thumbChart,
-                  cloneEl: cloneEl
-              };
-          }
-      }, {
-          key: "_getDataZoomOpt",
-          value: function _getDataZoomOpt(opt, app) {
-
-              var coordInfo = app._coord.getSizeAndOrigin();
-
-              //初始化 datazoom 模块
-              var dataZoomOpt = _$1.extend(true, opt, {
-                  width: parseInt(coordInfo.width), //app._coord.width,
-                  pos: {
-                      x: coordInfo.origin.x //app._coord.origin.x,
-                      //y: 0 // opt中有传入  app._coord.origin.y + app._coord._xAxis.height
-                  },
-                  dragIng: function dragIng(range) {
-                      var trigger = {
-                          name: "dataZoom",
-                          left: app.dataFrame.range.start - range.start,
-                          right: range.end - app.dataFrame.range.end
-                      };
-
-                      _$1.extend(app.dataFrame.range, range);
-
-                      //不想要重新构造dataFrame，所以第一个参数为null
-                      app.resetData(null, trigger);
-                      app.fire("dataZoomDragIng");
-                  },
-                  dragEnd: function dragEnd(range) {
-                      app.updateChecked && app.updateChecked();
-                      app.fire("dataZoomDragEnd");
-                  }
-              });
-
-              return dataZoomOpt;
-          }
       }]);
       return dataZoom;
   }(component);
@@ -23515,6 +23490,7 @@ var Chartx = (function () {
       }, {
           key: "draw",
           value: function draw() {
+              return;
               var me = this;
 
               var y = this._getYPos();

@@ -63,15 +63,15 @@ const defaultProps = {
 export default class dataZoom extends Component
 {
 
-    constructor(opt, cloneChart)
+    constructor(opt, app)
 	{
-        super(opt, cloneChart);
-        
-        this._cloneChart = cloneChart;
+        super(opt, app);
+
+        this._cloneChart = null;
         
         this.count = 1; //把w 均为为多少个区间， 同样多节点的line 和  bar， 这个count相差一
         this.dataLen = 1;
-        this.axisLayoutType = cloneChart.thumbChart._coord._xAxis.layoutType; //和line bar等得xAxis.layoutType 一一对应
+        this.axisLayoutType = null; //和line bar等得xAxis.layoutType 一一对应
 
         this.dragIng = function(){};
         this.dragEnd = function(){};
@@ -82,9 +82,10 @@ export default class dataZoom extends Component
         this._btnRight = null;
         this._underline = null;
 
-        opt && _.extend( true, this, opt);
-        this._computeAttrs( opt );
-
+        //预设默认的opt.dataZoom
+        _.extend( true, this, defaultProps , opt);
+        this._layout();
+        
         this.sprite = new Canvax.Display.Sprite({
             id : "dataZoom",
             context: {
@@ -102,58 +103,38 @@ export default class dataZoom extends Component
         this.sprite.addChild( this.dataZoomBg );
         this.sprite.addChild( this.dataZoomBtns );
 
-        this.widget();
-        this._setLines();
-        this.setZoomBg();
+        app.stage.addChild( this.sprite );
+
 	}
 
     //datazoom begin
-    static register(opt,app)
+    _layout()
     {
-
         let me = this;
-
-        //预设默认的opt.dataZoom
-        opt = _.extend( true, defaultProps , opt);
-
-        if( opt.position == "bottom" ){
-            
+        let app = this.app;
+        if( this.position == "bottom" ){
             //目前dataZoom是固定在bottom位置的
             //_getDataZoomOpt中会矫正x
-            opt.pos = {
+            this.pos = {
                 x : 0, //x在 _getDataZoomOpt 中计算
-                y : app.height - (opt.height + app.padding.bottom + opt.margin.bottom)
+                y : app.height - (this.height + app.padding.bottom + this.margin.bottom)
             };
-            app.padding.bottom += (opt.height + opt.margin.top + opt.margin.bottom);
-        }
-        if( opt.position == "top" ){
-            opt.pos = {
-                x : 0, //x在 _getDataZoomOpt 中计算
-                y : app.padding.top + opt.margin.top
-            };
-            app.padding.top += (opt.height + opt.margin.top + opt.margin.bottom);
+            app.padding.bottom += (this.height + this.margin.top + this.margin.bottom);
         };
-        
-        
-        app.components.push( {
-            type : "once",
-            plug : {
-                draw: function(){
-                    //这个时候才能拿到_coord.width _coord.height等尺寸信息， 这个时候_coord也才绘制完成了
-                    var _dataZoom = new me( me._getDataZoomOpt( opt, app ) , me._getCloneChart( opt, app ) );
-                    app.components.push( {
-                        type : "dataZoom",
-                        plug : _dataZoom
-                    } ); 
-                    //app.graphsSprite.addChild( _dataZoom.sprite );
-                    app.stage.addChild( _dataZoom.sprite );
-                }
-            }
-        } );
-    }
 
-    static _getCloneChart( opt, app ) 
+        if( this.position == "top" ){
+            this.pos = {
+                x : 0, //x在 _getDataZoomOpt 中计算
+                y : app.padding.top + this.margin.top
+            };
+            app.padding.top += (this.height + this.margin.top + this.margin.bottom);
+        };
+    }
+ 
+
+    _getCloneChart() 
     {
+        var app = this.app;
         var chartConstructor = app.constructor;//(barConstructor || Bar);
         var cloneEl = app.el.cloneNode();
         cloneEl.innerHTML = "";
@@ -240,13 +221,14 @@ export default class dataZoom extends Component
         }
     }
 
-    static _getDataZoomOpt( opt, app)
+    _setDataZoomOpt()
     {
 
+        var app = this.app;
         var coordInfo = app._coord.getSizeAndOrigin();
         
         //初始化 datazoom 模块
-        var dataZoomOpt = _.extend(true, opt, {
+        _.extend(true, this, {
             width: parseInt( coordInfo.width ),//app._coord.width,
             pos: {
                 x: coordInfo.origin.x//app._coord.origin.x,
@@ -270,14 +252,24 @@ export default class dataZoom extends Component
                 app.fire("dataZoomDragEnd");
             }
         });
-
-        return dataZoomOpt
     }
     //datazoom end
 
-    draw()
+    draw( opt )
     {
+       
+
+        this._setDataZoomOpt();
+        
+        this._cloneChart = this._getCloneChart();
+        this.axisLayoutType = this._cloneChart.thumbChart._coord._xAxis.layoutType; //和line bar等得xAxis.layoutType 一一对应
+
+        this._computeAttrs();
+
         //这个组件可以在init的时候就绘制好
+        this.widget();
+        this._setLines();
+        this.setZoomBg();
     }
 
     destroy()
@@ -295,7 +287,7 @@ export default class dataZoom extends Component
         var _preEnd = this.range.end;
 
         opt && _.extend(true, this, opt);
-        this._cloneChart = dataZoom._getCloneChart( opt, this.app )//cloneChart;
+        this._cloneChart = dataZoom._getCloneChart()//cloneChart;
         this._computeAttrs(opt);
 
         if( 
@@ -308,8 +300,9 @@ export default class dataZoom extends Component
 
         this.setZoomBg( );
     }
+
     //计算属性
-    _computeAttrs(opt)
+    _computeAttrs()
     {
         var _cloneChart = this._cloneChart.thumbChart
 
@@ -324,7 +317,7 @@ export default class dataZoom extends Component
         };
 
         //如果用户没有配置layoutType但是配置了position
-        if( !opt.direction && opt.position ){
+        if( !this.direction && this.position ){
             if( this.position == "left" || this.position == "right" ){
                 this.direction = 'v';
             } else {
@@ -347,14 +340,14 @@ export default class dataZoom extends Component
         return end
     }
 
-    widget() 
+    widget()
     {
         var me = this;
         var setLines = function(){
             me._setLines.apply(me, arguments);
         };
 
-        if(me.bg.enabled){
+        if( me.bg.enabled ){
             var bgRectCtx = {
                 x: 0,
                 y: 0,

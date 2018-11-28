@@ -6,19 +6,19 @@ const Circle = Canvax.Shapes.Circle
 
 export default class Legend extends Component
 {
-    constructor(data, opt, app)
+    constructor(opt, app)
     {
-        super();
+        super(opt, app);
 
-        this.app = app;
+        this.type = 'legend';
+
         /* data的数据结构为
         [
             //descartes中用到的时候还会带入yAxis
             {name: "uv", color: "#ff8533", field: '' ...如果手动传入数据只需要前面这三个 enabled: true, ind: 0, } //外部只需要传field和fillStyle就行了 activate是内部状态
         ]
         */
-        
-        this.data = data || [];
+        this.data = this._getLegendData(opt);
 
         this.width = 0;
         this.height = 0;
@@ -55,39 +55,10 @@ export default class Legend extends Component
         //this.onUnChecked=function(){};
 
         this._labelColor = "#999";
-
         this.position = "top" ; //图例所在的方向top,right,bottom,left
-
         this.direction = "h"; //横向 top,bottom --> h left,right -- >v
 
-        this.sprite  = null;
-
-        if( opt ){
-            _.extend(true, this , opt );
-
-            if( !opt.direction && opt.position ){
-                if( this.position == "left" || this.position == "right" ){
-                    this.direction = 'v';
-                } else {
-                    this.direction = 'h';
-                };
-            };
-            
-        };
-
-        
-
-        this.sprite = new Canvax.Display.Sprite({
-            id : "LegendSprite"
-        });
-
-        this._draw();
-    }
-
-    static register( opt,app )
-    {
-        //设置legendOpt
-        var legendOpt = _.extend(true, {
+        _.extend(true, this , {
             icon : {
                 onChecked : function( obj ){
                     app.show( obj.name , obj );
@@ -98,8 +69,21 @@ export default class Legend extends Component
                     app.componentsReset({ name : "legend" });
                 }
             }
-        } , opt);
+        }, opt );
+        debugger
+        this._layout();
+        this.sprite = new Canvax.Display.Sprite({
+            id : "LegendSprite",
+            context: {
+                x: this.pos.x,
+                y: this.pos.y
+            }
+        });
+        this.widget();
 
+    }
+
+    _getLegendData( opt ){
         var legendData = opt.data;
         if( legendData ){
             _.each( legendData, function( item, i ){
@@ -108,74 +92,61 @@ export default class Legend extends Component
             } );
             delete opt.data;
         } else {
-            legendData = app.getLegendData();
+            legendData = this.app.getLegendData();
         };
-        
-        var _legend = new this( legendData, legendOpt, app );
-        
-        if( _legend.direction == "h" ){
-            app.padding[ _legend.position ] += _legend.height;
-        } else {
-            app.padding[ _legend.position ] += _legend.width;
+        return legendData || [];
+    }
+
+    _layout(){
+        let app = this.app;
+        if( !this._opt.direction && this._opt.position ){
+            if( this.position == "left" || this.position == "right" ){
+                this.direction = 'v';
+            } else {
+                this.direction = 'h';
+            };
         };
 
-        if( app._coord && app._coord.type == 'rect' ){
-            if( _legend.position == "top" || _legend.position == "bottom" ){
-                app.components.push( {
-                    type : "once",
-                    plug : {
-                        draw : function(){
-                            _legend.pos( { 
-                                x : app._coord.getSizeAndOrigin().origin.x
-                            } );
-                        }
-                    }
-                } );
-            }
-        }
-        
+        if( this.direction == "h" ){
+            app.padding[ this.position ] += this.height;
+        } else {
+            app.padding[ this.position ] += this.width;
+        };
+
         //default right
         var pos = {
             x : app.width - app.padding.right,
             y : app.padding.top
         };
-        if( _legend.position == "left" ){
-            pos.x = app.padding.left - _legend.width;
+        if( this.position == "left" ){
+            pos.x = app.padding.left - this.width;
         };
-        if( _legend.position == "top" ){
+        if( this.position == "top" ){
             pos.x = app.padding.left;
-            pos.y = app.padding.top - _legend.height;
+            pos.y = app.padding.top - this.height;
         };
-        if( _legend.position == "bottom" ){
+        if( this.position == "bottom" ){
             pos.x = app.padding.left;
             //TODO: this.icon.height 这里要后续拿到单个图例的高，现在默认26
             pos.y = app.height - app.padding.bottom + 26/2;
         };
 
-        _legend.pos( pos );
-
-        app.components.push( {
-            type : "legend",
-            plug : _legend
-        } );
-
-        app.stage.addChild( _legend.sprite );
-    }
-
-    pos( pos )
-    {
-        pos.x && (this.sprite.context.x = pos.x + this.icon.radius);
-        pos.y && (this.sprite.context.y = pos.y);
+        this.pos = pos;
     }
 
 
     draw()
     {
-        //图例组件运行开始运行的时候就需要计算好自己的高宽 所以早就在_draw中渲染好了， 
-        //组件统一调用draw的时候就不需要做任何处理了
+        if( this.app._coord && this.app._coord.type == 'rect' ){
+            if( this.position == "top" || this.position == "bottom" ){
+                var x = this.app._coord.getSizeAndOrigin().origin.x;
+                this.sprite.context.x = x + this.icon.radius
+            }
+        };
+        
     }
 
-    _draw()
+    widget()
     {
         var me = this;
 
