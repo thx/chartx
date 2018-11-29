@@ -9698,16 +9698,10 @@
                           _comp = [_comp];
                       }
                       _$1.each(_comp, function (compOpt) {
-                          //这里开始mount组件进来
 
                           var compConstructor = me.componentModules.getComponentModule(_p, compOpt.type);
                           var _comp = new compConstructor(compOpt, me);
                           me.components.push(_comp);
-                          /*
-                          if( compConstructor && compConstructor.register ){
-                              compConstructor.register( compOpt, me );
-                          };
-                          */
                       });
                   }
               }        }
@@ -9971,13 +9965,13 @@
           /*
            * 只响应数据的变化，不涉及配置变化
            * 
-           * @dataTrigger 一般是触发这个data reset的一些场景数据，
+           * @trigger 一般是触发这个data reset的一些场景数据，
            * 比如如果是 datazoom 触发的， 就会有 trigger数据{ name:'datazoom', left:1,right:1 }
            */
 
       }, {
           key: "resetData",
-          value: function resetData(data, dataTrigger) {
+          value: function resetData(data, trigger) {
               var me = this;
 
               var preDataLenth = this.dataFrame.length;
@@ -9992,12 +9986,12 @@
                   return;
               }
               if (this._coord) {
-                  this._coord.resetData(this.dataFrame, dataTrigger);
+                  this._coord.resetData(this.dataFrame, trigger);
               }            _$1.each(this._graphs, function (_g) {
-                  _g.resetData(me.dataFrame, dataTrigger);
+                  _g.resetData(me.dataFrame, trigger);
               });
 
-              this.componentsReset(dataTrigger);
+              this.componentsReset(trigger);
 
               this.fire("resetData");
           }
@@ -10007,28 +10001,27 @@
               return dataFrame.apply(this, arguments);
           }
 
-          //所有plug触发更新
+          //TODO:除开 coord,graphs 其他所有plug触发更新其实后续也要统一
 
       }, {
           key: "componentsReset",
           value: function componentsReset(trigger) {
               var me = this;
               _$1.each(this.components, function (p, i) {
-                  if (trigger && trigger.name == p.type) {
+                  if (trigger && trigger.comp && trigger.comp.__cid == p.__cid) {
                       //如果这次reset就是由自己触发的，那么自己这个components不需要reset，负责观察就好
                       return;
-                  }                p.plug.reset && p.plug.reset(me[p.type] || {}, me.dataFrame);
+                  }                p.reset && p.reset(me[p.type] || {}, me.dataFrame);
               });
           }
       }, {
-          key: "getComponentsByType",
-          value: function getComponentsByType(type) {
+          key: "getComponentsByName",
+          value: function getComponentsByName(name) {
               var arr = [];
               _$1.each(this.components, function (c) {
-                  if (c.type == type) {
-                      arr.push(c.plug);
-                  }
-              });
+                  if (c.name == name) {
+                      arr.push(c);
+                  }            });
               return arr;
           }
       }, {
@@ -10036,12 +10029,12 @@
           value: function getComponentById(id) {
               var comp;
               _$1.each(this.components, function (c) {
-                  if (c.id == id) {
+                  if (c.id && c.id == id) {
                       comp = c;
                       return false;
                   }
               });
-              return comp ? comp.plug : null;
+              return comp;
           }
           //插件相关代码end
 
@@ -10146,33 +10139,36 @@
           }
       }, {
           key: "show",
-          value: function show(field, legendData) {
-              this._coord.addField(field, legendData);
+          value: function show(field, trigger) {
+              this._coord.show(field, trigger);
               _$1.each(this._graphs, function (_g) {
-                  _g.show(field, legendData);
+                  _g.show(field, trigger);
               });
+              this.componentsReset(trigger);
           }
       }, {
           key: "hide",
-          value: function hide(field, legendData) {
-              this._coord.removeField(field, legendData);
+          value: function hide(field, trigger) {
+              this._coord.hide(field, trigger);
               _$1.each(this._graphs, function (_g) {
-                  _g.hide(field, legendData);
+                  _g.hide(field, trigger);
               });
+              this.componentsReset(trigger);
           }
       }, {
           key: "_bindEvent",
           value: function _bindEvent() {
               var me = this;
               this.on("panstart mouseover", function (e) {
-                  var _tips = me.getComponentById("tips");
+                  debugger;
+                  var _tips = me.getComponentsByName("tips")[0];
                   if (_tips) {
                       me._setTipsInfo.apply(me, [e]);
                       _tips.show(e);
                       me._tipsPointerAtAllGraphs(e);
                   }            });
               this.on("panmove mousemove", function (e) {
-                  var _tips = me.getComponentById("tips");
+                  var _tips = me.getComponentsByName("tips")[0];
                   if (_tips) {
                       me._setTipsInfo.apply(me, [e]);
                       _tips.move(e);
@@ -10181,13 +10177,13 @@
               this.on("panend mouseout", function (e) {
                   //如果e.toTarget有货，但是其实这个point还是在induce 的范围内的
                   //那么就不要执行hide，顶多只显示这个点得tips数据
-                  var _tips = me.getComponentById("tips");
+                  var _tips = me.getComponentsByName("tips")[0];
                   if (_tips && !(e.toTarget && me._coord && me._coord.induce && me._coord.induce.containsPoint(me._coord.induce.globalToLocal(e.target.localToGlobal(e.point))))) {
                       _tips.hide(e);
                       me._tipsPointerHideAtAllGraphs(e);
                   }            });
               this.on("tap", function (e) {
-                  var _tips = me.getComponentById("tips");
+                  var _tips = me.getComponentsByName("tips")[0];
                   if (_tips) {
                       _tips.hide(e);
                       me._setTipsInfo.apply(me, [e]);
@@ -10247,9 +10243,21 @@
 
           var _this = possibleConstructorReturn$1(this, (component.__proto__ || Object.getPrototypeOf(component)).call(this, opt, app));
 
+          _this.name = "component"; //组件名称
+          _this.type = null; //组件子类型，比如 Graphs组件下面的bar,line,scat等
+
           _this.enabled = false; //是否加载该组件
           _this._opt = opt;
           _this.app = app; //这个组件挂在哪个app上面（图表）
+          _this.pos = {
+              x: 0,
+              y: 0
+          };
+          _this.width = 0;
+          _this.height = 0; //height 不包含margin
+          _this.margin = {
+              top: 0, right: 0, bottom: 0, left: 0
+          };
           _this.__cid = canvax.utils.createId("comp_");
 
           return _this;
@@ -10270,6 +10278,16 @@
       }, {
           key: "reset",
           value: function reset() {}
+      }, {
+          key: "setPosition",
+          value: function setPosition(pos) {
+              !pos && (pos = this.pos);
+              pos.x && (this.sprite.context.x = pos.x);
+              pos.y && (this.sprite.context.y = pos.y);
+          }
+      }, {
+          key: "layout",
+          value: function layout() {}
       }]);
       return component;
   }(canvax.Event.EventDispatcher);
@@ -10281,6 +10299,8 @@
           classCallCheck$2(this, coorBase);
 
           var _this = possibleConstructorReturn$1(this, (coorBase.__proto__ || Object.getPrototypeOf(coorBase)).call(this, opt, app));
+
+          _this.name = "coord";
 
           _this._opt = opt;
           _this.app = app;
@@ -10375,13 +10395,13 @@
               return arr;
           }
       }, {
-          key: "removeField",
-          value: function removeField(field) {
+          key: "hide",
+          value: function hide(field) {
               this.changeFieldEnabled(field);
           }
       }, {
-          key: "addField",
-          value: function addField(field) {
+          key: "show",
+          value: function show(field) {
               this.changeFieldEnabled(field);
           }
       }, {
@@ -13250,9 +13270,11 @@
       function GraphsBase(opt, app) {
           classCallCheck$2(this, GraphsBase);
 
-          //这里所有的opts都要透传给 group
           var _this = possibleConstructorReturn$1(this, (GraphsBase.__proto__ || Object.getPrototypeOf(GraphsBase)).call(this, opt, app));
 
+          _this.name = "graphs";
+
+          //这里所有的opts都要透传给 group
           _this._opt = opt || {};
           _this.app = app;
           _this.ctx = app.stage.canvas.getContext("2d");
@@ -18816,28 +18838,28 @@
 
       }, {
           key: "show",
-          value: function show(field, legendData) {
-              this.getAgreeNodeData(legendData, function (data) {
+          value: function show(field, trigger) {
+              this.getAgreeNodeData(trigger, function (data) {
                   data.nodeElement && (data.nodeElement.context.visible = true);
                   data.labelElement && (data.labelElement.context.visible = true);
               });
           }
       }, {
           key: "hide",
-          value: function hide(field, legendData) {
-              this.getAgreeNodeData(legendData, function (data) {
+          value: function hide(field, trigger) {
+              this.getAgreeNodeData(trigger, function (data) {
                   data.nodeElement && (data.nodeElement.context.visible = false);
                   data.labelElement && (data.labelElement.context.visible = false);
               });
           }
       }, {
           key: "getAgreeNodeData",
-          value: function getAgreeNodeData(legendData, callback) {
+          value: function getAgreeNodeData(trigger, callback) {
               _$1.each(this._ringGroups, function (_g) {
                   _$1.each(_g._rings, function (ring, i) {
                       _$1.each(ring.planets, function (data, ii) {
                           var rowData = data.rowData;
-                          if (legendData.name == rowData[legendData.field]) {
+                          if (trigger.mesg.name == rowData[trigger.mesg.field]) {
                               //这个数据符合
                               //data.nodeElement.context.visible = false;
                               //data.labelElement.context.visible = false;
@@ -22446,7 +22468,7 @@
 
           var _this = possibleConstructorReturn$1(this, (Legend.__proto__ || Object.getPrototypeOf(Legend)).call(this, opt, app));
 
-          _this.type = 'legend';
+          _this.name = "legend";
 
           /* data的数据结构为
           [
@@ -22455,9 +22477,6 @@
           ]
           */
           _this.data = _this._getLegendData(opt);
-
-          _this.width = 0;
-          _this.height = 0;
 
           //一般来讲，比如柱状图折线图等，是按照传入的field来分组来设置图例的，那么legend.field都是null
           //但是还有一种情况就是，是按照同一个field中的数据去重后来分组的，比如散点图中sex属性的男女两个分组作为图例，
@@ -22497,17 +22516,26 @@
           _$1.extend(true, _this, {
               icon: {
                   onChecked: function onChecked(obj) {
-                      app.show(obj.name, obj);
-                      app.componentsReset({ name: "legend" });
+                      app.show(obj.name, {
+                          comp: this,
+                          mesg: obj
+                      });
                   },
                   onUnChecked: function onUnChecked(obj) {
-                      app.hide(obj.name, obj);
-                      app.componentsReset({ name: "legend" });
+                      app.hide(obj.name, {
+                          comp: this,
+                          mesg: obj
+                      });
                   }
               }
           }, opt);
-          debugger;
-          _this._layout();
+
+          if (!opt.direction && opt.position) {
+              if (_this.position == "left" || _this.position == "right") {
+                  _this.direction = 'v';
+              } else {
+                  _this.direction = 'h';
+              }        }
           _this.sprite = new canvax.Display.Sprite({
               id: "LegendSprite",
               context: {
@@ -22515,7 +22543,12 @@
                   y: _this.pos.y
               }
           });
+          _this.app.stage.addChild(_this.sprite);
+
           _this.widget();
+
+          //图例是需要自己绘制完成后，才能拿到高宽来设置自己的位置
+          _this.layout();
 
           return _this;
       }
@@ -22535,34 +22568,28 @@
               }            return legendData || [];
           }
       }, {
-          key: "_layout",
-          value: function _layout() {
+          key: "layout",
+          value: function layout() {
               var app = this.app;
-              if (!this._opt.direction && this._opt.position) {
-                  if (this.position == "left" || this.position == "right") {
-                      this.direction = 'v';
-                  } else {
-                      this.direction = 'h';
-                  }            }
+
               if (this.direction == "h") {
-                  app.padding[this.position] += this.height;
+                  app.padding[this.position] += this.height + this.margin.top + this.margin.bottom;
               } else {
-                  app.padding[this.position] += this.width;
+                  app.padding[this.position] += this.width + this.margin.left + this.margin.right;
               }
               //default right
               var pos = {
-                  x: app.width - app.padding.right,
-                  y: app.padding.top
+                  x: app.width - app.padding.right + this.margin.left,
+                  y: app.padding.top + this.margin.top
               };
               if (this.position == "left") {
-                  pos.x = app.padding.left - this.width;
+                  pos.x = app.padding.left - this.width + this.margin.left;
               }            if (this.position == "top") {
-                  pos.x = app.padding.left;
-                  pos.y = app.padding.top - this.height;
+                  pos.x = app.padding.left + this.margin.left;
+                  pos.y = app.padding.top - this.height - this.margin.top;
               }            if (this.position == "bottom") {
-                  pos.x = app.padding.left;
-                  //TODO: this.icon.height 这里要后续拿到单个图例的高，现在默认26
-                  pos.y = app.height - app.padding.bottom + 26 / 2;
+                  pos.x = app.padding.left + this.margin.left;
+                  pos.y = app.height - app.padding.bottom + this.margin.bottom;
               }
               this.pos = pos;
           }
@@ -22571,10 +22598,9 @@
           value: function draw() {
               if (this.app._coord && this.app._coord.type == 'rect') {
                   if (this.position == "top" || this.position == "bottom") {
-                      var x = this.app._coord.getSizeAndOrigin().origin.x;
-                      this.sprite.context.x = x + this.icon.radius;
-                  }
-              }        }
+                      this.pos.x = this.app._coord.getSizeAndOrigin().origin.x + this.icon.radius;
+                  }            }            this.setPosition();
+          }
       }, {
           key: "widget",
           value: function widget() {
@@ -22663,11 +22689,13 @@
                       height = Math.max(height, y);
                   } else {
                       //横向排布
+
                       if (x + itemW > viewWidth) {
                           if (me.icon.height * (rows + 1) > viewHeight * 0.3) {
                               isOver = true;
                               return;
-                          }                        width = Math.max(width, x);
+                          }                        debugger;
+                          width = Math.max(width, x);
                           x = 0;
                           rows++;
                       }
@@ -22738,17 +22766,7 @@
   var defaultProps = {
       height: 26,
       width: 100,
-      pos: {
-          x: 0,
-          y: 0
-      },
-      offset: { //还没实现
-          x: 0,
-          y: 0
-      },
-      margin: {
-          top: 5, right: 0, bottom: 5, left: 0
-      }, //以上部分是所有组件后续都要实现的
+      //以上部分是所有组件后续都要实现的
 
       range: { //0-1
           start: 0,
@@ -22797,6 +22815,8 @@
 
           var _this = possibleConstructorReturn$1(this, (dataZoom.__proto__ || Object.getPrototypeOf(dataZoom)).call(this, opt, app));
 
+          _this.name = "datazoom";
+
           _this._cloneChart = null;
 
           _this.count = 1; //把w 均为为多少个区间， 同样多节点的line 和  bar， 这个count相差一
@@ -22811,10 +22831,6 @@
           _this._btnLeft = null;
           _this._btnRight = null;
           _this._underline = null;
-
-          //预设默认的opt.dataZoom
-          _$1.extend(true, _this, defaultProps, opt);
-          _this._layout();
 
           _this.sprite = new canvax.Display.Sprite({
               id: "dataZoom",
@@ -22835,6 +22851,10 @@
 
           app.stage.addChild(_this.sprite);
 
+          //预设默认的opt.dataZoom
+          _$1.extend(true, _this, defaultProps, opt);
+          _this.layout();
+
           return _this;
       }
 
@@ -22842,23 +22862,16 @@
 
 
       createClass$2(dataZoom, [{
-          key: "_layout",
-          value: function _layout() {
+          key: "layout",
+          value: function layout() {
               var app = this.app;
               if (this.position == "bottom") {
                   //目前dataZoom是固定在bottom位置的
                   //_getDataZoomOpt中会矫正x
-                  this.pos = {
-                      x: 0, //x在 _getDataZoomOpt 中计算
-                      y: app.height - (this.height + app.padding.bottom + this.margin.bottom)
-                  };
+                  this.pos.y = app.height - (this.height + app.padding.bottom + this.margin.bottom);
                   app.padding.bottom += this.height + this.margin.top + this.margin.bottom;
-              }
-              if (this.position == "top") {
-                  this.pos = {
-                      x: 0, //x在 _getDataZoomOpt 中计算
-                      y: app.padding.top + this.margin.top
-                  };
+              }            if (this.position == "top") {
+                  this.pos.y = app.padding.top + this.margin.top;
                   app.padding.top += this.height + this.margin.top + this.margin.bottom;
               }        }
       }, {
@@ -22955,6 +22968,7 @@
 
               var app = this.app;
               var coordInfo = app._coord.getSizeAndOrigin();
+              var me = this;
 
               //初始化 datazoom 模块
               _$1.extend(true, this, {
@@ -22964,14 +22978,16 @@
                       //y: 0 // opt中有传入  app._coord.origin.y + app._coord._xAxis.height
                   },
                   dragIng: function dragIng(range) {
-                      var trigger = {
-                          name: "dataZoom",
-                          left: app.dataFrame.range.start - range.start,
-                          right: range.end - app.dataFrame.range.end
-                      };
 
                       _$1.extend(app.dataFrame.range, range);
 
+                      var trigger = {
+                          comp: me,
+                          mesg: {
+                              left: app.dataFrame.range.start - range.start,
+                              right: range.end - app.dataFrame.range.end
+                          }
+                      };
                       //不想要重新构造dataFrame，所以第一个参数为null
                       app.resetData(null, trigger);
                       app.fire("dataZoomDragIng");
@@ -22999,6 +23015,7 @@
               this.widget();
               this._setLines();
               this.setZoomBg();
+              this.setPosition();
           }
       }, {
           key: "destroy",
@@ -23684,11 +23701,11 @@
       function Tips(opt, app) {
           classCallCheck$2(this, Tips);
 
-          var _this = possibleConstructorReturn$1(this, (Tips.__proto__ || Object.getPrototypeOf(Tips)).call(this));
+          var _this = possibleConstructorReturn$1(this, (Tips.__proto__ || Object.getPrototypeOf(Tips)).call(this, opt, app));
 
-          _this.app = app;
+          _this.name = "tips";
 
-          _this.tipDomContainer = app.canvax.domView;
+          _this.tipDomContainer = _this.app.canvax.domView;
           _this.cW = 0; //容器的width
           _this.cH = 0; //容器的height
 
@@ -23722,14 +23739,18 @@
           _this.pointerAnim = true;
           _this._tipsPointer = null;
 
-          _$1.extend(true, _this, opt);
           _this.sprite = new canvax.Display.Sprite({
               id: "TipSprite"
           });
-          var self = _this;
+          _this.app.stage.addChild(_this.sprite);
+
+          var me = _this;
           _this.sprite.on("destroy", function () {
-              self._tipDom = null;
+              me._tipDom = null;
           });
+
+          _$1.extend(true, _this, opt);
+
           return _this;
       }
 
@@ -24062,18 +24083,6 @@
                   el.context.x = x;
                   el.context.y = y;
               }
-          }
-      }], [{
-          key: "register",
-          value: function register(opt, app) {
-              //所有的tips放在一个单独的tips中
-              var _tips = new this(opt, app);
-              app.stage.addChild(_tips.sprite);
-              app.components.push({
-                  type: "tips",
-                  id: "tips",
-                  plug: _tips
-              });
           }
       }]);
       return Tips;
@@ -24445,11 +24454,12 @@
       function waterMark(opt, app) {
           classCallCheck$2(this, waterMark);
 
-          var _this = possibleConstructorReturn$1(this, (waterMark.__proto__ || Object.getPrototypeOf(waterMark)).call(this));
+          var _this = possibleConstructorReturn$1(this, (waterMark.__proto__ || Object.getPrototypeOf(waterMark)).call(this, opt, app));
 
-          _this.app = app;
-          _this.width = app.width;
-          _this.height = app.height;
+          _this.name = "watermark";
+
+          _this.width = _this.app.width;
+          _this.height = _this.app.height;
 
           _this.text = "chartx";
           _this.fontSize = 20;
@@ -24464,6 +24474,7 @@
           _this.spripte = new canvax.Display.Sprite({
               id: "watermark"
           });
+          _this.app.stage.addChild(_this.spripte);
           _this.draw();
           return _this;
       }
@@ -24504,12 +24515,6 @@
                       this.spripte.addChild(_textEl);
                   }
               }
-          }
-      }], [{
-          key: "register",
-          value: function register(opt, app) {
-              var _water = new this(opt, app);
-              app.stage.addChild(_water.spripte);
           }
       }]);
       return waterMark;

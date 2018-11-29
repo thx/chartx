@@ -11,10 +11,12 @@ export default class waterMark extends Component
 {
     constructor( opt , app )
     {
-        super();
-        this.app = app;
-        this.width = app.width;
-        this.height = app.height;
+        super( opt , app );
+        
+        this.name = "watermark";
+
+        this.width = this.app.width;
+        this.height = this.app.height;
 
         this.text = "chartx";
         this.fontSize = 20;
@@ -29,15 +31,9 @@ export default class waterMark extends Component
         this.spripte = new Canvax.Display.Sprite({
             id : "watermark"
         });
+        this.app.stage.addChild( this.spripte );
         this.draw();
     }
-
-    static register( opt , app )
-    {
-        var _water = new this( opt, app );
-        app.stage.addChild( _water.spripte );
-    }
-
 
     draw()
     {

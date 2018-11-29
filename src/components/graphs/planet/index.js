@@ -343,30 +343,30 @@ export default class PlanetGraphs extends GraphsBase
 
     //graphs方法
 
-    show( field , legendData)
+    show( field , trigger )
     {
-        this.getAgreeNodeData( legendData, function( data ){
+        this.getAgreeNodeData( trigger, function( data ){
             data.nodeElement && (data.nodeElement.context.visible = true);
             data.labelElement && (data.labelElement.context.visible = true);
         } );
     }
 
-    hide( field , legendData)
+    hide( field , trigger)
     {
-        this.getAgreeNodeData( legendData, function( data ){
+        this.getAgreeNodeData( trigger, function( data ){
             data.nodeElement && (data.nodeElement.context.visible = false);
             data.labelElement && (data.labelElement.context.visible = false);
         } );
     }
 
-    getAgreeNodeData( legendData , callback)
+    getAgreeNodeData( trigger , callback)
     {
         var me = this;
         _.each( this._ringGroups, function( _g ){
             _.each( _g._rings , function( ring , i ){
                 _.each( ring.planets, function( data , ii){
                     var rowData = data.rowData;
-                    if( legendData.name == rowData[ legendData.field ] ){
+                    if( trigger.mesg.name == rowData[ trigger.mesg.field ] ){
                         //这个数据符合
                         //data.nodeElement.context.visible = false;
                         //data.labelElement.context.visible = false;

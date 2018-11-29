@@ -143,16 +143,10 @@ export default class Chart extends Canvax.Event.EventDispatcher
                 };
 
                 _.each( _comp, function( compOpt ){
-                    //这里开始mount组件进来
-                    
+
                     var compConstructor = me.componentModules.getComponentModule( _p, compOpt.type );
                     var _comp = new compConstructor( compOpt, me );
                     me.components.push( _comp );
-                    /*
-                    if( compConstructor && compConstructor.register ){
-                        compConstructor.register( compOpt, me );
-                    };
-                    */
                     
                 } );
                 
@@ -425,10 +419,10 @@ export default class Chart extends Canvax.Event.EventDispatcher
     /*
      * 只响应数据的变化，不涉及配置变化
      * 
-     * @dataTrigger 一般是触发这个data reset的一些场景数据，
+     * @trigger 一般是触发这个data reset的一些场景数据，
      * 比如如果是 datazoom 触发的， 就会有 trigger数据{ name:'datazoom', left:1,right:1 }
      */
-    resetData(data , dataTrigger)
+    resetData(data , trigger)
     {
         var me = this;
 
@@ -446,13 +440,13 @@ export default class Chart extends Canvax.Event.EventDispatcher
         };
         
         if( this._coord ){
-            this._coord.resetData( this.dataFrame , dataTrigger);
+            this._coord.resetData( this.dataFrame , trigger);
         };
         _.each( this._graphs, function( _g ){
-            _g.resetData( me.dataFrame , dataTrigger);
+            _g.resetData( me.dataFrame , trigger);
         } );
 
-        this.componentsReset( dataTrigger );
+        this.componentsReset( trigger );
 
         this.fire("resetData");
     }
@@ -464,27 +458,26 @@ export default class Chart extends Canvax.Event.EventDispatcher
     }
 
 
-    //所有plug触发更新
+    //TODO:除开 coord,graphs 其他所有plug触发更新其实后续也要统一
     componentsReset( trigger )
     {
         var me = this;
         _.each(this.components , function( p , i ){
-            if( trigger && trigger.name == p.type ){
+            if( trigger && trigger.comp && trigger.comp.__cid == p.__cid ){
                 //如果这次reset就是由自己触发的，那么自己这个components不需要reset，负责观察就好
                 return;
             };
-            p.plug.reset && p.plug.reset( me[ p.type ] || {} , me.dataFrame);
-        }); 
+            p.reset && p.reset( me[ p.type ] || {} , me.dataFrame);
+        });
     }
 
 
-    getComponentsByType( type )
-    {
+    getComponentsByName( name ){
         var arr = [];
         _.each( this.components, function( c ){
-            if( c.type == type ){
-                arr.push( c.plug )
-            }
+            if( c.name == name ){
+                arr.push( c )
+            };
         } );
         return arr;
     }
@@ -493,12 +486,12 @@ export default class Chart extends Canvax.Event.EventDispatcher
     {
         var comp;
         _.each( this.components, function( c ){
-            if( c.id == id ){
+            if( c.id && c.id == id ){
                 comp = c;
                 return false;
             }
         } );
-        return comp ? comp.plug : null;
+        return comp;
     }
     //插件相关代码end
 
@@ -595,22 +588,24 @@ export default class Chart extends Canvax.Event.EventDispatcher
         return data;
     }
 
-    show( field , legendData)
+    show( field , trigger )
     {
         var me = this;
-        this._coord.addField( field , legendData);
+        this._coord.show( field, trigger );
         _.each( this._graphs, function( _g ){
-            _g.show( field , legendData);
+            _g.show( field , trigger);
         } );
+        this.componentsReset( trigger );
     }
 
-    hide( field , legendData)
+    hide( field , trigger)
     {
         var me = this;
-        this._coord.removeField( field , legendData );
+        this._coord.hide( field ,trigger );
         _.each( this._graphs, function( _g ){
-            _g.hide( field , legendData );
+            _g.hide( field , trigger );
         } );
+        this.componentsReset( trigger );
     }
 
 
@@ -618,7 +613,8 @@ export default class Chart extends Canvax.Event.EventDispatcher
     {
         var me = this;
         this.on("panstart mouseover", function(e) {
-            var _tips = me.getComponentById("tips");
+            debugger
+            var _tips = me.getComponentsByName("tips")[0];
             if ( _tips ) {
                 me._setTipsInfo.apply(me, [e]);
                 _tips.show(e);
@@ -626,7 +622,7 @@ export default class Chart extends Canvax.Event.EventDispatcher
             };
         });
         this.on("panmove mousemove", function(e) {
-            var _tips = me.getComponentById("tips");
+            var _tips = me.getComponentsByName("tips")[0];
             if ( _tips ) {
                 me._setTipsInfo.apply(me, [e]);
                 _tips.move(e);
@@ -636,14 +632,14 @@ export default class Chart extends Canvax.Event.EventDispatcher
         this.on("panend mouseout", function(e) {
             //如果e.toTarget有货，但是其实这个point还是在induce 的范围内的
             //那么就不要执行hide，顶多只显示这个点得tips数据
-            var _tips = me.getComponentById("tips");
+            var _tips = me.getComponentsByName("tips")[0];
             if ( _tips && !( e.toTarget && me._coord && me._coord.induce && me._coord.induce.containsPoint( me._coord.induce.globalToLocal(e.target.localToGlobal(e.point) )) )) {
                 _tips.hide(e);
                 me._tipsPointerHideAtAllGraphs( e );
             };
         });
         this.on("tap", function(e) {
-            var _tips = me.getComponentById("tips");
+            var _tips = me.getComponentsByName("tips")[0];
             if ( _tips ) {
                 _tips.hide(e);
                 me._setTipsInfo.apply(me, [e]);

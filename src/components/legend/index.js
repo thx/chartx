@@ -10,7 +10,7 @@ export default class Legend extends Component
     {
         super(opt, app);
 
-        this.type = 'legend';
+        this.name = "legend";
 
         /* data的数据结构为
         [
@@ -19,9 +19,6 @@ export default class Legend extends Component
         ]
         */
         this.data = this._getLegendData(opt);
-
-        this.width = 0;
-        this.height = 0;
 
         //一般来讲，比如柱状图折线图等，是按照传入的field来分组来设置图例的，那么legend.field都是null
         //但是还有一种情况就是，是按照同一个field中的数据去重后来分组的，比如散点图中sex属性的男女两个分组作为图例，
@@ -61,17 +58,28 @@ export default class Legend extends Component
         _.extend(true, this , {
             icon : {
                 onChecked : function( obj ){
-                    app.show( obj.name , obj );
-                    app.componentsReset({ name : "legend" });
+                    app.show( obj.name , {
+                        comp : this,
+                        mesg : obj
+                    } );
                 },
                 onUnChecked : function( obj ){
-                    app.hide( obj.name , obj );
-                    app.componentsReset({ name : "legend" });
+                    app.hide( obj.name , {
+                        comp : this,
+                        mesg : obj
+                    } );
                 }
             }
         }, opt );
-        debugger
-        this._layout();
+
+        if( !opt.direction && opt.position ){
+            if( this.position == "left" || this.position == "right" ){
+                this.direction = 'v';
+            } else {
+                this.direction = 'h';
+            };
+        };
+
         this.sprite = new Canvax.Display.Sprite({
             id : "LegendSprite",
             context: {
@@ -79,7 +87,12 @@ export default class Legend extends Component
                 y: this.pos.y
             }
         });
+        this.app.stage.addChild( this.sprite );
+
         this.widget();
+
+        //图例是需要自己绘制完成后，才能拿到高宽来设置自己的位置
+        this.layout();
 
     }
 
@@ -97,38 +110,30 @@ export default class Legend extends Component
         return legendData || [];
     }
 
-    _layout(){
+    layout(){
         let app = this.app;
-        if( !this._opt.direction && this._opt.position ){
-            if( this.position == "left" || this.position == "right" ){
-                this.direction = 'v';
-            } else {
-                this.direction = 'h';
-            };
-        };
 
         if( this.direction == "h" ){
-            app.padding[ this.position ] += this.height;
+            app.padding[ this.position ] += (this.height+this.margin.top+this.margin.bottom);
         } else {
-            app.padding[ this.position ] += this.width;
+            app.padding[ this.position ] += (this.width+this.margin.left+this.margin.right);
         };
 
         //default right
         var pos = {
-            x : app.width - app.padding.right,
-            y : app.padding.top
+            x : app.width - app.padding.right + this.margin.left,
+            y : app.padding.top + this.margin.top
         };
         if( this.position == "left" ){
-            pos.x = app.padding.left - this.width;
+            pos.x = app.padding.left - this.width + this.margin.left;
         };
         if( this.position == "top" ){
-            pos.x = app.padding.left;
-            pos.y = app.padding.top - this.height;
+            pos.x = app.padding.left + this.margin.left;
+            pos.y = app.padding.top - this.height - this.margin.top;
         };
         if( this.position == "bottom" ){
-            pos.x = app.padding.left;
-            //TODO: this.icon.height 这里要后续拿到单个图例的高，现在默认26
-            pos.y = app.height - app.padding.bottom + 26/2;
+            pos.x = app.padding.left + this.margin.left;
+            pos.y = app.height - app.padding.bottom + this.margin.bottom;
         };
 
         this.pos = pos;
@@ -139,11 +144,10 @@ export default class Legend extends Component
     {
         if( this.app._coord && this.app._coord.type == 'rect' ){
             if( this.position == "top" || this.position == "bottom" ){
-                var x = this.app._coord.getSizeAndOrigin().origin.x;
-                this.sprite.context.x = x + this.icon.radius
-            }
+                this.pos.x = this.app._coord.getSizeAndOrigin().origin.x + this.icon.radius;
+            };
         };
-        
+        this.setPosition();
     }
 
     widget()
@@ -233,11 +237,13 @@ export default class Legend extends Component
                 height = Math.max( height , y );
             } else {
                 //横向排布
+
                 if( x + itemW > viewWidth ){
                     if( me.icon.height * (rows+1) > viewHeight*0.3 ){
                         isOver = true;
                         return;
                     };
+                    debugger
                     width = Math.max( width, x );
                     x = 0;
                     rows++;    

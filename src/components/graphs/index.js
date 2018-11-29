@@ -7,6 +7,8 @@ export default class GraphsBase extends Component
     {
         super( opt, app );
 
+        this.name = "graphs";
+
         //这里所有的opts都要透传给 group
         this._opt = opt || {};
         this.app = app;

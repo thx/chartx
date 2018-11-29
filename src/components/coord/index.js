@@ -7,6 +7,8 @@ export default class coorBase extends Component
 	constructor(opt, app){
         super(opt, app);
 
+        this.name = "coord";
+
         this._opt = opt;
         this.app  = app;
         this.dataFrame = this.app.dataFrame;
@@ -93,12 +95,12 @@ export default class coorBase extends Component
         return arr;
     }
 
-    removeField( field )
+    hide( field )
     {
         this.changeFieldEnabled( field );
     }
 
-    addField( field )
+    show( field )
     {
         this.changeFieldEnabled( field );
     }

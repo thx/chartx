@@ -9,17 +9,7 @@ const Rect = Canvax.Shapes.Rect;
 const defaultProps = {
     height : 26,
     width  : 100,
-    pos : {
-        x: 0,
-        y: 0
-    },
-    offset : { //还没实现
-        x: 0,
-        y: 0
-    },
-    margin: {
-        top: 5, right: 0, bottom: 5, left: 0
-    }, //以上部分是所有组件后续都要实现的
+    //以上部分是所有组件后续都要实现的
 
     range : {//0-1
         start: 0,
@@ -67,6 +57,8 @@ export default class dataZoom extends Component
 	{
         super(opt, app);
 
+        this.name = "datazoom";
+
         this._cloneChart = null;
         
         this.count = 1; //把w 均为为多少个区间， 同样多节点的line 和  bar， 这个count相差一
@@ -82,10 +74,6 @@ export default class dataZoom extends Component
         this._btnRight = null;
         this._underline = null;
 
-        //预设默认的opt.dataZoom
-        _.extend( true, this, defaultProps , opt);
-        this._layout();
-        
         this.sprite = new Canvax.Display.Sprite({
             id : "dataZoom",
             context: {
@@ -105,30 +93,30 @@ export default class dataZoom extends Component
 
         app.stage.addChild( this.sprite );
 
+        //预设默认的opt.dataZoom
+        _.extend( true, this, defaultProps , opt);
+        this.layout();
+
 	}
 
+    
     //datazoom begin
-    _layout()
+    layout()
     {
         let me = this;
         let app = this.app;
         if( this.position == "bottom" ){
             //目前dataZoom是固定在bottom位置的
             //_getDataZoomOpt中会矫正x
-            this.pos = {
-                x : 0, //x在 _getDataZoomOpt 中计算
-                y : app.height - (this.height + app.padding.bottom + this.margin.bottom)
-            };
+            this.pos.y = app.height - (this.height + app.padding.bottom + this.margin.bottom);
             app.padding.bottom += (this.height + this.margin.top + this.margin.bottom);
         };
-
         if( this.position == "top" ){
-            this.pos = {
-                x : 0, //x在 _getDataZoomOpt 中计算
-                y : app.padding.top + this.margin.top
-            };
+            this.pos.y = app.padding.top + this.margin.top;
             app.padding.top += (this.height + this.margin.top + this.margin.bottom);
         };
+
+        
     }
  
 
@@ -226,6 +214,7 @@ export default class dataZoom extends Component
 
         var app = this.app;
         var coordInfo = app._coord.getSizeAndOrigin();
+        var me = this;
         
         //初始化 datazoom 模块
         _.extend(true, this, {
@@ -235,14 +224,16 @@ export default class dataZoom extends Component
                 //y: 0 // opt中有传入  app._coord.origin.y + app._coord._xAxis.height
             },
             dragIng: function(range) {
-                var trigger = {
-                    name : "dataZoom",
-                    left :  app.dataFrame.range.start - range.start,
-                    right : range.end - app.dataFrame.range.end
-                };
 
                 _.extend( app.dataFrame.range , range );
                 
+                var trigger = {
+                    comp : me,
+                    mesg : {
+                        left :  app.dataFrame.range.start - range.start,
+                        right : range.end - app.dataFrame.range.end
+                    }
+                };
                 //不想要重新构造dataFrame，所以第一个参数为null
                 app.resetData( null , trigger );
                 app.fire("dataZoomDragIng");
@@ -257,7 +248,6 @@ export default class dataZoom extends Component
 
     draw( opt )
     {
-       
 
         this._setDataZoomOpt();
         
@@ -270,6 +260,7 @@ export default class dataZoom extends Component
         this.widget();
         this._setLines();
         this.setZoomBg();
+        this.setPosition();
     }
 
     destroy()

@@ -8,11 +8,11 @@ const Line = Canvax.Shapes.Line;
 
 export default class Tips extends Component {
     constructor(opt, app) {
-        super();
+        super(opt, app);
 
-        this.app = app;
+        this.name = "tips"
 
-        this.tipDomContainer = app.canvax.domView;
+        this.tipDomContainer = this.app.canvax.domView;
         this.cW = 0;  //容器的width
         this.cH = 0;  //容器的height
 
@@ -46,25 +46,19 @@ export default class Tips extends Component {
         this.pointerAnim = true;
         this._tipsPointer = null;
 
-        _.extend(true, this, opt);
+        
         this.sprite = new Canvax.Display.Sprite({
             id: "TipSprite"
         });
-        var self = this;
-        this.sprite.on("destroy", function () {
-            self._tipDom = null;
-        });
-    }
+        this.app.stage.addChild(this.sprite);
 
-    static register(opt, app) {
-        //所有的tips放在一个单独的tips中
-        var _tips = new this(opt, app);
-        app.stage.addChild(_tips.sprite);
-        app.components.push({
-            type: "tips",
-            id: "tips",
-            plug: _tips
+        var me = this;
+        this.sprite.on("destroy", function () {
+            me._tipDom = null;
         });
+
+        _.extend(true, this, opt);
+        
     }
 
     show(e) {
