@@ -425,6 +425,24 @@
       return _$1.isArray(obj) ? obj.slice() : _$1.extend(true, {}, obj);
   };
 
+  //********补存一些数学常用方法,暂放在这里文件下,后期多了单独成立一个类库  */
+  // compute euclidian modulo of m % n
+  // https://en.wikipedia.org/wiki/Modulo_operation
+  _$1.euclideanModulo = function (n, m) {
+      return (n % m + m) % m;
+  };
+
+  _$1.DEG2RAD = Math.PI / 180;
+  _$1.RAD2DEG = 180 / Math.PI;
+
+  _$1.degToRad = function (degrees) {
+      return degrees * _$1.DEG2RAD;
+  };
+
+  _$1.radToDeg = function (radians) {
+      return radians * _$1.RAD2DEG;
+  };
+
   function normalizeTickInterval(interval, magnitude) {
       var normalized, i;
       // var multiples = [1, 2, 2.5, 5, 10];
@@ -1865,6 +1883,365 @@
       hexTostring: hexTostring,
       rgbTohex: rgbTohex
   });
+
+  var aRound = 360; //一圈的度数
+  var Cos = Math.cos;
+  var Sin = Math.sin;
+
+  var Polar = function () {
+      function Polar() {
+          var opt = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+          var dataFrame = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [];
+          classCallCheck(this, Polar);
+
+          this._opt = _$1.clone(opt);
+          this.dataFrame = dataFrame;
+
+          this.axisLength = 1;
+
+          this.dataOrg = [];
+
+          this.startAngle = this._opt.startAngle;
+          this.allAngles = this._opt.allAngles;
+          this.sort = this._opt.sort;
+
+          this.layoutData = []; //和dataSection一一对应的，每个值的pos,agend,dregg,centerPos
+
+
+          this.maxRadius = 0; //最大半径值
+          this.minRadius = 0; //最小半径值 
+      }
+
+      createClass(Polar, [{
+          key: "calculateProps",
+          value: function calculateProps() {
+              var _this = this;
+
+              var axisLength = 0;
+              var percentage = 0;
+              var currentAngle = 0;
+              var opt = this._opt;
+              var angle = void 0,
+                  endAngle = void 0,
+                  cosV = void 0,
+                  sinV = void 0,
+                  midAngle = void 0,
+                  quadrant = void 0;
+              var percentFixedNum = 2;
+
+              var outRadius = opt.node.outRadius;
+              var innerRadius = opt.node.innerRadius;
+              var moveDis = opt.node.moveDis;
+
+              this.layoutData.forEach(function (item, i) {
+                  if (!item.enabled) return;
+                  axisLength += isNaN(+item.value) ? 0 : +item.value;
+
+                  if (item.radiusField) {
+                      _this.maxRadius = Math.max(item.radiusValue, axisLength);
+                      _this.minRadius = Math.min(item.radiusValue, axisLength);
+                  }
+              });
+
+              this.axisLength = axisLength;
+
+              if (axisLength > 0) {
+
+                  //原始算法
+                  // currentAngle = + opt.startAngle % 360;
+                  // limitAngle = opt.allAngles + me.startAngle % me.allAngles;
+
+                  //新的算法
+                  //这里只是计算每个扇区的初始位置,所以这里求模就可以啦
+                  currentAngle = _$1.euclideanModulo(this.startAngle, aRound);
+                  // opt.allAngles = opt.allAngles > 0 ? opt.allAngles : aRound;
+                  // limitAngle = opt.allAngles + _.euclideanModulo(opt.startAngle, opt.allAngles);
+
+                  this.layoutData.forEach(function (item, i) {
+                      percentage = item.value / axisLength;
+                      //enabled为false的sec，比率就设置为0
+                      if (!item.enabled) {
+                          percentage = 0;
+                      }
+                      angle = _this.allAngles * percentage;
+                      //旧的算法
+                      // endAngle = currentAngle + angle > limitAngle ? limitAngle : me.currentAngle + angle;
+                      endAngle = currentAngle + angle;
+                      midAngle = currentAngle + angle * 0.5;
+
+                      cosV = Cos(_$1.degToRad(midAngle));
+                      sinV = Sin(_$1.degToRad(midAngle));
+
+                      cosV = cosV.toFixed(5);
+                      sinV = sinV.toFixed(5);
+                      quadrant = _this.getAuadrant(midAngle);
+
+                      //如果用户在配置中制定了半径字段,这里需要计算相对的半径比例值
+                      if (!!item.radiusField) {
+                          // var _rr = Number(item.rowData[opt.node.radius]);
+                          outRadius = parseInt((opt.node.outRadius - opt.node.innerRadius) * ((item.radiusValue - _this.minRadius) / (_this.maxRadius - _this.minRadius)) + opt.node.innerRadius);
+                      }_$1.extend(item, {
+                          outRadius: outRadius,
+                          innerRadius: innerRadius,
+                          startAngle: currentAngle, //起始角度
+                          endAngle: endAngle, //结束角度
+                          midAngle: midAngle, //中间角度
+
+                          moveDis: moveDis,
+
+                          outOffsetx: moveDis * 0.7 * cosV, //focus的事实外扩后圆心的坐标x
+                          outOffsety: moveDis * 0.7 * sinV, //focus的事实外扩后圆心的坐标y
+
+                          centerx: outRadius * cosV,
+                          centery: outRadius * sinV,
+                          outx: (outRadius + moveDis) * cosV,
+                          outy: (outRadius + moveDis) * sinV,
+                          edgex: (outRadius + moveDis) * cosV,
+                          edgey: (outRadius + moveDis) * sinV,
+
+                          orginPercentage: percentage,
+                          percentage: (percentage * 100).toFixed(percentFixedNum),
+
+                          quadrant: quadrant, //象限
+                          isRightSide: quadrant == 1 || quadrant == 4 ? 1 : 0,
+                          cosV: cosV,
+                          sinV: sinV
+                      });
+
+                      currentAngle += angle;
+                  });
+              }
+          }
+          /**
+           *  重设数据后,需要调用setDataFrame与calculateProps 重新计算layoutData
+           * @param {ArryObject} dataFrame 
+           */
+
+      }, {
+          key: "resetData",
+          value: function resetData(dataFrame) {
+              this.dataFrame = dataFrame || [];
+
+              this.axisLength = 1;
+
+              this.dataOrg = [];
+              this.startAngle = this._opt.startAngle || -90;
+              this.allAngles = this._opt.allAngles || 360;
+
+              this.layoutData = [];
+          }
+      }, {
+          key: "setOption",
+          value: function setOption() {
+              var opt = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+              Object.assign(this._opt, opt);
+              this.startAngle = this._opt.startAngle;
+              this.allAngles = this._opt.allAngles;
+              this.sort = this._opt.sort;
+          }
+      }, {
+          key: "setDataFrame",
+          value: function setDataFrame(dataFrame) {
+              var _this2 = this;
+
+              var data = [];
+              var opt = this._opt;
+              var field = opt.field;
+              var labelField = opt.groupField || opt.label.field || opt.field;
+              var radiusField = opt.node.radius;
+
+              dataFrame = dataFrame || this.dataFrame;
+              this.dataFrame = dataFrame;
+
+              this.dataOrg = [];
+
+              for (var i = 0, l = dataFrame.length; i < l; i++) {
+                  var rowData = dataFrame.getRowDataAt(i);
+
+                  var layoutData = {
+                      rowData: rowData, //把这一行数据给到layoutData引用起来
+                      enabled: true, //是否启用，显示在列表中
+
+                      value: rowData[field],
+                      label: rowData[labelField],
+                      iNode: i
+                  };
+
+                  this.dataOrg.push(rowData[field]);
+
+                  if (this._isFiled(radiusField, layoutData)) {
+                      layoutData.radiusField = radiusField;
+                      layoutData.radiusValue = rowData[radiusField];
+                  }
+                  data.push(layoutData);
+              }
+              if (this.sort) {
+                  this.dataOrg = [];
+                  data.sort(function (a, b) {
+                      if (_this2.sort == 'asc') {
+                          return a.value - b.value;
+                      } else {
+                          return b.value - a.value;
+                      }
+                  });
+
+                  //重新设定下ind
+                  _$1.each(data, function (d, i) {
+                      d.iNode = i;
+                      _this2.dataOrg.push(d);
+                  });
+              }
+              this.layoutData = data;
+              return data;
+          }
+      }, {
+          key: "getLayoutData",
+          value: function getLayoutData() {
+              return this.layoutData || [];
+          }
+      }, {
+          key: "_isFiled",
+          value: function _isFiled(field, layoutData) {
+              return field && _$1.isString(field) && field in layoutData.rowData;
+          }
+      }, {
+          key: "getAuadrant",
+          value: function getAuadrant(ang) {
+              //获取象限
+
+              ang = _$1.euclideanModulo(ang, aRound);
+              var angleRatio = parseInt(ang / 90);
+              var _quadrant = 0;
+              switch (angleRatio) {
+                  case 0:
+                      _quadrant = 1;
+                      break;
+                  case 1:
+                      _quadrant = 2;
+                      break;
+                  case 2:
+                      _quadrant = 3;
+                      break;
+                  case 3:
+                  case 4:
+                      _quadrant = 4;
+                      break;
+              }
+              return _quadrant;
+          }
+
+          /**
+           * 通过值或者索引返回数据集对象
+           * @param {Object} opt {val:xxx} 或 {ind:xxx} 
+           */
+
+      }, {
+          key: "_getLayoutDataOf",
+          value: function _getLayoutDataOf(opt) {
+              //先提供 具体值 和 索引的计算
+              var props = [{ val: "value" }, { ind: "iNode" }];
+              var prop = props[Object.keys(opt)[0]];
+
+              var layoutData;
+              _$1.each(this.layoutData, function (item) {
+                  if (item[prop] === opt[prop]) {
+                      layoutData = item;
+                  }
+              });
+
+              return layoutData || {};
+          }
+      }, {
+          key: "getRadiansAtR",
+          value: function getRadiansAtR() {
+              //基类不实现
+          }
+      }, {
+          key: "getPointsOfR",
+          value: function getPointsOfR(r, angleList) {
+              var points = [];
+              _$1.each(angleList, function (_a) {
+                  //弧度
+                  var _r = Math.PI * _a / 180;
+                  var point = Polar.getPointInRadianOfR(_r, r);
+                  points.push(point);
+              });
+              return points;
+          }
+      }], [{
+          key: "filterPointsInRect",
+          value: function filterPointsInRect(points, origin, width, height) {
+              for (var i = 0, l = points.length; i < l; i++) {
+                  if (!Polar.checkPointInRect(points[i], origin, width, height)) {
+                      //该点不在root rect范围内，去掉
+                      points.splice(i, 1);
+                      i--, l--;
+                  }
+              }return points;
+          }
+      }, {
+          key: "checkPointInRect",
+          value: function checkPointInRect(p, origin, width, height) {
+              var _tansRoot = { x: p.x + origin.x, y: p.y + origin.y };
+              return !(_tansRoot.x < 0 || _tansRoot.x > width || _tansRoot.y < 0 || _tansRoot.y > height);
+          }
+
+          //检查由n个相交点分割出来的圆弧是否在rect内
+
+      }, {
+          key: "checkArcInRect",
+          value: function checkArcInRect(arc, r, origin, width, height) {
+              var start = arc[0];
+              var to = arc[1];
+              var differenceR = to.radian - start.radian;
+              if (to.radian < start.radian) {
+                  differenceR = Math.PI * 2 + to.radian - start.radian;
+              }var middleR = (start.radian + differenceR / 2) % (Math.PI * 2);
+              return Polar.checkPointInRect(Polar.getPointInRadianOfR(middleR, r), origin, width, height);
+          }
+
+          //获取某个点相对圆心的弧度值
+
+      }, {
+          key: "getRadianInPoint",
+          value: function getRadianInPoint(point) {
+              var pi2 = Math.PI * 2;
+              return (Math.atan2(point.y, point.x) + pi2) % pi2;
+          }
+
+          //获取某个弧度方向，半径为r的时候的point坐标点位置
+
+      }, {
+          key: "getPointInRadianOfR",
+          value: function getPointInRadianOfR(radian, r) {
+              var pi = Math.PI;
+              var x = Math.cos(radian) * r;
+              if (radian == pi / 2 || radian == pi * 3 / 2) {
+                  //90度或者270度的时候
+                  x = 0;
+              }var y = Math.sin(radian) * r;
+              if (radian % pi == 0) {
+                  y = 0;
+              }return {
+                  x: x,
+                  y: y
+              };
+          }
+      }, {
+          key: "getROfNum",
+          value: function getROfNum(num, dataSection, width, height) {
+              var r = 0;
+              var maxNum = _$1.max(dataSection);
+              var minNum = 0; //Math.min( this.rAxis.dataSection );
+              var maxR = parseInt(Math.max(width, height) / 2);
+
+              r = maxR * ((num - minNum) / (maxNum - minNum));
+              return r;
+          }
+      }]);
+      return Polar;
+  }();
 
   var commonjsGlobal = typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
@@ -9755,18 +10132,7 @@
               //绘制除开coord graphs 以外的所有组件
               for (var i = 0, l = this.components.length; i < l; i++) {
                   var p = this.components[i];
-                  p.draw(opt);
-
-                  /*
-                  p.plug && p.plug.draw && p.plug.draw(  );
-                  p.plug.app = this;
-                  if( p.type == "once" ){
-                      this.components.splice( i, 1 );
-                      i--;
-                      //l--; l重新计算p.plug.draw 可能会改变components
-                  }
-                  l = this.components.length;
-                  */
+                  p.draw();
               }
               this._bindEvent();
 
@@ -10015,13 +10381,26 @@
               });
           }
       }, {
-          key: "getComponentsByName",
-          value: function getComponentsByName(name) {
+          key: "getComponent",
+          value: function getComponent(opt) {
+              return this.getComponents(opt)[0];
+          }
+      }, {
+          key: "getComponents",
+          value: function getComponents(opt) {
               var arr = [];
-              _$1.each(this.components, function (c) {
-                  if (c.name == name) {
-                      arr.push(c);
+              var expCount = 0;
+              for (var p in opt) {
+                  expCount++;
+              }
+              _$1.each(this.components, function (comp) {
+                  for (var p in opt) {
+                      if (JSON.stringify(comp[p]) == JSON.stringify(opt[p])) {
+                          expCount--;
+                      }                }                if (!expCount) {
+                      arr.push(comp);
                   }            });
+
               return arr;
           }
       }, {
@@ -10036,11 +10415,8 @@
               });
               return comp;
           }
-          //插件相关代码end
-
 
           //从graphs里面去根据opt做一一对比，比对成功为true
-          //getGraphsByType,getGraphById 可以逐渐淘汰
           //count为要查询的数量， 如果为1，则
 
       }, {
@@ -10057,7 +10433,7 @@
               for (var p in opt) {
                   expCount++;
               }
-              _$1.each(this._graphs, function (g) {
+              _$1.each(this.getComponents({ name: 'graphs' }), function (g) {
                   for (var p in opt) {
                       if (JSON.stringify(g[p]) == JSON.stringify(opt[p])) {
                           expCount--;
@@ -10068,27 +10444,13 @@
               return arr;
           }
 
-          //获取graphs列表根据type
-
-      }, {
-          key: "getGraphsByType",
-          value: function getGraphsByType(type) {
-              var arr = [];
-              _$1.each(this._graphs, function (g) {
-                  if (g.type == type) {
-                      arr.push(g);
-                  }
-              });
-              return arr;
-          }
-
           //获取graphs根据id
 
       }, {
           key: "getGraphById",
           value: function getGraphById(id) {
               var _g;
-              _$1.each(this._graphs, function (g) {
+              _$1.each(this.getComponents({ name: 'graphs' }), function (g) {
                   if (g.id == id) {
                       _g = g;
                       return false;
@@ -10141,7 +10503,7 @@
           key: "show",
           value: function show(field, trigger) {
               this._coord.show(field, trigger);
-              _$1.each(this._graphs, function (_g) {
+              _$1.each(this.getComponents({ name: 'graphs' }), function (_g) {
                   _g.show(field, trigger);
               });
               this.componentsReset(trigger);
@@ -10150,7 +10512,7 @@
           key: "hide",
           value: function hide(field, trigger) {
               this._coord.hide(field, trigger);
-              _$1.each(this._graphs, function (_g) {
+              _$1.each(this.getComponents({ name: 'graphs' }), function (_g) {
                   _g.hide(field, trigger);
               });
               this.componentsReset(trigger);
@@ -10160,15 +10522,14 @@
           value: function _bindEvent() {
               var me = this;
               this.on("panstart mouseover", function (e) {
-                  debugger;
-                  var _tips = me.getComponentsByName("tips")[0];
+                  var _tips = me.getComponent({ name: 'tips' });
                   if (_tips) {
                       me._setTipsInfo.apply(me, [e]);
                       _tips.show(e);
                       me._tipsPointerAtAllGraphs(e);
                   }            });
               this.on("panmove mousemove", function (e) {
-                  var _tips = me.getComponentsByName("tips")[0];
+                  var _tips = me.getComponent({ name: 'tips' });
                   if (_tips) {
                       me._setTipsInfo.apply(me, [e]);
                       _tips.move(e);
@@ -10177,13 +10538,13 @@
               this.on("panend mouseout", function (e) {
                   //如果e.toTarget有货，但是其实这个point还是在induce 的范围内的
                   //那么就不要执行hide，顶多只显示这个点得tips数据
-                  var _tips = me.getComponentsByName("tips")[0];
+                  var _tips = me.getComponent({ name: 'tips' });
                   if (_tips && !(e.toTarget && me._coord && me._coord.induce && me._coord.induce.containsPoint(me._coord.induce.globalToLocal(e.target.localToGlobal(e.point))))) {
                       _tips.hide(e);
                       me._tipsPointerHideAtAllGraphs(e);
                   }            });
               this.on("tap", function (e) {
-                  var _tips = me.getComponentsByName("tips")[0];
+                  var _tips = me.getComponent({ name: 'tips' });
                   if (_tips) {
                       _tips.hide(e);
                       me._setTipsInfo.apply(me, [e]);
@@ -10249,12 +10610,13 @@
           _this.enabled = false; //是否加载该组件
           _this._opt = opt;
           _this.app = app; //这个组件挂在哪个app上面（图表）
+
+          _this.width = 0;
+          _this.height = 0; //height 不包含margin
           _this.pos = {
               x: 0,
               y: 0
           };
-          _this.width = 0;
-          _this.height = 0; //height 不包含margin
           _this.margin = {
               top: 0, right: 0, bottom: 0, left: 0
           };
@@ -13172,14 +13534,14 @@
       return polarComponent;
   }(coorBase);
 
-  var Polar = function (_CoordBase) {
-      inherits$1(Polar, _CoordBase);
+  var Polar$1 = function (_CoordBase) {
+      inherits$1(Polar$$1, _CoordBase);
 
-      function Polar(node, data, opt, componentModules) {
-          classCallCheck$2(this, Polar);
+      function Polar$$1(node, data, opt, componentModules) {
+          classCallCheck$2(this, Polar$$1);
 
           //坐标系统
-          var _this = possibleConstructorReturn$1(this, (Polar.__proto__ || Object.getPrototypeOf(Polar)).call(this, node, data, opt, componentModules));
+          var _this = possibleConstructorReturn$1(this, (Polar$$1.__proto__ || Object.getPrototypeOf(Polar$$1)).call(this, node, data, opt, componentModules));
 
           _this.CoordComponents = polarComponent;
           _this._coord = null;
@@ -13192,7 +13554,7 @@
       //在CoordBase中被调用
 
 
-      createClass$2(Polar, [{
+      createClass$2(Polar$$1, [{
           key: "getLegendData",
           value: function getLegendData() {
               var legendData = [
@@ -13261,7 +13623,7 @@
               return opt;
           }
       }]);
-      return Polar;
+      return Polar$$1;
   }(coorBase);
 
   var GraphsBase = function (_Component) {
@@ -23002,7 +23364,7 @@
 
       }, {
           key: "draw",
-          value: function draw(opt) {
+          value: function draw() {
 
               this._setDataZoomOpt();
 
@@ -23033,7 +23395,7 @@
               var _preEnd = this.range.end;
 
               opt && _$1.extend(true, this, opt);
-              this._cloneChart = dataZoom._getCloneChart(); //cloneChart;
+              this._cloneChart = this._getCloneChart(); //cloneChart;
               this._computeAttrs(opt);
 
               if (_preCount != this.count || opt.range && (opt.range.start != _preStart || opt.range.end != _preEnd)) {
@@ -23420,18 +23782,16 @@
   var MarkLine = function (_Component) {
       inherits$1(MarkLine, _Component);
 
-      function MarkLine(opt, _yAxis) {
+      function MarkLine(opt, app) {
           classCallCheck$2(this, MarkLine);
 
-          var _this = possibleConstructorReturn$1(this, (MarkLine.__proto__ || Object.getPrototypeOf(MarkLine)).call(this, opt, _yAxis));
+          var _this = possibleConstructorReturn$1(this, (MarkLine.__proto__ || Object.getPrototypeOf(MarkLine)).call(this, opt, app));
 
-          _this._yAxis = _yAxis;
-          _this.w = 0;
-          _this.h = 0;
+          _this.name = "markline";
+
+          _this._yAxis = null;
+
           _this.field = null;
-          _this.origin = {
-              x: 0, y: 0
-          };
 
           _this.markTo = null; //默认给所有字段都现实一条markline，有设置的话，配置给固定的几个 field 显示markline
           _this.yVal = 0; //y 的值，可能是个function，均值计算就是个function
@@ -23459,58 +23819,95 @@
           _this._txt = null;
           _this._line = null;
 
-          opt && _$1.extend(true, _this, opt);
-
           _this.sprite = new Sprite$1();
+          _this.app.graphsSprite.addChild(_this.sprite);
 
-          _this.core = new Sprite$1({
-              context: {
-                  x: _this.origin.x,
-                  y: _this.origin.y
-              }
-          });
-
-          _this.sprite.addChild(_this.core);
+          opt && _$1.extend(true, _this, opt);
           return _this;
       }
 
-      //markLine begin
-
-
       createClass$2(MarkLine, [{
-          key: "_getYVal",
-
-          //markLine end
-
-          value: function _getYVal() {
-              var y = this.yVal;
-              if (_$1.isFunction(this.yVal)) {
-                  y = this.yVal(this);
-              }
-              return y;
-          }
-      }, {
-          key: "_getYPos",
-          value: function _getYPos() {
-              return -this._yAxis.getPosOfVal(this._getYVal());        }
-      }, {
-          key: "_getLabel",
-          value: function _getLabel() {
-              var str;
-              var yVal = this._getYVal();
-              if (_$1.isFunction(this.label.format)) {
-                  str = this.label.format(yVal, this);
-              } else {
-                  if (_$1.isString(this.label.text)) {
-                      str = this.label.text;
-                  } else {
-                      str = yVal;
-                  }            }            return str;
-          }
-      }, {
           key: "draw",
           value: function draw() {
-              return;
+              this._calculateProps();
+              this.setPosition();
+              this.widget();
+          }
+      }, {
+          key: "_calculateProps",
+          value: function _calculateProps() {
+              var opt = this._opt;
+
+              //如果markline有target配置，那么只现在target配置里的字段的 markline, 推荐
+              var field = opt.markTo;
+
+              var _coord = this.app._coord;
+
+              if (field && _$1.indexOf(this.app.dataFrame.fields, field) == -1) {
+                  //如果配置的字段不存在，则不绘制
+                  return;
+              }
+              var _yAxis = this.app._coord._yAxis[0]; //默认为左边的y轴
+
+              if (field) {
+                  //如果有配置markTo就从me._coord._yAxis中找到这个markTo所属的yAxis对象
+                  _$1.each(this.app._coord._yAxis, function ($yAxis, yi) {
+                      var fs = _$1.flatten([$yAxis.field]);
+                      if (_$1.indexOf(fs, field) >= 0) {
+                          _yAxis = $yAxis;
+                      }
+                  });
+              }
+              if (opt.yAxisAlign) {
+                  //如果有配置yAxisAlign，就直接通过yAxisAlign找到对应的
+                  _yAxis = this.app._coord._yAxis[opt.yAxisAlign == "left" ? 0 : 1];
+              }
+              var y;
+              if (opt.y !== undefined && opt.y !== null) {
+                  y = Number(opt.y);
+              } else {
+                  //如果没有配置这个y的属性，就 自动计算出来均值
+                  //但是均值是自动计算的，比如datazoom在draging的时候
+                  y = function y() {
+                      var _fdata = this.app.dataFrame.getFieldData(field);
+                      var _count = 0;
+                      _$1.each(_fdata, function (val) {
+                          if (Number(val)) {
+                              _count += val;
+                          }
+                      });
+                      return _count / _fdata.length;
+                  };
+              }
+              if (!isNaN(y)) {
+                  //如果y是个function说明是均值，自动实时计算的，而且不会超过ydatasection的范围
+                  _yAxis.setWaterLine(y);
+              }
+              var _fstyle = "#777";
+              var fieldMap = this.app._coord.getFieldMapOf(field);
+              if (fieldMap) {
+                  _fstyle = fieldMap.color;
+              }            var lineStrokeStyle = opt.line && opt.line.strokeStyle || _fstyle;
+              var textFillStyle = opt.label && opt.label.fillStyle || _fstyle;
+
+              //开始计算赋值到属性上面
+              this._yAxis = _yAxis;
+              this.width = _coord.width;
+              this.height = _coord.height;
+              this.yVal = y;
+              this.pos = {
+                  x: _coord.origin.x,
+                  y: _coord.origin.y
+              };
+              this.line.list = [[0, 0], [this.width, 0]];
+              this.label.fillStyle = textFillStyle;
+              this.field = field;
+              if (lineStrokeStyle) {
+                  this.line.strokeStyle = lineStrokeStyle;
+              }        }
+      }, {
+          key: "widget",
+          value: function widget() {
               var me = this;
 
               var y = this._getYPos();
@@ -23525,7 +23922,7 @@
                       lineType: me.line.lineType
                   }
               });
-              me.core.addChild(line);
+              me.sprite.addChild(line);
               me._line = line;
 
               if (me.label.enabled) {
@@ -23533,7 +23930,7 @@
                       context: me.label
                   });
                   this._txt = txt;
-                  me.core.addChild(txt);
+                  me.sprite.addChild(txt);
 
                   me._setTxtPos(y);
               }
@@ -23574,7 +23971,7 @@
               if (_$1.isNumber(me.label.x)) {
                   txt.context.x = me.label.x;
               } else {
-                  txt.context.x = this.w - txt.getTextWidth() - 5;
+                  txt.context.x = this.width - txt.getTextWidth() - 5;
               }
               if (_$1.isNumber(me.label.y)) {
                   txt.context.y = me.label.y;
@@ -23582,111 +23979,32 @@
                   txt.context.y = y - txt.getTextHeight();
               }
           }
-      }], [{
-          key: "register",
-          value: function register(opt, app) {
-              var app = app;
-              var me = this;
-
-              if (!_$1.isArray(opt)) {
-                  opt = [opt];
+      }, {
+          key: "_getYVal",
+          value: function _getYVal() {
+              var y = this.yVal;
+              if (_$1.isFunction(this.yVal)) {
+                  y = this.yVal(this);
               }
-              _$1.each(opt, function (ML) {
-                  //如果markline有target配置，那么只现在target配置里的字段的 markline, 推荐
-                  var field = ML.markTo;
-
-                  if (field && _$1.indexOf(app.dataFrame.fields, field) == -1) {
-                      //如果配置的字段不存在，则不绘制
-                      return;
-                  }
-
-                  var _yAxis = app._coord._yAxis[0]; //默认为左边的y轴
-
-                  if (field) {
-                      //如果有配置markTo就从me._coord._yAxis中找到这个markTo所属的yAxis对象
-                      _$1.each(app._coord._yAxis, function ($yAxis, yi) {
-                          var fs = _$1.flatten([$yAxis.field]);
-                          if (_$1.indexOf(fs, field) >= 0) {
-                              _yAxis = $yAxis;
-                          }
-                      });
-                  }
-
-                  if (ML.yAxisAlign) {
-                      //如果有配置yAxisAlign，就直接通过yAxisAlign找到对应的
-                      _yAxis = app._coord._yAxis[ML.yAxisAlign == "left" ? 0 : 1];
-                  }
-
-                  var y;
-                  if (ML.y !== undefined && ML.y !== null) {
-                      y = Number(ML.y);
-                  } else {
-                      //如果没有配置这个y的属性，就 自动计算出来均值
-                      //但是均值是自动计算的，比如datazoom在draging的时候
-                      y = function y() {
-                          var _fdata = app.dataFrame.getFieldData(field);
-                          var _count = 0;
-                          _$1.each(_fdata, function (val) {
-                              if (Number(val)) {
-                                  _count += val;
-                              }
-                          });
-                          return _count / _fdata.length;
-                      };
-                  }
-                  if (!isNaN(y)) {
-                      //如果y是个function说明是均值，自动实时计算的，而且不会超过ydatasection的范围
-                      _yAxis.setWaterLine(y);
-                  }
-                  app.components.push({
-                      type: "once",
-                      plug: {
-                          draw: function draw() {
-
-                              var _fstyle = "#777";
-                              var fieldMap = app._coord.getFieldMapOf(field);
-                              if (fieldMap) {
-                                  _fstyle = fieldMap.color;
-                              }                            var lineStrokeStyle = ML.line && ML.line.strokeStyle || _fstyle;
-                              var textFillStyle = ML.label && ML.label.fillStyle || _fstyle;
-
-                              me.creatOneMarkLine(app, ML, y, _yAxis, lineStrokeStyle, textFillStyle, field);
-                          }
-                      }
-                  });
-              });
+              return y;
           }
       }, {
-          key: "creatOneMarkLine",
-          value: function creatOneMarkLine(app, ML, yVal, _yAxis, lineStrokeStyle, textFillStyle, field) {
-
-              var o = {
-                  w: app._coord.width,
-                  h: app._coord.height,
-                  yVal: yVal,
-                  origin: {
-                      x: app._coord.origin.x,
-                      y: app._coord.origin.y
-                  },
-                  line: {
-                      list: [[0, 0], [app._coord.width, 0]]
-                      //strokeStyle: lineStrokeStyle
-                  },
-                  label: {
-                      fillStyle: textFillStyle
-                  },
-                  field: field
-              };
-
-              if (lineStrokeStyle) {
-                  o.line.strokeStyle = lineStrokeStyle;
-              }
-              var _markLine = new this(_$1.extend(true, ML, o), _yAxis);
-              app.components.push({
-                  type: "markLine",
-                  plug: _markLine
-              });
-              app.graphsSprite.addChild(_markLine.sprite);
+          key: "_getYPos",
+          value: function _getYPos() {
+              return -this._yAxis.getPosOfVal(this._getYVal());        }
+      }, {
+          key: "_getLabel",
+          value: function _getLabel() {
+              var str;
+              var yVal = this._getYVal();
+              if (_$1.isFunction(this.label.format)) {
+                  str = this.label.format(yVal, this);
+              } else {
+                  if (_$1.isString(this.label.text)) {
+                      str = this.label.text;
+                  } else {
+                      str = yVal;
+                  }            }            return str;
           }
       }]);
       return MarkLine;
@@ -24680,7 +24998,7 @@
 
   //global.registerComponent( emptyCoord, 'coord' );
   global$1.registerComponent(Rect$3, 'coord', 'rect');
-  global$1.registerComponent(Polar, 'coord', 'polar');
+  global$1.registerComponent(Polar$1, 'coord', 'polar');
 
   global$1.registerComponent(BarGraphs, 'graphs', 'bar');
   global$1.registerComponent(LineGraphs, 'graphs', 'line');

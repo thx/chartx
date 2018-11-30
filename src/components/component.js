@@ -12,12 +12,13 @@ export default class component extends Canvax.Event.EventDispatcher
         this.enabled = false; //是否加载该组件
         this._opt = opt;
         this.app = app; //这个组件挂在哪个app上面（图表）
+        
+        this.width = 0;
+        this.height = 0; //height 不包含margin
         this.pos = {
             x : 0,
             y : 0
         };
-        this.width = 0;
-        this.height = 0; //height 不包含margin
         this.margin = {
             top: 0, right: 0, bottom: 0, left: 0
         };

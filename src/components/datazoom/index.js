@@ -246,7 +246,7 @@ export default class dataZoom extends Component
     }
     //datazoom end
 
-    draw( opt )
+    draw()
     {
 
         this._setDataZoomOpt();
@@ -278,7 +278,7 @@ export default class dataZoom extends Component
         var _preEnd = this.range.end;
 
         opt && _.extend(true, this, opt);
-        this._cloneChart = dataZoom._getCloneChart()//cloneChart;
+        this._cloneChart = this._getCloneChart()//cloneChart;
         this._computeAttrs(opt);
 
         if( 

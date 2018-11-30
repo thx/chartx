@@ -207,18 +207,7 @@ export default class Chart extends Canvax.Event.EventDispatcher
         //绘制除开coord graphs 以外的所有组件
         for( var i=0,l=this.components.length; i<l; i++ ){
             var p = this.components[i];
-            p.draw( opt );
-
-            /*
-            p.plug && p.plug.draw && p.plug.draw(  );
-            p.plug.app = this;
-            if( p.type == "once" ){
-                this.components.splice( i, 1 );
-                i--;
-                //l--; l重新计算p.plug.draw 可能会改变components
-            }
-            l = this.components.length;
-            */
+            p.draw();
         };
 
         this._bindEvent();
@@ -471,17 +460,30 @@ export default class Chart extends Canvax.Event.EventDispatcher
         });
     }
 
-
-    getComponentsByName( name ){
-        var arr = [];
-        _.each( this.components, function( c ){
-            if( c.name == name ){
-                arr.push( c )
-            };
-        } );
-        return arr;
+    getComponent( opt ){
+        return this.getComponents( opt )[0];
     }
 
+    getComponents( opt ){
+        var arr = [];
+        var expCount = 0;
+        for( var p in opt ){
+            expCount++;
+        };
+
+        _.each( this.components, function( comp ){
+            for( var p in opt ){
+                if( JSON.stringify( comp[p] ) == JSON.stringify( opt[p] ) ){
+                    expCount--
+                };
+            };
+            if( !expCount ){
+                arr.push( comp );
+            };
+        } );
+        
+        return arr;
+    }
     getComponentById( id )
     {
         var comp;
@@ -493,11 +495,9 @@ export default class Chart extends Canvax.Event.EventDispatcher
         } );
         return comp;
     }
-    //插件相关代码end
 
 
     //从graphs里面去根据opt做一一对比，比对成功为true
-    //getGraphsByType,getGraphById 可以逐渐淘汰
     //count为要查询的数量， 如果为1，则
     getGraph( opt ){
         var graphs = this.getGraphs( opt );
@@ -511,7 +511,7 @@ export default class Chart extends Canvax.Event.EventDispatcher
             expCount++;
         };
 
-        _.each( this._graphs, function( g ){
+        _.each( this.getComponents({name:'graphs'}), function( g ){
             for( var p in opt ){
                 if( JSON.stringify( g[p] ) == JSON.stringify( opt[p] ) ){
                     expCount--
@@ -525,23 +525,11 @@ export default class Chart extends Canvax.Event.EventDispatcher
         return arr;
     }
 
-    //获取graphs列表根据type
-    getGraphsByType( type )
-    {
-        var arr = [];
-        _.each( this._graphs, function( g ){
-            if( g.type == type ){
-                arr.push( g )
-            }
-        } );
-        return arr;
-    }
-
     //获取graphs根据id
     getGraphById( id )
     {
         var _g;
-        _.each( this._graphs, function( g ){
+        _.each( this.getComponents({name:'graphs'}), function( g ){
             if( g.id == id ){
                 _g = g;
                 return false;
@@ -592,7 +580,7 @@ export default class Chart extends Canvax.Event.EventDispatcher
     {
         var me = this;
         this._coord.show( field, trigger );
-        _.each( this._graphs, function( _g ){
+        _.each( this.getComponents({name:'graphs'}), function( _g ){
             _g.show( field , trigger);
         } );
         this.componentsReset( trigger );
@@ -602,7 +590,7 @@ export default class Chart extends Canvax.Event.EventDispatcher
     {
         var me = this;
         this._coord.hide( field ,trigger );
-        _.each( this._graphs, function( _g ){
+        _.each( this.getComponents({name:'graphs'}), function( _g ){
             _g.hide( field , trigger );
         } );
         this.componentsReset( trigger );
@@ -613,8 +601,7 @@ export default class Chart extends Canvax.Event.EventDispatcher
     {
         var me = this;
         this.on("panstart mouseover", function(e) {
-            debugger
-            var _tips = me.getComponentsByName("tips")[0];
+            var _tips = me.getComponent({name:'tips'});
             if ( _tips ) {
                 me._setTipsInfo.apply(me, [e]);
                 _tips.show(e);
@@ -622,7 +609,7 @@ export default class Chart extends Canvax.Event.EventDispatcher
             };
         });
         this.on("panmove mousemove", function(e) {
-            var _tips = me.getComponentsByName("tips")[0];
+            var _tips = me.getComponent({name:'tips'});
             if ( _tips ) {
                 me._setTipsInfo.apply(me, [e]);
                 _tips.move(e);
@@ -632,14 +619,14 @@ export default class Chart extends Canvax.Event.EventDispatcher
         this.on("panend mouseout", function(e) {
             //如果e.toTarget有货，但是其实这个point还是在induce 的范围内的
             //那么就不要执行hide，顶多只显示这个点得tips数据
-            var _tips = me.getComponentsByName("tips")[0];
+            var _tips = me.getComponent({name:'tips'});
             if ( _tips && !( e.toTarget && me._coord && me._coord.induce && me._coord.induce.containsPoint( me._coord.induce.globalToLocal(e.target.localToGlobal(e.point) )) )) {
                 _tips.hide(e);
                 me._tipsPointerHideAtAllGraphs( e );
             };
         });
         this.on("tap", function(e) {
-            var _tips = me.getComponentsByName("tips")[0];
+            var _tips = me.getComponent({name:'tips'});
             if ( _tips ) {
                 _tips.hide(e);
                 me._setTipsInfo.apply(me, [e]);
