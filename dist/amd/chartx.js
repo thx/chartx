@@ -23875,9 +23875,12 @@ define(function () { 'use strict';
                       return _count / _fdata.length;
                   };
               }
+              //y = this._getYVal( y );
+              debugger;
               if (!isNaN(y)) {
                   //如果y是个function说明是均值，自动实时计算的，而且不会超过ydatasection的范围
                   _yAxis.setWaterLine(y);
+                  _yAxis.draw();
               }
               var _fstyle = "#777";
               var fieldMap = this.app._coord.getFieldMapOf(field);
@@ -23964,8 +23967,9 @@ define(function () { 'use strict';
           value: function _setTxtPos(y) {
               var me = this;
               var txt = me._txt;
-              if (_$1.isNumber(me.label.x)) {
-                  txt.context.x = me.label.x;
+
+              if (this._yAxis.align == "left") {
+                  txt.context.x = 5;
               } else {
                   txt.context.x = this.width - txt.getTextWidth() - 5;
               }
@@ -23973,14 +23977,14 @@ define(function () { 'use strict';
                   txt.context.y = me.label.y;
               } else {
                   txt.context.y = y - txt.getTextHeight();
-              }
-          }
+              }        }
       }, {
           key: "_getYVal",
-          value: function _getYVal() {
-              var y = this.yVal;
-              if (_$1.isFunction(this.yVal)) {
-                  y = this.yVal(this);
+          value: function _getYVal(yVal) {
+              var yVal = yVal || this.yVal;
+              var y = yVal;
+              if (_$1.isFunction(yVal)) {
+                  y = yVal.apply(this);
               }
               return y;
           }
@@ -24720,9 +24724,8 @@ define(function () { 'use strict';
       function themeComponent(theme, app) {
           classCallCheck$2(this, themeComponent);
 
-          var _this = possibleConstructorReturn$1(this, (themeComponent.__proto__ || Object.getPrototypeOf(themeComponent)).call(this));
+          var _this = possibleConstructorReturn$1(this, (themeComponent.__proto__ || Object.getPrototypeOf(themeComponent)).call(this, theme, app));
 
-          _this.app = app;
           _this.colors = theme || [];
           return _this;
       }

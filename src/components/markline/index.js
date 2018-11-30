@@ -105,9 +105,12 @@ export default class MarkLine extends Component
             }
         };
 
+        //y = this._getYVal( y );
+debugger
         if( !isNaN(y) ) {
             //如果y是个function说明是均值，自动实时计算的，而且不会超过ydatasection的范围
             _yAxis.setWaterLine( y );
+            _yAxis.draw();
         };
 
         var _fstyle = "#777";
@@ -161,9 +164,9 @@ export default class MarkLine extends Component
         if(me.label.enabled){
             var txt = new Text( me._getLabel() , {           //文字
                 context : me.label
-            })
-            this._txt = txt
-            me.sprite.addChild(txt)
+            });
+            this._txt = txt;
+            me.sprite.addChild(txt);
 
             me._setTxtPos( y );
         }
@@ -202,23 +205,26 @@ export default class MarkLine extends Component
     {
         var me = this;
         var txt = me._txt;
-        if(_.isNumber(me.label.x)){
-            txt.context.x = me.label.x
+        
+        if( this._yAxis.align == "left" ){
+            txt.context.x = 5;
         } else {
             txt.context.x = this.width - txt.getTextWidth() - 5; 
-        }
+        };
+            
         if(_.isNumber(me.label.y)){
             txt.context.y = me.label.y
         } else {
             txt.context.y = y - txt.getTextHeight() 
-        }
+        };
     }
 
-    _getYVal()
+    _getYVal( yVal )
     {
-        var y = this.yVal;
-        if( _.isFunction( this.yVal ) ){
-            y = this.yVal( this );
+        var yVal = yVal || this.yVal;
+        var y = yVal;
+        if( _.isFunction( yVal ) ){
+            y = yVal.apply( this );
         };
 
         return y;
