@@ -213,15 +213,14 @@ export default class dataZoom extends Component
     {
 
         var app = this.app;
-        var coordInfo = app._coord.getSizeAndOrigin();
+        var coordInfo = app.getComponent({name:'coord'}).getSizeAndOrigin();
         var me = this;
         
         //初始化 datazoom 模块
         _.extend(true, this, {
-            width: parseInt( coordInfo.width ),//app._coord.width,
+            width: parseInt( coordInfo.width ),
             pos: {
-                x: coordInfo.origin.x//app._coord.origin.x,
-                //y: 0 // opt中有传入  app._coord.origin.y + app._coord._xAxis.height
+                x: coordInfo.origin.x
             },
             dragIng: function(range) {
 
@@ -252,7 +251,7 @@ export default class dataZoom extends Component
         this._setDataZoomOpt();
         
         this._cloneChart = this._getCloneChart();
-        this.axisLayoutType = this._cloneChart.thumbChart._coord._xAxis.layoutType; //和line bar等得xAxis.layoutType 一一对应
+        this.axisLayoutType = this._cloneChart.thumbChart.getComponent({name:'coord'})._xAxis.layoutType; //和line bar等得xAxis.layoutType 一一对应
 
         this._computeAttrs();
 
@@ -673,7 +672,7 @@ export default class dataZoom extends Component
         };
 
         var graphssp = this._cloneChart.thumbChart.graphsSprite;
-        var _coor = this._cloneChart.thumbChart._coord;
+        var _coor = this._cloneChart.thumbChart.getComponent({name:'coord'});
 
         graphssp.id = graphssp.id + "_datazoomthumbChartbg"
         graphssp.context.x = -_coor.origin.x; //0;

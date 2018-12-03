@@ -68,9 +68,7 @@ export default class Rect_Component extends coorBase
 
     init(opt)
     {
-        this.sprite = new Canvax.Display.Sprite({
-            id : "coord"
-        });
+
         this._initModules();
         //创建好了坐标系统后，设置 _fieldsDisplayMap 的值，
         // _fieldsDisplayMap 的结构里包含每个字段是否在显示状态的enabled 和 这个字段属于哪个yAxis

@@ -66,9 +66,7 @@ export default class VennGraphs extends GraphsBase
 
     init()
     {
-        this.sprite = new Canvax.Display.Sprite({ 
-            id : "venn_graphs"
-        });
+
         this.venn_circles = new Canvax.Display.Sprite({ 
             id : "venn_circles"
         });

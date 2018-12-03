@@ -54,8 +54,6 @@ export default class PieGraphs extends GraphsBase
     {
         _.extend(true, this, opt);
 
-        this.sprite = new Canvax.Display.Sprite();
-
         //初步设置下data，主要legend等需要用到
         this.data = this._dataHandle();
     }
@@ -97,6 +95,7 @@ export default class PieGraphs extends GraphsBase
      */
     draw( opt )
     {
+        
         !opt && (opt ={});
 
         _.extend(true, this, opt);
@@ -145,7 +144,7 @@ export default class PieGraphs extends GraphsBase
     _dataHandle()
     {
         var me = this;
-        var _coor = me.app._coord;
+        //var _coord = me.app.getComponent({name:'coord'});
 
         var data = [];
         var dataFrame = me.dataFrame;

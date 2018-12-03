@@ -1,4 +1,5 @@
 import Component from "../component"
+import Canvax from "canvax"
 import { _ } from "mmvis"
 
 export default class GraphsBase extends Component
@@ -16,8 +17,6 @@ export default class GraphsBase extends Component
         this.dataFrame = app.dataFrame; //app.dataFrame的引用
 
         this.data   = null; //没个graphs中自己_trimGraphs的数据
-        
-        this.sprite = null;
 
         this.width  = 0;
         this.height = 0;
@@ -28,6 +27,11 @@ export default class GraphsBase extends Component
 
         this.animation = true;
         this.inited = false;
+
+        this.sprite = new Canvax.Display.Sprite({
+            name: "graphs_"+opt.type
+        });
+        this.app.graphsSprite.addChild( this.sprite );
     }
 
     tipsPointerOf(e){}

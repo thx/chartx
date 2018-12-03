@@ -254,7 +254,6 @@ export default class xAxis extends axis
             ind : ind,
             val : val
         } );
-
         var o = {
             ind   : ind,
             value : val,
@@ -525,7 +524,7 @@ export default class xAxis extends axis
         var rootPaddingRight = 0;
         if( this._coord.app ){
             rootPaddingRight = this._coord.app.padding.right;
-        }
+        };
         return rootPaddingRight;
     }
 

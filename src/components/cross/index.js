@@ -24,8 +24,8 @@ export default class MarkLine extends Component
         
         //准心的位置
         this.aimPoint = {
-            x : this.width / 2,
-            y : this.height / 2
+            x : 0,
+            y : 0
         };
        
         //圆点，对应着坐标系统的原点
@@ -67,65 +67,38 @@ export default class MarkLine extends Component
        
         opt && _.extend(true, this, opt);
 
-        this.sprite  = new Sprite({
-            id : "cross_"+Canvax.utils.getUID(),
-            context : {
-                x : this.origin.x,
-                y : this.origin.y
-            }
-        });
-    }
-
-    //rect cross begin
-    static register(opt,app)
-    {
-        //原则上一个直角坐标系中最佳只设置一个cross
-        var me = this;
-        if( !_.isArray( opt ) ){
-            opt = [ opt ];
-        };
-        _.each( opt, function( cross , i){
-            app.components.push( {
-                type : "once",
-                plug : {
-                    draw: function(){
-
-                        var opt = _.extend( true, {
-                            origin: {
-                                x: app._coord.origin.x,
-                                y: app._coord.origin.y
-                            },
-                            width : app._coord.width,
-                            height : app._coord.height
-                        } , cross );
-
-                        var _cross = new me( opt, app );
-                        app.components.push( {
-                            type : "cross"+i,
-                            plug : _cross
-                        } );
-                        app.graphsSprite.addChild( _cross.sprite );
-
-                    }
-                }
-            } );
-        });
+        this._yAxis = this.app.getComponent({name:'coord'})._yAxis[ this.yAxisAlign=="left"?0:1 ];
+        this.sprite  = new Canvax.Display.Sprite();
+        this.app.graphsSprite.addChild( this.sprite );
     }
 
     draw()
     {
         var me = this;
-        var aimPoint = me.aimPoint;
 
-        me._hLine = new Line({//横向线条
+        var _coord = this.app.getComponent({name:'coord'});
+        this.pos = {   
+            x: _coord.origin.x,
+            y: _coord.origin.y
+        };
+        this.width = _coord.width;
+        this.height = _coord.height;
+        this.aimPoint = {
+            x : this.width / 2,
+            y : this.height / 2
+        };
+        this.setPosition();
+
+
+        me._hLine = new Line({ //横向线条
             context : {
                 start : {
                     x : 0,
-                    y : -aimPoint.y
+                    y : -this.aimPoint.y
                 },
                 end : {
                     x : me.width,
-                    y : -aimPoint.y
+                    y : -this.aimPoint.y
                 },
                 strokeStyle : me.line.strokeStyle,
                 lineWidth   : me.line.lineWidth,
@@ -134,15 +107,14 @@ export default class MarkLine extends Component
         });
         me.sprite.addChild( me._hLine );
 
-
-        me._vLine = new Line({               //线条
+        me._vLine = new Line({ //线条
             context : {
                 start : {
-                    x : aimPoint.x,
+                    x : this.aimPoint.x,
                     y : 0
                 },
                 end : {
-                    x : aimPoint.x,
+                    x : this.aimPoint.x,
                     y : -me.height
                 },
                 strokeStyle : me.line.strokeStyle,
@@ -151,7 +123,6 @@ export default class MarkLine extends Component
             }
         });
         me.sprite.addChild( me._vLine );
-
     }
 
 }

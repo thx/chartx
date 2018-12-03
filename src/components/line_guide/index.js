@@ -49,7 +49,7 @@ export default class barGuide extends Component
         
         _.extend(true, this , opt );
         
-        this._yAxis = this.app._coord._yAxis[ this.yAxisAlign=="left"?0:1 ];
+        this._yAxis = this.app.getComponent({name:'coord'})._yAxis[ this.yAxisAlign=="left"?0:1 ];
         this.sprite  = new Canvax.Display.Sprite({
             id : "barGuideSprite",
             context : {
@@ -75,10 +75,11 @@ export default class barGuide extends Component
                 plug : {
                     draw: function(){
 
+                        var _coord = app.getComponent({name:'coord'});
                         barGuideOpt = _.extend( true, {
                             origin: {
-                                x: app._coord.origin.x,
-                                y: app._coord.origin.y
+                                x: _coord.origin.x,
+                                y: _coord.origin.y
                             }
                         } , barGuideOpt );
 

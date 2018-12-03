@@ -9,10 +9,7 @@ export default class barTgi extends Component
 
     constructor( opt, app )
     {
-        super();
-
-        this._opt = opt;
-        this.app = app;
+        super(opt, app);
 
         this.field = null;
         this.barField = null;
@@ -26,7 +23,7 @@ export default class barTgi extends Component
         this.sprite = null;
 
         this.standardVal = 100;
-        this.origin = {
+        this.pos = {
             x : 0,
             y : 0
         };
@@ -43,50 +40,9 @@ export default class barTgi extends Component
         
         _.extend(true, this , opt );
         
-        this._yAxis = this.app._coord._yAxis[ this.yAxisAlign=="left"?0:1 ];
-        this.sprite  = new Canvax.Display.Sprite({
-            id : "barTgiSprite",
-            context : {
-                x : this.origin.x,
-                y : this.origin.y
-            }
-        });
-    }
-
-
-    static register( opt,app )
-    {
-        
-        if( !_.isArray( opt ) ){
-            opt = [ opt ];
-        };
-
-        var barTgiConstructor = this;
-
-        _.each( opt , function( barTgiOpt, i ){
-            app.components.push( {
-                type : "once",
-                plug : {
-                    draw: function(){
-
-                        barTgiOpt = _.extend( true, {
-                            origin: {
-                                x: app._coord.origin.x,
-                                y: app._coord.origin.y
-                            }
-                        } , barTgiOpt );
-
-                        var _barTgi = new barTgiConstructor( barTgiOpt, app );
-                        app.components.push( {
-                            type : "barTgi",
-                            plug : _barTgi
-                        } ); 
-                        app.graphsSprite.addChild( _barTgi.sprite );
-
-                    }
-                }
-            } );
-        } );
+        this._yAxis = this.app.getComponent({name:'coord'})._yAxis[ this.yAxisAlign=="left"?0:1 ];
+        this.sprite  = new Canvax.Display.Sprite();
+        this.app.graphsSprite.addChild( this.sprite );
     }
 
     reset( opt )
@@ -102,6 +58,13 @@ export default class barTgi extends Component
     {
         var me = this;
 
+        var _coord = this.app.getComponent({name:'coord'});
+        this.pos = {   
+            x: _coord.origin.x,
+            y: _coord.origin.y
+        };
+        this.setPosition();
+
         _.each( me.app.getComponents({name:'graphs'}), function( _g ){
             if( _g.type == "bar" && _g.data[ me.barField ] ){
                 me.barDatas = _g.data[ me.barField ];
@@ -112,7 +75,7 @@ export default class barTgi extends Component
 
         if( !this.barDatas ) {
             return;
-        }
+        };
 
         _.each( this.data, function( tgi, i ){
             var y = -me._yAxis.getPosOfVal( tgi );
@@ -141,7 +104,7 @@ export default class barTgi extends Component
         var res = val;
         if( _.isFunction( val ) ){
             res = val.apply( this, [ tgi, i ] )
-        }
+        };
         return res;
     }
 }

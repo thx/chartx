@@ -71,9 +71,6 @@ export default class polarComponent extends coorBase
 
     init(opt)
     {
-        this.sprite = new Canvax.Display.Sprite({
-            id : "coord_polar"
-        });
 
         this._initModules();
 

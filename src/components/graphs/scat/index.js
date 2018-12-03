@@ -92,9 +92,6 @@ export default class ScatGraphs extends GraphsBase
 
     init()
     {
-        this.sprite = new Canvax.Display.Sprite({ 
-            id : "graphsEl"
-        });
 
         this._shapesp = new Canvax.Display.Sprite({ 
             id : "shapesp"
@@ -149,8 +146,9 @@ export default class ScatGraphs extends GraphsBase
     {
         var tmplData = [];
 
+        var _coord = this.app.getComponent({name:'coord'});
         var dataLen  = this.dataFrame.length;
-        var xField = this.app._coord._xAxis.field;
+        var xField = _coord._xAxis.field;
 
         ////计算半径的时候需要用到， 每次执行_trimGraphs都必须要初始化一次
         this._rData = null;
@@ -163,10 +161,10 @@ export default class ScatGraphs extends GraphsBase
             var xValue = rowData[ xField ];
             var yValue = rowData[ this.field ];
 
-            var xPos = this.app._coord._xAxis.getPosOfVal( xValue );
-            var yPos = -this.app._coord._getYaxisOfField( this.field ).getPosOfVal( yValue );
+            var xPos = _coord._xAxis.getPosOfVal( xValue );
+            var yPos = -_coord._getYaxisOfField( this.field ).getPosOfVal( yValue );
 
-            var fieldMap = this.app._coord.getFieldMapOf( this.field );
+            var fieldMap = _coord.getFieldMapOf( this.field );
 
             var nodeLayoutData = {
                 rowData  : rowData,
@@ -504,8 +502,9 @@ export default class ScatGraphs extends GraphsBase
             ctx.y = 0;
         };
         if( this.aniOrigin == "origin" ){
-            ctx.x = this.app._coord._yAxis[0]._axisLine.context.x;//0;
-            ctx.y = this.app._coord._xAxis._axisLine.context.y;//0;
+            var _coord = this.app.getComponent({name:'coord'});
+            ctx.x = _coord._yAxis[0]._axisLine.context.x;//0;
+            ctx.y = _coord._xAxis._axisLine.context.y;//0;
         };
         if( this.aniOrigin == "center" ){
             ctx.x = this.width/2;

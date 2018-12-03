@@ -19,7 +19,7 @@ export default class BarGraphs extends GraphsBase
         this.enabledField = null;
  
         this.yAxisAlign = "left"; //默认设置为左y轴
-        this._xAxis = this.app._coord._xAxis;
+        this._xAxis = this.app.getComponent({name:'coord'})._xAxis;
 
         //trimGraphs的时候是否需要和其他的 bar graphs一起并排计算，true的话这个就会和别的重叠
         //和css中得absolute概念一致，脱离文档流的绝对定位
@@ -83,9 +83,6 @@ export default class BarGraphs extends GraphsBase
 
     init()
     {
-        this.sprite = new Canvax.Display.Sprite({
-            id: "graphsEl"
-        });
 
         this.barsSp = new Canvax.Display.Sprite({
             id: "barsSp"
@@ -140,7 +137,7 @@ export default class BarGraphs extends GraphsBase
         var value = nodeData.value;
         var field = nodeData.field;
 
-        var fieldMap = this.app._coord.getFieldMapOf(field);
+        var fieldMap = this.app.getComponent({name:'coord'}).getFieldMapOf(field);
         var color;
        
         //field对应的索引，， 取颜色这里不要用i
@@ -564,7 +561,7 @@ export default class BarGraphs extends GraphsBase
     setEnabledField()
     {
         //要根据自己的 field，从enabledFields中根据enabled数据，计算一个 enabled版本的field子集
-        this.enabledField = this.app._coord.getEnabledFields( this.field );
+        this.enabledField = this.app.getComponent({name:'coord'}).getEnabledFields( this.field );
     }
 
     _getGroupRegionStyle( iNode )
@@ -591,7 +588,7 @@ export default class BarGraphs extends GraphsBase
     {
         var me = this;
         var _xAxis = this._xAxis;
-        var _coord = this.app._coord;
+        var _coord = this.app.getComponent({name:'coord'});
 
         //用来计算下面的hLen
         this.setEnabledField();

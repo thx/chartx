@@ -193,6 +193,9 @@ export default class Tips extends Component {
 
     _getDefaultContent(info) {
         var str = "";
+        if( !info.nodes.length ){
+            return str;
+        };
         if (info.title !== undefined && info.title !== null && info.title !== "") {
             str += "<div style='font-size:14px;border-bottom:1px solid #f0f0f0;padding:4px;margin-bottom:6px;'>" + info.title + "</div>";
         }; 
@@ -252,7 +255,7 @@ export default class Tips extends Component {
 
 
     _tipsPointerShow(e) {
-        var _coord = this.app._coord;
+        var _coord = this.app.getComponent({name:'coord'});
 
         //目前只实现了直角坐标系的tipsPointer
         if (!_coord || _coord.type != 'rect') return;
@@ -330,7 +333,7 @@ export default class Tips extends Component {
     }
 
     _tipsPointerHide() {
-        var _coord = this.app._coord;
+        var _coord = this.app.getComponent({name:'coord'});
         //目前只实现了直角坐标系的tipsPointer
         if (!_coord || _coord.type != 'rect') return;
 
@@ -342,7 +345,7 @@ export default class Tips extends Component {
 
     _tipsPointerMove(e) {
 
-        var _coord = this.app._coord;
+        var _coord = this.app.getComponent({name:'coord'});
 
         //目前只实现了直角坐标系的tipsPointer
         if (!_coord || _coord.type != 'rect') return;

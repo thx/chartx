@@ -7,10 +7,9 @@ export default class barGuide extends Component
 
     constructor( opt, app )
     {
-        super();
+        super(opt, app);
 
-        this._opt = opt;
-        this.app = app;
+        this.name = "bar_guide";
 
         this.field = null;
         this.barField = null;
@@ -49,50 +48,9 @@ export default class barGuide extends Component
         
         _.extend(true, this , opt );
         
-        this._yAxis = this.app._coord._yAxis[ this.yAxisAlign=="left"?0:1 ];
-        this.sprite  = new Canvax.Display.Sprite({
-            id : "barGuideSprite",
-            context : {
-                x : this.origin.x,
-                y : this.origin.y
-            }
-        });
-    }
-
-
-    static register( opt,app )
-    {
-        
-        if( !_.isArray( opt ) ){
-            opt = [ opt ];
-        };
-
-        var barGuideConstructor = this;
-
-        _.each( opt , function( barGuideOpt, i ){
-            app.components.push( {
-                type : "once",
-                plug : {
-                    draw: function(){
-
-                        barGuideOpt = _.extend( true, {
-                            origin: {
-                                x: app._coord.origin.x,
-                                y: app._coord.origin.y
-                            }
-                        } , barGuideOpt );
-
-                        var _barGuide = new barGuideConstructor( barGuideOpt, app );
-                        app.components.push( {
-                            type : "barGuide",
-                            plug : _barGuide
-                        } ); 
-                        app.graphsSprite.addChild( _barGuide.sprite );
-
-                    }
-                }
-            } );
-        } );
+        this._yAxis = this.app.getComponent({name:'coord'})._yAxis[ this.yAxisAlign=="left"?0:1 ];
+        this.sprite  = new Canvax.Display.Sprite();
+        this.app.graphsSprite.addChild( this.sprite );
     }
 
     reset( opt )
@@ -107,6 +65,13 @@ export default class barGuide extends Component
     draw()
     {
         var me = this;
+        
+        var _coord = this.app.getComponent({name:'coord'});
+        this.pos = {   
+            x: _coord.origin.x,
+            y: _coord.origin.y
+        };
+        this.setPosition();
 
         _.each( me.app.getComponents({name:'graphs'}), function( _g ){
             if( _g.type == "bar" && _g.data[ me.barField ] ){

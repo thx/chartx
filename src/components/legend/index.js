@@ -142,9 +142,10 @@ export default class Legend extends Component
 
     draw()
     {
-        if( this.app._coord && this.app._coord.type == 'rect' ){
+        var _coord = this.app.getComponent({name:'coord'});
+        if( _coord && _coord.type == 'rect' ){
             if( this.position == "top" || this.position == "bottom" ){
-                this.pos.x = this.app._coord.getSizeAndOrigin().origin.x + this.icon.radius;
+                this.pos.x = _coord.getSizeAndOrigin().origin.x + this.icon.radius;
             };
         };
         this.setPosition();

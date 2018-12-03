@@ -50,9 +50,7 @@ export default class RadarGraphs extends GraphsBase
 
     init()
     {
-        this.sprite = new Canvax.Display.Sprite({ 
-            id : "graphsEl"
-        });
+
     }
 
     draw(opt)
@@ -74,7 +72,7 @@ export default class RadarGraphs extends GraphsBase
     _widget()
     {
         var me = this;
-        var _coord = this.app._coord;
+        var _coord = this.app.getComponent({name:'coord'});
 
         var iGroup = 0;
         _.each( this.data, function( list , field ){
@@ -233,10 +231,10 @@ export default class RadarGraphs extends GraphsBase
     _trimGraphs()
     {
         var me = this;
-        var _coord = this.app._coord;
+        var _coord = this.app.getComponent({name:'coord'});
 
         //用来计算下面的hLen
-        this.enabledField = this.app._coord.getEnabledFields( this.field );
+        this.enabledField = _coord.getEnabledFields( this.field );
         
         var data = {}
         _.each( this.enabledField, function( field ){

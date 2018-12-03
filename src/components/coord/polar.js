@@ -1,17 +1,11 @@
-import CoordBase from "./index"
 import CoordComponents from "./polar/index"
 import { _ } from "mmvis"
 
-export default class Polar extends CoordBase
+export default class Polar extends CoordComponents
 {
-    constructor( node, data, opt, componentModules )
+    constructor( opt, app )
     {
-        super( node, data, opt, componentModules );
-
-        //坐标系统
-        this.CoordComponents = CoordComponents;
-        this._coord = null;
-
+        super( opt, app );
     }
 
     //设置这个坐标系下面特有的 opt 默认值
@@ -56,7 +50,7 @@ export default class Polar extends CoordBase
         var legendData = [
             //{name: "uv", style: "#ff8533", enabled: true, ind: 0}
         ];
-        _.each( this.getComponents({name:'graphs'}), function( _g ){
+        _.each( this.app.getComponents({name:'graphs'}), function( _g ){
             _.each( _g.getLegendData(), function( item ){
                 
                 if( _.find( legendData , function( d ){
@@ -70,21 +64,5 @@ export default class Polar extends CoordBase
             } );
         } );
         return legendData;
-    }
-
-    //把这个点位置对应的x轴数据和y轴数据存到tips的info里面
-    //方便外部自定义tip是的content
-    setTipsInfo(e)
-    {
-        e.eventInfo = this._coord.getTipsInfoHandler(e);
-        //如果具体的e事件对象中有设置好了得e.eventInfo.nodes，那么就不再遍历_graphs去取值
-        if( !e.eventInfo.nodes || !e.eventInfo.nodes.length ){
-            var nodes = [];
-            var iNode = e.eventInfo.aAxis.ind;
-            _.each( this.getComponents({name:'graphs'}), function( _g ){
-                nodes = nodes.concat( _g.getNodesAt( iNode ) );
-            } );
-            e.eventInfo.nodes = nodes;
-        };
     }
 };

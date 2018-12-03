@@ -14,7 +14,6 @@ export default class PlanetGroup
         this.dataFrame = dataFrame;
         this._graphs = _graphs;
         this.app = _graphs.app;
-        this._coord = this.app._coord;
 
         this.field = null;
 
@@ -96,11 +95,12 @@ export default class PlanetGroup
     init()
     {
         var me = this;
+        var _coord = this.app.getComponent({name:'coord'});
         this.sprite = new Canvax.Display.Sprite({
             id : "group_"+this.iGroup,
             context : {
-                x : this._coord.origin.x,
-                y : this._coord.origin.y
+                x : _coord.origin.x,
+                y : _coord.origin.y
             }
         });
 
@@ -112,11 +112,11 @@ export default class PlanetGroup
     _trimGraphs()
     {
         var me = this;
+        var _coord = this.app.getComponent({name:'coord'});
 
-
-        if( (this._coord.maxR - this.rRange.to)/(this.pit.radius*2) < this.groupLen-1-this.iGroup ){
+        if( (_coord.maxR - this.rRange.to)/(this.pit.radius*2) < this.groupLen-1-this.iGroup ){
             //要保证后面的group至少能有意个ringNum
-            this.rRange.to = this._coord.maxR - (this.groupLen-1-this.iGroup)*this.pit.radius*2;
+            this.rRange.to = _coord.maxR - (this.groupLen-1-this.iGroup)*this.pit.radius*2;
         };
         if( this.rRange.to - this.rRange.start < this.pit.radius*2 ){
             this.rRange.to = this.rRange.start + this.pit.radius*2;
@@ -197,6 +197,8 @@ export default class PlanetGroup
         var me = this;
         var _rings = [];
 
+        var _coord = this.app.getComponent({name:'coord'});
+
         for( var i=0,l=this.ringNum ; i<l ; i++ ){
             var _r = i*this.pit.radius*2 + this.pit.radius + this.rRange.start;
 
@@ -205,7 +207,7 @@ export default class PlanetGroup
             };
 
             //该半径上面的弧度集合
-            var arcs = this._coord.getRadiansAtR( _r , me.width, me.height );
+            var arcs = _coord.getRadiansAtR( _r , me.width, me.height );
 
             //测试代码begin---------------------------------------------------
             //用来绘制弧度的辅助线
@@ -271,7 +273,7 @@ export default class PlanetGroup
 
                         //测试占位情况代码begin---------------------------------------------
                         /*
-                        var point = me._coord.getPointInRadianOfR( pit.middle , ring.radius )
+                        var point = me.this.getComponent({name:'coord'}).getPointInRadianOfR( pit.middle , ring.radius )
                         me.sprite.addChild(new Circle({
                             context:{
                                 x : point.x,
@@ -360,6 +362,7 @@ export default class PlanetGroup
     draw()
     {
         var me = this;
+        var _coord = this.app.getComponent({name:'coord'});
         _.each( this._rings , function( ring , i ){
             var _ringCtx = {
                 rotation : 0
@@ -378,7 +381,7 @@ export default class PlanetGroup
                     return;
                 };
 
-                var point = me._coord.getPointInRadianOfR( p.pit.middle , ring.radius );
+                var point = _coord.getPointInRadianOfR( p.pit.middle , ring.radius );
 
                 var r = me._getRProp( me.node.radius , i, ii , p);
 

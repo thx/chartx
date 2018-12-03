@@ -63,18 +63,18 @@ export default class MarkLine extends Component
         //如果markline有target配置，那么只现在target配置里的字段的 markline, 推荐
         var field = opt.markTo;
 
-        var _coord = this.app._coord;
+        var _coord = this.app.getComponent({name:'coord'});
 
         if( field && _.indexOf( this.app.dataFrame.fields , field ) == -1 ){
             //如果配置的字段不存在，则不绘制
             return;
         };
 
-        var _yAxis = this.app._coord._yAxis[0]; //默认为左边的y轴
+        var _yAxis = _coord._yAxis[0]; //默认为左边的y轴
         
         if( field ){
-            //如果有配置markTo就从me._coord._yAxis中找到这个markTo所属的yAxis对象
-            _.each( this.app._coord._yAxis, function( $yAxis, yi ){
+            //如果有配置markTo就从 _coord._yAxis中找到这个markTo所属的yAxis对象
+            _.each( _coord._yAxis, function( $yAxis, yi ){
                 var fs = _.flatten([ $yAxis.field ]);
                 if( _.indexOf( fs, field ) >= 0 ){
                     _yAxis = $yAxis;
@@ -84,7 +84,7 @@ export default class MarkLine extends Component
 
         if( opt.yAxisAlign ){
             //如果有配置yAxisAlign，就直接通过yAxisAlign找到对应的
-            _yAxis = this.app._coord._yAxis[ opt.yAxisAlign=="left" ? 0 : 1 ];
+            _yAxis = _coord._yAxis[ opt.yAxisAlign=="left" ? 0 : 1 ];
         };
 
         var y;
@@ -114,7 +114,7 @@ export default class MarkLine extends Component
         };
 
         var _fstyle = "#777";
-        var fieldMap = this.app._coord.getFieldMapOf( field );
+        var fieldMap = _coord.getFieldMapOf( field );
         if( fieldMap ){
             _fstyle = fieldMap.color;
         };

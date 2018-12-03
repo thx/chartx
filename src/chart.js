@@ -46,17 +46,14 @@ export default class Chart extends Canvax.Event.EventDispatcher
 
         //构件好coord 和 graphs 的根容器
         this.setCoord_Graphs_Sp();
-    
 
+        //这三类组件是优先级最高的组件，所有的组件的模块化和绘制，都要一次在这三个完成后实现
+        this.__highModules = [ "theme", "coord", "graphs" ];
         //组件管理机制,所有的组件都绘制在这个地方
         this.components = [];
       
         this.inited = false;
-        
-
-        //先从全局皮肤里拿一组全局皮肤作为默认皮肤
-        this._theme = _.extend( [], global.getGlobalTheme() );
-
+    
         this.init.apply(this, arguments);
     }
 
@@ -97,66 +94,44 @@ export default class Chart extends Canvax.Event.EventDispatcher
     {
         var me = this;
 
-        //优先处理皮肤组件
-        if( this._opt.theme ){
-            //如果用户有配置皮肤组件，优先级最高
-            //皮肤就是一组颜色
-
-            //假如用户就只传了一个颜色值
-            if( !_.isArray( this._opt.theme ) ){
-                this._opt.theme = [this._opt.theme];
-            };
-            var _theme = new this.componentModules.getComponentModule("theme")( this._opt.theme, this );
-            this._theme = _theme.get(); //如果用户有设置图表皮肤组件，那么就全部用用户自己设置的，不再用merge 
-        };
-
-        //首先是创建一个坐标系对象
-        //查找这个opt中的coord，调用对应的静态 setDefaultOpt 方法处理
-        if( opt.coord && opt.coord.type ){
-            var coordModule = me.componentModules.getComponentModule("coord", opt.coord.type);
-            this._coord = new coordModule( opt.coord, me );
-            this.coordSprite.addChild( this._coord.sprite );
-        };
-
-        _.each( _.flatten( [ opt.graphs ] ) , function( graphs ){
-            var graphsModule = me.componentModules.getComponentModule("graphs", graphs.type);
-            var _g = new graphsModule( graphs, me );
-            me.components.push( _g );
-            me.graphsSprite.addChild( _g.sprite );
+        //先依次init 处理 "theme", "coord", "graphs" 三个优先级最高的模块
+        _.each( this.__highModules, function( compName ){
+            if( !opt[compName] ) return;
+            var comps = _.flatten([ opt[compName] ]);
+            _.each( comps, function( comp ){
+                var compModule = me.componentModules.getComponentModule(compName, comp.type);
+                if( compModule ){
+                    var _comp = new compModule( comp, me );
+                    me.components.push( _comp );
+                };
+            } );
         } );
 
         //PS: theme 组件优先级最高，在registerComponents之前已经加载过
-        var highModules = [ "coord", "graphs" , "theme" ];
         for( var _p in this._opt ){
             //非coord graphs theme，其实后面也可以统一的
-            if( _.indexOf( highModules, _p ) == -1 ){
+            if( _.indexOf( this.__highModules, _p ) == -1 ){
                 var _comp = this._opt[ _p ];
-
                 //所有的组件都按照数组方式处理，这里，组件里面就不需要再这样处理了
                 if( ! _.isArray( _comp ) ){
                     _comp = [ _comp ];
                 };
-
                 _.each( _comp, function( compOpt ){
-
                     var compConstructor = me.componentModules.getComponentModule( _p, compOpt.type );
                     var _comp = new compConstructor( compOpt, me );
                     me.components.push( _comp );
-                    
                 } );
-                
             }
         };
     }
 
     _startDraw(opt)
     {
-        
         var me = this;
         !opt && (opt ={});
-        var _coord = this._coord;
+        var _coord = this.getComponent({name:'coord'});
 
-        if( this._coord && this._coord.horizontal ){
+        if( _coord && _coord.horizontal ){
             this._drawBeginHorizontal && this._drawBeginHorizontal();
         };
 
@@ -164,12 +139,12 @@ export default class Chart extends Canvax.Event.EventDispatcher
         var height = this.height - this.padding.top - this.padding.bottom;
         var origin = { x : this.padding.left,y : this.padding.top }
 
-        if( this._coord ){
+        if( _coord ){
             //先绘制好坐标系统
-            this._coord.draw( opt );
-            width  = this._coord.width;
-            height = this._coord.height;
-            origin = this._coord.origin;
+            _coord.draw( opt );
+            width  = _coord.width;
+            height = _coord.height;
+            origin = _coord.origin;
         };
 
         if( this.dataFrame.length == 0 ){
@@ -177,7 +152,7 @@ export default class Chart extends Canvax.Event.EventDispatcher
             me.fire("complete");
             return;
         };
-    debugger
+    
         var _graphs = this.getComponents({name:'graphs'});
         var graphsCount = _graphs.length;
         var completeNum = 0;
@@ -193,22 +168,23 @@ export default class Chart extends Canvax.Event.EventDispatcher
                 completeNum ++;
                 if( completeNum == graphsCount ){
                     me.fire("complete");
-                }
+                };
                 _g.inited = true;
             });
             _g.draw( opt );
         } );
 
-
         //绘制除开coord graphs 以外的所有组件
         for( var i=0,l=this.components.length; i<l; i++ ){
             var p = this.components[i];
-            p.draw();
+            if( _.indexOf( this.__highModules, p.name ) == -1 ){
+                p.draw();
+            };
         };
 
         this._bindEvent();
 
-        if( this._coord && this._coord.horizontal ){
+        if( _coord && _coord.horizontal ){
             this._drawEndHorizontal && this._drawEndHorizontal();
         };
 
@@ -290,7 +266,11 @@ export default class Chart extends Canvax.Event.EventDispatcher
     //ind 如果有就获取对应索引的具体颜色值
     getTheme( ind )
     {
-        var colors = this._theme;
+        var colors = global.getGlobalTheme();
+        var _theme = this.getComponent({name:'theme'});
+        if( _theme ) {
+            colors = _theme.get();
+        };
         if( ind != undefined ){
             return colors[ ind % colors.length ] || "#ccc";
         };
@@ -348,7 +328,6 @@ export default class Chart extends Canvax.Event.EventDispatcher
         this.setCoord_Graphs_Sp();
 
         this.components = []; //组件清空
-        this._coord = null;   //坐标系清空
         this.canvax.domView.innerHTML = "";
         //padding数据也要重置为起始值
         this.padding = this._getPadding();
@@ -423,8 +402,9 @@ export default class Chart extends Canvax.Event.EventDispatcher
             return;
         };
         
-        if( this._coord ){
-            this._coord.resetData( this.dataFrame , trigger);
+        var _coord = this.getComponent({name:'coord'})
+        if( _coord ){
+            _coord.resetData( this.dataFrame , trigger);
         };
         _.each( this.getComponents({name:'graphs'}), function( _g ){
             _g.resetData( me.dataFrame , trigger);
@@ -442,11 +422,15 @@ export default class Chart extends Canvax.Event.EventDispatcher
     }
 
 
-    //TODO:除开 coord,graphs 其他所有plug触发更新其实后续也要统一
     componentsReset( trigger )
     {
         var me = this;
         _.each(this.components , function( p , i ){
+            //theme coord graphs额外处理
+            if( _.indexOf( me.__highModules, p.name ) != -1 ){
+                return
+            };
+
             if( trigger && trigger.comp && trigger.comp.__cid == p.__cid ){
                 //如果这次reset就是由自己触发的，那么自己这个components不需要reset，负责观察就好
                 return;
@@ -532,7 +516,7 @@ export default class Chart extends Canvax.Event.EventDispatcher
     //目前没有多个坐标系的图表，所以不需要 getCoords 
     getCoord( opt )
     {
-        return this._coord;
+        return this.getComponent(_.extend( true, {name:'coord'}, opt ));
     }
 
     //只有field为多组数据的时候才需要legend，给到legend组件来调用
@@ -540,35 +524,44 @@ export default class Chart extends Canvax.Event.EventDispatcher
     {
         var me   = this;
         var data = [];
-        
-        _.each( _.flatten(me._coord.fieldsMap) , function( map , i ){
-            //因为yAxis上面是可以单独自己配置field的，所以，这部分要过滤出 legend data
-            var isGraphsField = false;
-            _.each( me.graphs, function( gopt ){
-                if( _.indexOf( _.flatten([ gopt.field ]), map.field ) > -1 ){
-                    isGraphsField = true;
-                    return false;
-                }
-            } );
 
-            if( isGraphsField ){
-                data.push( {
-                    enabled : map.enabled,
-                    name    : map.field,
-                    field   : map.field,
-                    ind     : map.ind,
-                    color   : map.color,
-                    yAxis   : map.yAxis
+        var _coord = me.getComponent({name:'coord'});
+
+        if( _coord.getLegendData ){
+            data = _coord.getLegendData();
+        } else {
+            _.each( _coord.fieldsMap , function( map , i ){
+                //因为yAxis上面是可以单独自己配置field的，所以，这部分要过滤出 legend data
+                var isGraphsField = false;
+                _.each( me.graphs, function( gopt ){
+                    if( _.indexOf( _.flatten([ gopt.field ]), map.field ) > -1 ){
+                        isGraphsField = true;
+                        return false;
+                    }
                 } );
-            }
-        });
+    
+                if( isGraphsField ){
+                    data.push( {
+                        enabled : map.enabled,
+                        name    : map.field,
+                        field   : map.field,
+                        ind     : map.ind,
+                        color   : map.color,
+                        yAxis   : map.yAxis
+                    } );
+                }
+            });
+        };
         return data;
     }
 
     show( field , trigger )
     {
         var me = this;
-        this._coord.show( field, trigger );
+
+        var _coord = this.getComponent({name:'coord'});
+        _coord && _coord.show( field, trigger );
+
         _.each( this.getComponents({name:'graphs'}), function( _g ){
             _g.show( field , trigger);
         } );
@@ -578,7 +571,8 @@ export default class Chart extends Canvax.Event.EventDispatcher
     hide( field , trigger)
     {
         var me = this;
-        this._coord.hide( field ,trigger );
+        var _coord = me.getComponent({name:'coord'});
+        _coord && _coord.hide( field ,trigger );
         _.each( this.getComponents({name:'graphs'}), function( _g ){
             _g.hide( field , trigger );
         } );
@@ -609,7 +603,8 @@ export default class Chart extends Canvax.Event.EventDispatcher
             //如果e.toTarget有货，但是其实这个point还是在induce 的范围内的
             //那么就不要执行hide，顶多只显示这个点得tips数据
             var _tips = me.getComponent({name:'tips'});
-            if ( _tips && !( e.toTarget && me._coord && me._coord.induce && me._coord.induce.containsPoint( me._coord.induce.globalToLocal(e.target.localToGlobal(e.point) )) )) {
+            var _coord = me.getComponent({name:'coord'});
+            if ( _tips && !( e.toTarget && _coord && _coord.induce && _coord.induce.containsPoint( _coord.induce.globalToLocal(e.target.localToGlobal(e.point) )) )) {
                 _tips.hide(e);
                 me._tipsPointerHideAtAllGraphs( e );
             };
@@ -632,8 +627,9 @@ export default class Chart extends Canvax.Event.EventDispatcher
              e.eventInfo = {};
          };
 
-         if( this._coord ){
-            e.eventInfo = this._coord.getTipsInfoHandler(e);
+         var _coord = this.getComponent({name:'coord'});
+         if( _coord ){
+            e.eventInfo = _coord.getTipsInfoHandler(e);
          };
 
          //如果具体的e事件对象中有设置好了得 e.eventInfo.nodes，那么就不再遍历_graphs去取值

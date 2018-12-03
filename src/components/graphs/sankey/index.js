@@ -70,7 +70,6 @@ export default class sankeyGraphs extends GraphsBase
 
     init()
     {
-        this.sprite = new Canvax.Display.Sprite();
         this._links = new Canvax.Display.Sprite();
         this._nodes = new Canvax.Display.Sprite();
         this._labels = new Canvax.Display.Sprite();

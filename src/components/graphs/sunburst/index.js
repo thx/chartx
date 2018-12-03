@@ -48,9 +48,7 @@ export default class sunburstGraphs extends GraphsBase
 
     init()
     {
-        this.sprite = new Canvax.Display.Sprite({ 
-            id : "sunburst_graphs"
-        });
+
     }
 
 

@@ -2,12 +2,14 @@
  * 皮肤组件，不是一个具体的ui组件
  */
 import Component from "../component"
+import { _ } from "mmvis"
 
-export default class themeComponent extends Component
+export default class theme extends Component
 {
     constructor( theme , app )
     {
         super( theme, app );
+        this.name = "theme";
         this.colors = theme || [];
     }
 
@@ -19,6 +21,10 @@ export default class themeComponent extends Component
 
     get( ind )
     {
+        var colors = this.colors;
+        if( !_.isArray( colors ) ){
+            colors = [ colors ]
+        };
         return this.colors
     }
 

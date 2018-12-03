@@ -60,9 +60,7 @@ export default class CloudGraphs extends GraphsBase
 
     init()
     {
-        this.sprite = new Canvax.Display.Sprite({ 
-            id : "graphsEl"
-        });
+
     }
 
     draw( opt )

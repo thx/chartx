@@ -63,9 +63,6 @@ export default class FunnelGraphs extends GraphsBase
 
     init()
     {
-        this.sprite = new Canvax.Display.Sprite({ 
-            name : "funnelGraphsEl"
-        });
         
     }
 

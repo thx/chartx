@@ -1,4 +1,5 @@
 import Component from "../component"
+import Canvax from "canvax"
 import { _ } from "mmvis"
 
 
@@ -21,7 +22,10 @@ export default class coorBase extends Component
             y : 0
         };
 
-        this.sprite = null;
+        this.sprite = new Canvax.Display.Sprite({
+            name : "coord_"+opt.type
+        });
+        this.app.coordSprite.addChild( this.sprite );
         
         /*
         吧原始的field转换为对应结构的显示树

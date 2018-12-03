@@ -18,8 +18,6 @@ export default class PlanetGraphs extends GraphsBase
 
         this.field = null;
         
-        //this.legendField = null;
-
         var me = this;
         //圆心原点坐标
         this.center = {
@@ -68,10 +66,6 @@ export default class PlanetGraphs extends GraphsBase
     
     init()
     {
-        this.sprite = new Canvax.Display.Sprite({ 
-            id : "graphsEl"
-        });
-
         this.gridSp = new Canvax.Display.Sprite({ 
             id : "gridSp"
         });
@@ -94,30 +88,6 @@ export default class PlanetGraphs extends GraphsBase
         this.fire("complete");
     
     }
-
-    getLegendData()
-    {
-        var list = [];
-        var legendDataList = [];
-        if( this.legendField ){
-            
-            _.each( this.dataFrame.getFieldData( this.legendField ), function( val ){
-                if( _.indexOf( list, val ) == -1 ){
-                    list.push( val );
-                    legendDataList.push({
-                        name: val, 
-                        field : this.legendField,
-                        color: "#ff8533", 
-                        enabled: true, 
-                        ind: 0
-                    });
-                };
-            } );
-
-        };
-
-        return legendDataList;
-    }
     
 
     _getMaxR()
@@ -137,8 +107,8 @@ export default class PlanetGraphs extends GraphsBase
         var me = this;
 
         var groupRStart = this.center.radius + this.center.margin;
-        
-        var maxR = me.app._coord.maxR - me.center.radius - me.center.margin;
+      
+        var maxR = me.app.getComponent({name:'coord'}).maxR - me.center.radius - me.center.margin;
         var _circleMaxR = this._getMaxR();
 
         _.each( this.groupDataFrames , function( df , i ){
@@ -204,6 +174,7 @@ export default class PlanetGraphs extends GraphsBase
 
     _drawBack(){
         var me = this;
+        var _coord = this.app.getComponent({name:'coord'});
         
         if( me.grid.rings.section.length == 1 ){
 
@@ -225,8 +196,8 @@ export default class PlanetGraphs extends GraphsBase
             var _scale = me.grid.rings.section[i];
             me.gridSp.addChild( new Circle({
                 context : {
-                    x : me.app._coord.origin.x,
-                    y : me.app._coord.origin.y,
+                    x : _coord.origin.x,
+                    y : _coord.origin.y,
                     r : _scale.radius,
                     lineWidth : me._getBackProp( me.grid.rings.lineWidth , i),
                     strokeStyle : me._getBackProp( me.grid.rings.strokeStyle , i),
@@ -238,10 +209,10 @@ export default class PlanetGraphs extends GraphsBase
         
         //如果back.rays.count非0， 则绘制从圆心出发的射线
         if( me.grid.rays.count > 1 ){
-            var cx = this.app._coord.origin.x;
-            var cy = this.app._coord.origin.y;
+            var cx = _coord.origin.x;
+            var cy = _coord.origin.y;
             var itemAng = 360 / me.grid.rays.count;
-            var _r = me.app._coord.maxR; //Math.max( me.w, me.h );
+            var _r = _coord.maxR; //Math.max( me.w, me.h );
 
             if( me.grid.rings.section.length ){
                 _r = me.grid.rings.section.slice(-1)[0].radius
@@ -273,8 +244,8 @@ export default class PlanetGraphs extends GraphsBase
         var _clipRect = new Rect({
             name: "clipRect",
             context : {
-                x : me.app._coord.origin.x-me.app.width/2,
-                y : me.app._coord.origin.y-me.height/2,
+                x : _coord.origin.x-me.app.width/2,
+                y : _coord.origin.y-me.height/2,
                 width : me.app.width,
                 height : me.height
             }
