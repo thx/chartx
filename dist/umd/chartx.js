@@ -700,14 +700,14 @@
 
                       var arr = this._getDataSection();
 
-                      if (this.waterLine) {
-                          arr.push(this.waterLine);
-                      }
                       if ("origin" in me._opt) {
                           arr.push(me._opt.origin);
                       }
                       if (arr.length == 1) {
                           arr.push(arr[0] * 2);
+                      }
+                      if (this.waterLine) {
+                          arr.push(this.waterLine);
                       }
                       if (this.symmetric) {
                           //如果需要处理为对称数据
@@ -1627,7 +1627,7 @@
   };
 
   var is3dOpt = function is3dOpt(opt) {
-      var chartx3dCoordTypes = ["box"];
+      var chartx3dCoordTypes = ["box", "polar3d"];
       return opt.coord && opt.coord.type && chartx3dCoordTypes.indexOf(opt.coord.type) > -1;
   };
 
@@ -1742,7 +1742,7 @@
       },
       getComponentModules: function getComponentModules(dimension) {
           var comps = this.components.c_2d;
-          if (dimension == "3d") {
+          if (dimension == 3) {
               comps = this.components.c_3d;
           }if (!comps.modules) {
               comps.modules = {};
@@ -1762,14 +1762,14 @@
        * @param { dimension } 如果有四个参数，那么第三个肯定是type，第四个肯定是dimension 
        */
       registerComponent: function registerComponent(compModule, name) {
-          var dimension = "2d";
+          var dimension = 2;
           var type = "empty";
 
           if (arguments.length == 3) {
               var arg2 = arguments[2];
               if (_$1.isNumber(arg2)) {
                   if (arg2 == 3) {
-                      dimension = "3d";
+                      dimension = 3;
                   }
               }if (_$1.isString(arg2)) {
                   type = arg2;
@@ -1778,7 +1778,7 @@
               //那么肯定是有传 type  dimension 两个值
               type = arguments[2];
               if (arguments[3] == 3) {
-                  dimension = "3d";
+                  dimension = 3;
               }
           }
           var comps = this.getComponentModules(dimension).modules;
@@ -1798,14 +1798,14 @@
        * @param { dimension } 如果有三个参数，那么第二个肯定是type，第三个肯定是dimension 
        */
       getComponentModule: function getComponentModule(name) {
-          var dimension = "2d";
+          var dimension = 2;
           var type = "empty";
 
           if (arguments.length == 2) {
               var arg1 = arguments[1];
               if (_$1.isNumber(arg1)) {
                   if (arg1 == 3) {
-                      dimension = "3d";
+                      dimension = 3;
                   }
               }if (_$1.isString(arg1)) {
                   type = arg1;
@@ -1814,7 +1814,7 @@
               //那么肯定是有传 type  dimension 两个值
               type = arguments[1];
               if (arguments[2] == 3) {
-                  dimension = "3d";
+                  dimension = 3;
               }
           }
           var comps = this.getComponentModules(dimension).modules;
@@ -1902,7 +1902,7 @@
           this.dataOrg = [];
 
           this.startAngle = this._opt.startAngle;
-          this.allAngles = this._opt.allAngles;
+          this.allAngles = Math.min(360, this._opt.allAngles);
           this.sort = this._opt.sort;
 
           this.layoutData = []; //和dataSection一一对应的，每个值的pos,agend,dregg,centerPos
@@ -2037,7 +2037,7 @@
 
               Object.assign(this._opt, opt);
               this.startAngle = this._opt.startAngle;
-              this.allAngles = this._opt.allAngles;
+              this.allAngles = Math.min(360, this._opt.allAngles);
               this.sort = this._opt.sort;
           }
       }, {
@@ -5375,6 +5375,12 @@
 
           //所有属性准备好了后，先要计算一次this._updateTransform()得到_tansform
           _this._updateTransform();
+
+          _this._tweens = [];
+          var me = _this;
+          _this.on("destory", function () {
+              me.cleanAnimates();
+          });
           return _this;
       }
 
@@ -5955,10 +5961,49 @@
               }
               options.onComplete = function (status) {
                   compFun.apply(self, arguments);
+                  self._removeTween(tween);
+              };
+              options.onStop = function () {
+                  self._removeTween(tween);
               };
               options.desc = "tweenType:DisplayObject.animate__id:" + this.id + "__objectType:" + this.type;
               tween = AnimationFrame.registTween(options);
+              this._tweens.push(tween);
               return tween;
+          }
+      }, {
+          key: "_removeTween",
+          value: function _removeTween(tween) {
+              for (var i = 0; i < this._tweens.length; i++) {
+                  if (tween == this._tweens[i]) {
+                      this._tweens.splice(i, 1);
+                      break;
+                  }
+              }
+          }
+      }, {
+          key: "removeAnimate",
+          value: function removeAnimate(animate) {
+              animate.stop();
+              this._removeTween(animate);
+          }
+
+          //清楚所有的动画
+
+      }, {
+          key: "cleanAnimates",
+          value: function cleanAnimates() {
+              this._cleanAnimates();
+          }
+
+          //清楚所有的动画
+
+      }, {
+          key: "_cleanAnimates",
+          value: function _cleanAnimates() {
+              while (this._tweens.length) {
+                  this._tweens.shift().stop();
+              }
           }
 
           //从树中删除
@@ -6129,6 +6174,18 @@
               this._destroy();
           }
 
+          //集合类的自我销毁
+
+      }, {
+          key: "cleanAnimates",
+          value: function cleanAnimates() {
+              //依次销毁所有子元素
+              for (var i = 0, l = this.children.length; i < l; i++) {
+                  this.getChildAt(i).cleanAnimates();
+              }
+              this._cleanAnimates();
+          }
+
           /*
            *@id 元素的id
            *@boolen 是否深度查询，默认就在第一层子元素中查询
@@ -6243,13 +6300,10 @@
           return _this;
       }
 
+      //由canvax的afterAddChild 回调
+
+
       createClass$1(Stage, [{
-          key: "init",
-          value: function init() {}
-
-          //由canvax的afterAddChild 回调
-
-      }, {
           key: "initStage",
           value: function initStage(canvas, width, height) {
               var self = this;
@@ -9983,9 +10037,6 @@
           //构件好coord 和 graphs 的根容器
           _this.setCoord_Graphs_Sp();
 
-          //初始化_graphs为空数组
-          _this._graphs = [];
-
           //组件管理机制,所有的组件都绘制在这个地方
           _this.components = [];
 
@@ -10022,9 +10073,7 @@
           value: function _pretreatmentOpt(opt) {
               if (!opt.resize) {
                   //如果是resize的话，是不需要处理默认值的
-                  if (opt.graphs) {
-                      opt.graphs = _$1.flatten([opt.graphs]);
-                  }
+
                   //查找这个opt中的coord，调用对应的静态 setDefaultOpt 方法处理
                   if (opt.coord && opt.coord.type) {
                       var coordModule = this.componentModules.getComponentModule("coord", opt.coord.type);
@@ -10056,10 +10105,10 @@
                   this._coord = new coordModule(opt.coord, me);
                   this.coordSprite.addChild(this._coord.sprite);
               }
-              _$1.each(opt.graphs, function (graphs) {
+              _$1.each(_$1.flatten([opt.graphs]), function (graphs) {
                   var graphsModule = me.componentModules.getComponentModule("graphs", graphs.type);
                   var _g = new graphsModule(graphs, me);
-                  me._graphs.push(_g);
+                  me.components.push(_g);
                   me.graphsSprite.addChild(_g.sprite);
               });
 
@@ -10108,8 +10157,9 @@
                   //如果没有数据，不需要绘制graphs
                   me.fire("complete");
                   return;
-              }
-              var graphsCount = this._graphs.length;
+              }            debugger;
+              var _graphs = this.getComponents({ name: 'graphs' });
+              var graphsCount = _graphs.length;
               var completeNum = 0;
 
               opt = _$1.extend(opt, {
@@ -10118,7 +10168,7 @@
                   origin: origin
               });
 
-              _$1.each(this._graphs, function (_g) {
+              _$1.each(_graphs, function (_g) {
                   _g.on("complete", function (g) {
                       completeNum++;
                       if (completeNum == graphsCount) {
@@ -10181,7 +10231,7 @@
                       ctx.rotation = ctx.rotation - 90;
                   }            }
 
-              _$1.each(me._graphs, function (_graphs) {
+              _$1.each(me.getComponents({ name: 'graphs' }), function (_graphs) {
                   _horizontalText(_graphs.sprite);
               });
           }
@@ -10274,7 +10324,6 @@
 
               this.components = []; //组件清空
               this._coord = null; //坐标系清空
-              this._graphs = []; //绘图组件清空
               this.canvax.domView.innerHTML = "";
               //padding数据也要重置为起始值
               this.padding = this._getPadding();
@@ -10353,7 +10402,7 @@
               }
               if (this._coord) {
                   this._coord.resetData(this.dataFrame, trigger);
-              }            _$1.each(this._graphs, function (_g) {
+              }            _$1.each(this.getComponents({ name: 'graphs' }), function (_g) {
                   _g.resetData(me.dataFrame, trigger);
               });
 
@@ -10381,29 +10430,6 @@
               });
           }
       }, {
-          key: "getComponent",
-          value: function getComponent(opt) {
-              return this.getComponents(opt)[0];
-          }
-      }, {
-          key: "getComponents",
-          value: function getComponents(opt) {
-              var arr = [];
-              var expCount = 0;
-              for (var p in opt) {
-                  expCount++;
-              }
-              _$1.each(this.components, function (comp) {
-                  for (var p in opt) {
-                      if (JSON.stringify(comp[p]) == JSON.stringify(opt[p])) {
-                          expCount--;
-                      }                }                if (!expCount) {
-                      arr.push(comp);
-                  }            });
-
-              return arr;
-          }
-      }, {
           key: "getComponentById",
           value: function getComponentById(id) {
               var comp;
@@ -10414,6 +10440,36 @@
                   }
               });
               return comp;
+          }
+      }, {
+          key: "getComponent",
+          value: function getComponent(opt) {
+              return this.getComponents(opt)[0];
+          }
+      }, {
+          key: "getComponents",
+          value: function getComponents(opt, components) {
+              var arr = [];
+              var expCount = 0;
+              for (var p in opt) {
+                  expCount++;
+              }
+              if (!expCount) {
+                  return arr;
+              }
+              if (!components) {
+                  components = this.components;
+              }
+              _$1.each(components, function (comp) {
+                  var i = 0;
+                  for (var p in opt) {
+                      if (JSON.stringify(comp[p]) == JSON.stringify(opt[p])) {
+                          i++;
+                      }                }                if (expCount == i) {
+                      arr.push(comp);
+                  }            });
+
+              return arr;
           }
 
           //从graphs里面去根据opt做一一对比，比对成功为true
@@ -10428,20 +10484,7 @@
       }, {
           key: "getGraphs",
           value: function getGraphs(opt) {
-              var arr = [];
-              var expCount = 0;
-              for (var p in opt) {
-                  expCount++;
-              }
-              _$1.each(this.getComponents({ name: 'graphs' }), function (g) {
-                  for (var p in opt) {
-                      if (JSON.stringify(g[p]) == JSON.stringify(opt[p])) {
-                          expCount--;
-                      }                }                if (!expCount) {
-                      arr.push(g);
-                  }            });
-
-              return arr;
+              return this.getComponents(opt, this.getComponents({ name: 'graphs' }));
           }
 
           //获取graphs根据id
@@ -10570,7 +10613,7 @@
               if (!e.eventInfo.nodes || !e.eventInfo.nodes.length) {
                   var nodes = [];
                   var iNode = e.eventInfo.xAxis.ind;
-                  _$1.each(this._graphs, function (_g) {
+                  _$1.each(this.getComponents({ name: 'graphs' }), function (_g) {
                       nodes = nodes.concat(_g.getNodesAt(iNode));
                   });
                   e.eventInfo.nodes = nodes;
@@ -10581,14 +10624,14 @@
       }, {
           key: "_tipsPointerAtAllGraphs",
           value: function _tipsPointerAtAllGraphs(e) {
-              _$1.each(this._graphs, function (_g) {
+              _$1.each(this.getComponents({ name: 'graphs' }), function (_g) {
                   _g.tipsPointerOf(e);
               });
           }
       }, {
           key: "_tipsPointerHideAtAllGraphs",
           value: function _tipsPointerHideAtAllGraphs(e) {
-              _$1.each(this._graphs, function (_g) {
+              _$1.each(this.getComponents({ name: 'graphs' }), function (_g) {
                   _g.tipsPointerHideOf(e);
               });
           }
@@ -11554,6 +11597,8 @@
 
               this.setAxisLength(this.height);
 
+              this.sprite.cleanAnimates();
+
               this._trimYAxis();
               this._widget(opt);
 
@@ -11731,7 +11776,8 @@
 
                           if (me.animation && !opt.resize) {
                               yNode._txt.animate({
-                                  y: posy
+                                  y: posy,
+                                  globalAlpha: 1
                               }, {
                                   duration: 500,
                                   delay: a * 80,
@@ -12665,6 +12711,8 @@
               //根据opt中得Graphs配置，来设置 coord.yAxis
               if (opt.graphs) {
 
+                  opt.graphs = _$1.flatten([opt.graphs]);
+
                   //有graphs的就要用找到这个graphs.field来设置coord.yAxis
                   for (var i = 0; i < opt.graphs.length; i++) {
                       var graphs = opt.graphs[i];
@@ -13560,7 +13608,7 @@
               var legendData = [
                   //{name: "uv", style: "#ff8533", enabled: true, ind: 0}
               ];
-              _$1.each(this._graphs, function (_g) {
+              _$1.each(this.getComponents({ name: 'graphs' }), function (_g) {
                   _$1.each(_g.getLegendData(), function (item) {
 
                       if (_$1.find(legendData, function (d) {
@@ -13587,7 +13635,7 @@
               if (!e.eventInfo.nodes || !e.eventInfo.nodes.length) {
                   var nodes = [];
                   var iNode = e.eventInfo.aAxis.ind;
-                  _$1.each(this._graphs, function (_g) {
+                  _$1.each(this.getComponents({ name: 'graphs' }), function (_g) {
                       nodes = nodes.concat(_g.getNodesAt(iNode));
                   });
                   e.eventInfo.nodes = nodes;
@@ -14286,7 +14334,7 @@
               var _preHLenOver = false;
 
               if (!this.absolute) {
-                  _$1.each(this.app._graphs, function (_g) {
+                  _$1.each(this.app.getComponents({ name: 'graphs' }), function (_g) {
                       if (!_g.absolute && _g.type == "bar") {
                           if (_g === me) {
                               _preHLenOver = true;
@@ -23056,7 +23104,7 @@
                           if (me.icon.height * (rows + 1) > viewHeight * 0.3) {
                               isOver = true;
                               return;
-                          }                        debugger;
+                          }
                           width = Math.max(width, x);
                           x = 0;
                           rows++;
@@ -23256,7 +23304,7 @@
               //clone的chart只需要coord 和 graphs 配置就可以了
               //因为画出来后也只需要拿graphs得sprite去贴图
               var graphsOpt = [];
-              _$1.each(app._graphs, function (_g) {
+              _$1.each(app.getComponents({ name: 'graphs' }), function (_g) {
                   var _field = _g.enabledField || _g.field;
 
                   if (_$1.flatten([_field]).length) {
@@ -23880,7 +23928,7 @@
                   };
               }
               //y = this._getYVal( y );
-              debugger;
+
               if (!isNaN(y)) {
                   //如果y是个function说明是均值，自动实时计算的，而且不会超过ydatasection的范围
                   _yAxis.setWaterLine(y);
@@ -24477,7 +24525,7 @@
           value: function draw() {
               var me = this;
 
-              _$1.each(me.app._graphs, function (_g) {
+              _$1.each(me.app.getComponents({ name: 'graphs' }), function (_g) {
                   if (_g.type == "bar" && _g.data[me.barField]) {
                       me.barDatas = _g.data[me.barField];
                       return false;
@@ -24628,7 +24676,7 @@
           value: function draw() {
               var me = this;
 
-              _$1.each(me.app._graphs, function (_g) {
+              _$1.each(me.app.getComponents({ name: 'graphs' }), function (_g) {
                   if (_g.type == "bar" && _g.data[me.barField]) {
                       me.barDatas = _g.data[me.barField];
                       return false;

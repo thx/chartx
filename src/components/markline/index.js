@@ -106,7 +106,7 @@ export default class MarkLine extends Component
         };
 
         //y = this._getYVal( y );
-debugger
+
         if( !isNaN(y) ) {
             //如果y是个function说明是均值，自动实时计算的，而且不会超过ydatasection的范围
             _yAxis.setWaterLine( y );

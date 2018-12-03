@@ -102,7 +102,7 @@ export default class barTgi extends Component
     {
         var me = this;
 
-        _.each( me.app._graphs, function( _g ){
+        _.each( me.app.getComponents({name:'graphs'}), function( _g ){
             if( _g.type == "bar" && _g.data[ me.barField ] ){
                 me.barDatas = _g.data[ me.barField ];
                 return false;

@@ -139,7 +139,7 @@ export default class dataZoom extends Component
         //clone的chart只需要coord 和 graphs 配置就可以了
         //因为画出来后也只需要拿graphs得sprite去贴图
         var graphsOpt = [];
-        _.each( app._graphs, function( _g ){
+        _.each( app.getComponents({name:'graphs'}), function( _g ){
             var _field = _g.enabledField || _g.field;
             
             if( _.flatten([_field]).length ) {

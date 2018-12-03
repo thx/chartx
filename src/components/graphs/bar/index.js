@@ -603,7 +603,7 @@ export default class BarGraphs extends GraphsBase
         var _preHLenOver = false;
 
         if( !this.absolute ){
-            _.each( this.app._graphs , function( _g ){
+            _.each( this.app.getComponents({name:'graphs'}) , function( _g ){
                 if( !_g.absolute && _g.type == "bar" ) {
                     if( _g === me ){
                         _preHLenOver = true;

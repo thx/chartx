@@ -56,7 +56,7 @@ export default class Polar extends CoordBase
         var legendData = [
             //{name: "uv", style: "#ff8533", enabled: true, ind: 0}
         ];
-        _.each( this._graphs, function( _g ){
+        _.each( this.getComponents({name:'graphs'}), function( _g ){
             _.each( _g.getLegendData(), function( item ){
                 
                 if( _.find( legendData , function( d ){
@@ -81,7 +81,7 @@ export default class Polar extends CoordBase
         if( !e.eventInfo.nodes || !e.eventInfo.nodes.length ){
             var nodes = [];
             var iNode = e.eventInfo.aAxis.ind;
-            _.each( this._graphs, function( _g ){
+            _.each( this.getComponents({name:'graphs'}), function( _g ){
                 nodes = nodes.concat( _g.getNodesAt( iNode ) );
             } );
             e.eventInfo.nodes = nodes;

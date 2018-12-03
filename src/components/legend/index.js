@@ -243,7 +243,7 @@ export default class Legend extends Component
                         isOver = true;
                         return;
                     };
-                    debugger
+                    
                     width = Math.max( width, x );
                     x = 0;
                     rows++;    

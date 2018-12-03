@@ -46,9 +46,7 @@ export default class Chart extends Canvax.Event.EventDispatcher
 
         //构件好coord 和 graphs 的根容器
         this.setCoord_Graphs_Sp();
-        
-        //初始化_graphs为空数组
-        this._graphs = [];
+    
 
         //组件管理机制,所有的组件都绘制在这个地方
         this.components = [];
@@ -83,10 +81,7 @@ export default class Chart extends Canvax.Event.EventDispatcher
     _pretreatmentOpt( opt ){
         if( !opt.resize ){
             //如果是resize的话，是不需要处理默认值的
-            if( opt.graphs ){
-                opt.graphs = _.flatten( [ opt.graphs ] );
-            };
-
+        
             //查找这个opt中的coord，调用对应的静态 setDefaultOpt 方法处理
             if( opt.coord && opt.coord.type ){
                 var coordModule = this.componentModules.getComponentModule("coord", opt.coord.type);
@@ -123,10 +118,10 @@ export default class Chart extends Canvax.Event.EventDispatcher
             this.coordSprite.addChild( this._coord.sprite );
         };
 
-        _.each( opt.graphs , function( graphs ){
+        _.each( _.flatten( [ opt.graphs ] ) , function( graphs ){
             var graphsModule = me.componentModules.getComponentModule("graphs", graphs.type);
             var _g = new graphsModule( graphs, me );
-            me._graphs.push( _g );
+            me.components.push( _g );
             me.graphsSprite.addChild( _g.sprite );
         } );
 
@@ -182,8 +177,9 @@ export default class Chart extends Canvax.Event.EventDispatcher
             me.fire("complete");
             return;
         };
-    
-        var graphsCount = this._graphs.length;
+    debugger
+        var _graphs = this.getComponents({name:'graphs'});
+        var graphsCount = _graphs.length;
         var completeNum = 0;
 
         opt = _.extend( opt, {
@@ -192,7 +188,7 @@ export default class Chart extends Canvax.Event.EventDispatcher
             origin : origin
         } );
 
-        _.each( this._graphs, function( _g ){
+        _.each( _graphs, function( _g ){
             _g.on( "complete", function(g) {
                 completeNum ++;
                 if( completeNum == graphsCount ){
@@ -262,7 +258,7 @@ export default class Chart extends Canvax.Event.EventDispatcher
             };
         }
 
-        _.each(me._graphs, function( _graphs ) {
+        _.each(me.getComponents({name:'graphs'}), function( _graphs ) {
             _horizontalText( _graphs.sprite );
         });
     }
@@ -353,7 +349,6 @@ export default class Chart extends Canvax.Event.EventDispatcher
 
         this.components = []; //组件清空
         this._coord = null;   //坐标系清空
-        this._graphs = [];    //绘图组件清空
         this.canvax.domView.innerHTML = "";
         //padding数据也要重置为起始值
         this.padding = this._getPadding();
@@ -431,7 +426,7 @@ export default class Chart extends Canvax.Event.EventDispatcher
         if( this._coord ){
             this._coord.resetData( this.dataFrame , trigger);
         };
-        _.each( this._graphs, function( _g ){
+        _.each( this.getComponents({name:'graphs'}), function( _g ){
             _g.resetData( me.dataFrame , trigger);
         } );
 
@@ -460,30 +455,6 @@ export default class Chart extends Canvax.Event.EventDispatcher
         });
     }
 
-    getComponent( opt ){
-        return this.getComponents( opt )[0];
-    }
-
-    getComponents( opt ){
-        var arr = [];
-        var expCount = 0;
-        for( var p in opt ){
-            expCount++;
-        };
-
-        _.each( this.components, function( comp ){
-            for( var p in opt ){
-                if( JSON.stringify( comp[p] ) == JSON.stringify( opt[p] ) ){
-                    expCount--
-                };
-            };
-            if( !expCount ){
-                arr.push( comp );
-            };
-        } );
-        
-        return arr;
-    }
     getComponentById( id )
     {
         var comp;
@@ -496,6 +467,41 @@ export default class Chart extends Canvax.Event.EventDispatcher
         return comp;
     }
 
+    getComponent( opt ){
+        return this.getComponents( opt )[0];
+    }
+
+    getComponents( opt, components ){
+        var arr = [];
+        var expCount = 0;
+        for( var p in opt ){
+            expCount++;
+        };
+
+        if( !expCount ){
+            return arr;
+        };
+
+        if( !components ){
+            components = this.components;
+        };
+
+        _.each( components, function( comp ){
+            var i = 0;
+            for( var p in opt ){
+                if( JSON.stringify( comp[p] ) == JSON.stringify( opt[p] ) ){
+                    i++;
+                };
+            };
+            if( expCount == i ){
+                arr.push( comp );
+            };
+        } );
+        
+        return arr;
+    }
+    
+
 
     //从graphs里面去根据opt做一一对比，比对成功为true
     //count为要查询的数量， 如果为1，则
@@ -505,24 +511,7 @@ export default class Chart extends Canvax.Event.EventDispatcher
     }
 
     getGraphs( opt ){
-        var arr = [];
-        var expCount = 0;
-        for( var p in opt ){
-            expCount++;
-        };
-
-        _.each( this.getComponents({name:'graphs'}), function( g ){
-            for( var p in opt ){
-                if( JSON.stringify( g[p] ) == JSON.stringify( opt[p] ) ){
-                    expCount--
-                };
-            };
-            if( !expCount ){
-                arr.push( g );
-            };
-        } );
-        
-        return arr;
+        return this.getComponents( opt, this.getComponents({name:'graphs'}) );
     }
 
     //获取graphs根据id
@@ -653,7 +642,7 @@ export default class Chart extends Canvax.Event.EventDispatcher
         if( !e.eventInfo.nodes || !e.eventInfo.nodes.length ){
             var nodes = [];
             var iNode = e.eventInfo.xAxis.ind;
-            _.each( this._graphs, function( _g ){
+            _.each( this.getComponents({name:'graphs'}), function( _g ){
                 nodes = nodes.concat( _g.getNodesAt( iNode ) );
             } );
             e.eventInfo.nodes = nodes;
@@ -664,14 +653,14 @@ export default class Chart extends Canvax.Event.EventDispatcher
      //把这个point拿来给每一个graphs执行一次测试，给graphs上面的shape触发激活样式
      _tipsPointerAtAllGraphs( e )
      {
-         _.each( this._graphs, function( _g ){
+         _.each( this.getComponents({name:'graphs'}), function( _g ){
              _g.tipsPointerOf( e );
          });
      }
  
      _tipsPointerHideAtAllGraphs( e )
      {
-         _.each( this._graphs, function( _g ){
+         _.each( this.getComponents({name:'graphs'}), function( _g ){
              _g.tipsPointerHideOf( e );
          });
      }

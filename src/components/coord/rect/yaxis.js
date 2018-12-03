@@ -128,6 +128,8 @@ export default class yAxis extends axis
     
         this.setAxisLength( this.height );
 
+        this.sprite.cleanAnimates();
+
         this._trimYAxis();
         this._widget( opt );
 
@@ -310,7 +312,8 @@ export default class yAxis extends axis
 
                     if (me.animation && !opt.resize) {
                         yNode._txt.animate({
-                            y: posy
+                            y: posy,
+                            globalAlpha : 1
                         }, {
                             duration: 500,
                             delay: a*80,
@@ -336,7 +339,6 @@ export default class yAxis extends axis
                         yNode._tickLine.context.y = y;
                     }
                 };
-
             } else {
                 yNode = new Canvax.Display.Sprite({
                     id: "yNode" + a
