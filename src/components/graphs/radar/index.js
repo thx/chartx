@@ -1,6 +1,6 @@
 import Canvax from "canvax"
 import GraphsBase from "../index"
-import { _ } from "mmvis"
+import { _,event } from "mmvis"
 
 const Polygon = Canvax.Shapes.Polygon;
 const Circle = Canvax.Shapes.Circle;
@@ -109,7 +109,7 @@ export default class RadarGraphs extends GraphsBase
             group.area = _poly;
             me.sprite.addChild( _poly );
 
-            _poly.on("panstart mouseover panmove mousemove panend mouseout tap click dblclick", function(e) {
+            _poly.on(event.types.get(), function(e) {
                 
                 if( e.type == "mouseover" ){
                     this.context.fillAlpha += 0.2

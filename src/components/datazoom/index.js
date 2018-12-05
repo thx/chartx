@@ -1,6 +1,7 @@
 import Component from "../component"
 import Canvax from "canvax"
 import { _ } from "mmvis"
+import Trigger from "../trigger"
 
 
 const Line = Canvax.Shapes.Line;
@@ -223,16 +224,11 @@ export default class dataZoom extends Component
                 x: coordInfo.origin.x
             },
             dragIng: function(range) {
-
+                var trigger = new Trigger( me, {
+                    left :  app.dataFrame.range.start - range.start,
+                    right : range.end - app.dataFrame.range.end
+                } );
                 _.extend( app.dataFrame.range , range );
-                
-                var trigger = {
-                    comp : me,
-                    mesg : {
-                        left :  app.dataFrame.range.start - range.start,
-                        right : range.end - app.dataFrame.range.end
-                    }
-                };
                 //不想要重新构造dataFrame，所以第一个参数为null
                 app.resetData( null , trigger );
                 app.fire("dataZoomDragIng");

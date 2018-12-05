@@ -1,7 +1,7 @@
 import Canvax from "canvax"
 import GraphsBase from "../index"
 import {numAddSymbol} from "../../../utils/tools"
-import { _ } from "mmvis"
+import { _ , event } from "mmvis"
 
 const Text = Canvax.Display.Text;
 const Polygon = Canvax.Shapes.Polygon;
@@ -19,7 +19,7 @@ export default class FunnelGraphs extends GraphsBase
         this.data  = []; //layoutData list , default is empty Array
         this.sort = null;
 
-        this.invert = false;//默认为倒立的金字塔结构
+        this.invert = false; //默认为倒立的金字塔结构
 
         this._maxVal = null;
         this._minVal = null;
@@ -219,7 +219,7 @@ export default class FunnelGraphs extends GraphsBase
             });
             me.sprite.addChild( _polygon );
             _polygon.nodeData = ld;
-            _polygon.on("mousedown mouseup panstart mouseover panmove mousemove panend mouseout tap click dblclick", function(e) {
+            _polygon.on( event.types.get() , function(e) {
                 
                 e.eventInfo = {
                     title : me.field,

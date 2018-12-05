@@ -8,7 +8,8 @@ rollup.rollup({
     input: 'src/index.js',
     plugins: [
       babel({
-        exclude: 'node_modules/**'
+        //exclude : 'node_modules/**',
+        include : ['./src/**','node_modules/mmvis/**', "node_modules/canvax/**"]
       }),
       resolve({ jsnext: true, main: true, browser: true }), 
       commonjs()
@@ -30,14 +31,7 @@ rollup.rollup({
         //sourceMap: 'inline'
     });
 
-
-    bundle.write({
-        format: 'amd',
-        name: 'Chartx',
-        file: 'dist/amd/chartx.js',
-        //sourceMap: 'inline'
-    });
-
+    /*
     bundle.write({
         format: 'umd',
         name: 'Chartx',
@@ -45,11 +39,22 @@ rollup.rollup({
         //sourceMap: 'inline'
     });
 
+    
+    bundle.write({
+        format: 'amd',
+        name: 'Chartx',
+        file: 'dist/amd/chartx.js',
+        //sourceMap: 'inline'
+    });
+
+    
+
     bundle.write({
         format: 'cjs',
         name: 'Chartx',
         file: 'dist/cjs/chartx.js',
         //sourceMap: 'inline'
     });
+    */
 
 });

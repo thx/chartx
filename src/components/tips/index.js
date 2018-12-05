@@ -68,9 +68,18 @@ export default class Tips extends Component {
         if (e.eventInfo) {
             this.eventInfo = e.eventInfo;
 
+            //TODO:这里要优化，canvax后续要提供直接获取canvax实例的方法
             var stage = e.target.getStage();
-            this.cW = stage.context.width;
-            this.cH = stage.context.height;
+            if( stage ){
+                this.cW = stage.context.width;
+                this.cH = stage.context.height;
+            } else {
+                if( e.target.type == 'canvax' ){
+                    this.cW = e.target.width;
+                    this.cH = e.target.height;
+                };
+            };
+            
 
             var content = this._setContent(e);
             if (content) {

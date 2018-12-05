@@ -1,6 +1,7 @@
 import Canvax from "canvax"
+import {event} from "mmvis"
 
-export default class component extends Canvax.Event.EventDispatcher
+export default class component extends event.Dispatcher
 {
     constructor(opt, app)
     {

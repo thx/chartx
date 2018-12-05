@@ -25,7 +25,7 @@ export default class theme extends Component
         if( !_.isArray( colors ) ){
             colors = [ colors ]
         };
-        return this.colors
+        return colors;
     }
 
     mergeTo( colors )

@@ -337,7 +337,7 @@ export default class PlanetGraphs extends GraphsBase
             _.each( _g._rings , function( ring , i ){
                 _.each( ring.planets, function( data , ii){
                     var rowData = data.rowData;
-                    if( trigger.mesg.name == rowData[ trigger.mesg.field ] ){
+                    if( trigger.params.name == rowData[ trigger.params.field ] ){
                         //这个数据符合
                         //data.nodeElement.context.visible = false;
                         //data.labelElement.context.visible = false;

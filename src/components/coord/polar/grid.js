@@ -1,11 +1,11 @@
 import Canvax from "canvax"
-import { _ } from "mmvis"
+import { _, event } from "mmvis"
 
 const Line = Canvax.Shapes.Line;
 const Circle = Canvax.Shapes.Circle;
 const Polygon = Canvax.Shapes.Polygon;
 
-export default class polarGrid extends Canvax.Event.EventDispatcher
+export default class polarGrid extends event.Dispatcher
 {
     constructor( opt, app )
     {

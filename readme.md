@@ -138,6 +138,7 @@ line --》（多个数据节点的链接，在雷达图和line折线图中表现
 area --》（同样地，表示多个数据节点的链接，然后有一个闭环，出现了一个面）
 text --》 文本
 
+所有组件对外影响的时候都会抛出一个 trigger对象 trigger对象包括comp（触发的组件）和params两个属性
 
 nodeData, nodeElement ， data和图形之间互相引用的属性约定
 

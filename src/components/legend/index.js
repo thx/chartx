@@ -1,6 +1,7 @@
 import Component from "../component"
 import Canvax from "canvax"
 import { _ } from "mmvis"
+import Trigger from "../trigger"
 
 const Circle = Canvax.Shapes.Circle
 
@@ -58,16 +59,10 @@ export default class Legend extends Component
         _.extend(true, this , {
             icon : {
                 onChecked : function( obj ){
-                    app.show( obj.name , {
-                        comp : this,
-                        mesg : obj
-                    } );
+                    app.show( obj.name , new Trigger( this, obj ) );
                 },
                 onUnChecked : function( obj ){
-                    app.hide( obj.name , {
-                        comp : this,
-                        mesg : obj
-                    } );
+                    app.hide( obj.name , new Trigger( this, obj ));
                 }
             }
         }, opt );

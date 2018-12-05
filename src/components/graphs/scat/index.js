@@ -1,6 +1,6 @@
 import Canvax from "canvax"
 import GraphsBase from "../index"
-import { _ } from "mmvis"
+import { _,event } from "mmvis"
 
 const Circle = Canvax.Shapes.Circle;
 const Rect = Canvax.Shapes.Rect;
@@ -335,7 +335,7 @@ export default class ScatGraphs extends GraphsBase
                 });
                 me._shapesp.addChild( _nodeElement );
 
-                _nodeElement.on("mousedown mouseup panstart mouseover panmove mousemove panend mouseout tap click dblclick", function(e) {
+                _nodeElement.on(event.types.get(), function(e) {
                     
                      e.eventInfo = {
                          title : null,

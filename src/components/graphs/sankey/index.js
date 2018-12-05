@@ -4,7 +4,7 @@
 import Canvax from "canvax"
 import GraphsBase from "../index"
 import sankeyLayout from "../../../layout/sankey/index"
-import { _ } from "mmvis"
+import { _,event } from "mmvis"
 
 const Path = Canvax.Shapes.Path;
 const Rect = Canvax.Shapes.Rect;
@@ -215,7 +215,7 @@ export default class sankeyGraphs extends GraphsBase
 
             _path.link = link;
 
-            _path.on("mousedown mouseup panstart mouseover panmove mousemove panend mouseout tap click dblclick", function(e) {
+            _path.on( event.types.get(), function(e) {
                 
                 if( e.type == 'mouseover' ){
                     this.context.globalAlpha += 0.2;

@@ -1,7 +1,7 @@
 import Canvax from "canvax"
 import {numAddSymbol} from "../../../utils/tools"
 import GraphsBase from "../index"
-import { _ } from "mmvis"
+import { _, event } from "mmvis"
 
 const AnimationFrame = Canvax.AnimationFrame;
 const BrokenLine = Canvax.Shapes.BrokenLine;
@@ -333,7 +333,7 @@ export default class BarGraphs extends GraphsBase
                         
                         groupRegion.iNode = h;
                         //触发注册的事件
-                        groupRegion.on('mousedown mouseup panstart mouseover panmove mousemove panend mouseout tap click dblclick', function (e) {
+                        groupRegion.on( event.types.get() , function (e) {
                             
                             e.eventInfo = {
                                 iNode : this.iNode
@@ -667,6 +667,7 @@ export default class BarGraphs extends GraphsBase
                     };
 
                     var _x = _xAxis.getPosOfInd( i );
+                    
                     
                     var x = _x - cellWidth / 2 + disLeft + (barW + barDis)*b;
 

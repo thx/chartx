@@ -1,6 +1,6 @@
 import Canvax from "canvax"
 import {getPath} from "../../../utils/tools"
-import { _ , color } from "mmvis"
+import { _ , color, event } from "mmvis"
 
 const AnimationFrame = Canvax.AnimationFrame;
 const BrokenLine = Canvax.Shapes.BrokenLine;
@@ -9,7 +9,7 @@ const Circle = Canvax.Shapes.Circle;
 const Path = Canvax.Shapes.Path;
  
 
-export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
+export default class LineGraphsGroup extends event.Dispatcher
 {
     constructor( fieldMap, iGroup, opt, ctx, h, w )
     {
@@ -172,29 +172,29 @@ export default class LineGraphsGroup extends Canvax.Event.EventDispatcher
         var plen = me._pointList.length;
         var cplen = me._currPointList.length;
 
-        if( !dataTrigger ){
-            dataTrigger = {
-                name : 'normal',
-                left : 0, //默认左边数据没变
-                right : plen - cplen
+        var params = {
+            left : 0, //默认左边数据没变
+            right : plen - cplen
+        };
+        if( dataTrigger ){
+            _.extend( params, dataTrigger.params );
+        };
+
+        if( params.left ){
+            if( params.left > 0 ){
+                this._currPointList = this._pointList.slice(0, params.left ).concat( this._currPointList )
+            }
+            if( params.left < 0 ){
+                this._currPointList.splice( 0, Math.abs( params.left ) );
             }
         };
 
-        if( dataTrigger.left ){
-            if( dataTrigger.left > 0 ){
-                this._currPointList = this._pointList.slice(0, dataTrigger.left ).concat( this._currPointList )
+        if( params.right ){
+            if( params.right > 0 ){
+                this._currPointList = this._currPointList.concat( this._pointList.slice( -params.right ) );
             }
-            if( dataTrigger.left < 0 ){
-                this._currPointList.splice( 0, Math.abs( dataTrigger.left ) );
-            }
-        };
-
-        if( dataTrigger.right ){
-            if( dataTrigger.right > 0 ){
-                this._currPointList = this._currPointList.concat( this._pointList.slice( -dataTrigger.right ) );
-            }
-            if( dataTrigger.right < 0 ){
-                this._currPointList.splice( this._currPointList.length - Math.abs( dataTrigger.right ) );
+            if( params.right < 0 ){
+                this._currPointList.splice( this._currPointList.length - Math.abs( params.right ) );
             }
         };
 

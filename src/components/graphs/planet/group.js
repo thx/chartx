@@ -1,5 +1,5 @@
 import Canvax from "canvax"
-import { _ } from "mmvis"
+import { _,event } from "mmvis"
 
 const Text = Canvax.Display.Text;
 const Circle = Canvax.Shapes.Circle;
@@ -429,7 +429,7 @@ export default class PlanetGroup
                     context : circleCtx
                 });
 
-                _circle.on("mousedown mouseup panstart mouseover panmove mousemove panend mouseout tap click dblclick", function(e) {
+                _circle.on( event.types.get(), function(e) {
                     
                      e.eventInfo = {
                          title : null,

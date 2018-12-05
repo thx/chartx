@@ -4,7 +4,7 @@ import GraphsBase from "../index"
 import {venn, lossFunction, normalizeSolution, scaleSolution} from "../../../layout/venn/layout";
 import {intersectionArea, distance, getCenter} from "../../../layout/venn/circleintersection";
 import {nelderMead} from "fmin";
-import { _ } from "mmvis"
+import { _, event } from "mmvis"
 
 const Text = Canvax.Display.Text;
 const Path = Canvax.Shapes.Path;
@@ -331,7 +331,7 @@ export default class VennGraphs extends GraphsBase
 
                 //新创建的元素才需要绑定事件，因为复用的原件已经绑定过事件了
                 if( isNewShape ){
-                    _shape.on("mousedown mouseup panstart mouseover panmove mousemove panend mouseout tap click dblclick", function(e) {
+                    _shape.on( event.types.get(), function(e) {
                         
                         e.eventInfo = {
                             title : null,

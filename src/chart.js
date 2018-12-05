@@ -1,9 +1,9 @@
 import Canvax from "canvax"
-import { _ , dataFrame, dom , global } from "mmvis"
+import { _ , dataFrame, $ , global , event } from "mmvis"
 
 const _padding = 20;
 
-export default class Chart extends Canvax.Event.EventDispatcher
+export default class Chart extends event.Dispatcher
 {
     constructor( node, data, opt, componentModules )
     {
@@ -17,12 +17,12 @@ export default class Chart extends Canvax.Event.EventDispatcher
 
         this.dataFrame = this.initData( data , opt );
 
-        this.el = dom.query(node) //chart 在页面里面的容器节点，也就是要把这个chart放在哪个节点里
+        this.el = $.query(node) //chart 在页面里面的容器节点，也就是要把这个chart放在哪个节点里
         this.width = parseInt(this.el.offsetWidth) //图表区域宽
         this.height = parseInt(this.el.offsetHeight) //图表区域高
 
         //legend如果在top，就会把图表的padding.top修改，减去legend的height
-        this.padding = this._getPadding();
+        this.padding = null;
 
         //Canvax实例
 		this.canvax = new Canvax.App({
@@ -31,12 +31,10 @@ export default class Chart extends Canvax.Event.EventDispatcher
 		});
         this.canvax.registEvent();
 
-
         this.id = "chartx_"+this.canvax.id;
         this.el.setAttribute("chart_id" , this.id);
         this.el.setAttribute("chartx_version", "2.0");
 
-        
         //设置stage ---------------------------------------------------------begin
 		this.stage = new Canvax.Display.Stage({
 		    id: "main-chart-stage"
@@ -54,52 +52,25 @@ export default class Chart extends Canvax.Event.EventDispatcher
       
         this.inited = false;
     
-        this.init.apply(this, arguments);
+        this.init();
     }
 
     init()
     {
-    }
-
-    //create的时候调用没有opt参数
-    //resize（opt=={resize : true}） 和 reset的时候会有 opt参数传过来
-    draw( opt )
-    {
-        !opt && (opt = this._opt);
-
-        //预处理各种配置
-        this._pretreatmentOpt( opt );
-
-        //初始化各个组件模块
-        this._initModule( opt );
-        this._startDraw( opt );
-    }
-
-    _pretreatmentOpt( opt ){
-        if( !opt.resize ){
-            //如果是resize的话，是不需要处理默认值的
-        
-            //查找这个opt中的coord，调用对应的静态 setDefaultOpt 方法处理
-            if( opt.coord && opt.coord.type ){
-                var coordModule = this.componentModules.getComponentModule("coord", opt.coord.type);
-                coordModule.setDefaultOpt( opt );
-            };
-
-            _.extend(true, this, opt);
-        };
-        return opt;
-    }
-
-    _initModule(opt)
-    {
         var me = this;
+
+        //init全部用 this._opt
+        var opt = this._opt;
+
+        //padding数据也要重置为起始值
+        this.padding = this._getPadding();
 
         //先依次init 处理 "theme", "coord", "graphs" 三个优先级最高的模块
         _.each( this.__highModules, function( compName ){
             if( !opt[compName] ) return;
             var comps = _.flatten([ opt[compName] ]);
             _.each( comps, function( comp ){
-                var compModule = me.componentModules.getComponentModule(compName, comp.type);
+                var compModule = me.componentModules.get(compName, comp.type);
                 if( compModule ){
                     var _comp = new compModule( comp, me );
                     me.components.push( _comp );
@@ -117,7 +88,7 @@ export default class Chart extends Canvax.Event.EventDispatcher
                     _comp = [ _comp ];
                 };
                 _.each( _comp, function( compOpt ){
-                    var compConstructor = me.componentModules.getComponentModule( _p, compOpt.type );
+                    var compConstructor = me.componentModules.get( _p, compOpt.type );
                     var _comp = new compConstructor( compOpt, me );
                     me.components.push( _comp );
                 } );
@@ -125,7 +96,8 @@ export default class Chart extends Canvax.Event.EventDispatcher
         };
     }
 
-    _startDraw(opt)
+    
+    draw(opt)
     {
         var me = this;
         !opt && (opt ={});
@@ -297,7 +269,7 @@ export default class Chart extends Canvax.Event.EventDispatcher
      */
     destroy() 
     {
-        this._clean();
+        this.clean();
         if( this.el ){
             this.el.removeAttribute("chart_id");
             this.el.removeAttribute("chartx_version");
@@ -311,7 +283,7 @@ export default class Chart extends Canvax.Event.EventDispatcher
     /*
      * 清除整个图表
      **/
-    _clean()
+    clean()
     {
         //保留所有的stage，stage下面得元素全部 destroy 掉
         for (var i=0,l=this.canvax.children.length;i<l;i++){
@@ -329,8 +301,7 @@ export default class Chart extends Canvax.Event.EventDispatcher
 
         this.components = []; //组件清空
         this.canvax.domView.innerHTML = "";
-        //padding数据也要重置为起始值
-        this.padding = this._getPadding();
+        
     }
 
     /**
@@ -347,7 +318,8 @@ export default class Chart extends Canvax.Event.EventDispatcher
         this.canvax.resize();
         this.inited = false;
 
-        this._clean();
+        this.clean();
+        this.init();
         this.draw( {
             resize : true
         } );
@@ -364,18 +336,15 @@ export default class Chart extends Canvax.Event.EventDispatcher
 
         _.extend(true, this._opt, opt);
 
-        //和上面的不同this._opts存储的都是用户设置的配置
-        //而下面的这个extend到this上面， this上面的属性都有包含默认配置的情况
-        _.extend(true, this , opt);
-
         if( data ) {
             this._data = data;
         };
 
         this.dataFrame = this.initData( this._data, opt );
 
-        this._clean();
-        this.draw( opt );
+        this.clean();
+        this.init();
+        this.draw();
 
     }
 
@@ -397,7 +366,8 @@ export default class Chart extends Canvax.Event.EventDispatcher
 
         if( !preDataLenth ){
             //如果之前的数据为空， 那么我们应该这里就直接重绘吧
-            this._clean();
+            this.clean();
+            this.init();
             this.draw( this._opt );
             return;
         };
@@ -430,7 +400,6 @@ export default class Chart extends Canvax.Event.EventDispatcher
             if( _.indexOf( me.__highModules, p.name ) != -1 ){
                 return
             };
-
             if( trigger && trigger.comp && trigger.comp.__cid == p.__cid ){
                 //如果这次reset就是由自己触发的，那么自己这个components不需要reset，负责观察就好
                 return;
@@ -533,7 +502,7 @@ export default class Chart extends Canvax.Event.EventDispatcher
             _.each( _coord.fieldsMap , function( map , i ){
                 //因为yAxis上面是可以单独自己配置field的，所以，这部分要过滤出 legend data
                 var isGraphsField = false;
-                _.each( me.graphs, function( gopt ){
+                _.each( me._opt.graphs, function( gopt ){
                     if( _.indexOf( _.flatten([ gopt.field ]), map.field ) > -1 ){
                         isGraphsField = true;
                         return false;
@@ -623,16 +592,16 @@ export default class Chart extends Canvax.Event.EventDispatcher
     //默认的基本tipsinfo处理，极坐标和笛卡尔坐标系统会覆盖
     _setTipsInfo(e)
     {
-         if( !e.eventInfo ){
-             e.eventInfo = {};
-         };
+        if( !e.eventInfo ){
+            e.eventInfo = {};
+        };
 
-         var _coord = this.getComponent({name:'coord'});
-         if( _coord ){
+        var _coord = this.getComponent({name:'coord'});
+        if( _coord ){
             e.eventInfo = _coord.getTipsInfoHandler(e);
-         };
+        };
 
-         //如果具体的e事件对象中有设置好了得 e.eventInfo.nodes，那么就不再遍历_graphs去取值
+        //如果具体的e事件对象中有设置好了得 e.eventInfo.nodes，那么就不再遍历_graphs去取值
         //比如鼠标移动到多柱子组合的具体某根bar上面，e.eventInfo.nodes = [ {bardata} ] 就有了这个bar的数据
         //那么tips就只显示这个bardata的数据
         if( !e.eventInfo.nodes || !e.eventInfo.nodes.length ){
@@ -660,4 +629,5 @@ export default class Chart extends Canvax.Event.EventDispatcher
              _g.tipsPointerHideOf( e );
          });
      }
+     
 }

@@ -1,7 +1,7 @@
 import Canvax from "canvax"
 import GraphsBase from "../index"
 import cloudLayout from "../../../layout/cloud"
-import { _ } from "mmvis"
+import { _,event } from "mmvis"
 
 const Text = Canvax.Display.Text;
 
@@ -217,7 +217,7 @@ export default class CloudGraphs extends GraphsBase
 
                 tagTxt.nodeData = tag;
                 tag._node = tagTxt;
-                tagTxt.on("mousedown mouseup panstart mouseover panmove mousemove panend mouseout tap click dblclick", function(e) {
+                tagTxt.on(event.types.get(), function(e) {
                     
                     e.eventInfo = {
                         title : null,

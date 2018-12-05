@@ -1,7 +1,7 @@
 //单环pie
 
 import Canvax from "canvax"
-import { _ } from "mmvis"
+import { _,event } from "mmvis"
 
 
 const Sector = Canvax.Shapes.Sector
@@ -9,8 +9,7 @@ const Path = Canvax.Shapes.Path
 const Rect = Canvax.Shapes.Rect
 const AnimationFrame = Canvax.AnimationFrame
 
-
-export default class Pie extends Canvax.Event.EventDispatcher
+export default class Pie extends event.Dispatcher
 {
     constructor( _graphs, data )
     {
@@ -143,7 +142,7 @@ export default class Pie extends Canvax.Event.EventDispatcher
                 });
 
                 //触发注册的事件
-                sector.on('mousedown mouseup panstart mouseover panmove mousemove panend mouseout tap click dblclick', function (e) {
+                sector.on(event.types.get(), function (e) {
                     
                     //me.fire( e.type, e );
                 

@@ -22,7 +22,8 @@
     "email": "252759102@qq.com"
   },
   "repository": "git",
-  "main": "./dist/cjs/chartx.js",
+  "main": "./dist/umd/chartx.js",
+  "module": "./src/index.js",
   "devDependencies": {
     "babel-core": "^6.13.0",
     "babel-preset-es2015-rollup": "^1.1.1",
@@ -35,9 +36,9 @@
     "rollup-watch": "4.3.1"
   },
   "dependencies": {
-    "canvax": "^2.0.9",
-    "fmin": "0.0.2",
-    "mmvis": "file:../mmvis"
+    "mmvis": "^0.0.18",
+    "canvax": "^2.0.13",
+    "fmin": "0.0.2"
   },
   "scripts": {
     "rollup": "node rollup.config.js",

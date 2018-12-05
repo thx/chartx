@@ -4,7 +4,7 @@
 import Canvax from "canvax"
 import GraphsBase from "../index"
 import Partition from "../../../layout/partition"
-import { _ } from "mmvis"
+import { _,event } from "mmvis"
 
 const Sector = Canvax.Shapes.Sector;
 const Circle = Canvax.Shapes.Circle;
@@ -191,7 +191,7 @@ export default class sunburstGraphs extends GraphsBase
                 } , function(e){
                     me._unfocus( layoutData , group );
                 });
-                sector.on("mousedown mouseup panstart mouseover panmove mousemove panend mouseout tap click dblclick", function(e) {
+                sector.on(event.types.get(), function(e) {
                     //fire到root上面去的是为了让root去处理tips
                     e.eventInfo = {
                         iNode : layoutData.iNode
