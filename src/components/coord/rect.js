@@ -431,7 +431,7 @@ export default class extends coorBase
     //由coor_base中得addField removeField来调用
     changeFieldEnabled( field )
     {
-        debugger
+        
         this.setFieldEnabled( field );
         
         var fieldMap = this.getFieldMapOf(field);
@@ -451,7 +451,6 @@ export default class extends coorBase
         });
     }
 
-    
 
     _initInduce()
     {
@@ -514,13 +513,6 @@ export default class extends coorBase
 
         return obj;
     }
-
-
-
-
-
-
-
 
 
 

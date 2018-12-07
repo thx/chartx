@@ -13962,7 +13962,7 @@ var Chartx = (function () {
       }, {
           key: "changeFieldEnabled",
           value: function changeFieldEnabled(field) {
-              debugger;
+
               this.setFieldEnabled(field);
 
               var fieldMap = this.getFieldMapOf(field);
@@ -14874,6 +14874,9 @@ var Chartx = (function () {
       }, {
           key: "getPoint",
           value: function getPoint(opt) {}
+      }, {
+          key: "getSizeAndOrigin",
+          value: function getSizeAndOrigin() {}
       }]);
       return _class;
   }(coorBase);

@@ -664,4 +664,7 @@ export default class extends coorBase
     getPoint( opt ){
 
     }
+    getSizeAndOrigin(){
+        
+    }
 }
