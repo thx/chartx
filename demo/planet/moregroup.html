@@ -197,16 +197,17 @@ var options = {
             show:function( field , legendData)
             {
                 this.getAgreeNodeData( legendData, function( data ){
-                    data.node.context.visible = true;
-                    data.textNode.context.visible = true;
+                    data.nodeElement.context.visible = true;
+                    data.labelElement.context.visible = true;
                 } );
             },
         
             hide:function( field , legendData)
             {
+                debugger
                 this.getAgreeNodeData( legendData, function( data ){
-                    data.node.context.visible = false;
-                    data.textNode.context.visible = false;
+                    data.nodeElement.context.visible = false;
+                    data.labelElement.context.visible = false;
                 } );
             }
         }

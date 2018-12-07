@@ -70,6 +70,11 @@ export default class Chart extends event.Dispatcher
             if( !opt[compName] ) return;
             var comps = _.flatten([ opt[compName] ]);
             _.each( comps, function( comp ){
+                if( //没有type的coord和没有field(or keyField)的graphs，都无效，不要创建该组件
+                    //关系图中是keyField
+                    (compName == "coord" && !comp.type ) || 
+                    (compName == "graphs" && !comp.field && !comp.keyField  )
+                ) return; 
                 var compModule = me.componentModules.get(compName, comp.type);
                 if( compModule ){
                     var _comp = new compModule( comp, me );
@@ -82,15 +87,17 @@ export default class Chart extends event.Dispatcher
         for( var _p in this._opt ){
             //非coord graphs theme，其实后面也可以统一的
             if( _.indexOf( this.__highModules, _p ) == -1 ){
-                var _comp = this._opt[ _p ];
+                var comps = this._opt[ _p ];
                 //所有的组件都按照数组方式处理，这里，组件里面就不需要再这样处理了
-                if( ! _.isArray( _comp ) ){
-                    _comp = [ _comp ];
+                if( ! _.isArray( comps ) ){
+                    comps = [ comps ];
                 };
-                _.each( _comp, function( compOpt ){
-                    var compConstructor = me.componentModules.get( _p, compOpt.type );
-                    var _comp = new compConstructor( compOpt, me );
-                    me.components.push( _comp );
+                _.each( comps, function( comp ){
+                    var compModule = me.componentModules.get( _p, comp.type );
+                    if( compModule ){
+                        var _comp = new compModule( comp, me );
+                        me.components.push( _comp );
+                    }
                 } );
             }
         };
@@ -104,7 +111,7 @@ export default class Chart extends event.Dispatcher
         var _coord = this.getComponent({name:'coord'});
 
         if( _coord && _coord.horizontal ){
-            this._drawBeginHorizontal && this._drawBeginHorizontal();
+            this._drawBeginHorizontal();
         };
 
         var width = this.width - this.padding.left - this.padding.right;
@@ -157,7 +164,7 @@ export default class Chart extends event.Dispatcher
         this._bindEvent();
 
         if( _coord && _coord.horizontal ){
-            this._drawEndHorizontal && this._drawEndHorizontal();
+            this._drawEndHorizontal();
         };
 
     }
@@ -180,14 +187,17 @@ export default class Chart extends event.Dispatcher
     //绘制完毕后的横向处理
     _drawEndHorizontal() 
     {
-        var me = this;
-
-        var ctx = me.graphsSprite.context;
-        ctx.x += ((me.width - me.height) / 2);
-        ctx.y += ((me.height - me.width) / 2);
+        var ctx = this.graphsSprite.context;
+        ctx.x += ((this.width - this.height) / 2);
+        ctx.y += ((this.height - this.width) / 2);
         ctx.rotation = 90;
-        ctx.rotateOrigin = { x : me.height/2, y : me.width/2 };
+        ctx.rotateOrigin = { x : this.height/2, y : this.width/2 };
         
+        this._horizontalGraphsText();
+    }
+
+    _horizontalGraphsText(){
+        var me = this;
         function _horizontalText( el ){
             
             if( el.children ){
@@ -195,13 +205,15 @@ export default class Chart extends event.Dispatcher
                     _horizontalText( _el );
                 } )
             };
-            if( el.type == "text" ){
+            if( el.type == "text" && !el.__horizontal ){
                 
                 var ctx = el.context;
                 var w = ctx.width;
                 var h = ctx.height;
 
                 ctx.rotation = ctx.rotation - 90;
+
+                el.__horizontal = true;
                 
             };
         }
@@ -373,6 +385,7 @@ export default class Chart extends event.Dispatcher
         };
         
         var _coord = this.getComponent({name:'coord'})
+
         if( _coord ){
             _coord.resetData( this.dataFrame , trigger);
         };
@@ -381,6 +394,10 @@ export default class Chart extends event.Dispatcher
         } );
 
         this.componentsReset( trigger );
+
+        if( _coord && _coord.horizontal ){
+            this._horizontalGraphsText();
+        };
 
         this.fire("resetData");
     }
@@ -494,33 +511,50 @@ export default class Chart extends event.Dispatcher
         var me   = this;
         var data = [];
 
-        var _coord = me.getComponent({name:'coord'});
+        //这里涌来兼容pie等的图例，其实后续可以考虑后面所有的graphs都提供一个getLegendData的方法
+        //那么就可以统一用这个方法， 下面的代码就可以去掉了
+        _.each( this.getComponents({name:'graphs'}), function( _g ){
+            _.each( _g.getLegendData(), function( item ){
+                
+                if( _.find( data , function( d ){
+                    return d.name == item.name
+                } ) ) return;
 
-        if( _coord.getLegendData ){
-            data = _coord.getLegendData();
-        } else {
-            _.each( _coord.fieldsMap , function( map , i ){
-                //因为yAxis上面是可以单独自己配置field的，所以，这部分要过滤出 legend data
-                var isGraphsField = false;
-                _.each( me._opt.graphs, function( gopt ){
-                    if( _.indexOf( _.flatten([ gopt.field ]), map.field ) > -1 ){
-                        isGraphsField = true;
-                        return false;
-                    }
-                } );
-    
-                if( isGraphsField ){
-                    data.push( {
-                        enabled : map.enabled,
-                        name    : map.field,
-                        field   : map.field,
-                        ind     : map.ind,
-                        color   : map.color,
-                        yAxis   : map.yAxis
-                    } );
-                }
-            });
+                var legendItem = _.extend(true, {}, item);
+                legendItem.color = item.fillStyle || item.color || item.style;
+
+                data.push( legendItem )
+            } );
+        } );
+        if( data.length ){
+            return data;
         };
+
+        //------------------------------------------------------------//
+
+        var _coord = me.getComponent({name:'coord'});
+        _.each( _.flatten( _coord.fieldsMap ) , function( map , i ){
+            //因为yAxis上面是可以单独自己配置field的，所以，这部分要过滤出 legend data
+            var isGraphsField = false;
+            _.each( me._opt.graphs, function( gopt ){
+                if( _.indexOf( _.flatten([ gopt.field ]), map.field ) > -1 ){
+                    isGraphsField = true;
+                    return false;
+                }
+            } );
+
+            if( isGraphsField ){
+                data.push( {
+                    enabled : map.enabled,
+                    name    : map.field,
+                    field   : map.field,
+                    ind     : map.ind,
+                    color   : map.color,
+                    yAxis   : map.yAxis
+                } );
+            }
+        });
+        
         return data;
     }
 
@@ -606,7 +640,7 @@ export default class Chart extends event.Dispatcher
         //那么tips就只显示这个bardata的数据
         if( !e.eventInfo.nodes || !e.eventInfo.nodes.length ){
             var nodes = [];
-            var iNode = e.eventInfo.xAxis.ind;
+            var iNode = e.eventInfo.iNode;
             _.each( this.getComponents({name:'graphs'}), function( _g ){
                 nodes = nodes.concat( _g.getNodesAt( iNode ) );
             } );
@@ -629,5 +663,5 @@ export default class Chart extends event.Dispatcher
              _g.tipsPointerHideOf( e );
          });
      }
-     
+
 }

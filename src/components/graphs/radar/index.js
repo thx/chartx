@@ -77,7 +77,8 @@ export default class RadarGraphs extends GraphsBase
         var iGroup = 0;
         _.each( this.data, function( list , field ){
 
-            var group = {};
+            var group = {
+            };
 
             var pointList = [];
             _.each( list , function( node, i ){
@@ -220,12 +221,30 @@ export default class RadarGraphs extends GraphsBase
 
     hide( field )
     {
-
+        //用来计算下面的hLen
+        var _coord = this.app.getComponent({name:'coord'});
+        this.enabledField = _coord.filterEnabledFields( this.field );
+        var group = this.groups[ field ];
+        if( group ){
+            group.area.context.visible = false;
+            _.each( group.nodes, function( element ){
+                element.context.visible = false;
+            } );
+            
+        }
     }
 
     show( field )
     {
-
+        var _coord = this.app.getComponent({name:'coord'});
+        this.enabledField = _coord.filterEnabledFields( this.field );
+        var group = this.groups[ field ];
+        if( group ){
+            group.area.context.visible = true;
+            _.each( group.nodes, function( element ){
+                element.context.visible = true;
+            } );
+        }
     }
 
     _trimGraphs()
@@ -234,7 +253,7 @@ export default class RadarGraphs extends GraphsBase
         var _coord = this.app.getComponent({name:'coord'});
 
         //用来计算下面的hLen
-        this.enabledField = _coord.getEnabledFields( this.field );
+        this.enabledField = _coord.filterEnabledFields( this.field );
         
         var data = {}
         _.each( this.enabledField, function( field ){

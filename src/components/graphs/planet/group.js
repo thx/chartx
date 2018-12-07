@@ -147,7 +147,8 @@ export default class PlanetGroup
                 groupLen    : this.groupLen,
                 iGroup      : me.iGroup,
                 iNode       : i,
-                node        : null, //canvax元素
+                nodeElement : null, //canvax元素
+                labelElement: null, //label的canvax元素
                 rowData     : rowData,
 
                 //下面这些都只能在绘制的时候确定然后赋值

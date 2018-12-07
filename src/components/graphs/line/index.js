@@ -75,10 +75,10 @@ export default class LineGraphs extends GraphsBase
     setEnabledField()
     {
         //要根据自己的 field，从enabledFields中根据enabled数据，计算一个 enabled版本的field子集
-        this.enabledField = this.app.getComponent({name:'coord'}).getEnabledFields( this.field );
+        this.enabledField = this.app.getComponent({name:'coord'}).filterEnabledFields( this.field );
     }
 
-    //_yAxis, dataFrame
+    //dataFrame
     _trimGraphs()
     {
         var me = this;
@@ -89,8 +89,6 @@ export default class LineGraphs extends GraphsBase
         var tmpData = {}; 
 
         me.setEnabledField();
-
-        var _yAxis = this.yAxisAlign == "right" ? _coord._yAxisRight : _coord._yAxisLeft;
 
         _.each( _.flatten( me.enabledField ) , function( field, i ){
             //var maxValue = 0;
@@ -104,16 +102,16 @@ export default class LineGraphs extends GraphsBase
             var _data = [];
 
             for (var b = 0, bl = _lineData.length; b < bl; b++) {
-                var _xAxis = _coord ? _coord._xAxis : me.app._xAxis;
 
-                var x = _xAxis.getPosOfInd( b );
-                
-                var y = _lineData[b];
-                if( !isNaN( y ) && y !== null && y !== undefined && y !== ""  ){
-                    y = -_yAxis.getPosOfVal( y );
-                } else {
-                    y = undefined;
-                };
+                //返回一个和value的结构对应的point结构{x:  y: }
+                var point = _coord.getPoint( {
+                    iNode : b,
+                    field : field,
+                    value : {
+                        //x:
+                        y : _lineData[b]
+                    }
+                } );
 
                 var node = {
                     type     : "line",
@@ -121,20 +119,19 @@ export default class LineGraphs extends GraphsBase
                     iNode    : b,
                     field    : field,
                     value    : _lineData[b],
-                    x        : x,
-                    y        : y,
+                    x        : point.pos.x,
+                    y        : point.pos.y,
                     rowData  : me.dataFrame.getRowDataAt( b ),
                     color    : fieldMap.color
                 };
 
                 _data.push( node );
-                
             };
 
             tmpData[ field ] = {
-                yAxis: _yAxis,
-                field: field,
-                data: _data
+                yAxis : fieldMap.yAxis,
+                field : field,
+                data  : _data
             };
 
         } );

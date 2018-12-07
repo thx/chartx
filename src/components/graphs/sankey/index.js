@@ -82,6 +82,7 @@ export default class sankeyGraphs extends GraphsBase
 
     draw( opt )
     {
+        
         !opt && (opt ={});
         _.extend( true, this , opt );
 

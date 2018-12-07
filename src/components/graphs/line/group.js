@@ -373,11 +373,11 @@ export default class LineGraphsGroup extends event.Dispatcher
         for( var i=0,l=this.data.length; i<l; i++ ){
             var nodeData = this.data[i];
             if( _.isNumber( nodeData.y ) ){
-                if( _firstNode === null || ( this._yAxis.place == "right" ) ){
+                if( _firstNode === null || ( this._yAxis.align == "right" ) ){
                     //_yAxis为右轴的话，
                     _firstNode = nodeData;
                 }
-                if( this._yAxis.place !== "right" && _firstNode !== null ){
+                if( this._yAxis.align !== "right" && _firstNode !== null ){
                     break;
                 }
             };

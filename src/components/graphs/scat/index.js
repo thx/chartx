@@ -148,7 +148,6 @@ export default class ScatGraphs extends GraphsBase
 
         var _coord = this.app.getComponent({name:'coord'});
         var dataLen  = this.dataFrame.length;
-        var xField = _coord._xAxis.field;
 
         ////计算半径的时候需要用到， 每次执行_trimGraphs都必须要初始化一次
         this._rData = null;
@@ -158,22 +157,22 @@ export default class ScatGraphs extends GraphsBase
         for( var i=0; i<dataLen; i++ ){
             
             var rowData = this.dataFrame.getRowDataAt(i);
-            var xValue = rowData[ xField ];
-            var yValue = rowData[ this.field ];
-
-            var xPos = _coord._xAxis.getPosOfVal( xValue );
-            var yPos = -_coord._getYaxisOfField( this.field ).getPosOfVal( yValue );
-
             var fieldMap = _coord.getFieldMapOf( this.field );
+
+            var point = _coord.getPoint( {
+                iNode : i,
+                field : this.field,
+                value : {
+                    //x:
+                    y : rowData[ this.field ]
+                }
+            } );
 
             var nodeLayoutData = {
                 rowData  : rowData,
-                x        : xPos,
-                y        : yPos,
-                value    : {
-                    x    : xValue,
-                    y    : yValue
-                },
+                x        : point.pos.x,
+                y        : point.pos.y,
+                value    : point.value,
                 field    : this.field,
                 fieldColor : fieldMap.color,
                 iNode    : i,
@@ -503,8 +502,9 @@ export default class ScatGraphs extends GraphsBase
         };
         if( this.aniOrigin == "origin" ){
             var _coord = this.app.getComponent({name:'coord'});
-            ctx.x = _coord._yAxis[0]._axisLine.context.x;//0;
-            ctx.y = _coord._xAxis._axisLine.context.y;//0;
+            var originPoint = _coord.getOriginPos( {field: this.field} );
+            ctx.x = originPoint.x;
+            ctx.y = originPoint.y;
         };
         if( this.aniOrigin == "center" ){
             ctx.x = this.width/2;

@@ -1,8 +1,8 @@
 import coorBase from "./index"
 import Canvax from "canvax"
-import xAxisConstructor from "./rect/xaxis"
-import yAxisConstructor from "./rect/yaxis"
-import Grid from "./rect/grid"
+import xAxisConstructor from "./xaxis"
+import yAxisConstructor from "./yaxis"
+import Grid from "./grid"
 import { _ } from "mmvis"
 
 const Rect = Canvax.Shapes.Rect;
@@ -160,7 +160,7 @@ export default class extends coorBase
         this._initModules();
         //创建好了坐标系统后，设置 _fieldsDisplayMap 的值，
         // _fieldsDisplayMap 的结构里包含每个字段是否在显示状态的enabled 和 这个字段属于哪个yAxis
-        this.fieldsMap = this._setFieldsMap();
+        this.fieldsMap = this.setFieldsMap( {type: "yAxis"} );
     }
 
     resetData( dataFrame , dataTrigger )
@@ -168,12 +168,12 @@ export default class extends coorBase
         var me = this;
         this.dataFrame = dataFrame;
 
-        var _xAxisDataFrame = this._getAxisDataFrame(this.xAxis.field);
+        var _xAxisDataFrame = this.getAxisDataFrame(this.xAxis.field);
         this._xAxis.resetData( _xAxisDataFrame );
 
         _.each( this._yAxis , function( _yAxis ){
             //这个_yAxis是具体的y轴实例
-            var yAxisDataFrame = me._getAxisDataFrame( _yAxis.field );
+            var yAxisDataFrame = me.getAxisDataFrame( _yAxis.field );
             _yAxis.resetData( yAxisDataFrame );
         } );
 
@@ -325,8 +325,6 @@ export default class extends coorBase
 
     }
 
-
-
     getSizeAndOrigin(){
         
         var obj = {
@@ -359,8 +357,9 @@ export default class extends coorBase
         this._grid = new Grid( this.grid, this );
         this.sprite.addChild( this._grid.sprite );
 
-        var _xAxisDataFrame = this._getAxisDataFrame(this.xAxis.field);
+        var _xAxisDataFrame = this.getAxisDataFrame(this.xAxis.field);
         this._xAxis = new xAxisConstructor(this.xAxis, _xAxisDataFrame, this);
+        this._axiss.push( this._xAxis );
         this.sprite.addChild(this._xAxis.sprite);
 
         //这里定义的是配置
@@ -379,22 +378,24 @@ export default class extends coorBase
         } );
     
         if( yAxisLeft ){
-            yAxisLeftDataFrame = this._getAxisDataFrame( yAxisLeft.field );
+            yAxisLeftDataFrame = this.getAxisDataFrame( yAxisLeft.field );
             this._yAxisLeft = new yAxisConstructor( yAxisLeft, yAxisLeftDataFrame );
             this._yAxisLeft.axis = yAxisLeft;
             this.sprite.addChild( this._yAxisLeft.sprite );
             this._yAxis.push( this._yAxisLeft );
+            this._axiss.push( this._yAxisLeft );
         }
        
         yAxisRight = _.find( yAxis , function( ya ){
             return ya.align == "right"
         } );
         if( yAxisRight ){
-            yAxisRightDataFrame = this._getAxisDataFrame( yAxisRight.field )
+            yAxisRightDataFrame = this.getAxisDataFrame( yAxisRight.field )
             this._yAxisRight = new yAxisConstructor( yAxisRight, yAxisRightDataFrame );
             this._yAxisRight.axis = yAxisRight;
             this.sprite.addChild( this._yAxisRight.sprite );
             this._yAxis.push( this._yAxisRight );
+            this._axiss.push( this._yAxisRight );
         };
     }
 
@@ -425,68 +426,20 @@ export default class extends coorBase
 
     }
 
-    _getAxisDataFrame( fields )
-    {
-        return {
-            field : fields,
-            org : this.dataFrame.getDataOrg( fields , function( val ){
-                if( val === undefined || val === null || val == "" ){
-                    return val;
-                }
-                return (isNaN(Number( val )) ? val : Number( val ))
-            })
-        }
-    }
-
-    //从 fieldsMap 中过滤筛选出来一个一一对应的 enabled为true的对象结构
-    //这个方法还必须要返回的数据里描述出来多y轴的结构。否则外面拿到数据后并不好处理那个数据对应哪个轴
-    getEnabledFields( fields )
-    {
-        if( fields ){
-            //如果有传参数 fields 进来，那么就把这个指定的 fields 过滤掉 enabled==false的field
-            //只留下enabled的field 结构
-            return this.filterEnabledFields( fields );
-        };
-
-        var fmap = {
-            left: [], right:[]
-        };
-
-        _.each( this.fieldsMap, function( bamboo, b ){
-            if( _.isArray( bamboo ) ){
-                //多节竹子，堆叠
-
-                var align;
-                var fields = [];
-                
-                //设置完fields后，返回这个group属于left还是right的axis
-                _.each( bamboo, function( obj, v ){
-                    if( obj.field && obj.enabled ){
-                        align = obj.yAxis.align;
-                        fields.push( obj.field );
-                    }
-                } );
-
-                fields.length && fmap[ align ].push( fields );
-
-            } else {
-                //单节棍
-                if( bamboo.field && bamboo.enabled ){
-                    fmap[ bamboo.yAxis.align ].push( bamboo.field );
-                }
-            };
-        } );
-
-        return fmap;
-    }
+    
 
     //由coor_base中得addField removeField来调用
     changeFieldEnabled( field )
     {
+        debugger
         this.setFieldEnabled( field );
+        
         var fieldMap = this.getFieldMapOf(field);
-        var enabledFields = this.getEnabledFields()[ fieldMap.yAxis.align ];
-        fieldMap.yAxis.resetData( this._getAxisDataFrame( enabledFields ) );
+        var _axis = fieldMap.yAxis || fieldMap.rAxis;
+        
+        var enabledFields = this.getEnabledFieldsOf( _axis )//[ fieldMap.yAxis.align ];
+        
+        _axis.resetData( this.getAxisDataFrame( enabledFields ) );
         this._resetXY_axisLine_pos();
 
         //然后yAxis更新后，对应的背景也要更新
@@ -498,71 +451,7 @@ export default class extends coorBase
         });
     }
 
-    //查询field在哪个yAxis上面,外部查询的话直接用fieldMap._yAxis
-    _getYaxisOfField( field )
-    {
-        var me = this;
-        var Axis;
-        _.each( this._yAxis , function( _yAxis , i ){
-            var fs = _yAxis.field;
-            var _fs = _.flatten( [fs] );
-            var ind = _.indexOf( _fs , field );
-            if( ind >-1 ){
-                //那么说明这个yAxis轴上面有这个字段，这个yaxis需要reset
-                Axis = _yAxis;
-                return false;
-            }
-        } );
-        return Axis;
-    }
-
-    //和原始field结构保持一致，但是对应的field换成 {field: , enabled:...}结构
-    _setFieldsMap()
-    {
-        var me = this;
-        var fieldInd = 0;
-
-        function _set( fields ){
-            if(!fields){
-                var yAxis = me.yAxis;
-                if( !_.isArray( yAxis ) ){
-                    yAxis = [yAxis];
-                };
-                fields = [];
-                _.each( yAxis, function( item, i ){
-                    if( item.field ){
-                        fields = fields.concat( item.field );
-                    };
-                } );
-            };
     
-            if( _.isString(fields) ){
-                fields = [fields];
-            };
-
-            var clone_fields = _.clone( fields );
-            for(var i = 0 , l=fields.length ; i<l ; i++) {
-                if( _.isString( fields[i] ) ){
-                    
-                    clone_fields[i] = {
-                        field : fields[i],
-                        enabled : true,
-                        yAxis : me._getYaxisOfField( fields[i] ),
-                        color : me.app.getTheme(fieldInd),
-                        ind : fieldInd++
-                    }
-                    
-                }
-                if( _.isArray( fields[i] ) ){
-                    clone_fields[i] = _set( fields[i], fieldInd );
-                }
-            };
-
-            return clone_fields;
-        };
-
-        return _set();
-    }
 
     _initInduce()
     {
@@ -606,6 +495,9 @@ export default class extends coorBase
         var obj = {
             xAxis : xNode,
             title : xNode.text,
+
+            //下面两个属性是所有坐标系统一的
+            iNode : xNode.ind,
             nodes : [
                 //遍历_graphs 去拿东西
             ]
@@ -623,32 +515,80 @@ export default class extends coorBase
         return obj;
     }
 
-    getAxis( opt ){
-        var axiss = this.getAxiss( opt );
-        return axiss[0];
-    }
 
-    getAxiss( opt ){
-        var axiss = _.flatten(  [ this._xAxis, this._yAxis ] );
 
-        var arr = [];
-        var expCount = 0;
-        for( var p in opt ){
-            expCount++;
+
+
+
+
+
+
+
+
+    //下面的方法是所有坐标系都要提供的方法，用来计算位置的， graphs里面会调用
+    //return {pos {x,y}, value :{x,y}}
+    getPoint( opt ){
+        var point = {
+            x : 0,
+            y : undefined
         };
 
-        _.each( axiss, function( item ){
-            for( var p in opt ){
-                if( JSON.stringify( item[p] ) == JSON.stringify( opt[p] ) ){
-                    expCount--
-                };
-            };
-            if( !expCount ){
-                arr.push( item );
-            };
-        } );
-        
-        return arr;
+        var xaxisExp = {
+            type : "xAxis"
+        };
+        var yaxisExp = {
+            type : "yAxis", 
+            field : opt.field
+        };
+        var _xAxis = this.getAxis( xaxisExp );
+        var _yAxis = this.getAxis( yaxisExp );
+
+        var _iNode = opt.iNode || 0;
+
+        var _value = opt.value; //x y 一般至少会带 yval过来
+
+        if( !("x" in _value) ){
+            //如果没有传xval过来，要用iNode去xAxis的org去取
+            _value.x = _.flatten( _xAxis.dataOrg )[ _iNode ];
+        };
+        point.x = _xAxis.getPosOf({ ind: _iNode, val: _value.x });
+
+        var y = _value.y;
+        if( !isNaN( y ) && y !== null && y !== undefined && y !== ""  ){
+            point.y = -_yAxis.getPosOfVal( y );
+        } else {
+            point.y = undefined;
+        };
+
+        return {
+            pos : point,
+            value : _value
+        };
+
+    }
+
+    getAxisOriginPoint( exp ){
+        var _yAxis = this.getAxis( exp );
+        return {
+            pos : -_yAxis.originPos,
+            value : _yAxis.origin
+        }
+    }
+
+    getOriginPos( exp ){
+        var xaxisExp = {
+            type : "xAxis"
+        };
+        var yaxisExp = {
+            type : "yAxis", 
+            field : exp.field
+        };
+        var _xAxis = this.getAxis( xaxisExp );
+        var _yAxis = this.getAxis( yaxisExp );
+        return {
+            x : _xAxis.originPos,
+            y : -_yAxis.originPos
+        }
     }
 
 }

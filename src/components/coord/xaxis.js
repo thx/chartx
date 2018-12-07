@@ -1,5 +1,5 @@
 import Canvax from "canvax"
-import {numAddSymbol} from "../../../utils/tools"
+import {numAddSymbol} from "../../utils/tools"
 import {axis,_} from "mmvis"
 
 const Line = Canvax.Shapes.Line;

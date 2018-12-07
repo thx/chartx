@@ -224,9 +224,8 @@ export default class sunburstGraphs extends GraphsBase
         } )
     }
 
-    getNodesAt( e ){
+    getNodesAt( iNode ){
         var nodes = [];
-        var iNode = e.eventInfo.iNode
         if( iNode !== undefined ){
             var node = _.find( this.data, function( item ){
                 return item.iNode == iNode

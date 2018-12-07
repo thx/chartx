@@ -83,8 +83,10 @@ export default class polarGrid extends event.Dispatcher
 
     reset( opt )
     {    
+        /*
         this.sprite.removeAllChildren();
         this.draw( opt );
+        */
     }
 
     _widget()

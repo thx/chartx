@@ -19,7 +19,6 @@ export default class BarGraphs extends GraphsBase
         this.enabledField = null;
  
         this.yAxisAlign = "left"; //默认设置为左y轴
-        this._xAxis = this.app.getComponent({name:'coord'})._xAxis;
 
         //trimGraphs的时候是否需要和其他的 bar graphs一起并排计算，true的话这个就会和别的重叠
         //和css中得absolute概念一致，脱离文档流的绝对定位
@@ -428,7 +427,7 @@ export default class BarGraphs extends GraphsBase
                     
                     var rectCtx = {
                         x         : finalPos.x,
-                        y         : nodeData.yOriginPoint.y,//0,
+                        y         : nodeData.yOriginPoint.pos,//0,
                         width     : finalPos.width,
                         height    : finalPos.height,
                         fillStyle : finalPos.fillStyle,
@@ -561,7 +560,7 @@ export default class BarGraphs extends GraphsBase
     setEnabledField()
     {
         //要根据自己的 field，从enabledFields中根据enabled数据，计算一个 enabled版本的field子集
-        this.enabledField = this.app.getComponent({name:'coord'}).getEnabledFields( this.field );
+        this.enabledField = this.app.getComponent({name:'coord'}).filterEnabledFields( this.field );
     }
 
     _getGroupRegionStyle( iNode )
@@ -587,7 +586,6 @@ export default class BarGraphs extends GraphsBase
     _trimGraphs()
     {
         var me = this;
-        var _xAxis = this._xAxis;
         var _coord = this.app.getComponent({name:'coord'});
 
         //用来计算下面的hLen
@@ -620,7 +618,7 @@ export default class BarGraphs extends GraphsBase
             hLen = this.enabledField.length;
         };
 
-        var cellWidth = _xAxis.getCellLength();
+        var cellWidth = _coord.getAxis({type:'xAxis'}).getCellLength();
         //x方向的二维长度，就是一个bar分组里面可能有n个子bar柱子，那么要二次均分
         var ceilWidth2 = cellWidth / (hLen + 1);
 
@@ -637,7 +635,6 @@ export default class BarGraphs extends GraphsBase
         };
 
         //var tmpData = [];
-        var _yAxis = this.yAxisAlign == "left" ? _coord._yAxisLeft : _coord._yAxisRight;
 
         //然后计算出对于结构的dataOrg
         var dataOrg = this.dataFrame.getDataOrg( this.enabledField );
@@ -666,27 +663,35 @@ export default class BarGraphs extends GraphsBase
                         });
                     };
 
-                    var _x = _xAxis.getPosOfInd( i );
-                    
-                    
+                    var field = me._getTargetField(b, v, i, me.enabledField);
+
+                    //返回一个和value的结构对应的point结构{x:  y: }
+                    var point = _coord.getPoint( {
+                        iNode : i,
+                        field : field,
+                        value : {
+                            //x:
+                            y : val
+                        }
+                    } );
+
+                    var _x = point.pos.x;
+
                     var x = _x - cellWidth / 2 + disLeft + (barW + barDis)*b;
 
                     var y = 0;
                     if (me.proportion) {
-                        y = -val / vCount * _yAxis.height;
+                        y = -val / vCount * _coord.height;
                     } else {
-                        y = -_yAxis.getPosOfVal( val );
+                        y = point.pos.y;
                     };
 
-                    var yOriginPoint = {
-                        value : _yAxis.origin,
-                        y     : -_yAxis.originPos
-                    };
+                    var yOriginPoint = _coord.getAxisOriginPoint( { field: field } );
 
                     function _getFromY( tempBarData, v, i, val, y ){
                         var preData = tempBarData[v - 1];
                         if( !preData ){
-                            return yOriginPoint.y;
+                            return yOriginPoint.pos;
                         };
 
                         var preY = preData[i].y;
@@ -712,16 +717,16 @@ export default class BarGraphs extends GraphsBase
                         }
                     }
 
-                    //找到其着脚点,一般就是 yOriginPoint.y
+                    //找到其着脚点,一般就是 yOriginPoint.pos
                     var fromY = _getFromY(tempBarData, v, i, val, y);
-                    y += fromY - yOriginPoint.y;
+                    y += fromY - yOriginPoint.pos;
 
                     var nodeData = {
                         type    : "bar",
                         value   : val,
                         vInd    : v, //如果是堆叠图的话，这个node在堆叠中得位置
                         vCount  : vCount, //纵向方向的总数,比瑞堆叠了uv(100),pv(100),那么这个vCount就是200，比例柱状图的话，外部tips定制content的时候需要用到
-                        field   : me._getTargetField(b, v, i, me.enabledField),
+                        field   : field,
                         fromX   : x,
                         fromY   : fromY,
                         x       : x,
@@ -729,7 +734,7 @@ export default class BarGraphs extends GraphsBase
                         width   : barW,
                         yOriginPoint : yOriginPoint,
                         isLeaf  : true,
-                        xAxis   : _xAxis.getNodeInfoOfX( _x ),
+                        xAxis   : _coord.getAxis({type:'xAxis'}).getNodeInfoOfX( _x ),
                         iNode   : i,
                         rowData : me.dataFrame.getRowDataAt( i ),
                         color   : null
@@ -770,14 +775,24 @@ export default class BarGraphs extends GraphsBase
             x : 0, y : 0
         };
         var x=bar.x ,y=bar.y;
+        var isNegative = true; //是负数
+        if( bar.y > nodeData.y ){
+            isNegative = false;
+        };
         switch( me.label.position ){
             case "top" :
                 x = bar.x + bar.width/2;
                 y = bar.y + bar.height;
+                if( isNegative ) {
+                    y += 16
+                };
                 break;
             case "topRight" :
                 x = bar.x + bar.width;
                 y = bar.y + bar.height;
+                if( isNegative ) {
+                    y += 16
+                };
                 break;
             case "right" :
                 x = bar.x + bar.width;
@@ -802,6 +817,9 @@ export default class BarGraphs extends GraphsBase
             case "leftTop" :
                 x = bar.x;
                 y = bar.y + bar.height;
+                if( isNegative ) {
+                    y += 16
+                };
                 break;
             case "center" :
                 x = bar.x + bar.width/2;
