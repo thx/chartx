@@ -58,7 +58,7 @@ export default class dataZoom extends Component
 	{
         super(opt, app);
 
-        this.name = "datazoom";
+        this.name = "dataZoom";
 
         this._cloneChart = null;
         

@@ -613,6 +613,7 @@ var Chartx = (function () {
           // ]
           this._opt = _$1.clone(opt);
           this.dataOrg = dataOrg || [];
+          this.sectionHandler = null;
           this.dataSection = []; //从原数据 dataOrg 中 结果 datasection 重新计算后的数据
           this.dataSectionLayout = []; //和dataSection一一对应的，每个值的pos，//get xxx OfPos的时候，要先来这里做一次寻找
 
@@ -759,8 +760,12 @@ var Chartx = (function () {
                               ai--;
                               al--;
                           }                    }
-                      this.dataSection = dataSection.section(arr, 3);
-
+                      if (_$1.isFunction(this.sectionHandler)) {
+                          this.dataSection = this.sectionHandler(arr);
+                      }
+                      if (!this.dataSection || !this.dataSection.length) {
+                          this.dataSection = dataSection.section(arr, 3);
+                      }
                       if (this.symmetric) {
                           //可能得到的区间是偶数， 非对称，强行补上
                           var _min = _$1.min(this.dataSection);
@@ -1231,7 +1236,6 @@ var Chartx = (function () {
                   if (this.layoutType == "proportion") {
                       cellLength = 1;
                   } else {
-
                       //默认按照 peak 也就是柱状图的需要的布局方式
                       cellLength = axisLength / cellCount;
                       if (this.layoutType == "rule") {
@@ -1276,9 +1280,11 @@ var Chartx = (function () {
               if (this.layoutType == "proportion") {
                   cellCount = this.axisLength;
               } else {
+
                   if (this.dataOrg.length && this.dataOrg[0].length && this.dataOrg[0][0].length) {
                       cellCount = this.dataOrg[0][0].length;
-                  }            }            this._cellCount = cellCount;
+                  }
+              }            this._cellCount = cellCount;
               return cellCount;
           }
       }]);
@@ -1348,10 +1354,8 @@ var Chartx = (function () {
       //检测第一个数据是否为一个array, 否就是传入了一个json格式的数据
       if (data.length > 0 && !_$1.isArray(data[0])) {
           data = parse2MatrixData(data);
-          dataFrame.length = data.length;
-      } else {
-          dataFrame.length = data.length - 1;
-      }
+      }    dataFrame.length = data.length - 1;
+
       //设置好数据区间end值
       dataFrame.range.end = dataFrame.length - 1;
       //然后检查opts中是否有dataZoom.range
@@ -11262,6 +11266,9 @@ var Chartx = (function () {
 
   var _padding = 20;
 
+  //为了能通过Chartx.Canvax 拿到渲染引擎
+  global$1.Canvax = Canvax;
+
   var Chart = function (_event$Dispatcher) {
       inherits(Chart, _event$Dispatcher);
 
@@ -12598,7 +12605,7 @@ var Chartx = (function () {
               var res = val;
               if (_$1.isFunction(this.label.format)) {
                   res = this.label.format.apply(this, arguments);
-              }            if (_$1.isNumber(res)) {
+              }            if (_$1.isNumber(res) && me.layoutType == "proportion") {
                   res = numAddSymbol(res);
               }            return res;
           }
@@ -13104,7 +13111,7 @@ var Chartx = (function () {
                   var text = layoutData.value;
                   if (_$1.isFunction(me.label.format)) {
                       text = me.label.format.apply(this, [text, i]);
-                  }                if (text === undefined || text === null) {
+                  }                if ((text === undefined || text === null) && me.layoutType == "proportion") {
                       text = numAddSymbol(layoutData.value);
                   }                layoutData.text = text;
 
@@ -24435,7 +24442,7 @@ var Chartx = (function () {
 
           var _this = possibleConstructorReturn(this, (dataZoom.__proto__ || Object.getPrototypeOf(dataZoom)).call(this, opt, app));
 
-          _this.name = "datazoom";
+          _this.name = "dataZoom";
 
           _this._cloneChart = null;
 
@@ -25039,7 +25046,7 @@ var Chartx = (function () {
 
           var _this = possibleConstructorReturn(this, (MarkLine.__proto__ || Object.getPrototypeOf(MarkLine)).call(this, opt, app));
 
-          _this.name = "markline";
+          _this.name = "markLine";
 
           _this._yAxis = null;
 
@@ -25680,6 +25687,8 @@ var Chartx = (function () {
 
           var _this = possibleConstructorReturn(this, (barTgi.__proto__ || Object.getPrototypeOf(barTgi)).call(this, opt, app));
 
+          _this.name = "barTgi";
+
           _this.field = null;
           _this.barField = null;
 
@@ -25788,7 +25797,7 @@ var Chartx = (function () {
 
           var _this = possibleConstructorReturn(this, (barGuide.__proto__ || Object.getPrototypeOf(barGuide)).call(this, opt, app));
 
-          _this.name = "bar_guide";
+          _this.name = "barGuide";
 
           _this.field = null;
           _this.barField = null;
@@ -25801,10 +25810,6 @@ var Chartx = (function () {
 
           _this.sprite = null;
 
-          _this.origin = {
-              x: 0,
-              y: 0
-          };
           _this.node = defineProperty({
               lineWidth: 3,
               shapeType: "circle",
@@ -25973,7 +25978,7 @@ var Chartx = (function () {
 
           var _this = possibleConstructorReturn(this, (waterMark.__proto__ || Object.getPrototypeOf(waterMark)).call(this, opt, app));
 
-          _this.name = "watermark";
+          _this.name = "waterMark";
 
           _this.width = _this.app.width;
           _this.height = _this.app.height;
@@ -26047,9 +26052,9 @@ var Chartx = (function () {
       function MarkLine(opt, app) {
           classCallCheck(this, MarkLine);
 
-          var _this = possibleConstructorReturn(this, (MarkLine.__proto__ || Object.getPrototypeOf(MarkLine)).call(this, opt));
+          var _this = possibleConstructorReturn(this, (MarkLine.__proto__ || Object.getPrototypeOf(MarkLine)).call(this, opt, app));
 
-          _this.app = app;
+          _this.name = "cross";
 
           _this.width = opt.width || 0;
           _this.height = opt.height || 0;
@@ -26062,11 +26067,6 @@ var Chartx = (function () {
           _this.aimPoint = {
               x: 0,
               y: 0
-          };
-
-          //圆点，对应着坐标系统的原点
-          _this.origin = {
-              x: 0, y: 0
           };
 
           _this.line = {
@@ -26165,6 +26165,161 @@ var Chartx = (function () {
       return MarkLine;
   }(component);
 
+  var barGuide$1 = function (_Component) {
+      inherits(barGuide, _Component);
+
+      function barGuide(opt, app) {
+          classCallCheck(this, barGuide);
+
+          var _this = possibleConstructorReturn(this, (barGuide.__proto__ || Object.getPrototypeOf(barGuide)).call(this, opt, app));
+
+          _this.name = "lineSchedu";
+
+          _this.data = null;
+          _this.lineDatas = null;
+
+          _this.lineField = null;
+          _this.style = "#3995ff";
+          _this.fillStyle = "#fff";
+          _this.lineWidth = 2;
+          _this.radius = 6;
+          _this.timeFontSize = 14;
+          _this.timeFontColor = "#606060";
+          _this.listFontSize = 12;
+          _this.listFontColor = null;
+
+          _$1.extend(true, _this, opt);
+
+          _this.sprite = new Canvax.Display.Sprite();
+          _this.app.graphsSprite.addChild(_this.sprite);
+          return _this;
+      }
+
+      createClass(barGuide, [{
+          key: "reset",
+          value: function reset(opt) {
+              _$1.extend(true, this, opt);
+              this.lineDatas = null;
+              this.data = null;
+              this.sprite.removeAllChildren();
+              this.draw();
+          }
+      }, {
+          key: "draw",
+          value: function draw() {
+              var me = this;
+
+              var _coord = this.app.getComponent({ name: 'coord' });
+              this.pos = {
+                  x: _coord.origin.x,
+                  y: _coord.origin.y
+              };
+              this.setPosition();
+
+              var lineGraphs = me.app.getComponent({
+                  name: 'graphs',
+                  type: "line",
+                  field: me.lineField
+              });
+
+              me.lineDatas = lineGraphs.data[me.lineField].data;
+
+              var iNode = this.app.getComponent({ name: "coord" }).getAxis({ type: "xAxis" }).getIndexOfVal(this.time);
+
+              var nodeData = this.lineDatas[iNode];
+
+              if (nodeData.y != undefined) {
+                  var y = me._getNodeY(nodeData, _coord);
+                  var x = nodeData.x;
+
+                  var _txtSp = new Canvax.Display.Sprite({
+                      context: {
+                          x: x - 20
+                      }
+                  });
+                  this.sprite.addChild(_txtSp);
+                  var txtHeight = 0;
+
+                  var _title = new Canvax.Display.Text(me.time, {
+                      context: {
+                          fillStyle: this.timeFontColor || this.style,
+                          fontSize: this.timeFontSize
+                      }
+                  });
+                  _txtSp.addChild(_title);
+                  var txtHeight = _title.getTextHeight();
+                  var txtWidth = _title.getTextWidth();
+
+                  var _list = new Canvax.Display.Text(_$1.flatten([me.list]).join("\n"), {
+                      context: {
+                          y: txtHeight,
+                          fillStyle: this.listFontColor || this.style,
+                          fontSize: this.listFontSize
+                      }
+                  });
+                  _txtSp.addChild(_list);
+                  txtHeight += _list.getTextHeight();
+                  txtWidth = Math.max(txtWidth, _list.getTextWidth());
+
+                  if (txtWidth + x - 20 > _coord.width + me.app.padding.right) {
+                      _txtSp.context.x = _coord.width + me.app.padding.right;
+                      _title.context.textAlign = "right";
+                      _list.context.textAlign = "right";
+                  }
+                  var tsTop = 0;
+                  if (me.status == "online") {
+                      tsTop = y - (this.radius + 3) - txtHeight;
+                      if (Math.abs(tsTop) > _coord.origin.y) {
+                          tsTop = -_coord.origin.y;
+                          y = -(_coord.origin.y - (this.radius + 3) - txtHeight);
+                      }                } else {
+                      tsTop = y + (this.radius + 3);
+                      if (tsTop + txtHeight > 0) {
+                          tsTop = -txtHeight;
+                          y = -(this.radius + 3) - txtHeight;
+                      }                }
+                  _txtSp.context.y = tsTop;
+
+                  var _line = new Canvax.Shapes.BrokenLine({
+                      context: {
+                          pointList: [[x, y], [x, nodeData.y]],
+                          strokeStyle: me.style,
+                          lineWidth: me.lineWidth
+                      }
+                  });
+
+                  me.sprite.addChild(_line);
+
+                  var _node = new Canvax.Shapes.Circle({
+                      context: {
+                          x: x,
+                          y: y,
+                          r: me.radius,
+                          fillStyle: me.fillStyle,
+                          strokeStyle: me.style,
+                          lineWidth: me.lineWidth
+                      }
+                  });
+                  me.sprite.addChild(_node);
+              }
+          }
+      }, {
+          key: "_getNodeY",
+          value: function _getNodeY(nodeData, _coord) {
+
+              var appHeight = this.app.height;
+              var coordHeight = _coord.height;
+              var y = nodeData.y;
+              if (this.status == "online") {
+                  y -= Math.min(50, (appHeight - Math.abs(y)) * 0.3);
+              } else {
+                  y += Math.min(50, Math.abs(y) * 0.3);
+              }            return y;
+          }
+      }]);
+      return barGuide;
+  }(component);
+
   global$1.registerComponent(Chart, 'chart');
 
   //global.registerComponent( emptyCoord, 'coord' );
@@ -26189,9 +26344,10 @@ var Chartx = (function () {
   global$1.registerComponent(MarkLine, 'markLine');
   global$1.registerComponent(Tips, 'tips');
   global$1.registerComponent(barTgi, 'barTgi');
-  global$1.registerComponent(barGuide, 'bar_guide');
+  global$1.registerComponent(barGuide, 'barGuide');
   global$1.registerComponent(waterMark, 'waterMark');
   global$1.registerComponent(MarkLine$1, 'cross');
+  global$1.registerComponent(barGuide$1, 'lineSchedu');
 
   //皮肤设定begin ---------------
   //如果数据库中有项目皮肤

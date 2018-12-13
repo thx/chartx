@@ -11,9 +11,9 @@ export default class MarkLine extends Component
 
     constructor(opt , app)
     {
-        super(opt);
+        super(opt , app);
 
-        this.app = app;
+        this.name = "cross";
 
         this.width  = opt.width || 0;
         this.height = opt.height || 0;
@@ -28,11 +28,6 @@ export default class MarkLine extends Component
             y : 0
         };
        
-        //圆点，对应着坐标系统的原点
-        this.origin = {
-            x : 0 , y : 0
-        };
-
         this.line       = {
             y           : 0,
             strokeStyle : '#cccccc',

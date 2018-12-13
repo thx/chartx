@@ -9,7 +9,7 @@ export default class barGuide extends Component
     {
         super(opt, app);
 
-        this.name = "bar_guide";
+        this.name = "barGuide";
 
         this.field = null;
         this.barField = null;
@@ -22,10 +22,6 @@ export default class barGuide extends Component
 
         this.sprite = null;
 
-        this.origin = {
-            x : 0,
-            y : 0
-        };
         this.node = {
             lineWidth : 3,
             shapeType : "circle",

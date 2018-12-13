@@ -13,7 +13,7 @@ export default class waterMark extends Component
     {
         super( opt , app );
         
-        this.name = "watermark";
+        this.name = "waterMark";
 
         this.width = this.app.width;
         this.height = this.app.height;

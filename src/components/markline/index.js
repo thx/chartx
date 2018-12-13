@@ -12,7 +12,7 @@ export default class MarkLine extends Component
     {
         super(opt , app);
 
-        this.name = "markline";
+        this.name = "markLine";
 
         this._yAxis = null;
 

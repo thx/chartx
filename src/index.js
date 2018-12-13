@@ -29,10 +29,11 @@ import DataZoom from "./components/datazoom/index"
 import MarkLine from "./components/markline/index"
 import Tips from "./components/tips/index"
 import BarTgi from "./components/bartgi/index"
-import BarGuide from "./components/bar_guide/index"
+import BarGuide from "./components/barguide/index"
 import Theme from "./components/theme/index"
 import WaterMark from "./components/watermark/index"
 import Cross from "./components/cross/index"
+import lineSchedu from "./components/lineschedu/index"
 
 global.registerComponent( Chart, 'chart' );
 
@@ -58,9 +59,10 @@ global.registerComponent( DataZoom, 'dataZoom' );
 global.registerComponent( MarkLine, 'markLine' );
 global.registerComponent( Tips, 'tips' );
 global.registerComponent( BarTgi, 'barTgi' );
-global.registerComponent( BarGuide, 'bar_guide' );
+global.registerComponent( BarGuide, 'barGuide' );
 global.registerComponent( WaterMark, 'waterMark' );
 global.registerComponent( Cross, 'cross' );
+global.registerComponent( lineSchedu, 'lineSchedu' )
 
 //皮肤设定begin ---------------
 //如果数据库中有项目皮肤

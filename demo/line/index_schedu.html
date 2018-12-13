@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
+<title>xChart demo -- bar</title>
+
+<script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
+<script type="text/javascript" src="../../dist/chartx.js"></script>
+<!-- codemirror -->
+<script type="text/javascript" src="../../lib/codemirror/codemirror.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/active-line.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/javascript.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/matchbrackets.js"></script>
+<link rel="stylesheet" href="../../lib/codemirror/codemirror.css">
+<link rel="stylesheet" href="../../lib/codemirror/zenburn.css">
+<link rel="stylesheet" href="../../lib/codemirror/docs.css">
+<!-- codemirror end -->
+<!--bootstrap-->
+<script type="text/javascript" src="../../lib/bootstrap/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap-theme.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/docs.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap.min.css">
+<!--bootstrap end-->
+<script type="text/javascript" src="../../lib/demo.js"></script>
+<link rel="stylesheet" href="../../lib/demo.css">
+</head>
+<body >
+
+<table>
+    <tr>
+        <td id="td-vl">
+            <form><textarea id="code" name="code">
+
+//chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
+//第一行是表头。
+var data= [
+    ["xfield" , "uv"],
+    [ "1月1号" , 11  ],
+    [ "1月2号" , 130  ],
+    [ "1月3号" , 123  ],
+    [ "1月4号" , 132  ],
+    [ "1月5号" , 130 ],
+    [ "1月6号" , 150  ],
+    [ "1月7号" , 110 ],
+    [ "1月8号" , 166  ],
+    [ "1月9号" , 132 ],
+    [ "1月10号", 158 ],
+    [ "1月11号", 79  ],
+    [ "1月12号", 88 ]
+];
+
+
+var options = {
+    theme : "#3995ff",
+    coord: {
+        type: "rect",
+        xAxis: {
+            field: "xfield"
+        }
+    },
+    graphs: [
+        {
+            type: "line",
+            field: "uv",
+            node: {
+                enabled: false
+            }
+        }
+    ],
+    legend: {
+        enabled: 1
+    },
+    lineSchedu: [
+        { 
+            lineField : "uv",
+            time  : "1月2号", //对应xAxis的字段
+            list  : [ "白夜追凶（第一季）", "将军在上", '华尔街之狼','地球百子' ],
+            status: "online"
+        },
+        { 
+            lineField : "uv",
+            time: "1月8号", //对应xAxis的字段
+            list: [ "天坑猎鹰" ],
+            status: "complete",
+            style : "#b5b5b5"
+        },
+        { 
+            lineField : "uv",
+            time: "1月12号", //对应xAxis的字段
+            list: [ "一千零一夜 TV版" ],
+            status: "online"
+        },
+        { 
+            lineField : "uv",
+            time: "1月12号", //对应xAxis的字段
+            list: [ "古剑奇谭2","冰与火之歌","复仇者联盟" ],
+            status: "complete",
+            style : "#b5b5b5"
+        }
+    ]
+}
+
+
+window.line = Chartx.create("canvasTest" , data , options)
+
+setTimeout( function(){
+    return;
+    Chartx.create("canvasTest" , data , options)
+} , 3000)
+
+            </textarea></form>
+        </td>
+        <td style="padding:0 10px;" id="td-vr">
+            <div id="chartdemo-r">
+            <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
+                <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
+
+                <h4>折线图（bar chart）</h4>
+                <p>
+                    联系人：@释剑
+                </p>
+            </div>
+            <div  class="test-c">
+                <div id="canvasTest" style='width:100%;height:300px;position:relative;'></div>
+            </div>
+
+            </div>
+        </td>
+    </tr>
+</table>
+
+
+</body> 
+</html>
+
+

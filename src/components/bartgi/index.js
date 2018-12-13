@@ -11,6 +11,8 @@ export default class barTgi extends Component
     {
         super(opt, app);
 
+        this.name = "barTgi";
+
         this.field = null;
         this.barField = null;
 

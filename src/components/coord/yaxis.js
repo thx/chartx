@@ -217,7 +217,7 @@ export default class yAxis extends axis
             if (_.isFunction(me.label.format)) {
                 text = me.label.format.apply(this, [text, i ]);
             };
-            if( text === undefined || text === null ){
+            if( (text === undefined || text === null) && me.layoutType == "proportion" ){
                 text = numAddSymbol( layoutData.value );
             };  
             layoutData.text = text;
