@@ -643,8 +643,7 @@ export default class extends coorBase
         var obj = {
             //aAxis : aNode,
             //title : aNode.label,
-
-            iNode : aNode.ind,
+            //iNode : aNode.ind,
             nodes : [
                 //遍历_graphs 去拿东西
             ]
@@ -652,6 +651,7 @@ export default class extends coorBase
         if( aNode ){
             obj.aAxis = aNode;
             obj.title = aNode.text;
+            obj.iNode = aNode.ind;
         };
         
         if( e.eventInfo ){

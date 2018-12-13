@@ -14861,8 +14861,7 @@ var Chartx = (function () {
               var obj = {
                   //aAxis : aNode,
                   //title : aNode.label,
-
-                  iNode: aNode.ind,
+                  //iNode : aNode.ind,
                   nodes: [
                       //遍历_graphs 去拿东西
                   ]
@@ -14870,6 +14869,7 @@ var Chartx = (function () {
               if (aNode) {
                   obj.aAxis = aNode;
                   obj.title = aNode.text;
+                  obj.iNode = aNode.ind;
               }
               if (e.eventInfo) {
                   obj = _$1.extend(obj, e.eventInfo);
