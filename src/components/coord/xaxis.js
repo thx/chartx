@@ -302,7 +302,7 @@ export default class xAxis extends axis
         if ( _.isFunction(this.label.format) ) {
             res = this.label.format.apply( this, arguments );
         };
-        if ( _.isNumber(res) && me.layoutType == "proportion"  ) {
+        if ( _.isNumber(res) && this.layoutType == "proportion"  ) {
             res = numAddSymbol(res);
         };
         return res;
