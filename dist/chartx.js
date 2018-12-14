@@ -7759,7 +7759,6 @@ var Chartx = (function () {
           this.type = type; //2canvas,1webgl
           this.app = app;
 
-          //prepare options
           if (options) {
               for (var i in settings.RENDER_OPTIONS) {
                   if (typeof options[i] === 'undefined') {

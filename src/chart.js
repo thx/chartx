@@ -666,4 +666,5 @@ export default class Chart extends event.Dispatcher
              _g.tipsPointerHideOf( e );
          });
      }
+     
 }
