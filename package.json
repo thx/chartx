@@ -41,7 +41,6 @@
     "fmin": "0.0.2"
   },
   "scripts": {
-    "build": "rollup -c",
-    "rollup" : "node rollup.config.js"
+    "build": "rollup -c"
   }
 }
