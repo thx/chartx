@@ -12,8 +12,7 @@ rollup.rollup({
         include : ['./src/**','node_modules/mmvis/**', "node_modules/canvax/**"]
       }),
       resolve({ jsnext: true, main: true, browser: true }), 
-      commonjs(),
-      uglify()
+      commonjs()
     ]
 }).then(function(bundle) {
 
