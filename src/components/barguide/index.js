@@ -2,7 +2,7 @@ import Component from "../component"
 import Canvax from "canvax"
 import { _ } from "mmvis"
 
-export default class barGuide extends Component
+export default class extends Component
 {
 
     constructor( opt, app )

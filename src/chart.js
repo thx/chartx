@@ -72,6 +72,12 @@ export default class Chart extends event.Dispatcher
         _.each( this.__highModules, function( compName ){
             if( !opt[compName] ) return;
             var comps = _.flatten([ opt[compName] ]);
+
+            //them是一个数组的组件。so特殊处理
+            if( compName == "theme" ){
+                comps = [ comps ];
+            };
+            
             _.each( comps, function( comp ){
                 if( //没有type的coord和没有field(or keyField)的graphs，都无效，不要创建该组件
                     //关系图中是keyField

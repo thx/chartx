@@ -2,7 +2,7 @@
   "name": "chartx",
   "title": "chartx.js",
   "description": "Data Visualization Chart Library",
-  "version": "1.0.83",
+  "version": "1.0.86",
   "homepage": "https://thx.github.io/chartx/",
   "license": "MIT",
   "magixCliConfig": {
@@ -36,7 +36,7 @@
     "rollup-watch": "4.3.1"
   },
   "dependencies": {
-    "mmvis": "0.0.22",
+    "mmvis": "0.0.25",
     "canvax": "2.0.16",
     "fmin": "0.0.2"
   },

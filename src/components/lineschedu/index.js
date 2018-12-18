@@ -2,7 +2,7 @@ import Component from "../component"
 import Canvax from "canvax"
 import { _ } from "mmvis"
 
-export default class barGuide extends Component
+export default class extends Component
 {
 
     constructor( opt, app )
@@ -60,6 +60,10 @@ export default class barGuide extends Component
 
         var iNode = this.app.getComponent({name : "coord"}).getAxis({type: "xAxis"}).getIndexOfVal( this.time );
         
+        if( iNode == -1 ){
+            return;
+        };
+
         var nodeData = this.lineDatas[iNode];
 
         if( nodeData.y != undefined ){
