@@ -3,15 +3,31 @@ import Canvax from "canvax"
 import xAxisConstructor from "./xaxis"
 import yAxisConstructor from "./yaxis"
 import Grid from "./grid"
-import { _ } from "mmvis"
+import { _,getDefaultProps } from "mmvis"
 
 const Rect = Canvax.Shapes.Rect;
 
 export default class extends coorBase
 {
+    static defaultProps = {
+        horizontal : {
+            detail : '横向翻转坐标系',
+            documentation : "横向翻转坐标系",
+            insertText    : "horizontal: ",
+            default       : false,
+            values        : [true, false]
+        },
+        _children  : {
+            xAxis  : {},
+            yAxis  : {},
+            grid   : {}
+        }
+    } 
+
     constructor( opt, app )
     {
         super( opt, app );
+        ;
 
         this.type = "rect";
         
@@ -22,19 +38,9 @@ export default class extends coorBase
         this._yAxisRight = null;
         this._grid  = null;
 
-        this.horizontal = false;
+        _.extend( true, this, getDefaultProps( new.target.defaultProps ), this.setDefaultOpt( opt, app ) );
 
-        this.xAxis = {
-            field : this.dataFrame.fields[0]
-        };
-        this.yAxis = [{
-            field : this.dataFrame.fields.slice(1)
-        }];
-        this.grid = {
-        };
-
-        _.extend( true, this, this.setDefaultOpt( opt, app ) );
-
+        
         if( opt.horizontal ){
             this.xAxis.isH = true;
             _.each( this.yAxis , function( yAxis ){
@@ -62,6 +68,7 @@ export default class extends coorBase
     setDefaultOpt( coordOpt, app )
     {
         var coord = {
+            field : this.dataFrame.fields[0],
             xAxis : {
                 //波峰波谷布局模型，默认是柱状图的，折线图种需要做覆盖
                 layoutType    : "rule", //"peak",  

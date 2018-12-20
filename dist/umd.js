@@ -102,6 +102,36 @@
     return _assertThisInitialized(self);
   }
 
+  function _superPropBase(object, property) {
+    while (!Object.prototype.hasOwnProperty.call(object, property)) {
+      object = _getPrototypeOf(object);
+      if (object === null) break;
+    }
+
+    return object;
+  }
+
+  function _get(target, property, receiver) {
+    if (typeof Reflect !== "undefined" && Reflect.get) {
+      _get = Reflect.get;
+    } else {
+      _get = function _get(target, property, receiver) {
+        var base = _superPropBase(target, property);
+
+        if (!base) return;
+        var desc = Object.getOwnPropertyDescriptor(base, property);
+
+        if (desc.get) {
+          return desc.get.call(receiver);
+        }
+
+        return desc.value;
+      };
+    }
+
+    return _get(target, property, receiver || target);
+  }
+
   var _$1 = {};
   var breaker = {};
   var ArrayProto = Array.prototype,
@@ -1820,6 +1850,14 @@
   var is3dOpt = function is3dOpt(opt) {
     var chartx3dCoordTypes = ["box", "polar3d"];
     return opt.coord && opt.coord.type && chartx3dCoordTypes.indexOf(opt.coord.type) > -1;
+  };
+
+  var setDefaultProps$1 = function setDefaultProps(dProps, target) {
+    for (var p in dProps) {
+      if (!!p.indexOf("_")) {
+        target[p] = dProps[p].default;
+      }
+    }
   };
 
   //图表皮肤
@@ -12631,6 +12669,7 @@
       _classCallCheck(this, coorBase);
 
       _this = _possibleConstructorReturn(this, _getPrototypeOf(coorBase).call(this, opt, app));
+      setDefaultProps$1(_get(_getPrototypeOf(coorBase.prototype), "defaultProps", _assertThisInitialized(_this)), _assertThisInitialized(_assertThisInitialized(_this)));
       _this.name = "coord";
       _this._opt = opt;
       _this.app = app;
@@ -12732,10 +12771,10 @@
         var me = this;
         var fieldMap = null;
 
-        function get(maps) {
+        function get$$1(maps) {
           _$1.each(maps, function (map, i) {
             if (_$1.isArray(map)) {
-              get(map);
+              get$$1(map);
             } else if (map.field && map.field == field) {
               fieldMap = map;
               return false;
@@ -12743,7 +12782,7 @@
           });
         }
 
-        get(me.fieldsMap);
+        get$$1(me.fieldsMap);
         return fieldMap;
       } //从 fieldsMap 中过滤筛选出来一个一一对应的 enabled为true的对象结构
       //这个方法还必须要返回的数据里描述出来多y轴的结构。否则外面拿到数据后并不好处理那个数据对应哪个轴
@@ -12913,6 +12952,21 @@
 
     return coorBase;
   }(component);
+
+  _defineProperty(coorBase, "defaultProps", {
+    type: {
+      detail: '坐标系组件',
+      documentation: "坐标系组件，可选值有'rect'（二维直角坐标系）,'polar'（二维极坐标系）,'box'（三维直角坐标系） ",
+      insertText: "type: ",
+      default: "",
+      values: ["rect", "polar", "box", "polar3d"]
+    },
+    _children: _defineProperty({
+      rect: {},
+      polar: {},
+      box: {}
+    }, "polar", {})
+  });
 
   /**
    * 数字千分位加','号
@@ -14325,20 +14379,13 @@
       _classCallCheck(this, _default);
 
       _this = _possibleConstructorReturn(this, _getPrototypeOf(_default).call(this, opt, app));
+      setDefaultProps$1(_get(_getPrototypeOf(_default.prototype), "defaultProps", _assertThisInitialized(_this)), _assertThisInitialized(_assertThisInitialized(_this)));
       _this.type = "rect";
       _this._xAxis = null;
       _this._yAxis = [];
       _this._yAxisLeft = null;
       _this._yAxisRight = null;
       _this._grid = null;
-      _this.horizontal = false;
-      _this.xAxis = {
-        field: _this.dataFrame.fields[0]
-      };
-      _this.yAxis = [{
-        field: _this.dataFrame.fields.slice(1)
-      }];
-      _this.grid = {};
 
       _$1.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), _this.setDefaultOpt(opt, app));
 
@@ -14374,6 +14421,7 @@
       key: "setDefaultOpt",
       value: function setDefaultOpt(coordOpt, app) {
         var coord = {
+          field: this.dataFrame.fields[0],
           xAxis: {
             //波峰波谷布局模型，默认是柱状图的，折线图种需要做覆盖
             layoutType: "rule",
@@ -14909,6 +14957,21 @@
     return _default;
   }(coorBase);
 
+  _defineProperty(_default, "defaultProps", {
+    horizontal: {
+      detail: '横向翻转坐标系',
+      documentation: "横向翻转坐标系",
+      insertText: "horizontal: ",
+      default: false,
+      values: [true, false]
+    },
+    _children: {
+      xAxis: {},
+      yAxis: {},
+      grid: {}
+    }
+  });
+
   var Line$4 = Canvax.Shapes.Line;
   var Circle$2 = Canvax.Shapes.Circle;
   var Polygon$2 = Canvax.Shapes.Polygon;
@@ -15092,9 +15155,8 @@
       _classCallCheck(this, _default);
 
       _this = _possibleConstructorReturn(this, _getPrototypeOf(_default).call(this, opt, app));
+      setDefaultProps(_get(_getPrototypeOf(_default.prototype), "defaultProps", _assertThisInitialized(_this)), _assertThisInitialized(_assertThisInitialized(_this)));
       _this.type = "polar";
-      _this.allAngle = 360; //默认是个周园
-
       _this.aAxis = {
         field: null,
         layoutType: "proportion",
@@ -15123,9 +15185,9 @@
       };
       _this.grid = {
         enabled: false
-      };
-      _this.maxR = null;
-      _this.squareRange = true; //default true, 说明将会绘制一个width===height的矩形范围内，否则就跟着画布走
+      }; //this.allAngle = 360; //默认是个周园
+      //this.maxRadius = null;
+      //this.squareRange = true; //default true, 说明将会绘制一个width===height的矩形范围内，否则就跟着画布走
 
       _$1.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), _this.setDefaultOpt(opt, app));
 
@@ -15315,8 +15377,8 @@
           _maxR = Math.max(this.width / 2, this.height / 2);
         }
 
-        if (!(this.maxR != null && this.maxR <= _maxR)) {
-          this.maxR = _maxR;
+        if (!(this.maxRadius != 'auto' && this.maxRadius <= _maxR)) {
+          this.maxRadius = _maxR;
         }
       } //获取极坐标系内任意半径上的弧度集合
       //[ [{point , radian} , {point , radian}] ... ]
@@ -15335,7 +15397,7 @@
         }
         var _rs = [];
 
-        if (r > this.maxR) {
+        if (r > this.maxRadius) {
           return [];
         } else {
           //下面的坐标点都是已经origin为原点的坐标系统里
@@ -15522,8 +15584,8 @@
 
         var minNum = 0; //Math.min( this.rAxis.dataSection );
 
-        var maxR = parseInt(Math.max(this.width, this.height) / 2);
-        r = maxR * ((num - minNum) / (maxNum - minNum));
+        var maxRadius = parseInt(Math.max(this.width, this.height) / 2);
+        r = maxRadius * ((num - minNum) / (maxNum - minNum));
         return r;
       } //获取在r的半径上面，沿aAxis的points
 
@@ -15769,6 +15831,35 @@
 
     return _default;
   }(coorBase);
+
+  _defineProperty(_default$1, "defaultProps", {
+    allAngle: {
+      detail: '坐标系总角度',
+      documentation: "",
+      insertText: "allAngle: ",
+      default: 360,
+      values: [0, 360]
+    },
+    squareRange: {
+      detail: '是否正方形的坐标区域',
+      documentation: "",
+      insertText: "squareRange: ",
+      default: true,
+      values: [true, false]
+    },
+    maxRadius: {
+      detail: '坐标系的最大半径',
+      documentation: "默认自动计算view的高宽，如果squareRange==true，则会取Math.min(width,height)",
+      insertText: "maxRadius: ",
+      default: 'auto',
+      values: null
+    },
+    _children: {
+      xAxis: {},
+      yAxis: {},
+      grid: {}
+    }
+  });
 
   var GraphsBase =
   /*#__PURE__*/

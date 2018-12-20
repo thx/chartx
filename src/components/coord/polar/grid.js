@@ -20,6 +20,8 @@ export default class polarGrid extends event.Dispatcher
             y : 0
         };
 
+
+
         this.enabled = false;
      
         //环
@@ -40,6 +42,9 @@ export default class polarGrid extends event.Dispatcher
         };
 
         this.dataSection = [];
+
+
+
 
         this.sprite = null;//总的sprite
 
@@ -91,6 +96,7 @@ export default class polarGrid extends event.Dispatcher
 
     _widget()
     {
+        
         var me = this;
         _.each( this.dataSection, function( num, i ){
             

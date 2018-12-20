@@ -16,55 +16,143 @@
 import coorBase from "./index"
 import Canvax from "canvax"
 import Grid from "./polar/grid"
-import { dataSection,_ } from "mmvis"
+import { dataSection,_,getDefaultProps } from "mmvis"
 
 export default class extends coorBase
 {
+    static defaultProps = {
+        allAngle : {
+            detail : '坐标系总角度',
+            documentation : "",
+            default       : 360,
+            values        : [0, 360]
+        },
+        squareRange : {
+            detail : '是否正方形的坐标区域',
+            documentation : "",
+            default       : true,
+            values        : [true, false]
+        },
+        maxRadius : {
+            detail : '坐标系的最大半径',
+            documentation : "默认自动计算view的高宽，如果squareRange==true，则会取Math.min(width,height)",
+            default       : 'auto',
+            values        : null
+        },
+        aAxis : {
+            detail : '角度轴',
+            documentation : "类似直角坐标系中的x轴",
+            propertys     : {
+                field : {
+                    detail : '数据字段',
+                    documentation : "",
+                    default       : ''
+                },
+                layoutType : {
+                    detail : '布局类型',
+                    documentation : "",
+                    default       : 'proportion'
+                },
+                beginAngle : {
+                    detail : '起始角度',
+                    documentation : "",
+                    default       : -90
+                },
+                enabled : {
+                    detail : '是否显示',
+                    documentation : "",
+                    default       : false
+                },
+                label : {
+                    detail : '文本配置',
+                    documentation : '',
+                    propertys : {
+                        enabled : {
+                            detail : '是否显示',
+                            documentation : "",
+                            default       : true
+                        },
+                        format  : {
+                            detail : 'label的格式化处理函数',
+                            documentation : "",
+                            default : null
+                        },
+                        fontColor: {
+                            detail : 'label颜色',
+                            documentation: '',
+                            default : "#666"
+                        }
+                    }
+                }
+            }
+        },
+        rAxis : {
+            detail : '半径维度轴',
+            documentation: '类似直角坐标系中的y轴维度',
+            propertys : {
+                field : {
+                    detail : '数据字段',
+                    documentation : "",
+                    default       : ''
+                },
+                dataSection : {
+                    detail : '轴的显示数据',
+                    documentation : "默认根据源数据中自动计算，用户也可以手动指定",
+                    default       : false
+                },
+                enabled : {
+                    detail : '是否显示',
+                    documentation : "",
+                    default       : false
+                }
+            }
+        }
+    } 
+
     constructor( opt , app )
     {
         super( opt , app );
+        //let defaultProps = getDefaultProps( new.target.defaultProps );
 
         this.type  = "polar";
-        
-        this.allAngle = 360; //默认是个周园
 
         this.aAxis = {
-            field : null,
-            layoutType : "proportion", // proportion 弧度均分， proportion 和直角坐标中的一样
+            //field : null,
+            //layoutType : "proportion", // proportion 弧度均分， proportion 和直角坐标中的一样
             data : [],
             angleList : [], //对应layoutType下的角度list
-            beginAngle : -90,
+            //beginAngle : -90,
             
             //刻度尺,在最外沿的蜘蛛网上面
             layoutData : [], //aAxis.data的 label.format后版本
-            enabled : opt.aAxis && opt.aAxis.field,
+            //enabled : opt.aAxis && opt.aAxis.field,
+            /*
             label : {
                 enabled : true,
                 format : function( v ){ return v },
                 fontColor : "#666"
             }
+            */
         };
-
+        
+        /*
         this.rAxis = {
             field : [],
             dataSection : null,
             //半径刻度尺,从中心点触发，某个角度达到最外沿的蜘蛛网为止
-            enabled : false 
+            enabled : false
         };
 
         this.grid = {
             enabled : false
         };
+         */ 
 
-        this.maxR = null;
-        this.squareRange = true; //default true, 说明将会绘制一个width===height的矩形范围内，否则就跟着画布走
+        //this.allAngle = 360; //默认是个周园
+        //this.maxRadius = null;
+        //this.squareRange = true; //default true, 说明将会绘制一个width===height的矩形范围内，否则就跟着画布走
 
-        _.extend( true, this, this.setDefaultOpt( opt, app ) );
-
-        if( !this.aAxis.field ){
-            //如果aAxis.field都没有的话，是没法绘制grid的，所以grid的enabled就是false
-            this.grid.enabled = false;
-        };
+        _.extend( true, this, getDefaultProps( new.target.defaultProps ), this.setDefaultOpt( opt, app ) );
 
         this.init(opt);
     }
@@ -75,7 +163,9 @@ export default class extends coorBase
         var coord = {
             rAxis : {
                 field : []
-            }
+            },
+            aAxis : {},
+            grid  : {}
         };
         _.extend( true, coord, coordOpt );
 
@@ -87,7 +177,6 @@ export default class extends coorBase
         //根据opt中得Graphs配置，来设置 coord.yAxis
         var graphsArr = _.flatten( [app._opt.graphs] );
         
-       
         //有graphs的就要用找到这个graphs.field来设置coord.rAxis
         var arrs = [];
         _.each( graphsArr, function( graphs ){
@@ -101,6 +190,13 @@ export default class extends coorBase
             };
         } );
         coord.rAxis.field = coord.rAxis.field.concat( arrs );
+
+        if( coordOpt.aAxis &&coordOpt.aAxis.field ){
+            coord.aAxis.enabled = true;
+        } else {
+            //如果aAxis.field都没有的话，是没法绘制grid的，所以grid的enabled就是false
+            coord.grid.enabled = false;
+        };
 
         return coord
     }
@@ -250,8 +346,8 @@ export default class extends coorBase
             _maxR = Math.max( this.width / 2 , this.height / 2 );
         };
 
-        if( !(this.maxR != null && this.maxR <= _maxR) ){
-            this.maxR = _maxR
+        if( !(this.maxRadius != 'auto' && this.maxRadius <= _maxR) ){
+            this.maxRadius = _maxR
         };
     }
 
@@ -269,7 +365,7 @@ export default class extends coorBase
         };
 
         var _rs = [];
-        if( r > this.maxR ){
+        if( r > this.maxRadius ){
             return [];
         } else {
             //下面的坐标点都是已经origin为原点的坐标系统里
@@ -425,9 +521,9 @@ export default class extends coorBase
         var r = 0;
         var maxNum = _.max( this.rAxis.dataSection );
         var minNum = 0; //Math.min( this.rAxis.dataSection );
-        var maxR = parseInt( Math.max( this.width, this.height ) / 2 );
+        var maxRadius = parseInt( Math.max( this.width, this.height ) / 2 );
 
-        r = maxR * ( (num-minNum) / (maxNum-minNum) );
+        r = maxRadius * ( (num-minNum) / (maxNum-minNum) );
         return r;
     }
 
@@ -495,8 +591,8 @@ export default class extends coorBase
                 y : point.y,
                 fillStyle : me.aAxis.label.fontColor
             };
-
-            var text = me.aAxis.label.format( value );
+            
+            var text = _.isFunction(me.aAxis.label.format) ? me.aAxis.label.format( value ) : value;
             _.extend( c , me._getTextAlignForPoint(Math.atan2(point.y , point.x)) );
             me._aAxisScaleSp.addChild(new Canvax.Display.Text( text , {
                 context : c

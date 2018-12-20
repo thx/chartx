@@ -27,6 +27,7 @@
   "devDependencies": {
     "@babel/core": "7.2.0",
     "@babel/plugin-external-helpers": "^7.2.0",
+    "@babel/plugin-proposal-class-properties": "^7.2.1",
     "@babel/preset-env": "^7.2.0",
     "rollup": "0.67.4",
     "rollup-plugin-babel": "^4.1.0",
@@ -36,11 +37,12 @@
     "rollup-watch": "4.3.1"
   },
   "dependencies": {
-    "mmvis": "0.0.25",
+    "mmvis": "file:../mmvis",
     "canvax": "2.0.16",
     "fmin": "0.0.2"
   },
   "scripts": {
-    "build": "rollup -c"
+    "build": "rollup -c",
+    "dev": "rollup -c -w"
   }
 }

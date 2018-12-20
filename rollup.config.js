@@ -17,7 +17,9 @@ export default {
         file : "dist/chartx.js",
         name : "Chartx",
         format: "iife"
-    },{
+    }
+    /*
+    ,{
         file : "dist/cjs.js",
         name : "Chartx",
         format: "cjs"
@@ -33,7 +35,9 @@ export default {
         file : "dist/umd.js",
         name : "Chartx",
         format: "umd"
-    }],
+    }
+    */
+    ],
     plugins: [
         babel({
             exclude: /node_modules\/(?!.*@(mmvis|canvax)\/).*/,
@@ -48,7 +52,8 @@ export default {
                 ]
             ],
             plugins: [
-                "@babel/plugin-external-helpers"
+                "@babel/plugin-external-helpers",
+                "@babel/plugin-proposal-class-properties"
             ]
         }),
         resolve({ jsnext: true, main: true, browser: true }), 

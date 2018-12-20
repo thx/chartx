@@ -1,13 +1,29 @@
 import Component from "../component"
 import Canvax from "canvax"
-import { _ } from "mmvis"
-
+import { _,getDefaultProps } from "mmvis"
 
 export default class coorBase extends Component
 {
+    static defaultProps = {
+        type : {
+            detail : '坐标系组件',
+            documentation : "坐标系组件，可选值有'rect'（二维直角坐标系）,'polar'（二维极坐标系）,'box'（三维直角坐标系） ",
+            insertText    : "type: ",
+            default       : "",
+            values        : ["rect","polar","box","polar3d"]
+        },
+        _children  : {
+            rect  : {},
+            polar : {},
+            box   : {},
+            polar : {}
+        }
+    }
+
 	constructor(opt, app){
         super(opt, app);
-
+        _.extend( true, this, getDefaultProps( new.target.defaultProps ) );
+        
         this.name = "coord";
 
         this._opt = opt;

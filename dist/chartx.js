@@ -1819,6 +1819,24 @@ var Chartx = (function () {
     return opt.coord && opt.coord.type && chartx3dCoordTypes.indexOf(opt.coord.type) > -1;
   };
 
+  var getDefaultProps = function getDefaultProps(dProps) {
+    var target = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
+    for (var p in dProps) {
+      if (!!p.indexOf("_")) {
+        if (!dProps[p].propertys) {
+          //如果这个属性没有子属性了，那么就说明这个已经是叶子节点了
+          target[p] = dProps[p].default;
+        } else {
+          target[p] = {};
+          getDefaultProps(dProps[p].propertys, target[p]);
+        }
+      }
+    }
+
+    return target;
+  };
+
   //图表皮肤
   var global$1 = {
     create: function create(el, _data, _opt) {
@@ -12628,6 +12646,9 @@ var Chartx = (function () {
       _classCallCheck(this, coorBase);
 
       _this = _possibleConstructorReturn(this, _getPrototypeOf(coorBase).call(this, opt, app));
+
+      _$1.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps((this instanceof coorBase ? this.constructor : void 0).defaultProps));
+
       _this.name = "coord";
       _this._opt = opt;
       _this.app = app;
@@ -12910,6 +12931,21 @@ var Chartx = (function () {
 
     return coorBase;
   }(component);
+
+  _defineProperty(coorBase, "defaultProps", {
+    type: {
+      detail: '坐标系组件',
+      documentation: "坐标系组件，可选值有'rect'（二维直角坐标系）,'polar'（二维极坐标系）,'box'（三维直角坐标系） ",
+      insertText: "type: ",
+      default: "",
+      values: ["rect", "polar", "box", "polar3d"]
+    },
+    _children: _defineProperty({
+      rect: {},
+      polar: {},
+      box: {}
+    }, "polar", {})
+  });
 
   /**
    * 数字千分位加','号
@@ -14328,16 +14364,8 @@ var Chartx = (function () {
       _this._yAxisLeft = null;
       _this._yAxisRight = null;
       _this._grid = null;
-      _this.horizontal = false;
-      _this.xAxis = {
-        field: _this.dataFrame.fields[0]
-      };
-      _this.yAxis = [{
-        field: _this.dataFrame.fields.slice(1)
-      }];
-      _this.grid = {};
 
-      _$1.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), _this.setDefaultOpt(opt, app));
+      _$1.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps((this instanceof _default ? this.constructor : void 0).defaultProps), _this.setDefaultOpt(opt, app));
 
       if (opt.horizontal) {
         _this.xAxis.isH = true;
@@ -14371,6 +14399,7 @@ var Chartx = (function () {
       key: "setDefaultOpt",
       value: function setDefaultOpt(coordOpt, app) {
         var coord = {
+          field: this.dataFrame.fields[0],
           xAxis: {
             //波峰波谷布局模型，默认是柱状图的，折线图种需要做覆盖
             layoutType: "rule",
@@ -14906,6 +14935,21 @@ var Chartx = (function () {
     return _default;
   }(coorBase);
 
+  _defineProperty(_default, "defaultProps", {
+    horizontal: {
+      detail: '横向翻转坐标系',
+      documentation: "横向翻转坐标系",
+      insertText: "horizontal: ",
+      default: false,
+      values: [true, false]
+    },
+    _children: {
+      xAxis: {},
+      yAxis: {},
+      grid: {}
+    }
+  });
+
   var Line$4 = Canvax.Shapes.Line;
   var Circle$2 = Canvax.Shapes.Circle;
   var Polygon$2 = Canvax.Shapes.Polygon;
@@ -15088,48 +15132,45 @@ var Chartx = (function () {
 
       _classCallCheck(this, _default);
 
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(_default).call(this, opt, app));
-      _this.type = "polar";
-      _this.allAngle = 360; //默认是个周园
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(_default).call(this, opt, app)); //let defaultProps = getDefaultProps( new.target.defaultProps );
 
+      _this.type = "polar";
       _this.aAxis = {
-        field: null,
-        layoutType: "proportion",
-        // proportion 弧度均分， proportion 和直角坐标中的一样
+        //field : null,
+        //layoutType : "proportion", // proportion 弧度均分， proportion 和直角坐标中的一样
         data: [],
         angleList: [],
         //对应layoutType下的角度list
-        beginAngle: -90,
+        //beginAngle : -90,
         //刻度尺,在最外沿的蜘蛛网上面
-        layoutData: [],
-        //aAxis.data的 label.format后版本
-        enabled: opt.aAxis && opt.aAxis.field,
-        label: {
-          enabled: true,
-          format: function format(v) {
-            return v;
-          },
-          fontColor: "#666"
+        layoutData: [] //aAxis.data的 label.format后版本
+        //enabled : opt.aAxis && opt.aAxis.field,
+
+        /*
+        label : {
+            enabled : true,
+            format : function( v ){ return v },
+            fontColor : "#666"
         }
-      };
-      _this.rAxis = {
-        field: [],
-        dataSection: null,
-        //半径刻度尺,从中心点触发，某个角度达到最外沿的蜘蛛网为止
-        enabled: false
-      };
-      _this.grid = {
-        enabled: false
-      };
-      _this.maxR = null;
-      _this.squareRange = true; //default true, 说明将会绘制一个width===height的矩形范围内，否则就跟着画布走
+        */
 
-      _$1.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), _this.setDefaultOpt(opt, app));
+      };
+      /*
+      this.rAxis = {
+          field : [],
+          dataSection : null,
+          //半径刻度尺,从中心点触发，某个角度达到最外沿的蜘蛛网为止
+          enabled : false
+      };
+       this.grid = {
+          enabled : false
+      };
+       */
+      //this.allAngle = 360; //默认是个周园
+      //this.maxRadius = null;
+      //this.squareRange = true; //default true, 说明将会绘制一个width===height的矩形范围内，否则就跟着画布走
 
-      if (!_this.aAxis.field) {
-        //如果aAxis.field都没有的话，是没法绘制grid的，所以grid的enabled就是false
-        _this.grid.enabled = false;
-      }
+      _$1.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps((this instanceof _default ? this.constructor : void 0).defaultProps), _this.setDefaultOpt(opt, app));
 
       _this.init(opt);
 
@@ -15142,7 +15183,9 @@ var Chartx = (function () {
         var coord = {
           rAxis: {
             field: []
-          }
+          },
+          aAxis: {},
+          grid: {}
         };
 
         _$1.extend(true, coord, coordOpt); //根据graphs.field 来 配置 coord.rAxis.field -------------------
@@ -15170,6 +15213,13 @@ var Chartx = (function () {
         });
 
         coord.rAxis.field = coord.rAxis.field.concat(arrs);
+
+        if (coordOpt.aAxis && coordOpt.aAxis.field) {
+          coord.aAxis.enabled = true;
+        } else {
+          //如果aAxis.field都没有的话，是没法绘制grid的，所以grid的enabled就是false
+          coord.grid.enabled = false;
+        }
         return coord;
       }
     }, {
@@ -15312,8 +15362,8 @@ var Chartx = (function () {
           _maxR = Math.max(this.width / 2, this.height / 2);
         }
 
-        if (!(this.maxR != null && this.maxR <= _maxR)) {
-          this.maxR = _maxR;
+        if (!(this.maxRadius != 'auto' && this.maxRadius <= _maxR)) {
+          this.maxRadius = _maxR;
         }
       } //获取极坐标系内任意半径上的弧度集合
       //[ [{point , radian} , {point , radian}] ... ]
@@ -15332,7 +15382,7 @@ var Chartx = (function () {
         }
         var _rs = [];
 
-        if (r > this.maxR) {
+        if (r > this.maxRadius) {
           return [];
         } else {
           //下面的坐标点都是已经origin为原点的坐标系统里
@@ -15519,8 +15569,8 @@ var Chartx = (function () {
 
         var minNum = 0; //Math.min( this.rAxis.dataSection );
 
-        var maxR = parseInt(Math.max(this.width, this.height) / 2);
-        r = maxR * ((num - minNum) / (maxNum - minNum));
+        var maxRadius = parseInt(Math.max(this.width, this.height) / 2);
+        r = maxRadius * ((num - minNum) / (maxNum - minNum));
         return r;
       } //获取在r的半径上面，沿aAxis的points
 
@@ -15588,7 +15638,7 @@ var Chartx = (function () {
             y: point.y,
             fillStyle: me.aAxis.label.fontColor
           };
-          var text = me.aAxis.label.format(value);
+          var text = _$1.isFunction(me.aAxis.label.format) ? me.aAxis.label.format(value) : value;
 
           _$1.extend(c, me._getTextAlignForPoint(Math.atan2(point.y, point.x)));
 
@@ -15766,6 +15816,95 @@ var Chartx = (function () {
 
     return _default;
   }(coorBase);
+
+  _defineProperty(_default$1, "defaultProps", {
+    allAngle: {
+      detail: '坐标系总角度',
+      documentation: "",
+      default: 360,
+      values: [0, 360]
+    },
+    squareRange: {
+      detail: '是否正方形的坐标区域',
+      documentation: "",
+      default: true,
+      values: [true, false]
+    },
+    maxRadius: {
+      detail: '坐标系的最大半径',
+      documentation: "默认自动计算view的高宽，如果squareRange==true，则会取Math.min(width,height)",
+      default: 'auto',
+      values: null
+    },
+    aAxis: {
+      detail: '角度轴',
+      documentation: "类似直角坐标系中的x轴",
+      propertys: {
+        field: {
+          detail: '数据字段',
+          documentation: "",
+          default: ''
+        },
+        layoutType: {
+          detail: '布局类型',
+          documentation: "",
+          default: 'proportion'
+        },
+        beginAngle: {
+          detail: '起始角度',
+          documentation: "",
+          default: -90
+        },
+        enabled: {
+          detail: '是否显示',
+          documentation: "",
+          default: false
+        },
+        label: {
+          detail: '文本配置',
+          documentation: '',
+          propertys: {
+            enabled: {
+              detail: '是否显示',
+              documentation: "",
+              default: true
+            },
+            format: {
+              detail: 'label的格式化处理函数',
+              documentation: "",
+              default: null
+            },
+            fontColor: {
+              detail: 'label颜色',
+              documentation: '',
+              default: "#666"
+            }
+          }
+        }
+      }
+    },
+    rAxis: {
+      detail: '半径维度轴',
+      documentation: '类似直角坐标系中的y轴维度',
+      propertys: {
+        field: {
+          detail: '数据字段',
+          documentation: "",
+          default: ''
+        },
+        dataSection: {
+          detail: '轴的显示数据',
+          documentation: "默认根据源数据中自动计算，用户也可以手动指定",
+          default: false
+        },
+        enabled: {
+          detail: '是否显示',
+          documentation: "",
+          default: false
+        }
+      }
+    }
+  });
 
   var GraphsBase =
   /*#__PURE__*/
