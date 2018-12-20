@@ -21,7 +21,6 @@ export function numAddSymbol($n,$s)
     }   
 }
 
-
 //在一个数组中 返回比对$arr中的值离$n最近的值的索引
 export function getDisMinATArr($n, $arr) {
     var index = 0
