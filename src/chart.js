@@ -453,16 +453,16 @@ export default class Chart extends event.Dispatcher
     getComponents( opt, components ){
         var arr = [];
         var expCount = 0;
+        if( !components ){
+            components = this.components;
+        };
+
         for( var p in opt ){
             expCount++;
         };
 
         if( !expCount ){
-            return arr;
-        };
-
-        if( !components ){
-            components = this.components;
+            return components;
         };
 
         _.each( components, function( comp ){
@@ -595,42 +595,35 @@ export default class Chart extends event.Dispatcher
     _bindEvent()
     {
         var me = this;
-        this.on("panstart mouseover", function(e) {
-            var _tips = me.getComponent({name:'tips'});
-            if ( _tips ) {
-                me._setTipsInfo.apply(me, [e]);
-                _tips.show(e);
-                me._tipsPointerAtAllGraphs( e );
-            };
-        });
-        this.on("panmove mousemove", function(e) {
-            var _tips = me.getComponent({name:'tips'});
-            if ( _tips ) {
-                me._setTipsInfo.apply(me, [e]);
-                _tips.move(e);
-                me._tipsPointerAtAllGraphs( e );
-            };
-        });
-        this.on("panend mouseout", function(e) {
-            //如果e.toTarget有货，但是其实这个point还是在induce 的范围内的
-            //那么就不要执行hide，顶多只显示这个点得tips数据
+        this.on(event.types.get() , function(e){
             var _tips = me.getComponent({name:'tips'});
             var _coord = me.getComponent({name:'coord'});
-            if ( _tips && !( e.toTarget && _coord && _coord.induce && _coord.induce.containsPoint( _coord.induce.globalToLocal(e.target.localToGlobal(e.point) )) )) {
-                _tips.hide(e);
-                me._tipsPointerHideAtAllGraphs( e );
-            };
-        });
-        this.on("tap", function(e) {
-            var _tips = me.getComponent({name:'tips'});
-            if ( _tips ) {
-                _tips.hide(e);
+            if( _tips ){
                 me._setTipsInfo.apply(me, [e]);
-                _tips.show(e);
-                me._tipsPointerAtAllGraphs( e );
+                if( e.type == "mouseover" ){
+                    _tips.show(e);
+                    me._tipsPointerAtAllGraphs( e );
+                };
+                if( e.type == "mousemove" ){
+                    _tips.move(e);
+                    me._tipsPointerAtAllGraphs( e );
+                };
+                if( e.type == "mouseout" && !( e.toTarget && _coord && _coord.induce && _coord.induce.containsPoint( _coord.induce.globalToLocal(e.target.localToGlobal(e.point) )) ) ){
+                    _tips.hide(e);
+                    me._tipsPointerHideAtAllGraphs( e );
+                };
+            };
+
+            //触发每个graphs级别的事件，
+            if( e.eventInfo ){
+                _.each( this.getGraphs(), function( graph ){
+                    graph.triggerEvent( e );
+                } );
             };
         });
+
     }
+
 
     //默认的基本tipsinfo处理，极坐标和笛卡尔坐标系统会覆盖
     _setTipsInfo(e)

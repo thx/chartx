@@ -147,12 +147,12 @@ export default class Pie extends event.Dispatcher
                     //me.fire( e.type, e );
                 
                     e.eventInfo = {
+                        trigger : me._graphs.node,
                         nodes : [ this.nodeData ]
                     };
 
                     //图表触发，用来处理Tips
                     me._graphs.app.fire( e.type, e );
-                    me._graphs.triggerEvent( me._graphs.node , e );
 
                 });
 

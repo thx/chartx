@@ -119,8 +119,6 @@ export default class RadarGraphs extends GraphsBase
                     this.context.fillAlpha -= 0.2
                 };
                 
-                me.fire( e.type, e );
-                //图表触发，用来处理Tips
                 me.app.fire( e.type, e );
             });
             
@@ -144,14 +142,12 @@ export default class RadarGraphs extends GraphsBase
                     _node.iNode = i;
                     _node.nodeData = node;
                     _node._strokeStyle = _strokeStyle;
-                    _node.on("panstart mouseover panmove mousemove panend mouseout tap click dblclick", function(e) {
-
-                        me.fire( e.type, e );
-                        //图表触发，用来处理Tips
+                    _node.on(event.types.get(), function(e) {
 
                         //这样就会直接用这个aAxisInd了，不会用e.point去做计算
                         e.aAxisInd = this.iNode;
                         e.eventInfo = {
+                            trigger : me.node,
                             nodes : [ this.nodeData ]
                         };
                         me.app.fire( e.type, e );

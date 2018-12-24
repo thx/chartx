@@ -16,7 +16,7 @@
 import coorBase from "./index"
 import Canvax from "canvax"
 import Grid from "./polar/grid"
-import { dataSection,_,getDefaultProps } from "mmvis"
+import { dataSection,_,getDefaultProps,event } from "mmvis"
 
 export default class extends coorBase
 {
@@ -43,6 +43,11 @@ export default class extends coorBase
             detail : '角度轴',
             documentation : "类似直角坐标系中的x轴",
             propertys     : {
+                
+                data : [],
+                angleList : [], //对应layoutType下的角度list
+                layoutData : [], //aAxis.data的 label.format后版本
+
                 field : {
                     detail : '数据字段',
                     documentation : "",
@@ -112,46 +117,8 @@ export default class extends coorBase
     constructor( opt , app )
     {
         super( opt , app );
-        //let defaultProps = getDefaultProps( new.target.defaultProps );
-
         this.type  = "polar";
-
-        this.aAxis = {
-            //field : null,
-            //layoutType : "proportion", // proportion 弧度均分， proportion 和直角坐标中的一样
-            data : [],
-            angleList : [], //对应layoutType下的角度list
-            //beginAngle : -90,
-            
-            //刻度尺,在最外沿的蜘蛛网上面
-            layoutData : [], //aAxis.data的 label.format后版本
-            //enabled : opt.aAxis && opt.aAxis.field,
-            /*
-            label : {
-                enabled : true,
-                format : function( v ){ return v },
-                fontColor : "#666"
-            }
-            */
-        };
         
-        /*
-        this.rAxis = {
-            field : [],
-            dataSection : null,
-            //半径刻度尺,从中心点触发，某个角度达到最外沿的蜘蛛网为止
-            enabled : false
-        };
-
-        this.grid = {
-            enabled : false
-        };
-         */ 
-
-        //this.allAngle = 360; //默认是个周园
-        //this.maxRadius = null;
-        //this.squareRange = true; //default true, 说明将会绘制一个width===height的矩形范围内，否则就跟着画布走
-
         _.extend( true, this, getDefaultProps( new.target.defaultProps ), this.setDefaultOpt( opt, app ) );
 
         this.init(opt);
@@ -591,7 +558,7 @@ export default class extends coorBase
                 y : point.y,
                 fillStyle : me.aAxis.label.fontColor
             };
-            
+
             var text = _.isFunction(me.aAxis.label.format) ? me.aAxis.label.format( value ) : value;
             _.extend( c , me._getTextAlignForPoint(Math.atan2(point.y , point.x)) );
             me._aAxisScaleSp.addChild(new Canvax.Display.Text( text , {
@@ -722,7 +689,7 @@ export default class extends coorBase
     {
         var me = this;
         me.induce = this._grid.induce;
-        me.induce && me.induce.on("panstart mouseover panmove mousemove panend mouseout tap click dblclick", function(e) {
+        me.induce && me.induce.on(event.types.get(), function(e) {
             me.fire( e.type, e );
             //图表触发，用来处理Tips
             me.app.fire( e.type, e );

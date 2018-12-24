@@ -94,7 +94,7 @@ export default class PlanetGraphs extends GraphsBase
     {
         var _circleMaxR;
         try{
-            _circleMaxR = this.graphs.group.circle.maxR;
+            _circleMaxR = this.graphs.group.circle.maxRadius;
         } catch(e){}
         if( _circleMaxR == undefined ){
             _circleMaxR = 30
@@ -108,12 +108,12 @@ export default class PlanetGraphs extends GraphsBase
 
         var groupRStart = this.center.radius + this.center.margin;
       
-        var maxR = me.app.getComponent({name:'coord'}).maxR - me.center.radius - me.center.margin;
+        var maxRadius = me.app.getComponent({name:'coord'}).maxRadius - me.center.radius - me.center.margin;
         var _circleMaxR = this._getMaxR();
 
         _.each( this.groupDataFrames , function( df , i ){
             
-            var toR = groupRStart + maxR*( (df.length) / (me.dataFrame.length) );
+            var toR = groupRStart + maxRadius*( (df.length) / (me.dataFrame.length) );
             
             var _g = new Group( _.extend(true, {
                 iGroup : i,
@@ -212,7 +212,7 @@ export default class PlanetGraphs extends GraphsBase
             var cx = _coord.origin.x;
             var cy = _coord.origin.y;
             var itemAng = 360 / me.grid.rays.count;
-            var _r = _coord.maxR; //Math.max( me.w, me.h );
+            var _r = _coord.maxRadius; //Math.max( me.w, me.h );
 
             if( me.grid.rings.section.length ){
                 _r = me.grid.rings.section.slice(-1)[0].radius

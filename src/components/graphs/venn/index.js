@@ -334,13 +334,13 @@ export default class VennGraphs extends GraphsBase
                     _shape.on( event.types.get(), function(e) {
                         
                         e.eventInfo = {
+                            trigger : me.node,
                             title : null,
                             nodes : [ this.nodeData ]
                         };
         
                         //fire到root上面去的是为了让root去处理tips
                         me.app.fire( e.type, e );
-                        me.triggerEvent( me.node , e );
                     });
                 };
 

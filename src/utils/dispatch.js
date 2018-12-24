@@ -21,6 +21,7 @@ function parseTypenames(typenames, types) {
   });
 }
 
+
 Dispatch.prototype = dispatch.prototype = {
   constructor: Dispatch,
   on: function(typename, callback) {

@@ -222,13 +222,13 @@ export default class FunnelGraphs extends GraphsBase
             _polygon.on( event.types.get() , function(e) {
                 
                 e.eventInfo = {
+                    trigger: me.node,
                     title : me.field,
                     nodes : [ this.nodeData ]
                 };
 
                 //fire到root上面去的是为了让root去处理tips
                 me.app.fire( e.type, e );
-                me.triggerEvent( me.node , e );
             });
 
             var textAlign = "center";

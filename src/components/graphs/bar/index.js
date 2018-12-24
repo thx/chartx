@@ -340,9 +340,6 @@ export default class BarGraphs extends GraphsBase
                                 //nodes : me.getNodesAt( this.iNode ) 
                             };
 
-                            //触发root统一设置e.eventInfo.nodes,所以上面不需要设置
-                            me.app.fire( e.type, e );
-
                             if( me.select.enabled && e.type == me.select.triggerEventType ){
                                 //如果开启了图表的选中交互
                                 var ind = me.dataFrame.range.start + this.iNode;
@@ -354,7 +351,8 @@ export default class BarGraphs extends GraphsBase
                                 }
                             };
 
-                            me.triggerEvent( me , e );
+                            //触发root统一设置e.eventInfo.nodes,所以上面不需要设置
+                            me.app.fire( e.type, e );
 
                         });
                     }
@@ -460,6 +458,14 @@ export default class BarGraphs extends GraphsBase
                         });
                         rectEl.field = nodeData.field;
                         groupH.addChild(rectEl);
+                        rectEl.on(event.types.get(), function(e) {
+                            e.eventInfo = {
+                                trigger : me.node,
+                                nodes : [ this.nodeData ]
+                            };
+                            
+                            me.app.fire( e.type, e );
+                        });
                     };
 
                     rectEl.finalPos = finalPos;

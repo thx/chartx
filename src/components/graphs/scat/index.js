@@ -338,6 +338,7 @@ export default class ScatGraphs extends GraphsBase
                     
                      e.eventInfo = {
                          title : null,
+                         trigger : me.node,
                          nodes : [ this.nodeData ]
                      };
                      if( this.nodeData.label ){
@@ -346,7 +347,6 @@ export default class ScatGraphs extends GraphsBase
             
                      //fire到root上面去的是为了让root去处理tips
                      me.app.fire( e.type, e );
-                     me.triggerEvent( me.node , e );
                  });
 
             } else {

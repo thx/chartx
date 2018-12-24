@@ -3,7 +3,7 @@ import Canvax from "canvax"
 import xAxisConstructor from "./xaxis"
 import yAxisConstructor from "./yaxis"
 import Grid from "./grid"
-import { _,getDefaultProps } from "mmvis"
+import { _,getDefaultProps,event } from "mmvis"
 
 const Rect = Canvax.Shapes.Rect;
 
@@ -40,7 +40,7 @@ export default class extends coorBase
 
         _.extend( true, this, getDefaultProps( new.target.defaultProps ), this.setDefaultOpt( opt, app ) );
 
-        
+
         if( opt.horizontal ){
             this.xAxis.isH = true;
             _.each( this.yAxis , function( yAxis ){
@@ -479,7 +479,7 @@ export default class extends coorBase
             me.sprite.addChild(me.induce);
         };
         
-        me.induce.on("panstart mouseover panmove mousemove panend mouseout tap click dblclick", function(e) {
+        me.induce.on(event.types.get(), function(e) {
             //e.eventInfo = me._getInfoHandler(e);
             me.fire( e.type, e );
             //图表触发，用来处理Tips

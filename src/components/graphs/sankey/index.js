@@ -228,13 +228,13 @@ export default class sankeyGraphs extends GraphsBase
                 var linkData = this.link;
 
                 e.eventInfo = {
+                    trigger : me.node,
                     title : linkData.source.name+" --<span style='position:relative;top:-0.5px;font-size:16px;left:-3px;'>></span> "+linkData.target.name,
                     nodes : [ linkData ]
                 };
     
                 //fire到root上面去的是为了让root去处理tips
                 me.app.fire( e.type, e );
-                me.triggerEvent( me.node , e );
              });
 
 

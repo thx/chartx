@@ -31,7 +31,7 @@ export default class PlanetGroup
 
         this.node = {
             shapeType : "circle",
-            maxR : 30,//15
+            maxRadius : 30,//15
             minR : 5,
             lineWidth : 1,
             strokeStyle : "#fff",
@@ -84,9 +84,9 @@ export default class PlanetGroup
 
         _.extend( true, this, opt );
 
-        //circle.maxR 绝对不能大于最大 占位 pit.radius
-        if( this.node.maxR > this.pit.radius ){
-            this.pit.radius = this.node.maxR
+        //circle.maxRadius 绝对不能大于最大 占位 pit.radius
+        if( this.node.maxRadius > this.pit.radius ){
+            this.pit.radius = this.node.maxRadius
         };
         
         this.init();
@@ -114,9 +114,9 @@ export default class PlanetGroup
         var me = this;
         var _coord = this.app.getComponent({name:'coord'});
 
-        if( (_coord.maxR - this.rRange.to)/(this.pit.radius*2) < this.groupLen-1-this.iGroup ){
+        if( (_coord.maxRadius - this.rRange.to)/(this.pit.radius*2) < this.groupLen-1-this.iGroup ){
             //要保证后面的group至少能有意个ringNum
-            this.rRange.to = _coord.maxR - (this.groupLen-1-this.iGroup)*this.pit.radius*2;
+            this.rRange.to = _coord.maxRadius - (this.groupLen-1-this.iGroup)*this.pit.radius*2;
         };
         if( this.rRange.to - this.rRange.start < this.pit.radius*2 ){
             this.rRange.to = this.rRange.start + this.pit.radius*2;
@@ -387,7 +387,7 @@ export default class PlanetGroup
                 var r = me._getRProp( me.node.radius , i, ii , p);
 
                 //计算该萝卜在坑位（pit）中围绕pit的圆心可以随机移动的范围（r）
-                var _transR = me.node.maxR - r;
+                var _transR = me.node.maxRadius - r;
                 //然后围绕pit的圆心随机找一个点位，重新设置Point
                 var _randomTransR = parseInt(Math.random()*_transR);
                 var _randomAngle = parseInt(Math.random()*360);
@@ -434,6 +434,7 @@ export default class PlanetGroup
                     
                      e.eventInfo = {
                          title : null,
+                         trigger : me.node,
                          nodes : [ this.nodeData ]
                      };
                      if( this.nodeData.label ){
@@ -449,10 +450,7 @@ export default class PlanetGroup
                         }
                     };
             
-                     //fire到root上面去的是为了让root去处理tips
-                     me.app.fire( e.type, e );
-
-                     if( me.node.select.enabled && e.type == me.node.select.triggerEventType ){
+                    if( me.node.select.enabled && e.type == me.node.select.triggerEventType ){
                         //如果开启了图表的选中交互
                         //TODO:这里不能
                         if( this.nodeData.selected ){
@@ -462,7 +460,10 @@ export default class PlanetGroup
                             me.selectAt( this.nodeData );
                         }
                     };
-                    me._graphs.triggerEvent( me.node , e );
+
+                    //fire到root上面去的是为了让root去处理tips
+                    me.app.fire( e.type, e );
+
                  });
 
                 //互相用属性引用起来
@@ -579,7 +580,7 @@ export default class PlanetGroup
             };
             var rVal = nodeData.rowData[ r ];
             
-            return me.node.minR + (rVal-this.__rValMin)/(this.__rValMax-this.__rValMin) * (me.node.maxR - me.node.minR);
+            return me.node.minR + (rVal-this.__rValMin)/(this.__rValMax-this.__rValMin) * (me.node.maxRadius - me.node.minR);
         };
         return me._getProp(r , nodeData);
     }

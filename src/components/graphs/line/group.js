@@ -96,7 +96,6 @@ export default class LineGraphsGroup extends event.Dispatcher
     }
 
 
-
     //自我销毁
     destroy()
     {

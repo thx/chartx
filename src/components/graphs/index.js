@@ -57,18 +57,20 @@ export default class GraphsBase extends Component
     getLegendData(){}
 
     //触发事件, 事件处理函数中的this都指向对应的graphs对象。
-    triggerEvent( eventTargetOpt, e )
+    triggerEvent( e )
     {
-        var fn = eventTargetOpt[ "on"+e.type ];
+        var trigger = e.eventInfo.trigger || this;
+        var fn = trigger[ "on"+e.type ];
         if( fn && _.isFunction( fn ) ){
             //如果有在pie的配置上面注册对应的事件，则触发
             var nodeData = null;
             if( e.eventInfo && e.eventInfo.nodes && e.eventInfo.nodes.length ){
+                //完整的nodes数据在e.eventInfo中有，但是添加第二个参数，如果nodes只有一个数据就返回单个，多个则数组
                 if( e.eventInfo.nodes.length == 1 ){
                     fn.apply( this , [ e , e.eventInfo.nodes[0] ] );
                 } else {
                     fn.apply( this , [ e , e.eventInfo.nodes ] );
-                }
+                };
             } else {
                 var _arr = [];
                 _.each( arguments, function(item, i){
