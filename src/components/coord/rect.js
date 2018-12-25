@@ -27,7 +27,6 @@ export default class extends coorBase
     constructor( opt, app )
     {
         super( opt, app );
-        ;
 
         this.type = "rect";
         
@@ -39,28 +38,6 @@ export default class extends coorBase
         this._grid  = null;
 
         _.extend( true, this, getDefaultProps( new.target.defaultProps ), this.setDefaultOpt( opt, app ) );
-
-
-        if( opt.horizontal ){
-            this.xAxis.isH = true;
-            _.each( this.yAxis , function( yAxis ){
-                yAxis.isH = true;
-            });
-        };
-
-        if( "enabled" in opt ){
-            //如果有给直角坐标系做配置display，就直接通知到xAxis，yAxis，grid三个子组件
-            _.extend( true, this.xAxis, {
-                enabled : opt.enabled
-            } );
-            _.each( this.yAxis , function( yAxis ){
-                _.extend( true, yAxis, {
-                    enabled : opt.enabled
-                } );
-            });
-
-            this.grid.enabled = opt.enabled;
-        };
 
         this.init(opt);
     }
@@ -75,6 +52,9 @@ export default class extends coorBase
                 //默认为false，x轴的计量是否需要取整， 这样 比如某些情况下得柱状图的柱子间隔才均匀。
                 //比如一像素间隔的柱状图，如果需要精确的绘制出来每个柱子的间距是1px， 就必须要把这里设置为true
                 posParseToInt : false
+            },
+            grid : {
+
             }
         };
 
@@ -90,7 +70,7 @@ export default class extends coorBase
             coord.yAxis = _nyarr;
         } else {
             coord.yAxis = [];
-        }
+        };
 
         //根据opt中得Graphs配置，来设置 coord.yAxis
         var graphsArr = _.flatten( [app._opt.graphs] );
@@ -157,6 +137,26 @@ export default class extends coorBase
             }
         } );
         coord.yAxis = _lys.concat( _rys );
+
+        if( coord.horizontal ){
+            coord.xAxis.isH = true;
+            _.each( coord.yAxis , function( yAxis ){
+                yAxis.isH = true;
+            });
+        };
+
+        if( "enabled" in coord ){
+            //如果有给直角坐标系做配置display，就直接通知到xAxis，yAxis，grid三个子组件
+            _.extend( true, coord.xAxis, {
+                enabled : coord.enabled
+            } );
+            _.each( coord.yAxis , function( yAxis ){
+                _.extend( true, yAxis, {
+                    enabled : coord.enabled
+                } );
+            });
+            coord.grid.enabled = coord.enabled;
+        };
         
         return coord;
     }

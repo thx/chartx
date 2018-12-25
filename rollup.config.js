@@ -9,14 +9,14 @@ var { uglify } = require('rollup-plugin-uglify');
 // cjs – CommonJS，适用于node和browserify / Webpack
 // es6 (default) – 保持ES6的格式
 // iife – 使用于<script> 标签引用的方式
-// umd – 适用于CommonJs和AMD风格通用模式
+// umd – 适用于 CommonJs 和 AMD 风格通用模式
 
 export default {
     input : 'src/index.js',
     output: [{
         file : "dist/chartx.js",
         name : "Chartx",
-        format: "iife"
+        format : "iife"
     }
     /*
     ,{
