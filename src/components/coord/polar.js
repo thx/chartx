@@ -27,6 +27,12 @@ export default class extends coorBase
             default       : 360,
             values        : [0, 360]
         },
+        startAngle : {
+            detail : '坐标系其实角度',
+            documentation : "",
+            default       : 0,
+            values        : [0, 360]
+        },
         squareRange : {
             detail : '是否正方形的坐标区域',
             documentation : "",
@@ -292,13 +298,59 @@ export default class extends coorBase
             this.width = this.height = _num;
         };
 
-
+        
         if( !("origin" in this._opt) ){
             //如果没有传入任何origin数据，则默认为中心点
             //origin是相对画布左上角的
+            var vw = rootWidth - _padding.left - _padding.right;
+            var vh = rootHeight - _padding.top - _padding.bottom;
             this.origin = {
-                x : _padding.left + ( rootWidth - _padding.left - _padding.right )/2, //rootWidth/2,
-                y : _padding.top + ( rootHeight - _padding.top - _padding.bottom )/2  //rootHeight/2
+                x : _padding.left + vw/2, //rootWidth/2,
+                y : _padding.top + vh/2  //rootHeight/2
+            };
+
+            if( this.allAngle % 360 != 0 ){
+                var sinMin=0,sinMax=0,cosMin=0,cosMax=0;
+                //如果该坐标系并非一个整圆,那么圆心位置 需要对应的调整，才能铺满整个画布
+                var angles = [ this.startAngle ]
+                for( var i=0,l= parseInt(this.allAngle/90); i<=l;i++ ){
+                    var angle = parseInt(this.startAngle/90)*90 + i*90;
+                    if( _.indexOf( angles, angle ) == -1 ){
+                        angles.push( angle );
+                    };
+                };
+
+                var lastAngle = this.startAngle + this.allAngle;
+                if( _.indexOf( angles, lastAngle ) == -1 ){
+                    angles.push( lastAngle );
+                };
+                
+                _.each( angles, function( angle ){
+                    if( angle != 360 ){
+                        angle = angle % 360;
+                    };
+                    var _sin = Math.sin( angle*Math.PI/180 );
+                    if( angle == 180 ){
+                        _sin = 0;
+                    };
+
+                    var _cos = Math.cos( angle*Math.PI/180 );
+                    if( angle == 270 || angle == 90 ){
+                        _cos = 0;
+                    };
+
+                    sinMin = Math.min( sinMin, _sin );
+                    sinMax = Math.max( sinMax, _sin );
+                    cosMin = Math.min( cosMin, _cos );
+                    cosMax = Math.max( cosMax, _cos );
+                } );
+
+                debugger
+
+
+                
+                console.log(sinMin+"|"+sinMax+"|"+cosMin+"|"+cosMax)
+                debugger
             };
         };
 

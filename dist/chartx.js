@@ -15290,12 +15290,62 @@ var Chartx = (function () {
         if (!("origin" in this._opt)) {
           //如果没有传入任何origin数据，则默认为中心点
           //origin是相对画布左上角的
+          var vw = rootWidth - _padding.left - _padding.right;
+          var vh = rootHeight - _padding.top - _padding.bottom;
           this.origin = {
-            x: _padding.left + (rootWidth - _padding.left - _padding.right) / 2,
+            x: _padding.left + vw / 2,
             //rootWidth/2,
-            y: _padding.top + (rootHeight - _padding.top - _padding.bottom) / 2 //rootHeight/2
+            y: _padding.top + vh / 2 //rootHeight/2
 
           };
+
+          if (this.allAngle % 360 != 0) {
+            var sinMin = 0,
+                sinMax = 0,
+                cosMin = 0,
+                cosMax = 0; //如果该坐标系并非一个整圆,那么圆心位置 需要对应的调整，才能铺满整个画布
+
+            var angles = [this.startAngle];
+
+            for (var i = 0, l = parseInt(this.allAngle / 90); i <= l; i++) {
+              var angle = parseInt(this.startAngle / 90) * 90 + i * 90;
+
+              if (_$1.indexOf(angles, angle) == -1) {
+                angles.push(angle);
+              }
+            }
+            var lastAngle = this.startAngle + this.allAngle;
+
+            if (_$1.indexOf(angles, lastAngle) == -1) {
+              angles.push(lastAngle);
+            }
+
+            _$1.each(angles, function (angle) {
+              if (angle != 360) {
+                angle = angle % 360;
+              }
+
+              var _sin = Math.sin(angle * Math.PI / 180);
+
+              if (angle == 180) {
+                _sin = 0;
+              }
+
+              var _cos = Math.cos(angle * Math.PI / 180);
+
+              if (angle == 270 || angle == 90) {
+                _cos = 0;
+              }
+              sinMin = Math.min(sinMin, _sin);
+              sinMax = Math.max(sinMax, _sin);
+              cosMin = Math.min(cosMin, _cos);
+              cosMax = Math.max(cosMax, _cos);
+            });
+
+            debugger;
+            console.log(sinMin + "|" + sinMax + "|" + cosMin + "|" + cosMax);
+            debugger;
+          }
         }
         //如果外面要求过 maxR，
 
@@ -15770,6 +15820,12 @@ var Chartx = (function () {
       detail: '坐标系总角度',
       documentation: "",
       default: 360,
+      values: [0, 360]
+    },
+    startAngle: {
+      detail: '坐标系其实角度',
+      documentation: "",
+      default: 0,
       values: [0, 360]
     },
     squareRange: {
@@ -25693,6 +25749,57 @@ var Chartx = (function () {
     return sankeyGraphs;
   }(GraphsBase);
 
+  var Progress =
+  /*#__PURE__*/
+  function (_GraphsBase) {
+    _inherits(Progress, _GraphsBase);
+
+    function Progress(opt, app) {
+      var _this;
+
+      _classCallCheck(this, Progress);
+
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(Progress).call(this, opt, app));
+      _this.type = "progress";
+
+      _$1.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps((this instanceof Progress ? this.constructor : void 0).defaultProps));
+
+      _this.init();
+
+      return _this;
+    }
+
+    _createClass(Progress, [{
+      key: "init",
+      value: function init() {}
+    }, {
+      key: "draw",
+      value: function draw(opt) {
+        !opt && (opt = {});
+
+        _$1.extend(true, this, opt); //this.data = this._trimGraphs();
+        //this._widget();
+
+
+        this.sprite.context.x = this.origin.x;
+        this.sprite.context.y = this.origin.y;
+        debugger;
+        this.fire("complete");
+      }
+    }]);
+
+    return Progress;
+  }(GraphsBase);
+
+  _defineProperty(Progress, "defaultProps", {
+    node: {
+      detail: '横向翻转坐标系',
+      documentation: "横向翻转坐标系",
+      default: false,
+      values: [true, false]
+    }
+  });
+
   /**
    * 每个组件中对外影响的时候，要抛出一个trigger对象
    * 上面的comp属性就是触发这个trigger的组件本身
@@ -28159,6 +28266,7 @@ var Chartx = (function () {
   global$1.registerComponent(VennGraphs, 'graphs', 'venn');
   global$1.registerComponent(sunburstGraphs, 'graphs', 'sunburst');
   global$1.registerComponent(sankeyGraphs, 'graphs', 'sankey');
+  global$1.registerComponent(Progress, 'graphs', 'progress');
   global$1.registerComponent(theme, 'theme');
   global$1.registerComponent(Legend, 'legend');
   global$1.registerComponent(dataZoom, 'dataZoom');
