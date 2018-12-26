@@ -15342,9 +15342,11 @@ var Chartx = (function () {
               cosMax = Math.max(cosMax, _cos);
             });
 
-            debugger;
-            console.log(sinMin + "|" + sinMax + "|" + cosMin + "|" + cosMax);
-            debugger;
+            this.origin = {
+              x: _padding.left + vw * (cosMin / (cosMin - cosMax)),
+              //rootWidth/2,
+              y: _padding.top + vh * (sinMin / (sinMin - sinMax))
+            };
           }
         }
         //如果外面要求过 maxR，

@@ -345,12 +345,11 @@ export default class extends coorBase
                     cosMax = Math.max( cosMax, _cos );
                 } );
 
-                debugger
-
-
+                this.origin = {
+                    x : _padding.left + vw*(cosMin/(cosMin-cosMax)), //rootWidth/2,
+                    y : _padding.top + vh*(sinMin/(sinMin-sinMax))
+                };
                 
-                console.log(sinMin+"|"+sinMax+"|"+cosMin+"|"+cosMax)
-                debugger
             };
         };
 
