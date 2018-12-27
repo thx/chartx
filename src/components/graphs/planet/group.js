@@ -114,9 +114,9 @@ export default class PlanetGroup
         var me = this;
         var _coord = this.app.getComponent({name:'coord'});
 
-        if( (_coord.maxRadius - this.rRange.to)/(this.pit.radius*2) < this.groupLen-1-this.iGroup ){
+        if( (_coord.radius - this.rRange.to)/(this.pit.radius*2) < this.groupLen-1-this.iGroup ){
             //要保证后面的group至少能有意个ringNum
-            this.rRange.to = _coord.maxRadius - (this.groupLen-1-this.iGroup)*this.pit.radius*2;
+            this.rRange.to = _coord.radius - (this.groupLen-1-this.iGroup)*this.pit.radius*2;
         };
         if( this.rRange.to - this.rRange.start < this.pit.radius*2 ){
             this.rRange.to = this.rRange.start + this.pit.radius*2;

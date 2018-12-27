@@ -15264,16 +15264,22 @@ var Chartx = (function () {
     }, {
       key: "_computeAttr",
       value: function _computeAttr() {
+        var _r;
+
+        var _squareRangeScaleX = 1;
+        var _squareRangeScaleY = 1;
         var _padding = this.app.padding;
         var rootWidth = this.app.width;
         var rootHeight = this.app.height;
+        var vw = rootWidth - _padding.left - _padding.right;
+        var vh = rootHeight - _padding.top - _padding.bottom;
 
         if (!("width" in this._opt)) {
-          this.width = rootWidth - _padding.left - _padding.right;
+          this.width = vw;
         }
 
         if (!("height" in this._opt)) {
-          this.height = rootHeight - _padding.top - _padding.bottom;
+          this.height = vh;
         }
 
         if (this.aAxis.enabled) {
@@ -15284,87 +15290,111 @@ var Chartx = (function () {
         if (this.squareRange) {
           var _num = Math.min(this.width, this.height);
 
+          if (this.width > this.height) {
+            //那么就是缩放了width， 就是x
+            _squareRangeScaleX = _num / this.width;
+          }
+
+          if (this.width < this.height) {
+            //那么就是缩放了width， 就是x
+            _squareRangeScaleY = _num / this.height;
+          }
+
+          _r = _num / 2;
           this.width = this.height = _num;
         }
 
         if (!("origin" in this._opt)) {
           //如果没有传入任何origin数据，则默认为中心点
           //origin是相对画布左上角的
-          var vw = rootWidth - _padding.left - _padding.right;
-          var vh = rootHeight - _padding.top - _padding.bottom;
+
+          /*
           this.origin = {
-            x: _padding.left + vw / 2,
-            //rootWidth/2,
-            y: _padding.top + vh / 2 //rootHeight/2
-
+              x : _padding.left + vw/2,
+              y : _padding.top + vh/2 
           };
+          */
+          debugger; //if( this.allAngle % 360 != 0 ){
 
-          if (this.allAngle % 360 != 0) {
-            var sinMin = 0,
-                sinMax = 0,
-                cosMin = 0,
-                cosMax = 0; //如果该坐标系并非一个整圆,那么圆心位置 需要对应的调整，才能铺满整个画布
+          var sinTop = 0,
+              sinBottom = 0,
+              cosLeft = 0,
+              cosRight = 0; //如果该坐标系并非一个整圆,那么圆心位置 需要对应的调整，才能铺满整个画布
 
-            var angles = [this.startAngle];
+          var angles = [this.startAngle];
 
-            for (var i = 0, l = parseInt(this.allAngle / 90); i <= l; i++) {
-              var angle = parseInt(this.startAngle / 90) * 90 + i * 90;
+          for (var i = 0, l = parseInt(this.allAngle / 90); i <= l; i++) {
+            var angle = parseInt(this.startAngle / 90) * 90 + i * 90;
 
-              if (_$1.indexOf(angles, angle) == -1) {
-                angles.push(angle);
-              }
+            if (_$1.indexOf(angles, angle) == -1 && angle > angles.slice(-1)[0]) {
+              angles.push(angle);
             }
-            var lastAngle = this.startAngle + this.allAngle;
-
-            if (_$1.indexOf(angles, lastAngle) == -1) {
-              angles.push(lastAngle);
-            }
-
-            _$1.each(angles, function (angle) {
-              if (angle != 360) {
-                angle = angle % 360;
-              }
-
-              var _sin = Math.sin(angle * Math.PI / 180);
-
-              if (angle == 180) {
-                _sin = 0;
-              }
-
-              var _cos = Math.cos(angle * Math.PI / 180);
-
-              if (angle == 270 || angle == 90) {
-                _cos = 0;
-              }
-              sinMin = Math.min(sinMin, _sin);
-              sinMax = Math.max(sinMax, _sin);
-              cosMin = Math.min(cosMin, _cos);
-              cosMax = Math.max(cosMax, _cos);
-            });
-
-            this.origin = {
-              x: _padding.left + vw * (cosMin / (cosMin - cosMax)),
-              //rootWidth/2,
-              y: _padding.top + vh * (sinMin / (sinMin - sinMax))
-            };
           }
+          var lastAngle = this.startAngle + this.allAngle;
+
+          if (_$1.indexOf(angles, lastAngle) == -1) {
+            angles.push(lastAngle);
+          }
+          console.log(angles);
+
+          _$1.each(angles, function (angle) {
+            if (angle != 360) {
+              angle = angle % 360;
+            }
+
+            var _sin = Math.sin(angle * Math.PI / 180);
+
+            if (angle == 180) {
+              _sin = 0;
+            }
+
+            var _cos = Math.cos(angle * Math.PI / 180);
+
+            if (angle == 270 || angle == 90) {
+              _cos = 0;
+            }
+            sinTop = Math.min(sinTop, _sin);
+            sinBottom = Math.max(sinBottom, _sin);
+            cosLeft = Math.min(cosLeft, _cos);
+            cosRight = Math.max(cosRight, _cos);
+          });
+
+          this.origin = {
+            x: _padding.left + vw * (cosLeft / (cosLeft - cosRight)),
+            //rootWidth/2,
+            y: _padding.top + vh * (sinTop / (sinTop - sinBottom))
+          }; //};
         }
         //如果外面要求过 maxR，
 
         var origin = this.origin;
 
-        var _maxR;
-
-        if (origin.x != this.width / 2 || origin.y != this.height / 2) {
-          var _distances = [origin.x, this.width - origin.x, origin.y, this.height - origin.y];
-          _maxR = _$1.max(_distances);
+        if (!this.squareRange) {
+          var _distances = [origin.x - _padding.left, //原点到left的距离
+          vw + _padding.left - origin.x, //原点到右边的距离
+          origin.y - _padding.top, vh + _padding.top - origin.y];
+          _r = _$1.max(_distances);
+        }
+        /*
+        if( origin.x != this.width/2 || origin.y != this.height/2 ){
+            var _distances = [ 
+                origin.x-_padding.left , //原点到left的距离
+                vw+_padding.left - origin.x , //原点到右边的距离
+                origin.y-_padding.top , 
+                vh + _padding.top - origin.y
+            ];
+            _r = _.max( _distances );
         } else {
-          _maxR = Math.max(this.width / 2, this.height / 2);
-        }
+            _r = Math.max( vw / 2 , vh / 2 );
+        };
+        
+         if( !(this.radius != 'auto' && this.radius <= _r) ){
+            this.radius = _r
+        };
+        */
 
-        if (!(this.maxRadius != 'auto' && this.maxRadius <= _maxR)) {
-          this.maxRadius = _maxR;
-        }
+        this.radius = _r;
+        console.log(this.radius);
       } //获取极坐标系内任意半径上的弧度集合
       //[ [{point , radian} , {point , radian}] ... ]
 
@@ -15382,7 +15412,7 @@ var Chartx = (function () {
         }
         var _rs = [];
 
-        if (r > this.maxRadius) {
+        if (r > this.radius) {
           return [];
         } else {
           //下面的坐标点都是已经origin为原点的坐标系统里
@@ -15569,8 +15599,9 @@ var Chartx = (function () {
 
         var minNum = 0; //Math.min( this.rAxis.dataSection );
 
-        var maxRadius = parseInt(Math.max(this.width, this.height) / 2);
-        r = maxRadius * ((num - minNum) / (maxNum - minNum));
+        var _r = parseInt(Math.max(this.width, this.height) / 2);
+
+        r = _r * ((num - minNum) / (maxNum - minNum));
         return r;
       } //获取在r的半径上面，沿aAxis的points
 
@@ -15836,7 +15867,7 @@ var Chartx = (function () {
       default: true,
       values: [true, false]
     },
-    maxRadius: {
+    radius: {
       detail: '坐标系的最大半径',
       documentation: "默认自动计算view的高宽，如果squareRange==true，则会取Math.min(width,height)",
       default: 'auto',
@@ -21006,9 +21037,9 @@ var Chartx = (function () {
           name: 'coord'
         });
 
-        if ((_coord.maxRadius - this.rRange.to) / (this.pit.radius * 2) < this.groupLen - 1 - this.iGroup) {
+        if ((_coord.radius - this.rRange.to) / (this.pit.radius * 2) < this.groupLen - 1 - this.iGroup) {
           //要保证后面的group至少能有意个ringNum
-          this.rRange.to = _coord.maxRadius - (this.groupLen - 1 - this.iGroup) * this.pit.radius * 2;
+          this.rRange.to = _coord.radius - (this.groupLen - 1 - this.iGroup) * this.pit.radius * 2;
         }
 
         if (this.rRange.to - this.rRange.start < this.pit.radius * 2) {
@@ -21691,7 +21722,7 @@ var Chartx = (function () {
         var groupRStart = this.center.radius + this.center.margin;
         var maxRadius = me.app.getComponent({
           name: 'coord'
-        }).maxRadius - me.center.radius - me.center.margin;
+        }).radius;
 
         var _circleMaxR = this._getMaxR();
 
@@ -21795,7 +21826,7 @@ var Chartx = (function () {
           var cx = _coord.origin.x;
           var cy = _coord.origin.y;
           var itemAng = 360 / me.grid.rays.count;
-          var _r = _coord.maxRadius; //Math.max( me.w, me.h );
+          var _r = _coord.radius; //Math.max( me.w, me.h );
 
           if (me.grid.rings.section.length) {
             _r = me.grid.rings.section.slice(-1)[0].radius;
@@ -25764,7 +25795,7 @@ var Chartx = (function () {
       _this = _possibleConstructorReturn(this, _getPrototypeOf(Progress).call(this, opt, app));
       _this.type = "progress";
 
-      _$1.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps((this instanceof Progress ? this.constructor : void 0).defaultProps));
+      _$1.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps((this instanceof Progress ? this.constructor : void 0).defaultProps), opt);
 
       _this.init();
 
@@ -25779,14 +25810,97 @@ var Chartx = (function () {
       value: function draw(opt) {
         !opt && (opt = {});
 
-        _$1.extend(true, this, opt); //this.data = this._trimGraphs();
-        //this._widget();
+        _$1.extend(true, this, opt);
 
+        this.data = this._trimGraphs(); //this._widget();
 
         this.sprite.context.x = this.origin.x;
         this.sprite.context.y = this.origin.y;
-        debugger;
         this.fire("complete");
+      }
+    }, {
+      key: "_trimGraphs",
+      value: function _trimGraphs() {
+        var me = this;
+
+        var _coord = this.app.getComponent({
+          name: 'coord'
+        }); //用来计算下面的hLen
+
+
+        this.enabledField = _coord.filterEnabledFields(this.field);
+        var data = {};
+
+        _$1.each(this.enabledField, function (field) {
+          var dataOrg = me.dataFrame.getFieldData(field);
+
+          var fieldMap = _coord.getFieldMapOf(field);
+
+          var arr = [];
+          var startAngle = me.startAngle || _coord.startAngle;
+          var allAngle = me.allAngle || _coord.allAngle;
+          var endAngle = startAngle + allAngle;
+          var startRadian = Math.PI * startAngle / 180; //起始弧度
+
+          var endRadian = Math.PI * endAngle / 180; //终点弧度
+
+          debugger;
+          var outRadius = _coord.radius;
+          var innerRadius = outRadius - me.node.width;
+
+          var startOutPoint = _coord.getPointInRadianOfR(startRadian, outRadius);
+
+          var endOutPoint = _coord.getPointInRadianOfR(endRadian, outRadius);
+
+          var startInnerPoint = _coord.getPointInRadianOfR(startRadian, innerRadius);
+
+          var endInnerPoint = _coord.getPointInRadianOfR(endRadian, innerRadius);
+
+          var large_arc_flag = 0;
+
+          if (allAngle > 180) {
+            large_arc_flag = 1;
+          }
+          var pathStr = "M" + startOutPoint.x + " " + startOutPoint.y;
+          pathStr += "A" + outRadius + " " + outRadius + " 0 " + large_arc_flag + " 1 " + endOutPoint.x + " " + endOutPoint.y;
+          pathStr += "L" + endInnerPoint.x + " " + endInnerPoint.y;
+          pathStr += "A" + innerRadius + " " + innerRadius + " 0 " + large_arc_flag + " 0 " + startInnerPoint.x + " " + startInnerPoint.y;
+          pathStr += "Z";
+          var pathElement = new Canvax.Shapes.Path({
+            context: {
+              path: pathStr,
+              fillStyle: "blue"
+            }
+          });
+          me.sprite.addChild(pathElement);
+          var center = new Canvax.Shapes.Circle({
+            context: {
+              r: 5,
+              fillStyle: "red"
+            }
+          });
+          me.sprite.addChild(center);
+          /*
+          _.each( _coord.aAxis.angleList , function( _a , i ){
+              //弧度
+              var _r = Math.PI * _a / 180;
+              var point = _coord.getPointInRadianOfR( _r, _coord.getROfNum(dataOrg[i]) );
+              arr.push( {
+                  field   : field,
+                  iNode   : i,
+                  rowData : me.dataFrame.getRowDataAt(i),
+                  focused : false,
+                  value   : dataOrg[i],
+                  point   : point,
+                  color   : fieldMap.color
+              } );
+          } );
+          */
+
+          data[field] = arr;
+        });
+
+        return data;
       }
     }]);
 
@@ -25795,10 +25909,28 @@ var Chartx = (function () {
 
   _defineProperty(Progress, "defaultProps", {
     node: {
-      detail: '横向翻转坐标系',
-      documentation: "横向翻转坐标系",
-      default: false,
-      values: [true, false]
+      detail: '进度条设置',
+      propertys: {
+        width: {
+          detail: '进度条的宽度',
+          default: 20
+        },
+        radius: {
+          detail: '进度条两端的圆角半径',
+          default: 10 //默认为width的一半
+
+        }
+      }
+    },
+    allAngle: {
+      detail: '总角度',
+      documentation: '默认为null，则和坐标系同步',
+      default: null
+    },
+    startAngle: {
+      detail: '其实角度',
+      documentation: '默认为null，则和坐标系同步',
+      default: null
     }
   });
 

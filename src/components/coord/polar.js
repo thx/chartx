@@ -39,7 +39,8 @@ export default class extends coorBase
             default       : true,
             values        : [true, false]
         },
-        maxRadius : {
+        
+        radius : {
             detail : '坐标系的最大半径',
             documentation : "默认自动计算view的高宽，如果squareRange==true，则会取Math.min(width,height)",
             default       : 'auto',
@@ -276,17 +277,24 @@ export default class extends coorBase
 
     _computeAttr()
     {
+        var _r;
+        var _squareRangeScaleX = 1;
+        var _squareRangeScaleY = 1;
+
         var _padding = this.app.padding;
         var rootWidth = this.app.width;
         var rootHeight = this.app.height;
 
+        var vw = rootWidth - _padding.left - _padding.right;
+        var vh = rootHeight - _padding.top - _padding.bottom;
+        
+
         if( !("width" in this._opt) ){
-            this.width = rootWidth - _padding.left - _padding.right;
+            this.width = vw;
         };
         if( !("height" in this._opt) ){
-            this.height = rootHeight - _padding.top - _padding.bottom;
+            this.height = vh;
         };
-
         if( this.aAxis.enabled ){
             this.width -= 20*2;
             this.height -= 20*2;
@@ -295,27 +303,39 @@ export default class extends coorBase
         //重置width和height ， 不能和上面的计算origin调换位置
         if( this.squareRange ){
             var _num = Math.min( this.width, this.height );
+            
+            if( this.width > this.height ){
+                //那么就是缩放了width， 就是x
+                _squareRangeScaleX = _num / this.width;
+            } 
+            if( this.width < this.height ){
+                //那么就是缩放了width， 就是x
+                _squareRangeScaleY = _num / this.height;
+            } 
+            
+            _r = _num/2;
             this.width = this.height = _num;
+            
         };
 
-        
         if( !("origin" in this._opt) ){
             //如果没有传入任何origin数据，则默认为中心点
             //origin是相对画布左上角的
-            var vw = rootWidth - _padding.left - _padding.right;
-            var vh = rootHeight - _padding.top - _padding.bottom;
-            this.origin = {
-                x : _padding.left + vw/2, //rootWidth/2,
-                y : _padding.top + vh/2  //rootHeight/2
-            };
 
-            if( this.allAngle % 360 != 0 ){
-                var sinMin=0,sinMax=0,cosMin=0,cosMax=0;
+            /*
+            this.origin = {
+                x : _padding.left + vw/2,
+                y : _padding.top + vh/2 
+            };
+            */
+debugger
+            //if( this.allAngle % 360 != 0 ){
+                var sinTop=0,sinBottom=0,cosLeft=0,cosRight=0;
                 //如果该坐标系并非一个整圆,那么圆心位置 需要对应的调整，才能铺满整个画布
                 var angles = [ this.startAngle ]
                 for( var i=0,l= parseInt(this.allAngle/90); i<=l;i++ ){
                     var angle = parseInt(this.startAngle/90)*90 + i*90;
-                    if( _.indexOf( angles, angle ) == -1 ){
+                    if( _.indexOf( angles, angle ) == -1 && angle>angles.slice(-1)[0] ){
                         angles.push( angle );
                     };
                 };
@@ -324,7 +344,7 @@ export default class extends coorBase
                 if( _.indexOf( angles, lastAngle ) == -1 ){
                     angles.push( lastAngle );
                 };
-                
+                console.log(angles)
                 _.each( angles, function( angle ){
                     if( angle != 360 ){
                         angle = angle % 360;
@@ -339,34 +359,57 @@ export default class extends coorBase
                         _cos = 0;
                     };
 
-                    sinMin = Math.min( sinMin, _sin );
-                    sinMax = Math.max( sinMax, _sin );
-                    cosMin = Math.min( cosMin, _cos );
-                    cosMax = Math.max( cosMax, _cos );
+                    sinTop = Math.min( sinTop, _sin );
+                    sinBottom = Math.max( sinBottom, _sin );
+                    cosLeft = Math.min( cosLeft, _cos );
+                    cosRight = Math.max( cosRight, _cos );
                 } );
 
                 this.origin = {
-                    x : _padding.left + vw*(cosMin/(cosMin-cosMax)), //rootWidth/2,
-                    y : _padding.top + vh*(sinMin/(sinMin-sinMax))
+                    x : _padding.left  + vw*(cosLeft/(cosLeft-cosRight)), //rootWidth/2,
+                    y : _padding.top + vh*(sinTop/(sinTop-sinBottom))
                 };
-                
-            };
+            
+            //};
         };
 
         //计算maxR
         //如果外面要求过 maxR，
         var origin = this.origin;
-        var _maxR;
-        if( origin.x != this.width/2 || origin.y != this.height/2 ){
-            var _distances = [ origin.x , this.width-origin.x , origin.y , this.height - origin.y ];
-            _maxR = _.max( _distances );
-        } else {
-            _maxR = Math.max( this.width / 2 , this.height / 2 );
-        };
 
-        if( !(this.maxRadius != 'auto' && this.maxRadius <= _maxR) ){
-            this.maxRadius = _maxR
+        if( !this.squareRange ){
+            var _distances = [ 
+                origin.x-_padding.left , //原点到left的距离
+                vw+_padding.left - origin.x , //原点到右边的距离
+                origin.y-_padding.top , 
+                vh + _padding.top - origin.y
+            ];
+            _r = _.max( _distances );
         };
+        
+        /*
+        if( origin.x != this.width/2 || origin.y != this.height/2 ){
+            var _distances = [ 
+                origin.x-_padding.left , //原点到left的距离
+                vw+_padding.left - origin.x , //原点到右边的距离
+                origin.y-_padding.top , 
+                vh + _padding.top - origin.y
+            ];
+            _r = _.max( _distances );
+        } else {
+            _r = Math.max( vw / 2 , vh / 2 );
+        };
+        
+
+        if( !(this.radius != 'auto' && this.radius <= _r) ){
+            this.radius = _r
+        };
+        */
+
+        this.radius = _r
+
+        console.log( this.radius );
+        
     }
 
     //获取极坐标系内任意半径上的弧度集合
@@ -383,7 +426,7 @@ export default class extends coorBase
         };
 
         var _rs = [];
-        if( r > this.maxRadius ){
+        if( r > this.radius ){
             return [];
         } else {
             //下面的坐标点都是已经origin为原点的坐标系统里
@@ -539,9 +582,9 @@ export default class extends coorBase
         var r = 0;
         var maxNum = _.max( this.rAxis.dataSection );
         var minNum = 0; //Math.min( this.rAxis.dataSection );
-        var maxRadius = parseInt( Math.max( this.width, this.height ) / 2 );
+        var _r = parseInt( Math.max( this.width, this.height ) / 2 );
 
-        r = maxRadius * ( (num-minNum) / (maxNum-minNum) );
+        r = _r * ( (num-minNum) / (maxNum-minNum) );
         return r;
     }
 
