@@ -21,6 +21,10 @@ export default class Progress extends GraphsBase
                 }
             }
         },
+        radius : {
+            detail : '半径',
+            default : null
+        },
         allAngle : {
             detail : '总角度',
             documentation: '默认为null，则和坐标系同步',
@@ -87,7 +91,7 @@ export default class Progress extends GraphsBase
             var endRadian = Math.PI * endAngle / 180; //终点弧度
 
             debugger
-            var outRadius= _coord.radius;
+            var outRadius= me.radius || _coord.radius;
             var innerRadius = outRadius - me.node.width;
 
 

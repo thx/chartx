@@ -15298,9 +15298,9 @@ var Chartx = (function () {
           if (this.width < this.height) {
             //那么就是缩放了width， 就是x
             _squareRangeScaleY = _num / this.height;
-          }
+          } //_r = _num/2;
 
-          _r = _num / 2;
+
           this.width = this.height = _num;
         }
 
@@ -15314,8 +15314,7 @@ var Chartx = (function () {
               y : _padding.top + vh/2 
           };
           */
-          debugger; //if( this.allAngle % 360 != 0 ){
-
+          //if( this.allAngle % 360 != 0 ){
           var sinTop = 0,
               sinBottom = 0,
               cosLeft = 0,
@@ -15359,10 +15358,20 @@ var Chartx = (function () {
             cosRight = Math.max(cosRight, _cos);
           });
 
+          console.log([sinTop, cosRight, sinBottom, cosLeft]);
+          debugger;
+          var _disv = [Math.abs(parseInt(this.height * (sinTop / (sinTop - sinBottom)))), //上边距
+          //Math.abs(parseInt(this.width * (cosRight/(cosLeft-cosRight)))),//右边距
+          Math.abs(parseInt(this.height * (sinBottom / (sinTop - sinBottom))))];
+          var _dish = [//Math.abs(parseInt(this.height * (sinTop/(sinTop-sinBottom)))),//上边距
+          Math.abs(parseInt(this.width * (cosRight / (cosLeft - cosRight)))), //右边距
+          //Math.abs(parseInt(this.height * (sinBottom/(sinTop-sinBottom)))),//下边距
+          Math.abs(parseInt(this.width * (cosLeft / (cosLeft - cosRight))))];
+          _r = _$1.min([_$1.max(_disv), _$1.max(_dish)]);
           this.origin = {
-            x: _padding.left + vw * (cosLeft / (cosLeft - cosRight)),
+            x: _padding.left + vw * (cosLeft / (cosLeft - cosRight)) - (vw - this.width) / 2,
             //rootWidth/2,
-            y: _padding.top + vh * (sinTop / (sinTop - sinBottom))
+            y: _padding.top + vh * (sinTop / (sinTop - sinBottom)) - (vh - this.height) / 2
           }; //};
         }
         //如果外面要求过 maxR，
@@ -25845,7 +25854,7 @@ var Chartx = (function () {
           var endRadian = Math.PI * endAngle / 180; //终点弧度
 
           debugger;
-          var outRadius = _coord.radius;
+          var outRadius = me.radius || _coord.radius;
           var innerRadius = outRadius - me.node.width;
 
           var startOutPoint = _coord.getPointInRadianOfR(startRadian, outRadius);
@@ -25921,6 +25930,10 @@ var Chartx = (function () {
 
         }
       }
+    },
+    radius: {
+      detail: '半径',
+      default: null
     },
     allAngle: {
       detail: '总角度',

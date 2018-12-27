@@ -313,7 +313,7 @@ export default class extends coorBase
                 _squareRangeScaleY = _num / this.height;
             } 
             
-            _r = _num/2;
+            //_r = _num/2;
             this.width = this.height = _num;
             
         };
@@ -328,7 +328,7 @@ export default class extends coorBase
                 y : _padding.top + vh/2 
             };
             */
-debugger
+
             //if( this.allAngle % 360 != 0 ){
                 var sinTop=0,sinBottom=0,cosLeft=0,cosRight=0;
                 //如果该坐标系并非一个整圆,那么圆心位置 需要对应的调整，才能铺满整个画布
@@ -364,10 +364,29 @@ debugger
                     cosLeft = Math.min( cosLeft, _cos );
                     cosRight = Math.max( cosRight, _cos );
                 } );
+                console.log( [ sinTop,cosRight,sinBottom,cosLeft ] );
+                debugger
+                var _disv = [
+                    Math.abs(parseInt(this.height * (sinTop/(sinTop-sinBottom)))),//上边距
+                    //Math.abs(parseInt(this.width * (cosRight/(cosLeft-cosRight)))),//右边距
+                    Math.abs(parseInt(this.height * (sinBottom/(sinTop-sinBottom)))),//下边距
+                    //Math.abs(parseInt(this.width * (cosLeft/(cosLeft-cosRight))))
+                ];
+                var _dish = [
+                    //Math.abs(parseInt(this.height * (sinTop/(sinTop-sinBottom)))),//上边距
+                    Math.abs(parseInt(this.width * (cosRight/(cosLeft-cosRight)))),//右边距
+                    //Math.abs(parseInt(this.height * (sinBottom/(sinTop-sinBottom)))),//下边距
+                    Math.abs(parseInt(this.width * (cosLeft/(cosLeft-cosRight))))
+                ];
+            
+                _r = _.min( [
+                    _.max( _disv ),
+                    _.max( _dish )
+                ]);
 
                 this.origin = {
-                    x : _padding.left  + vw*(cosLeft/(cosLeft-cosRight)), //rootWidth/2,
-                    y : _padding.top + vh*(sinTop/(sinTop-sinBottom))
+                    x : _padding.left  + vw * (cosLeft/(cosLeft-cosRight)) - (vw-this.width)/2, //rootWidth/2,
+                    y : _padding.top + vh * (sinTop/(sinTop-sinBottom)) - (vh-this.height)/2
                 };
             
             //};
