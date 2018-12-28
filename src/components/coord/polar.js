@@ -278,8 +278,8 @@ export default class extends coorBase
     _computeAttr()
     {
         var _r;
-        var _squareRangeScaleX = 1;
-        var _squareRangeScaleY = 1;
+
+        var scaleXY = 1; //width/height 宽高比
 
         var _padding = this.app.padding;
         var rootWidth = this.app.width;
@@ -287,115 +287,139 @@ export default class extends coorBase
 
         var vw = rootWidth - _padding.left - _padding.right;
         var vh = rootHeight - _padding.top - _padding.bottom;
-        
-
         if( !("width" in this._opt) ){
             this.width = vw;
         };
         if( !("height" in this._opt) ){
             this.height = vh;
-        };
-        if( this.aAxis.enabled ){
-            this.width -= 20*2;
-            this.height -= 20*2;
-        };
+        };        
+     
 
-        //重置width和height ， 不能和上面的计算origin调换位置
-        if( this.squareRange ){
-            var _num = Math.min( this.width, this.height );
-            
-            if( this.width > this.height ){
-                //那么就是缩放了width， 就是x
-                _squareRangeScaleX = _num / this.width;
-            } 
-            if( this.width < this.height ){
-                //那么就是缩放了width， 就是x
-                _squareRangeScaleY = _num / this.height;
-            } 
-            
-            //_r = _num/2;
-            this.width = this.height = _num;
-            
-        };
+        //然后根据allAngle startAngle来实现计算出这个polar的和模型 高宽比例
+        //if( this.allAngle % 360 != 0 ){
 
-        if( !("origin" in this._opt) ){
-            //如果没有传入任何origin数据，则默认为中心点
-            //origin是相对画布左上角的
-
-            /*
-            this.origin = {
-                x : _padding.left + vw/2,
-                y : _padding.top + vh/2 
+            //360的polar高宽比例肯定是1：1的
+            var sinTop=0,sinBottom=0,cosLeft=0,cosRight=0;
+            //如果该坐标系并非一个整圆,那么圆心位置 需要对应的调整，才能铺满整个画布
+            var angles = [ this.startAngle ]
+            for( var i=0,l= (parseInt((this.startAngle+this.allAngle)/90) - parseInt(this.startAngle/90)); i<=l;i++ ){
+                var angle = parseInt(this.startAngle/90)*90 + i*90;
+                if( _.indexOf( angles, angle ) == -1 && angle>angles.slice(-1)[0] ){
+                    angles.push( angle );
+                };
             };
-            */
 
-            //if( this.allAngle % 360 != 0 ){
-                var sinTop=0,sinBottom=0,cosLeft=0,cosRight=0;
-                //如果该坐标系并非一个整圆,那么圆心位置 需要对应的调整，才能铺满整个画布
-                var angles = [ this.startAngle ]
-                for( var i=0,l= parseInt(this.allAngle/90); i<=l;i++ ){
-                    var angle = parseInt(this.startAngle/90)*90 + i*90;
-                    if( _.indexOf( angles, angle ) == -1 && angle>angles.slice(-1)[0] ){
-                        angles.push( angle );
-                    };
+            var lastAngle = this.startAngle + this.allAngle;
+            if( _.indexOf( angles, lastAngle ) == -1 ){
+                angles.push( lastAngle );
+            };
+            
+            _.each( angles, function( angle ){
+                
+                angle = angle % 360;
+                
+                var _sin = Math.sin( angle*Math.PI/180 );
+                if( angle == 180 ){
+                    _sin = 0;
+                };
+                var _cos = Math.cos( angle*Math.PI/180 );
+                if( angle == 270 || angle == 90 ){
+                    _cos = 0;
+                };
+                sinTop = Math.min( sinTop, _sin );
+                sinBottom = Math.max( sinBottom, _sin );
+                cosLeft = Math.min( cosLeft, _cos );
+                cosRight = Math.max( cosRight, _cos );
+
+            } );
+
+            scaleXY = (Math.abs(cosLeft) + Math.abs(cosRight))/(Math.abs(sinTop) + Math.abs(sinBottom))
+            var _num = Math.min( this.width, this.height );
+            if( scaleXY == 1 ){
+                this.width = this.height = _num;
+            } else {
+                var _w = this.height * scaleXY;
+                var _h = this.width  / scaleXY;
+                if( _w > this.width ){
+                    //如果超出了， 那么缩放height
+                    this.height = _h;
+                } else {
+                    this.width = _w;
+                }
+            };
+
+            var x = _padding.left + (vw-this.width)/2;
+            var y = _padding.top + (vh-this.height)/2;
+
+            this.origin = {
+                x : x + this.width * (cosLeft/(cosLeft-cosRight)),
+                y : y + this.height * (sinTop/(sinTop-sinBottom))
+            };
+
+            var distanceToLine = {
+                top    : this.origin.y - y,
+                right  : x+this.width - this.origin.x,
+                bottom : y+this.height - this.origin.y,
+                left   : this.origin.x - x 
+            };
+
+            var anglesRadius = []; //每个角度上面的和边线相交点到origin的距离，可以作为半径
+            var quadrantLines = [
+                ["right" , "bottom"],
+                ["bottom" , "left"],
+                ["left" , "top"],
+                ["top" , "right"]
+            ];
+            _.each( angles, function( angle ){
+                //判断这个angle在会和哪根边线相交
+                angle = angle%360;
+                
+                var quadrant = parseInt(angle/90); //当前angle在第几象限，每个象限可能相交的边线不同
+                var lines = quadrantLines[quadrant];
+                if( angle%90 == 0 ){ //说明在4个正方向，只会和一条边线有可能相交，而且垂直
+                    lines = [[ "right","bottom","left","top" ][quadrant]];
                 };
 
-                var lastAngle = this.startAngle + this.allAngle;
-                if( _.indexOf( angles, lastAngle ) == -1 ){
-                    angles.push( lastAngle );
+                var _sin = Math.sin( angle*Math.PI/180 );
+                if( angle == 180 ){
+                    _sin = 0;
                 };
-                console.log(angles)
-                _.each( angles, function( angle ){
-                    if( angle != 360 ){
-                        angle = angle % 360;
-                    };
-                    var _sin = Math.sin( angle*Math.PI/180 );
-                    if( angle == 180 ){
-                        _sin = 0;
-                    };
+                var _cos = Math.cos( angle*Math.PI/180 );
+                if( angle == 270 || angle == 90 ){
+                    _cos = 0;
+                };
 
-                    var _cos = Math.cos( angle*Math.PI/180 );
-                    if( angle == 270 || angle == 90 ){
-                        _cos = 0;
+                //可能相交的边线集合 top right bottom left
+                _.each( lines , function( line ){
+                    var _r;
+                    if( line == "top" || line == "bottom" ){
+                        //和上下边线的相交
+                        if( _sin ){
+                            // !_sin的话，不可能和上下边线相交的，平行
+                            _r = Math.abs( distanceToLine[line] / _sin )
+                        };
                     };
-
-                    sinTop = Math.min( sinTop, _sin );
-                    sinBottom = Math.max( sinBottom, _sin );
-                    cosLeft = Math.min( cosLeft, _cos );
-                    cosRight = Math.max( cosRight, _cos );
+                    if( line == "right" || line == "left" ){
+                        //和左右线的相交
+                        if( _cos ){
+                            // !_sin的话，不可能和左右边线相交的，平行
+                            _r = Math.abs( distanceToLine[line] / _cos );
+                        };
+                    };
+                    anglesRadius.push( _r );
                 } );
-                console.log( [ sinTop,cosRight,sinBottom,cosLeft ] );
-                debugger
-                var _disv = [
-                    Math.abs(parseInt(this.height * (sinTop/(sinTop-sinBottom)))),//上边距
-                    //Math.abs(parseInt(this.width * (cosRight/(cosLeft-cosRight)))),//右边距
-                    Math.abs(parseInt(this.height * (sinBottom/(sinTop-sinBottom)))),//下边距
-                    //Math.abs(parseInt(this.width * (cosLeft/(cosLeft-cosRight))))
-                ];
-                var _dish = [
-                    //Math.abs(parseInt(this.height * (sinTop/(sinTop-sinBottom)))),//上边距
-                    Math.abs(parseInt(this.width * (cosRight/(cosLeft-cosRight)))),//右边距
-                    //Math.abs(parseInt(this.height * (sinBottom/(sinTop-sinBottom)))),//下边距
-                    Math.abs(parseInt(this.width * (cosLeft/(cosLeft-cosRight))))
-                ];
+            } );
+            _r = _.min(anglesRadius);
             
-                _r = _.min( [
-                    _.max( _disv ),
-                    _.max( _dish )
-                ]);
+        //};
 
-                this.origin = {
-                    x : _padding.left  + vw * (cosLeft/(cosLeft-cosRight)) - (vw-this.width)/2, //rootWidth/2,
-                    y : _padding.top + vh * (sinTop/(sinTop-sinBottom)) - (vh-this.height)/2
-                };
-            
-            //};
-        };
+
+
+/*
 
         //计算maxR
         //如果外面要求过 maxR，
         var origin = this.origin;
-
         if( !this.squareRange ){
             var _distances = [ 
                 origin.x-_padding.left , //原点到left的距离
@@ -406,28 +430,9 @@ export default class extends coorBase
             _r = _.max( _distances );
         };
         
-        /*
-        if( origin.x != this.width/2 || origin.y != this.height/2 ){
-            var _distances = [ 
-                origin.x-_padding.left , //原点到left的距离
-                vw+_padding.left - origin.x , //原点到右边的距离
-                origin.y-_padding.top , 
-                vh + _padding.top - origin.y
-            ];
-            _r = _.max( _distances );
-        } else {
-            _r = Math.max( vw / 2 , vh / 2 );
-        };
-        
-
-        if( !(this.radius != 'auto' && this.radius <= _r) ){
-            this.radius = _r
-        };
-        */
+*/
 
         this.radius = _r
-
-        console.log( this.radius );
         
     }
 
