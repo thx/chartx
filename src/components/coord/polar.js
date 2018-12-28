@@ -285,14 +285,15 @@ export default class extends coorBase
         var rootWidth = this.app.width;
         var rootHeight = this.app.height;
 
-        var vw = rootWidth - _padding.left - _padding.right;
-        var vh = rootHeight - _padding.top - _padding.bottom;
         if( !("width" in this._opt) ){
-            this.width = vw;
+            this.width = rootWidth - _padding.left - _padding.right;
         };
         if( !("height" in this._opt) ){
-            this.height = vh;
-        };        
+            this.height = rootHeight - _padding.top - _padding.bottom;
+        };  
+        
+        var vw = this.width;
+        var vh = this.height;
      
 
         //然后根据allAngle startAngle来实现计算出这个polar的和模型 高宽比例
@@ -334,32 +335,32 @@ export default class extends coorBase
             } );
 
             scaleXY = (Math.abs(cosLeft) + Math.abs(cosRight))/(Math.abs(sinTop) + Math.abs(sinBottom))
-            var _num = Math.min( this.width, this.height );
+            var _num = Math.min( vw, vh );
             if( scaleXY == 1 ){
-                this.width = this.height = _num;
+                vw = vh = _num;
             } else {
-                var _w = this.height * scaleXY;
-                var _h = this.width  / scaleXY;
-                if( _w > this.width ){
+                var _w = vh * scaleXY;
+                var _h = vw  / scaleXY;
+                if( _w > vw ){
                     //如果超出了， 那么缩放height
-                    this.height = _h;
+                    vh = _h;
                 } else {
-                    this.width = _w;
+                    vw = _w;
                 }
             };
 
-            var x = _padding.left + (vw-this.width)/2;
-            var y = _padding.top + (vh-this.height)/2;
+            var x = _padding.left + (this.width-vw)/2;
+            var y = _padding.top + (this.height-vh)/2;
 
             this.origin = {
-                x : x + this.width * (cosLeft/(cosLeft-cosRight)),
-                y : y + this.height * (sinTop/(sinTop-sinBottom))
+                x : x + vw * (cosLeft/(cosLeft-cosRight)),
+                y : y + vh * (sinTop/(sinTop-sinBottom))
             };
 
             var distanceToLine = {
                 top    : this.origin.y - y,
-                right  : x+this.width - this.origin.x,
-                bottom : y+this.height - this.origin.y,
+                right  : x+vw - this.origin.x,
+                bottom : y+vh - this.origin.y,
                 left   : this.origin.x - x 
             };
 
@@ -409,31 +410,33 @@ export default class extends coorBase
                     anglesRadius.push( _r );
                 } );
             } );
-            _r = _.min(anglesRadius);
+            _r = _.min( anglesRadius );
             
         //};
 
-
-
-/*
-
-        //计算maxR
-        //如果外面要求过 maxR，
-        var origin = this.origin;
-        if( !this.squareRange ){
-            var _distances = [ 
-                origin.x-_padding.left , //原点到left的距离
-                vw+_padding.left - origin.x , //原点到右边的距离
-                origin.y-_padding.top , 
-                vh + _padding.top - origin.y
-            ];
-            _r = _.max( _distances );
-        };
-        
-*/
-
         this.radius = _r
         
+    }
+
+    getMaxDisToViewOfOrigin(){
+        var origin = this.origin;
+        var _r = 0;
+        var _padding = this.app.padding;
+        var rootWidth = this.app.width;
+        var rootHeight = this.app.height;
+
+        var vw = rootWidth - _padding.left - _padding.right;
+        var vh = rootHeight - _padding.top - _padding.bottom;
+
+        var _distances = [ 
+            origin.x - _padding.left , //原点到left的距离
+            vw + _padding.left - origin.x , //原点到右边的距离
+            origin.y - _padding.top , 
+            vh + _padding.top - origin.y
+        ];
+        _r = _.max( _distances );
+        
+        return _r;
     }
 
     //获取极坐标系内任意半径上的弧度集合
@@ -450,9 +453,9 @@ export default class extends coorBase
         };
 
         var _rs = [];
-        if( r > this.radius ){
-            return [];
-        } else {
+        //if( r > maxRadius ){
+        //    return [];
+        //} else {
             //下面的坐标点都是已经origin为原点的坐标系统里
 
             //矩形的4边框线段
@@ -473,8 +476,8 @@ export default class extends coorBase
             if( distanceT < r ){
                 x = Math.sqrt( Math.pow(r,2)-Math.pow(distanceT , 2) );
                 _rs = _rs.concat( this._filterPointsInRect([
-                    { x : -x ,y : -distanceT},
-                    { x : x  ,y : -distanceT}
+                    { x : -x ,y : -distanceT },
+                    { x : x  ,y : -distanceT }
                 ], origin,width, height) );
             };
 
@@ -539,7 +542,7 @@ export default class extends coorBase
                 }
             };
             return arcs;
-        }
+        //}
     }
 
     _filterPointsInRect( points , origin, width, height)

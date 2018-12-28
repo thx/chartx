@@ -113,10 +113,11 @@ export default class PlanetGroup
     {
         var me = this;
         var _coord = this.app.getComponent({name:'coord'});
+        var _coordMaxDis = _coord.getMaxDisToViewOfOrigin();
 
-        if( (_coord.radius - this.rRange.to)/(this.pit.radius*2) < this.groupLen-1-this.iGroup ){
+        if( (_coordMaxDis - this.rRange.to)/(this.pit.radius*2) < this.groupLen-1-this.iGroup ){
             //要保证后面的group至少能有意个ringNum
-            this.rRange.to = _coord.radius - (this.groupLen-1-this.iGroup)*this.pit.radius*2;
+            this.rRange.to = _coordMaxDis - (this.groupLen-1-this.iGroup)*this.pit.radius*2;
         };
         if( this.rRange.to - this.rRange.start < this.pit.radius*2 ){
             this.rRange.to = this.rRange.start + this.pit.radius*2;
@@ -274,7 +275,7 @@ export default class PlanetGroup
 
                         //测试占位情况代码begin---------------------------------------------
                         /*
-                        var point = me.this.getComponent({name:'coord'}).getPointInRadianOfR( pit.middle , ring.radius )
+                        var point = me.app.getComponent({name:'coord'}).getPointInRadianOfR( pit.middle , ring.radius )
                         me.sprite.addChild(new Circle({
                             context:{
                                 x : point.x,

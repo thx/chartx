@@ -15271,16 +15271,16 @@ var Chartx = (function () {
         var _padding = this.app.padding;
         var rootWidth = this.app.width;
         var rootHeight = this.app.height;
-        var vw = rootWidth - _padding.left - _padding.right;
-        var vh = rootHeight - _padding.top - _padding.bottom;
 
         if (!("width" in this._opt)) {
-          this.width = vw;
+          this.width = rootWidth - _padding.left - _padding.right;
         }
 
         if (!("height" in this._opt)) {
-          this.height = vh;
+          this.height = rootHeight - _padding.top - _padding.bottom;
         }
+        var vw = this.width;
+        var vh = this.height; //然后根据allAngle startAngle来实现计算出这个polar的和模型 高宽比例
         //if( this.allAngle % 360 != 0 ){
         //360的polar高宽比例肯定是1：1的
 
@@ -15326,32 +15326,32 @@ var Chartx = (function () {
 
         scaleXY = (Math.abs(cosLeft) + Math.abs(cosRight)) / (Math.abs(sinTop) + Math.abs(sinBottom));
 
-        var _num = Math.min(this.width, this.height);
+        var _num = Math.min(vw, vh);
 
         if (scaleXY == 1) {
-          this.width = this.height = _num;
+          vw = vh = _num;
         } else {
-          var _w = this.height * scaleXY;
+          var _w = vh * scaleXY;
 
-          var _h = this.width / scaleXY;
+          var _h = vw / scaleXY;
 
-          if (_w > this.width) {
+          if (_w > vw) {
             //如果超出了， 那么缩放height
-            this.height = _h;
+            vh = _h;
           } else {
-            this.width = _w;
+            vw = _w;
           }
         }
-        var x = _padding.left + (vw - this.width) / 2;
-        var y = _padding.top + (vh - this.height) / 2;
+        var x = _padding.left + (this.width - vw) / 2;
+        var y = _padding.top + (this.height - vh) / 2;
         this.origin = {
-          x: x + this.width * (cosLeft / (cosLeft - cosRight)),
-          y: y + this.height * (sinTop / (sinTop - sinBottom))
+          x: x + vw * (cosLeft / (cosLeft - cosRight)),
+          y: y + vh * (sinTop / (sinTop - sinBottom))
         };
         var distanceToLine = {
           top: this.origin.y - y,
-          right: x + this.width - this.origin.x,
-          bottom: y + this.height - this.origin.y,
+          right: x + vw - this.origin.x,
+          bottom: y + vh - this.origin.y,
           left: this.origin.x - x
         };
         var anglesRadius = []; //每个角度上面的和边线相交点到origin的距离，可以作为半径
@@ -15406,24 +15406,23 @@ var Chartx = (function () {
 
         _r = _$1.min(anglesRadius); //};
 
-        /*
-        
-                //计算maxR
-                //如果外面要求过 maxR，
-                var origin = this.origin;
-                if( !this.squareRange ){
-                    var _distances = [ 
-                        origin.x-_padding.left , //原点到left的距离
-                        vw+_padding.left - origin.x , //原点到右边的距离
-                        origin.y-_padding.top , 
-                        vh + _padding.top - origin.y
-                    ];
-                    _r = _.max( _distances );
-                };
-                
-        */
-
         this.radius = _r;
+      }
+    }, {
+      key: "getMaxDisToViewOfOrigin",
+      value: function getMaxDisToViewOfOrigin() {
+        var origin = this.origin;
+        var _r = 0;
+        var _padding = this.app.padding;
+        var rootWidth = this.app.width;
+        var rootHeight = this.app.height;
+        var vw = rootWidth - _padding.left - _padding.right;
+        var vh = rootHeight - _padding.top - _padding.bottom;
+        var _distances = [origin.x - _padding.left, //原点到left的距离
+        vw + _padding.left - origin.x, //原点到右边的距离
+        origin.y - _padding.top, vh + _padding.top - origin.y];
+        _r = _$1.max(_distances);
+        return _r;
       } //获取极坐标系内任意半径上的弧度集合
       //[ [{point , radian} , {point , radian}] ... ]
 
@@ -15439,121 +15438,119 @@ var Chartx = (function () {
         if (height == undefined) {
           height = this.height;
         }
-        var _rs = [];
+        var _rs = []; //if( r > maxRadius ){
+        //    return [];
+        //} else {
+        //下面的坐标点都是已经origin为原点的坐标系统里
+        //矩形的4边框线段
 
-        if (r > this.radius) {
-          return [];
-        } else {
-          //下面的坐标点都是已经origin为原点的坐标系统里
-          //矩形的4边框线段
-          var _padding = this.app.padding; //这个origin 是相对在width，height矩形范围内的圆心，
-          //而this.origin 是在整个画布的位置
+        var _padding = this.app.padding; //这个origin 是相对在width，height矩形范围内的圆心，
+        //而this.origin 是在整个画布的位置
 
-          var origin = {
-            x: this.origin.x - _padding.left - (this.width - width) / 2,
-            y: this.origin.y - _padding.top - (this.height - height) / 2
-          };
-          var x, y; //于上边界的相交点
-          //最多有两个交点
+        var origin = {
+          x: this.origin.x - _padding.left - (this.width - width) / 2,
+          y: this.origin.y - _padding.top - (this.height - height) / 2
+        };
+        var x, y; //于上边界的相交点
+        //最多有两个交点
 
-          var distanceT = origin.y;
+        var distanceT = origin.y;
 
-          if (distanceT < r) {
-            x = Math.sqrt(Math.pow(r, 2) - Math.pow(distanceT, 2));
-            _rs = _rs.concat(this._filterPointsInRect([{
-              x: -x,
-              y: -distanceT
-            }, {
-              x: x,
-              y: -distanceT
-            }], origin, width, height));
-          }
-          //最多有两个交点
-
-          var distanceR = width - origin.x;
-
-          if (distanceR < r) {
-            y = Math.sqrt(Math.pow(r, 2) - Math.pow(distanceR, 2));
-            _rs = _rs.concat(this._filterPointsInRect([{
-              x: distanceR,
-              y: -y
-            }, {
-              x: distanceR,
-              y: y
-            }], origin, width, height));
-          }
-          //最多有两个交点
-
-          var distanceB = height - origin.y;
-
-          if (distanceB < r) {
-            x = Math.sqrt(Math.pow(r, 2) - Math.pow(distanceB, 2));
-            _rs = _rs.concat(this._filterPointsInRect([{
-              x: x,
-              y: distanceB
-            }, {
-              x: -x,
-              y: distanceB
-            }], origin, width, height));
-          }
-          //最多有两个交点
-
-          var distanceL = origin.x;
-
-          if (distanceL < r) {
-            y = Math.sqrt(Math.pow(r, 2) - Math.pow(distanceL, 2));
-            _rs = _rs.concat(this._filterPointsInRect([{
-              x: -distanceL,
-              y: y
-            }, {
-              x: -distanceL,
-              y: -y
-            }], origin, width, height));
-          }
-          var arcs = []; //[ [{point , radian} , {point , radian}] ... ]
-          //根据相交点的集合，分割弧段
-
-          if (_rs.length == 0) {
-            //说明整圆都在画布内
-            //[ [0 , 2*Math.PI] ];
-            arcs.push([{
-              point: {
-                x: r,
-                y: 0
-              },
-              radian: 0
-            }, {
-              point: {
-                x: r,
-                y: 0
-              },
-              radian: Math.PI * 2
-            }]);
-          } else {
-            //分割多段
-            _$1.each(_rs, function (point, i) {
-              var nextInd = i == _rs.length - 1 ? 0 : i + 1;
-
-              var nextPoint = _rs.slice(nextInd, nextInd + 1)[0];
-
-              arcs.push([{
-                point: point,
-                radian: me.getRadianInPoint(point)
-              }, {
-                point: nextPoint,
-                radian: me.getRadianInPoint(nextPoint)
-              }]);
-            });
-          }
-
-          for (var i = 0, l = arcs.length; i < l; i++) {
-            if (!this._checkArcInRect(arcs[i], r, origin, width, height)) {
-              arcs.splice(i, 1);
-              i--, l--;
-            }
-          }
-          return arcs;
+        if (distanceT < r) {
+          x = Math.sqrt(Math.pow(r, 2) - Math.pow(distanceT, 2));
+          _rs = _rs.concat(this._filterPointsInRect([{
+            x: -x,
+            y: -distanceT
+          }, {
+            x: x,
+            y: -distanceT
+          }], origin, width, height));
         }
+        //最多有两个交点
+
+        var distanceR = width - origin.x;
+
+        if (distanceR < r) {
+          y = Math.sqrt(Math.pow(r, 2) - Math.pow(distanceR, 2));
+          _rs = _rs.concat(this._filterPointsInRect([{
+            x: distanceR,
+            y: -y
+          }, {
+            x: distanceR,
+            y: y
+          }], origin, width, height));
+        }
+        //最多有两个交点
+
+        var distanceB = height - origin.y;
+
+        if (distanceB < r) {
+          x = Math.sqrt(Math.pow(r, 2) - Math.pow(distanceB, 2));
+          _rs = _rs.concat(this._filterPointsInRect([{
+            x: x,
+            y: distanceB
+          }, {
+            x: -x,
+            y: distanceB
+          }], origin, width, height));
+        }
+        //最多有两个交点
+
+        var distanceL = origin.x;
+
+        if (distanceL < r) {
+          y = Math.sqrt(Math.pow(r, 2) - Math.pow(distanceL, 2));
+          _rs = _rs.concat(this._filterPointsInRect([{
+            x: -distanceL,
+            y: y
+          }, {
+            x: -distanceL,
+            y: -y
+          }], origin, width, height));
+        }
+        var arcs = []; //[ [{point , radian} , {point , radian}] ... ]
+        //根据相交点的集合，分割弧段
+
+        if (_rs.length == 0) {
+          //说明整圆都在画布内
+          //[ [0 , 2*Math.PI] ];
+          arcs.push([{
+            point: {
+              x: r,
+              y: 0
+            },
+            radian: 0
+          }, {
+            point: {
+              x: r,
+              y: 0
+            },
+            radian: Math.PI * 2
+          }]);
+        } else {
+          //分割多段
+          _$1.each(_rs, function (point, i) {
+            var nextInd = i == _rs.length - 1 ? 0 : i + 1;
+
+            var nextPoint = _rs.slice(nextInd, nextInd + 1)[0];
+
+            arcs.push([{
+              point: point,
+              radian: me.getRadianInPoint(point)
+            }, {
+              point: nextPoint,
+              radian: me.getRadianInPoint(nextPoint)
+            }]);
+          });
+        }
+
+        for (var i = 0, l = arcs.length; i < l; i++) {
+          if (!this._checkArcInRect(arcs[i], r, origin, width, height)) {
+            arcs.splice(i, 1);
+            i--, l--;
+          }
+        }
+        return arcs; //}
       }
     }, {
       key: "_filterPointsInRect",
@@ -21066,9 +21063,11 @@ var Chartx = (function () {
           name: 'coord'
         });
 
-        if ((_coord.radius - this.rRange.to) / (this.pit.radius * 2) < this.groupLen - 1 - this.iGroup) {
+        var _coordMaxDis = _coord.getMaxDisToViewOfOrigin();
+
+        if ((_coordMaxDis - this.rRange.to) / (this.pit.radius * 2) < this.groupLen - 1 - this.iGroup) {
           //要保证后面的group至少能有意个ringNum
-          this.rRange.to = _coord.radius - (this.groupLen - 1 - this.iGroup) * this.pit.radius * 2;
+          this.rRange.to = _coordMaxDis - (this.groupLen - 1 - this.iGroup) * this.pit.radius * 2;
         }
 
         if (this.rRange.to - this.rRange.start < this.pit.radius * 2) {
@@ -21224,7 +21223,7 @@ var Chartx = (function () {
                 ring.pits.push(pit); //测试占位情况代码begin---------------------------------------------
 
                 /*
-                var point = me.this.getComponent({name:'coord'}).getPointInRadianOfR( pit.middle , ring.radius )
+                var point = me.app.getComponent({name:'coord'}).getPointInRadianOfR( pit.middle , ring.radius )
                 me.sprite.addChild(new Circle({
                     context:{
                         x : point.x,
@@ -21751,7 +21750,7 @@ var Chartx = (function () {
         var groupRStart = this.center.radius + this.center.margin;
         var maxRadius = me.app.getComponent({
           name: 'coord'
-        }).radius;
+        }).getMaxDisToViewOfOrigin() - me.center.radius - me.center.margin;
 
         var _circleMaxR = this._getMaxR();
 
@@ -21855,7 +21854,9 @@ var Chartx = (function () {
           var cx = _coord.origin.x;
           var cy = _coord.origin.y;
           var itemAng = 360 / me.grid.rays.count;
-          var _r = _coord.radius; //Math.max( me.w, me.h );
+
+          var _r = _coord.getMaxDisToViewOfOrigin(); //Math.max( me.w, me.h );
+
 
           if (me.grid.rings.section.length) {
             _r = me.grid.rings.section.slice(-1)[0].radius;
