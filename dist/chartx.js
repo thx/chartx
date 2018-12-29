@@ -9867,9 +9867,9 @@ var Chartx = (function () {
             this.graphicsData.pop();
           }
         } //this.currentPath = null;
+        //this.beginPath();
 
 
-        this.beginPath();
         var data = new GraphicsData(this.lineWidth, this.strokeStyle, this.lineAlpha, this.fillStyle, this.fillAlpha, shape);
         this.graphicsData.push(data);
 
@@ -15974,6 +15974,8 @@ var Chartx = (function () {
     }
   });
 
+  var AnimationFrame$1 = Canvax.AnimationFrame;
+
   var GraphsBase =
   /*#__PURE__*/
   function (_Component) {
@@ -16000,13 +16002,27 @@ var Chartx = (function () {
         x: 0,
         y: 0
       };
-      _this.animation = true;
+      _this.animation = true; //是否有动画
+
+      _this.aniDuration = 500; //动画时长
+
       _this.inited = false;
       _this.sprite = new Canvax.Display.Sprite({
         name: "graphs_" + opt.type
       });
 
       _this.app.graphsSprite.addChild(_this.sprite);
+
+      _this._growTween = null;
+
+      var me = _assertThisInitialized(_assertThisInitialized(_this));
+
+      _this.sprite.on("destroy", function () {
+        if (me._growTween) {
+          AnimationFrame$1.destroyTween(me._growTween);
+          me._growTween = null;
+        }
+      });
 
       return _this;
     }
@@ -16078,13 +16094,45 @@ var Chartx = (function () {
             fn.apply(this, _arr);
           }
         }
+      } //所有graphs默认的grow
+
+    }, {
+      key: "grow",
+      value: function grow(callback, opt) {
+        !opt && (opt = {});
+        var me = this;
+        var duration = this.aniDuration;
+
+        if (!this.animation) {
+          duration = 0;
+        }
+        var from = 0;
+        var to = 1;
+        if ("from" in opt) from = opt.from;
+        if ("to" in opt) to = opt.to;
+        this._growTween = AnimationFrame$1.registTween({
+          from: {
+            process: from
+          },
+          to: {
+            process: to
+          },
+          duration: duration,
+          onUpdate: function onUpdate(status) {
+            _$1.isFunction(callback) && callback(status.process);
+          },
+          onComplete: function onComplete(status) {
+            this._growTween = null;
+            me.fire("complete");
+          }
+        });
       }
     }]);
 
     return GraphsBase;
   }(component);
 
-  var AnimationFrame$1 = Canvax.AnimationFrame;
+  var AnimationFrame$2 = Canvax.AnimationFrame;
   var BrokenLine$1 = Canvax.Shapes.BrokenLine;
   var Rect$3 = Canvax.Shapes.Rect;
 
@@ -16982,7 +17030,7 @@ var Chartx = (function () {
                 bar.context.height = bar.finalPos.height;
               } else {
                 if (bar._tweenObj) {
-                  AnimationFrame$1.destroyTween(bar._tweenObj);
+                  AnimationFrame$2.destroyTween(bar._tweenObj);
                 }
                 bar._tweenObj = bar.animate({
                   scaleY: sy,
@@ -17068,7 +17116,7 @@ var Chartx = (function () {
     return BarGraphs;
   }(GraphsBase);
 
-  var AnimationFrame$2 = Canvax.AnimationFrame;
+  var AnimationFrame$3 = Canvax.AnimationFrame;
   var BrokenLine$2 = Canvax.Shapes.BrokenLine;
   var Rect$4 = Canvax.Shapes.Rect;
   var Circle$3 = Canvax.Shapes.Circle;
@@ -17155,12 +17203,6 @@ var Chartx = (function () {
       key: "init",
       value: function init(opt) {
         this.sprite = new Canvax.Display.Sprite();
-        var me = this;
-        this.sprite.on("destroy", function () {
-          if (me._growTween) {
-            AnimationFrame$2.destroyTween(me._growTween);
-          }
-        });
       }
     }, {
       key: "draw",
@@ -17327,7 +17369,7 @@ var Chartx = (function () {
             }
           });
         }
-        this._growTween = AnimationFrame$2.registTween({
+        this._growTween = AnimationFrame$3.registTween({
           from: me._getPointPosStr(me._currPointList),
           to: me._getPointPosStr(me._pointList),
           desc: me.field,
@@ -18698,7 +18740,7 @@ var Chartx = (function () {
   var Sector$1 = Canvax.Shapes.Sector;
   var Path$2 = Canvax.Shapes.Path;
   var Rect$7 = Canvax.Shapes.Rect;
-  var AnimationFrame$3 = Canvax.AnimationFrame;
+  var AnimationFrame$4 = Canvax.AnimationFrame;
 
   var Pie =
   /*#__PURE__*/
@@ -18992,7 +19034,7 @@ var Chartx = (function () {
 
         me._hideGrowLabel();
 
-        AnimationFrame$3.registTween({
+        AnimationFrame$4.registTween({
           from: {
             process: 0
           },
@@ -25827,6 +25869,8 @@ var Chartx = (function () {
 
       _$1.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps((this instanceof Progress ? this.constructor : void 0).defaultProps), opt);
 
+      _this.bgNodeData = null; //背景的nodeData数据，和data里面的结构保持一致
+
       _this.init();
 
       return _this;
@@ -25839,98 +25883,240 @@ var Chartx = (function () {
       key: "draw",
       value: function draw(opt) {
         !opt && (opt = {});
+        var me = this;
 
         _$1.extend(true, this, opt);
 
-        this.data = this._trimGraphs(); //this._widget();
+        me.grow(function (process) {
+          me.data = me._trimGraphs(process);
 
+          me._widget();
+        });
         this.sprite.context.x = this.origin.x;
         this.sprite.context.y = this.origin.y;
-        this.fire("complete");
       }
     }, {
       key: "_trimGraphs",
-      value: function _trimGraphs() {
+      value: function _trimGraphs(scale) {
         var me = this;
+
+        if (scale == undefined) {
+          scale = 1;
+        }
 
         var _coord = this.app.getComponent({
           name: 'coord'
         }); //用来计算下面的hLen
 
 
-        this.enabledField = _coord.filterEnabledFields(this.field);
+        this.enabledField = _coord.filterEnabledFields(this.field); //整个的
+
+        var _startAngle = me.startAngle || _coord.startAngle;
+
+        var _allAngle = me.allAngle || _coord.allAngle;
+
+        this.bgNodeData = this._getNodeData(_startAngle, _allAngle);
+        this.bgNodeData.fillStyle = this._getStyle(this.bgNodeData, this.bgColor);
         var data = {};
 
         _$1.each(this.enabledField, function (field) {
           var dataOrg = me.dataFrame.getFieldData(field);
+          var nodeDatas = [];
 
-          var fieldMap = _coord.getFieldMapOf(field);
+          _$1.each(dataOrg, function (val, i) {
+            val *= scale;
+            var preNodeData = nodeDatas.slice(-1)[0];
+            var startAngle = preNodeData ? preNodeData.endAngle : _startAngle;
+            var allAngle = _allAngle * (val / 100);
 
-          var arr = [];
-          var startAngle = me.startAngle || _coord.startAngle;
-          var allAngle = me.allAngle || _coord.allAngle;
-          var endAngle = startAngle + allAngle;
-          var startRadian = Math.PI * startAngle / 180; //起始弧度
+            var nodeData = me._getNodeData(startAngle, allAngle, field, val, i);
 
-          var endRadian = Math.PI * endAngle / 180; //终点弧度
-
-          debugger;
-          var outRadius = me.radius || _coord.radius;
-          var innerRadius = outRadius - me.node.width;
-
-          var startOutPoint = _coord.getPointInRadianOfR(startRadian, outRadius);
-
-          var endOutPoint = _coord.getPointInRadianOfR(endRadian, outRadius);
-
-          var startInnerPoint = _coord.getPointInRadianOfR(startRadian, innerRadius);
-
-          var endInnerPoint = _coord.getPointInRadianOfR(endRadian, innerRadius);
-
-          var large_arc_flag = 0;
-
-          if (allAngle > 180) {
-            large_arc_flag = 1;
-          }
-          var pathStr = "M" + startOutPoint.x + " " + startOutPoint.y;
-          pathStr += "A" + outRadius + " " + outRadius + " 0 " + large_arc_flag + " 1 " + endOutPoint.x + " " + endOutPoint.y;
-          pathStr += "L" + endInnerPoint.x + " " + endInnerPoint.y;
-          pathStr += "A" + innerRadius + " " + innerRadius + " 0 " + large_arc_flag + " 0 " + startInnerPoint.x + " " + startInnerPoint.y;
-          pathStr += "Z";
-          var pathElement = new Canvax.Shapes.Path({
-            context: {
-              path: pathStr,
-              fillStyle: "blue"
-            }
+            nodeData.fillStyle = me._getStyle(nodeData, me.node.fillStyle);
+            nodeDatas.push(nodeData);
           });
-          me.sprite.addChild(pathElement);
-          var center = new Canvax.Shapes.Circle({
-            context: {
-              r: 5,
-              fillStyle: "red"
-            }
-          });
-          me.sprite.addChild(center);
-          /*
-          _.each( _coord.aAxis.angleList , function( _a , i ){
-              //弧度
-              var _r = Math.PI * _a / 180;
-              var point = _coord.getPointInRadianOfR( _r, _coord.getROfNum(dataOrg[i]) );
-              arr.push( {
-                  field   : field,
-                  iNode   : i,
-                  rowData : me.dataFrame.getRowDataAt(i),
-                  focused : false,
-                  value   : dataOrg[i],
-                  point   : point,
-                  color   : fieldMap.color
-              } );
-          } );
-          */
 
-          data[field] = arr;
+          data[field] = nodeDatas;
         });
 
         return data;
+      }
+    }, {
+      key: "_getNodeData",
+      value: function _getNodeData(startAngle, allAngle, field, val, i) {
+        var me = this;
+
+        var _coord = this.app.getComponent({
+          name: 'coord'
+        });
+
+        var middleAngle = startAngle + allAngle / 2;
+        var endAngle = startAngle + allAngle;
+        var startRadian = Math.PI * startAngle / 180; //起始弧度
+
+        var middleRadian = Math.PI * middleAngle / 180;
+        var endRadian = Math.PI * endAngle / 180; //终点弧度
+
+        var outRadius = me.radius || _coord.radius;
+        var innerRadius = outRadius - me.node.width;
+
+        var startOutPoint = _coord.getPointInRadianOfR(startRadian, outRadius);
+
+        var middleOutPoint = _coord.getPointInRadianOfR(middleRadian, outRadius);
+
+        var endOutPoint = _coord.getPointInRadianOfR(endRadian, outRadius);
+
+        var startInnerPoint = _coord.getPointInRadianOfR(startRadian, innerRadius);
+
+        var middleInnerPoint = _coord.getPointInRadianOfR(middleRadian, innerRadius);
+
+        var endInnerPoint = _coord.getPointInRadianOfR(endRadian, innerRadius);
+
+        var nodeData = {
+          field: field,
+          value: val,
+          iNode: i,
+          allAngle: allAngle,
+          startAngle: startAngle,
+          middleAngle: middleAngle,
+          endAngle: endAngle,
+          startRadian: startRadian,
+          middleRadian: middleRadian,
+          endRadian: endRadian,
+          outRadius: outRadius,
+          innerRadius: innerRadius,
+          startOutPoint: startOutPoint,
+          middleOutPoint: middleOutPoint,
+          endOutPoint: endOutPoint,
+          startInnerPoint: startInnerPoint,
+          middleInnerPoint: middleInnerPoint,
+          endInnerPoint: endInnerPoint,
+          rowData: me.dataFrame.getRowDataAt(i),
+          fillStyle: null
+        };
+        /*  样式的设置全部在外面处理
+        if( field ){
+            //没有field的说明是bgNodeData的调用,
+            nodeData.fillStyle = me._getStyle( nodeData, me.node.fillStyle );
+        };
+        */
+
+        /*
+        if( allAngle%360 > 180 ){
+            nodeData.large_arc_flag = 1;
+        };
+        */
+
+        return nodeData;
+      }
+    }, {
+      key: "_widget",
+      value: function _widget() {
+        var me = this;
+
+        if (me.bgEnabled) {
+          var bgPathStr = me._getPathStr(this.bgNodeData);
+
+          if (me._bgPathElement) {
+            me._bgPathElement.context.path = bgPathStr;
+          } else {
+            me._bgPathElement = new Canvax.Shapes.Path({
+              context: {
+                path: bgPathStr
+              }
+            });
+            me.sprite.addChild(me._bgPathElement);
+          }
+          me._bgPathElement.context.fillStyle = this.bgNodeData.fillStyle;
+        }
+
+        _$1.each(this.data, function (nodeDatas) {
+          _$1.each(nodeDatas, function (nodeData, i) {
+            var pathStr = me._getPathStr(nodeData);
+
+            var elId = "progress_bar_" + nodeData.field + "_" + i;
+            var pathElement = me.sprite.getChildById(elId);
+
+            if (pathElement) {
+              pathElement.context.path = pathStr;
+            } else {
+              pathElement = new Canvax.Shapes.Path({
+                id: elId,
+                context: {
+                  path: pathStr
+                }
+              });
+              me.sprite.addChild(pathElement);
+            }
+            pathElement.context.fillStyle = nodeData.fillStyle;
+          });
+        }); //绘制圆心
+
+
+        return;
+        var center = new Canvax.Shapes.Circle({
+          context: {
+            r: 2,
+            fillStyle: "red"
+          }
+        });
+        me.sprite.addChild(center);
+      }
+    }, {
+      key: "_getPathStr",
+      value: function _getPathStr(nodeData) {
+        var pathStr = "M" + nodeData.startOutPoint.x + " " + nodeData.startOutPoint.y;
+        pathStr += "A" + nodeData.outRadius + " " + nodeData.outRadius + " 0 0 1 " + nodeData.middleOutPoint.x + " " + nodeData.middleOutPoint.y;
+        pathStr += "A" + nodeData.outRadius + " " + nodeData.outRadius + " 0 0 1 " + nodeData.endOutPoint.x + " " + nodeData.endOutPoint.y;
+        var actionType = "L";
+
+        if (nodeData.allAngle % 360 == 0) ;
+        pathStr += actionType + nodeData.endInnerPoint.x + " " + nodeData.endInnerPoint.y;
+        pathStr += "A" + nodeData.innerRadius + " " + nodeData.innerRadius + " 0 0 0 " + nodeData.middleInnerPoint.x + " " + nodeData.middleInnerPoint.y;
+        pathStr += "A" + nodeData.innerRadius + " " + nodeData.innerRadius + " 0 0 0 " + nodeData.startInnerPoint.x + " " + nodeData.startInnerPoint.y;
+        pathStr += "Z";
+        return pathStr;
+      }
+    }, {
+      key: "_getStyle",
+      value: function _getStyle(nodeData, prop, def) {
+        var me = this;
+
+        var _coord = this.app.getComponent({
+          name: 'coord'
+        });
+
+        var fieldMap = _coord.getFieldMapOf(nodeData.field);
+
+        def = def || (fieldMap ? fieldMap.color : "#171717");
+        var style;
+
+        if (prop) {
+          if (_$1.isString(prop)) {
+            style = prop;
+          }
+
+          if (_$1.isArray(prop)) {
+            style = prop[nodeData.iNode];
+          }
+
+          if (_$1.isFunction(prop)) {
+            style = prop.apply(this, arguments);
+          }
+
+          if (prop && prop.lineargradient) {
+            var style = me.ctx.createLinearGradient(nodeData.startOutPoint.x, nodeData.startOutPoint.y, nodeData.endOutPoint.x, nodeData.endOutPoint.y);
+
+            _$1.each(prop.lineargradient, function (item, i) {
+              style.addColorStop(item.position, item.color);
+            });
+          }
+        }
+
+        if (!style) {
+          style = def;
+        }
+
+        return style;
       }
     }]);
 
@@ -25949,8 +26135,21 @@ var Chartx = (function () {
           detail: '进度条两端的圆角半径',
           default: 10 //默认为width的一半
 
+        },
+        fillStyle: {
+          detail: '进度条的填充色',
+          documentation: '可以是单个颜色，也可以是数组，也可以是一个函数,也可以是个lineargradient',
+          default: null
         }
       }
+    },
+    bgEnabled: {
+      detail: '是否开启背景',
+      default: true
+    },
+    bgColor: {
+      detail: '进度条背景颜色',
+      default: '#f7f7f7'
     },
     radius: {
       detail: '半径',

@@ -2,6 +2,8 @@ import Component from "../component"
 import Canvax from "canvax"
 import { _ } from "mmvis"
 
+const AnimationFrame = Canvax.AnimationFrame;
+
 export default class GraphsBase extends Component
 {
     constructor(opt, app)
@@ -25,13 +27,23 @@ export default class GraphsBase extends Component
             y: 0
         };
 
-        this.animation = true;
+        this.animation = true; //是否有动画
+        this.aniDuration = 500;//动画时长
         this.inited = false;
 
         this.sprite = new Canvax.Display.Sprite({
             name: "graphs_"+opt.type
         });
         this.app.graphsSprite.addChild( this.sprite );
+
+        this._growTween = null;
+        var me = this;
+        this.sprite.on("destroy" , function(){
+            if(me._growTween){
+                AnimationFrame.destroyTween( me._growTween );
+                me._growTween = null;
+            };
+        });
     }
 
     tipsPointerOf(e){}
@@ -82,6 +94,37 @@ export default class GraphsBase extends Component
             }
             
         };
+    }
+
+    //所有graphs默认的grow
+    grow( callback, opt ){
+        !opt && (opt = {});
+        var me = this; 
+        var duration = this.aniDuration;
+        if( !this.animation ){
+            duration = 0;
+        };
+        var from = 0;
+        var to = 1;
+        if( "from" in opt ) from = opt.from;
+        if( "to" in opt ) to = opt.to;
+        
+        this._growTween = AnimationFrame.registTween({
+            from: {
+                process: from
+            },
+            to: {
+                process: to
+            },
+            duration: duration,
+            onUpdate: function ( status ) {
+                _.isFunction( callback ) && callback( status.process );
+            },
+            onComplete: function (status) {
+                this._growTween = null;
+                me.fire("complete");
+            }
+        });
     }
 
 }

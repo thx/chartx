@@ -80,12 +80,6 @@ export default class LineGraphsGroup extends event.Dispatcher
     init(opt)
     {
         this.sprite = new Canvax.Display.Sprite();
-        var me = this;
-        this.sprite.on("destroy" , function(){
-            if(me._growTween){
-                AnimationFrame.destroyTween( me._growTween );
-            }
-        });
     }
 
     draw(opt, data)
