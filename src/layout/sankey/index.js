@@ -1,3 +1,4 @@
+import { _ } from "mmvis"
 export default function() {
     var sankey = {},
         nodeWidth = 24,

@@ -574,7 +574,7 @@ export default class BarGraphs extends GraphsBase
         var me = this;
         var _groupRegionStyle = me.select.fillStyle;
         if (_.isArray( me.select.fillStyle )) {
-            _groupRegionStyle = me.select.fillStyle[ h ];
+            _groupRegionStyle = me.select.fillStyle[ iNode ];
         };
         if (_.isFunction( me.select.fillStyle )) {
             _groupRegionStyle = me.select.fillStyle.apply(this, [ {
