@@ -40,7 +40,7 @@ export default {
     ],
     plugins: [
         babel({
-            exclude: /node_modules\/(?!.*@(mmvis|canvax)\/).*/,
+            exclude: /node_modules\/(?!.*@*(mmvis|canvax)\/).*/,
             externalHelpers: true,
             babelrc: false,
             presets: [
