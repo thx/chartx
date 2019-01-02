@@ -12635,14 +12635,7 @@ var Chartx = (function () {
       _this.name = "coord";
       _this._opt = opt;
       _this.app = app;
-      _this.dataFrame = _this.app.dataFrame; //这个width为坐标系的width，height， 不是 图表的width和height（图表的widht，height有padding等）
-
-      _this.width = 0;
-      _this.height = 0;
-      _this.origin = {
-        x: 0,
-        y: 0
-      };
+      _this.dataFrame = _this.app.dataFrame;
       _this.sprite = new Canvax.Display.Sprite({
         name: "coord_" + opt.type
       });
@@ -12923,6 +12916,27 @@ var Chartx = (function () {
       default: "",
       values: ["rect", "polar", "box", "polar3d"]
     },
+    width: {
+      detail: '坐标系width',
+      default: 0
+    },
+    height: {
+      detail: '坐标系height',
+      default: 0
+    },
+    origin: {
+      detail: '坐标系原点',
+      propertys: {
+        x: {
+          detail: '原点x位置',
+          default: 0
+        },
+        y: {
+          detail: '原点x位置',
+          default: 0
+        }
+      }
+    },
     _children: _defineProperty({
       rect: {},
       polar: {},
@@ -13018,52 +13032,36 @@ var Chartx = (function () {
       _this.type = "xAxis";
       _this._opt = opt;
       _this._coord = _coord || {};
-      _this.width = 0;
-      _this.height = 0;
-      _this.title = {
-        text: "",
-        shapeType: "text",
-        fontColor: '#999',
-        fontSize: 12,
-        offset: 2,
-        textAlign: "center",
-        textBaseline: "middle",
-        strokeStyle: null,
-        lineHeight: 0
-      };
       _this._title = null; //this.title对应的文本对象
 
-      _this.enabled = true;
-      _this.tickLine = {
-        enabled: 1,
-        //是否有刻度线
-        lineWidth: 1,
-        //线宽
-        lineLength: 4,
-        //线长
-        offset: 2,
-        strokeStyle: '#cccccc'
+      _this._txts = [];
+      _this._axisLine = null;
+      /*
+      this.tickLine = {
+          enabled    : 1, //是否有刻度线
+          lineWidth  : 1, //线宽
+          lineLength : 4, //线长
+          offset   : 2,
+          strokeStyle: '#cccccc'
       };
-      _this.axisLine = {
-        position: "default",
-        //位置，default在align的位置（left，right），可选 "center" 和 具体的值
-        enabled: 1,
-        //是否有轴线
-        lineWidth: 1,
-        strokeStyle: '#cccccc'
+      this.axisLine = {
+          position   : "default",//位置，default在align的位置（left，right），可选 "center" 和 具体的值
+          enabled    : 1, //是否有轴线
+          lineWidth  : 1,
+          strokeStyle: '#cccccc'
       };
-      _this.label = {
-        enabled: 1,
-        fontColor: '#999',
-        fontSize: 12,
-        rotation: 0,
-        format: null,
-        offset: 2,
-        textAlign: "center",
-        lineHeight: 1,
-        evade: true //是否开启逃避检测，目前的逃避只是隐藏
-
+      this.label = {
+          enabled    : 1,
+          fontColor  : '#999',
+          fontSize   : 12,
+          rotation   : 0,
+          format     : null,
+          offset   : 2,
+          textAlign  : "center",
+          lineHeight : 1,
+          evade      : true  //是否开启逃避检测，目前的逃避只是隐藏
       };
+      */
 
       if (opt.isH && (!opt.label || opt.label.rotaion === undefined)) {
         //如果是横向直角坐标系图
@@ -13079,25 +13077,13 @@ var Chartx = (function () {
 
       _this.layoutData = []; //{x:100, value:'1000',visible:true}
 
-      _this.sprite = null; //过滤器，可以用来过滤哪些yaxis 的 节点是否显示已经颜色之类的
-      //@params params包括 dataSection , 索引index，txt(canvax element) ，line(canvax element) 等属性
-
-      _this.filter = null; //function(params){}; 
-
+      _this.sprite = null;
       _this.isH = false; //是否为横向转向的x轴
 
-      _this.animation = true;
       _this.layoutType = "rule"; // rule（均分，起点在0） , peak（均分，起点在均分单位的中心）, proportion（实际数据真实位置，数据一定是number）
-      //如果用户有手动的 trimLayout ，那么就全部visible为true，然后调用用户自己的过滤程序
-      //trimLayout就事把arr种的每个元素的visible设置为true和false的过程
-      //function
-
-      _this.trimLayout = null;
 
       _this.init(opt, data);
 
-      _this._txts = [];
-      _this._axisLine = null;
       return _this;
     }
 
@@ -13609,6 +13595,145 @@ var Chartx = (function () {
 
     return xAxis;
   }(axis);
+
+  _defineProperty(xAxis, "defaultProps", {
+    width: {
+      detail: '轴宽',
+      default: 0
+    },
+    height: {
+      detail: '轴高',
+      default: 0
+    },
+    enabled: {
+      detail: '是否显示轴',
+      default: true
+    },
+    animation: {
+      detail: '是否开启动画',
+      default: true
+    },
+    title: {
+      detail: '轴名称',
+      propertys: {
+        shapeType: "text",
+        textAlign: "center",
+        textBaseline: "middle",
+        strokeStyle: null,
+        lineHeight: 0,
+        text: {
+          detail: '轴名称的内容',
+          default: ''
+        },
+        fontColor: {
+          detail: '颜色',
+          default: '#999'
+        },
+        fontSize: {
+          detail: '字体大小',
+          default: 12
+        }
+      }
+    },
+    tickLine: {
+      detail: '刻度线',
+      propertys: {
+        enabled: {
+          detail: '是否开启',
+          default: true
+        },
+        lineWidth: {
+          detail: '刻度线宽',
+          default: 1
+        },
+        lineLength: {
+          detail: '刻度线长度',
+          default: 4
+        },
+        offset: {
+          detail: '便宜量',
+          default: 2
+        },
+        strokeStyle: {
+          detail: '描边颜色',
+          default: '#cccccc'
+        }
+      }
+    },
+    axisLine: {
+      detail: '轴线配置',
+      propertys: {
+        enabled: {
+          detail: '是否有轴线',
+          default: true
+        },
+        position: {
+          detail: '轴线的位置',
+          documentation: 'default在align的位置（left，right），可选 "center" 和 具体的值',
+          default: 'default'
+        },
+        lineWidth: {
+          detail: '轴线宽度',
+          default: 1
+        },
+        strokeStyle: {
+          detail: '轴线的颜色',
+          default: '#cccccc'
+        }
+      }
+    },
+    label: {
+      detail: '刻度文本',
+      propertys: {
+        enabled: {
+          detail: '是否显示刻度文本',
+          default: true
+        },
+        fontColor: {
+          detail: '文本颜色',
+          default: '#999'
+        },
+        fontSize: {
+          detail: '字体大小',
+          default: 12
+        },
+        rotation: {
+          detail: '旋转角度',
+          default: 0
+        },
+        format: {
+          detail: 'label文本的格式化处理函数',
+          default: null
+        },
+        offset: {
+          detail: '和轴线之间的间距',
+          default: 2
+        },
+        textAlign: {
+          detail: '水平方向对齐方式',
+          default: 'center'
+        },
+        lineHeight: {
+          detail: '文本的行高',
+          default: 1
+        },
+        evade: {
+          detail: '是否开启逃避算法,目前的逃避只是隐藏',
+          default: true
+        }
+      }
+    },
+    filter: {
+      detail: '过滤函数',
+      documentation: '可以用来过滤哪些yaxis 的 节点是否显示已经颜色之类的',
+      default: null
+    },
+    trimLayout: {
+      detail: '自定义的显示规则函数',
+      documentation: '如果用户有手动的 trimLayout ，那么就全部visible为true，然后调用用户自己的过滤程序',
+      default: null
+    }
+  });
 
   var Line$2 = Canvax.Shapes.Line;
 

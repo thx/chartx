@@ -12,6 +12,27 @@ export default class coorBase extends Component
             default       : "",
             values        : ["rect","polar","box","polar3d"]
         },
+        width : {
+            detail : '坐标系width',
+            default: 0
+        },
+        height : {
+            detail : '坐标系height',
+            default: 0
+        },
+        origin : {
+            detail : '坐标系原点',
+            propertys : {
+                x : {
+                    detail : '原点x位置',
+                    default : 0
+                },
+                y : {
+                    detail : '原点x位置',
+                    default : 0
+                }
+            }
+        },
         _children  : {
             rect  : {},
             polar : {},
@@ -29,14 +50,6 @@ export default class coorBase extends Component
         this._opt = opt;
         this.app  = app;
         this.dataFrame = this.app.dataFrame;
-
-        //这个width为坐标系的width，height， 不是 图表的width和height（图表的widht，height有padding等）
-        this.width  = 0;
-        this.height = 0;
-        this.origin = {
-            x : 0,
-            y : 0
-        };
 
         this.sprite = new Canvax.Display.Sprite({
             name : "coord_"+opt.type
