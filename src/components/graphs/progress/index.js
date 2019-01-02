@@ -7,7 +7,6 @@ const AnimationFrame = Canvax.AnimationFrame;
 
 export default class Progress extends GraphsBase
 {
-
     static defaultProps = {
         node : {
             detail : '进度条设置',
@@ -24,6 +23,64 @@ export default class Progress extends GraphsBase
                     detail : '进度条的填充色',
                     documentation : '可以是单个颜色，也可以是数组，也可以是一个函数,也可以是个lineargradient',
                     default : null
+                }
+            }
+        },
+        label : {
+            detail : '进度值文本',
+            propertys : {
+                enabled   : {
+                    detail : '是否启用label',
+                    default: 'true'
+                },
+                fontColor : {
+                    detail : 'label颜色',
+                    default : '#666'
+                },
+                fontSize  : {
+                    detail : 'label文本大小',
+                    default: 26
+                },
+                format    : {
+                    detail : 'label格式化处理函数',
+                    default: function(val, nodeData){
+                        return val.toFixed(0)
+                    }
+                },
+                lineWidth : {
+                    detail : 'label文本描边线宽',
+                    default: null
+                },
+                strokeStyle : {
+                    detail : 'label描边颜色',
+                    default: null
+                },
+                
+                rotation : {
+                    detail : 'label旋转角度',
+                    default: 0
+                },
+                align :{
+                    detail : 'label align',
+                    default:  'center',
+                    values :  ['left','center','right']
+                },  //left center right
+                verticalAlign : {
+                    detail : 'label verticalAlign',
+                    default: 'middle',
+                    values : [ 'top', 'middle', 'bottom' ]
+                }, //top middle bottom
+                position : {
+                    detail : 'label位置',
+                    default: 'origin'
+                }, 
+                offsetX : {
+                    detail : 'label在x方向的偏移量',
+                    default: 0
+                },
+                offsetY : {
+                    detail : 'label在y方向的偏移量',
+                    default: 0
                 }
             }
         },
@@ -151,6 +208,7 @@ export default class Progress extends GraphsBase
         var nodeData = {
             field           : field,
             value           : val,
+            text            : val, //value format后的数据
             iNode           : i,
             allAngle        : allAngle,
 
@@ -175,6 +233,12 @@ export default class Progress extends GraphsBase
          
             rowData         : me.dataFrame.getRowDataAt( i ),
             fillStyle       : null
+        };
+
+        if( field ){
+            if( me.label.format && _.isFunction( me.label.format ) ){
+                nodeData.text = me.label.format( val, nodeData );
+            };
         };
 
         /*  样式的设置全部在外面处理
@@ -229,8 +293,71 @@ export default class Progress extends GraphsBase
                 };
                 
                 pathElement.context.fillStyle = nodeData.fillStyle;
+
+                if( me.label.enabled ){
+
+                    var labelSpId = "progress_label_"+nodeData.field+"_sprite_"+i;
+                    var labelSpElement = me.sprite.getChildById( labelSpId );
+                    if( labelSpElement ){
+                        labelSpElement
+                    } else {
+                        labelSpElement = new Canvax.Display.Sprite({
+                            id : labelSpId
+                        });
+                        me.sprite.addChild( labelSpElement );
+                    };
+                    labelSpElement.context.x = me.label.offsetX - 6; //%好会占一部分位置 所以往左边偏移6
+                    labelSpElement.context.y = me.label.offsetY;
+
+                    var lebelCxt = {
+                        fillStyle   : me.label.fontColor,
+                        fontSize    : me.label.fontSize,
+                        lineWidth   : me.label.lineWidth,
+                        strokeStyle : me.label.strokeStyle,
+                        textAlign   : me.label.align,
+                        textBaseline: me.label.verticalAlign,
+                        rotation    : me.label.rotation
+                    };
+                    var labelId = "progress_label_"+nodeData.field+"_"+i;
+                    var labelElement = labelSpElement.getChildById( labelId );
+                    if( labelElement ){
+                        labelElement.resetText( nodeData.text );
+                        _.extend( labelElement.context, lebelCxt );
+                    } else {
+                        var labelElement = new Canvax.Display.Text( nodeData.text, {
+                            id : labelId,
+                            context : lebelCxt
+                        } );
+                        labelSpElement.addChild( labelElement );
+                    };
+
+
+                    var labelSymbolId = "progress_label_"+nodeData.field+"_symbol_"+i;
+                    var labelSymbolElement = labelSpElement.getChildById( labelSymbolId );
+                    var lebelSymbolCxt = {
+                        x : labelElement.getTextWidth()/2,
+                        y : 3,
+                        fillStyle   : me.label.fontColor,
+                        fontSize    : me.label.fontSize-8,
+                        textAlign   : "left",
+                        textBaseline: me.label.verticalAlign,
+                    };
+                    
+                    if( labelSymbolElement ){
+                        _.extend( labelSymbolElement.context, lebelSymbolCxt );
+                    } else {
+                        var labelSymbolElement = new Canvax.Display.Text( "%", {
+                            id : labelSymbolId,
+                            context : lebelSymbolCxt
+                        } );
+                        labelSpElement.addChild( labelSymbolElement );
+                    };
+                
+                };
             } );
         } );
+
+        
 
         //绘制圆心
         return;
@@ -244,14 +371,13 @@ export default class Progress extends GraphsBase
     }
 
     _getPathStr( nodeData ){
-     
         var pathStr = "M"+nodeData.startOutPoint.x+" "+nodeData.startOutPoint.y;
         pathStr += "A"+nodeData.outRadius+" "+nodeData.outRadius+" 0 0 1 " + nodeData.middleOutPoint.x + " "+ nodeData.middleOutPoint.y;
         pathStr += "A"+nodeData.outRadius+" "+nodeData.outRadius+" 0 0 1 " + nodeData.endOutPoint.x + " "+ nodeData.endOutPoint.y;
-        
+
         var actionType = "L";
         if( nodeData.allAngle % 360 == 0 ){
-            //actionType = "M"
+            //actionType = "M" 
         };
 
         pathStr += actionType+nodeData.endInnerPoint.x+" "+nodeData.endInnerPoint.y;

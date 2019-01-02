@@ -8469,7 +8469,7 @@ var Chartx = (function () {
           ctx.lineWidth = data.lineWidth;
 
           if (data.type === SHAPES.POLY) {
-            ctx.beginPath();
+            !i && ctx.beginPath();
             this.renderPolygon(shape.points, shape.closed, ctx, isClip);
 
             if (fill) {
@@ -9867,9 +9867,9 @@ var Chartx = (function () {
             this.graphicsData.pop();
           }
         } //this.currentPath = null;
-        //this.beginPath();
 
 
+        this.beginPath();
         var data = new GraphicsData(this.lineWidth, this.strokeStyle, this.lineAlpha, this.fillStyle, this.fillAlpha, shape);
         this.graphicsData.push(data);
 
@@ -16119,7 +16119,7 @@ var Chartx = (function () {
           },
           duration: duration,
           onUpdate: function onUpdate(status) {
-            _$1.isFunction(callback) && callback(status.process);
+            _.isFunction(callback) && callback(status.process);
           },
           onComplete: function onComplete(status) {
             this._growTween = null;
@@ -25923,7 +25923,7 @@ var Chartx = (function () {
           var dataOrg = me.dataFrame.getFieldData(field);
           var nodeDatas = [];
 
-          _$1.each(dataOrg, function (val, i) {
+          _.each(dataOrg, function (val, i) {
             val *= scale;
             var preNodeData = nodeDatas.slice(-1)[0];
             var startAngle = preNodeData ? preNodeData.endAngle : _startAngle;
@@ -25974,6 +25974,8 @@ var Chartx = (function () {
         var nodeData = {
           field: field,
           value: val,
+          text: val,
+          //value format后的数据
           iNode: i,
           allAngle: allAngle,
           startAngle: startAngle,
@@ -25993,6 +25995,12 @@ var Chartx = (function () {
           rowData: me.dataFrame.getRowDataAt(i),
           fillStyle: null
         };
+
+        if (field) {
+          if (me.label.format && _.isFunction(me.label.format)) {
+            nodeData.text = me.label.format(val, nodeData);
+          }
+        }
         /*  样式的设置全部在外面处理
         if( field ){
             //没有field的说明是bgNodeData的调用,
@@ -26029,8 +26037,8 @@ var Chartx = (function () {
           me._bgPathElement.context.fillStyle = this.bgNodeData.fillStyle;
         }
 
-        _$1.each(this.data, function (nodeDatas) {
-          _$1.each(nodeDatas, function (nodeData, i) {
+        _.each(this.data, function (nodeDatas) {
+          _.each(nodeDatas, function (nodeData, i) {
             var pathStr = me._getPathStr(nodeData);
 
             var elId = "progress_bar_" + nodeData.field + "_" + i;
@@ -26048,6 +26056,64 @@ var Chartx = (function () {
               me.sprite.addChild(pathElement);
             }
             pathElement.context.fillStyle = nodeData.fillStyle;
+
+            if (me.label.enabled) {
+              var labelSpId = "progress_label_" + nodeData.field + "_sprite_" + i;
+              var labelSpElement = me.sprite.getChildById(labelSpId);
+
+              if (labelSpElement) ; else {
+                labelSpElement = new Canvax.Display.Sprite({
+                  id: labelSpId
+                });
+                me.sprite.addChild(labelSpElement);
+              }
+              labelSpElement.context.x = me.label.offsetX - 6; //%好会占一部分位置 所以往左边偏移6
+
+              labelSpElement.context.y = me.label.offsetY;
+              var lebelCxt = {
+                fillStyle: me.label.fontColor,
+                fontSize: me.label.fontSize,
+                lineWidth: me.label.lineWidth,
+                strokeStyle: me.label.strokeStyle,
+                textAlign: me.label.align,
+                textBaseline: me.label.verticalAlign,
+                rotation: me.label.rotation
+              };
+              var labelId = "progress_label_" + nodeData.field + "_" + i;
+              var labelElement = labelSpElement.getChildById(labelId);
+
+              if (labelElement) {
+                labelElement.resetText(nodeData.text);
+
+                _.extend(labelElement.context, lebelCxt);
+              } else {
+                var labelElement = new Canvax.Display.Text(nodeData.text, {
+                  id: labelId,
+                  context: lebelCxt
+                });
+                labelSpElement.addChild(labelElement);
+              }
+              var labelSymbolId = "progress_label_" + nodeData.field + "_symbol_" + i;
+              var labelSymbolElement = labelSpElement.getChildById(labelSymbolId);
+              var lebelSymbolCxt = {
+                x: labelElement.getTextWidth() / 2,
+                y: 3,
+                fillStyle: me.label.fontColor,
+                fontSize: me.label.fontSize - 8,
+                textAlign: "left",
+                textBaseline: me.label.verticalAlign
+              };
+
+              if (labelSymbolElement) {
+                _.extend(labelSymbolElement.context, lebelSymbolCxt);
+              } else {
+                var labelSymbolElement = new Canvax.Display.Text("%", {
+                  id: labelSymbolId,
+                  context: lebelSymbolCxt
+                });
+                labelSpElement.addChild(labelSymbolElement);
+              }
+            }
           });
         }); //绘制圆心
 
@@ -26091,22 +26157,22 @@ var Chartx = (function () {
         var style;
 
         if (prop) {
-          if (_$1.isString(prop)) {
+          if (_.isString(prop)) {
             style = prop;
           }
 
-          if (_$1.isArray(prop)) {
+          if (_.isArray(prop)) {
             style = prop[nodeData.iNode];
           }
 
-          if (_$1.isFunction(prop)) {
+          if (_.isFunction(prop)) {
             style = prop.apply(this, arguments);
           }
 
           if (prop && prop.lineargradient) {
             var style = me.ctx.createLinearGradient(nodeData.startOutPoint.x, nodeData.startOutPoint.y, nodeData.endOutPoint.x, nodeData.endOutPoint.y);
 
-            _$1.each(prop.lineargradient, function (item, i) {
+            _.each(prop.lineargradient, function (item, i) {
               style.addColorStop(item.position, item.color);
             });
           }
@@ -26140,6 +26206,65 @@ var Chartx = (function () {
           detail: '进度条的填充色',
           documentation: '可以是单个颜色，也可以是数组，也可以是一个函数,也可以是个lineargradient',
           default: null
+        }
+      }
+    },
+    label: {
+      detail: '进度值文本',
+      propertys: {
+        enabled: {
+          detail: '是否启用label',
+          default: 'true'
+        },
+        fontColor: {
+          detail: 'label颜色',
+          default: '#666'
+        },
+        fontSize: {
+          detail: 'label文本大小',
+          default: 26
+        },
+        format: {
+          detail: 'label格式化处理函数',
+          default: function _default(val, nodeData) {
+            return val.toFixed(0);
+          }
+        },
+        lineWidth: {
+          detail: 'label文本描边线宽',
+          default: null
+        },
+        strokeStyle: {
+          detail: 'label描边颜色',
+          default: null
+        },
+        rotation: {
+          detail: 'label旋转角度',
+          default: 0
+        },
+        align: {
+          detail: 'label align',
+          default: 'center',
+          values: ['left', 'center', 'right']
+        },
+        //left center right
+        verticalAlign: {
+          detail: 'label verticalAlign',
+          default: 'middle',
+          values: ['top', 'middle', 'bottom']
+        },
+        //top middle bottom
+        position: {
+          detail: 'label位置',
+          default: 'origin'
+        },
+        offsetX: {
+          detail: 'label在x方向的偏移量',
+          default: 0
+        },
+        offsetY: {
+          detail: 'label在y方向的偏移量',
+          default: 0
         }
       }
     },

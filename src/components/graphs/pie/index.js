@@ -95,7 +95,7 @@ export default class PieGraphs extends GraphsBase
      */
     draw( opt )
     {
-        
+    
         !opt && (opt ={});
 
         _.extend(true, this, opt);
