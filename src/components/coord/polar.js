@@ -295,7 +295,6 @@ debugger
         var vw = this.width;
         var vh = this.height;
      
-
         //然后根据allAngle startAngle来实现计算出这个polar的和模型 高宽比例
         //if( this.allAngle % 360 != 0 ){
 

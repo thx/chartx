@@ -16428,59 +16428,74 @@ var Chartx = (function () {
                 me.barsSp.addChild(groupH);
                 groupH.iNode = h;
               }
-              //以及显示selected状态
+              var preGraphs = 0;
+              var barGraphs = me.app.getComponents({
+                name: 'graphs',
+                type: 'bar'
+              });
 
-              var groupRegion;
-              var groupRegionWidth = itemW * me.select.width;
+              _.each(barGraphs, function (graph, i) {
+                if (graph == me) {
+                  preGraphs = i;
+                }
+              });
 
-              if (me.select.width > 1) {
-                //说明是具体指
-                groupRegionWidth = me.select.width;
-              }
+              if (!preGraphs) {
+                //只有preGraphs == 0，第一组graphs的时候才需要加载这个region
+                //这个x轴单元 nodes的分组，添加第一个rect用来接受一些事件处理
+                //以及显示selected状态
+                var groupRegion;
+                var groupRegionWidth = itemW * me.select.width;
 
-              if (h <= preDataLen - 1) {
-                groupRegion = groupH.getChildById("group_region_" + h);
-                groupRegion.context.width = groupRegionWidth;
-                groupRegion.context.x = itemW * h + (itemW - groupRegionWidth) / 2;
-              } else {
-                groupRegion = new Rect$3({
-                  id: "group_region_" + h,
-                  pointChkPriority: false,
-                  hoverClone: false,
-                  xyToInt: false,
-                  context: {
-                    x: itemW * h + (itemW - groupRegionWidth) / 2,
-                    y: -me.height,
-                    width: groupRegionWidth,
-                    height: me.height,
-                    fillStyle: me._getGroupRegionStyle(h),
-                    globalAlpha: _.indexOf(me.select.inds, me.dataFrame.range.start + h) > -1 ? me.select.alpha : 0
-                  }
-                });
-                groupH.addChild(groupRegion);
-                groupRegion.iNode = h; //触发注册的事件
+                if (me.select.width > 1) {
+                  //说明是具体指
+                  groupRegionWidth = me.select.width;
+                }
 
-                groupRegion.on(types.get(), function (e) {
-                  e.eventInfo = {
-                    iNode: this.iNode //TODO:这里设置了的话，会导致多graphs里获取不到别的graphs的nodes信息了
-                    //nodes : me.getNodesAt( this.iNode ) 
-
-                  };
-
-                  if (me.select.enabled && e.type == me.select.triggerEventType) {
-                    //如果开启了图表的选中交互
-                    var ind = me.dataFrame.range.start + this.iNode;
-
-                    if (_.indexOf(me.select.inds, ind) > -1) {
-                      //说明已经选中了
-                      me.unselectAt(ind);
-                    } else {
-                      me.selectAt(ind);
+                if (h <= preDataLen - 1) {
+                  groupRegion = groupH.getChildById("group_region_" + h);
+                  groupRegion.context.width = groupRegionWidth;
+                  groupRegion.context.x = itemW * h + (itemW - groupRegionWidth) / 2;
+                } else {
+                  groupRegion = new Rect$3({
+                    id: "group_region_" + h,
+                    pointChkPriority: false,
+                    hoverClone: false,
+                    xyToInt: false,
+                    context: {
+                      x: itemW * h + (itemW - groupRegionWidth) / 2,
+                      y: -me.height,
+                      width: groupRegionWidth,
+                      height: me.height,
+                      fillStyle: me._getGroupRegionStyle(h),
+                      globalAlpha: _.indexOf(me.select.inds, me.dataFrame.range.start + h) > -1 ? me.select.alpha : 0
                     }
-                  }
+                  });
+                  groupH.addChild(groupRegion);
+                  groupRegion.iNode = h; //触发注册的事件
 
-                  me.app.fire(e.type, e);
-                });
+                  groupRegion.on(types.get(), function (e) {
+                    e.eventInfo = {
+                      iNode: this.iNode //TODO:这里设置了的话，会导致多graphs里获取不到别的graphs的nodes信息了
+                      //nodes : me.getNodesAt( this.iNode ) 
+
+                    };
+
+                    if (me.select.enabled && e.type == me.select.triggerEventType) {
+                      //如果开启了图表的选中交互
+                      var ind = me.dataFrame.range.start + this.iNode;
+
+                      if (_.indexOf(me.select.inds, ind) > -1) {
+                        //说明已经选中了
+                        me.unselectAt(ind);
+                      } else {
+                        me.selectAt(ind);
+                      }
+                    }
+
+                    me.app.fire(e.type, e);
+                  });
+                }
               }
             } else {
               groupH = me.barsSp.getChildById("barGroup_" + h);
@@ -16579,7 +16594,6 @@ var Chartx = (function () {
                 });
                 rectEl.field = nodeData.field;
                 groupH.addChild(rectEl);
-                console.log(rectEl.id + "|" + nodeData.value);
                 rectEl.on(types.get(), function (e) {
                   e.eventInfo = {
                     trigger: me.node,

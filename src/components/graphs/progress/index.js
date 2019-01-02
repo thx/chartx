@@ -138,7 +138,6 @@ export default class Progress extends GraphsBase
 
         this.sprite.context.x = this.origin.x;
         this.sprite.context.y = this.origin.y;
-
     }
 
     _trimGraphs( scale )
