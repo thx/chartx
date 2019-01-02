@@ -458,6 +458,7 @@ export default class BarGraphs extends GraphsBase
                         });
                         rectEl.field = nodeData.field;
                         groupH.addChild(rectEl);
+console.log( rectEl.id +"|"+ nodeData.value )
                         rectEl.on(event.types.get(), function(e) {
                             e.eventInfo = {
                                 trigger : me.node,
@@ -466,6 +467,7 @@ export default class BarGraphs extends GraphsBase
                             
                             me.app.fire( e.type, e );
                         });
+                        
                     };
 
                     rectEl.finalPos = finalPos;

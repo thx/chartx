@@ -215,7 +215,7 @@ export default class extends coorBase
 
         this.rAxis.dataSection = this._getRDataSection();
         this.aAxis.data = this.app.dataFrame.getFieldData( this.aAxis.field );
-
+debugger
         this._setAAxisAngleList();
 
         if( this.grid.enabled ){
@@ -608,9 +608,8 @@ export default class extends coorBase
     {
         var r = 0;
         var maxNum = _.max( this.rAxis.dataSection );
-        var minNum = 0; //Math.min( this.rAxis.dataSection );
-        var _r = parseInt( Math.max( this.width, this.height ) / 2 );
-
+        var minNum = 0;
+        var _r = parseInt( Math.min( this.width, this.height ) / 2 );
         r = _r * ( (num-minNum) / (maxNum-minNum) );
         return r;
     }

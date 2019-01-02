@@ -3505,7 +3505,6 @@ var Chartx = (function () {
 
       this._opt = _$1.clone(opt);
       this.dataOrg = dataOrg || [];
-      this.sectionHandler = null;
       this.dataSection = []; //从原数据 dataOrg 中 结果 datasection 重新计算后的数据
 
       this.dataSectionLayout = []; //和dataSection一一对应的，每个值的pos，//get xxx OfPos的时候，要先来这里做一次寻找
@@ -3657,14 +3656,7 @@ var Chartx = (function () {
                 al--;
               }
             }
-
-            if (_$1.isFunction(this.sectionHandler)) {
-              this.dataSection = this.sectionHandler(arr);
-            }
-
-            if (!this.dataSection || !this.dataSection.length) {
-              this.dataSection = dataSection$1.section(arr, 3);
-            }
+            this.dataSection = dataSection$1.section(arr, 3);
 
             if (this.symmetric) {
               //可能得到的区间是偶数， 非对称，强行补上
@@ -5980,15 +5972,17 @@ var Chartx = (function () {
 
   		// Tweens are updated in "batches". If you add a new tween during an update, then the
   		// new tween will be updated in the next batch.
-  		// If you remove a tween during an update, it will normally still be updated. However,
+  		// If you remove a tween during an update, it may or may not be updated. However,
   		// if the removed tween was added during the current batch, then it will not be updated.
   		while (tweenIds.length > 0) {
   			this._tweensAddedDuringUpdate = {};
 
   			for (var i = 0; i < tweenIds.length; i++) {
 
-  				if (this._tweens[tweenIds[i]].update(time) === false) {
-  					this._tweens[tweenIds[i]]._isPlaying = false;
+  				var tween = this._tweens[tweenIds[i]];
+
+  				if (tween && tween.update(time) === false) {
+  					tween._isPlaying = false;
 
   					if (!preserve) {
   						delete this._tweens[tweenIds[i]];
@@ -6169,6 +6163,11 @@ var Chartx = (function () {
 
   	},
 
+  	group: function group(group) {
+  		this._group = group;
+  		return this;
+  	},
+
   	delay: function delay(amount) {
 
   		this._delayTime = amount;
@@ -6190,23 +6189,23 @@ var Chartx = (function () {
 
   	},
 
-  	yoyo: function yoyo(yoyo) {
+  	yoyo: function yoyo(yy) {
 
-  		this._yoyo = yoyo;
+  		this._yoyo = yy;
   		return this;
 
   	},
 
-  	easing: function easing(easing) {
+  	easing: function easing(eas) {
 
-  		this._easingFunction = easing;
+  		this._easingFunction = eas;
   		return this;
 
   	},
 
-  	interpolation: function interpolation(interpolation) {
+  	interpolation: function interpolation(inter) {
 
-  		this._interpolationFunction = interpolation;
+  		this._interpolationFunction = inter;
   		return this;
 
   	},
@@ -6266,7 +6265,7 @@ var Chartx = (function () {
   		}
 
   		elapsed = (time - this._startTime) / this._duration;
-  		elapsed = elapsed > 1 ? 1 : elapsed;
+  		elapsed = (this._duration === 0 || elapsed > 1) ? 1 : elapsed;
 
   		value = this._easingFunction(elapsed);
 
@@ -7312,7 +7311,7 @@ var Chartx = (function () {
 
       var me = _assertThisInitialized(_assertThisInitialized(_this));
 
-      _this.on("destory", function () {
+      _this.on("destroy", function () {
         me.cleanAnimates();
       });
 
@@ -8182,7 +8181,8 @@ var Chartx = (function () {
         for (var i = this.children.length - 1; i >= 0; i--) {
           var child = this.children[i];
 
-          if (child == null || !child._eventEnabled && !child.dragEnabled || !child.context.$model.visible) {
+          if (child == null || !child.context.$model.visible) {
+            //不管是集合还是非集合，如果不显示的都不接受点击检测
             continue;
           }
 
@@ -8196,7 +8196,10 @@ var Chartx = (function () {
               }
             }
           } else {
-            //非集合，可以开始做getChildInPoint了
+            if (!child._eventEnabled && !child.dragEnabled) {
+              continue;
+            }
+
             if (child.getChildInPoint(point)) {
               result.push(child);
 
@@ -8469,6 +8472,7 @@ var Chartx = (function () {
           ctx.lineWidth = data.lineWidth;
 
           if (data.type === SHAPES.POLY) {
+            //只第一次需要beginPath()
             !i && ctx.beginPath();
             this.renderPolygon(shape.points, shape.closed, ctx, isClip);
 
@@ -15210,6 +15214,7 @@ var Chartx = (function () {
 
         this.rAxis.dataSection = this._getRDataSection();
         this.aAxis.data = this.app.dataFrame.getFieldData(this.aAxis.field);
+        debugger;
 
         this._setAAxisAngleList();
 
@@ -15623,9 +15628,9 @@ var Chartx = (function () {
 
         var maxNum = _.max(this.rAxis.dataSection);
 
-        var minNum = 0; //Math.min( this.rAxis.dataSection );
+        var minNum = 0;
 
-        var _r = parseInt(Math.max(this.width, this.height) / 2);
+        var _r = parseInt(Math.min(this.width, this.height) / 2);
 
         r = _r * ((num - minNum) / (maxNum - minNum));
         return r;
@@ -16574,6 +16579,7 @@ var Chartx = (function () {
                 });
                 rectEl.field = nodeData.field;
                 groupH.addChild(rectEl);
+                console.log(rectEl.id + "|" + nodeData.value);
                 rectEl.on(types.get(), function (e) {
                   e.eventInfo = {
                     trigger: me.node,
@@ -19002,6 +19008,7 @@ var Chartx = (function () {
       key: "cancelCheckedSec",
       value: function cancelCheckedSec(sec, callback) {
         var selectedSec = sec._selectedSec;
+        debugger;
         selectedSec.animate({
           startAngle: selectedSec.context.endAngle - 0.5
         }, {
@@ -28788,4 +28795,3 @@ var Chartx = (function () {
   return chartx;
 
 }());
-//# sourceMappingURL=chartx.js.map

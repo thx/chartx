@@ -38,11 +38,11 @@
   },
   "dependencies": {
     "mmvis": "^0.0.27",
-    "canvax": "2.0.16",
+    "canvax": "^2.0.18",
     "fmin": "0.0.2"
   },
   "scripts": {
     "build": "rollup -c",
-    "dev": "rollup -c -m -w"
+    "dev": "rollup -c -w"
   }
 }
