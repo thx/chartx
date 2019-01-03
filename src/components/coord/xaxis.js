@@ -7,6 +7,10 @@ const Line = Canvax.Shapes.Line;
 export default class xAxis extends axis
 {
     static defaultProps = {
+        layoutType : {
+            detail : '布局方式',
+            default: 'rule'
+        },
         width : {
             detail : '轴宽',
             default: 0
@@ -157,63 +161,30 @@ export default class xAxis extends axis
         this._txts = [];
         this._axisLine = null;
     
-
-        /*
-        this.tickLine = {
-            enabled    : 1, //是否有刻度线
-            lineWidth  : 1, //线宽
-            lineLength : 4, //线长
-            offset   : 2,
-            strokeStyle: '#cccccc'
-        };
-        this.axisLine = {
-            position   : "default",//位置，default在align的位置（left，right），可选 "center" 和 具体的值
-            enabled    : 1, //是否有轴线
-            lineWidth  : 1,
-            strokeStyle: '#cccccc'
-        };
-        this.label = {
-            enabled    : 1,
-            fontColor  : '#999',
-            fontSize   : 12,
-            rotation   : 0,
-            format     : null,
-            offset   : 2,
-            textAlign  : "center",
-            lineHeight : 1,
-            evade      : true  //是否开启逃避检测，目前的逃避只是隐藏
-        };
-        */
-
-        if( opt.isH && (!opt.label || opt.label.rotaion === undefined) ){
-            //如果是横向直角坐标系图
-            this.label.rotation = 90;
-        };
+        this._formatTextSection = []; //dataSection的值format后一一对应的值
+        this._textElements = []; //_formatTextSection中每个文本对应的canvax.shape.Text对象
 
         this.pos = {
             x: 0,
             y: 0
         };
-
-        this._formatTextSection = []; //dataSection的值format后一一对应的值
-        this._textElements = []; //_formatTextSection中每个文本对应的canvax.shape.Text对象
-
         this.layoutData = []; //{x:100, value:'1000',visible:true}
-
         this.sprite = null;
-
         this.isH = false; //是否为横向转向的x轴
 
-        this.layoutType = "rule"; // rule（均分，起点在0） , peak（均分，起点在均分单位的中心）, proportion（实际数据真实位置，数据一定是number）
+        _.extend( true, this, getDefaultProps( new.target.defaultProps ) );
 
-        this.init(opt, data);
-
-
+        this.init(opt);
     }
 
-    init(opt, data) 
+    init(opt) 
     {
         _.extend(true , this, opt);
+
+        if( opt.isH && (!opt.label || opt.label.rotaion === undefined) ){
+            //如果是横向直角坐标系图
+            this.label.rotation = 90;
+        };
 
         this._initHandle();
 
