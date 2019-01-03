@@ -431,7 +431,7 @@ export default class yAxis extends axis
                 };
             }
         };
-
+        
         //把 rulesSprite.children中多余的给remove掉
         if( me.rulesSprite.children.length > arr.length ){
             for( var al = arr.length,pl = me.rulesSprite.children.length;al<pl;al++  ){

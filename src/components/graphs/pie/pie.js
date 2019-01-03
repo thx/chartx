@@ -285,7 +285,7 @@ export default class Pie extends event.Dispatcher
     cancelCheckedSec (sec, callback) 
     {
         var selectedSec = sec._selectedSec;
-        
+        debugger
         selectedSec.animate({
             startAngle: selectedSec.context.endAngle - 0.5
         }, {

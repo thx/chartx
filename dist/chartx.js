@@ -821,7 +821,7 @@ var Chartx = (function () {
             }
 
             if (arr.length == 1) {
-              arr.push(arr[0] * 2);
+              arr.push(arr[0] * .5);
             }
 
             if (this.waterLine) {
@@ -1661,7 +1661,7 @@ var Chartx = (function () {
     return dataFrame;
   }
 
-  var RESOLUTION = window.devicePixelRatio || 1;
+  var RESOLUTION = typeof window !== 'undefined' ? window.devicePixelRatio : 1;
 
   var addOrRmoveEventHand = function addOrRmoveEventHand(domHand, ieHand) {
     if (document[domHand]) {
@@ -1842,6 +1842,8 @@ var Chartx = (function () {
   };
 
   //图表皮肤
+  var globalAnimationEnabled = true; //是否开启全局的动画开关
+
   var global$1 = {
     create: function create(el, _data, _opt) {
       var chart = null;
@@ -2071,6 +2073,12 @@ var Chartx = (function () {
       var _comp = this._getComponentModules(dimension).modules[name];
 
       return _comp ? _comp[type] : undefined;
+    },
+    setAnimationEnabled: function setAnimationEnabled(bool) {
+      globalAnimationEnabled = bool;
+    },
+    getAnimationEnabled: function getAnimationEnabled(bool) {
+      return globalAnimationEnabled;
     }
   };
 
@@ -4242,7 +4250,7 @@ var Chartx = (function () {
   * 这样的结构化数据格式。
   */
 
-  var RESOLUTION$1 = window.devicePixelRatio || 1;
+  var RESOLUTION$1 = typeof window !== 'undefined' ? window.devicePixelRatio : 1;
 
   var addOrRmoveEventHand$1 = function addOrRmoveEventHand(domHand, ieHand) {
     if (document[domHand]) {
@@ -4368,8 +4376,278 @@ var Chartx = (function () {
   /**
    * 系统皮肤
    */
+  var _colors$1 = ["#ff8533", "#73ace6", "#82d982", "#e673ac", "#cd6bed", "#8282d9", "#c0e650", "#e6ac73", "#6bcded", "#73e6ac", "#ed6bcd", "#9966cc"];
+  var globalTheme$1 = {
+    colors: _colors$1,
+    set: function set(colors) {
+      this.colors = colors;
+      /*
+      var me = this;
+      _.each( colors, function( color , i ){
+          me.colors[i] = color;
+      } );
+      */
+
+      return this.colors;
+    },
+    get: function get() {
+      return this.colors;
+    }
+  };
+
+  var cloneOptions$1 = function cloneOptions(opt) {
+    return _$1.clone(opt);
+  };
+
+  var cloneData$1 = function cloneData(data) {
+    return JSON.parse(JSON.stringify(data));
+  };
+
+  var is3dOpt$1 = function is3dOpt(opt) {
+    var chartx3dCoordTypes = ["box", "polar3d"];
+    return opt.coord && opt.coord.type && chartx3dCoordTypes.indexOf(opt.coord.type) > -1;
+  };
 
   //图表皮肤
+  var globalAnimationEnabled$1 = true; //是否开启全局的动画开关
+
+  var global$2 = {
+    create: function create(el, _data, _opt) {
+      var chart = null;
+      var me = this;
+      var data = cloneData$1(_data);
+      var opt = cloneOptions$1(_opt);
+
+      var _destroy = function _destroy() {
+        me.instances[chart.id] = null;
+        delete me.instances[chart.id];
+      }; //这个el如果之前有绘制过图表，那么就要在instances中找到图表实例，然后销毁
+
+
+      var chart_id = $$1.query(el).getAttribute("chart_id");
+
+      if (chart_id != undefined) {
+        var _chart = me.instances[chart_id];
+
+        if (_chart) {
+          _chart.destroy();
+
+          _chart.off && _chart.off("destroy", _destroy);
+        }
+        delete me.instances[chart_id];
+      }
+
+      var dimension = 2;
+
+      if (is3dOpt$1(_opt)) {
+        dimension = 3;
+      }
+
+      var componentModules = me._getComponentModules(dimension); //如果用户没有配置coord，说明这个图表是一个默认目标系的图表，比如标签云
+
+
+      var Chart = me._getComponentModule('chart', dimension); //try {
+
+
+      chart = new Chart(el, data, opt, componentModules);
+
+      if (chart) {
+        chart.draw();
+        me.instances[chart.id] = chart;
+        chart.on("destroy", _destroy);
+      }
+      //    throw "Chatx Error：" + err
+      //};
+
+      return chart;
+    },
+    setGlobalTheme: function setGlobalTheme(colors) {
+      globalTheme$1.set(colors);
+    },
+    getGlobalTheme: function getGlobalTheme() {
+      return globalTheme$1.get();
+    },
+    instances: {},
+    getChart: function getChart(chartId) {
+      return this.instances[chartId];
+    },
+    resize: function resize() {
+      //调用全局的这个resize方法，会把当前所有的 chart instances 都执行一遍resize
+      for (var c in this.instances) {
+        this.instances[c].resize();
+      }
+    },
+    //第二个参数是用户要用来覆盖chartpark中的配置的options
+    getOptions: function getOptions(chartPark_cid, userOptions) {
+      //chartPark_cid,chartpark中的图表id
+      if (!this.options[chartPark_cid]) {
+        return userOptions || {};
+      }
+      var JsonSerialize = {
+        prefix: '[[JSON_FUN_PREFIX_',
+        suffix: '_JSON_FUN_SUFFIX]]'
+      };
+
+      var parse = function parse(string) {
+        return JSON.parse(string, function (key, value) {
+          if (typeof value === 'string' && value.indexOf(JsonSerialize.suffix) > 0 && value.indexOf(JsonSerialize.prefix) == 0) {
+            return new Function('return ' + value.replace(JsonSerialize.prefix, '').replace(JsonSerialize.suffix, ''))();
+          }
+          return value;
+        }) || {};
+      };
+
+      var opt = parse(decodeURIComponent(this.options[chartPark_cid] || {}));
+
+      if (userOptions) {
+        opt = _$1.extend(true, opt, userOptions);
+      }
+      return opt;
+    },
+    components: {
+      c_2d: {
+        /*
+        modules:{
+            coord : {
+                empty : ..,
+                rect  : ..,
+                ...
+            },
+            graphs : {
+                //empty : .., //一般只有coord才会有empty
+                bar   : ..,
+                ...
+            }
+        },
+        get: function( name, type ){}
+        */
+      },
+      c_3d: {//所有3d组件,同上
+      }
+    },
+    _getComponentModules: function _getComponentModules(dimension) {
+      var comps = this.components.c_2d;
+
+      if (dimension == 3) {
+        comps = this.components.c_3d;
+      }
+
+      if (!comps.modules) {
+        comps.modules = {};
+      }
+
+      if (!comps.get) {
+        comps.get = function (name, type) {
+          if (!type) {
+            type = "empty";
+          }
+          name = name.toLowerCase();
+          type = type.toLowerCase();
+          var _module = comps.modules[name];
+
+          if (_module && _module[type]) {
+            return _module[type];
+          }
+        };
+      }
+      return comps;
+    },
+
+    /**
+     * @param {compModule} 要注册进去的模块名称
+     * @param {name} 要获取的comp名称
+     * @param { dimension,type } 后面可以传传两个参数 
+     * @param { dimension } 如果有四个参数，那么第三个肯定是type，第四个肯定是dimension 
+     */
+    registerComponent: function registerComponent(compModule, name) {
+      var dimension = 2;
+      var type = "empty";
+
+      if (arguments.length == 3) {
+        var arg2 = arguments[2];
+
+        if (_$1.isNumber(arg2)) {
+          if (arg2 == 3) {
+            dimension = 3;
+          }
+        }
+
+        if (_$1.isString(arg2)) {
+          type = arg2;
+        }
+      }
+
+      if (arguments.length == 4) {
+        //那么肯定是有传 type  dimension 两个值
+        type = arguments[2];
+
+        if (arguments[3] == 3) {
+          dimension = 3;
+        }
+      }
+
+      var comps = this._getComponentModules(dimension).modules;
+
+      name = name.toLowerCase();
+      type = type.toLowerCase();
+      var _comp = comps[name];
+
+      if (!_comp) {
+        _comp = comps[name] = {};
+      }
+
+      if (!_comp[type]) {
+        _comp[type] = compModule;
+      }
+      return comps;
+    },
+
+    /**
+     * 
+     * @param {name} 要获取的comp名称
+     * @param { dimension,type } 后面可以传传两个参数 
+     * @param { dimension } 如果有三个参数，那么第二个肯定是type，第三个肯定是dimension 
+     */
+    _getComponentModule: function _getComponentModule(name) {
+      var dimension = 2;
+      var type = "empty";
+
+      if (arguments.length == 2) {
+        var arg1 = arguments[1];
+
+        if (_$1.isNumber(arg1)) {
+          if (arg1 == 3) {
+            dimension = 3;
+          }
+        }
+
+        if (_$1.isString(arg1)) {
+          type = arg1;
+        }
+      }
+
+      if (arguments.length == 3) {
+        //那么肯定是有传 type  dimension 两个值
+        type = arguments[1];
+
+        if (arguments[2] == 3) {
+          dimension = 3;
+        }
+      }
+      name = name.toLowerCase();
+      type = type.toLowerCase();
+
+      var _comp = this._getComponentModules(dimension).modules[name];
+
+      return _comp ? _comp[type] : undefined;
+    },
+    setAnimationEnabled: function setAnimationEnabled(bool) {
+      globalAnimationEnabled$1 = bool;
+    },
+    getAnimationEnabled: function getAnimationEnabled(bool) {
+      return globalAnimationEnabled$1;
+    }
+  };
 
   //十六进制颜色值的正则表达式
 
@@ -5606,7 +5884,7 @@ var Chartx = (function () {
     _pixelCtx: null,
     __emptyFunc: function __emptyFunc() {},
     //retina 屏幕优化
-    _devicePixelRatio: window.devicePixelRatio || 1,
+    _devicePixelRatio: typeof window !== 'undefined' ? window.devicePixelRatio : 1,
     _UID: 0,
     //该值为向上的自增长整数值
     getUID: function getUID() {
@@ -5625,7 +5903,6 @@ var Chartx = (function () {
       if (window.FlashCanvas && FlashCanvas.initElement) {
         FlashCanvas.initElement(canvas);
       }
-
       return canvas;
     },
 
@@ -5980,15 +6257,17 @@ var Chartx = (function () {
 
   		// Tweens are updated in "batches". If you add a new tween during an update, then the
   		// new tween will be updated in the next batch.
-  		// If you remove a tween during an update, it will normally still be updated. However,
+  		// If you remove a tween during an update, it may or may not be updated. However,
   		// if the removed tween was added during the current batch, then it will not be updated.
   		while (tweenIds.length > 0) {
   			this._tweensAddedDuringUpdate = {};
 
   			for (var i = 0; i < tweenIds.length; i++) {
 
-  				if (this._tweens[tweenIds[i]].update(time) === false) {
-  					this._tweens[tweenIds[i]]._isPlaying = false;
+  				var tween = this._tweens[tweenIds[i]];
+
+  				if (tween && tween.update(time) === false) {
+  					tween._isPlaying = false;
 
   					if (!preserve) {
   						delete this._tweens[tweenIds[i]];
@@ -6169,6 +6448,11 @@ var Chartx = (function () {
 
   	},
 
+  	group: function group(group) {
+  		this._group = group;
+  		return this;
+  	},
+
   	delay: function delay(amount) {
 
   		this._delayTime = amount;
@@ -6190,23 +6474,23 @@ var Chartx = (function () {
 
   	},
 
-  	yoyo: function yoyo(yoyo) {
+  	yoyo: function yoyo(yy) {
 
-  		this._yoyo = yoyo;
+  		this._yoyo = yy;
   		return this;
 
   	},
 
-  	easing: function easing(easing) {
+  	easing: function easing(eas) {
 
-  		this._easingFunction = easing;
+  		this._easingFunction = eas;
   		return this;
 
   	},
 
-  	interpolation: function interpolation(interpolation) {
+  	interpolation: function interpolation(inter) {
 
-  		this._interpolationFunction = interpolation;
+  		this._interpolationFunction = inter;
   		return this;
 
   	},
@@ -6266,7 +6550,7 @@ var Chartx = (function () {
   		}
 
   		elapsed = (time - this._startTime) / this._duration;
-  		elapsed = elapsed > 1 ? 1 : elapsed;
+  		elapsed = (this._duration === 0 || elapsed > 1) ? 1 : elapsed;
 
   		value = this._easingFunction(elapsed);
 
@@ -6829,18 +7113,24 @@ var Chartx = (function () {
    */
 
   var lastTime = 0;
-  var vendors = ['ms', 'moz', 'webkit', 'o'];
+  var requestAnimationFrame, cancelAnimationFrame;
 
-  for (var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
-    window.requestAnimationFrame = window[vendors[x] + 'RequestAnimationFrame'];
-    window.cancelAnimationFrame = window[vendors[x] + 'CancelAnimationFrame'] || window[vendors[x] + 'CancelRequestAnimationFrame'];
+  if (typeof window !== 'undefined') {
+    requestAnimationFrame = window.requestAnimationFrame;
+    cancelAnimationFrame = window.cancelAnimationFrame;
+    var vendors = ['ms', 'moz', 'webkit', 'o'];
+
+    for (var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
+      requestAnimationFrame = window.requestAnimationFrame = window[vendors[x] + 'RequestAnimationFrame'];
+      cancelAnimationFrame = window.cancelAnimationFrame = window[vendors[x] + 'CancelAnimationFrame'] || window[vendors[x] + 'CancelRequestAnimationFrame'];
+    }
   }
 
-  if (!window.requestAnimationFrame) {
-    window.requestAnimationFrame = function (callback, element) {
+  if (!requestAnimationFrame) {
+    requestAnimationFrame = function requestAnimationFrame(callback, element) {
       var currTime = new Date().getTime();
       var timeToCall = Math.max(0, 16 - (currTime - lastTime));
-      var id = window.setTimeout(function () {
+      var id = setTimeout(function () {
         callback(currTime + timeToCall);
       }, timeToCall);
       lastTime = currTime + timeToCall;
@@ -6848,8 +7138,8 @@ var Chartx = (function () {
     };
   }
 
-  if (!window.cancelAnimationFrame) {
-    window.cancelAnimationFrame = function (id) {
+  if (!cancelAnimationFrame) {
+    cancelAnimationFrame = function cancelAnimationFrame(id) {
       clearTimeout(id);
     };
   }
@@ -6936,6 +7226,12 @@ var Chartx = (function () {
 
     }, options);
 
+    if (!global$2.getAnimationEnabled()) {
+      //如果全局动画被禁用，那么下面两项强制设置为0
+      //TODO:其实应该直接执行回调函数的
+      opt.duration = 0;
+      opt.delay = 0;
+    }
     var tween = {};
     var tid = "tween_" + Utils.getUID();
     opt.id && (tid = tid + "_" + opt.id);
@@ -7218,7 +7514,7 @@ var Chartx = (function () {
 
   var settings = {
     //设备分辨率
-    RESOLUTION: window.devicePixelRatio || 1,
+    RESOLUTION: typeof window !== 'undefined' ? window.devicePixelRatio : 1,
 
     /**
      * Target frames per millisecond.
@@ -7312,7 +7608,7 @@ var Chartx = (function () {
 
       var me = _assertThisInitialized(_assertThisInitialized(_this));
 
-      _this.on("destory", function () {
+      _this.on("destroy", function () {
         me.cleanAnimates();
       });
 
@@ -8182,7 +8478,8 @@ var Chartx = (function () {
         for (var i = this.children.length - 1; i >= 0; i--) {
           var child = this.children[i];
 
-          if (child == null || !child._eventEnabled && !child.dragEnabled || !child.context.$model.visible) {
+          if (child == null || !child.context.$model.visible) {
+            //不管是集合还是非集合，如果不显示的都不接受点击检测
             continue;
           }
 
@@ -8196,7 +8493,10 @@ var Chartx = (function () {
               }
             }
           } else {
-            //非集合，可以开始做getChildInPoint了
+            if (!child._eventEnabled && !child.dragEnabled) {
+              continue;
+            }
+
             if (child.getChildInPoint(point)) {
               result.push(child);
 
@@ -8469,7 +8769,8 @@ var Chartx = (function () {
           ctx.lineWidth = data.lineWidth;
 
           if (data.type === SHAPES.POLY) {
-            !i && ctx.beginPath();
+            //只第一次需要beginPath()
+            ctx.beginPath();
             this.renderPolygon(shape.points, shape.closed, ctx, isClip);
 
             if (fill) {
@@ -15748,10 +16049,9 @@ var Chartx = (function () {
 
         var maxNum = _.max(this.rAxis.dataSection);
 
-        var minNum = 0; //Math.min( this.rAxis.dataSection );
+        var minNum = 0; //var _r = parseInt( Math.min( this.width, this.height ) / 2 );
 
-        var _r = parseInt(Math.max(this.width, this.height) / 2);
-
+        var _r = this.radius;
         r = _r * ((num - minNum) / (maxNum - minNum));
         return r;
       } //获取在r的半径上面，沿aAxis的points
@@ -16548,59 +16848,74 @@ var Chartx = (function () {
                 me.barsSp.addChild(groupH);
                 groupH.iNode = h;
               }
-              //以及显示selected状态
+              var preGraphs = 0;
+              var barGraphs = me.app.getComponents({
+                name: 'graphs',
+                type: 'bar'
+              });
 
-              var groupRegion;
-              var groupRegionWidth = itemW * me.select.width;
+              _.each(barGraphs, function (graph, i) {
+                if (graph == me) {
+                  preGraphs = i;
+                }
+              });
 
-              if (me.select.width > 1) {
-                //说明是具体指
-                groupRegionWidth = me.select.width;
-              }
+              if (!preGraphs) {
+                //只有preGraphs == 0，第一组graphs的时候才需要加载这个region
+                //这个x轴单元 nodes的分组，添加第一个rect用来接受一些事件处理
+                //以及显示selected状态
+                var groupRegion;
+                var groupRegionWidth = itemW * me.select.width;
 
-              if (h <= preDataLen - 1) {
-                groupRegion = groupH.getChildById("group_region_" + h);
-                groupRegion.context.width = groupRegionWidth;
-                groupRegion.context.x = itemW * h + (itemW - groupRegionWidth) / 2;
-              } else {
-                groupRegion = new Rect$3({
-                  id: "group_region_" + h,
-                  pointChkPriority: false,
-                  hoverClone: false,
-                  xyToInt: false,
-                  context: {
-                    x: itemW * h + (itemW - groupRegionWidth) / 2,
-                    y: -me.height,
-                    width: groupRegionWidth,
-                    height: me.height,
-                    fillStyle: me._getGroupRegionStyle(h),
-                    globalAlpha: _.indexOf(me.select.inds, me.dataFrame.range.start + h) > -1 ? me.select.alpha : 0
-                  }
-                });
-                groupH.addChild(groupRegion);
-                groupRegion.iNode = h; //触发注册的事件
+                if (me.select.width > 1) {
+                  //说明是具体指
+                  groupRegionWidth = me.select.width;
+                }
 
-                groupRegion.on(types.get(), function (e) {
-                  e.eventInfo = {
-                    iNode: this.iNode //TODO:这里设置了的话，会导致多graphs里获取不到别的graphs的nodes信息了
-                    //nodes : me.getNodesAt( this.iNode ) 
-
-                  };
-
-                  if (me.select.enabled && e.type == me.select.triggerEventType) {
-                    //如果开启了图表的选中交互
-                    var ind = me.dataFrame.range.start + this.iNode;
-
-                    if (_.indexOf(me.select.inds, ind) > -1) {
-                      //说明已经选中了
-                      me.unselectAt(ind);
-                    } else {
-                      me.selectAt(ind);
+                if (h <= preDataLen - 1) {
+                  groupRegion = groupH.getChildById("group_region_" + h);
+                  groupRegion.context.width = groupRegionWidth;
+                  groupRegion.context.x = itemW * h + (itemW - groupRegionWidth) / 2;
+                } else {
+                  groupRegion = new Rect$3({
+                    id: "group_region_" + h,
+                    pointChkPriority: false,
+                    hoverClone: false,
+                    xyToInt: false,
+                    context: {
+                      x: itemW * h + (itemW - groupRegionWidth) / 2,
+                      y: -me.height,
+                      width: groupRegionWidth,
+                      height: me.height,
+                      fillStyle: me._getGroupRegionStyle(h),
+                      globalAlpha: _.indexOf(me.select.inds, me.dataFrame.range.start + h) > -1 ? me.select.alpha : 0
                     }
-                  }
+                  });
+                  groupH.addChild(groupRegion);
+                  groupRegion.iNode = h; //触发注册的事件
 
-                  me.app.fire(e.type, e);
-                });
+                  groupRegion.on(types.get(), function (e) {
+                    e.eventInfo = {
+                      iNode: this.iNode //TODO:这里设置了的话，会导致多graphs里获取不到别的graphs的nodes信息了
+                      //nodes : me.getNodesAt( this.iNode ) 
+
+                    };
+
+                    if (me.select.enabled && e.type == me.select.triggerEventType) {
+                      //如果开启了图表的选中交互
+                      var ind = me.dataFrame.range.start + this.iNode;
+
+                      if (_.indexOf(me.select.inds, ind) > -1) {
+                        //说明已经选中了
+                        me.unselectAt(ind);
+                      } else {
+                        me.selectAt(ind);
+                      }
+                    }
+
+                    me.app.fire(e.type, e);
+                  });
+                }
               }
             } else {
               groupH = me.barsSp.getChildById("barGroup_" + h);
@@ -19127,6 +19442,7 @@ var Chartx = (function () {
       key: "cancelCheckedSec",
       value: function cancelCheckedSec(sec, callback) {
         var selectedSec = sec._selectedSec;
+        debugger;
         selectedSec.animate({
           startAngle: selectedSec.context.endAngle - 0.5
         }, {
@@ -28913,4 +29229,3 @@ var Chartx = (function () {
   return chartx;
 
 }());
-//# sourceMappingURL=chartx.js.map

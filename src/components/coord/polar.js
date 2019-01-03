@@ -295,7 +295,6 @@ export default class extends coorBase
         var vw = this.width;
         var vh = this.height;
      
-
         //然后根据allAngle startAngle来实现计算出这个polar的和模型 高宽比例
         //if( this.allAngle % 360 != 0 ){
 
@@ -608,9 +607,10 @@ export default class extends coorBase
     {
         var r = 0;
         var maxNum = _.max( this.rAxis.dataSection );
-        var minNum = 0; //Math.min( this.rAxis.dataSection );
-        var _r = parseInt( Math.max( this.width, this.height ) / 2 );
+        var minNum = 0;
+        //var _r = parseInt( Math.min( this.width, this.height ) / 2 );
 
+        var _r = this.radius;
         r = _r * ( (num-minNum) / (maxNum-minNum) );
         return r;
     }
