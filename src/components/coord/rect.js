@@ -1,4 +1,4 @@
-import coorBase from "./index"
+import coordBase from "./index"
 import Canvax from "canvax"
 import xAxisConstructor from "./xaxis"
 import yAxisConstructor from "./yaxis"
@@ -7,7 +7,7 @@ import { _,getDefaultProps,event } from "mmvis"
 
 const Rect = Canvax.Shapes.Rect;
 
-export default class extends coorBase
+export default class extends coordBase
 {
     static defaultProps = {
         horizontal : {
@@ -24,8 +24,10 @@ export default class extends coorBase
         }
     } 
 
+
     constructor( opt, app )
     {
+        console.log(new.target.defaultProps);
         super( opt, app );
 
         this.type = "rect";

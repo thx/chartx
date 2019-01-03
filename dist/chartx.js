@@ -1824,7 +1824,7 @@ var Chartx = (function () {
 
     for (var p in dProps) {
       if (!!p.indexOf("_")) {
-        if (!dProps[p].propertys) {
+        if (!dProps[p] || !dProps[p].propertys) {
           //如果这个属性没有子属性了，那么就说明这个已经是叶子节点了
           if (_.isObject(dProps[p]) && !_.isFunction(dProps[p]) && !_.isArray(dProps[p])) {
             target[p] = dProps[p].default;
@@ -2900,11 +2900,10 @@ var Chartx = (function () {
    */
 
 
-  var contains = document.compareDocumentPosition ? function (parent, child) {
+  var contains = document && document.compareDocumentPosition ? function (parent, child) {
     if (!child) {
       return false;
     }
-
     return !!(parent.compareDocumentPosition(child) & 16);
   } : function (parent, child) {
     if (!child) {
@@ -12919,20 +12918,22 @@ var Chartx = (function () {
     return component;
   }(Dispatcher);
 
-  var coorBase =
+  var coordBase =
   /*#__PURE__*/
   function (_Component) {
-    _inherits(coorBase, _Component);
+    _inherits(coordBase, _Component);
 
-    function coorBase(opt, app) {
+    function coordBase(opt, app) {
       var _this;
 
-      _classCallCheck(this, coorBase);
+      _classCallCheck(this, coordBase);
 
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(coorBase).call(this, opt, app));
+      console.log((this instanceof coordBase ? this.constructor : void 0).defaultProps);
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(coordBase).call(this, opt, app));
 
-      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps((this instanceof coorBase ? this.constructor : void 0).defaultProps));
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps((this instanceof coordBase ? this.constructor : void 0).defaultProps));
 
+      debugger;
       _this.name = "coord";
       _this._opt = opt;
       _this.app = app;
@@ -12959,7 +12960,7 @@ var Chartx = (function () {
     } //和原始field结构保持一致，但是对应的field换成 {field: , enabled:...}结构
 
 
-    _createClass(coorBase, [{
+    _createClass(coordBase, [{
       key: "setFieldsMap",
       value: function setFieldsMap(axisExp) {
         var me = this;
@@ -13206,10 +13207,10 @@ var Chartx = (function () {
       }
     }]);
 
-    return coorBase;
+    return coordBase;
   }(component);
 
-  _defineProperty(coorBase, "defaultProps", {
+  _defineProperty(coordBase, "defaultProps", {
     type: {
       detail: '坐标系组件',
       documentation: "坐标系组件，可选值有'rect'（二维直角坐标系）,'polar'（二维极坐标系）,'box'（三维直角坐标系） ",
@@ -14736,14 +14737,15 @@ var Chartx = (function () {
 
   var _default =
   /*#__PURE__*/
-  function (_coorBase) {
-    _inherits(_default, _coorBase);
+  function (_coordBase) {
+    _inherits(_default, _coordBase);
 
     function _default(opt, app) {
       var _this;
 
       _classCallCheck(this, _default);
 
+      console.log((this instanceof _default ? this.constructor : void 0).defaultProps);
       _this = _possibleConstructorReturn(this, _getPrototypeOf(_default).call(this, opt, app));
       _this.type = "rect";
       _this._xAxis = null;
@@ -15320,7 +15322,7 @@ var Chartx = (function () {
     }]);
 
     return _default;
-  }(coorBase);
+  }(coordBase);
 
   _defineProperty(_default, "defaultProps", {
     horizontal: {
@@ -16275,7 +16277,7 @@ var Chartx = (function () {
     }]);
 
     return _default;
-  }(coorBase);
+  }(coordBase);
 
   _defineProperty(_default$1, "defaultProps", {
     allAngle: {

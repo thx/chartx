@@ -52,6 +52,7 @@ export default {
                 ]
             ],
             plugins: [
+                "@babel/plugin-transform-new-target",
                 "@babel/plugin-external-helpers",
                 "@babel/plugin-proposal-class-properties"
             ]

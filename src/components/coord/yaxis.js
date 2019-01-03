@@ -4,6 +4,7 @@ import {axis,_} from "mmvis"
 
 const Line = Canvax.Shapes.Line;
 
+
 export default class yAxis extends axis
 {
 	constructor( opt, data, _coord){

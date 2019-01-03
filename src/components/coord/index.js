@@ -2,7 +2,7 @@ import Component from "../component"
 import Canvax from "canvax"
 import { _,getDefaultProps } from "mmvis"
 
-export default class coorBase extends Component
+export default class coordBase extends Component
 {
     static defaultProps = {
         type : {
@@ -42,9 +42,11 @@ export default class coorBase extends Component
     }
 
 	constructor(opt, app){
+        console.log(new.target.defaultProps);
         super(opt, app);
-        _.extend( true, this, getDefaultProps( new.target.defaultProps ) );
         
+        _.extend( true, this, getDefaultProps( new.target.defaultProps ) );
+        debugger 
         this.name = "coord";
 
         this._opt = opt;
