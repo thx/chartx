@@ -2897,11 +2897,10 @@ function (_Manager) {
  */
 
 
-var contains = document.compareDocumentPosition ? function (parent, child) {
+var contains = document && document.compareDocumentPosition ? function (parent, child) {
   if (!child) {
     return false;
   }
-
   return !!(parent.compareDocumentPosition(child) & 16);
 } : function (parent, child) {
   if (!child) {
