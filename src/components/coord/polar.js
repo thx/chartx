@@ -18,7 +18,7 @@ import Canvax from "canvax"
 import Grid from "./polar/grid"
 import { dataSection,_,getDefaultProps,event } from "mmvis"
 
-export default class extends coorBase
+export default class Polar extends coorBase
 {
     static defaultProps = {
         allAngle : {
@@ -126,7 +126,7 @@ export default class extends coorBase
         super( opt , app );
         this.type  = "polar";
         
-        _.extend( true, this, getDefaultProps( new.target.defaultProps ), this.setDefaultOpt( opt, app ) );
+        _.extend( true, this, getDefaultProps( Polar.defaultProps ), this.setDefaultOpt( opt, app ) );
 
         this.init(opt);
     }

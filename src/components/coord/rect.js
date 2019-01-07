@@ -7,7 +7,7 @@ import { _,getDefaultProps,event } from "mmvis"
 
 const Rect = Canvax.Shapes.Rect;
 
-export default class extends coordBase
+export default class Rect extends coordBase
 {
     static defaultProps = {
         horizontal : {
@@ -27,9 +27,9 @@ export default class extends coordBase
 
     constructor( opt, app )
     {
-        console.log(new.target.defaultProps);
+        
         super( opt, app );
-
+        
         this.type = "rect";
         
         this._xAxis = null;
@@ -39,7 +39,7 @@ export default class extends coordBase
         this._yAxisRight = null;
         this._grid  = null;
 
-        _.extend( true, this, getDefaultProps( new.target.defaultProps ), this.setDefaultOpt( opt, app ) );
+        _.extend( true, this, getDefaultProps( Rect.defaultProps ), this.setDefaultOpt( opt, app ) );
 
         this.init(opt);
     }

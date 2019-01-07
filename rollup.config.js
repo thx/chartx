@@ -18,7 +18,7 @@ export default {
         name : "Chartx",
         format : "iife"
     }
-    /*
+    
     ,{
         file : "dist/cjs.js",
         name : "Chartx",
@@ -36,7 +36,7 @@ export default {
         name : "Chartx",
         format: "umd"
     }
-    */
+    
     ],
     plugins: [
         babel({
@@ -52,9 +52,9 @@ export default {
                 ]
             ],
             plugins: [
-                "@babel/plugin-transform-new-target",
                 "@babel/plugin-external-helpers",
-                "@babel/plugin-proposal-class-properties"
+                "@babel/plugin-proposal-class-properties",
+                "@babel/plugin-transform-new-target",
             ]
         }),
         resolve({ jsnext: true, main: true, browser: true }), 

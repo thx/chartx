@@ -44,6 +44,6 @@
   },
   "scripts": {
     "build": "rollup -c",
-    "dev": "rollup -c -w"
+    "dev": "rollup -c -m -w"
   }
 }

@@ -42,11 +42,10 @@ export default class coordBase extends Component
     }
 
 	constructor(opt, app){
-        console.log(new.target.defaultProps);
-        super(opt, app);
         
-        _.extend( true, this, getDefaultProps( new.target.defaultProps ) );
-        debugger 
+        super(opt, app);
+        _.extend( true, this, getDefaultProps( coordBase.defaultProps ) ); 
+
         this.name = "coord";
 
         this._opt = opt;

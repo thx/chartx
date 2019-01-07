@@ -12928,12 +12928,10 @@ var Chartx = (function () {
 
       _classCallCheck(this, coordBase);
 
-      console.log((this instanceof coordBase ? this.constructor : void 0).defaultProps);
       _this = _possibleConstructorReturn(this, _getPrototypeOf(coordBase).call(this, opt, app));
 
-      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps((this instanceof coordBase ? this.constructor : void 0).defaultProps));
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(coordBase.defaultProps));
 
-      debugger;
       _this.name = "coord";
       _this._opt = opt;
       _this.app = app;
@@ -14735,18 +14733,18 @@ var Chartx = (function () {
 
   var Rect$2 = Canvax.Shapes.Rect;
 
-  var _default =
+  var CoordRect =
   /*#__PURE__*/
   function (_coordBase) {
-    _inherits(_default, _coordBase);
+    _inherits(CoordRect, _coordBase);
 
-    function _default(opt, app) {
+    function CoordRect(opt, app) {
       var _this;
 
-      _classCallCheck(this, _default);
+      _classCallCheck(this, CoordRect);
 
-      console.log((this instanceof _default ? this.constructor : void 0).defaultProps);
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(_default).call(this, opt, app));
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(CoordRect).call(this, opt, app));
+      console.log(CoordRect.defaultProps);
       _this.type = "rect";
       _this._xAxis = null;
       _this._yAxis = [];
@@ -14754,14 +14752,14 @@ var Chartx = (function () {
       _this._yAxisRight = null;
       _this._grid = null;
 
-      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps((this instanceof _default ? this.constructor : void 0).defaultProps), _this.setDefaultOpt(opt, app));
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps((this instanceof CoordRect ? this.constructor : void 0).defaultProps), _this.setDefaultOpt(opt, app));
 
       _this.init(opt);
 
       return _this;
     }
 
-    _createClass(_default, [{
+    _createClass(CoordRect, [{
       key: "setDefaultOpt",
       value: function setDefaultOpt(coordOpt, app) {
         var coord = {
@@ -15321,10 +15319,10 @@ var Chartx = (function () {
       }
     }]);
 
-    return _default;
+    return CoordRect;
   }(coordBase);
 
-  _defineProperty(_default, "defaultProps", {
+  _defineProperty(CoordRect, "defaultProps", {
     horizontal: {
       detail: '横向翻转坐标系',
       documentation: "横向翻转坐标系",
@@ -15511,27 +15509,27 @@ var Chartx = (function () {
     return polarGrid;
   }(Dispatcher);
 
-  var _default$1 =
+  var Polar$2 =
   /*#__PURE__*/
   function (_coorBase) {
-    _inherits(_default, _coorBase);
+    _inherits(Polar$$1, _coorBase);
 
-    function _default(opt, app) {
+    function Polar$$1(opt, app) {
       var _this;
 
-      _classCallCheck(this, _default);
+      _classCallCheck(this, Polar$$1);
 
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(_default).call(this, opt, app));
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(Polar$$1).call(this, opt, app));
       _this.type = "polar";
 
-      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps((this instanceof _default ? this.constructor : void 0).defaultProps), _this.setDefaultOpt(opt, app));
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(Polar$$1.defaultProps), _this.setDefaultOpt(opt, app));
 
       _this.init(opt);
 
       return _this;
     }
 
-    _createClass(_default, [{
+    _createClass(Polar$$1, [{
       key: "setDefaultOpt",
       value: function setDefaultOpt(coordOpt, app) {
         var coord = {
@@ -16276,10 +16274,10 @@ var Chartx = (function () {
       value: function getSizeAndOrigin() {}
     }]);
 
-    return _default;
+    return Polar$$1;
   }(coordBase);
 
-  _defineProperty(_default$1, "defaultProps", {
+  _defineProperty(Polar$2, "defaultProps", {
     allAngle: {
       detail: '坐标系总角度',
       documentation: "",
@@ -28588,7 +28586,7 @@ var Chartx = (function () {
     return barTgi;
   }(component);
 
-  var _default$2 =
+  var _default =
   /*#__PURE__*/
   function (_Component) {
     _inherits(_default, _Component);
@@ -28983,7 +28981,7 @@ var Chartx = (function () {
     return MarkLine;
   }(component);
 
-  var _default$3 =
+  var _default$1 =
   /*#__PURE__*/
   function (_Component) {
     _inherits(_default, _Component);
@@ -29166,8 +29164,8 @@ var Chartx = (function () {
 
   global$1.registerComponent(Chart, 'chart'); //global.registerComponent( emptyCoord, 'coord' );
 
-  global$1.registerComponent(_default, 'coord', 'rect');
-  global$1.registerComponent(_default$1, 'coord', 'polar');
+  global$1.registerComponent(CoordRect, 'coord', 'rect');
+  global$1.registerComponent(Polar$2, 'coord', 'polar');
   global$1.registerComponent(BarGraphs, 'graphs', 'bar');
   global$1.registerComponent(LineGraphs, 'graphs', 'line');
   global$1.registerComponent(ScatGraphs, 'graphs', 'scat');
@@ -29186,10 +29184,10 @@ var Chartx = (function () {
   global$1.registerComponent(MarkLine, 'markLine');
   global$1.registerComponent(Tips, 'tips');
   global$1.registerComponent(barTgi, 'barTgi');
-  global$1.registerComponent(_default$2, 'barGuide');
+  global$1.registerComponent(_default, 'barGuide');
   global$1.registerComponent(waterMark, 'waterMark');
   global$1.registerComponent(MarkLine$1, 'cross');
-  global$1.registerComponent(_default$3, 'lineSchedu'); //皮肤设定begin ---------------
+  global$1.registerComponent(_default$1, 'lineSchedu'); //皮肤设定begin ---------------
   //如果数据库中有项目皮肤
 
   var projectTheme = []; //从数据库中查询出来设计师设置的项目皮肤
@@ -29209,3 +29207,4 @@ var Chartx = (function () {
   return chartx;
 
 }());
+//# sourceMappingURL=chartx.js.map
