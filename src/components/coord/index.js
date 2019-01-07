@@ -43,6 +43,7 @@ export default class coorBase extends Component
         });
         this.app.coordSprite.addChild( this.sprite );
         
+
         /*
         吧原始的field转换为对应结构的显示树
         ["uv"] --> [
