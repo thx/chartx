@@ -5,7 +5,6 @@ import yAxisConstructor from "./yaxis"
 import Grid from "./grid"
 import { _,getDefaultProps,event } from "mmvis"
 
-const Rect = Canvax.Shapes.Rect;
 
 export default class Rect extends coordBase
 {
@@ -24,11 +23,11 @@ export default class Rect extends coordBase
         }
     } 
 
-
     constructor( opt, app )
     {
         
         super( opt, app );
+        _.extend( true, this, getDefaultProps( Rect.defaultProps ), this.setDefaultOpt( opt, app ) );
         
         this.type = "rect";
         
@@ -38,8 +37,6 @@ export default class Rect extends coordBase
         this._yAxisLeft = null;
         this._yAxisRight = null;
         this._grid  = null;
-
-        _.extend( true, this, getDefaultProps( Rect.defaultProps ), this.setDefaultOpt( opt, app ) );
 
         this.init(opt);
     }
@@ -258,19 +255,19 @@ export default class Rect extends coordBase
 
         //绘制背景网格
         this._grid.draw({
-            width   : this._xAxis.width,
-            height  : this._yAxis[0].height,
-            xDirection   : {
-                data: this._yAxis[0].layoutData
+            width        : this._xAxis.width,
+            height       : this._yAxis[0].height,
+            oneDimension : {
+                data     : this._yAxis[0].layoutData
             },
-            yDirection   : {
-                data: this._xAxis.layoutData
+            towDimension : {
+                data     : this._xAxis.layoutData
             },
-            pos     : {
-                x   : _yAxisW + _padding.left,
-                y   : y
+            pos          : {
+                x        : _yAxisW + _padding.left,
+                y        : y
             },
-            resize : opt.resize
+            resize       : opt.resize
         } );
 
 
@@ -464,7 +461,7 @@ export default class Rect extends coordBase
     _initInduce()
     {
         var me = this;
-        me.induce = new Rect({
+        me.induce = new Canvax.Shapes.Rect({
             id: "induce",
             context: {
                 x: me.origin.x,

@@ -1,49 +1,91 @@
 import Canvax from "canvax"
-import { _, event } from "mmvis"
+import { _, event,getDefaultProps } from "mmvis"
 
 const Line = Canvax.Shapes.Line;
 const Rect = Canvax.Shapes.Rect;
 
-export default class descartesGrid extends event.Dispatcher
+export default class rectGrid extends event.Dispatcher
 {
+    static defaultProps = {
+        enabled : {
+            detail : '是否开启grid绘制',
+            default: true
+        },
+        oneDimension : {
+            detail : '一维方向的网格线',
+            propertys : {
+                enabled : {
+                    detail : '是否开启',
+                    default: true
+                },
+                data : [],
+                lineType : {
+                    detail : '线的样式，虚线或者实现',
+                    default: 'solid'
+                },
+                lineWidth : {
+                    detail : '线宽',
+                    default: 1
+                },
+                strokeStyle : {
+                    detail : '线颜色',
+                    default: '#f0f0f0'
+                }
+            }
+        },
+        twoDimension : {
+            detail : '二维方向的网格线',
+            propertys : {
+                enabled : {
+                    detail : '是否开启',
+                    default: false
+                },
+                data : [],
+                lineType : {
+                    detail : '线的样式，虚线或者实现',
+                    default: 'solid'
+                },
+                lineWidth : {
+                    detail : '线宽',
+                    default: 1
+                },
+                strokeStyle : {
+                    detail : '线颜色',
+                    default: '#f0f0f0'
+                }
+            }
+        },
+        fill : {
+            detail : '背景',
+            propertys : {
+                enabled : {
+                    detail : '是否开启',
+                    default: false
+                },
+                fillStyle : {
+                    detail : '背景颜色',
+                    default: null
+                },
+                alpha : {
+                    detail : '背景透明度',
+                    default: null
+                }
+            }
+        }
+    }
+
     constructor( opt, app )
     {
         super( opt, app);
+        _.extend( true, this, getDefaultProps( rectGrid.defaultProps ) );
 
         this.width  = 0;   
         this.height = 0;
-        this.app   = app; //该组件被添加到的目标图表项目，
+        this.app = app; //该组件被添加到的目标图表项目，
 
-        this.pos    = {
+        this.pos = {
             x : 0,
             y : 0
-        };
-
-        this.enabled = 1;
-
-        this.xDirection = {                                //x方向上的线
-            shapeType   : "line",
-            enabled     : 1,
-            data        : [],                      //[{y:100},{}]
-            lineType    : 'solid',                //线条类型(dashed = 虚线 | '' = 实线)
-            lineWidth   : 1,
-            strokeStyle : '#f0f0f0', //'#e5e5e5',
-            filter      : null 
-        };
-        this.yDirection = {                                //y方向上的线
-            shapeType   : "line",
-            enabled     : 0,
-            data        : [],                      //[{x:100},{}]
-            lineType    : 'solid',                      //线条类型(dashed = 虚线 | '' = 实线)
-            lineWidth   : 1,
-            strokeStyle : '#f0f0f0',//'#e5e5e5',
-            filter      : null
-        };
-        
-        this.fill = {
-            enabled : true,
-            fillStyle : null,
-            alpha : null
         };
 
         this.sprite       = null;                       //总的sprite
@@ -122,7 +164,7 @@ export default class descartesGrid extends event.Dispatcher
         self.yAxisSp   = new Canvax.Display.Sprite(),  self.sprite.addChild(self.yAxisSp);
         
         //x轴方向的线集合
-        var arr = self.xDirection.data;
+        var arr = self.oneDimension.data;
         for(var a = 0, al = arr.length; a < al; a++){
             var o = arr[a];
           
@@ -130,17 +172,12 @@ export default class descartesGrid extends event.Dispatcher
                 id : "back_line_"+a,
                 context : {
                     y : o.y,
-                    lineType    : self.xDirection.lineType,
-                    lineWidth   : self.xDirection.lineWidth,
-                    strokeStyle : self.xDirection.strokeStyle  
+                    lineType    : self.oneDimension.lineType,
+                    lineWidth   : self.oneDimension.lineWidth,
+                    strokeStyle : self.oneDimension.strokeStyle  
                 }
             });
-            if(self.xDirection.enabled){
-                _.isFunction( self.xDirection.filter ) && self.xDirection.filter.apply( line , [{
-                    layoutData : self.yDirection.data,
-                    index      : a,
-                    line       : line
-                } , self]);
+            if(self.oneDimension.enabled){
 
                 self.xAxisSp.addChild(line);
     
@@ -151,7 +188,7 @@ export default class descartesGrid extends event.Dispatcher
         };
 
         //y轴方向的线集合
-        var arr = self.yDirection.data
+        var arr = self.twoDimension.data
         for(var a = 0, al = arr.length; a < al; a++){
             var o = arr[a]
             var line = new Line({
@@ -165,20 +202,15 @@ export default class descartesGrid extends event.Dispatcher
                         x : 0,
                         y : -self.height
                     },
-                    lineType    : self.yDirection.lineType,
-                    lineWidth   : self.yDirection.lineWidth,
-                    strokeStyle : self.yDirection.strokeStyle,
+                    lineType    : self.twoDimension.lineType,
+                    lineWidth   : self.twoDimension.lineWidth,
+                    strokeStyle : self.twoDimension.strokeStyle,
                     visible     : o.x ? true : false
                 }
             });
-            if(self.yDirection.enabled){
-                _.isFunction( self.yDirection.filter ) && self.yDirection.filter.apply(line , [{
-                    layoutData : self.xDirection.data,
-                    index      : a,
-                    line       : line
-                } , self ]);
+            if(self.twoDimension.enabled){
                 self.yAxisSp.addChild(line);
-            }
+            };
         };
     }
 }

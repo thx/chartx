@@ -40,6 +40,7 @@ export default class coordBase extends Component
             polar : {}
         }
     }
+    
 
 	constructor(opt, app){
         
@@ -57,6 +58,7 @@ export default class coordBase extends Component
         });
         this.app.coordSprite.addChild( this.sprite );
         
+
         /*
         吧原始的field转换为对应结构的显示树
         ["uv"] --> [

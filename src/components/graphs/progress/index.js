@@ -1,9 +1,6 @@
 import Canvax from "canvax"
-import {numAddSymbol} from "../../../utils/tools"
 import GraphsBase from "../index"
-import { _, event, getDefaultProps } from "mmvis"
-
-const AnimationFrame = Canvax.AnimationFrame;
+import { _, getDefaultProps } from "mmvis"
 
 export default class Progress extends GraphsBase
 {
@@ -114,7 +111,7 @@ export default class Progress extends GraphsBase
 
         this.type = "progress";
 
-        _.extend( true, this, getDefaultProps( new.target.defaultProps ), opt );
+        _.extend( true, this, getDefaultProps( Progress.defaultProps ), opt );
         
         this.bgNodeData = null;//背景的nodeData数据，和data里面的结构保持一致
         this.init();

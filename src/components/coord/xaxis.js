@@ -172,7 +172,7 @@ export default class xAxis extends axis
         this.sprite = null;
         this.isH = false; //是否为横向转向的x轴
 
-        _.extend( true, this, getDefaultProps( new.target.defaultProps ) );
+        _.extend( true, this, getDefaultProps( xAxis.defaultProps ) );
 
         this.init(opt);
     }
