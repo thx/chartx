@@ -10781,12 +10781,201 @@
     return s;
   }
 
+  var Axis =
+  /*#__PURE__*/
+  function (_baseAxis) {
+    _inherits(Axis, _baseAxis);
+
+    function Axis(opt, dataOrg, _coord) {
+      var _this;
+
+      _classCallCheck(this, Axis);
+
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(Axis).call(this, opt, dataOrg));
+
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(Axis.defaultProps));
+
+      return _this;
+    }
+
+    _createClass(Axis, [{
+      key: "drawWaterLine",
+      value: function drawWaterLine(y) {
+        this.dataSection = [];
+        this.setWaterLine(y);
+        this.draw();
+      }
+    }]);
+
+    return Axis;
+  }(axis);
+
+  _defineProperty(Axis, "defaultProps", {
+    field: {
+      detail: '轴字段配置',
+      documentation: '目前x轴的field只支持单维度设置，也就是说只支持一条x轴',
+      default: []
+    },
+    layoutType: {
+      detail: '布局方式',
+      default: 'rule'
+    },
+    width: {
+      detail: '轴宽',
+      default: 0
+    },
+    height: {
+      detail: '轴高',
+      default: 0
+    },
+    enabled: {
+      detail: '是否显示轴',
+      default: true
+    },
+    animation: {
+      detail: '是否开启动画',
+      default: true
+    },
+    title: {
+      detail: '轴名称',
+      propertys: {
+        shapeType: "text",
+        textAlign: {
+          detail: '水平对齐方式',
+          default: 'center'
+        },
+        textBaseline: {
+          detail: '基线对齐方式',
+          default: 'middle'
+        },
+        strokeStyle: {
+          detail: '文本描边颜色',
+          default: null
+        },
+        lineHeight: {
+          detail: '行高',
+          default: 0
+        },
+        text: {
+          detail: '轴名称的内容',
+          default: ''
+        },
+        fontColor: {
+          detail: '颜色',
+          default: '#999'
+        },
+        fontSize: {
+          detail: '字体大小',
+          default: 12
+        }
+      }
+    },
+    tickLine: {
+      detail: '刻度线',
+      propertys: {
+        enabled: {
+          detail: '是否开启',
+          default: true
+        },
+        lineWidth: {
+          detail: '刻度线宽',
+          default: 1
+        },
+        lineLength: {
+          detail: '刻度线长度',
+          default: 4
+        },
+        distance: {
+          detail: '和前面一个元素的距离',
+          default: 2
+        },
+        strokeStyle: {
+          detail: '描边颜色',
+          default: '#cccccc'
+        }
+      }
+    },
+    axisLine: {
+      detail: '轴线配置',
+      propertys: {
+        enabled: {
+          detail: '是否有轴线',
+          default: true
+        },
+        position: {
+          detail: '轴线的位置',
+          documentation: 'default在align的位置（left，right），可选 "center" 和 具体的值',
+          default: 'default'
+        },
+        lineWidth: {
+          detail: '轴线宽度',
+          default: 1
+        },
+        strokeStyle: {
+          detail: '轴线的颜色',
+          default: '#cccccc'
+        }
+      }
+    },
+    label: {
+      detail: '刻度文本',
+      propertys: {
+        enabled: {
+          detail: '是否显示刻度文本',
+          default: true
+        },
+        fontColor: {
+          detail: '文本颜色',
+          default: '#999'
+        },
+        fontSize: {
+          detail: '字体大小',
+          default: 12
+        },
+        rotation: {
+          detail: '旋转角度',
+          default: 0
+        },
+        format: {
+          detail: 'label文本的格式化处理函数',
+          default: null
+        },
+        distance: {
+          detail: '和轴线之间的间距',
+          default: 2
+        },
+        textAlign: {
+          detail: '水平方向对齐方式',
+          default: 'center'
+        },
+        lineHeight: {
+          detail: '文本的行高',
+          default: 1
+        },
+        evade: {
+          detail: '是否开启逃避算法,目前的逃避只是隐藏',
+          default: true
+        }
+      }
+    },
+    filter: {
+      detail: '过滤函数',
+      documentation: '可以用来过滤哪些yaxis 的 节点是否显示已经颜色之类的',
+      default: null
+    },
+    trimLayout: {
+      detail: '自定义的显示规则函数',
+      documentation: '如果用户有手动的 trimLayout ，那么就全部visible为true，然后调用用户自己的过滤程序',
+      default: null
+    }
+  });
+
   var Line$1 = Canvax.Shapes.Line;
 
   var xAxis =
   /*#__PURE__*/
-  function (_axis) {
-    _inherits(xAxis, _axis);
+  function (_Axis) {
+    _inherits(xAxis, _Axis);
 
     function xAxis(opt, data, _coord) {
       var _this;
@@ -10795,7 +10984,6 @@
 
       _this = _possibleConstructorReturn(this, _getPrototypeOf(xAxis).call(this, opt, data.org));
       _this.type = "xAxis";
-      _this._opt = opt;
       _this._coord = _coord || {};
       _this._title = null; //this.title对应的文本对象
 
@@ -10814,7 +11002,7 @@
       _this.sprite = null;
       _this.isH = false; //是否为横向转向的x轴
 
-      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(xAxis.defaultProps));
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(xAxis.defaultProps), opt);
 
       _this.init(opt);
 
@@ -10824,14 +11012,9 @@
     _createClass(xAxis, [{
       key: "init",
       value: function init(opt) {
-        _.extend(true, this, opt);
+        this._setField();
 
-        if (opt.isH && (!opt.label || opt.label.rotaion === undefined)) {
-          //如果是横向直角坐标系图
-          this.label.rotation = 90;
-        }
-
-        this._initHandle();
+        this._initHandle(opt);
 
         this.sprite = new Canvax.Display.Sprite({
           id: "xAxisSprite_" + new Date().getTime()
@@ -10843,10 +11026,15 @@
       }
     }, {
       key: "_initHandle",
-      value: function _initHandle() {
-        var me = this; //xAxis的field只有一个值
+      value: function _initHandle(opt) {
+        var me = this;
 
-        this.field = _.flatten([this.field])[0];
+        if (opt) {
+          if (opt.isH && (!opt.label || opt.label.rotaion === undefined)) {
+            //如果是横向直角坐标系图
+            this.label.rotation = 90;
+          }
+        }
         this.setDataSection();
         me._formatTextSection = [];
         me._textElements = [];
@@ -10872,6 +11060,15 @@
         this._setXAxisHeight();
       }
     }, {
+      key: "_setField",
+      value: function _setField(field) {
+        if (field) {
+          this.field = field;
+        }
+
+        this.field = _.flatten([this.field])[0];
+      }
+    }, {
       key: "draw",
       value: function draw(opt) {
         //首次渲染从 直角坐标系组件中会传入 opt,包含了width，origin等， 所有这个时候才能计算layoutData
@@ -10889,10 +11086,11 @@
     }, {
       key: "resetData",
       value: function resetData(dataFrame$$1) {
-        this.field = dataFrame$$1.field;
+        this._setField(dataFrame$$1.field);
+
         this.resetDataOrg(dataFrame$$1.org);
 
-        this._initHandle(dataFrame$$1);
+        this._initHandle();
 
         this.draw();
       }
@@ -10964,7 +11162,7 @@
               _maxTextHeight = Math.max(_maxTextHeight, height);
             });
           }
-          this.height = _maxTextHeight + this.tickLine.lineLength + this.tickLine.offset + this.label.offset;
+          this.height = _maxTextHeight + this.tickLine.lineLength + this.tickLine.distance + this.label.distance;
 
           if (this._title) {
             this.height += this._title.getTextHeight();
@@ -11064,7 +11262,7 @@
           }
           var o = arr[a];
           var x = o.x,
-              y = this.tickLine.lineLength + this.tickLine.offset + this.label.offset;
+              y = this.tickLine.lineLength + this.tickLine.distance + this.label.distance;
 
           if (this.label.enabled) {
             if (!!arr[a].visible) {
@@ -11136,7 +11334,7 @@
             if (!!arr[a].visible) {
               var lineContext = {
                 x: x,
-                y: this.tickLine.offset,
+                y: this.tickLine.distance,
                 end: {
                   x: 0,
                   y: this.tickLine.lineLength
@@ -11333,157 +11531,16 @@
     }]);
 
     return xAxis;
-  }(axis);
+  }(Axis);
 
-  _defineProperty(xAxis, "defaultProps", {
-    layoutType: {
-      detail: '布局方式',
-      default: 'rule'
-    },
-    width: {
-      detail: '轴宽',
-      default: 0
-    },
-    height: {
-      detail: '轴高',
-      default: 0
-    },
-    enabled: {
-      detail: '是否显示轴',
-      default: true
-    },
-    animation: {
-      detail: '是否开启动画',
-      default: true
-    },
-    title: {
-      detail: '轴名称',
-      propertys: {
-        shapeType: "text",
-        textAlign: "center",
-        textBaseline: "middle",
-        strokeStyle: null,
-        lineHeight: 0,
-        text: {
-          detail: '轴名称的内容',
-          default: ''
-        },
-        fontColor: {
-          detail: '颜色',
-          default: '#999'
-        },
-        fontSize: {
-          detail: '字体大小',
-          default: 12
-        }
-      }
-    },
-    tickLine: {
-      detail: '刻度线',
-      propertys: {
-        enabled: {
-          detail: '是否开启',
-          default: true
-        },
-        lineWidth: {
-          detail: '刻度线宽',
-          default: 1
-        },
-        lineLength: {
-          detail: '刻度线长度',
-          default: 4
-        },
-        offset: {
-          detail: '便宜量',
-          default: 2
-        },
-        strokeStyle: {
-          detail: '描边颜色',
-          default: '#cccccc'
-        }
-      }
-    },
-    axisLine: {
-      detail: '轴线配置',
-      propertys: {
-        enabled: {
-          detail: '是否有轴线',
-          default: true
-        },
-        position: {
-          detail: '轴线的位置',
-          documentation: 'default在align的位置（left，right），可选 "center" 和 具体的值',
-          default: 'default'
-        },
-        lineWidth: {
-          detail: '轴线宽度',
-          default: 1
-        },
-        strokeStyle: {
-          detail: '轴线的颜色',
-          default: '#cccccc'
-        }
-      }
-    },
-    label: {
-      detail: '刻度文本',
-      propertys: {
-        enabled: {
-          detail: '是否显示刻度文本',
-          default: true
-        },
-        fontColor: {
-          detail: '文本颜色',
-          default: '#999'
-        },
-        fontSize: {
-          detail: '字体大小',
-          default: 12
-        },
-        rotation: {
-          detail: '旋转角度',
-          default: 0
-        },
-        format: {
-          detail: 'label文本的格式化处理函数',
-          default: null
-        },
-        offset: {
-          detail: '和轴线之间的间距',
-          default: 2
-        },
-        textAlign: {
-          detail: '水平方向对齐方式',
-          default: 'center'
-        },
-        lineHeight: {
-          detail: '文本的行高',
-          default: 1
-        },
-        evade: {
-          detail: '是否开启逃避算法,目前的逃避只是隐藏',
-          default: true
-        }
-      }
-    },
-    filter: {
-      detail: '过滤函数',
-      documentation: '可以用来过滤哪些yaxis 的 节点是否显示已经颜色之类的',
-      default: null
-    },
-    trimLayout: {
-      detail: '自定义的显示规则函数',
-      documentation: '如果用户有手动的 trimLayout ，那么就全部visible为true，然后调用用户自己的过滤程序',
-      default: null
-    }
-  });
+  _defineProperty(xAxis, "defaultProps", {});
 
   var Line$2 = Canvax.Shapes.Line;
 
   var yAxis =
   /*#__PURE__*/
-  function (_axis) {
-    _inherits(yAxis, _axis);
+  function (_Axis) {
+    _inherits(yAxis, _Axis);
 
     function yAxis(opt, data, _coord) {
       var _this;
@@ -11492,97 +11549,35 @@
 
       _this = _possibleConstructorReturn(this, _getPrototypeOf(yAxis).call(this, opt, data.org));
       _this.type = "yAxis";
-      _this._opt = opt;
-      _this.width = null; //第一次计算后就会有值
-
-      _this.yMaxHeight = 0; //y轴最大高
-
-      _this.height = 0; //y轴第一条线到原点的高
-
-      _this.maxW = 0; //最大文本的 width
-
-      _this.field = []; //这个 轴 上面的 field 不需要主动配置。可以从graphs中拿
-
-      _this.title = {
-        text: "",
-        shapeType: "text",
-        fontColor: '#999',
-        fontSize: 12,
-        offset: 2,
-        textAlign: "center",
-        textBaseline: "middle",
-        strokeStyle: null,
-        lineHeight: 0
-      };
       _this._title = null; //this.label对应的文本对象
 
-      _this.enabled = true;
-      _this.tickLine = {
-        //刻度线
-        enabled: 1,
-        lineWidth: 1,
-        //线宽
-        lineLength: 4,
-        //线长
-        strokeStyle: '#cccccc',
-        distance: 2
-      };
-      _this.axisLine = {
-        //轴线
-        position: "default",
-        //位置，default默认在min，可选 "center" 和 具体的值
-        enabled: 1,
-        lineWidth: 1,
-        strokeStyle: '#cccccc'
-      };
-      _this.label = {
-        enabled: 1,
-        fontColor: '#999',
-        fontSize: 12,
-        format: null,
-        rotation: 0,
-        distance: 3,
-        //和刻度线的距离,
-        textAlign: null,
-        //"right",
-        lineHeight: 1
-      };
+      _this._axisLine = null;
+      _this.maxW = 0; //最大文本的 width
 
-      if (opt.isH && (!opt.label || opt.label.rotaion === undefined)) {
-        //如果是横向直角坐标系图
-        _this.label.rotation = 90;
-      }
       _this.pos = {
         x: 0,
         y: 0
       };
-      _this.align = "left"; //yAxis轴默认是再左边，但是再双轴的情况下，可能会right
+      _this.yMaxHeight = 0; //y轴最大高
 
       _this.layoutData = []; //dataSection 对应的layout数据{y:-100, value:'1000'}
 
-      _this.sprite = null; //过滤器，可以用来过滤哪些yaxis 的 节点是否显示已经颜色之类的
-      //@params params包括 dataSection , 索引index，txt(canvax element) ，line(canvax element) 等属性
-
-      _this.filter = null; //function(params){}; 
-
+      _this.sprite = null;
       _this.isH = false; //是否横向
 
-      _this.animation = true;
-      _this.layoutType = "proportion"; //rule , peak, proportion
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(yAxis.defaultProps), opt);
 
-      _this._axisLine = null;
-
-      _this.init(opt, data);
+      _this.init(opt);
 
       return _this;
     }
 
     _createClass(yAxis, [{
       key: "init",
-      value: function init(opt, data) {
-        _.extend(true, this, opt);
+      value: function init(opt) {
+        this._setField();
 
-        this._initHandle();
+        this._initHandle(opt);
 
         this.sprite = new Canvax.Display.Sprite({
           id: "yAxisSprite_" + new Date().getTime()
@@ -11594,17 +11589,35 @@
       }
     }, {
       key: "_initHandle",
-      value: function _initHandle() {
-        //extend会设置好this.field
-        //先要矫正子啊field确保一定是个array
-        if (!_.isArray(this.field)) {
-          this.field = [this.field];
+      value: function _initHandle(opt) {
+        if (opt) {
+          if (opt.isH && (!opt.label || opt.label.rotaion === undefined)) {
+            //如果是横向直角坐标系图
+            this.label.rotation = 90;
+          }
+          //除非用户强制设置textAlign，否则就要根据this.align做一次二次处理
+
+          if (!opt.label || !opt.label.textAlign) {
+            this.label.textAlign = this.align == "left" ? "right" : "left";
+          }
         }
         this.setDataSection();
 
         this._getTitle();
 
         this._setYaxisWidth();
+      }
+    }, {
+      key: "_setField",
+      value: function _setField(field) {
+        if (field) {
+          this.field = field;
+        }
+        //先要矫正子啊field确保一定是个array
+
+        if (!_.isArray(this.field)) {
+          this.field = [this.field];
+        }
       }
       /**
        * 
@@ -11631,7 +11644,8 @@
     }, {
       key: "resetData",
       value: function resetData(dataFrame$$1) {
-        this.field = dataFrame$$1.field;
+        this._setField(dataFrame$$1.field);
+
         this.resetDataOrg(dataFrame$$1.org);
 
         this._initHandle();
@@ -11782,9 +11796,9 @@
           if (!o.visible) {
             continue;
           }
-          var y = o.y;
-          var value = o.value;
-          var textAlign = me.label.textAlign || (me.align == "left" ? "right" : "left");
+          var y = o.y; //var value = o.value;
+
+          var textAlign = me.label.textAlign;
           var posy = y + (a == 0 ? -3 : 0) + (a == arr.length - 1 ? 3 : 0); //为横向图表把y轴反转后的 逻辑
 
           if (me.label.rotation == 90 || me.label.rotation == -90) {
@@ -11929,7 +11943,7 @@
           }
         }
 
-        if (me.width === null) {
+        if (!me.width && !('width' in me._opt)) {
           me.width = parseInt(me.maxW + me.label.distance);
 
           if (me.tickLine.enabled) {
@@ -11940,14 +11954,12 @@
             me.width += me._title.getTextHeight();
           }
         }
-
         var _originX = 0;
 
         if (me.align == "left") {
           me.rulesSprite.context.x = me.width;
           _originX = me.width;
-        } //轴线
-
+        }
 
         if (me.axisLine.enabled) {
           var _axisLine = new Line$2({
@@ -11996,7 +12008,18 @@
     }]);
 
     return yAxis;
-  }(axis);
+  }(Axis);
+
+  _defineProperty(yAxis, "defaultProps", {
+    align: {
+      detail: '左右轴设置',
+      default: 'left'
+    },
+    layoutType: {
+      detail: '布局方式',
+      default: 'proportion'
+    }
+  });
 
   var Line$3 = Canvax.Shapes.Line;
   var Rect$1 = Canvax.Shapes.Rect;
@@ -25354,9 +25377,9 @@
 
         if (!isNaN(y)) {
           //如果y是个function说明是均值，自动实时计算的，而且不会超过ydatasection的范围
-          _yAxis.setWaterLine(y);
-
-          _yAxis.draw();
+          //_yAxis.setWaterLine( y );
+          //_yAxis.draw();
+          _yAxis.drawWaterLine(y);
         }
         var _fstyle = "#777";
 

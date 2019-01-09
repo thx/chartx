@@ -1,101 +1,51 @@
 import Canvax from "canvax"
 import {numAddSymbol} from "../../utils/tools"
-import {axis,_} from "mmvis"
+import {_, getDefaultProps} from "mmvis"
+import Axis from "./axis"
 
 const Line = Canvax.Shapes.Line;
 
-
-export default class yAxis extends axis
+export default class yAxis extends Axis
 {
+    static defaultProps = {
+        align : {
+            detail : '左右轴设置',
+            default: 'left'
+        },
+        layoutType : {
+            detail : '布局方式',
+            default: 'proportion'
+        }
+    }
+
 	constructor( opt, data, _coord){
 
         super(opt, data.org);
+        this.type   = "yAxis";
 
-        this.type = "yAxis";
+        this._title = null;//this.label对应的文本对象
+        this._axisLine  = null;
 
-        this._opt = opt;
-        
-        this.width       = null; //第一次计算后就会有值
-        this.yMaxHeight  = 0;//y轴最大高
-        this.height      = 0;//y轴第一条线到原点的高
-
-        this.maxW        = 0;//最大文本的 width
-        this.field       = [];//这个 轴 上面的 field 不需要主动配置。可以从graphs中拿
-
-        this.title       = {
-            text         : "",
-            shapeType    : "text",
-            fontColor    : '#999',
-            fontSize     : 12,
-            offset       : 2,
-            textAlign    : "center",
-            textBaseline : "middle",
-            strokeStyle  : null,
-            lineHeight   : 0
-        };
-        this._title      = null;//this.label对应的文本对象
-
-        this.enabled     = true;
-        this.tickLine    = {//刻度线
-            enabled      : 1,
-            lineWidth    : 1,//线宽
-            lineLength   : 4,//线长
-            strokeStyle  : '#cccccc',
-            distance     : 2
-        };
-        this.axisLine    = {//轴线
-            position     : "default",//位置，default默认在min，可选 "center" 和 具体的值
-            enabled      : 1,     
-            lineWidth    : 1,
-            strokeStyle  : '#cccccc'
-        };
-        this.label       = {
-            enabled      : 1,
-            fontColor    : '#999',
-            fontSize     : 12,
-            format       : null,
-            rotation     : 0,
-            distance     : 3,//和刻度线的距离,
-            textAlign    : null,//"right",
-            lineHeight   : 1
-        };
-        
-        if( opt.isH && (!opt.label || opt.label.rotaion === undefined) ){
-            //如果是横向直角坐标系图
-            this.label.rotation = 90;
-        };
-
-        this.pos = {
+        this.maxW   = 0;//最大文本的 width
+        this.pos    = {
             x: 0,
             y: 0
         };
-        this.align = "left"; //yAxis轴默认是再左边，但是再双轴的情况下，可能会right
-        
+        this.yMaxHeight = 0;//y轴最大高
         this.layoutData = []; //dataSection 对应的layout数据{y:-100, value:'1000'}
+        this.sprite     = null;
+        this.isH        = false; //是否横向
 
-        this.sprite = null;
+        _.extend( true, this, getDefaultProps( yAxis.defaultProps ) , opt );
 
-        //过滤器，可以用来过滤哪些yaxis 的 节点是否显示已经颜色之类的
-        //@params params包括 dataSection , 索引index，txt(canvax element) ，line(canvax element) 等属性
-        this.filter = null; //function(params){}; 
-
-        this.isH = false; //是否横向
-
-        this.animation = true;
-
-        this.layoutType = "proportion"; //rule , peak, proportion
-
-        this._axisLine = null;
-
-        this.init(opt, data );
+        this.init(opt);
         
     }
 
-    init(opt, data )
+    init(opt )
     {
-        _.extend(true , this, opt);
-
-        this._initHandle();
+        this._setField();
+        this._initHandle( opt );
 
         this.sprite = new Canvax.Display.Sprite({
             id: "yAxisSprite_"+new Date().getTime()
@@ -106,15 +56,34 @@ export default class yAxis extends axis
         this.sprite.addChild( this.rulesSprite );
     }
 
-    _initHandle(){
+    _initHandle( opt ){
+        if( opt ){
+            if( opt.isH && (!opt.label || opt.label.rotaion === undefined) ){
+                //如果是横向直角坐标系图
+                this.label.rotation = 90;
+            };
+    
+            //yAxis中的label.textAlign 要额外处理，默认是center。
+            //除非用户强制设置textAlign，否则就要根据this.align做一次二次处理
+            if( !opt.label || !opt.label.textAlign ){
+                this.label.textAlign = this.align == "left" ? "right" : "left"
+            };
+        };
+
+        this.setDataSection();
+        this._getTitle();
+        this._setYaxisWidth();
+    }
+
+    _setField( field ){
+        if( field ){
+            this.field = field;
+        };
         //extend会设置好this.field
         //先要矫正子啊field确保一定是个array
         if( !_.isArray(this.field) ){
             this.field = [this.field];
         };
-        this.setDataSection();
-        this._getTitle();
-        this._setYaxisWidth();
     }
 
     /**
@@ -142,8 +111,9 @@ export default class yAxis extends axis
     //配置和数据变化
     resetData( dataFrame )
     {
-        this.field = dataFrame.field;
+        this._setField(dataFrame.field);
         this.resetDataOrg( dataFrame.org );
+        
         this._initHandle();
         this.draw();
     }
@@ -289,9 +259,9 @@ export default class yAxis extends axis
             };
             var y = o.y;
 
-            var value = o.value;
+            //var value = o.value;
 
-            var textAlign = me.label.textAlign || (me.align == "left" ? "right" : "left");
+            var textAlign = me.label.textAlign;
  
             var posy = y + (a == 0 ? -3 : 0) + (a == arr.length - 1 ? 3 : 0);
             //为横向图表把y轴反转后的 逻辑
@@ -441,7 +411,8 @@ export default class yAxis extends axis
             };
         };
 
-        if( me.width === null ){
+        //没有width，并且用户也没有设置过width
+        if( !me.width && !('width' in me._opt) ){
             me.width = parseInt( me.maxW + me.label.distance  );
             if (me.tickLine.enabled) {
                 me.width += parseInt( me.tickLine.lineLength + me.tickLine.distance );
@@ -449,13 +420,13 @@ export default class yAxis extends axis
             if ( me._title ){
                 me.width += me._title.getTextHeight();
             }
-        }
+        };
 
         var _originX = 0;
         if( me.align == "left" ){
             me.rulesSprite.context.x = me.width;
             _originX = me.width;
-        }
+        };
 
         //轴线
         if( me.axisLine.enabled ){
