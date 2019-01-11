@@ -149,12 +149,16 @@ export default class BarGraphs extends GraphsBase
             color = _.flatten(color)[ _.indexOf( _flattenField, field ) ];
         };
 
-        if( color && color.lineargradient ){
-            var _style = me.ctx.createLinearGradient( nodeData.x, (nodeData.fromY+nodeData.rectHeight), nodeData.x, nodeData.fromY );
-            _.each( color.lineargradient , function( item , i ){
-                _style.addColorStop( item.position , item.color);
-            });
-            color = _style;
+        if( color && color.lineargradient && color.lineargradient.length ){
+            if( nodeData.rectHeight > 0 ){
+                var _style = me.ctx.createLinearGradient( nodeData.x, (nodeData.fromY+nodeData.rectHeight), nodeData.x, nodeData.fromY );
+                _.each( color.lineargradient , function( item ){
+                    _style.addColorStop( item.position , item.color);
+                });
+                color = _style;
+            } else {
+                color = color.lineargradient[ parseInt( color.lineargradient.length / 2 ) ].color;
+            };
         };
 
         if( color === undefined || color === null ){
@@ -398,7 +402,7 @@ export default class BarGraphs extends GraphsBase
 
                     var rectHeight = nodeData.y - nodeData.fromY;
 
-                    if( isNaN(rectHeight) ){
+                    if( isNaN(nodeData.value) ){
                         rectHeight = 0;
                     } else {
                         if( Math.abs(rectHeight) < me.node.minHeight ){
@@ -700,6 +704,10 @@ export default class BarGraphs extends GraphsBase
                         y = -val / vCount * _coord.height;
                     } else {
                         y = point.pos.y;
+                    };
+
+                    if( isNaN( y ) ){
+                        y = 0;
                     };
 
                     var yOriginPoint = _coord.getAxisOriginPoint( { field: field } );
