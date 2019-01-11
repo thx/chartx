@@ -129,10 +129,11 @@ export default class BarGraphs extends GraphsBase
         }
     }
 
-    _getColor(c, nodeData, _flattenField)
+    _getColor(c, nodeData)
     {
         var me = this;
         var field = nodeData.field;
+        var _flattenField = _.flatten( [ this.field ] );
 
         var fieldMap = this.app.getComponent({name:'coord'}).getFieldMapOf(field);
         var color;
@@ -250,8 +251,6 @@ export default class BarGraphs extends GraphsBase
 
         me.node._count = 0;
 
-        var _flattenField = _.flatten( [ this.field ] );
-
         _.each( this.enabledField , function(h_group, i) {
             
             h_group = _.flatten([ h_group ]);
@@ -289,7 +288,7 @@ export default class BarGraphs extends GraphsBase
                         groupH = new Canvax.Display.Sprite({
                             id: "barGroup_" + h
                         });
-                        me.barsSp.addChild(groupH);
+                        me.barsSp.addChild( groupH );
                         groupH.iNode = h;
                     };
 
@@ -411,9 +410,8 @@ export default class BarGraphs extends GraphsBase
 
                     nodeData.rectHeight = rectHeight;
 
-                    var fillStyle = me._getColor(me.node.fillStyle, nodeData, _flattenField);
+                    var fillStyle = me._getColor(me.node.fillStyle, nodeData);
                     nodeData.color = fillStyle;
-
                     //如果用户配置了渐变， 那么tips里面就取对应的中间位置的颜色
                     if( fillStyle instanceof CanvasGradient ){
                         if( me.node.fillStyle.lineargradient ){
@@ -422,7 +420,7 @@ export default class BarGraphs extends GraphsBase
                                 nodeData.color = _middleStyle.color
                             };
                         }
-                    }
+                    };
 
                     var finalPos = {
                         x         : Math.round(nodeData.x),
@@ -493,7 +491,7 @@ export default class BarGraphs extends GraphsBase
 
                     //label begin ------------------------------
                     if ( me.label.enabled ) {
-debugger
+
                         var value = nodeData.value;
                         if ( _.isFunction(me.label.format) ) {
                             var _formatc = me.label.format(value, nodeData);
@@ -973,12 +971,15 @@ debugger
 
     //这里的ind是包含了start的全局index
     selectAt( ind ){
+        var me = this;
         if( _.indexOf( this.select.inds, ind ) > -1 ) return;
 
         this.select.inds.push( ind );
 
         _.each( this.data, function( list, f ){
-            list[ ind ].selected = true;
+            var nodeData = list[ ind ];
+            nodeData.selected = true;
+            me.setNodeElementStyle( nodeData );
         } );
 
         var index = ind - this.dataFrame.range.start;
@@ -993,12 +994,15 @@ debugger
 
     //这里的ind是包含了start的全局index
     unselectAt( ind ){
+        var me = this;
         if( _.indexOf( this.select.inds, ind ) == -1 ) return;
 
         var _index = _.indexOf( this.select.inds, ind );
         this.select.inds.splice( _index, 1 );
         _.each( this.data, function( list, f ){
-            list[ ind ].selected = false;
+            var nodeData = list[ ind ];
+            nodeData.selected = false;
+            me.setNodeElementStyle( nodeData );
         } );
 
         var index = ind - this.dataFrame.range.start;
@@ -1022,5 +1026,11 @@ debugger
         } );
 
         return rowDatas;
+    }
+
+    setNodeElementStyle( nodeData ){
+        var me = this;
+        var fillStyle = me._getColor(me.node.fillStyle, nodeData);
+        nodeData.nodeElement.context.fillStyle = fillStyle;
     }
 }

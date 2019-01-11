@@ -14021,9 +14021,12 @@ function (_GraphsBase) {
     }
   }, {
     key: "_getColor",
-    value: function _getColor(c, nodeData, _flattenField) {
+    value: function _getColor(c, nodeData) {
       var me = this;
       var field = nodeData.field;
+
+      var _flattenField = _.flatten([this.field]);
+
       var fieldMap = this.app.getComponent({
         name: 'coord'
       }).getFieldMapOf(field);
@@ -14141,8 +14144,6 @@ function (_GraphsBase) {
       var groupsLen = this.enabledField.length;
       var itemW = 0;
       me.node._count = 0;
-
-      var _flattenField = _.flatten([this.field]);
 
       _.each(this.enabledField, function (h_group, i) {
         h_group = _.flatten([h_group]);
@@ -14292,7 +14293,7 @@ function (_GraphsBase) {
             }
             nodeData.rectHeight = rectHeight;
 
-            var fillStyle = me._getColor(me.node.fillStyle, nodeData, _flattenField);
+            var fillStyle = me._getColor(me.node.fillStyle, nodeData);
 
             nodeData.color = fillStyle; //如果用户配置了渐变， 那么tips里面就取对应的中间位置的颜色
 
@@ -14305,7 +14306,6 @@ function (_GraphsBase) {
                 }
               }
             }
-
             var finalPos = {
               x: Math.round(nodeData.x),
               y: nodeData.fromY,
@@ -14369,7 +14369,6 @@ function (_GraphsBase) {
             me.node.filter && me.node.filter.apply(rectEl, [nodeData, me]); //label begin ------------------------------
 
             if (me.label.enabled) {
-              debugger;
               var value = nodeData.value;
 
               if (_.isFunction(me.label.format)) {
@@ -14872,11 +14871,14 @@ function (_GraphsBase) {
   }, {
     key: "selectAt",
     value: function selectAt(ind) {
+      var me = this;
       if (_.indexOf(this.select.inds, ind) > -1) return;
       this.select.inds.push(ind);
 
       _.each(this.data, function (list, f) {
-        list[ind].selected = true;
+        var nodeData = list[ind];
+        nodeData.selected = true;
+        me.setNodeElementStyle(nodeData);
       });
 
       var index$$1 = ind - this.dataFrame.range.start;
@@ -14894,6 +14896,7 @@ function (_GraphsBase) {
   }, {
     key: "unselectAt",
     value: function unselectAt(ind) {
+      var me = this;
       if (_.indexOf(this.select.inds, ind) == -1) return;
 
       var _index = _.indexOf(this.select.inds, ind);
@@ -14901,7 +14904,9 @@ function (_GraphsBase) {
       this.select.inds.splice(_index, 1);
 
       _.each(this.data, function (list, f) {
-        list[ind].selected = false;
+        var nodeData = list[ind];
+        nodeData.selected = false;
+        me.setNodeElementStyle(nodeData);
       });
 
       var index$$1 = ind - this.dataFrame.range.start;
@@ -14927,6 +14932,15 @@ function (_GraphsBase) {
       });
 
       return rowDatas;
+    }
+  }, {
+    key: "setNodeElementStyle",
+    value: function setNodeElementStyle(nodeData) {
+      var me = this;
+
+      var fillStyle = me._getColor(me.node.fillStyle, nodeData);
+
+      nodeData.nodeElement.context.fillStyle = fillStyle;
     }
   }]);
 
