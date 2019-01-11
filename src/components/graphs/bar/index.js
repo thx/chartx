@@ -402,7 +402,7 @@ export default class BarGraphs extends GraphsBase
 
                     var rectHeight = nodeData.y - nodeData.fromY;
 
-                    if( isNaN(rectHeight) ){
+                    if( isNaN(nodeData.value) ){
                         rectHeight = 0;
                     } else {
                         if( Math.abs(rectHeight) < me.node.minHeight ){

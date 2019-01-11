@@ -14284,7 +14284,7 @@ function (_GraphsBase) {
             nodeData.iGroup = i, nodeData.iNode = h, nodeData.iLay = v;
             var rectHeight = nodeData.y - nodeData.fromY;
 
-            if (isNaN(rectHeight)) {
+            if (isNaN(nodeData.value)) {
               rectHeight = 0;
             } else {
               if (Math.abs(rectHeight) < me.node.minHeight) {
