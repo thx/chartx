@@ -36,8 +36,8 @@
                 //第一行是表头。
                 var data= [
                     ["xfield","uv" ,"pv" ,"click", "ppc"],
-                    [ "天猫淘宝、天猫淘宝直通车"      , 101 , 20  , 0    , 53],
-                    
+                    [ "天猫淘宝、天猫淘宝直通车"      , 101 , 20  , 20    , 53],
+                    /*
                     [ 2      , 67  , 51  , 10    , 62],
                     [ 3      , 130 , 50  , 0    , 23],
                     [ 4      , 101 , 60  , 33    , 64],
@@ -46,7 +46,7 @@
                     [ 7      , 51  , 120 , 33    , 112],
                     [ 8      , 67  , 51  , 86    , 231],
                     [ 9      , 120 , 90  , 150   , 23 ]
-                    
+                    */
                 
                 ];
                 var options = {
@@ -103,7 +103,7 @@
                             },
                             select : {
                                 enabled : true,
-                                inds : [1,5]
+                                inds : [0]
                             },
                             node : {
                                 fillStyle : function( nodeData ){
@@ -135,6 +135,24 @@
                                 fontColor : "#fff",
                                 lineWidth : 2,
                                 rotation : -90
+                            },
+                            node : {
+                                fillStyle : function( nodeData ){
+                                    if( nodeData.selected ){
+                                        return {
+                                            lineargradient: [
+                                                {
+                                                    position: 0,
+                                                    color: "#1D90FA"
+                                                },
+                                                {
+                                                    position: 1,
+                                                    color: "#1D5BFA"
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
                             }
                         }
                         

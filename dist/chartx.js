@@ -13951,6 +13951,7 @@ var Chartx = (function () {
         offsetX: 0,
         offsetY: 0
       }; //分组的选中，不是选中具体的某个node，这里的选中靠groupRegion来表现出来
+      //只有在第一个graphs bar 上配置有效
 
       _this.select = {
         enabled: false,
@@ -14239,17 +14240,13 @@ var Chartx = (function () {
                       //如果开启了图表的选中交互
                       var ind = me.dataFrame.range.start + this.iNode; //region触发的selected，需要把所有的graphs都执行一遍
 
-                      var allBarGraphs = me.app.getComponents({
-                        name: 'graphs'
-                      });
-
                       if (_.indexOf(me.select.inds, ind) > -1) {
                         //说明已经选中了
-                        _.each(allBarGraphs, function (barGraph) {
+                        _.each(barGraphs, function (barGraph) {
                           barGraph.unselectAt(ind);
                         });
                       } else {
-                        _.each(allBarGraphs, function (barGraph) {
+                        _.each(barGraphs, function (barGraph) {
                           barGraph.selectAt(ind);
                         });
                       }
@@ -14496,10 +14493,11 @@ var Chartx = (function () {
         var _preHLenOver = false;
 
         if (!this.absolute) {
-          _.each(this.app.getComponents({
-            name: 'graphs'
+          _.each(me.app.getComponents({
+            name: 'graphs',
+            type: 'bar'
           }), function (_g) {
-            if (!_g.absolute && _g.type == "bar") {
+            if (!_g.absolute) {
               if (_g === me) {
                 _preHLenOver = true;
               }
@@ -14655,27 +14653,14 @@ var Chartx = (function () {
                 me.data[nodeData.field] = tempBarData[v];
               }
 
-              var selectOpt = me.select;
-
-              if (!selectOpt) {
-                var barGraphs = me.app.getComponents({
-                  name: 'graphs',
-                  type: 'bar'
-                });
-
-                _.each(barGraphs, function (barGraph) {
-                  if (selectOpt) return false;
-
-                  if (!selectOpt && barGraph.select) {
-                    selectOpt = barGraph.select;
-                  }
-                });
-              }
+              var selectOpt = me.getGraphSelectOpt();
 
               if (selectOpt && selectOpt.inds && selectOpt.inds.length) {
                 if (_.indexOf(selectOpt.inds, i) > -1) {
                   nodeData.selected = true;
                 }
+
+                me.select.inds = _.clone(selectOpt.inds);
               }
 
               tempBarData[v].push(nodeData);
@@ -14943,6 +14928,29 @@ var Chartx = (function () {
         var fillStyle = me._getColor(me.node.fillStyle, nodeData);
 
         nodeData.nodeElement.context.fillStyle = fillStyle;
+      }
+    }, {
+      key: "getGraphSelectOpt",
+      value: function getGraphSelectOpt() {
+        var me = this; //如果某个graph 配置了select ----start
+
+        var selectOpt = me._opt.select;
+
+        if (!selectOpt) {
+          var barGraphs = me.app.getComponents({
+            name: 'graphs',
+            type: 'bar'
+          });
+
+          _.each(barGraphs, function (barGraph) {
+            if (selectOpt) return false;
+
+            if (!selectOpt && barGraph._opt.select) {
+              selectOpt = barGraph.select;
+            }
+          });
+        }
+        return selectOpt;
       }
     }]);
 

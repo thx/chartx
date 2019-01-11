@@ -59,6 +59,7 @@ export default class BarGraphs extends GraphsBase
         };
         
         //分组的选中，不是选中具体的某个node，这里的选中靠groupRegion来表现出来
+        //只有在第一个graphs bar 上配置有效
         this.select = {
             enabled : false,
             alpha : 0.2,
@@ -345,14 +346,13 @@ export default class BarGraphs extends GraphsBase
                                     var ind = me.dataFrame.range.start + this.iNode;
 
                                     //region触发的selected，需要把所有的graphs都执行一遍
-                                    var allBarGraphs = me.app.getComponents({ name:'graphs' });
                                     if( _.indexOf( me.select.inds, ind ) > -1 ){
                                         //说明已经选中了
-                                        _.each( allBarGraphs, function( barGraph ){
+                                        _.each( barGraphs, function( barGraph ){
                                             barGraph.unselectAt( ind );
                                         })
                                     } else {
-                                        _.each( allBarGraphs, function( barGraph ){
+                                        _.each( barGraphs, function( barGraph ){
                                             barGraph.selectAt( ind );
                                         })
                                     };
@@ -614,8 +614,8 @@ export default class BarGraphs extends GraphsBase
         var _preHLenOver = false;
 
         if( !this.absolute ){
-            _.each( this.app.getComponents({name:'graphs'}) , function( _g ){
-                if( !_g.absolute && _g.type == "bar" ) {
+            _.each( me.app.getComponents({name:'graphs',type:'bar'}) , function( _g ){
+                if( !_g.absolute ) {
                     if( _g === me ){
                         _preHLenOver = true;
                     };
@@ -765,23 +765,16 @@ export default class BarGraphs extends GraphsBase
                     };
 
                     //如果某个graph 配置了select ----start
-                    var selectOpt = me.select;
-                    if( !selectOpt ){
-                        var barGraphs = me.app.getComponents({name:'graphs',type:'bar'});
-                        _.each( barGraphs, function( barGraph ){
-                            if( selectOpt ) return false;
-                            if( !selectOpt && barGraph.select ){
-                                selectOpt = barGraph.select;
-                            };
-                        } );
-                    };
+                    var selectOpt = me.getGraphSelectOpt();
                     if( selectOpt && selectOpt.inds && selectOpt.inds.length ){
                         if( _.indexOf( selectOpt.inds, i ) > -1 ){
                             nodeData.selected = true;
                         };
+                        //同步到自己的select.inds
+                        
+                        me.select.inds = _.clone(selectOpt.inds);
                     };
                     //----end
-
 
                     tempBarData[v].push(nodeData);
 
@@ -993,6 +986,7 @@ export default class BarGraphs extends GraphsBase
     //这里的ind是包含了start的全局index
     unselectAt( ind ){
         var me = this;
+        
         if( _.indexOf( this.select.inds, ind ) == -1 ) return;
 
         var _index = _.indexOf( this.select.inds, ind );
@@ -1030,5 +1024,21 @@ export default class BarGraphs extends GraphsBase
         var me = this;
         var fillStyle = me._getColor(me.node.fillStyle, nodeData);
         nodeData.nodeElement.context.fillStyle = fillStyle;
+    }
+
+    getGraphSelectOpt(){
+        var me = this;
+        //如果某个graph 配置了select ----start
+        var selectOpt = me._opt.select;
+        if( !selectOpt ){
+            var barGraphs = me.app.getComponents({name:'graphs',type:'bar'});
+            _.each( barGraphs, function( barGraph ){
+                if( selectOpt ) return false;
+                if( !selectOpt && barGraph._opt.select ){
+                    selectOpt = barGraph.select;
+                };
+            } );
+        };
+        return selectOpt
     }
 }
