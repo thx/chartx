@@ -14044,14 +14044,18 @@ function (_GraphsBase) {
         color$$1 = _.flatten(color$$1)[_.indexOf(_flattenField, field)];
       }
 
-      if (color$$1 && color$$1.lineargradient) {
-        var _style = me.ctx.createLinearGradient(nodeData.x, nodeData.fromY + nodeData.rectHeight, nodeData.x, nodeData.fromY);
+      if (color$$1 && color$$1.lineargradient && color$$1.lineargradient.length) {
+        if (nodeData.rectHeight > 0) {
+          var _style = me.ctx.createLinearGradient(nodeData.x, nodeData.fromY + nodeData.rectHeight, nodeData.x, nodeData.fromY);
 
-        _.each(color$$1.lineargradient, function (item, i) {
-          _style.addColorStop(item.position, item.color);
-        });
+          _.each(color$$1.lineargradient, function (item) {
+            _style.addColorStop(item.position, item.color);
+          });
 
-        color$$1 = _style;
+          color$$1 = _style;
+        } else {
+          color$$1 = color$$1.lineargradient[parseInt(color$$1.lineargradient.length / 2)].color;
+        }
       }
 
       if (color$$1 === undefined || color$$1 === null) {
@@ -14580,6 +14584,10 @@ function (_GraphsBase) {
               y = -val / vCount * _coord.height;
             } else {
               y = point.pos.y;
+            }
+
+            if (isNaN(y)) {
+              y = 0;
             }
 
             var yOriginPoint = _coord.getAxisOriginPoint({

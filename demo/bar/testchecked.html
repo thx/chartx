@@ -36,10 +36,12 @@
                 //第一行是表头。
                 var data= [
                     ["xfield","uv" ,"pv" ,"click", "ppc"],
-                    [ "天猫淘宝、天猫淘宝直通车"      , 101 , 20  , 20    , 53],
-                    /*
-                    [ 2      , 67  , 51  , 10    , 62],
+                    [ "天猫淘宝、天猫淘宝直通车"      , 101 , 20  , null    , 53],
+                    
+                    [ 2      , 67  , 51  , undefined    , 62],
+                    
                     [ 3      , 130 , 50  , 0    , 23],
+                    /*
                     [ 4      , 101 , 60  , 33    , 64],
                     [ 5      , 67  , 91  , 126   , 34 ],
                     [ 6      , 30  , 50 , 90     , 21],
@@ -99,14 +101,29 @@
                             field : "click",
                             yAxisAlign : "left",
                             label : {
-                                enabled : true
+                                enabled : true,
+                                format : function(){
+                                    return "xx"
+                                }
                             },
                             select : {
                                 enabled : true,
-                                inds : [0]
+                                inds : [0,1]
                             },
                             node : {
-                                fillStyle : function( nodeData ){
+                                fillStyle : {
+                                    lineargradient: [
+                                        {
+                                            position: 0,
+                                            color: "#1D90FA"
+                                        },
+                                        {
+                                            position: 1,
+                                            color: "#1D5BFA"
+                                        }
+                                    ]
+                                },
+                                fill_Style : function( nodeData ){
                                     if( nodeData.selected ){
                                         return {
                                             lineargradient: [
