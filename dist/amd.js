@@ -13893,7 +13893,6 @@ define(function () { 'use strict';
   }(component);
 
   var AnimationFrame$2 = Canvax.AnimationFrame;
-  var BrokenLine$1 = Canvax.Shapes.BrokenLine;
   var Rect$3 = Canvax.Shapes.Rect;
 
   var BarGraphs =
@@ -14026,12 +14025,15 @@ define(function () { 'use strict';
       key: "_getColor",
       value: function _getColor(c, nodeData, _flattenField) {
         var me = this;
-        var value = nodeData.value;
         var field = nodeData.field;
         var fieldMap = this.app.getComponent({
           name: 'coord'
         }).getFieldMapOf(field);
-        var color$$1; //field对应的索引，， 取颜色这里不要用i
+        var color$$1;
+
+        if (_.isFunction(c)) {
+          color$$1 = c.apply(this, [nodeData]);
+        }
 
         if (_.isString(c)) {
           color$$1 = c;
@@ -14041,14 +14043,10 @@ define(function () { 'use strict';
           color$$1 = _.flatten(c)[_.indexOf(_flattenField, field)];
         }
 
-        if (_.isFunction(c)) {
-          color$$1 = c.apply(this, [nodeData]);
-        }
-
-        if (c && c.lineargradient) {
+        if (color$$1 && color$$1.lineargradient) {
           var _style = me.ctx.createLinearGradient(nodeData.x, nodeData.fromY + nodeData.rectHeight, nodeData.x, nodeData.fromY);
 
-          _.each(c.lineargradient, function (item, i) {
+          _.each(color$$1.lineargradient, function (item, i) {
             _style.addColorStop(item.position, item.color);
           });
 
@@ -14155,7 +14153,7 @@ define(function () { 'use strict';
           //h_group就会为两组，一组代表uv 一组代表pv。
           var spg = new Canvax.Display.Sprite({ id : "barGroup"+i });
           */
-          //vLen 为一单元bar上面纵向堆叠的length
+          //vLen 为一单元bar上面纵向堆叠的 length
           //比如yAxis.field = [?
           //    ["uv","pv"],  vLen == 2
           //    "click"       vLen == 1
@@ -14238,13 +14236,21 @@ define(function () { 'use strict';
 
                     if (me.select.enabled && e.type == me.select.triggerEventType) {
                       //如果开启了图表的选中交互
-                      var ind = me.dataFrame.range.start + this.iNode;
+                      var ind = me.dataFrame.range.start + this.iNode; //region触发的selected，需要把所有的graphs都执行一遍
+
+                      var allBarGraphs = me.app.getComponents({
+                        name: 'graphs'
+                      });
 
                       if (_.indexOf(me.select.inds, ind) > -1) {
                         //说明已经选中了
-                        me.unselectAt(ind);
+                        _.each(allBarGraphs, function (barGraph) {
+                          barGraph.unselectAt(ind);
+                        });
                       } else {
-                        me.selectAt(ind);
+                        _.each(allBarGraphs, function (barGraph) {
+                          barGraph.selectAt(ind);
+                        });
                       }
                     }
 
@@ -14365,6 +14371,7 @@ define(function () { 'use strict';
               me.node.filter && me.node.filter.apply(rectEl, [nodeData, me]); //label begin ------------------------------
 
               if (me.label.enabled) {
+                debugger;
                 var value = nodeData.value;
 
                 if (_.isFunction(me.label.format)) {
@@ -14639,12 +14646,39 @@ define(function () { 'use strict';
                 }).getNodeInfoOfX(_x),
                 iNode: i,
                 rowData: me.dataFrame.getRowDataAt(i),
-                color: null
+                color: null,
+                //focused       : false,  //是否获取焦点，外扩
+                selected: false //是否选中
+
               };
 
               if (!me.data[nodeData.field]) {
                 me.data[nodeData.field] = tempBarData[v];
               }
+
+              var selectOpt = me.select;
+
+              if (!selectOpt) {
+                var barGraphs = me.app.getComponents({
+                  name: 'graphs',
+                  type: 'bar'
+                });
+
+                _.each(barGraphs, function (barGraph) {
+                  if (selectOpt) return false;
+
+                  if (!selectOpt && barGraph.select) {
+                    selectOpt = barGraph.select;
+                  }
+                });
+              }
+
+              if (selectOpt && selectOpt.inds && selectOpt.inds.length) {
+                if (_.indexOf(selectOpt.inds, i) > -1) {
+                  nodeData.selected = true;
+                }
+              }
+
               tempBarData[v].push(nodeData);
             });
           }); //tempBarData.length && tmpData.push( tempBarData );
@@ -14679,7 +14713,7 @@ define(function () { 'use strict';
             y = bar.y;
         var isNegative = true; //是负数
 
-        if (bar.y > nodeData.y) {
+        if (bar.y >= nodeData.y) {
           isNegative = false;
         }
 
@@ -14842,6 +14876,11 @@ define(function () { 'use strict';
       value: function selectAt(ind) {
         if (_.indexOf(this.select.inds, ind) > -1) return;
         this.select.inds.push(ind);
+
+        _.each(this.data, function (list, f) {
+          list[ind].selected = true;
+        });
+
         var index$$1 = ind - this.dataFrame.range.start;
         var group = this.barsSp.getChildById("barGroup_" + index$$1);
 
@@ -14862,6 +14901,11 @@ define(function () { 'use strict';
         var _index = _.indexOf(this.select.inds, ind);
 
         this.select.inds.splice(_index, 1);
+
+        _.each(this.data, function (list, f) {
+          list[ind].selected = false;
+        });
+
         var index$$1 = ind - this.dataFrame.range.start;
         var group = this.barsSp.getChildById("barGroup_" + index$$1);
 
@@ -14892,7 +14936,7 @@ define(function () { 'use strict';
   }(GraphsBase);
 
   var AnimationFrame$3 = Canvax.AnimationFrame;
-  var BrokenLine$2 = Canvax.Shapes.BrokenLine;
+  var BrokenLine$1 = Canvax.Shapes.BrokenLine;
   var Rect$4 = Canvax.Shapes.Rect;
   var Circle$3 = Canvax.Shapes.Circle;
   var Path$1 = Canvax.Shapes.Path;
@@ -15222,7 +15266,7 @@ define(function () { 'use strict';
           list = me._pointList;
         }
         me._currPointList = list;
-        var bline = new BrokenLine$2({
+        var bline = new BrokenLine$1({
           //线条
           context: {
             pointList: list,
@@ -16777,7 +16821,6 @@ define(function () { 'use strict';
       key: "cancelCheckedSec",
       value: function cancelCheckedSec(sec, callback) {
         var selectedSec = sec._selectedSec;
-        debugger;
         selectedSec.animate({
           startAngle: selectedSec.context.endAngle - 0.5
         }, {
@@ -25104,7 +25147,7 @@ define(function () { 'use strict';
     return dataZoom;
   }(component);
 
-  var BrokenLine$3 = Canvax.Shapes.BrokenLine;
+  var BrokenLine$2 = Canvax.Shapes.BrokenLine;
   var Sprite$1 = Canvax.Display.Sprite;
   var Text$6 = Canvax.Display.Text;
 
@@ -25256,7 +25299,7 @@ define(function () { 'use strict';
 
         var y = this._getYPos();
 
-        var line = new BrokenLine$3({
+        var line = new BrokenLine$2({
           //线条
           id: "line",
           context: {
