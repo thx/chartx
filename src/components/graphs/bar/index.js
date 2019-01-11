@@ -4,7 +4,6 @@ import GraphsBase from "../index"
 import { _, event } from "mmvis"
 
 const AnimationFrame = Canvax.AnimationFrame;
-const BrokenLine = Canvax.Shapes.BrokenLine;
 const Rect = Canvax.Shapes.Rect;
 
 export default class BarGraphs extends GraphsBase
@@ -60,6 +59,7 @@ export default class BarGraphs extends GraphsBase
         };
         
         //分组的选中，不是选中具体的某个node，这里的选中靠groupRegion来表现出来
+        //只有在第一个graphs bar 上配置有效
         this.select = {
             enabled : false,
             alpha : 0.2,
@@ -130,34 +130,31 @@ export default class BarGraphs extends GraphsBase
         }
     }
 
-    _getColor(c, nodeData, _flattenField)
+    _getColor(color, nodeData)
     {
         var me = this;
-        var value = nodeData.value;
         var field = nodeData.field;
+        var _flattenField = _.flatten( [ this.field ] );
 
         var fieldMap = this.app.getComponent({name:'coord'}).getFieldMapOf(field);
-        var color;
        
+        if (_.isFunction( color )) {
+            color = color.apply(this, [ nodeData ]);
+        };
         //field对应的索引，， 取颜色这里不要用i
-        if (_.isString(c)) {
-            color = c
+        if (_.isString(color)) {
+            color = color
         };
-        if (_.isArray(c)) {
-            color = _.flatten(c)[ _.indexOf( _flattenField, field ) ];
-        };
-        if (_.isFunction(c)) {
-            color = c.apply(this, [ nodeData ]);
+        if (_.isArray(color)) {
+            color = _.flatten(color)[ _.indexOf( _flattenField, field ) ];
         };
 
-        if( c && c.lineargradient ){
-
+        if( color && color.lineargradient ){
             var _style = me.ctx.createLinearGradient( nodeData.x, (nodeData.fromY+nodeData.rectHeight), nodeData.x, nodeData.fromY );
-            _.each( c.lineargradient , function( item , i ){
+            _.each( color.lineargradient , function( item , i ){
                 _style.addColorStop( item.position , item.color);
             });
             color = _style;
-
         };
 
         if( color === undefined || color === null ){
@@ -253,8 +250,6 @@ export default class BarGraphs extends GraphsBase
 
         me.node._count = 0;
 
-        var _flattenField = _.flatten( [ this.field ] );
-
         _.each( this.enabledField , function(h_group, i) {
             
             h_group = _.flatten([ h_group ]);
@@ -264,7 +259,7 @@ export default class BarGraphs extends GraphsBase
             var spg = new Canvax.Display.Sprite({ id : "barGroup"+i });
             */
 
-            //vLen 为一单元bar上面纵向堆叠的length
+            //vLen 为一单元bar上面纵向堆叠的 length
             //比如yAxis.field = [?
             //    ["uv","pv"],  vLen == 2
             //    "click"       vLen == 1
@@ -292,7 +287,7 @@ export default class BarGraphs extends GraphsBase
                         groupH = new Canvax.Display.Sprite({
                             id: "barGroup_" + h
                         });
-                        me.barsSp.addChild(groupH);
+                        me.barsSp.addChild( groupH );
                         groupH.iNode = h;
                     };
 
@@ -349,12 +344,19 @@ export default class BarGraphs extends GraphsBase
                                 if( me.select.enabled && e.type == me.select.triggerEventType ){
                                     //如果开启了图表的选中交互
                                     var ind = me.dataFrame.range.start + this.iNode;
+
+                                    //region触发的selected，需要把所有的graphs都执行一遍
                                     if( _.indexOf( me.select.inds, ind ) > -1 ){
                                         //说明已经选中了
-                                        me.unselectAt( ind );
+                                        _.each( barGraphs, function( barGraph ){
+                                            barGraph.unselectAt( ind );
+                                        })
                                     } else {
-                                        me.selectAt( ind );
-                                    }
+                                        _.each( barGraphs, function( barGraph ){
+                                            barGraph.selectAt( ind );
+                                        })
+                                    };
+                                    
                                 };
 
                                 //触发root统一设置e.eventInfo.nodes,所以上面不需要设置
@@ -406,9 +408,8 @@ export default class BarGraphs extends GraphsBase
 
                     nodeData.rectHeight = rectHeight;
 
-                    var fillStyle = me._getColor(me.node.fillStyle, nodeData, _flattenField);
+                    var fillStyle = me._getColor(me.node.fillStyle, nodeData);
                     nodeData.color = fillStyle;
-
                     //如果用户配置了渐变， 那么tips里面就取对应的中间位置的颜色
                     if( fillStyle instanceof CanvasGradient ){
                         if( me.node.fillStyle.lineargradient ){
@@ -417,7 +418,7 @@ export default class BarGraphs extends GraphsBase
                                 nodeData.color = _middleStyle.color
                             };
                         }
-                    }
+                    };
 
                     var finalPos = {
                         x         : Math.round(nodeData.x),
@@ -613,8 +614,8 @@ export default class BarGraphs extends GraphsBase
         var _preHLenOver = false;
 
         if( !this.absolute ){
-            _.each( this.app.getComponents({name:'graphs'}) , function( _g ){
-                if( !_g.absolute && _g.type == "bar" ) {
+            _.each( me.app.getComponents({name:'graphs',type:'bar'}) , function( _g ){
+                if( !_g.absolute ) {
                     if( _g === me ){
                         _preHLenOver = true;
                     };
@@ -737,27 +738,43 @@ export default class BarGraphs extends GraphsBase
                     y += fromY - yOriginPoint.pos;
 
                     var nodeData = {
-                        type    : "bar",
-                        value   : val,
-                        vInd    : v, //如果是堆叠图的话，这个node在堆叠中得位置
-                        vCount  : vCount, //纵向方向的总数,比瑞堆叠了uv(100),pv(100),那么这个vCount就是200，比例柱状图的话，外部tips定制content的时候需要用到
-                        field   : field,
-                        fromX   : x,
-                        fromY   : fromY,
-                        x       : x,
-                        y       : y,
-                        width   : barW,
-                        yOriginPoint : yOriginPoint,
-                        isLeaf  : true,
-                        xAxis   : _coord.getAxis({type:'xAxis'}).getNodeInfoOfX( _x ),
-                        iNode   : i,
-                        rowData : me.dataFrame.getRowDataAt( i ),
-                        color   : null
+                        type          : "bar",
+                        value         : val,
+                        vInd          : v, //如果是堆叠图的话，这个node在堆叠中得位置
+                        vCount        : vCount, //纵向方向的总数,比瑞堆叠了uv(100),pv(100),那么这个vCount就是200，比例柱状图的话，外部tips定制content的时候需要用到
+                        field         : field,
+                        fromX         : x,
+                        fromY         : fromY,
+                        x             : x,
+                        y             : y,
+                        width         : barW,
+                        yOriginPoint  : yOriginPoint,
+                        isLeaf        : true,
+                        xAxis         : _coord.getAxis({type:'xAxis'}).getNodeInfoOfX( _x ),
+                        iNode         : i,
+                        rowData       : me.dataFrame.getRowDataAt( i ),
+                        color         : null,
+
+                        //focused       : false,  //是否获取焦点，外扩
+                        selected      : false  //是否选中
+
                     };
 
                     if( !me.data[ nodeData.field ] ){
                         me.data[ nodeData.field ] = tempBarData[v];
                     };
+
+                    //如果某个graph 配置了select ----start
+                    var selectOpt = me.getGraphSelectOpt();
+                    if( selectOpt && selectOpt.inds && selectOpt.inds.length ){
+                        if( _.indexOf( selectOpt.inds, i ) > -1 ){
+                            nodeData.selected = true;
+                        };
+                        //同步到自己的select.inds
+                        
+                        me.select.inds = _.clone(selectOpt.inds);
+                    };
+                    //----end
 
                     tempBarData[v].push(nodeData);
 
@@ -791,7 +808,7 @@ export default class BarGraphs extends GraphsBase
         };
         var x=bar.x ,y=bar.y;
         var isNegative = true; //是负数
-        if( bar.y > nodeData.y ){
+        if( bar.y >= nodeData.y ){
             isNegative = false;
         };
         switch( me.label.position ){
@@ -945,9 +962,16 @@ export default class BarGraphs extends GraphsBase
 
     //这里的ind是包含了start的全局index
     selectAt( ind ){
+        var me = this;
         if( _.indexOf( this.select.inds, ind ) > -1 ) return;
 
         this.select.inds.push( ind );
+
+        _.each( this.data, function( list, f ){
+            var nodeData = list[ ind ];
+            nodeData.selected = true;
+            me.setNodeElementStyle( nodeData );
+        } );
 
         var index = ind - this.dataFrame.range.start;
         var group = this.barsSp.getChildById("barGroup_" + index);
@@ -961,10 +985,17 @@ export default class BarGraphs extends GraphsBase
 
     //这里的ind是包含了start的全局index
     unselectAt( ind ){
+        var me = this;
+        
         if( _.indexOf( this.select.inds, ind ) == -1 ) return;
 
         var _index = _.indexOf( this.select.inds, ind );
         this.select.inds.splice( _index, 1 );
+        _.each( this.data, function( list, f ){
+            var nodeData = list[ ind ];
+            nodeData.selected = false;
+            me.setNodeElementStyle( nodeData );
+        } );
 
         var index = ind - this.dataFrame.range.start;
         var group = this.barsSp.getChildById("barGroup_" + index);
@@ -987,5 +1018,27 @@ export default class BarGraphs extends GraphsBase
         } );
 
         return rowDatas;
+    }
+
+    setNodeElementStyle( nodeData ){
+        var me = this;
+        var fillStyle = me._getColor(me.node.fillStyle, nodeData);
+        nodeData.nodeElement.context.fillStyle = fillStyle;
+    }
+
+    getGraphSelectOpt(){
+        var me = this;
+        //如果某个graph 配置了select ----start
+        var selectOpt = me._opt.select;
+        if( !selectOpt ){
+            var barGraphs = me.app.getComponents({name:'graphs',type:'bar'});
+            _.each( barGraphs, function( barGraph ){
+                if( selectOpt ) return false;
+                if( !selectOpt && barGraph._opt.select ){
+                    selectOpt = barGraph.select;
+                };
+            } );
+        };
+        return selectOpt
     }
 }

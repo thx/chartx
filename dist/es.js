@@ -14045,7 +14045,6 @@ function (_Component) {
 }(component);
 
 var AnimationFrame$2 = Canvax.AnimationFrame;
-var BrokenLine$1 = Canvax.Shapes.BrokenLine;
 var Rect$3 = Canvax.Shapes.Rect;
 
 var BarGraphs =
@@ -14103,6 +14102,7 @@ function (_GraphsBase) {
       offsetX: 0,
       offsetY: 0
     }; //分组的选中，不是选中具体的某个node，这里的选中靠groupRegion来表现出来
+    //只有在第一个graphs bar 上配置有效
 
     _this.select = {
       enabled: false,
@@ -14176,31 +14176,32 @@ function (_GraphsBase) {
     }
   }, {
     key: "_getColor",
-    value: function _getColor(c, nodeData, _flattenField) {
+    value: function _getColor(color$$1, nodeData) {
       var me = this;
-      var value = nodeData.value;
       var field = nodeData.field;
+
+      var _flattenField = _.flatten([this.field]);
+
       var fieldMap = this.app.getComponent({
         name: 'coord'
       }).getFieldMapOf(field);
-      var color$$1; //field对应的索引，， 取颜色这里不要用i
 
-      if (_.isString(c)) {
-        color$$1 = c;
+      if (_.isFunction(color$$1)) {
+        color$$1 = color$$1.apply(this, [nodeData]);
       }
 
-      if (_.isArray(c)) {
-        color$$1 = _.flatten(c)[_.indexOf(_flattenField, field)];
+      if (_.isString(color$$1)) {
+        color$$1 = color$$1;
       }
 
-      if (_.isFunction(c)) {
-        color$$1 = c.apply(this, [nodeData]);
+      if (_.isArray(color$$1)) {
+        color$$1 = _.flatten(color$$1)[_.indexOf(_flattenField, field)];
       }
 
-      if (c && c.lineargradient) {
+      if (color$$1 && color$$1.lineargradient) {
         var _style = me.ctx.createLinearGradient(nodeData.x, nodeData.fromY + nodeData.rectHeight, nodeData.x, nodeData.fromY);
 
-        _.each(c.lineargradient, function (item, i) {
+        _.each(color$$1.lineargradient, function (item, i) {
           _style.addColorStop(item.position, item.color);
         });
 
@@ -14298,8 +14299,6 @@ function (_GraphsBase) {
       var itemW = 0;
       me.node._count = 0;
 
-      var _flattenField = _.flatten([this.field]);
-
       _.each(this.enabledField, function (h_group, i) {
         h_group = _.flatten([h_group]);
         /*
@@ -14307,7 +14306,7 @@ function (_GraphsBase) {
         //h_group就会为两组，一组代表uv 一组代表pv。
         var spg = new Canvax.Display.Sprite({ id : "barGroup"+i });
         */
-        //vLen 为一单元bar上面纵向堆叠的length
+        //vLen 为一单元bar上面纵向堆叠的 length
         //比如yAxis.field = [?
         //    ["uv","pv"],  vLen == 2
         //    "click"       vLen == 1
@@ -14390,13 +14389,17 @@ function (_GraphsBase) {
 
                   if (me.select.enabled && e.type == me.select.triggerEventType) {
                     //如果开启了图表的选中交互
-                    var ind = me.dataFrame.range.start + this.iNode;
+                    var ind = me.dataFrame.range.start + this.iNode; //region触发的selected，需要把所有的graphs都执行一遍
 
                     if (_.indexOf(me.select.inds, ind) > -1) {
                       //说明已经选中了
-                      me.unselectAt(ind);
+                      _.each(barGraphs, function (barGraph) {
+                        barGraph.unselectAt(ind);
+                      });
                     } else {
-                      me.selectAt(ind);
+                      _.each(barGraphs, function (barGraph) {
+                        barGraph.selectAt(ind);
+                      });
                     }
                   }
 
@@ -14440,7 +14443,7 @@ function (_GraphsBase) {
             }
             nodeData.rectHeight = rectHeight;
 
-            var fillStyle = me._getColor(me.node.fillStyle, nodeData, _flattenField);
+            var fillStyle = me._getColor(me.node.fillStyle, nodeData);
 
             nodeData.color = fillStyle; //如果用户配置了渐变， 那么tips里面就取对应的中间位置的颜色
 
@@ -14453,7 +14456,6 @@ function (_GraphsBase) {
                 }
               }
             }
-
             var finalPos = {
               x: Math.round(nodeData.x),
               y: nodeData.fromY,
@@ -14642,10 +14644,11 @@ function (_GraphsBase) {
       var _preHLenOver = false;
 
       if (!this.absolute) {
-        _.each(this.app.getComponents({
-          name: 'graphs'
+        _.each(me.app.getComponents({
+          name: 'graphs',
+          type: 'bar'
         }), function (_g) {
-          if (!_g.absolute && _g.type == "bar") {
+          if (!_g.absolute) {
             if (_g === me) {
               _preHLenOver = true;
             }
@@ -14791,12 +14794,26 @@ function (_GraphsBase) {
               }).getNodeInfoOfX(_x),
               iNode: i,
               rowData: me.dataFrame.getRowDataAt(i),
-              color: null
+              color: null,
+              //focused       : false,  //是否获取焦点，外扩
+              selected: false //是否选中
+
             };
 
             if (!me.data[nodeData.field]) {
               me.data[nodeData.field] = tempBarData[v];
             }
+
+            var selectOpt = me.getGraphSelectOpt();
+
+            if (selectOpt && selectOpt.inds && selectOpt.inds.length) {
+              if (_.indexOf(selectOpt.inds, i) > -1) {
+                nodeData.selected = true;
+              }
+
+              me.select.inds = _.clone(selectOpt.inds);
+            }
+
             tempBarData[v].push(nodeData);
           });
         }); //tempBarData.length && tmpData.push( tempBarData );
@@ -14831,7 +14848,7 @@ function (_GraphsBase) {
           y = bar.y;
       var isNegative = true; //是负数
 
-      if (bar.y > nodeData.y) {
+      if (bar.y >= nodeData.y) {
         isNegative = false;
       }
 
@@ -14992,8 +15009,16 @@ function (_GraphsBase) {
   }, {
     key: "selectAt",
     value: function selectAt(ind) {
+      var me = this;
       if (_.indexOf(this.select.inds, ind) > -1) return;
       this.select.inds.push(ind);
+
+      _.each(this.data, function (list, f) {
+        var nodeData = list[ind];
+        nodeData.selected = true;
+        me.setNodeElementStyle(nodeData);
+      });
+
       var index$$1 = ind - this.dataFrame.range.start;
       var group = this.barsSp.getChildById("barGroup_" + index$$1);
 
@@ -15009,11 +15034,19 @@ function (_GraphsBase) {
   }, {
     key: "unselectAt",
     value: function unselectAt(ind) {
+      var me = this;
       if (_.indexOf(this.select.inds, ind) == -1) return;
 
       var _index = _.indexOf(this.select.inds, ind);
 
       this.select.inds.splice(_index, 1);
+
+      _.each(this.data, function (list, f) {
+        var nodeData = list[ind];
+        nodeData.selected = false;
+        me.setNodeElementStyle(nodeData);
+      });
+
       var index$$1 = ind - this.dataFrame.range.start;
       var group = this.barsSp.getChildById("barGroup_" + index$$1);
 
@@ -15038,13 +15071,45 @@ function (_GraphsBase) {
 
       return rowDatas;
     }
+  }, {
+    key: "setNodeElementStyle",
+    value: function setNodeElementStyle(nodeData) {
+      var me = this;
+
+      var fillStyle = me._getColor(me.node.fillStyle, nodeData);
+
+      nodeData.nodeElement.context.fillStyle = fillStyle;
+    }
+  }, {
+    key: "getGraphSelectOpt",
+    value: function getGraphSelectOpt() {
+      var me = this; //如果某个graph 配置了select ----start
+
+      var selectOpt = me._opt.select;
+
+      if (!selectOpt) {
+        var barGraphs = me.app.getComponents({
+          name: 'graphs',
+          type: 'bar'
+        });
+
+        _.each(barGraphs, function (barGraph) {
+          if (selectOpt) return false;
+
+          if (!selectOpt && barGraph._opt.select) {
+            selectOpt = barGraph.select;
+          }
+        });
+      }
+      return selectOpt;
+    }
   }]);
 
   return BarGraphs;
 }(GraphsBase);
 
 var AnimationFrame$3 = Canvax.AnimationFrame;
-var BrokenLine$2 = Canvax.Shapes.BrokenLine;
+var BrokenLine$1 = Canvax.Shapes.BrokenLine;
 var Rect$4 = Canvax.Shapes.Rect;
 var Circle$3 = Canvax.Shapes.Circle;
 var Path$1 = Canvax.Shapes.Path;
@@ -15374,7 +15439,7 @@ function (_event$Dispatcher) {
         list = me._pointList;
       }
       me._currPointList = list;
-      var bline = new BrokenLine$2({
+      var bline = new BrokenLine$1({
         //线条
         context: {
           pointList: list,
@@ -16929,7 +16994,6 @@ function (_event$Dispatcher) {
     key: "cancelCheckedSec",
     value: function cancelCheckedSec(sec, callback) {
       var selectedSec = sec._selectedSec;
-      debugger;
       selectedSec.animate({
         startAngle: selectedSec.context.endAngle - 0.5
       }, {
@@ -25256,7 +25320,7 @@ function (_Component) {
   return dataZoom;
 }(component);
 
-var BrokenLine$3 = Canvax.Shapes.BrokenLine;
+var BrokenLine$2 = Canvax.Shapes.BrokenLine;
 var Sprite$1 = Canvax.Display.Sprite;
 var Text$6 = Canvax.Display.Text;
 
@@ -25408,7 +25472,7 @@ function (_Component) {
 
       var y = this._getYPos();
 
-      var line = new BrokenLine$3({
+      var line = new BrokenLine$2({
         //线条
         id: "line",
         context: {
