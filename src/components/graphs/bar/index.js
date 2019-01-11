@@ -129,28 +129,26 @@ export default class BarGraphs extends GraphsBase
         }
     }
 
-    _getColor(c, nodeData)
+    _getColor(color, nodeData)
     {
         var me = this;
         var field = nodeData.field;
         var _flattenField = _.flatten( [ this.field ] );
 
         var fieldMap = this.app.getComponent({name:'coord'}).getFieldMapOf(field);
-        var color;
        
-        if (_.isFunction(c)) {
-            color = c.apply(this, [ nodeData ]);
+        if (_.isFunction( color )) {
+            color = color.apply(this, [ nodeData ]);
         };
         //field对应的索引，， 取颜色这里不要用i
-        if (_.isString(c)) {
-            color = c
+        if (_.isString(color)) {
+            color = color
         };
-        if (_.isArray(c)) {
-            color = _.flatten(c)[ _.indexOf( _flattenField, field ) ];
+        if (_.isArray(color)) {
+            color = _.flatten(color)[ _.indexOf( _flattenField, field ) ];
         };
 
         if( color && color.lineargradient ){
-
             var _style = me.ctx.createLinearGradient( nodeData.x, (nodeData.fromY+nodeData.rectHeight), nodeData.x, nodeData.fromY );
             _.each( color.lineargradient , function( item , i ){
                 _style.addColorStop( item.position , item.color);

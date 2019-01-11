@@ -14024,7 +14024,7 @@ var Chartx = (function () {
       }
     }, {
       key: "_getColor",
-      value: function _getColor(c, nodeData) {
+      value: function _getColor(color$$1, nodeData) {
         var me = this;
         var field = nodeData.field;
 
@@ -14033,18 +14033,17 @@ var Chartx = (function () {
         var fieldMap = this.app.getComponent({
           name: 'coord'
         }).getFieldMapOf(field);
-        var color$$1;
 
-        if (_.isFunction(c)) {
-          color$$1 = c.apply(this, [nodeData]);
+        if (_.isFunction(color$$1)) {
+          color$$1 = color$$1.apply(this, [nodeData]);
         }
 
-        if (_.isString(c)) {
-          color$$1 = c;
+        if (_.isString(color$$1)) {
+          color$$1 = color$$1;
         }
 
-        if (_.isArray(c)) {
-          color$$1 = _.flatten(c)[_.indexOf(_flattenField, field)];
+        if (_.isArray(color$$1)) {
+          color$$1 = _.flatten(color$$1)[_.indexOf(_flattenField, field)];
         }
 
         if (color$$1 && color$$1.lineargradient) {
