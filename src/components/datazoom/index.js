@@ -1,58 +1,152 @@
 import Component from "../component"
 import Canvax from "canvax"
-import { _ } from "mmvis"
+import { _ ,getDefaultProps} from "mmvis"
 import Trigger from "../trigger"
-
 
 const Line = Canvax.Shapes.Line;
 const Rect = Canvax.Shapes.Rect;
 
-const defaultProps = {
-    height : 26,
-    width  : 100,
-    //以上部分是所有组件后续都要实现的
-
-    range : {//0-1
-        start: 0,
-        end : null,
-        max : null, //可以外围控制智能在哪个区间拖动
-        min : 1  //最少至少选中了一个数据
-    },
-    color : "#008ae6",
-    left : { 
-        eventEnabled : true,
-        fillStyle : null,
-    },
-    right : { 
-        eventEnabled : true,
-        fillStyle: null
-    },
-    btnOut : 6, //left,right按钮突出的大小
-    btnHeight : 20,//left,right按钮的高，不在left，right下面，统一在这个属性里， 以为要强制保持一致
-    btnWidth : 8,//left,right按钮的宽，不在left，right下面，统一在这个属性里， 以为要强制保持一致
-
-    center : {
-        eventEnabled: true,
-        fillStyle : '#000000',
-        alpha : 0.015
-    },
-    bg : {
-        enabled : true,
-        fillStyle : "",
-        strokeStyle: "#e6e6e6",
-        lineWidth : 1
-    },
-    underline : {
-        enabled : true,
-        strokeStyle : null,
-        lineWidth : 2
-    },
-    position : "bottom", //图例所在的方向top,right,bottom,left
-    direction : "h" //横向 top,bottom --> h left,right -- >v
-};
-
 export default class dataZoom extends Component
 {
+    static defaultProps = {
+        position : {
+            detail: '位置',
+            default: 'bottom'
+        },
+        direction : {
+            detail : '方向',
+            default : 'h'
+        },
+        height : {
+            detail : '高',
+            default: 26
+        },
+        width : {
+            detail: '宽',
+            default: 100
+        },
+        color : {
+            detail : '颜色',
+            default: '#008ae6' 
+        },
+        range : {
+            detail : '范围设置',
+            propertys : {
+                start : {
+                    detail : '开始位置',
+                    default: 0
+                },
+                end : {
+                    detail : '结束位置，默认为null，表示到最后',
+                    default: null
+                },
+                max : {
+                    detail : '可以外围控制智能在哪个区间拖动',
+                    default: null
+                },
+                min : {
+                    detail : '最少至少选中了几个数据',
+                    default: 1
+                }
+            }
+        },
+        left : {
+            detail : '左边按钮',
+            propertys : {
+                eventEnabled : {
+                    detail : '是否响应事件',
+                    default: true
+                },
+                fillStyle : {
+                    detail : '颜色，默认取组件.color',
+                    default: null
+                }
+            }
+        },
+        right : {
+            detail : '右边按钮',
+            propertys : {
+                eventEnabled : {
+                    detail : '是否响应事件',
+                    default: true
+                },
+                fillStyle : {
+                    detail : '颜色，默认取组件.color',
+                    default: null
+                }
+            }
+        },
+        center : {
+            detail : '中间位置设置',
+            propertys : {
+                eventEnabled : {
+                    detail : '是否响应事件',
+                    default: true
+                },
+                fillStyle : {
+                    detail : '填充色',
+                    default: '#000000'
+                },
+                alpha: {
+                    detail : '透明度',
+                    default: 0.015
+                }
+            }
+        },
+        bg : {
+            detail : '背景设置',
+            propertys : {
+                enabled : {
+                    detail : '是否开启',
+                    default: true
+                },
+                fillStyle : {
+                    detail : '填充色',
+                    default: ''
+                },
+                strokeStyle: {
+                    detail : '边框色',
+                    default: '#e6e6e6'
+                },
+                lineWidth : {
+                    detail : '线宽',
+                    default: 1
+                }
+            }
+        },
+        underline : {
+            detail : 'underline',
+            propertys : {
+                enabled : {
+                    detail : '是否开启',
+                    default: true
+                },
+                strokeStyle: {
+                    detail : '线条色',
+                    default: null
+                },
+                lineWidth : {
+                    detail : '线宽',
+                    default: 2
+                }
+            }
+        },
+        btnOut : {
+            detail : 'left,right按钮突出的大小',
+            default: 6
+        },
+        btnHeight : {
+            detail : 'left,right按钮高',
+            default: 20,
+            documentation : 'left,right按钮的高，不在left，right下面，统一在这个属性里， 以为要强制保持一致'
+        },
+        btnWidth: {
+            detail : 'left,right按钮的宽',
+            default: 8,
+            documentation: 'left,right按钮的宽，不在left，right下面，统一在这个属性里， 以为要强制保持一致'
+        }
+
+    }
 
     constructor(opt, app)
 	{
@@ -95,7 +189,7 @@ export default class dataZoom extends Component
         app.stage.addChild( this.sprite );
 
         //预设默认的opt.dataZoom
-        _.extend( true, this, defaultProps , opt);
+        _.extend( true, this, getDefaultProps(dataZoom.defaultProps) , opt);
         this.layout();
 
 	}

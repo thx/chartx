@@ -1,13 +1,44 @@
 import Component from "../component"
 import Canvax from "canvax"
-import { _ } from "mmvis"
+import { _, getDefaultProps } from "mmvis"
 
 const Line = Canvax.Shapes.Line;
-const Sprite = Canvax.Display.Sprite;
-const Text = Canvax.Display.Text;
 
-export default class MarkLine extends Component
+export default class Cross extends Component
 {
+
+    static defaultProps = {
+        aimPoint : {
+            detail : '准心位置',
+            propertys : {
+                x : {
+                    detail : 'x',
+                    default: 0
+                },
+                y : {
+                    detail : 'y',
+                    default: 0
+                }
+            }
+        },
+        line : {
+            detail : '线配置',
+            propertys : {
+                strokeStyle : {
+                    detail : '线颜色',
+                    default: '#cccccc'
+                },
+                lineWidth: {
+                    detail : '线宽',
+                    default: 1
+                },
+                lineType: {
+                    detail : '线样式类型',
+                    default: 'solid'
+                }
+            }
+        }
+    }
 
     constructor(opt , app)
     {
@@ -21,46 +52,11 @@ export default class MarkLine extends Component
         //x,y都是准心的 x轴方向和y方向的 value值，不是真实的px，需要
         this.x = null;
         this.y = null;
-        
-        //准心的位置
-        this.aimPoint = {
-            x : 0,
-            y : 0
-        };
-       
-        this.line       = {
-            y           : 0,
-            strokeStyle : '#cccccc',
-            lineWidth   : 1,
-            smooth      : false,
-            lineType    : 'solid'
-        };
-
-        //待开发
-        this.node = {
-            enabled : false,
-            shapeType : "circle",
-            radius : 1,
-            fillStyle : "#999"
-        };
-
-        //待开发
-        this.label = {
-            enabled  : false,
-            fillStyle: '#999999',
-            fontSize : 12,
-            value  : null,
-            lineType : 'dashed',
-            lineWidth: 1,
-            strokeStyle : "white"
-        };
-
-        this._txt   = null;
-        this._node  = null;
+  
         this._hLine = null; //横向的线
         this._vLine = null; //竖向的线
        
-        opt && _.extend(true, this, opt);
+        _.extend( true, this, getDefaultProps( Cross.defaultProps ), opt );
 
         this._yAxis = this.app.getComponent({name:'coord'})._yAxis[ this.yAxisAlign=="left"?0:1 ];
         this.sprite  = new Canvax.Display.Sprite();

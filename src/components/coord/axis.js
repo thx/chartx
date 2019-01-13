@@ -171,6 +171,7 @@ export default class Axis extends baseAxis
     {
         this.dataSection = [];
         this.setWaterLine( y );
+        this._initHandle();
         this.draw();
     }
     

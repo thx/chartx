@@ -101,6 +101,7 @@ export default class yAxis extends Axis
         this.sprite.cleanAnimates();
 
         this._trimYAxis();
+        
         this._widget( opt );
 
         this.setX(this.pos.x);
