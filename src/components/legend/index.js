@@ -1,17 +1,94 @@
 import Component from "../component"
 import Canvax from "canvax"
-import { _ } from "mmvis"
+import { _ , getDefaultProps} from "mmvis"
 import Trigger from "../trigger"
 
 const Circle = Canvax.Shapes.Circle
 
 export default class Legend extends Component
 {
+    static defaultProps = {
+        data : {
+            detail : '图例数据',
+            default: [],
+            documentation: '\
+                数据结构为：{name: "uv", color: "#ff8533", field: "" ...}\
+                如果手动传入数据只需要前面这三个 enabled: true, ind: 0\
+                外部只需要传field和fillStyle就行了\
+                '
+        },
+        position : {
+            detail : '图例位置',
+            documentation: '图例所在的方向top,right,bottom,left',
+            default: 'top'
+        },
+        direction: {
+            detail : '图例布局方向',
+            default: 'h',
+            documentation: '横向 top,bottom --> h left,right -- >v'
+        },
+        icon : {
+            detail : '图标设置',
+            propertys : {
+                height : {
+                    detail : '高',
+                    default : 26
+                },
+                width : {
+                    detail : '图标宽',
+                    default : 'auto'
+                },
+                shapeType : {
+                    detail : '图标的图形类型，目前只实现了圆形',
+                    default: 'circle'
+                },
+                radius : {
+                    detail : '图标（circle）半径',
+                    default: 5
+                },
+                lineWidth : {
+                    detail : '图标描边宽度',
+                    default: 1
+                },
+                fillStyle : {
+                    detail : '图标颜色，一般会从data里面取，这里是默认色',
+                    default: '#999'
+                } 
+            }
+        },
+        label : {
+            detail : '文本配置',
+            propertys: {
+                textAlign :{
+                    detail : '水平对齐方式',
+                    default: 'left'
+                },
+                textBaseline : {
+                    detail : '文本基线对齐方式',
+                    default: 'middle'
+                },
+                fontColor : {
+                    detail : '文本颜色',
+                    default: '#333333'
+                },
+                cursor : {
+                    detail : '鼠标样式',
+                    default: 'pointer'
+                },
+                format : {
+                    detail : '文本格式化处理函数',
+                    default: null
+                }
+            }
+        }
+    }
+
     constructor(opt, app)
     {
         super(opt, app);
-
         this.name = "legend";
+
+        _.extend( true, this, getDefaultProps( Legend.defaultProps ), opt );
 
         /* data的数据结构为
         [
@@ -21,52 +98,8 @@ export default class Legend extends Component
         */
         this.data = this._getLegendData(opt);
 
-        //一般来讲，比如柱状图折线图等，是按照传入的field来分组来设置图例的，那么legend.field都是null
-        //但是还有一种情况就是，是按照同一个field中的数据去重后来分组的，比如散点图中sex属性的男女两个分组作为图例，
-        //以及pie饼图中的每个数据的name字段都是作为一个图例
-        //那么就想要给legend主动设置一个field字段，然后legend自己从dataFrame中拿到这个field的数据来去重，然后分组做为图例
-        //这是一个很屌的设计
-        this.field = null;
-
-        this.icon = {
-            height : 26,
-            width  : "auto",
-            shapeType : "circle",
-            radius : 5,
-            lineWidth : 1,
-            fillStyle : "#999",
-            onChecked : function(){},
-            onUnChecked : function(){}
-        };
-
-        this.label = {
-            textAlign : "left",
-            textBaseline : "middle",
-            fillStyle : "#333", //obj.color
-            cursor: "pointer",
-            format : function( name, info ){
-                return name
-            }
-        };
-
-        //this.onChecked=function(){};
-        //this.onUnChecked=function(){};
-
-        this._labelColor = "#999";
-        this.position = "top" ; //图例所在的方向top,right,bottom,left
-        this.direction = "h"; //横向 top,bottom --> h left,right -- >v
-
-        _.extend(true, this , {
-            icon : {
-                onChecked : function( obj ){
-                    app.show( obj.name , new Trigger( this, obj ) );
-                },
-                onUnChecked : function( obj ){
-                    app.hide( obj.name , new Trigger( this, obj ));
-                }
-            }
-        }, opt );
-
+        //this.position = "top" ; //图例所在的方向top,right,bottom,left
+        //this.direction = "h"; //横向 top,bottom --> h left,right -- >v
         if( !opt.direction && opt.position ){
             if( this.position == "left" || this.position == "right" ){
                 this.direction = 'v';
@@ -169,7 +202,7 @@ export default class Legend extends Component
                 context : {
                     x     : 0,
                     y     : me.icon.height/3 ,
-                    fillStyle : !obj.enabled ? "#ccc" : (obj.color || me._labelColor),
+                    fillStyle : !obj.enabled ? "#ccc" : (obj.color || "#999"),
                     r : me.icon.radius,
                     cursor: "pointer"
                 }
@@ -186,15 +219,20 @@ export default class Legend extends Component
             //阻止事件冒泡
             
             _icon.on("click" , function(){});
+
+            var _text = obj.name;
+            if( me.label.format ){
+                _text = me.label.format(obj.name, obj);
+            };
             
-            var txt = new Canvax.Display.Text( me.label.format(obj.name, obj) , {
+            var txt = new Canvax.Display.Text( _text , {
                 id: "legend_field_txt_"+i,
                 context : {
                     x : me.icon.radius + 3 ,
                     y : me.icon.height / 3,
                     textAlign : me.label.textAlign, //"left",
                     textBaseline : me.label.textBaseline, //"middle",
-                    fillStyle : me.label.fillStyle, //"#333", //obj.color
+                    fillStyle : me.label.fontColor, //"#333", //obj.color
                     cursor: me.label.cursor //"pointer"
                 }
             } );
@@ -270,12 +308,12 @@ export default class Legend extends Component
                 
                 obj.enabled = !obj.enabled;
 
-                _icon.context.fillStyle = !obj.enabled ? "#ccc" : (obj.color || me._labelColor);
+                _icon.context.fillStyle = !obj.enabled ? "#ccc" : (obj.color || "#999");
 
                 if( obj.enabled ){
-                    me.icon.onChecked( obj );
+                    app.show( obj.name , new Trigger( this, obj ) );
                 } else {
-                    me.icon.onUnChecked( obj );
+                    app.hide( obj.name , new Trigger( this, obj ));
                 }
             });
 

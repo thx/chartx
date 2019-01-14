@@ -150,7 +150,7 @@ export default class BarGraphs extends GraphsBase
         };
 
         if( color && color.lineargradient && color.lineargradient.length ){
-            if( nodeData.rectHeight > 0 ){
+            if( nodeData.rectHeight != 0 ){
                 var _style = me.ctx.createLinearGradient( nodeData.x, (nodeData.fromY+nodeData.rectHeight), nodeData.x, nodeData.fromY );
                 _.each( color.lineargradient , function( item ){
                     _style.addColorStop( item.position , item.color);
