@@ -1,6 +1,6 @@
 import Component from "../component"
 import Canvax from "canvax"
-import { _ , getDefaultProps} from "mmvis"
+import { _, getDefaultProps} from "mmvis"
 import Trigger from "../trigger"
 
 const Circle = Canvax.Shapes.Circle
@@ -311,9 +311,9 @@ export default class Legend extends Component
                 _icon.context.fillStyle = !obj.enabled ? "#ccc" : (obj.color || "#999");
 
                 if( obj.enabled ){
-                    app.show( obj.name , new Trigger( this, obj ) );
+                    me.app.show( obj.name , new Trigger( this, obj ) );
                 } else {
-                    app.hide( obj.name , new Trigger( this, obj ));
+                    me.app.hide( obj.name , new Trigger( this, obj ));
                 }
             });
 

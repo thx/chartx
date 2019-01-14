@@ -1,31 +1,52 @@
 import Component from "../component"
 import Canvax from "canvax"
-import { _ } from "mmvis"
+import { _, getDefaultProps } from "mmvis"
 
-export default class extends Component
+export default class lineSchedu extends Component
 {
+    static defaultProps = {
+        lineField : {
+            detail : '对应的line字段',
+            default: null
+        },
+        style : {
+            detail: '默认色',
+            default: '#3995ff'
+        },
+        fillStyle : {
+            detail: '节点填充色',
+            default: "#ffffff"
+        },
+        lineWidth : {
+            detail : '线宽',
+            default: 2
+        },
+        radius : {
+            detail : '圆点半径',
+            default: 6
+        },
+        timeFontSize : {
+            detail: '时间文本大小',
+            default: 14
+        },
+        timeFontColor: {
+            detail : '时间文本颜色',
+            default: '#606060'
+        },
+        listFontSize: {
+            detail : '列表信息文本大小',
+            default: 12
+        }
+    }
 
     constructor( opt, app )
     {
         super(opt, app);
-
         this.name = "lineSchedu";
 
-        this.data = null;
-        this.lineDatas = null;
+        _.extend(true, this , getDefaultProps(lineSchedu.defaultProps), opt );
 
-        this.lineField = null;
-        this.style = "#3995ff";
-        this.fillStyle = "#fff";
-        this.lineWidth = 2;
-        this.radius = 6;
-        this.timeFontSize = 14;
-        this.timeFontColor = "#606060";
-        this.listFontSize = 12;
-        this.listFontColor = null;
-        
-        _.extend(true, this , opt );
-        
+        this.lineDatas = null;
         this.sprite = new Canvax.Display.Sprite();
         this.app.graphsSprite.addChild( this.sprite );
     }
@@ -34,7 +55,6 @@ export default class extends Component
     {
         _.extend(true, this , opt );
         this.lineDatas = null;
-        this.data = null;
         this.sprite.removeAllChildren();
         this.draw();
     }

@@ -2,31 +2,44 @@
  * 水印组件
  */
 import Canvax from "canvax"
-import { _ } from "mmvis"
+import { _,getDefaultProps } from "mmvis"
 import Component from "../component"
-
-const Text = Canvax.Display.Text;
 
 export default class waterMark extends Component
 {
+
+    static defaultProps = {
+        text : {
+            detail : '水印内容',
+            default: 'chartx'
+        },
+        fontSize: {
+            detail : '字体大小',
+            default: 20
+        },
+        fontColor : {
+            detail : '水印颜色',
+            default: '#cccccc'
+        },
+        alpha : {
+            detail: '水印透明度',
+            default: 0.2
+        },
+        rotation : {
+            detail: '水印旋转角度',
+            default: 45
+        }
+    }
+
     constructor( opt , app )
     {
         super( opt , app );
-        
         this.name = "waterMark";
 
         this.width = this.app.width;
         this.height = this.app.height;
 
-        this.text = "chartx";
-        this.fontSize = 20;
-        this.fontColor = "#ccc";
-        this.strokeStyle = "#ccc";
-        this.lineWidth = 0;
-        this.alpha = 0.2;
-        this.rotation = 45;
-
-        _.extend( true, this, opt );
+        _.extend( true, this, getDefaultProps(waterMark.defaultProps) , opt );
 
         this.spripte = new Canvax.Display.Sprite({
             id : "watermark"
@@ -59,8 +72,6 @@ export default class waterMark extends Component
                     context: {
                         rotation    : this.rotation,
                         fontSize    : this.fontSize,
-                        strokeStyle : this.strokeStyle,
-                        lineWidth   : this.lineWidth,
                         fillStyle   : this.fontColor,
                         globalAlpha : this.alpha
                     }

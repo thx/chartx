@@ -1,12 +1,65 @@
 import Component from "../component"
 import Canvax from "canvax"
 import { numAddSymbol } from "../../utils/tools"
-import { _ } from "mmvis"
+import { _,getDefaultProps } from "mmvis"
 
 const Rect = Canvax.Shapes.Rect;
 const Line = Canvax.Shapes.Line;
 
 export default class Tips extends Component {
+
+    static defaultProps = {
+        enabled : {
+            detail: '是否开启Tips',
+            default: true
+        },
+        content : {
+            detail : '自定义tips的内容（html）',
+            default: null
+        },
+        borderRadius : {
+            detail  : 'tips的边框圆角半径',
+            default : 5
+        },
+        strokeStyle: {
+            detail : 'tips边框颜色',
+            default: '#ccc'
+        },
+        fillStyle : {
+            detail : 'tips背景色',
+            default: 'rgba(255,255,255,0.95)'
+        },
+        fontColor : {
+            detail: 'tips文本颜色',
+            default: '#999999'
+        },
+        positionOfPoint: {
+            detail : '在触发点的位置',
+            default: 'right'
+        },
+        offsetX : {
+            detail: 'tips内容到鼠标位置的偏移量x',
+            default: 10
+        },
+        offsetY : {
+            detail: 'tips内容到鼠标位置的偏移量y',
+            default: 10
+        },
+        positionInRange : {
+            detail : 'tip的浮层是否限定在画布区域',
+            default: true
+        },
+        pointer : {
+            detail : '触发tips的时候的指针样式',
+            default: 'line',
+            documentation: 'tips的指针,默认为直线，可选为："line" | "region"(柱状图中一般用region)'
+        },
+        pointerAnim : {
+            detail: 'tips移动的时候，指针是否开启动画',
+            default: true
+        }
+    }
+
     constructor(opt, app) {
         super(opt, app);
 
@@ -19,34 +72,15 @@ export default class Tips extends Component {
         this.dW = 0;  //html的tips内容width
         this.dH = 0;  //html的tips内容Height
 
-        this.borderRadius = "5px";  //背景框的 圆角 
-
-        this.sprite = null;
-        this.content = null; //tips的详细内容
-
-        this.fillStyle = "rgba(255,255,255,0.95)";//"#000000";
-        this.fontColor = "#999";
-        this.strokeStyle = "#ccc";
-
-        this.position = "right"; //在鼠标的左（右）边
 
         this._tipDom = null;
-
-        this.offsetX = 10; //tips内容到鼠标位置的偏移量x
-        this.offsetY = 10; //tips内容到鼠标位置的偏移量y
+        this._tipsPointer = null;
 
         //所有调用tip的 event 上面 要附带有符合下面结构的eventInfo属性
         //会deepExtend到this.indo上面来
         this.eventInfo = null;
 
-        this.positionInRange = true; //false; //tip的浮层是否限定在画布区域
-        this.enabled = true; //tips是默认显示的
-
-        this.pointer = 'line'; //tips的指针,默认为直线，可选为：'line' | 'region'(柱状图中一般用region)
-        this.pointerAnim = true;
-        this._tipsPointer = null;
-
-        
+        this.sprite = null;
         this.sprite = new Canvax.Display.Sprite({
             id: "TipSprite"
         });
@@ -57,7 +91,7 @@ export default class Tips extends Component {
             me._tipDom = null;
         });
 
-        _.extend(true, this, opt);
+        _.extend(true, this, getDefaultProps(Tips.defaultProps), opt);
         
     }
 
@@ -145,7 +179,7 @@ export default class Tips extends Component {
 
         this._tipDom.style.cssText += ";visibility:visible;left:" + x + "px;top:" + y + "px;-webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;";
 
-        if (this.position == "left") {
+        if (this.positionOfPoint == "left") {
             this._tipDom.style.left = this._checkX(pos.x - this.offsetX - this._tipDom.offsetWidth) + "px";
         };
     }
@@ -157,8 +191,8 @@ export default class Tips extends Component {
         var me = this;
         this._tipDom = document.createElement("div");
         this._tipDom.className = "chart-tips";
-        this._tipDom.style.cssText += "；-moz-border-radius:" + this.borderRadius + "; -webkit-border-radius:" + this.borderRadius + "; border-radius:" + this.borderRadius + ";background:" + this.fillStyle + ";border:1px solid " + this.strokeStyle + ";visibility:hidden;position:absolute;enabled:inline-block;*enabled:inline;*zoom:1;padding:6px;color:" + this.fontColor + ";line-height:1.5"
-        this._tipDom.style.cssText += "; -moz-box-shadow:1px 1px 3px " + this.strokeStyle + "; -webkit-box-shadow:1px 1px 3px " + this.strokeStyle + "; box-shadow:1px 1px 3px " + this.strokeStyle + ";"
+        this._tipDom.style.cssText += "; border-radius:" + this.borderRadius + "px;background:" + this.fillStyle + ";border:1px solid " + this.strokeStyle + ";visibility:hidden;position:absolute;enabled:inline-block;*enabled:inline;*zoom:1;padding:6px;color:" + this.fontColor + ";line-height:1.5"
+        this._tipDom.style.cssText += "; box-shadow:1px 1px 3px " + this.strokeStyle + ";"
         this._tipDom.style.cssText += "; border:none;white-space:nowrap;word-wrap:normal;"
         this._tipDom.style.cssText += "; text-align:left;"
         this.tipDomContainer.appendChild(this._tipDom);

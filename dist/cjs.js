@@ -27152,9 +27152,9 @@ function (_Component) {
           _icon.context.fillStyle = !obj.enabled ? "#ccc" : obj.color || "#999";
 
           if (obj.enabled) {
-            app.show(obj.name, new Trigger(this, obj));
+            me.app.show(obj.name, new Trigger(this, obj));
           } else {
-            app.hide(obj.name, new Trigger(this, obj));
+            me.app.hide(obj.name, new Trigger(this, obj));
           }
         });
       });
@@ -28082,29 +28082,9 @@ function (_Component) {
     _this = _possibleConstructorReturn(this, _getPrototypeOf(MarkLine).call(this, opt, app));
     _this.name = "markLine";
     _this._yAxis = null;
-    _this.field = null;
-    _this.markTo = null; //默认给所有字段都现实一条markline，有设置的话，配置给固定的几个 field 显示markline
-
-    _this.yVal = 0; //y 的值，可能是个function，均值计算就是个function
-
     _this.line = {
       y: 0,
-      list: [],
-      strokeStyle: '#999',
-      lineWidth: 1,
-      smooth: false,
-      lineType: 'dashed'
-    };
-    _this.label = {
-      enabled: false,
-      fillStyle: '#999999',
-      fontSize: 12,
-      text: null,
-      //"markline",
-      lineType: 'dashed',
-      lineWidth: 1,
-      strokeStyle: "white",
-      format: null
+      list: []
     };
     _this._txt = null;
     _this._line = null;
@@ -28112,7 +28092,8 @@ function (_Component) {
 
     _this.app.graphsSprite.addChild(_this.sprite);
 
-    opt && _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), opt);
+    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(MarkLine.defaultProps), opt);
+
     return _this;
   }
 
@@ -28192,7 +28173,7 @@ function (_Component) {
         _fstyle = fieldMap.color;
       }
       var lineStrokeStyle = opt.line && opt.line.strokeStyle || _fstyle;
-      var textFillStyle = opt.label && opt.label.fillStyle || _fstyle; //开始计算赋值到属性上面
+      var textFillStyle = opt.label && opt.label.fontColor || _fstyle; //开始计算赋值到属性上面
 
       this._yAxis = _yAxis;
       this.width = _coord.width;
@@ -28203,8 +28184,7 @@ function (_Component) {
         y: _coord.origin.y
       };
       this.line.list = [[0, 0], [this.width, 0]];
-      this.label.fillStyle = textFillStyle;
-      this.field = field;
+      this.label.fontColor = textFillStyle;
 
       if (lineStrokeStyle) {
         this.line.strokeStyle = lineStrokeStyle;
@@ -28328,6 +28308,60 @@ function (_Component) {
   return MarkLine;
 }(component);
 
+_defineProperty(MarkLine, "defaultProps", {
+  markTo: {
+    detail: '标准哪个目标字段',
+    default: null
+  },
+  yVal: {
+    detail: '组件的值',
+    default: 0,
+    documentation: '可能是个function，均值计算就是个function'
+  },
+  line: {
+    detail: '线的配置',
+    propertys: {
+      strokeStyle: {
+        detail: '线的颜色',
+        default: '#999999'
+      },
+      lineWidth: {
+        detail: '线宽',
+        default: 1
+      },
+      lineType: {
+        detail: '线样式',
+        default: 'dashed'
+      }
+    }
+  },
+  label: {
+    detail: '文本',
+    propertys: {
+      enabled: {
+        detail: '是否开启',
+        default: false
+      },
+      fontColor: {
+        detail: '文本字体颜色',
+        default: '#999999'
+      },
+      fontSize: {
+        detail: '文本字体大小',
+        default: 12
+      },
+      text: {
+        detail: '文本内容',
+        default: null
+      },
+      format: {
+        detail: '文本格式化函数',
+        default: null
+      }
+    }
+  }
+});
+
 var Rect$b = Canvax.Shapes.Rect;
 var Line$8 = Canvax.Shapes.Line;
 
@@ -28352,33 +28386,12 @@ function (_Component) {
 
     _this.dH = 0; //html的tips内容Height
 
-    _this.borderRadius = "5px"; //背景框的 圆角 
-
-    _this.sprite = null;
-    _this.content = null; //tips的详细内容
-
-    _this.fillStyle = "rgba(255,255,255,0.95)"; //"#000000";
-
-    _this.fontColor = "#999";
-    _this.strokeStyle = "#ccc";
-    _this.position = "right"; //在鼠标的左（右）边
-
     _this._tipDom = null;
-    _this.offsetX = 10; //tips内容到鼠标位置的偏移量x
-
-    _this.offsetY = 10; //tips内容到鼠标位置的偏移量y
-    //所有调用tip的 event 上面 要附带有符合下面结构的eventInfo属性
+    _this._tipsPointer = null; //所有调用tip的 event 上面 要附带有符合下面结构的eventInfo属性
     //会deepExtend到this.indo上面来
 
     _this.eventInfo = null;
-    _this.positionInRange = true; //false; //tip的浮层是否限定在画布区域
-
-    _this.enabled = true; //tips是默认显示的
-
-    _this.pointer = 'line'; //tips的指针,默认为直线，可选为：'line' | 'region'(柱状图中一般用region)
-
-    _this.pointerAnim = true;
-    _this._tipsPointer = null;
+    _this.sprite = null;
     _this.sprite = new Canvax.Display.Sprite({
       id: "TipSprite"
     });
@@ -28391,7 +28404,7 @@ function (_Component) {
       me._tipDom = null;
     });
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), opt);
+    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(Tips.defaultProps), opt);
 
     return _this;
   }
@@ -28491,7 +28504,7 @@ function (_Component) {
 
       this._tipDom.style.cssText += ";visibility:visible;left:" + x + "px;top:" + y + "px;-webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;";
 
-      if (this.position == "left") {
+      if (this.positionOfPoint == "left") {
         this._tipDom.style.left = this._checkX(pos.x - this.offsetX - this._tipDom.offsetWidth) + "px";
       }
     }
@@ -28504,8 +28517,8 @@ function (_Component) {
     value: function _creatTipDom(e) {
       this._tipDom = document.createElement("div");
       this._tipDom.className = "chart-tips";
-      this._tipDom.style.cssText += "；-moz-border-radius:" + this.borderRadius + "; -webkit-border-radius:" + this.borderRadius + "; border-radius:" + this.borderRadius + ";background:" + this.fillStyle + ";border:1px solid " + this.strokeStyle + ";visibility:hidden;position:absolute;enabled:inline-block;*enabled:inline;*zoom:1;padding:6px;color:" + this.fontColor + ";line-height:1.5";
-      this._tipDom.style.cssText += "; -moz-box-shadow:1px 1px 3px " + this.strokeStyle + "; -webkit-box-shadow:1px 1px 3px " + this.strokeStyle + "; box-shadow:1px 1px 3px " + this.strokeStyle + ";";
+      this._tipDom.style.cssText += "; border-radius:" + this.borderRadius + "px;background:" + this.fillStyle + ";border:1px solid " + this.strokeStyle + ";visibility:hidden;position:absolute;enabled:inline-block;*enabled:inline;*zoom:1;padding:6px;color:" + this.fontColor + ";line-height:1.5";
+      this._tipDom.style.cssText += "; box-shadow:1px 1px 3px " + this.strokeStyle + ";";
       this._tipDom.style.cssText += "; border:none;white-space:nowrap;word-wrap:normal;";
       this._tipDom.style.cssText += "; text-align:left;";
       this.tipDomContainer.appendChild(this._tipDom);
@@ -28777,6 +28790,58 @@ function (_Component) {
 
   return Tips;
 }(component);
+
+_defineProperty(Tips, "defaultProps", {
+  enabled: {
+    detail: '是否开启Tips',
+    default: true
+  },
+  content: {
+    detail: '自定义tips的内容（html）',
+    default: null
+  },
+  borderRadius: {
+    detail: 'tips的边框圆角半径',
+    default: 5
+  },
+  strokeStyle: {
+    detail: 'tips边框颜色',
+    default: '#ccc'
+  },
+  fillStyle: {
+    detail: 'tips背景色',
+    default: 'rgba(255,255,255,0.95)'
+  },
+  fontColor: {
+    detail: 'tips文本颜色',
+    default: '#999999'
+  },
+  positionOfPoint: {
+    detail: '在触发点的位置',
+    default: 'right'
+  },
+  offsetX: {
+    detail: 'tips内容到鼠标位置的偏移量x',
+    default: 10
+  },
+  offsetY: {
+    detail: 'tips内容到鼠标位置的偏移量y',
+    default: 10
+  },
+  positionInRange: {
+    detail: 'tip的浮层是否限定在画布区域',
+    default: true
+  },
+  pointer: {
+    detail: '触发tips的时候的指针样式',
+    default: 'line',
+    documentation: 'tips的指针,默认为直线，可选为："line" | "region"(柱状图中一般用region)'
+  },
+  pointerAnim: {
+    detail: 'tips移动的时候，指针是否开启动画',
+    default: true
+  }
+});
 
 var Line$9 = Canvax.Shapes.Line;
 
@@ -29193,8 +29258,6 @@ function (_Component) {
   return theme;
 }(component);
 
-var Text$7 = Canvax.Display.Text;
-
 var waterMark =
 /*#__PURE__*/
 function (_Component) {
@@ -29209,15 +29272,8 @@ function (_Component) {
     _this.name = "waterMark";
     _this.width = _this.app.width;
     _this.height = _this.app.height;
-    _this.text = "chartx";
-    _this.fontSize = 20;
-    _this.fontColor = "#ccc";
-    _this.strokeStyle = "#ccc";
-    _this.lineWidth = 0;
-    _this.alpha = 0.2;
-    _this.rotation = 45;
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), opt);
+    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(waterMark.defaultProps), opt);
 
     _this.spripte = new Canvax.Display.Sprite({
       id: "watermark"
@@ -29252,8 +29308,6 @@ function (_Component) {
             context: {
               rotation: this.rotation,
               fontSize: this.fontSize,
-              strokeStyle: this.strokeStyle,
-              lineWidth: this.lineWidth,
               fillStyle: this.fontColor,
               globalAlpha: this.alpha
             }
@@ -29269,6 +29323,29 @@ function (_Component) {
 
   return waterMark;
 }(component);
+
+_defineProperty(waterMark, "defaultProps", {
+  text: {
+    detail: '水印内容',
+    default: 'chartx'
+  },
+  fontSize: {
+    detail: '字体大小',
+    default: 20
+  },
+  fontColor: {
+    detail: '水印颜色',
+    default: '#cccccc'
+  },
+  alpha: {
+    detail: '水印透明度',
+    default: 0.2
+  },
+  rotation: {
+    detail: '水印旋转角度',
+    default: 45
+  }
+});
 
 var Line$a = Canvax.Shapes.Line;
 
@@ -29398,32 +29475,22 @@ _defineProperty(Cross, "defaultProps", {
   }
 });
 
-var _default =
+var lineSchedu =
 /*#__PURE__*/
 function (_Component) {
-  _inherits(_default, _Component);
+  _inherits(lineSchedu, _Component);
 
-  function _default(opt, app) {
+  function lineSchedu(opt, app) {
     var _this;
 
-    _classCallCheck(this, _default);
+    _classCallCheck(this, lineSchedu);
 
-    _this = _possibleConstructorReturn(this, _getPrototypeOf(_default).call(this, opt, app));
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(lineSchedu).call(this, opt, app));
     _this.name = "lineSchedu";
-    _this.data = null;
+
+    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(lineSchedu.defaultProps), opt);
+
     _this.lineDatas = null;
-    _this.lineField = null;
-    _this.style = "#3995ff";
-    _this.fillStyle = "#fff";
-    _this.lineWidth = 2;
-    _this.radius = 6;
-    _this.timeFontSize = 14;
-    _this.timeFontColor = "#606060";
-    _this.listFontSize = 12;
-    _this.listFontColor = null;
-
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), opt);
-
     _this.sprite = new Canvax.Display.Sprite();
 
     _this.app.graphsSprite.addChild(_this.sprite);
@@ -29431,13 +29498,12 @@ function (_Component) {
     return _this;
   }
 
-  _createClass(_default, [{
+  _createClass(lineSchedu, [{
     key: "reset",
     value: function reset(opt) {
       _.extend(true, this, opt);
 
       this.lineDatas = null;
-      this.data = null;
       this.sprite.removeAllChildren();
       this.draw();
     }
@@ -29576,8 +29642,43 @@ function (_Component) {
     }
   }]);
 
-  return _default;
+  return lineSchedu;
 }(component);
+
+_defineProperty(lineSchedu, "defaultProps", {
+  lineField: {
+    detail: '对应的line字段',
+    default: null
+  },
+  style: {
+    detail: '默认色',
+    default: '#3995ff'
+  },
+  fillStyle: {
+    detail: '节点填充色',
+    default: "#ffffff"
+  },
+  lineWidth: {
+    detail: '线宽',
+    default: 2
+  },
+  radius: {
+    detail: '圆点半径',
+    default: 6
+  },
+  timeFontSize: {
+    detail: '时间文本大小',
+    default: 14
+  },
+  timeFontColor: {
+    detail: '时间文本颜色',
+    default: '#606060'
+  },
+  listFontSize: {
+    detail: '列表信息文本大小',
+    default: 12
+  }
+});
 
 global$1.registerComponent(Chart, 'chart'); //global.registerComponent( emptyCoord, 'coord' );
 
@@ -29604,7 +29705,7 @@ global$1.registerComponent(barTgi, 'barTgi');
 global$1.registerComponent(barGuide, 'barGuide');
 global$1.registerComponent(waterMark, 'waterMark');
 global$1.registerComponent(Cross, 'cross');
-global$1.registerComponent(_default, 'lineSchedu'); //皮肤设定begin ---------------
+global$1.registerComponent(lineSchedu, 'lineSchedu'); //皮肤设定begin ---------------
 //如果数据库中有项目皮肤
 
 var projectTheme = []; //从数据库中查询出来设计师设置的项目皮肤

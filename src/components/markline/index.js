@@ -1,6 +1,6 @@
 import Component from "../component"
 import Canvax from "canvax"
-import { _ } from "mmvis"
+import { _ ,getDefaultProps} from "mmvis"
 
 const BrokenLine = Canvax.Shapes.BrokenLine;
 const Sprite = Canvax.Display.Sprite;
@@ -8,37 +8,70 @@ const Text = Canvax.Display.Text;
 
 export default class MarkLine extends Component
 {
+    static defaultProps = {
+        markTo : {
+            detail : '标准哪个目标字段',
+            default : null
+        },
+        yVal : {
+            detail: '组件的值',
+            default: 0,
+            documentation: '可能是个function，均值计算就是个function'
+        },
+        line : {
+            detail : '线的配置',
+            propertys: {
+                strokeStyle : {
+                    detail : '线的颜色',
+                    default: '#999999'
+                },
+                lineWidth : {
+                    detail : '线宽',
+                    default: 1
+                },
+                lineType : {
+                    detail : '线样式',
+                    default: 'dashed'
+                }
+            }
+        },
+        label : {
+            detail : '文本',
+            propertys : {
+                enabled : {
+                    detail : '是否开启',
+                    default: false
+                },
+                fontColor: {
+                    detail : '文本字体颜色',
+                    default: '#999999'
+                },
+                fontSize: {
+                    detail : '文本字体大小',
+                    default: 12
+                },
+                text : {
+                    detail : '文本内容',
+                    default: null
+                },
+                format : {
+                    detail : '文本格式化函数',
+                    default: null
+                }
+            }
+        }
+    }
+
     constructor(opt , app)
     {
         super(opt , app);
-
         this.name = "markLine";
 
         this._yAxis = null;
 
-        this.field  = null;
-
-        this.markTo = null; //默认给所有字段都现实一条markline，有设置的话，配置给固定的几个 field 显示markline
-        this.yVal = 0;     //y 的值，可能是个function，均值计算就是个function
-        
         this.line       = {
             y           : 0,
-            list        : [],
-            strokeStyle : '#999',
-            lineWidth   : 1,
-            smooth      : false,
-            lineType    : 'dashed'
-        };
-
-        this.label = {
-            enabled     : false,
-            fillStyle   : '#999999',
-            fontSize    : 12,
-            text        : null, //"markline",
-            lineType    : 'dashed',
-            lineWidth   : 1,
-            strokeStyle : "white",
-            format      : null
+            list        : []
         };
 
         this._txt = null;
@@ -47,7 +80,7 @@ export default class MarkLine extends Component
         this.sprite  = new Sprite();
         this.app.graphsSprite.addChild( this.sprite );
 
-        opt && _.extend(true, this, opt);
+        _.extend(true, this, getDefaultProps( MarkLine.defaultProps ), opt);
     }
 
     draw( ){
@@ -120,7 +153,7 @@ export default class MarkLine extends Component
             _fstyle = fieldMap.color;
         };
         var lineStrokeStyle =  opt.line && opt.line.strokeStyle || _fstyle;
-        var textFillStyle = opt.label && opt.label.fillStyle || _fstyle;
+        var textFillStyle = opt.label && opt.label.fontColor || _fstyle;
 
         //开始计算赋值到属性上面
         this._yAxis = _yAxis;
@@ -135,8 +168,8 @@ export default class MarkLine extends Component
             [0, 0],
             [this.width, 0]
         ];
-        this.label.fillStyle = textFillStyle;
-        this.field = field;
+        this.label.fontColor = textFillStyle;
+     
         if( lineStrokeStyle ){
             this.line.strokeStyle = lineStrokeStyle;
         };
