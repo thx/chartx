@@ -1,80 +1,190 @@
 import Canvax from "canvax"
 import {numAddSymbol} from "../../../utils/tools"
 import GraphsBase from "../index"
-import { _, event } from "mmvis"
+import { _, event, getDefaultProps } from "mmvis"
 
 const AnimationFrame = Canvax.AnimationFrame;
 const Rect = Canvax.Shapes.Rect;
 
 export default class BarGraphs extends GraphsBase
 {
+    static defaultProps = {
+        field : {
+            detail : '字段设置',
+            documentation : '支持二维数组格式的设置，一维方向就是横向分组，二维方向就是纵向的堆叠',
+            default: null
+        },
+        yAxisAlign : {
+            detail : '绘制在哪根y轴上面',
+            default: 'left'
+        },
+        absolute : {
+            detail : '是否脱离graphs的位置计算',
+            documentation: '\
+                trimGraphs的时候是否需要和其他的 bar graphs一起并排计算，\
+                true的话这个就会和别的重叠,\
+                和css中得absolute概念一致，脱离文档流的绝对定位',
+            default: false
+        },
+        proportion : {
+            detail: '比例柱状图',
+            default: false
+        },
+        node : {
+            detail : '单个数据对应的图形设置',
+            propertys : {
+                width : {
+                    detail : 'bar的宽度',
+                    default: 0
+                },
+                maxWidth : {
+                    detail : '最大width',
+                    default: 50
+                },
+                minWidth : {
+                    detail: '最小width',
+                    default: 1
+                },
+                minHeight : {
+                    detail : '最小height',
+                    default: 0
+                },
+                radius: {
+                    detail: '叶子节点的圆角半径',
+                    default: 3
+                },
+                fillStyle : {
+                    detail: 'bar填充色',
+                    default: null
+                },
+                fillAlpha : {
+                    detail: 'bar透明度',
+                    default: 0.95
+                },
+                xDis: {
+                    detail : '单分组内bar之间的间隔',
+                    default: null
+                },
+                filter: {
+                    detail: 'bar过滤处理器',
+                    default: null
+                }
+            }
+        },
+        label: {
+            detail: '文本设置',
+            propertys: {
+                enabled: {
+                    detail: '是否开启',
+                    default: false
+                },
+                fontColor: {
+                    detail: '文本颜色',
+                    default: null,
+                    documentation: '如果有设置text.fontColor那么优先使用fontColor'
+                },
+                fontSize: {
+                    detail: '文本字体大小',
+                    default: 12
+                },
+                format: {
+                    detail: '文本格式化处理函数',
+                    default: null
+                },
+                lineWidth: {
+                    detail: '文本描边线宽',
+                    default: 0
+                },
+                strokeStyle: {
+                    detail: '文本描边颜色',
+                    default: null
+                },
+                rotation: {
+                    detail: '旋转角度',
+                    default: 0
+                },
+                textAlign: {
+                    detail: '水平对齐方式',
+                    documentation: 'left center right',
+                    default: 'center'
+                },
+                verticalAlign: {
+                    detail: '垂直基线对齐方式',
+                    documentation: 'top middle bottom',
+                    default: 'bottom'
+                },
+                position: {
+                    detail: '文本布局位置',
+                    documentation: 'top,topRight,right,rightBottom,bottom,bottomLeft,left,leftTop,center',
+                    default: 'top'
+                },
+                offsetX : {
+                    detail: 'x偏移量',
+                    default: 0
+                },
+                offsetY: {
+                    detail: 'y偏移量',
+                    default: 0
+                }
+            }
+        },
+        select: {
+            detail: '分组选中',
+            documentation: '\
+                分组的选中，不是选中具体的某个node，这里的选中靠groupRegion来表现出来,\
+                目前只有在第一个graphs bar 上配置有效',
+            propertys: {
+                enabled : {
+                    detail: '是否开启',
+                    default: false
+                },
+                inds: {
+                    detail : '选中的分组索引集合',
+                    documentation: '选中的列的索引集合,注意，这里的ind不是当前视图的ind，而是加上了dataFrame.range.start的全局ind',
+                    default: []
+                },
+                width : {
+                    detail : '选中态背景宽度',
+                    default: 1
+                },
+                alpha : {
+                    detail: '选中态背景透明度',
+                    default: 0.2
+                },
+                fillStyle : {
+                    detail: '选中态背景填充色',
+                    default: null
+                },
+                triggerEventType: {
+                    detail: '触发选中效果的事件',
+                    default: 'click'
+                }
+            }
+        }
+    }
+
     constructor(opt, app)
     {
         super(opt, app);
-
         this.type = "bar";
 
-        this.field  = null;
         this.enabledField = null;
- 
-        this.yAxisAlign = "left"; //默认设置为左y轴
-
-        //trimGraphs的时候是否需要和其他的 bar graphs一起并排计算，true的话这个就会和别的重叠
-        //和css中得absolute概念一致，脱离文档流的绝对定位
-        this.absolute = false;
-        
-        this.proportion = false;//比例柱状图，比例图首先肯定是个堆叠图
 
         this.node = {
-            shapeType : 'rect',
-            width     : 0,
             _width    : 0,
-            maxWidth  : 50,
-            minWidth  : 1,
-            minHeight : 0,
-
-            radius    : 3,
-            fillStyle : null,
-            fillAlpha : 0.95,
-            _count    : 0, //总共有多少个bar
-            xDis      : null,
-            filter    : null
+            _count    : 0 //总共有多少个bar
         };
-
-        this.label = {
-            enabled   : false,
-            animation : true,
-            fontColor : null, //如果有设置text.fontColor那么优先使用fontColor
-            fontSize  : 12,
-            format    : null,
-            lineWidth : 0,
-            strokeStyle : null,
-
-            rotation : 0,
-            align : "center",  //left center right
-            verticalAlign : "bottom", //top middle bottom
-            position : "top", //top,topRight,right,rightBottom,bottom,bottomLeft,left,leftTop,center
-            offsetX : 0,
-            offsetY : 0
-        };
-        
         //分组的选中，不是选中具体的某个node，这里的选中靠groupRegion来表现出来
         //只有在第一个graphs bar 上配置有效
         this.select = {
-            enabled : false,
-            alpha : 0.2,
-            fillStyle : null,
-            _fillStyle : "#092848", //和bar.fillStyle一样可以支持array function
-            triggerEventType : "click",
-            width : 1,
-            inds : [] //选中的列的索引集合,注意，这里的ind不是当前视图的ind，而是加上了dataFrame.range.start的全局ind
+            _fillStyle : "#092848" //和bar.fillStyle一样可以支持array function
         };
 
         this._barsLen = 0;
 
         this.txtsSp = null;
 
-        _.extend(true, this, opt);
+        _.extend(true, this, getDefaultProps( BarGraphs.defaultProps ), opt);
 
         this.init();
 
@@ -515,7 +625,7 @@ export default class BarGraphs extends GraphsBase
                             fontSize    : me.label.fontSize,
                             lineWidth   : me.label.lineWidth,
                             strokeStyle : me.label.strokeStyle || finalPos.fillStyle,
-                            //textAlign   : me.label.align,
+                            //textAlign   : me.label.textAlign,
                             textBaseline: me.label.verticalAlign,
                             rotation      : me.label.rotation
                         };
@@ -797,15 +907,15 @@ export default class BarGraphs extends GraphsBase
     }
 
     _getTextAlign( bar , nodeData ){
-        var align = this.label.align;
+        var textAlign = this.label.textAlign;
         if( nodeData.value < nodeData.yOriginPoint.value ){
-            if( align == "left" ){
-                align = "right"
-            } else if( align == "right" ){
-                align = "left"
+            if( textAlign == "left" ){
+                textAlign = "right"
+            } else if( textAlign == "right" ){
+                textAlign = "left"
             }
         };
-        return align;
+        return textAlign;
     }
     
     _getTextPos( bar , nodeData ){

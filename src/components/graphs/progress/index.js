@@ -57,8 +57,8 @@ export default class Progress extends GraphsBase
                     detail : 'label旋转角度',
                     default: 0
                 },
-                align :{
-                    detail : 'label align',
+                textAlign :{
+                    detail : 'label textAlign',
                     default:  'center',
                     values :  ['left','center','right']
                 },  //left center right
@@ -108,7 +108,6 @@ export default class Progress extends GraphsBase
     constructor(opt, app)
     {
         super(opt, app);
-
         this.type = "progress";
 
         _.extend( true, this, getDefaultProps( Progress.defaultProps ), opt );
@@ -310,7 +309,7 @@ export default class Progress extends GraphsBase
                         fontSize    : me.label.fontSize,
                         lineWidth   : me.label.lineWidth,
                         strokeStyle : me.label.strokeStyle,
-                        textAlign   : me.label.align,
+                        textAlign   : me.label.textAlign,
                         textBaseline: me.label.verticalAlign,
                         rotation    : me.label.rotation
                     };

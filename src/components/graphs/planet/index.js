@@ -1,7 +1,7 @@
 import Canvax from "canvax"
 import GraphsBase from "../index"
 import Group from "./group"
-import { dataFrame,_ } from "mmvis"
+import { dataFrame,_,getDefaultProps } from "mmvis"
 
 const Text = Canvax.Display.Text;
 const Circle = Canvax.Shapes.Circle;
@@ -10,25 +10,102 @@ const Rect = Canvax.Shapes.Rect;
 
 export default class PlanetGraphs extends GraphsBase
 {
+    static defaultProps = {
+        field: {
+            detail : '字段设置',
+            default: null
+        },
+        center: {
+            detail: '中心点设置',
+            propertys : {
+                enabled: {
+                    detail: '是否显示中心',
+                    default: true
+                },
+                text : {
+                    detail: '中心区域文本',
+                    default: 'center'
+                },
+                radius: {
+                    detail: '中心圆半径',
+                    default: 30
+                },
+                fillStyle: {
+                    detail: '中心背景色',
+                    default: '#70629e'
+                },
+                fontSize: {
+                    detail: '中心字体大小',
+                    default: 15
+                },
+                fontColor: {
+                    detail: '中心字体颜色',
+                    default: '#ffffff'
+                },
+                margin : {
+                    detail: '中区区域和外围可绘图区域距离',
+                    default: 20
+                }
+            }
+        },
+        selectInds: {
+            detail: '选中的数据索引',
+            default: []
+        },
+
+        grid: {
+            detail: '星系图自己的grid',
+            propertys: {
+                rings: {
+                    detail: '环配置',
+                    propertys: {
+                        fillStyle: {
+                            detail: '背景色',
+                            default: null
+                        },
+                        strokeStyle: {
+                            detail: '环线色',
+                            default: null
+                        },
+                        lineWidth: {
+                            detail: '环线宽',
+                            default: 1
+                        },
+                        count: {
+                            detail: '分几环',
+                            default: 3
+                        }
+                    }
+                },
+                rays: {
+                    detail: '射线配置',
+                    propertys: {
+                        count: {
+                            detail: '射线数量',
+                            default: 0
+                        },
+                        globalAlpha: {
+                            detail: '线透明度',
+                            default: 0.4
+                        },
+                        strokeStyle: {
+                            detail: '线色',
+                            default: '#10519D'
+                        },
+                        lineWidth: {
+                            detail: '线宽',
+                            default: 1
+                        }
+                    }
+                }
+            }
+        }
+    }
     constructor(opt, app)
     {
         super( opt, app );
 
         this.type = "planet";
-
-        this.field = null;
-        
-        var me = this;
-        //圆心原点坐标
-        this.center = {
-            enabled   : true,
-            text      : "center",
-            radius    : 30,
-            fillStyle : "#70629e",
-            fontSize  : 15,
-            fontColor : "#ffffff",
-            margin    : 20 //最近ring到太阳的距离
-        };
 
         this.groupDataFrames = [];
         this.groupField = null;
@@ -37,23 +114,11 @@ export default class PlanetGraphs extends GraphsBase
         //planet自己得grid，不用polar的grid
         this.grid = {
             rings : {
-                fillStyle : null,
-                strokeStyle: null,
-                lineWidth : 1,
-                section: [], //环形刻度线集合
-                count: 3 //在 section.length>1 的时候会被修改为 section.length
-            },
-            rays : {
-                count : 0,
-                lineWidth : 1,
-                strokeStyle : "#10519D",
-                globalAlpha : 0.4
+                _section: []
             }
         };
 
-        this.selectInds = []; //源数据中__index__的集合，外面可以传入这个数据进来设置选中
-
-        _.extend( true, this , opt );
+        _.extend( true, this , getDefaultProps(PlanetGraphs.defaultProps), opt );
 
         if( this.center.radius == 0 || !this.center.enabled ){
             this.center.radius = 0;
@@ -132,7 +197,7 @@ export default class PlanetGraphs extends GraphsBase
 
             me._ringGroups.push( _g );
 
-            me.grid.rings.section.push({
+            me.grid.rings._section.push({
                 radius : _g.rRange.to
             });
             
@@ -177,24 +242,24 @@ export default class PlanetGraphs extends GraphsBase
         var me = this;
         var _coord = this.app.getComponent({name:'coord'});
         
-        if( me.grid.rings.section.length == 1 ){
+        if( me.grid.rings._section.length == 1 ){
 
             //如果只有一个，那么就强制添加到3个
-            var _diffR = (me.grid.rings.section[0].radius - me.center.radius) / me.grid.rings.count;
-            me.grid.rings.section = [];
+            var _diffR = (me.grid.rings._section[0].radius - me.center.radius) / me.grid.rings.count;
+            me.grid.rings._section = [];
             for( var i=0;i<me.grid.rings.count ; i++ ){
-                me.grid.rings.section.push({
+                me.grid.rings._section.push({
                     radius : me.center.radius + _diffR*(i+1)
                 });
             }
 
         } else {
-            me.grid.rings.count = me.grid.rings.section.length;
+            me.grid.rings.count = me.grid.rings._section.length;
         };
 
         
-        for( var i=me.grid.rings.section.length-1 ; i>=0 ; i-- ){
-            var _scale = me.grid.rings.section[i];
+        for( var i=me.grid.rings._section.length-1 ; i>=0 ; i-- ){
+            var _scale = me.grid.rings._section[i];
             me.gridSp.addChild( new Circle({
                 context : {
                     x : _coord.origin.x,
@@ -215,8 +280,8 @@ export default class PlanetGraphs extends GraphsBase
             var itemAng = 360 / me.grid.rays.count;
             var _r = _coord.getMaxDisToViewOfOrigin(); //Math.max( me.w, me.h );
 
-            if( me.grid.rings.section.length ){
-                _r = me.grid.rings.section.slice(-1)[0].radius
+            if( me.grid.rings._section.length ){
+                _r = me.grid.rings._section.slice(-1)[0].radius
             }
 
             for( var i=0,l=me.grid.rays.count; i<l; i++ ){
@@ -264,7 +329,7 @@ export default class PlanetGraphs extends GraphsBase
             res = p.apply( this , [ {
                 //iGroup : iGroup,
                 scaleInd : i,
-                count : this.grid.rings.section.length,
+                count : this.grid.rings._section.length,
 
                 groups : this._ringGroups,
                 graphs : this

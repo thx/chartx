@@ -1,6 +1,6 @@
 import Canvax from "canvax"
 import GraphsBase from "../index"
-import { _,event } from "mmvis"
+import { _,event,getDefaultProps } from "mmvis"
 
 const Circle = Canvax.Shapes.Circle;
 const Rect = Canvax.Shapes.Rect;
@@ -8,91 +8,203 @@ const Line = Canvax.Shapes.Line;
 
 export default class ScatGraphs extends GraphsBase
 {
+    static defaultProps = {
+        field: {
+            detail: '字段配置',
+            default: null
+        },
+        aniOrigin: {
+            detail: '节点动画的原点',
+            default:'default',
+            documentation: '可选的还有center（坐标正中）、origin（坐标原点）'
+        },
+        node: {
+            detail: '单数据节点图形设置',
+            propertys: {
+                shapeType: {
+                    detail: '图形类型',
+                    default: 'circle',
+                    documentation: '节点的现状可以是圆 ，也可以是rect，也可以是三角形，后面两种后面实现'
+                },
+                maxRadius: {
+                    detail: '节点最大半径',
+                    default: 25
+                },
+                minRadius: {
+                    detail: '节点最小半径',
+                    default: 5
+                },
+                radius: {
+                    detail: '半径',
+                    default: null
+                },
+                normalRadius: {
+                    detail: '默认半径',
+                    default: 15
+                },
+                fillStyle: {
+                    detail: '节点景色',
+                    default: null
+                },
+                fillAlpha: {
+                    detail: '节点透明度',
+                    default: 0.8
+                },
+                strokeStyle: {
+                    detail: '节点描边颜色',
+                    default: null
+                },
+                lineWidth: {
+                    detail: '节点描边线宽',
+                    default: 0
+                },
+                lineAlpha: {
+                    detail : '节点描边透明度',
+                    default: 0
+                },
+
+                focus: {
+                    detail: "节点hover态设置",
+                    propertys: {
+                        enabled: {
+                            detail: '是否开启',
+                            default: true
+                        },
+                        lineWidth: {
+                            detail: 'hover后的边框大小',
+                            default: 6
+                        },
+                        lineAlpha: {
+                            detail: 'hover后的边框透明度',
+                            default: 0.2
+                        },
+                        fillAlpha: {
+                            detail: 'hover后的背景透明度',
+                            default: 0.8
+                        }
+                    }
+                },
+
+                select: {
+                    detail: "节点选中态设置",
+                    propertys: {
+                        enabled: {
+                            detail: '是否开启',
+                            default: false
+                        },
+                        lineWidth: {
+                            detail: '选中后的边框大小',
+                            default: 8
+                        },
+                        lineAlpha: {
+                            detail: '选中后的边框透明度',
+                            default: 0.4
+                        },
+                        fillAlpha: {
+                            detail: '选中后的背景透明度',
+                            default: 1
+                        }
+                    }
+                }
+            }
+        },
+        line: {
+            detail: '每个节点和指标轴线的连线',
+            propertys: {
+                enabled: {
+                    detail: '是否开启',
+                    default: false
+                },
+                lineWidth: {
+                    detail: '连线宽',
+                    default: 1
+                },
+                strokeStyle: {
+                    detail: '连线颜色',
+                    default: '#ccc'
+                },
+                lineType: {
+                    detail: '连线类型',
+                    default: 'dashed'
+                }
+            }
+        },
+        label: {
+            detail: '文本设置',
+            propertys: {
+                enabled: {
+                    detail: '是否开启',
+                    default: true
+                },
+                field: {
+                    detail: '获取label的字段',
+                    default: null
+                },
+                format: {
+                    detail: 'label格式化处理函数',
+                    default:function(txt, nodeData){ 
+                        return txt 
+                    }
+                },
+                fontSize: {
+                    detail: 'label字体大小',
+                    default: 13
+                },
+                fontColor: {
+                    detail: '字体颜色',
+                    default: '#888'
+                },
+                strokeStyle: {
+                    detail: '字体描边颜色',
+                    default: '#ffffff'
+                },
+                lineWidth: {
+                    detail: '描边大小',
+                    default: 0
+                },
+
+                textAlign: {
+                    detail: '水平对齐方式',
+                    default:'center'
+                },
+                verticalAlign: {
+                    detail: '垂直基线对齐方式',
+                    default:'middle'
+                },
+                position: {
+                    detail: '文本布局位置',
+                    documentation:'auto(目前等于center，还未实现),center,top,right,bottom,left',
+                    default:'center'
+                },
+                offsetX: {
+                    detail: 'x方向偏移量',
+                    default: 0
+                },
+                offsetY: {
+                    detail: 'y方向偏移量',
+                    default: 0
+                }
+            }
+        }
+    }
+
     constructor(opt, app)
     {
         super( opt, app );
-
         this.type = "scat";
-
-        this.field  = null;
-
-        //TODO:待开发，用groupField来做分组，比如分组出男女两组，然后方便做图例（目前没给scat实现合适的图例）
-        this.groupField = null; 
-
-        this.node = {
-            shapeType : "circle", //节点的现状可以是圆 ，也可以是rect，也可以是三角形，后面两种后面实现
-            maxRadius : 25,  //圆圈默认最大半径
-            minRadius : 5,
-            radius    : null,
-            normalR   : 15,
-            fillStyle : null,
-            fillAlpha : 0.8,
-
-            strokeStyle : null,
-            lineWidth   : 0,
-            lineAlpha   : 0,
-            
-            focus : {
-                enabled : true,
-                lineWidth : 6,
-                lineAlpha : 0.2,
-                fillAlpha : 0.8
-            },
-            select : {
-                enabled : true,
-                lineWidth : 8,
-                lineAlpha : 0.4,
-                fillAlpha : 1
-            }
-
-            //onclick ondblclick 注册的事件都是小写
-        };
-
-        //从node点到垂直坐标y==0的连线
-        //气球的绳子
-        this.line = {
-            enabled: false,
-            lineWidth : 1,
-            strokeStyle : "#ccc",
-            lineType : "dashed"
-        };
-        
-        this.label = {
-            enabled : true,
-            field : null,
-            format : function(txt, nodeData){ 
-                return txt 
-            },
-            fontSize: 13,
-            fontColor: "#888",//"#888",//如果外面设置为null等false值，就会被自动设置为nodeData.fillStyle
-            strokeStyle : "#ffffff",
-            lineWidth : 0,
-
-            //rotation : 0, //柱状图中有需求， 这里没有目前
-            align : "center",  //left center right
-            verticalAlign : "middle", //top middle bottom
-            position : "center", //auto(目前等于center，还未实现),center,top,right,bottom,left
-            offsetX : 0,
-            offsetY : 0
-        };
-
-        //动画的起始位置， 默认x=data.x y = 0
-        this.aniOrigin = "default" //center（坐标正中） origin（坐标原点）
-        
-        _.extend( true, this , opt );
 
         //计算半径的时候需要用到， 每次执行_trimGraphs都必须要初始化一次
         this._rData = null;
         this._rMaxValue = null;
         this._rMinValue = null;
 
+        _.extend( true, this , getDefaultProps(ScatGraphs.defaultProps), opt );
 
-        this.init( );
+        this.init();
     }
 
     init()
     {
-
         this._shapesp = new Canvax.Display.Sprite({ 
             id : "shapesp"
         });
@@ -208,7 +320,7 @@ export default class ScatGraphs extends GraphsBase
     _setR( nodeLayoutData )
     {
 
-        var r = this.node.normalR;
+        var r = this.node.normalRadius;
         var rowData = nodeLayoutData.rowData;
         if( this.node.radius != null ){
             if( _.isString( this.node.radius ) && rowData[ this.node.radius ] ){
@@ -485,7 +597,7 @@ export default class ScatGraphs extends GraphsBase
             fontSize: fontSize,
             strokeStyle : this.label.strokeStyle || _context.fillStyle,
             lineWidth : this.label.lineWidth,
-            textAlign : this.label.align,
+            textAlign : this.label.textAlign,
             textBaseline : this.label.verticalAlign
         };
 

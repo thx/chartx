@@ -1,60 +1,112 @@
 import Canvax from "canvax"
 import GraphsBase from "../index"
 import cloudLayout from "../../../layout/cloud"
-import { _,event } from "mmvis"
+import { _,event,getDefaultProps } from "mmvis"
 
 const Text = Canvax.Display.Text;
 
 export default class CloudGraphs extends GraphsBase
 {
+    static defaultProps = {
+        field : {
+            detail : '字段配置',
+            default: null
+        },
+        node : {
+            detail : '节点文字配置',
+            propertys : {
+                fontFamily : {
+                    detail: '字体设置',
+                    default: 'Impact'
+                },
+                fontColor : {
+                    detail: '文字颜色',
+                    default: '#999'
+                },
+                fontSize : {
+                    detail: '文本字体大小',
+                    default: function(){
+                        //fontSize默认12-50的随机值
+                        return this.minFontSize + Math.random() * this.maxFontSize;
+                    }
+                },
+                maxFontSize: {
+                    detail: '文本最大字体大小',
+                    default: 30
+                },
+                minFontSize: {
+                    detail: '文本最小字体大小',
+                    default: 16
+                },
+                fontWeight: {
+                    detail : 'fontWeight',
+                    default: 'normal'
+                },
+                format : {
+                    detail: '文本格式化处理函数',
+                    default: null
+                },
+                padding : {
+                    detail: '文本间距',
+                    default: 10
+                },
+                rotation : {
+                    detail: '文本旋转角度',
+                    default: function(){
+                        return (~~(Math.random() * 6) - 3) * 30;
+                    }
+                },
+                strokeStyle: {
+                    detail: '文本描边颜色',
+                    default: null
+                },
+                select : {
+                    detail: '文本选中效果',
+                    propertys: {
+                        enabled: {
+                            detail: '是否开启选中',
+                            default: true
+                        },
+                        lineWidth: {
+                            detail: '选中后的文本描边宽',
+                            default: 2
+                        },
+                        strokeStyle: {
+                            detail: '选中后的文本描边色',
+                            default: '#666'
+                        }
+                    }
+                },
+                focus : {
+                    detail: '文本hover效果',
+                    propertys: {
+                        enabled: {
+                            detail: '是否开启hover效果',
+                            default: true
+                        }
+                    }
+                }
+            }
+        }
+    }
     constructor(opt, app)
     {
         super( opt, app );
 
         this.type = "cloud";
-
-        this.field = null;
-
         var me = this;
 
         //坚持一个数据节点的设置都在一个node下面
         this.node = {
-            fontFamily  : "Impact",
-            fontColor   : function( nodeData ){
-                return me.app.getTheme( nodeData.iNode )
-            },
-            fontSize    : function(){
-                //fontSize默认12-50的随机值
-                return this.minFontSize + Math.random() * this.maxFontSize;
-            },
-            maxFontSize : 30,
             _maxFontSizeVal : 0, //fontSizer如果配置为一个field的话， 找出这个field数据的最大值
-            minFontSize : 16,
             _minFontSizeVal : null,//fontSizer如果配置为一个field的话， 找出这个field数据的最小值
-
-            fontWeight : "normal",
-
-            format : function( str, tag ){ return str},
-
-            padding : 10,
-
-            rotation : function(){
-                return (~~(Math.random() * 6) - 3) * 30;
-            },
-
-            strokeStyle: null,
-            focus : {
-                enabled : true
-            },
-            select : {
-                enabled : true,
-                lineWidth : 2,
-                strokeStyle : "#666"
-            }
         };
 
-        _.extend( true, this , opt );
+        _.extend( true, this , getDefaultProps( CloudGraphs.defaultProps ), opt );
 
+        this.node.fontColor = function( nodeData ){
+            return me.app.getTheme( nodeData.iNode )
+        };
         this.init( );
     }
 
@@ -163,7 +215,12 @@ export default class CloudGraphs extends GraphsBase
                 };
 
                 tag.fontColor = me._getFontColor( tag );
-                tag.text = me.node.format(d, tag) || d;
+
+                var _txt = d;
+                if( me.node.format ){
+                    _txt = me.node.format( d, tag );
+                };
+                tag.text = _txt || d;
 
                 return tag
             }))

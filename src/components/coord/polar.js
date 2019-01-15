@@ -33,13 +33,6 @@ export default class Polar extends coorBase
             default       : 0,
             values        : [0, 360]
         },
-        squareRange : {
-            detail : '是否正方形的坐标区域',
-            documentation : "",
-            default       : true,
-            values        : [true, false]
-        },
-        
         radius : {
             detail : '坐标系的最大半径',
             documentation : "默认自动计算view的高宽，如果squareRange==true，则会取Math.min(width,height)",

@@ -1,15 +1,141 @@
 import Canvax from "canvax"
-import { _,event } from "mmvis"
+import { _,event,getDefaultProps } from "mmvis"
 
-const Text = Canvax.Display.Text;
 const Circle = Canvax.Shapes.Circle;
-
 
 export default class PlanetGroup
 {
+    static defaultProps = {
+        sort : {
+            detail: '排序',
+            default: 'desc'
+        },
+        sortField: {
+            detail: '用来排序的字段',
+            default: 'null'
+        },
+        node: {
+            detail: '单个数据节点图形配置',
+            propertys : {
+                maxRadius: {
+                    detail: '最大半径',
+                    default:30
+                },
+                minRadius: {
+                    detail: '最小半径',
+                    default: 5
+                },
+                radius: {
+                    detail: '半径',
+                    default:15,
+                    documentation: '也可以是个function,也可以配置{field:"pv"}来设置字段， 自动计算r'
+                },
+                lineWidth: {
+                    detail: '描边线宽',
+                    default: 1
+                },
+                strokeStyle: {
+                    detail: '描边颜色',
+                    default:'#ffffff'
+                },
+                fillStyle: {
+                    detail: '图形填充色',
+                    default:'#f2fbfb'
+                },
+                lineAlpha: {
+                    detail: '边框透明度',
+                    default: 0.6
+                },
+
+                focus: {
+                    detail: 'hover态设置',
+                    propertys: {
+                        enabled: {
+                            detail: '是否开启',
+                            default:true
+                        },
+                        lineAlpha: {
+                            detail: 'hover时候边框透明度',
+                            default: 0.7
+                        },
+                        lineWidth: {
+                            detail: 'hover时候边框大小',
+                            default: 2
+                        },
+                        strokeStyle: {
+                            detail: 'hover时候边框颜色',
+                            default: '#fff'
+                        }
+                    }
+                },
+
+                select: {
+                    detail: '选中态设置',
+                    propertys: {
+                        enabled: {
+                            detail: '是否开启',
+                            default:false
+                        },
+                        lineAlpha: {
+                            detail: '选中时候边框透明度',
+                            default:1
+                        },
+                        lineWidth: {
+                            detail: '选中时候边框大小',
+                            default:2
+                        },
+                        strokeStyle: {
+                            detail: '选中时候边框颜色',
+                            default:'#fff'
+                        },
+                        triggerEventType: {
+                            detail: '触发事件',
+                            default:'click'
+                        }
+                    }
+                }
+            }
+        },
+        label: {
+            detail: '文本设置',
+            propertys: {
+                enabled: {
+                    detail: '是否开启',
+                    default:true
+                },
+                fontColor: {
+                    detail: '文本颜色',
+                    default:'#666666'
+                },
+                fontSize: {
+                    detail: '文本字体大小',
+                    default:13
+                },
+                textAlign: {
+                    detail: '水平对齐方式',
+                    default:'center'
+                },
+                verticalAlign: {
+                    detail: '基线对齐方式',
+                    default: 'middle'
+                },
+                position: {
+                    detail: '文本布局位置',
+                    default:'center'
+                },
+                offsetX: {
+                    detail: 'x方向偏移量',
+                    default:0
+                },
+                offsetY: {
+                    detail: 'y方向偏移量',
+                    default:0
+                }
+            }
+        }
+    }
     constructor(opt, dataFrame , _graphs)
     {
-    
         this._opt = opt;
         this.dataFrame = dataFrame;
         this._graphs = _graphs;
@@ -29,46 +155,7 @@ export default class PlanetGroup
         this.width  = 0;
         this.height = 0;
 
-        this.node = {
-            shapeType : "circle",
-            maxRadius : 30,//15
-            minR : 5,
-            lineWidth : 1,
-            strokeStyle : "#fff",
-            fillStyle : '#f2fbfb',
-            lineAlpha : 0.6,
-            radius : 15, //也可以是个function,也可以配置{field:'pv'}来设置字段， 自动计算r
-
-            focus : {
-                enabled : true,
-                lineAlpha : 0.7,
-                lineWidth : 2,
-                strokeStyle : "#fff", //和bar.fillStyle一样可以支持array function
-            },
-
-            select : {
-                enabled : false,
-                lineAlpha : 1,
-                lineWidth : 2,
-                strokeStyle : "#fff", //和bar.fillStyle一样可以支持array function
-                triggerEventType : "click"
-            }
-        };
-        selectInds: [], //会从外面的index中传入一个统一的selectInds 引用
-
-        this.label = {
-            enabled   : true,
-            fontColor : "#666",
-            fontSize  : 13,
-            align : "center",  //left center right
-            verticalAlign : "middle", //top middle bottom
-            position  : "center", //center,bottom,auto,function
-            offsetX : 0, 
-            offsetY : 0
-        };
-
-        this.sort = "desc";
-        this.sortField = null;
+        this.selectInds = []; //会从外面的index中传入一个统一的selectInds 引用
 
         this.layoutType = "radian";
         
@@ -82,7 +169,7 @@ export default class PlanetGroup
         this.maxRingNum = 0;
         this.ringNum = 0;
 
-        _.extend( true, this, opt );
+        _.extend( true, this, getDefaultProps(PlanetGroup.defaultProps) , opt );
 
         //circle.maxRadius 绝对不能大于最大 占位 pit.radius
         if( this.node.maxRadius > this.pit.radius ){
@@ -483,7 +570,7 @@ export default class PlanetGroup
                     x: point.x,
                     y: point.y, //point.y + r +3
                     fontSize: me.label.fontSize,
-                    textAlign: me.label.align,
+                    textAlign: me.label.textAlign,
                     textBaseline: me.label.verticalAlign,
                     fillStyle: me.label.fontColor,
                     rotation : -_ringCtx.rotation,
@@ -581,7 +668,7 @@ export default class PlanetGroup
             };
             var rVal = nodeData.rowData[ r ];
             
-            return me.node.minR + (rVal-this.__rValMin)/(this.__rValMax-this.__rValMin) * (me.node.maxRadius - me.node.minR);
+            return me.node.minRadius + (rVal-this.__rValMin)/(this.__rValMax-this.__rValMin) * (me.node.maxRadius - me.node.minRadius);
         };
         return me._getProp(r , nodeData);
     }

@@ -1,62 +1,90 @@
 import Canvax from "canvax"
 import GraphsBase from "../index"
 import {numAddSymbol} from "../../../utils/tools"
-import { _ , event } from "mmvis"
+import { _ , event , getDefaultProps} from "mmvis"
 
 const Text = Canvax.Display.Text;
 const Polygon = Canvax.Shapes.Polygon;
 
 export default class FunnelGraphs extends GraphsBase
 {
+    static defaultProps = {
+        field : {
+            detail : '字段配置',
+            default: null
+        },
+        sort: {
+            detail : '排序规则',
+            default: null
+        },
+        maxNodeWidth: {
+            detail: '最大的元素宽',
+            default: null
+        },
+        minNodeWidth: {
+            detail: '最小的元素宽',
+            default: 0
+        },
+        minVal : {
+            detail: '漏斗的塔尖',
+            default: 0
+        },
+        node : {
+            detail: '单个元素图形配置',
+            propertys : {
+                height: {
+                    detail: '高',
+                    default: 0,
+                    documentation : '漏斗单元高，如果options没有设定， 就会被自动计算为 this.height/dataOrg.length'
+                }
+            }
+        },
+        label : {
+            detail: '文本配置',
+            propertys: {
+                enabled: {
+                    detail: '是否开启文本',
+                    default: true
+                },
+                textAlign: {
+                    detail: '文本布局位置(left,center,right)',
+                    default: 'center'
+                },
+                textBaseline: {
+                    detail: '文本基线对齐方式',
+                    default: 'middle'
+                },
+                format : {
+                    detail: '文本格式化处理函数',
+                    default: function( num ){ 
+                        return numAddSymbol( num );
+                    }
+                },
+                fontSize: {
+                    detail: '文本字体大小',
+                    default: 13
+                },
+                fontColor: {
+                    detail: '文本颜色',
+                    default: '#ffffff',
+                    documentation: 'align为center的时候的颜色，align为其他属性时候取node的颜色'
+                }
+            }
+        }
+    }
     constructor(opt, app)
     {
         super( opt, app );
 
         this.type = "funnel";
 
-        this.field = null;
         this.dataOrg = []; //this.dataFrame.getFieldData( this.field )
         this.data  = []; //layoutData list , default is empty Array
-        this.sort = null;
-
-        this.invert = false; //默认为倒立的金字塔结构
 
         this._maxVal = null;
         this._minVal = null;
-        this.maxNodeWidth = null;
-        this.minNodeWidth = 0;
-        this.minVal = 0; //漏斗的塔尖，默认为0
 
-        this.node = {
-            shapeType   : "polygon", //节点的现状可以是圆 ，也可以是rect，也可以是三角形，后面两种后面实现
-            height : 0, //漏斗单元高，如果options没有设定， 就会被自动计算为 this.height/dataOrg.length
-            
-            fillStyle : null, //目前主要用皮肤来实现配色，暂时node.fillStyle没用到，但是先定义起来
-            lineWidth : 0,
-            strokeStyle : null,
-
-            focus : {
-                enabled : true
-            },
-            select : {
-                enabled : true,
-                lineWidth : 2,
-                strokeStyle : "#666"
-            }
-        };
-
-        this.label = {
-            enabled : true,
-            align : "center", // left , center, right
-            format : function( num ){ 
-                return numAddSymbol( num );
-            },
-            fontColor : "#ffffff",
-            fontSize : 13,
-            textBaseline : "middle"
-        }
-
-        _.extend( true, this , opt );
+        _.extend( true, this , getDefaultProps(FunnelGraphs.defaultProps), opt );
 
         this.init( );
     }
@@ -83,14 +111,6 @@ export default class FunnelGraphs extends GraphsBase
             this.node.height = this.height / this.dataOrg.length;
         };
 
-        if( this.sort == "asc" ){
-            //倒序的话
-            this.invert = true;
-        };
-        if( this.sort == "desc" ){
-            //倒序的话
-            this.invert = false;
-        };
     }
 
     draw( opt )
@@ -181,7 +201,7 @@ export default class FunnelGraphs extends GraphsBase
         var topY = layoutData.iNode * this.node.height;
         var bottomY = topY + this.node.height;
 
-        if( !this.invert ){    
+        if( this.sort !== "asc" ){    
             points.push( [ -layoutData.width/2, topY] ); //左上
             points.push( [ layoutData.width/2, topY] ); //右上
 
@@ -236,12 +256,12 @@ export default class FunnelGraphs extends GraphsBase
                 x : ld.middlePoint.x,
                 y : ld.middlePoint.y
             };
-            if( me.label.align == "left" ){
+            if( me.label.textAlign == "left" ){
                 textPoint.x = ld.points[0][0] - (ld.points[0][0] - ld.points[3][0])/2;
                 textPoint.x -= 15;
                 textAlign = "right";
             };
-            if( me.label.align == "right" ){
+            if( me.label.textAlign == "right" ){
                 textPoint.x = ld.points[1][0] - (ld.points[1][0] - ld.points[2][0])/2
                 textPoint.x += 15;
                 textAlign = "left";
@@ -252,7 +272,7 @@ export default class FunnelGraphs extends GraphsBase
                     x : textPoint.x,
                     y : textPoint.y,
                     fontSize : me.label.fontSize,
-                    fillStyle : me.label.align == "center" ? me.label.fontColor : ld.color,
+                    fillStyle : me.label.textAlign == "center" ? me.label.fontColor : ld.color,
                     textAlign : textAlign,
                     textBaseline : me.label.textBaseline
                 }

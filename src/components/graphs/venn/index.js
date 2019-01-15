@@ -4,7 +4,7 @@ import GraphsBase from "../index"
 import {venn, lossFunction, normalizeSolution, scaleSolution} from "../../../layout/venn/layout";
 import {intersectionArea, distance, getCenter} from "../../../layout/venn/circleintersection";
 import {nelderMead} from "fmin";
-import { _, event } from "mmvis"
+import { _, event, getDefaultProps } from "mmvis"
 
 const Text = Canvax.Display.Text;
 const Path = Canvax.Shapes.Path;
@@ -12,49 +12,105 @@ const Circle = Canvax.Shapes.Circle;
 
 export default class VennGraphs extends GraphsBase
 {
+    static defaultProps = {
+        keyField: {
+            detail: 'key字段',
+            default: 'name'
+        },
+        valueField: {
+            detail: 'value字段',
+            default: 'value'
+        },
+        node: {
+            detail: '单个节点配置',
+            propertys: {
+                strokeStyle: {
+                    detail: '边框颜色',
+                    default: null
+                },
+                lineWidth: {
+                    detail: '边框大小',
+                    default: 2
+                },
+                lineAlpha: {
+                    detail: '边框透明度',
+                    default: 0
+                },
+                fillStyle: {
+                    detail: '背景色',
+                    default: null
+                },
+                fillAlpha: {
+                    detail: '背景透明度',
+                    default: 0.25
+                },
+                focus: {
+                    detail: 'hover设置',
+                    propertys: {
+                        enabled: {
+                            detail: '是否开启',
+                            default:true
+                        },
+                        lineAlpha: {
+                            detail: '边框透明度',
+                            default: 0.3
+                        }
+                    }
+                },
+                select: {
+                    detail: '选中设置',
+                    propertys: {
+                        enabled: {
+                            detail: '是否开启',
+                            default:true
+                        },
+                        lineWidth: {
+                            detail: '描边宽度',
+                            default: 2
+                        },
+                        strokeStyle: {
+                            detail: '描边颜色',
+                            default: '#666666'
+                        }
+                    }
+                }
+            }
+        },
+        label: {
+            detail: '文本设置',
+            propertys: {
+                field: {
+                    detail: '获取文本的字段',
+                    default: null
+                },
+                fontSize: {
+                    detail: '字体大小',
+                    default: 14
+                },
+                fontColor: {
+                    detail: '文本颜色',
+                    default: null
+                },
+                fontWeight: {
+                    detail: 'fontWeight',
+                    default: 'normal'
+                },
+                showInter: {
+                    detail: '是否显示相交部分的文本',
+                    default:true
+                }
+            }
+        }
+    }
+
     constructor(opt, app)
     {
         super( opt, app );
-
         this.type = "venn";
-
-        //this.field = null;
-        this.keyField = null;
-        this.valueField = null;
-
-        //坚持一个数据节点的设置都在一个node下面
-        this.node = {
-            //field : null, //node的id标识,而不是label
-
-            strokeStyle: null,
-            lineWidth : 2,
-            lineAlpha : 0,
-            fillStyle : null,
-            fillAlpha : 0.25,
-
-            focus : {
-                enabled : true,
-                lineAlpha : 0.3
-            },
-            select : {
-                enabled : true,
-                lineWidth : 2,
-                strokeStyle : "#666"
-            }
-        };
-
-        this.label = {
-            field      : null,
-            fontSize   : 14,
-            //fontFamily : "Impact",
-            fontColor  : null, //"#666",
-            fontWeight : "normal",
-            showInter  : true
-        };
 
         this.vennData = null;
 
-        _.extend( true, this , opt );
+        _.extend( true, this , getDefaultProps(VennGraphs.defaultProps), opt );
 
         //_trimGraphs后，计算出来本次data的一些属性
         this._dataCircleLen = 0;

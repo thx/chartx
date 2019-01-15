@@ -38,7 +38,7 @@
     "rollup-watch": "4.3.1"
   },
   "dependencies": {
-    "mmvis": "^0.0.39",
+    "mmvis": "^0.0.40",
     "canvax": "^2.0.23",
     "fmin": "0.0.2"
   },

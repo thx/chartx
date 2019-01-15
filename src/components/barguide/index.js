@@ -58,7 +58,7 @@ export default class barGuide extends Component
                     detail : '垂直对齐方式',
                     default: 'bottom'
                 },
-                align : {
+                textAlign : {
                     detail : '水平对齐方式',
                     default: 'center'
                 },
@@ -156,7 +156,7 @@ export default class barGuide extends Component
                     lineWidth : me.label.lineWidth,
                     strokeStyle: me.label.strokeStyle,
                     fontSize: me.label.fontSize,
-                    textAlign   : me.label.align,
+                    textAlign   : me.label.textAlign,
                     textBaseline: me.label.verticalAlign,
                 }
             } );

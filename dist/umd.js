@@ -526,7 +526,7 @@
           src = target[name];
           copy = options[name];
 
-          if (target === copy) {
+          if (target === copy || copy === undefined) {
             continue;
           }
 
@@ -16408,12 +16408,6 @@
       default: 0,
       values: [0, 360]
     },
-    squareRange: {
-      detail: '是否正方形的坐标区域',
-      documentation: "",
-      default: true,
-      values: [true, false]
-    },
     radius: {
       detail: '坐标系的最大半径',
       documentation: "默认自动计算view的高宽，如果squareRange==true，则会取Math.min(width,height)",
@@ -16507,7 +16501,10 @@
 
       _classCallCheck(this, GraphsBase);
 
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(GraphsBase).call(this, opt, app));
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(GraphsBase).call(this, opt, app)); //这里不能把opt个extend进this
+
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(GraphsBase.defaultProps));
+
       _this.name = "graphs"; //这里所有的opts都要透传给 group
 
       _this._opt = opt || {};
@@ -16523,10 +16520,6 @@
         x: 0,
         y: 0
       };
-      _this.animation = true; //是否有动画
-
-      _this.aniDuration = 500; //动画时长
-
       _this.inited = false;
       _this.sprite = new Canvax.Display.Sprite({
         name: "graphs_" + opt.type
@@ -16653,6 +16646,17 @@
     return GraphsBase;
   }(component);
 
+  _defineProperty(GraphsBase, "defaultProps", {
+    animation: {
+      detail: '是否开启入场动画',
+      default: true
+    },
+    aniDuration: {
+      detail: '动画时长',
+      default: 500
+    }
+  });
+
   var AnimationFrame$2 = Canvax.AnimationFrame;
   var Rect$3 = Canvax.Shapes.Rect;
 
@@ -16668,66 +16672,22 @@
 
       _this = _possibleConstructorReturn(this, _getPrototypeOf(BarGraphs).call(this, opt, app));
       _this.type = "bar";
-      _this.field = null;
       _this.enabledField = null;
-      _this.yAxisAlign = "left"; //默认设置为左y轴
-      //trimGraphs的时候是否需要和其他的 bar graphs一起并排计算，true的话这个就会和别的重叠
-      //和css中得absolute概念一致，脱离文档流的绝对定位
-
-      _this.absolute = false;
-      _this.proportion = false; //比例柱状图，比例图首先肯定是个堆叠图
-
       _this.node = {
-        shapeType: 'rect',
-        width: 0,
         _width: 0,
-        maxWidth: 50,
-        minWidth: 1,
-        minHeight: 0,
-        radius: 3,
-        fillStyle: null,
-        fillAlpha: 0.95,
-        _count: 0,
-        //总共有多少个bar
-        xDis: null,
-        filter: null
-      };
-      _this.label = {
-        enabled: false,
-        animation: true,
-        fontColor: null,
-        //如果有设置text.fontColor那么优先使用fontColor
-        fontSize: 12,
-        format: null,
-        lineWidth: 0,
-        strokeStyle: null,
-        rotation: 0,
-        align: "center",
-        //left center right
-        verticalAlign: "bottom",
-        //top middle bottom
-        position: "top",
-        //top,topRight,right,rightBottom,bottom,bottomLeft,left,leftTop,center
-        offsetX: 0,
-        offsetY: 0
+        _count: 0 //总共有多少个bar
+
       }; //分组的选中，不是选中具体的某个node，这里的选中靠groupRegion来表现出来
       //只有在第一个graphs bar 上配置有效
 
       _this.select = {
-        enabled: false,
-        alpha: 0.2,
-        fillStyle: null,
-        _fillStyle: "#092848",
-        //和bar.fillStyle一样可以支持array function
-        triggerEventType: "click",
-        width: 1,
-        inds: [] //选中的列的索引集合,注意，这里的ind不是当前视图的ind，而是加上了dataFrame.range.start的全局ind
+        _fillStyle: "#092848" //和bar.fillStyle一样可以支持array function
 
       };
       _this._barsLen = 0;
       _this.txtsSp = null;
 
-      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), opt);
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(BarGraphs.defaultProps), opt);
 
       _this.init();
 
@@ -17154,7 +17114,7 @@
                   fontSize: me.label.fontSize,
                   lineWidth: me.label.lineWidth,
                   strokeStyle: me.label.strokeStyle || finalPos.fillStyle,
-                  //textAlign   : me.label.align,
+                  //textAlign   : me.label.textAlign,
                   textBaseline: me.label.verticalAlign,
                   rotation: me.label.rotation
                 }; //然后根据position, offset确定x,y
@@ -17442,16 +17402,16 @@
     }, {
       key: "_getTextAlign",
       value: function _getTextAlign(bar, nodeData) {
-        var align = this.label.align;
+        var textAlign = this.label.textAlign;
 
         if (nodeData.value < nodeData.yOriginPoint.value) {
-          if (align == "left") {
-            align = "right";
-          } else if (align == "right") {
-            align = "left";
+          if (textAlign == "left") {
+            textAlign = "right";
+          } else if (textAlign == "right") {
+            textAlign = "left";
           }
         }
-        return align;
+        return textAlign;
       }
     }, {
       key: "_getTextPos",
@@ -17725,9 +17685,163 @@
     return BarGraphs;
   }(GraphsBase);
 
+  _defineProperty(BarGraphs, "defaultProps", {
+    field: {
+      detail: '字段设置',
+      documentation: '支持二维数组格式的设置，一维方向就是横向分组，二维方向就是纵向的堆叠',
+      default: null
+    },
+    yAxisAlign: {
+      detail: '绘制在哪根y轴上面',
+      default: 'left'
+    },
+    absolute: {
+      detail: '是否脱离graphs的位置计算',
+      documentation: '\
+                trimGraphs的时候是否需要和其他的 bar graphs一起并排计算，\
+                true的话这个就会和别的重叠,\
+                和css中得absolute概念一致，脱离文档流的绝对定位',
+      default: false
+    },
+    proportion: {
+      detail: '比例柱状图',
+      default: false
+    },
+    node: {
+      detail: '单个数据对应的图形设置',
+      propertys: {
+        width: {
+          detail: 'bar的宽度',
+          default: 0
+        },
+        maxWidth: {
+          detail: '最大width',
+          default: 50
+        },
+        minWidth: {
+          detail: '最小width',
+          default: 1
+        },
+        minHeight: {
+          detail: '最小height',
+          default: 0
+        },
+        radius: {
+          detail: '叶子节点的圆角半径',
+          default: 3
+        },
+        fillStyle: {
+          detail: 'bar填充色',
+          default: null
+        },
+        fillAlpha: {
+          detail: 'bar透明度',
+          default: 0.95
+        },
+        xDis: {
+          detail: '单分组内bar之间的间隔',
+          default: null
+        },
+        filter: {
+          detail: 'bar过滤处理器',
+          default: null
+        }
+      }
+    },
+    label: {
+      detail: '文本设置',
+      propertys: {
+        enabled: {
+          detail: '是否开启',
+          default: false
+        },
+        fontColor: {
+          detail: '文本颜色',
+          default: null,
+          documentation: '如果有设置text.fontColor那么优先使用fontColor'
+        },
+        fontSize: {
+          detail: '文本字体大小',
+          default: 12
+        },
+        format: {
+          detail: '文本格式化处理函数',
+          default: null
+        },
+        lineWidth: {
+          detail: '文本描边线宽',
+          default: 0
+        },
+        strokeStyle: {
+          detail: '文本描边颜色',
+          default: null
+        },
+        rotation: {
+          detail: '旋转角度',
+          default: 0
+        },
+        textAlign: {
+          detail: '水平对齐方式',
+          documentation: 'left center right',
+          default: 'center'
+        },
+        verticalAlign: {
+          detail: '垂直基线对齐方式',
+          documentation: 'top middle bottom',
+          default: 'bottom'
+        },
+        position: {
+          detail: '文本布局位置',
+          documentation: 'top,topRight,right,rightBottom,bottom,bottomLeft,left,leftTop,center',
+          default: 'top'
+        },
+        offsetX: {
+          detail: 'x偏移量',
+          default: 0
+        },
+        offsetY: {
+          detail: 'y偏移量',
+          default: 0
+        }
+      }
+    },
+    select: {
+      detail: '分组选中',
+      documentation: '\
+                分组的选中，不是选中具体的某个node，这里的选中靠groupRegion来表现出来,\
+                目前只有在第一个graphs bar 上配置有效',
+      propertys: {
+        enabled: {
+          detail: '是否开启',
+          default: false
+        },
+        inds: {
+          detail: '选中的分组索引集合',
+          documentation: '选中的列的索引集合,注意，这里的ind不是当前视图的ind，而是加上了dataFrame.range.start的全局ind',
+          default: []
+        },
+        width: {
+          detail: '选中态背景宽度',
+          default: 1
+        },
+        alpha: {
+          detail: '选中态背景透明度',
+          default: 0.2
+        },
+        fillStyle: {
+          detail: '选中态背景填充色',
+          default: null
+        },
+        triggerEventType: {
+          detail: '触发选中效果的事件',
+          default: 'click'
+        }
+      }
+    }
+  });
+
   var AnimationFrame$3 = Canvax.AnimationFrame;
   var BrokenLine$1 = Canvax.Shapes.BrokenLine;
-  var Rect$4 = Canvax.Shapes.Rect;
   var Circle$3 = Canvax.Shapes.Circle;
   var Path$1 = Canvax.Shapes.Path;
 
@@ -17754,40 +17868,7 @@
       _this.y = 0;
       _this.line = {
         //线
-        enabled: 1,
-        shapeType: "brokenLine",
-        //折线
-        strokeStyle: fieldMap.color,
-        lineWidth: 2,
-        lineType: "solid",
-        smooth: true
-      };
-      _this.node = {
-        //节点 
-        enabled: 1,
-        //是否有
-        shapeType: "circle",
-        corner: false,
-        //模式[false || 0 = 都有节点 | true || 1 = 拐角才有节点]
-        radius: 3,
-        //半径 node 圆点的半径
-        fillStyle: '#ffffff',
-        strokeStyle: null,
-        lineWidth: 2
-      };
-      _this.label = {
-        enabled: 0,
-        fontColor: null,
-        strokeStyle: null,
-        fontSize: 12,
-        format: null
-      };
-      _this.area = {
-        //填充
-        shapeType: "path",
-        enabled: 1,
-        fillStyle: null,
-        alpha: 0.2
+        strokeStyle: fieldMap.color
       };
       _this.data = [];
       _this.sprite = null;
@@ -17797,7 +17878,7 @@
 
       _this._bline = null;
 
-      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), opt); //TODO group中得field不能直接用opt中得field， 必须重新设置， 
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(LineGraphsGroup.defaultProps), opt); //TODO group中得field不能直接用opt中得field， 必须重新设置， 
       //group中得field只有一个值，代表一条折线, 后面要扩展extend方法，可以控制过滤哪些key值不做extend
 
 
@@ -18408,7 +18489,105 @@
     return LineGraphsGroup;
   }(Dispatcher);
 
-  var Rect$5 = Canvax.Shapes.Rect;
+  _defineProperty(LineGraphsGroup, "defaultProps", {
+    line: {
+      detail: '线配置',
+      propertys: {
+        enabled: {
+          detail: '是否开启',
+          default: true
+        },
+        strokeStyle: {
+          detail: '线的颜色',
+          default: undefined //不会覆盖掉constructor中的定义
+
+        },
+        lineWidth: {
+          detail: '线的宽度',
+          default: 2
+        },
+        lineType: {
+          detail: '线的样式',
+          default: 'solid'
+        },
+        smooth: {
+          detail: '是否平滑处理',
+          default: true
+        }
+      }
+    },
+    node: {
+      detail: '单个数据节点配置，对应线上的小icon图形',
+      propertys: {
+        enabled: {
+          detail: '是否开启',
+          default: true
+        },
+        corner: {
+          detail: '拐角才有节点',
+          default: false
+        },
+        radius: {
+          detail: '节点半径',
+          default: 3
+        },
+        fillStyle: {
+          detail: '节点图形的背景色',
+          default: '#ffffff'
+        },
+        strokeStyle: {
+          detail: '节点图形的描边色，默认和line.strokeStyle保持一致',
+          default: null
+        },
+        lineWidth: {
+          detail: '节点图形边宽大小',
+          default: 2
+        }
+      }
+    },
+    label: {
+      detail: '文本配置',
+      propertys: {
+        enabled: {
+          detail: '是否开启',
+          default: false
+        },
+        fontColor: {
+          detail: '文本颜色',
+          default: null
+        },
+        strokeStyle: {
+          detail: '文本描边色',
+          default: null
+        },
+        fontSize: {
+          detail: '文本字体大小',
+          default: 12
+        },
+        format: {
+          detail: '文本格式化处理函数',
+          default: null
+        }
+      }
+    },
+    area: {
+      detail: '面积区域配置',
+      propertys: {
+        enabled: {
+          detail: '是否开启',
+          default: true
+        },
+        fillStyle: {
+          detail: '面积背景色',
+          default: null
+        },
+        alpha: {
+          detail: '面积透明度',
+          default: 0.2
+        }
+      }
+    }
+  });
 
   var LineGraphs =
   /*#__PURE__*/
@@ -18421,25 +18600,20 @@
       _classCallCheck(this, LineGraphs);
 
       _this = _possibleConstructorReturn(this, _getPrototypeOf(LineGraphs).call(this, opt, app));
-      _this.type = "line"; //默认给左轴
-
-      _this.yAxisAlign = "left";
-      _this.field = null;
+      _this.type = "line";
       _this.enabledField = null;
       _this.groups = []; //群组集合
 
-      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), opt);
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(LineGraphs.defaultProps), opt);
 
-      _this.init(_this._opt);
+      _this.init();
 
       return _this;
     }
 
     _createClass(LineGraphs, [{
       key: "init",
-      value: function init(opt) {
-        opt.yAxisAlign && (this.yAxisAlign = opt.yAxisAlign);
-      }
+      value: function init() {}
     }, {
       key: "draw",
       value: function draw(opt) {
@@ -18686,8 +18860,19 @@
     return LineGraphs;
   }(GraphsBase);
 
+  _defineProperty(LineGraphs, "defaultProps", {
+    field: {
+      detail: '字段配置，支持二维数组格式',
+      default: null
+    },
+    yAxisAlign: {
+      detail: '绘制在哪根y轴上面',
+      default: 'left'
+    }
+  });
+
   var Circle$4 = Canvax.Shapes.Circle;
-  var Rect$6 = Canvax.Shapes.Rect;
+  var Rect$4 = Canvax.Shapes.Rect;
   var Line$5 = Canvax.Shapes.Line;
 
   var ScatGraphs =
@@ -18701,75 +18886,13 @@
       _classCallCheck(this, ScatGraphs);
 
       _this = _possibleConstructorReturn(this, _getPrototypeOf(ScatGraphs).call(this, opt, app));
-      _this.type = "scat";
-      _this.field = null; //TODO:待开发，用groupField来做分组，比如分组出男女两组，然后方便做图例（目前没给scat实现合适的图例）
-
-      _this.groupField = null;
-      _this.node = {
-        shapeType: "circle",
-        //节点的现状可以是圆 ，也可以是rect，也可以是三角形，后面两种后面实现
-        maxRadius: 25,
-        //圆圈默认最大半径
-        minRadius: 5,
-        radius: null,
-        normalR: 15,
-        fillStyle: null,
-        fillAlpha: 0.8,
-        strokeStyle: null,
-        lineWidth: 0,
-        lineAlpha: 0,
-        focus: {
-          enabled: true,
-          lineWidth: 6,
-          lineAlpha: 0.2,
-          fillAlpha: 0.8
-        },
-        select: {
-          enabled: true,
-          lineWidth: 8,
-          lineAlpha: 0.4,
-          fillAlpha: 1 //onclick ondblclick 注册的事件都是小写
-
-        }
-      }; //从node点到垂直坐标y==0的连线
-      //气球的绳子
-
-      _this.line = {
-        enabled: false,
-        lineWidth: 1,
-        strokeStyle: "#ccc",
-        lineType: "dashed"
-      };
-      _this.label = {
-        enabled: true,
-        field: null,
-        format: function format(txt, nodeData) {
-          return txt;
-        },
-        fontSize: 13,
-        fontColor: "#888",
-        //"#888",//如果外面设置为null等false值，就会被自动设置为nodeData.fillStyle
-        strokeStyle: "#ffffff",
-        lineWidth: 0,
-        //rotation : 0, //柱状图中有需求， 这里没有目前
-        align: "center",
-        //left center right
-        verticalAlign: "middle",
-        //top middle bottom
-        position: "center",
-        //auto(目前等于center，还未实现),center,top,right,bottom,left
-        offsetX: 0,
-        offsetY: 0
-      }; //动画的起始位置， 默认x=data.x y = 0
-
-      _this.aniOrigin = "default"; //center（坐标正中） origin（坐标原点）
-
-      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), opt); //计算半径的时候需要用到， 每次执行_trimGraphs都必须要初始化一次
-
+      _this.type = "scat"; //计算半径的时候需要用到， 每次执行_trimGraphs都必须要初始化一次
 
       _this._rData = null;
       _this._rMaxValue = null;
       _this._rMinValue = null;
+
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(ScatGraphs.defaultProps), opt);
 
       _this.init();
 
@@ -18901,7 +19024,7 @@
     }, {
       key: "_setR",
       value: function _setR(nodeLayoutData) {
-        var r = this.node.normalR;
+        var r = this.node.normalRadius;
         var rowData = nodeLayoutData.rowData;
 
         if (this.node.radius != null) {
@@ -19023,7 +19146,7 @@
         _.each(me.data, function (nodeData, iNode) {
           var _context = me._getNodeContext(nodeData);
 
-          var Shape = nodeData.shapeType == "circle" ? Circle$4 : Rect$6;
+          var Shape = nodeData.shapeType == "circle" ? Circle$4 : Rect$4;
 
           var _nodeElement = me._shapesp.getChildAt(iNode);
 
@@ -19186,7 +19309,7 @@
           fontSize: fontSize,
           strokeStyle: this.label.strokeStyle || _context.fillStyle,
           lineWidth: this.label.lineWidth,
-          textAlign: this.label.align,
+          textAlign: this.label.textAlign,
           textBaseline: this.label.verticalAlign
         };
 
@@ -19346,9 +19469,186 @@
     return ScatGraphs;
   }(GraphsBase);
 
+  _defineProperty(ScatGraphs, "defaultProps", {
+    field: {
+      detail: '字段配置',
+      default: null
+    },
+    aniOrigin: {
+      detail: '节点动画的原点',
+      default: 'default',
+      documentation: '可选的还有center（坐标正中）、origin（坐标原点）'
+    },
+    node: {
+      detail: '单数据节点图形设置',
+      propertys: {
+        shapeType: {
+          detail: '图形类型',
+          default: 'circle',
+          documentation: '节点的现状可以是圆 ，也可以是rect，也可以是三角形，后面两种后面实现'
+        },
+        maxRadius: {
+          detail: '节点最大半径',
+          default: 25
+        },
+        minRadius: {
+          detail: '节点最小半径',
+          default: 5
+        },
+        radius: {
+          detail: '半径',
+          default: null
+        },
+        normalRadius: {
+          detail: '默认半径',
+          default: 15
+        },
+        fillStyle: {
+          detail: '节点景色',
+          default: null
+        },
+        fillAlpha: {
+          detail: '节点透明度',
+          default: 0.8
+        },
+        strokeStyle: {
+          detail: '节点描边颜色',
+          default: null
+        },
+        lineWidth: {
+          detail: '节点描边线宽',
+          default: 0
+        },
+        lineAlpha: {
+          detail: '节点描边透明度',
+          default: 0
+        },
+        focus: {
+          detail: "节点hover态设置",
+          propertys: {
+            enabled: {
+              detail: '是否开启',
+              default: true
+            },
+            lineWidth: {
+              detail: 'hover后的边框大小',
+              default: 6
+            },
+            lineAlpha: {
+              detail: 'hover后的边框透明度',
+              default: 0.2
+            },
+            fillAlpha: {
+              detail: 'hover后的背景透明度',
+              default: 0.8
+            }
+          }
+        },
+        select: {
+          detail: "节点选中态设置",
+          propertys: {
+            enabled: {
+              detail: '是否开启',
+              default: false
+            },
+            lineWidth: {
+              detail: '选中后的边框大小',
+              default: 8
+            },
+            lineAlpha: {
+              detail: '选中后的边框透明度',
+              default: 0.4
+            },
+            fillAlpha: {
+              detail: '选中后的背景透明度',
+              default: 1
+            }
+          }
+        }
+      }
+    },
+    line: {
+      detail: '每个节点和指标轴线的连线',
+      propertys: {
+        enabled: {
+          detail: '是否开启',
+          default: false
+        },
+        lineWidth: {
+          detail: '连线宽',
+          default: 1
+        },
+        strokeStyle: {
+          detail: '连线颜色',
+          default: '#ccc'
+        },
+        lineType: {
+          detail: '连线类型',
+          default: 'dashed'
+        }
+      }
+    },
+    label: {
+      detail: '文本设置',
+      propertys: {
+        enabled: {
+          detail: '是否开启',
+          default: true
+        },
+        field: {
+          detail: '获取label的字段',
+          default: null
+        },
+        format: {
+          detail: 'label格式化处理函数',
+          default: function _default(txt, nodeData) {
+            return txt;
+          }
+        },
+        fontSize: {
+          detail: 'label字体大小',
+          default: 13
+        },
+        fontColor: {
+          detail: '字体颜色',
+          default: '#888'
+        },
+        strokeStyle: {
+          detail: '字体描边颜色',
+          default: '#ffffff'
+        },
+        lineWidth: {
+          detail: '描边大小',
+          default: 0
+        },
+        textAlign: {
+          detail: '水平对齐方式',
+          default: 'center'
+        },
+        verticalAlign: {
+          detail: '垂直基线对齐方式',
+          default: 'middle'
+        },
+        position: {
+          detail: '文本布局位置',
+          documentation: 'auto(目前等于center，还未实现),center,top,right,bottom,left',
+          default: 'center'
+        },
+        offsetX: {
+          detail: 'x方向偏移量',
+          default: 0
+        },
+        offsetY: {
+          detail: 'y方向偏移量',
+          default: 0
+        }
+      }
+    }
+  });
+
   var Sector$1 = Canvax.Shapes.Sector;
   var Path$2 = Canvax.Shapes.Path;
-  var Rect$7 = Canvax.Shapes.Rect;
+  var Rect$5 = Canvax.Shapes.Rect;
   var AnimationFrame$4 = Canvax.AnimationFrame;
 
   var Pie =
@@ -19984,6 +20284,8 @@
     return Pie;
   }(Dispatcher);
 
+  var _defineProperty2;
+
   var PieGraphs =
   /*#__PURE__*/
   function (_GraphsBase) {
@@ -19996,55 +20298,18 @@
 
       _this = _possibleConstructorReturn(this, _getPrototypeOf(PieGraphs).call(this, opt, app));
       _this.type = "pie";
-      _this.field = null;
-      _this.sort = null; //默认不排序，可以配置为asc,desc
-      //groupField主要是给legend用的， 所有在legend中需要显示的分组数据，都用groupField
-      //其他图也都统一， 不要改
 
-      _this.groupField = null;
-      _this.node = {
-        shapeType: "sector",
-        radius: null,
-        //每个扇形单元的半径，也可以配置一个字段，就成了丁格尔玫瑰图
-        innerRadius: 0,
-        //扇形的内圆半径
-        outRadius: null,
-        //最大外围半径
-        minRadius: 10,
-        //outRadius - innerRadius ， 也就是radius的最小值
-        moveDis: 15,
-        //要预留moveDis位置来hover sector 的时候外扩
-        fillStyle: null,
-        //this.app.getTheme(),
-        focus: {
-          enabled: true
-        },
-        select: {
-          enabled: false,
-          radius: 5,
-          alpha: 0.7
-        }
-      };
-      _this.label = {
-        field: null,
-        //默认获取field的值，但是可以单独设置
-        enabled: false,
-        format: null
-      };
-      _this.startAngle = -90;
-      _this.allAngles = 360;
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(PieGraphs.defaultProps), opt);
 
-      _this.init(opt);
+      _this.init();
 
       return _this;
     }
 
     _createClass(PieGraphs, [{
       key: "init",
-      value: function init(opt) {
-        _.extend(true, this, opt); //初步设置下data，主要legend等需要用到
-
-
+      value: function init() {
+        //初步设置下data，主要legend等需要用到
         this.data = this._dataHandle();
       }
     }, {
@@ -20424,6 +20689,102 @@
     return PieGraphs;
   }(GraphsBase);
 
+  _defineProperty(PieGraphs, "defaultProps", (_defineProperty2 = {
+    field: {
+      detail: '字段配置',
+      default: null
+    },
+    groupField: {
+      detail: '分组字段',
+      default: null,
+      documentation: 'groupField主要是给legend用的， 所有在legend中需要显示的分组数据，都用groupField'
+    },
+    sort: {
+      detail: '排序，默认不排序，可以配置为asc,desc',
+      default: null
+    },
+    startAngle: {
+      detail: '其实角度',
+      default: -90
+    }
+  }, _defineProperty(_defineProperty2, "startAngle", {
+    detail: '全部角度',
+    default: 360
+  }), _defineProperty(_defineProperty2, "node", {
+    detail: '单个节点（扇形）配置',
+    propertys: {
+      radius: {
+        detail: '半径',
+        default: null,
+        documentation: '每个扇形单元的半径，也可以配置一个字段，就成了丁格尔玫瑰图'
+      },
+      innerRadius: {
+        detail: '内径',
+        default: 0
+      },
+      outRadius: {
+        detail: '外径',
+        default: null
+      },
+      minRadius: {
+        detail: '最小的半径厚度',
+        default: 10,
+        documentation: 'outRadius - innerRadius ， 也就是radius的最小值'
+      },
+      moveDis: {
+        detail: 'hover偏移量',
+        default: 15,
+        documentation: '要预留moveDis位置来hover sector 的时候外扩'
+      },
+      fillStyle: {
+        detail: '单个图形背景色',
+        default: null
+      },
+      focus: {
+        detail: '图形的hover设置',
+        propertys: {
+          enabled: {
+            detail: '是否开启',
+            default: true
+          }
+        }
+      },
+      select: {
+        detail: '图形的选中效果',
+        propertys: {
+          enabled: {
+            detail: '是否开启',
+            default: true
+          },
+          radius: {
+            detail: '选中效果图形的半径厚度',
+            default: 5
+          },
+          alpha: {
+            detail: '选中效果图形的透明度',
+            default: 0.7
+          }
+        }
+      }
+    }
+  }), _defineProperty(_defineProperty2, "label", {
+    detail: 'label',
+    propertys: {
+      field: {
+        detail: '获取label的字段',
+        default: null
+      },
+      enabled: {
+        detail: '是否开启',
+        default: false
+      },
+      format: {
+        detail: 'label的格式化函数，支持html',
+        default: null
+      }
+    }
+  }), _defineProperty2));
+
   var Polygon$3 = Canvax.Shapes.Polygon;
   var Circle$5 = Canvax.Shapes.Circle;
 
@@ -20439,34 +20800,14 @@
 
       _this = _possibleConstructorReturn(this, _getPrototypeOf(RadarGraphs).call(this, opt, app));
       _this.type = "radar";
-      _this.field = null;
       _this.enabledField = null;
-      _this.line = {
-        shapeType: "brokenLine",
-        enabled: true,
-        lineWidth: 2,
-        strokeStyle: null
-      };
-      _this.area = {
-        shapeType: "path",
-        enabled: true,
-        fillStyle: null,
-        fillAlpha: 0.1
-      };
-      _this.node = {
-        enabled: true,
-        shapeType: "circle",
-        radius: 4,
-        strokeStyle: "#ffffff",
-        lineWidth: 1
-      };
       _this.groups = {//uv : {
         //   area : ,
         //   nodes: 
         //}
       };
 
-      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), opt);
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(RadarGraphs.defaultProps), opt);
 
       _this.init();
 
@@ -20774,6 +21115,68 @@
 
     return RadarGraphs;
   }(GraphsBase);
+
+  _defineProperty(RadarGraphs, "defaultProps", {
+    field: {
+      detail: '字段配置',
+      default: null
+    },
+    line: {
+      detail: '线配置',
+      propertys: {
+        enabled: {
+          detail: '是否显示',
+          default: true
+        },
+        lineWidth: {
+          detail: '线宽',
+          default: 2
+        },
+        strokeStyle: {
+          detail: '线颜色',
+          default: null
+        }
+      }
+    },
+    area: {
+      detail: '面积区域配置',
+      propertys: {
+        enabled: {
+          detail: '是否显示',
+          default: true
+        },
+        fillStyle: {
+          detail: '面积背景色',
+          default: null
+        },
+        fillAlpha: {
+          detail: '面积透明度',
+          default: 0.1
+        }
+      }
+    },
+    node: {
+      detail: '线上面的单数据节点图形配置',
+      propertys: {
+        enabled: {
+          detail: '是否显示',
+          default: true
+        },
+        strokeStyle: {
+          detail: '边框色',
+          default: '#ffffff'
+        },
+        radius: {
+          detail: '半径',
+          default: 4
+        },
+        lineWidth: {
+          detail: '边框大小',
+          default: 1
+        }
+      }
+    }
+  });
 
   var noop = {
     value: function value() {}
@@ -21345,46 +21748,22 @@
 
       _this = _possibleConstructorReturn(this, _getPrototypeOf(CloudGraphs).call(this, opt, app));
       _this.type = "cloud";
-      _this.field = null;
 
       var me = _assertThisInitialized(_assertThisInitialized(_this)); //坚持一个数据节点的设置都在一个node下面
 
 
       _this.node = {
-        fontFamily: "Impact",
-        fontColor: function fontColor(nodeData) {
-          return me.app.getTheme(nodeData.iNode);
-        },
-        fontSize: function fontSize() {
-          //fontSize默认12-50的随机值
-          return this.minFontSize + Math.random() * this.maxFontSize;
-        },
-        maxFontSize: 30,
         _maxFontSizeVal: 0,
         //fontSizer如果配置为一个field的话， 找出这个field数据的最大值
-        minFontSize: 16,
-        _minFontSizeVal: null,
-        //fontSizer如果配置为一个field的话， 找出这个field数据的最小值
-        fontWeight: "normal",
-        format: function format(str, tag) {
-          return str;
-        },
-        padding: 10,
-        rotation: function rotation() {
-          return (~~(Math.random() * 6) - 3) * 30;
-        },
-        strokeStyle: null,
-        focus: {
-          enabled: true
-        },
-        select: {
-          enabled: true,
-          lineWidth: 2,
-          strokeStyle: "#666"
-        }
+        _minFontSizeVal: null //fontSizer如果配置为一个field的话， 找出这个field数据的最小值
+
       };
 
-      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), opt);
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(CloudGraphs.defaultProps), opt);
+
+      _this.node.fontColor = function (nodeData) {
+        return me.app.getTheme(nodeData.iNode);
+      };
 
       _this.init();
 
@@ -21500,7 +21879,12 @@
 
           };
           tag.fontColor = me._getFontColor(tag);
-          tag.text = me.node.format(d, tag) || d;
+          var _txt = d;
+
+          if (me.node.format) {
+            _txt = me.node.format(d, tag);
+          }
+          tag.text = _txt || d;
           return tag;
         })).padding(me.node.padding).rotate(function (item, ind) {
           //return 0;
@@ -21600,7 +21984,89 @@
     return CloudGraphs;
   }(GraphsBase);
 
-  var Text$2 = Canvax.Display.Text;
+  _defineProperty(CloudGraphs, "defaultProps", {
+    field: {
+      detail: '字段配置',
+      default: null
+    },
+    node: {
+      detail: '节点文字配置',
+      propertys: {
+        fontFamily: {
+          detail: '字体设置',
+          default: 'Impact'
+        },
+        fontColor: {
+          detail: '文字颜色',
+          default: '#999'
+        },
+        fontSize: {
+          detail: '文本字体大小',
+          default: function _default() {
+            //fontSize默认12-50的随机值
+            return this.minFontSize + Math.random() * this.maxFontSize;
+          }
+        },
+        maxFontSize: {
+          detail: '文本最大字体大小',
+          default: 30
+        },
+        minFontSize: {
+          detail: '文本最小字体大小',
+          default: 16
+        },
+        fontWeight: {
+          detail: 'fontWeight',
+          default: 'normal'
+        },
+        format: {
+          detail: '文本格式化处理函数',
+          default: null
+        },
+        padding: {
+          detail: '文本间距',
+          default: 10
+        },
+        rotation: {
+          detail: '文本旋转角度',
+          default: function _default() {
+            return (~~(Math.random() * 6) - 3) * 30;
+          }
+        },
+        strokeStyle: {
+          detail: '文本描边颜色',
+          default: null
+        },
+        select: {
+          detail: '文本选中效果',
+          propertys: {
+            enabled: {
+              detail: '是否开启选中',
+              default: true
+            },
+            lineWidth: {
+              detail: '选中后的文本描边宽',
+              default: 2
+            },
+            strokeStyle: {
+              detail: '选中后的文本描边色',
+              default: '#666'
+            }
+          }
+        },
+        focus: {
+          detail: '文本hover效果',
+          propertys: {
+            enabled: {
+              detail: '是否开启hover效果',
+              default: true
+            }
+          }
+        }
+      }
+    }
+  });
+
   var Circle$6 = Canvax.Shapes.Circle;
 
   var PlanetGroup =
@@ -21623,50 +22089,8 @@
       };
       this.width = 0;
       this.height = 0;
-      this.node = {
-        shapeType: "circle",
-        maxRadius: 30,
-        //15
-        minR: 5,
-        lineWidth: 1,
-        strokeStyle: "#fff",
-        fillStyle: '#f2fbfb',
-        lineAlpha: 0.6,
-        radius: 15,
-        //也可以是个function,也可以配置{field:'pv'}来设置字段， 自动计算r
-        focus: {
-          enabled: true,
-          lineAlpha: 0.7,
-          lineWidth: 2,
-          strokeStyle: "#fff" //和bar.fillStyle一样可以支持array function
+      this.selectInds = []; //会从外面的index中传入一个统一的selectInds 引用
 
-        },
-        select: {
-          enabled: false,
-          lineAlpha: 1,
-          lineWidth: 2,
-          strokeStyle: "#fff",
-          //和bar.fillStyle一样可以支持array function
-          triggerEventType: "click"
-        }
-      };
-
-      selectInds: this.label = {
-        enabled: true,
-        fontColor: "#666",
-        fontSize: 13,
-        align: "center",
-        //left center right
-        verticalAlign: "middle",
-        //top middle bottom
-        position: "center",
-        //center,bottom,auto,function
-        offsetX: 0,
-        offsetY: 0
-      };
-
-      this.sort = "desc";
-      this.sortField = null;
       this.layoutType = "radian"; //坑位，用来做占位
 
       this.pit = {
@@ -21676,7 +22100,7 @@
       this.maxRingNum = 0;
       this.ringNum = 0;
 
-      _.extend(true, this, opt); //circle.maxRadius 绝对不能大于最大 占位 pit.radius
+      _.extend(true, this, getDefaultProps(PlanetGroup.defaultProps), opt); //circle.maxRadius 绝对不能大于最大 占位 pit.radius
 
 
       if (this.node.maxRadius > this.pit.radius) {
@@ -22086,7 +22510,7 @@
               y: point.y,
               //point.y + r +3
               fontSize: me.label.fontSize,
-              textAlign: me.label.align,
+              textAlign: me.label.textAlign,
               textBaseline: me.label.verticalAlign,
               fillStyle: me.label.fontColor,
               rotation: -_ringCtx.rotation,
@@ -22185,7 +22609,7 @@
             });
           }
           var rVal = nodeData.rowData[r];
-          return me.node.minR + (rVal - this.__rValMin) / (this.__rValMax - this.__rValMin) * (me.node.maxRadius - me.node.minR);
+          return me.node.minRadius + (rVal - this.__rValMin) / (this.__rValMax - this.__rValMin) * (me.node.maxRadius - me.node.minRadius);
         }
         return me._getProp(r, nodeData);
       }
@@ -22288,10 +22712,138 @@
     return PlanetGroup;
   }();
 
-  var Text$3 = Canvax.Display.Text;
+  _defineProperty(PlanetGroup, "defaultProps", {
+    sort: {
+      detail: '排序',
+      default: 'desc'
+    },
+    sortField: {
+      detail: '用来排序的字段',
+      default: 'null'
+    },
+    node: {
+      detail: '单个数据节点图形配置',
+      propertys: {
+        maxRadius: {
+          detail: '最大半径',
+          default: 30
+        },
+        minRadius: {
+          detail: '最小半径',
+          default: 5
+        },
+        radius: {
+          detail: '半径',
+          default: 15,
+          documentation: '也可以是个function,也可以配置{field:"pv"}来设置字段， 自动计算r'
+        },
+        lineWidth: {
+          detail: '描边线宽',
+          default: 1
+        },
+        strokeStyle: {
+          detail: '描边颜色',
+          default: '#ffffff'
+        },
+        fillStyle: {
+          detail: '图形填充色',
+          default: '#f2fbfb'
+        },
+        lineAlpha: {
+          detail: '边框透明度',
+          default: 0.6
+        },
+        focus: {
+          detail: 'hover态设置',
+          propertys: {
+            enabled: {
+              detail: '是否开启',
+              default: true
+            },
+            lineAlpha: {
+              detail: 'hover时候边框透明度',
+              default: 0.7
+            },
+            lineWidth: {
+              detail: 'hover时候边框大小',
+              default: 2
+            },
+            strokeStyle: {
+              detail: 'hover时候边框颜色',
+              default: '#fff'
+            }
+          }
+        },
+        select: {
+          detail: '选中态设置',
+          propertys: {
+            enabled: {
+              detail: '是否开启',
+              default: false
+            },
+            lineAlpha: {
+              detail: '选中时候边框透明度',
+              default: 1
+            },
+            lineWidth: {
+              detail: '选中时候边框大小',
+              default: 2
+            },
+            strokeStyle: {
+              detail: '选中时候边框颜色',
+              default: '#fff'
+            },
+            triggerEventType: {
+              detail: '触发事件',
+              default: 'click'
+            }
+          }
+        }
+      }
+    },
+    label: {
+      detail: '文本设置',
+      propertys: {
+        enabled: {
+          detail: '是否开启',
+          default: true
+        },
+        fontColor: {
+          detail: '文本颜色',
+          default: '#666666'
+        },
+        fontSize: {
+          detail: '文本字体大小',
+          default: 13
+        },
+        textAlign: {
+          detail: '水平对齐方式',
+          default: 'center'
+        },
+        verticalAlign: {
+          detail: '基线对齐方式',
+          default: 'middle'
+        },
+        position: {
+          detail: '文本布局位置',
+          default: 'center'
+        },
+        offsetX: {
+          detail: 'x方向偏移量',
+          default: 0
+        },
+        offsetY: {
+          detail: 'y方向偏移量',
+          default: 0
+        }
+      }
+    }
+  });
+
+  var Text$2 = Canvax.Display.Text;
   var Circle$7 = Canvax.Shapes.Circle;
   var Line$6 = Canvax.Shapes.Line;
-  var Rect$8 = Canvax.Shapes.Rect;
+  var Rect$6 = Canvax.Shapes.Rect;
 
   var PlanetGraphs =
   /*#__PURE__*/
@@ -22305,21 +22857,6 @@
 
       _this = _possibleConstructorReturn(this, _getPrototypeOf(PlanetGraphs).call(this, opt, app));
       _this.type = "planet";
-      _this.field = null;
-
-      var me = _assertThisInitialized(_assertThisInitialized(_this)); //圆心原点坐标
-
-
-      _this.center = {
-        enabled: true,
-        text: "center",
-        radius: 30,
-        fillStyle: "#70629e",
-        fontSize: 15,
-        fontColor: "#ffffff",
-        margin: 20 //最近ring到太阳的距离
-
-      };
       _this.groupDataFrames = [];
       _this.groupField = null;
       _this._ringGroups = []; //groupField对应的 group 对象
@@ -22327,24 +22864,11 @@
 
       _this.grid = {
         rings: {
-          fillStyle: null,
-          strokeStyle: null,
-          lineWidth: 1,
-          section: [],
-          //环形刻度线集合
-          count: 3 //在 section.length>1 的时候会被修改为 section.length
-
-        },
-        rays: {
-          count: 0,
-          lineWidth: 1,
-          strokeStyle: "#10519D",
-          globalAlpha: 0.4
+          _section: []
         }
       };
-      _this.selectInds = []; //源数据中__index__的集合，外面可以传入这个数据进来设置选中
 
-      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), opt);
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(PlanetGraphs.defaultProps), opt);
 
       if (_this.center.radius == 0 || !_this.center.enabled) {
         _this.center.radius = 0;
@@ -22424,7 +22948,7 @@
 
           me._ringGroups.push(_g);
 
-          me.grid.rings.section.push({
+          me.grid.rings._section.push({
             radius: _g.rRange.to
           });
         });
@@ -22449,7 +22973,7 @@
             }
           }); //绘制实心圆上面的文案
 
-          this._centerTxt = new Text$3(this.center.text, {
+          this._centerTxt = new Text$2(this.center.text, {
             context: {
               x: this.origin.x,
               y: this.origin.y,
@@ -22472,23 +22996,23 @@
           name: 'coord'
         });
 
-        if (me.grid.rings.section.length == 1) {
+        if (me.grid.rings._section.length == 1) {
           //如果只有一个，那么就强制添加到3个
-          var _diffR = (me.grid.rings.section[0].radius - me.center.radius) / me.grid.rings.count;
+          var _diffR = (me.grid.rings._section[0].radius - me.center.radius) / me.grid.rings.count;
 
-          me.grid.rings.section = [];
+          me.grid.rings._section = [];
 
           for (var i = 0; i < me.grid.rings.count; i++) {
-            me.grid.rings.section.push({
+            me.grid.rings._section.push({
               radius: me.center.radius + _diffR * (i + 1)
             });
           }
         } else {
-          me.grid.rings.count = me.grid.rings.section.length;
+          me.grid.rings.count = me.grid.rings._section.length;
         }
 
-        for (var i = me.grid.rings.section.length - 1; i >= 0; i--) {
-          var _scale = me.grid.rings.section[i];
+        for (var i = me.grid.rings._section.length - 1; i >= 0; i--) {
+          var _scale = me.grid.rings._section[i];
           me.gridSp.addChild(new Circle$7({
             context: {
               x: _coord.origin.x,
@@ -22509,8 +23033,8 @@
           var _r = _coord.getMaxDisToViewOfOrigin(); //Math.max( me.w, me.h );
 
 
-          if (me.grid.rings.section.length) {
-            _r = me.grid.rings.section.slice(-1)[0].radius;
+          if (me.grid.rings._section.length) {
+            _r = me.grid.rings._section.slice(-1)[0].radius;
           }
 
           for (var i = 0, l = me.grid.rays.count; i < l; i++) {
@@ -22538,7 +23062,7 @@
           }
         }
 
-        var _clipRect = new Rect$8({
+        var _clipRect = new Rect$6({
           name: "clipRect",
           context: {
             x: _coord.origin.x - me.app.width / 2,
@@ -22560,7 +23084,7 @@
           res = p.apply(this, [{
             //iGroup : iGroup,
             scaleInd: i,
-            count: this.grid.rings.section.length,
+            count: this.grid.rings._section.length,
             groups: this._ringGroups,
             graphs: this
           }]);
@@ -22748,7 +23272,98 @@
     return PlanetGraphs;
   }(GraphsBase);
 
-  var Text$4 = Canvax.Display.Text;
+  _defineProperty(PlanetGraphs, "defaultProps", {
+    field: {
+      detail: '字段设置',
+      default: null
+    },
+    center: {
+      detail: '中心点设置',
+      propertys: {
+        enabled: {
+          detail: '是否显示中心',
+          default: true
+        },
+        text: {
+          detail: '中心区域文本',
+          default: 'center'
+        },
+        radius: {
+          detail: '中心圆半径',
+          default: 30
+        },
+        fillStyle: {
+          detail: '中心背景色',
+          default: '#70629e'
+        },
+        fontSize: {
+          detail: '中心字体大小',
+          default: 15
+        },
+        fontColor: {
+          detail: '中心字体颜色',
+          default: '#ffffff'
+        },
+        margin: {
+          detail: '中区区域和外围可绘图区域距离',
+          default: 20
+        }
+      }
+    },
+    selectInds: {
+      detail: '选中的数据索引',
+      default: []
+    },
+    grid: {
+      detail: '星系图自己的grid',
+      propertys: {
+        rings: {
+          detail: '环配置',
+          propertys: {
+            fillStyle: {
+              detail: '背景色',
+              default: null
+            },
+            strokeStyle: {
+              detail: '环线色',
+              default: null
+            },
+            lineWidth: {
+              detail: '环线宽',
+              default: 1
+            },
+            count: {
+              detail: '分几环',
+              default: 3
+            }
+          }
+        },
+        rays: {
+          detail: '射线配置',
+          propertys: {
+            count: {
+              detail: '射线数量',
+              default: 0
+            },
+            globalAlpha: {
+              detail: '线透明度',
+              default: 0.4
+            },
+            strokeStyle: {
+              detail: '线色',
+              default: '#10519D'
+            },
+            lineWidth: {
+              detail: '线宽',
+              default: 1
+            }
+          }
+        }
+      }
+    }
+  });
+
+  var Text$3 = Canvax.Display.Text;
   var Polygon$4 = Canvax.Shapes.Polygon;
 
   var FunnelGraphs =
@@ -22763,51 +23378,14 @@
 
       _this = _possibleConstructorReturn(this, _getPrototypeOf(FunnelGraphs).call(this, opt, app));
       _this.type = "funnel";
-      _this.field = null;
       _this.dataOrg = []; //this.dataFrame.getFieldData( this.field )
 
       _this.data = []; //layoutData list , default is empty Array
 
-      _this.sort = null;
-      _this.invert = false; //默认为倒立的金字塔结构
-
       _this._maxVal = null;
       _this._minVal = null;
-      _this.maxNodeWidth = null;
-      _this.minNodeWidth = 0;
-      _this.minVal = 0; //漏斗的塔尖，默认为0
 
-      _this.node = {
-        shapeType: "polygon",
-        //节点的现状可以是圆 ，也可以是rect，也可以是三角形，后面两种后面实现
-        height: 0,
-        //漏斗单元高，如果options没有设定， 就会被自动计算为 this.height/dataOrg.length
-        fillStyle: null,
-        //目前主要用皮肤来实现配色，暂时node.fillStyle没用到，但是先定义起来
-        lineWidth: 0,
-        strokeStyle: null,
-        focus: {
-          enabled: true
-        },
-        select: {
-          enabled: true,
-          lineWidth: 2,
-          strokeStyle: "#666"
-        }
-      };
-      _this.label = {
-        enabled: true,
-        align: "center",
-        // left , center, right
-        format: function format(num) {
-          return numAddSymbol(num);
-        },
-        fontColor: "#ffffff",
-        fontSize: 13,
-        textBaseline: "middle"
-      };
-
-      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), opt);
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(FunnelGraphs.defaultProps), opt);
 
       _this.init();
 
@@ -22832,16 +23410,6 @@
 
         if (!this.node.height) {
           this.node.height = this.height / this.dataOrg.length;
-        }
-
-        if (this.sort == "asc") {
-          //倒序的话
-          this.invert = true;
-        }
-
-        if (this.sort == "desc") {
-          //倒序的话
-          this.invert = false;
         }
       }
     }, {
@@ -22928,7 +23496,7 @@
         var topY = layoutData.iNode * this.node.height;
         var bottomY = topY + this.node.height;
 
-        if (!this.invert) {
+        if (this.sort !== "asc") {
           points.push([-layoutData.width / 2, topY]); //左上
 
           points.push([layoutData.width / 2, topY]); //右上
@@ -22992,24 +23560,24 @@
             y: ld.middlePoint.y
           };
 
-          if (me.label.align == "left") {
+          if (me.label.textAlign == "left") {
             textPoint.x = ld.points[0][0] - (ld.points[0][0] - ld.points[3][0]) / 2;
             textPoint.x -= 15;
             textAlign = "right";
           }
 
-          if (me.label.align == "right") {
+          if (me.label.textAlign == "right") {
             textPoint.x = ld.points[1][0] - (ld.points[1][0] - ld.points[2][0]) / 2;
             textPoint.x += 15;
             textAlign = "left";
           }
 
-          var _text = new Text$4(ld.label, {
+          var _text = new Text$3(ld.label, {
             context: {
               x: textPoint.x,
               y: textPoint.y,
               fontSize: me.label.fontSize,
-              fillStyle: me.label.align == "center" ? me.label.fontColor : ld.color,
+              fillStyle: me.label.textAlign == "center" ? me.label.fontColor : ld.color,
               textAlign: textAlign,
               textBaseline: me.label.textBaseline
             }
@@ -23022,6 +23590,71 @@
 
     return FunnelGraphs;
   }(GraphsBase);
+
+  _defineProperty(FunnelGraphs, "defaultProps", {
+    field: {
+      detail: '字段配置',
+      default: null
+    },
+    sort: {
+      detail: '排序规则',
+      default: null
+    },
+    maxNodeWidth: {
+      detail: '最大的元素宽',
+      default: null
+    },
+    minNodeWidth: {
+      detail: '最小的元素宽',
+      default: 0
+    },
+    minVal: {
+      detail: '漏斗的塔尖',
+      default: 0
+    },
+    node: {
+      detail: '单个元素图形配置',
+      propertys: {
+        height: {
+          detail: '高',
+          default: 0,
+          documentation: '漏斗单元高，如果options没有设定， 就会被自动计算为 this.height/dataOrg.length'
+        }
+      }
+    },
+    label: {
+      detail: '文本配置',
+      propertys: {
+        enabled: {
+          detail: '是否开启文本',
+          default: true
+        },
+        textAlign: {
+          detail: '文本布局位置(left,center,right)',
+          default: 'center'
+        },
+        textBaseline: {
+          detail: '文本基线对齐方式',
+          default: 'middle'
+        },
+        format: {
+          detail: '文本格式化处理函数',
+          default: function _default(num) {
+            return numAddSymbol(num);
+          }
+        },
+        fontSize: {
+          detail: '文本字体大小',
+          default: 13
+        },
+        fontColor: {
+          detail: '文本颜色',
+          default: '#ffffff',
+          documentation: 'align为center的时候的颜色，align为其他属性时候取node的颜色'
+        }
+      }
+    }
+  });
 
   /** finds the zeros of a function, given two starting points (which must
    * have opposite signs */
@@ -24384,7 +25017,7 @@
     return scaled;
   }
 
-  var Text$5 = Canvax.Display.Text;
+  var Text$4 = Canvax.Display.Text;
   var Path$3 = Canvax.Shapes.Path;
   var Circle$8 = Canvax.Shapes.Circle;
 
@@ -24399,40 +25032,10 @@
       _classCallCheck(this, VennGraphs);
 
       _this = _possibleConstructorReturn(this, _getPrototypeOf(VennGraphs).call(this, opt, app));
-      _this.type = "venn"; //this.field = null;
-
-      _this.keyField = null;
-      _this.valueField = null; //坚持一个数据节点的设置都在一个node下面
-
-      _this.node = {
-        //field : null, //node的id标识,而不是label
-        strokeStyle: null,
-        lineWidth: 2,
-        lineAlpha: 0,
-        fillStyle: null,
-        fillAlpha: 0.25,
-        focus: {
-          enabled: true,
-          lineAlpha: 0.3
-        },
-        select: {
-          enabled: true,
-          lineWidth: 2,
-          strokeStyle: "#666"
-        }
-      };
-      _this.label = {
-        field: null,
-        fontSize: 14,
-        //fontFamily : "Impact",
-        fontColor: null,
-        //"#666",
-        fontWeight: "normal",
-        showInter: true
-      };
+      _this.type = "venn";
       _this.vennData = null;
 
-      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), opt); //_trimGraphs后，计算出来本次data的一些属性
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(VennGraphs.defaultProps), opt); //_trimGraphs后，计算出来本次data的一些属性
 
 
       _this._dataCircleLen = 0;
@@ -24757,7 +25360,7 @@
               var _txt = me.venn_labels.getChildAt(labelInd++);
 
               if (!_txt) {
-                _txt = new Text$5(nodeData.label, {
+                _txt = new Text$4(nodeData.label, {
                   context: _textContext
                 });
                 me.venn_labels.addChild(_txt);
@@ -24821,6 +25424,98 @@
 
     return VennGraphs;
   }(GraphsBase); //venn computeTextCentres 需要的相关代码 begin
+
+
+  _defineProperty(VennGraphs, "defaultProps", {
+    keyField: {
+      detail: 'key字段',
+      default: 'name'
+    },
+    valueField: {
+      detail: 'value字段',
+      default: 'value'
+    },
+    node: {
+      detail: '单个节点配置',
+      propertys: {
+        strokeStyle: {
+          detail: '边框颜色',
+          default: null
+        },
+        lineWidth: {
+          detail: '边框大小',
+          default: 2
+        },
+        lineAlpha: {
+          detail: '边框透明度',
+          default: 0
+        },
+        fillStyle: {
+          detail: '背景色',
+          default: null
+        },
+        fillAlpha: {
+          detail: '背景透明度',
+          default: 0.25
+        },
+        focus: {
+          detail: 'hover设置',
+          propertys: {
+            enabled: {
+              detail: '是否开启',
+              default: true
+            },
+            lineAlpha: {
+              detail: '边框透明度',
+              default: 0.3
+            }
+          }
+        },
+        select: {
+          detail: '选中设置',
+          propertys: {
+            enabled: {
+              detail: '是否开启',
+              default: true
+            },
+            lineWidth: {
+              detail: '描边宽度',
+              default: 2
+            },
+            strokeStyle: {
+              detail: '描边颜色',
+              default: '#666666'
+            }
+          }
+        }
+      }
+    },
+    label: {
+      detail: '文本设置',
+      propertys: {
+        field: {
+          detail: '获取文本的字段',
+          default: null
+        },
+        fontSize: {
+          detail: '字体大小',
+          default: 14
+        },
+        fontColor: {
+          detail: '文本颜色',
+          default: null
+        },
+        fontWeight: {
+          detail: 'fontWeight',
+          default: 'normal'
+        },
+        showInter: {
+          detail: '是否显示相交部分的文本',
+          default: true
+        }
+      }
+    }
+  });
 
   function getOverlappingCircles(circles) {
     var ret = {},
@@ -25330,7 +26025,6 @@
   }
 
   var Sector$2 = Canvax.Shapes.Sector;
-  var Circle$9 = Canvax.Shapes.Circle;
 
   var sunburstGraphs =
   /*#__PURE__*/
@@ -25344,25 +26038,8 @@
 
       _this = _possibleConstructorReturn(this, _getPrototypeOf(sunburstGraphs).call(this, opt, app));
       _this.type = "sunburst";
-      _this.keyField = "name"; //key, parent指向的值
 
-      _this.valueField = 'value';
-      _this.parentField = 'parent'; //坚持一个数据节点的设置都在一个node下面
-
-      _this.node = {
-        strokeStyle: "#fff",
-        lineWidth: 1,
-        lineAlpha: 1,
-        fillStyle: null,
-        fillAlpha: 1,
-        blurAlpha: 0.4,
-        focus: {
-          enabled: true,
-          lineAlpha: 1
-        }
-      };
-
-      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), opt);
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(sunburstGraphs.defaultProps), opt);
 
       _this.data = []; //布局算法布局后的数据
 
@@ -25616,6 +26293,51 @@
 
     return sunburstGraphs;
   }(GraphsBase);
+
+  _defineProperty(sunburstGraphs, "defaultProps", {
+    keyField: {
+      detail: 'key字段',
+      default: 'name'
+    },
+    valueField: {
+      detail: 'value字段',
+      default: 'value'
+    },
+    parentField: {
+      detail: 'parent字段',
+      default: 'parent'
+    },
+    node: {
+      detail: '单个节点图形设置',
+      propertys: {
+        strokeStyle: {
+          detail: '描边色',
+          default: '#ffffff'
+        },
+        lineWidth: {
+          detail: '描边线宽',
+          default: 1
+        },
+        lineAlpha: {
+          detail: '描边边框透明度',
+          default: 1
+        },
+        fillStyle: {
+          detail: '背景色',
+          default: null
+        },
+        fillAlpha: {
+          detail: '背景透明度',
+          default: 1
+        },
+        blurAlpha: {
+          detail: '非激活状态透明度',
+          documentation: '比如选中其中一项，其他不先关的要降低透明度',
+          default: 0.4
+        }
+      }
+    }
+  });
 
   function sankeyLayout () {
     var sankey = {},
@@ -26186,7 +26908,7 @@
   }
 
   var Path$4 = Canvax.Shapes.Path;
-  var Rect$9 = Canvax.Shapes.Rect;
+  var Rect$7 = Canvax.Shapes.Rect;
 
   var sankeyGraphs =
   /*#__PURE__*/
@@ -26200,48 +26922,8 @@
 
       _this = _possibleConstructorReturn(this, _getPrototypeOf(sankeyGraphs).call(this, opt, app));
       _this.type = "sankey";
-      _this.keyField = null; //key, parent指向的值
 
-      _this.valueField = 'value'; //默认的情况下sankey图是在keyField中使用 a|b 来表示流向
-      //但是也可以keyField表示b 用parentField来表示a，和其他表示流向的图的数据格式保持一致
-
-      _this.parentField = null; //坚持一个数据节点的设置都在一个node下面
-
-      _this.node = {
-        width: 18,
-        padding: 10,
-        fillStyle: null,
-        fillAlpha: 1,
-        blurAlpha: 0.4,
-        focus: {
-          enabled: true,
-          lineAlpha: 1
-        }
-      };
-      _this.line = {
-        strokeStyle: "blue",
-        lineWidth: 1,
-        lineAlpha: 1,
-        blurAlpha: 0.4,
-        focus: {
-          enabled: true,
-          lineAlpha: 1
-        }
-      };
-      _this.label = {
-        fontColor: "#666",
-        fontSize: 12,
-        align: "left",
-        //left center right
-        verticalAlign: "middle",
-        //top middle bottom
-        position: "right",
-        //left,center right
-        offsetX: 0,
-        offsetY: 0
-      };
-
-      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), opt);
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(sankeyGraphs.defaultProps), opt);
 
       _this.init();
 
@@ -26360,7 +27042,7 @@
         _.each(nodes, function (node, i) {
           var nodeColor = me._getColor(me.node.fillStyle, node, i);
 
-          var nodeEl = new Rect$9({
+          var nodeEl = new Rect$7({
             xyToInt: false,
             context: {
               x: node.x,
@@ -26392,7 +27074,7 @@
               path: d,
               fillStyle: linkColor,
               //lineWidth: Math.max(1, link.dy),
-              globalAlpha: 0.3,
+              globalAlpha: me.line.alpha,
               cursor: "pointer"
             }
           });
@@ -26427,12 +27109,12 @@
         var me = this;
 
         _.each(nodes, function (node) {
-          var align = me.label.align;
+          var textAlign = me.label.textAlign;
           var x = node.x + me.data.nodeWidth() + 4;
           /*
           if( x > me.width/2 ){
               x  = node.x - 4;
-              align = 'right';
+              textAlign = 'right';
           } else {
               x += 4;
           };
@@ -26445,7 +27127,7 @@
               y: y,
               fillStyle: me.label.fontColor,
               fontSize: me.label.fontSize,
-              textAlign: align,
+              textAlign: textAlign,
               textBaseline: me.label.verticalAlign
             }
           });
@@ -26462,6 +27144,72 @@
 
     return sankeyGraphs;
   }(GraphsBase);
+
+  _defineProperty(sankeyGraphs, "defaultProps", {
+    keyField: {
+      detail: 'key字段',
+      default: null
+    },
+    valueField: {
+      detail: 'value字段',
+      default: 'value'
+    },
+    parentField: {
+      detail: 'parent字段',
+      default: null
+    },
+    node: {
+      detail: 'node',
+      propertys: {
+        width: {
+          detail: '节点宽',
+          default: 18
+        },
+        padding: {
+          detail: '节点间距',
+          default: 10
+        },
+        fillStyle: {
+          detail: '节点背景色',
+          default: null
+        }
+      }
+    },
+    line: {
+      detail: '线设置',
+      propertys: {
+        strokeStyle: {
+          detail: '线颜色',
+          default: 'blue'
+        },
+        alpha: {
+          detail: '线透明度',
+          default: 0.3
+        }
+      }
+    },
+    label: {
+      detail: '文本设置',
+      propertys: {
+        fontColor: {
+          detail: '文本颜色',
+          default: '#666666'
+        },
+        fontSize: {
+          detail: '文本字体大小',
+          default: 12
+        },
+        textAlign: {
+          detail: '水平对齐方式',
+          default: 'left'
+        },
+        verticalAlign: {
+          detail: '垂直对齐方式',
+          default: 'middle'
+        }
+      }
+    }
+  });
 
   var Progress =
   /*#__PURE__*/
@@ -26684,7 +27432,7 @@
                 fontSize: me.label.fontSize,
                 lineWidth: me.label.lineWidth,
                 strokeStyle: me.label.strokeStyle,
-                textAlign: me.label.align,
+                textAlign: me.label.textAlign,
                 textBaseline: me.label.verticalAlign,
                 rotation: me.label.rotation
               };
@@ -26851,8 +27599,8 @@
           detail: 'label旋转角度',
           default: 0
         },
-        align: {
-          detail: 'label align',
+        textAlign: {
+          detail: 'label textAlign',
           default: 'center',
           values: ['left', 'center', 'right']
         },
@@ -26916,7 +27664,7 @@
     this.params = params;
   };
 
-  var Circle$a = Canvax.Shapes.Circle;
+  var Circle$9 = Canvax.Shapes.Circle;
 
   var Legend =
   /*#__PURE__*/
@@ -27047,7 +27795,7 @@
         _.each(this.data, function (obj, i) {
           if (isOver) return;
 
-          var _icon = new Circle$a({
+          var _icon = new Circle$9({
             id: "legend_field_icon_" + i,
             context: {
               x: 0,
@@ -27267,7 +28015,7 @@
   });
 
   var Line$7 = Canvax.Shapes.Line;
-  var Rect$a = Canvax.Shapes.Rect;
+  var Rect$8 = Canvax.Shapes.Rect;
 
   var dataZoom =
   /*#__PURE__*/
@@ -27573,7 +28321,7 @@
               onUpdate: setLines
             });
           } else {
-            me._bgRect = new Rect$a({
+            me._bgRect = new Rect$8({
               context: bgRectCtx
             });
             me.dataZoomBg.addChild(me._bgRect);
@@ -27618,7 +28366,7 @@
             onUpdate: setLines
           });
         } else {
-          me._btnLeft = new Rect$a({
+          me._btnLeft = new Rect$8({
             id: 'btnLeft',
             dragEnabled: me.left.eventEnabled,
             context: btnLeftCtx
@@ -27669,7 +28417,7 @@
             onUpdate: setLines
           });
         } else {
-          me._btnRight = new Rect$a({
+          me._btnRight = new Rect$8({
             id: 'btnRight',
             dragEnabled: me.right.eventEnabled,
             context: btnRightCtx
@@ -27716,7 +28464,7 @@
           });
         } else {
           //中间矩形拖拽区域
-          this.rangeRect = new Rect$a({
+          this.rangeRect = new Rect$8({
             id: 'btnCenter',
             dragEnabled: true,
             context: rangeRectCtx
@@ -28071,7 +28819,7 @@
 
   var BrokenLine$2 = Canvax.Shapes.BrokenLine;
   var Sprite$1 = Canvax.Display.Sprite;
-  var Text$6 = Canvax.Display.Text;
+  var Text$5 = Canvax.Display.Text;
 
   var MarkLine =
   /*#__PURE__*/
@@ -28216,7 +28964,7 @@
         me._line = line;
 
         if (me.label.enabled) {
-          var txt = new Text$6(me._getLabel(), {
+          var txt = new Text$5(me._getLabel(), {
             //文字
             context: me.label
           });
@@ -28366,7 +29114,7 @@
     }
   });
 
-  var Rect$b = Canvax.Shapes.Rect;
+  var Rect$9 = Canvax.Shapes.Rect;
   var Line$8 = Canvax.Shapes.Line;
 
   var Tips =
@@ -28694,7 +29442,7 @@
           if (this.pointer == "region") {
             var regionWidth = _coord._xAxis.getCellLengthOfPos(x);
 
-            el = new Rect$b({
+            el = new Rect$9({
               //xyToInt : false,
               context: {
                 width: regionWidth,
@@ -29111,7 +29859,7 @@
               lineWidth: me.label.lineWidth,
               strokeStyle: me.label.strokeStyle,
               fontSize: me.label.fontSize,
-              textAlign: me.label.align,
+              textAlign: me.label.textAlign,
               textBaseline: me.label.verticalAlign
             }
           });
@@ -29189,7 +29937,7 @@
           detail: '垂直对齐方式',
           default: 'bottom'
         },
-        align: {
+        textAlign: {
           detail: '水平对齐方式',
           default: 'center'
         },

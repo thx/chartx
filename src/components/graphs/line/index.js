@@ -1,35 +1,39 @@
-import Canvax from "canvax"
 import Group from "./group"
-import {getDisMinATArr} from "../../../utils/tools"
 import GraphsBase from "../index"
-import { _ } from "mmvis"
-
-const Rect = Canvax.Shapes.Rect;
+import { _, getDefaultProps } from "mmvis"
 
 export default class LineGraphs extends GraphsBase
 {
+
+    static defaultProps = {
+        field : {
+            detail : '字段配置，支持二维数组格式',
+            default: null
+        },
+        yAxisAlign : {
+            detail: '绘制在哪根y轴上面',
+            default: 'left'
+        }
+    }
+
     constructor(opt, app)
     {
         super( opt, app );
 
         this.type = "line";
 
-        //默认给左轴
-        this.yAxisAlign = "left";
-
-        this.field  = null;
         this.enabledField = null;
         
         this.groups = []; //群组集合
 
-        _.extend(true, this, opt);
+        _.extend(true, this, getDefaultProps( LineGraphs.defaultProps ), opt);
 
-        this.init(this._opt);
+        this.init();
     }
 
-    init(opt)
+    init()
     {
-        opt.yAxisAlign && (this.yAxisAlign = opt.yAxisAlign);
+       
     }
 
     draw(opt)

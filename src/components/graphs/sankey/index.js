@@ -4,66 +4,84 @@
 import Canvax from "canvax"
 import GraphsBase from "../index"
 import sankeyLayout from "../../../layout/sankey/index"
-import { _,event } from "mmvis"
+import { _,event,getDefaultProps } from "mmvis"
 
 const Path = Canvax.Shapes.Path;
 const Rect = Canvax.Shapes.Rect;
 
 export default class sankeyGraphs extends GraphsBase
 {
+    static defaultProps = {
+        keyField: {
+            detail: 'key字段',
+            default: null
+        },
+        valueField: {
+            detail: 'value字段',
+            default: 'value'
+        },
+        parentField: {
+            detail: 'parent字段',
+            default: null
+        },
+        node : {
+            detail: 'node',
+            propertys: {
+                width: {
+                    detail: '节点宽',
+                    default: 18
+                },
+                padding: {
+                    detail: '节点间距',
+                    default: 10
+                },
+                fillStyle: {
+                    detail: '节点背景色',
+                    default: null
+                }
+            }
+        },
+        line: {
+            detail: '线设置',
+            propertys: {
+                strokeStyle: {
+                    detail: '线颜色',
+                    default: 'blue'
+                },
+                alpha: {
+                    detail: '线透明度',
+                    default: 0.3
+                }
+            }
+        },
+        label: {
+            detail: '文本设置',
+            propertys: {
+                fontColor: {
+                    detail: '文本颜色',
+                    default: '#666666'
+                },
+                fontSize: {
+                    detail: '文本字体大小',
+                    default: 12
+                },
+                textAlign: {
+                    detail: '水平对齐方式',
+                    default: 'left'
+                },
+                verticalAlign: {
+                    detail: '垂直对齐方式',
+                    default: 'middle'
+                }
+            }
+        }
+    }
     constructor(opt, app)
     {
         super( opt, app );
-
         this.type = "sankey";
 
-        this.keyField = null; //key, parent指向的值
-        this.valueField = 'value';
-
-        //默认的情况下sankey图是在keyField中使用 a|b 来表示流向
-        //但是也可以keyField表示b 用parentField来表示a，和其他表示流向的图的数据格式保持一致
-        this.parentField = null; 
-
-        
-        //坚持一个数据节点的设置都在一个node下面
-        this.node = {
-            width : 18,
-            padding : 10,
-
-            fillStyle : null,
-            fillAlpha : 1,
-
-            blurAlpha : 0.4,
-            focus : {
-                enabled : true,
-                lineAlpha : 1
-            }
-
-        };
-
-        this.line = {
-            strokeStyle: "blue",
-            lineWidth : 1,
-            lineAlpha : 1,
-
-            blurAlpha : 0.4,
-            focus : {
-                enabled : true,
-                lineAlpha : 1
-            }
-        };
-
-        this.label = {
-            fontColor : "#666",
-            fontSize  : 12,
-            align : "left",  //left center right
-            verticalAlign : "middle", //top middle bottom
-            position : "right", //left,center right
-            offsetX : 0,
-            offsetY : 0
-        };
-
-        _.extend( true, this , opt );
+        _.extend( true, this, getDefaultProps(sankeyGraphs.defaultProps), opt );
 
         this.init( );
     }
@@ -208,7 +226,7 @@ export default class sankeyGraphs extends GraphsBase
                     path: d,
                     fillStyle: linkColor,
                     //lineWidth: Math.max(1, link.dy),
-                    globalAlpha: 0.3,
+                    globalAlpha: me.line.alpha,
                     cursor:"pointer"
                 }
             });
@@ -247,13 +265,13 @@ export default class sankeyGraphs extends GraphsBase
         var nodes = this.data.nodes();
         var me = this;
         _.each(nodes, function(node){
-            var align = me.label.align;
+            var textAlign = me.label.textAlign;
 
             var x = node.x+me.data.nodeWidth()+4;
             /*
             if( x > me.width/2 ){
                 x  = node.x - 4;
-                align = 'right';
+                textAlign = 'right';
             } else {
                 x += 4;
             };
@@ -266,7 +284,7 @@ export default class sankeyGraphs extends GraphsBase
                     y : y,
                     fillStyle    : me.label.fontColor,
                     fontSize     : me.label.fontSize,
-                    textAlign    : align,
+                    textAlign    : textAlign,
                     textBaseline : me.label.verticalAlign
                 }
             });

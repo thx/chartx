@@ -1,15 +1,27 @@
 import Component from "../component"
 import Canvax from "canvax"
-import { _ } from "mmvis"
+import { _, getDefaultProps } from "mmvis"
 
 const AnimationFrame = Canvax.AnimationFrame;
 
 export default class GraphsBase extends Component
 {
+    static defaultProps = {
+        animation : {
+            detail : '是否开启入场动画',
+            default: true
+        },
+        aniDuration: {
+            detail: '动画时长',
+            default: 500
+        }
+    }
+
     constructor(opt, app)
     {
         super( opt, app );
-
+        //这里不能把opt个extend进this
+        _.extend(true, this, getDefaultProps( GraphsBase.defaultProps ));
         this.name = "graphs";
 
         //这里所有的opts都要透传给 group
@@ -27,8 +39,6 @@ export default class GraphsBase extends Component
             y: 0
         };
 
-        this.animation = true; //是否有动画
-        this.aniDuration = 500;//动画时长
         this.inited = false;
 
         this.sprite = new Canvax.Display.Sprite({

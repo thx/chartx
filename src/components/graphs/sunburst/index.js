@@ -4,46 +4,68 @@
 import Canvax from "canvax"
 import GraphsBase from "../index"
 import Partition from "../../../layout/partition"
-import { _,event } from "mmvis"
+import { _,event,getDefaultProps } from "mmvis"
 
 const Sector = Canvax.Shapes.Sector;
-const Circle = Canvax.Shapes.Circle;
 
 export default class sunburstGraphs extends GraphsBase
 {
+    static defaultProps = {
+        keyField: {
+            detail: 'key字段',
+            default: 'name'
+        },
+        valueField: {
+            detail: 'value字段',
+            default: 'value'
+        },
+        parentField: {
+            detail: 'parent字段',
+            default: 'parent'
+        },
+        node: {
+            detail: '单个节点图形设置',
+            propertys: {
+                strokeStyle: {
+                    detail: '描边色',
+                    default: '#ffffff'
+                },
+                lineWidth: {
+                    detail: '描边线宽',
+                    default:1
+                },
+                lineAlpha: {
+                    detail: '描边边框透明度',
+                    default: 1
+                },
+                fillStyle: {
+                    detail: '背景色',
+                    default: null
+                },
+                fillAlpha: {
+                    detail: '背景透明度',
+                    default: 1
+                },
+                blurAlpha: {
+                    detail: '非激活状态透明度',
+                    documentation: '比如选中其中一项，其他不先关的要降低透明度',
+                    default: 0.4
+                }
+            }
+        }
+    }
+
     constructor(opt, app)
     {
         super( opt, app );
-
         this.type = "sunburst";
 
-        this.keyField = "name"; //key, parent指向的值
-        this.valueField = 'value';
-
-        this.parentField = 'parent';
-        
-        //坚持一个数据节点的设置都在一个node下面
-        this.node = {
-            strokeStyle: "#fff",
-            lineWidth : 1,
-            lineAlpha : 1,
-            fillStyle : null,
-            fillAlpha : 1,
-
-            blurAlpha : 0.4,
-            focus : {
-                enabled : true,
-                lineAlpha : 1
-            }
-
-        };
-
-        _.extend( true, this , opt );
+        _.extend( true, this , getDefaultProps(sunburstGraphs.defaultProps), opt );
 
         this.data = []; //布局算法布局后的数据
         this.dataGroup = []; //data数据按照深度的分组
 
-        this.init( );
+        this.init();
     }
 
     init()
