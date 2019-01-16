@@ -1,10 +1,8 @@
 //坐标系组件
-import {aa} from "./test.js"
-
-import {Rect} from "./components/coord/rect"
-
+import {aa_test} from "./test.js"
+import test1 from "./test1.js"
 let allProps = {
-    aa: aa
+    aa_test: aa_test
 };
 
 export default allProps;

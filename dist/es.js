@@ -708,6 +708,55 @@ var getDefaultProps = function getDefaultProps(dProps) {
   return target;
 };
 
+var defaultProps = {
+  layoutType: {
+    detail: '布局方式',
+    default: 'proportion'
+  },
+  dataSection: {
+    detail: '轴数据集',
+    default: []
+  },
+  sectionHandler: {
+    detail: '自定义dataSection的计算公式',
+    default: null
+  },
+  waterLine: {
+    detail: '水位线',
+    default: null,
+    documentation: '水位data，需要混入 计算 dataSection， 如果有设置waterLine， dataSection的最高水位不会低于这个值'
+  },
+  middleweight: {
+    detail: '区间等分线',
+    default: null,
+    documentation: '如果middleweight有设置的话 dataSectionGroup 为被middleweight分割出来的n个数组>..[ [0,50 , 100],[100,500,1000] ]'
+  },
+  symmetric: {
+    detail: '自动正负对称',
+    default: false,
+    documentation: 'proportion下，是否需要设置数据为正负对称的数据，比如 [ 0,5,10 ] = > [ -10, 0 10 ]，象限坐标系的时候需要'
+  },
+  origin: {
+    detail: '轴的起源值',
+    default: null,
+    documentation: '\
+            1，如果数据中又正数和负数，则默认为0 <br />\
+            2，如果dataSection最小值小于0，则baseNumber为最小值<br />\
+            3，如果dataSection最大值大于0，则baseNumber为最大值<br />\
+            4，也可以由用户在第2、3种情况下强制配置为0，则section会补充满从0开始的刻度值\
+        '
+  },
+  sort: {
+    detail: '排序',
+    default: null
+  },
+  posParseToInt: {
+    detail: '是否位置计算取整',
+    default: false,
+    documentation: '比如在柱状图中，有得时候需要高精度的能间隔1px的柱子，那么x轴的计算也必须要都是整除的'
+  }
+};
+
 var axis =
 /*#__PURE__*/
 function () {
@@ -744,7 +793,7 @@ function () {
     this._min = null;
     this._max = null;
 
-    _.extend(true, this, getDefaultProps(axis.defaultProps), opt);
+    _.extend(true, this, getDefaultProps(defaultProps), opt);
   }
 
   _createClass(axis, [{
@@ -1436,55 +1485,6 @@ function () {
 
   return axis;
 }();
-
-_defineProperty(axis, "defaultProps", {
-  layoutType: {
-    detail: '布局方式',
-    default: 'proportion'
-  },
-  dataSection: {
-    detail: '轴数据集',
-    default: []
-  },
-  sectionHandler: {
-    detail: '自定义dataSection的计算公式',
-    default: null
-  },
-  waterLine: {
-    detail: '水位线',
-    default: null,
-    documentation: '水位data，需要混入 计算 dataSection， 如果有设置waterLine， dataSection的最高水位不会低于这个值'
-  },
-  middleweight: {
-    detail: '区间等分线',
-    default: null,
-    documentation: '如果middleweight有设置的话 dataSectionGroup 为被middleweight分割出来的n个数组>..[ [0,50 , 100],[100,500,1000] ]'
-  },
-  symmetric: {
-    detail: '自动正负对称',
-    default: false,
-    documentation: 'proportion下，是否需要设置数据为正负对称的数据，比如 [ 0,5,10 ] = > [ -10, 0 10 ]，象限坐标系的时候需要'
-  },
-  origin: {
-    detail: '轴的起源值',
-    default: null,
-    documentation: '\
-                1，如果数据中又正数和负数，则默认为0 <br />\
-                2，如果dataSection最小值小于0，则baseNumber为最小值<br />\
-                3，如果dataSection最大值大于0，则baseNumber为最大值<br />\
-                4，也可以由用户在第2、3种情况下强制配置为0，则section会补充满从0开始的刻度值\
-            '
-  },
-  sort: {
-    detail: '排序',
-    default: null
-  },
-  posParseToInt: {
-    detail: '是否位置计算取整',
-    default: false,
-    documentation: '比如在柱状图中，有得时候需要高精度的能间隔1px的柱子，那么x轴的计算也必须要都是整除的'
-  }
-});
 
 /**
 * 把原始的数据
@@ -13233,7 +13233,7 @@ function (_Component) {
   return coordBase;
 }(component);
 
-_defineProperty(coordBase, "defaultProps", {
+coordBase.defaultProps = {
   type: {
     detail: '坐标系组件',
     documentation: "坐标系组件，可选值有'rect'（二维直角坐标系）,'polar'（二维极坐标系）,'box'（三维直角坐标系） ",
@@ -13267,7 +13267,7 @@ _defineProperty(coordBase, "defaultProps", {
     polar: {},
     box: {}
   }, "polar", {})
-});
+};
 
 /**
  * 数字千分位加','号
@@ -13373,7 +13373,7 @@ function (_baseAxis) {
   return Axis;
 }(axis);
 
-_defineProperty(Axis, "defaultProps", {
+Axis.defaultProps = {
   field: {
     detail: '轴字段配置',
     documentation: '目前x轴的field只支持单维度设置，也就是说只支持一条x轴',
@@ -13531,7 +13531,7 @@ _defineProperty(Axis, "defaultProps", {
     documentation: '如果用户有手动的 trimLayout ，那么就全部visible为true，然后调用用户自己的过滤程序',
     default: null
   }
-});
+};
 
 var Line$1 = Canvax.Shapes.Line;
 
@@ -14096,7 +14096,7 @@ function (_Axis) {
   return xAxis;
 }(Axis);
 
-_defineProperty(xAxis, "defaultProps", {});
+xAxis.defaultProps = {};
 
 var Line$2 = Canvax.Shapes.Line;
 
@@ -14573,7 +14573,7 @@ function (_Axis) {
   return yAxis;
 }(Axis);
 
-_defineProperty(yAxis, "defaultProps", {
+yAxis.defaultProps = {
   align: {
     detail: '左右轴设置',
     default: 'left'
@@ -14582,7 +14582,7 @@ _defineProperty(yAxis, "defaultProps", {
     detail: '布局方式',
     default: 'proportion'
   }
-});
+};
 
 var Line$3 = Canvax.Shapes.Line;
 var Rect$1 = Canvax.Shapes.Rect;
@@ -14743,7 +14743,7 @@ function (_event$Dispatcher) {
   return rectGrid;
 }(Dispatcher);
 
-_defineProperty(rectGrid, "defaultProps", {
+rectGrid.defaultProps = {
   enabled: {
     detail: '是否开启grid绘制',
     default: true
@@ -14809,7 +14809,7 @@ _defineProperty(rectGrid, "defaultProps", {
       }
     }
   }
-});
+};
 
 var Rect$2 =
 /*#__PURE__*/
@@ -15400,7 +15400,7 @@ function (_coordBase) {
   return Rect;
 }(coordBase);
 
-_defineProperty(Rect$2, "defaultProps", {
+Rect$2.defaultProps = {
   horizontal: {
     detail: '横向翻转坐标系',
     documentation: "横向翻转坐标系",
@@ -15413,7 +15413,7 @@ _defineProperty(Rect$2, "defaultProps", {
     yAxis: {},
     grid: {}
   }
-});
+};
 
 var Line$4 = Canvax.Shapes.Line;
 var Circle$2 = Canvax.Shapes.Circle;
@@ -15568,7 +15568,7 @@ function (_event$Dispatcher) {
   return polarGrid;
 }(Dispatcher);
 
-_defineProperty(polarGrid, "defaultProps", {
+polarGrid.defaultProps = {
   enabled: {
     detail: '是否开启grid',
     default: false
@@ -15619,7 +15619,7 @@ _defineProperty(polarGrid, "defaultProps", {
       }
     }
   }
-});
+};
 
 var Polar$2 =
 /*#__PURE__*/
@@ -16389,7 +16389,7 @@ function (_coorBase) {
   return Polar$$1;
 }(coordBase);
 
-_defineProperty(Polar$2, "defaultProps", {
+Polar$2.defaultProps = {
   allAngle: {
     detail: '坐标系总角度',
     documentation: "",
@@ -16481,7 +16481,7 @@ _defineProperty(Polar$2, "defaultProps", {
       }
     }
   }
-});
+};
 
 var AnimationFrame$1 = Canvax.AnimationFrame;
 
@@ -16640,7 +16640,7 @@ function (_Component) {
   return GraphsBase;
 }(component);
 
-_defineProperty(GraphsBase, "defaultProps", {
+GraphsBase.defaultProps = {
   animation: {
     detail: '是否开启入场动画',
     default: true
@@ -16649,7 +16649,7 @@ _defineProperty(GraphsBase, "defaultProps", {
     detail: '动画时长',
     default: 500
   }
-});
+};
 
 var AnimationFrame$2 = Canvax.AnimationFrame;
 var Rect$3 = Canvax.Shapes.Rect;
@@ -17679,7 +17679,7 @@ function (_GraphsBase) {
   return BarGraphs;
 }(GraphsBase);
 
-_defineProperty(BarGraphs, "defaultProps", {
+BarGraphs.defaultProps = {
   field: {
     detail: '字段设置',
     documentation: '支持二维数组格式的设置，一维方向就是横向分组，二维方向就是纵向的堆叠',
@@ -17832,7 +17832,7 @@ _defineProperty(BarGraphs, "defaultProps", {
       }
     }
   }
-});
+};
 
 var AnimationFrame$3 = Canvax.AnimationFrame;
 var BrokenLine$1 = Canvax.Shapes.BrokenLine;
@@ -18483,7 +18483,7 @@ function (_event$Dispatcher) {
   return LineGraphsGroup;
 }(Dispatcher);
 
-_defineProperty(LineGraphsGroup, "defaultProps", {
+LineGraphsGroup.defaultProps = {
   line: {
     detail: '线配置',
     propertys: {
@@ -18581,7 +18581,7 @@ _defineProperty(LineGraphsGroup, "defaultProps", {
       }
     }
   }
-});
+};
 
 var LineGraphs =
 /*#__PURE__*/
@@ -18854,7 +18854,7 @@ function (_GraphsBase) {
   return LineGraphs;
 }(GraphsBase);
 
-_defineProperty(LineGraphs, "defaultProps", {
+LineGraphs.defaultProps = {
   field: {
     detail: '字段配置，支持二维数组格式',
     default: null
@@ -18863,7 +18863,7 @@ _defineProperty(LineGraphs, "defaultProps", {
     detail: '绘制在哪根y轴上面',
     default: 'left'
   }
-});
+};
 
 var Circle$4 = Canvax.Shapes.Circle;
 var Rect$4 = Canvax.Shapes.Rect;
@@ -19463,7 +19463,7 @@ function (_GraphsBase) {
   return ScatGraphs;
 }(GraphsBase);
 
-_defineProperty(ScatGraphs, "defaultProps", {
+ScatGraphs.defaultProps = {
   field: {
     detail: '字段配置',
     default: null
@@ -19638,7 +19638,7 @@ _defineProperty(ScatGraphs, "defaultProps", {
       }
     }
   }
-});
+};
 
 var Sector$1 = Canvax.Shapes.Sector;
 var Path$2 = Canvax.Shapes.Path;
@@ -20278,7 +20278,7 @@ function (_event$Dispatcher) {
   return Pie;
 }(Dispatcher);
 
-var _defineProperty2;
+var _PieGraphs$defaultPro;
 
 var PieGraphs =
 /*#__PURE__*/
@@ -20683,7 +20683,7 @@ function (_GraphsBase) {
   return PieGraphs;
 }(GraphsBase);
 
-_defineProperty(PieGraphs, "defaultProps", (_defineProperty2 = {
+PieGraphs.defaultProps = (_PieGraphs$defaultPro = {
   field: {
     detail: '字段配置',
     default: null
@@ -20701,10 +20701,10 @@ _defineProperty(PieGraphs, "defaultProps", (_defineProperty2 = {
     detail: '其实角度',
     default: -90
   }
-}, _defineProperty(_defineProperty2, "startAngle", {
+}, _defineProperty(_PieGraphs$defaultPro, "startAngle", {
   detail: '全部角度',
   default: 360
-}), _defineProperty(_defineProperty2, "node", {
+}), _defineProperty(_PieGraphs$defaultPro, "node", {
   detail: '单个节点（扇形）配置',
   propertys: {
     radius: {
@@ -20761,7 +20761,7 @@ _defineProperty(PieGraphs, "defaultProps", (_defineProperty2 = {
       }
     }
   }
-}), _defineProperty(_defineProperty2, "label", {
+}), _defineProperty(_PieGraphs$defaultPro, "label", {
   detail: 'label',
   propertys: {
     field: {
@@ -20777,7 +20777,7 @@ _defineProperty(PieGraphs, "defaultProps", (_defineProperty2 = {
       default: null
     }
   }
-}), _defineProperty2));
+}), _PieGraphs$defaultPro);
 
 var Polygon$3 = Canvax.Shapes.Polygon;
 var Circle$5 = Canvax.Shapes.Circle;
@@ -21110,7 +21110,7 @@ function (_GraphsBase) {
   return RadarGraphs;
 }(GraphsBase);
 
-_defineProperty(RadarGraphs, "defaultProps", {
+RadarGraphs.defaultProps = {
   field: {
     detail: '字段配置',
     default: null
@@ -21170,7 +21170,7 @@ _defineProperty(RadarGraphs, "defaultProps", {
       }
     }
   }
-});
+};
 
 var noop = {
   value: function value() {}
@@ -21978,7 +21978,7 @@ function (_GraphsBase) {
   return CloudGraphs;
 }(GraphsBase);
 
-_defineProperty(CloudGraphs, "defaultProps", {
+CloudGraphs.defaultProps = {
   field: {
     detail: '字段配置',
     default: null
@@ -22059,7 +22059,7 @@ _defineProperty(CloudGraphs, "defaultProps", {
       }
     }
   }
-});
+};
 
 var Circle$6 = Canvax.Shapes.Circle;
 
@@ -22706,7 +22706,7 @@ function () {
   return PlanetGroup;
 }();
 
-_defineProperty(PlanetGroup, "defaultProps", {
+PlanetGroup.defaultProps = {
   sort: {
     detail: '排序',
     default: 'desc'
@@ -22832,7 +22832,7 @@ _defineProperty(PlanetGroup, "defaultProps", {
       }
     }
   }
-});
+};
 
 var Text$2 = Canvax.Display.Text;
 var Circle$7 = Canvax.Shapes.Circle;
@@ -23266,7 +23266,7 @@ function (_GraphsBase) {
   return PlanetGraphs;
 }(GraphsBase);
 
-_defineProperty(PlanetGraphs, "defaultProps", {
+PlanetGraphs.defaultProps = {
   field: {
     detail: '字段设置',
     default: null
@@ -23355,7 +23355,7 @@ _defineProperty(PlanetGraphs, "defaultProps", {
       }
     }
   }
-});
+};
 
 var Text$3 = Canvax.Display.Text;
 var Polygon$4 = Canvax.Shapes.Polygon;
@@ -23585,7 +23585,7 @@ function (_GraphsBase) {
   return FunnelGraphs;
 }(GraphsBase);
 
-_defineProperty(FunnelGraphs, "defaultProps", {
+FunnelGraphs.defaultProps = {
   field: {
     detail: '字段配置',
     default: null
@@ -23648,7 +23648,7 @@ _defineProperty(FunnelGraphs, "defaultProps", {
       }
     }
   }
-});
+};
 
 /** finds the zeros of a function, given two starting points (which must
  * have opposite signs */
@@ -25420,7 +25420,7 @@ function (_GraphsBase) {
 }(GraphsBase); //venn computeTextCentres 需要的相关代码 begin
 
 
-_defineProperty(VennGraphs, "defaultProps", {
+VennGraphs.defaultProps = {
   keyField: {
     detail: 'key字段',
     default: 'name'
@@ -25509,7 +25509,7 @@ _defineProperty(VennGraphs, "defaultProps", {
       }
     }
   }
-});
+};
 
 function getOverlappingCircles(circles) {
   var ret = {},
@@ -26288,7 +26288,7 @@ function (_GraphsBase) {
   return sunburstGraphs;
 }(GraphsBase);
 
-_defineProperty(sunburstGraphs, "defaultProps", {
+sunburstGraphs.defaultProps = {
   keyField: {
     detail: 'key字段',
     default: 'name'
@@ -26331,7 +26331,7 @@ _defineProperty(sunburstGraphs, "defaultProps", {
       }
     }
   }
-});
+};
 
 function sankeyLayout () {
   var sankey = {},
@@ -27139,7 +27139,7 @@ function (_GraphsBase) {
   return sankeyGraphs;
 }(GraphsBase);
 
-_defineProperty(sankeyGraphs, "defaultProps", {
+sankeyGraphs.defaultProps = {
   keyField: {
     detail: 'key字段',
     default: null
@@ -27203,7 +27203,7 @@ _defineProperty(sankeyGraphs, "defaultProps", {
       }
     }
   }
-});
+};
 
 var Progress =
 /*#__PURE__*/
@@ -27540,7 +27540,7 @@ function (_GraphsBase) {
   return Progress;
 }(GraphsBase);
 
-_defineProperty(Progress, "defaultProps", {
+Progress.defaultProps = {
   node: {
     detail: '进度条设置',
     propertys: {
@@ -27641,7 +27641,7 @@ _defineProperty(Progress, "defaultProps", {
     documentation: '默认为null，则和坐标系同步',
     default: null
   }
-});
+};
 
 /**
  * 每个组件中对外影响的时候，要抛出一个trigger对象
@@ -27932,7 +27932,7 @@ function (_Component) {
   return Legend;
 }(component);
 
-_defineProperty(Legend, "defaultProps", {
+Legend.defaultProps = {
   data: {
     detail: '图例数据',
     default: [],
@@ -28006,7 +28006,7 @@ _defineProperty(Legend, "defaultProps", {
       }
     }
   }
-});
+};
 
 var Line$7 = Canvax.Shapes.Line;
 var Rect$8 = Canvax.Shapes.Rect;
@@ -28672,7 +28672,7 @@ function (_Component) {
   return dataZoom;
 }(component);
 
-_defineProperty(dataZoom, "defaultProps", {
+dataZoom.defaultProps = {
   position: {
     detail: '位置',
     default: 'bottom'
@@ -28809,7 +28809,7 @@ _defineProperty(dataZoom, "defaultProps", {
     default: 8,
     documentation: 'left,right按钮的宽，不在left，right下面，统一在这个属性里， 以为要强制保持一致'
   }
-});
+};
 
 var BrokenLine$2 = Canvax.Shapes.BrokenLine;
 var Sprite$1 = Canvax.Display.Sprite;
@@ -29054,7 +29054,7 @@ function (_Component) {
   return MarkLine;
 }(component);
 
-_defineProperty(MarkLine, "defaultProps", {
+MarkLine.defaultProps = {
   markTo: {
     detail: '标准哪个目标字段',
     default: null
@@ -29106,7 +29106,7 @@ _defineProperty(MarkLine, "defaultProps", {
       }
     }
   }
-});
+};
 
 var Rect$9 = Canvax.Shapes.Rect;
 var Line$8 = Canvax.Shapes.Line;
@@ -29537,7 +29537,7 @@ function (_Component) {
   return Tips;
 }(component);
 
-_defineProperty(Tips, "defaultProps", {
+Tips.defaultProps = {
   enabled: {
     detail: '是否开启Tips',
     default: true
@@ -29587,7 +29587,7 @@ _defineProperty(Tips, "defaultProps", {
     detail: 'tips移动的时候，指针是否开启动画',
     default: true
   }
-});
+};
 
 var Line$9 = Canvax.Shapes.Line;
 
@@ -29717,7 +29717,7 @@ function (_Component) {
   return barTgi;
 }(component);
 
-_defineProperty(barTgi, "defaultProps", {
+barTgi.defaultProps = {
   field: {
     detail: '字段配置',
     default: null
@@ -29753,7 +29753,7 @@ _defineProperty(barTgi, "defaultProps", {
       }
     }
   }
-});
+};
 
 var barGuide =
 /*#__PURE__*/
@@ -29878,7 +29878,7 @@ function (_Component) {
   return barGuide;
 }(component);
 
-_defineProperty(barGuide, "defaultProps", {
+barGuide.defaultProps = {
   field: {
     detail: '字段配置',
     default: null
@@ -29949,7 +29949,7 @@ _defineProperty(barGuide, "defaultProps", {
       }
     }
   }
-});
+};
 
 var theme =
 /*#__PURE__*/
@@ -30070,7 +30070,7 @@ function (_Component) {
   return waterMark;
 }(component);
 
-_defineProperty(waterMark, "defaultProps", {
+waterMark.defaultProps = {
   text: {
     detail: '水印内容',
     default: 'chartx'
@@ -30091,7 +30091,7 @@ _defineProperty(waterMark, "defaultProps", {
     detail: '水印旋转角度',
     default: 45
   }
-});
+};
 
 var Line$a = Canvax.Shapes.Line;
 
@@ -30188,7 +30188,7 @@ function (_Component) {
   return Cross;
 }(component);
 
-_defineProperty(Cross, "defaultProps", {
+Cross.defaultProps = {
   aimPoint: {
     detail: '准心位置',
     propertys: {
@@ -30219,7 +30219,7 @@ _defineProperty(Cross, "defaultProps", {
       }
     }
   }
-});
+};
 
 var lineSchedu =
 /*#__PURE__*/
@@ -30391,7 +30391,7 @@ function (_Component) {
   return lineSchedu;
 }(component);
 
-_defineProperty(lineSchedu, "defaultProps", {
+lineSchedu.defaultProps = {
   lineField: {
     detail: '对应的line字段',
     default: null
@@ -30424,7 +30424,7 @@ _defineProperty(lineSchedu, "defaultProps", {
     detail: '列表信息文本大小',
     default: 12
   }
-});
+};
 
 global$1.registerComponent(Chart, 'chart'); //global.registerComponent( emptyCoord, 'coord' );
 

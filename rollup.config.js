@@ -11,55 +11,95 @@ var { uglify } = require('rollup-plugin-uglify');
 // iife – 使用于<script> 标签引用的方式
 // umd – 适用于 CommonJs 和 AMD 风格通用模式
 
-export default {
-    input : 'src/index.js',
-    output: [{
-        file : "dist/chartx.js",
-        name : "Chartx",
-        format : "iife"
-    }
-    
-    ,{
-        file : "dist/cjs.js",
-        name : "Chartx",
-        format: "cjs"
-    },{
-        file : "dist/amd.js",
-        name : "Chartx",
-        format: "amd"
-    },{
-        file : "dist/es.js",
-        name : "Chartx",
-        format: "es"
-    },{
-        file : "dist/umd.js",
-        name : "Chartx",
-        format: "umd"
-    }
-    
-    ],
-    plugins: [
-       
-        babel({
-            exclude: /node_modules\/(?!.*@*(mmvis|canvax)\/).*/,
-            externalHelpers: true,
-            babelrc: false,
-            presets: [
-                [
-                    "@babel/preset-env",
-                    {
-                    "modules": false,
-                    "loose": false 
-                    }
+export default [
+    {
+        input : 'src/index.js',
+        output: [{
+            file : "dist/chartx.js",
+            name : "Chartx",
+            format : "iife"
+        }
+        
+        ,{
+            file : "dist/cjs.js",
+            name : "Chartx",
+            format: "cjs"
+        },{
+            file : "dist/amd.js",
+            name : "Chartx",
+            format: "amd"
+        },{
+            file : "dist/es.js",
+            name : "Chartx",
+            format: "es"
+        },{
+            file : "dist/umd.js",
+            name : "Chartx",
+            format: "umd"
+        }
+        
+        ],
+        plugins: [
+           
+            babel({
+                exclude: /node_modules\/(?!.*@*(mmvis|canvax)\/).*/,
+                externalHelpers: true,
+                babelrc: false,
+                presets: [
+                    [
+                        "@babel/preset-env",
+                        {
+                        "modules": false,
+                        "loose": false 
+                        }
+                    ]
+                ],
+                plugins: [
+                    "@babel/plugin-external-helpers",
+                    [
+                        "@babel/plugin-proposal-class-properties",
+                        { "loose": true }
+                    ]
                 ]
-            ],
-            plugins: [
-                "@babel/plugin-external-helpers",
-                "@babel/plugin-proposal-class-properties"
-            ]
-        }),
-        resolve({ jsnext: true, main: true, browser: true }), 
-        commonjs()
-        //uglify()
-    ]
-}
+            }),
+            resolve({ jsnext: true, main: true, browser: true }), 
+            commonjs()
+            //uglify()
+        ]
+    },
+    {
+        input : 'src/props.js',
+        output: {
+            file : "dist/props.js",
+            name : "chartx_props",
+            format : "iife"
+        },
+        plugins: [
+           
+            babel({
+                exclude: /node_modules\/(?!.*@*(mmvis|canvax)\/).*/,
+                externalHelpers: true,
+                babelrc: false,
+                presets: [
+                    [
+                        "@babel/preset-env",
+                        {
+                        "modules": false,
+                        "loose": false 
+                        }
+                    ]
+                ],
+                plugins: [
+                    "@babel/plugin-external-helpers",
+                    [
+                        "@babel/plugin-proposal-class-properties",
+                        { "loose": false }
+                    ]
+                ]
+            }),
+            resolve({ jsnext: true, main: true, browser: true }), 
+            commonjs()
+            //uglify()
+        ]
+    }
+]
