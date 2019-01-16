@@ -38,7 +38,7 @@ export default class yAxis extends Axis
         this.sprite     = null;
         this.isH        = false; //是否横向
 
-        _.extend( true, this, getDefaultProps( yAxis.defaultProps ) , opt );
+        _.extend( true, this, getDefaultProps( yAxis.defaultProps() ) , opt );
 
         this.init(opt);
         

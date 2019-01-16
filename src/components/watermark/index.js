@@ -7,7 +7,6 @@ import Component from "../component"
 
 export default class waterMark extends Component
 {
-
     static defaultProps(){
         return {
             text : {
