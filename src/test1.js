@@ -6,9 +6,11 @@ let bb_test = class aa_test{};
 let defaultProps = {
     name : 'nickli'
 }
-export default class test1 {
-
+ class test1 {
     constructor(){
         _.extend( true, this, getDefaultProps( defaultProps ) );
     }
 };
+
+
+export {test1}

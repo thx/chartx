@@ -3,3 +3,4 @@
 _site
 .idea
 dist/chartx.js.map
+package-lock.json

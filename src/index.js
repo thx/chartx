@@ -10,6 +10,7 @@ import Chart from "./chart"
 import Rect from "./components/coord/rect"
 import Polar from "./components/coord/polar"
 
+
 //graphs
 import Bar from "./components/graphs/bar/index"
 import Line from "./components/graphs/line/index"

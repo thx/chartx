@@ -33,12 +33,6 @@ export default class coordBase extends Component
                         default : 0
                     }
                 }
-            },
-            _children  : {
-                rect  : {},
-                polar : {},
-                box   : {},
-                polar : {}
             }
         }
     }
