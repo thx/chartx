@@ -4,100 +4,102 @@ import { _,getDefaultProps } from "mmvis"
 
 export default class PieGraphs extends GraphsBase
 {
-    static defaultProps = {
-        field: {
-            detail: '字段配置',
-            default: null
-        },
-        groupField: {
-            detail: '分组字段',
-            default: null,
-            documentation: 'groupField主要是给legend用的， 所有在legend中需要显示的分组数据，都用groupField'
-        },
-        sort : {
-            detail: '排序，默认不排序，可以配置为asc,desc',
-            default: null
-        },
-        startAngle: {
-            detail: '其实角度',
-            default: -90
-        },
-        startAngle: {
-            detail: '全部角度',
-            default: 360
-        },
-        node: {
-            detail: '单个节点（扇形）配置',
-            propertys : {
-                radius: {
-                    detail: '半径',
-                    default: null,
-                    documentation: '每个扇形单元的半径，也可以配置一个字段，就成了丁格尔玫瑰图'
-                },
-                innerRadius: {
-                    detail: '内径',
-                    default: 0
-                },
-                outRadius: {
-                    detail: '外径',
-                    default: null
-                },
-                minRadius: {
-                    detail: '最小的半径厚度',
-                    default: 10,
-                    documentation: 'outRadius - innerRadius ， 也就是radius的最小值'
-                },
-                moveDis : {
-                    detail: 'hover偏移量',
-                    default: 15,
-                    documentation: '要预留moveDis位置来hover sector 的时候外扩'
-                },
-                fillStyle: {
-                    detail: '单个图形背景色',
-                    default: null
-                },
-                focus: {
-                    detail: '图形的hover设置',
-                    propertys: {
-                        enabled: {
-                            detail: '是否开启',
-                            default: true
+    static defaultProps(){
+        return {
+            field: {
+                detail: '字段配置',
+                default: null
+            },
+            groupField: {
+                detail: '分组字段',
+                default: null,
+                documentation: 'groupField主要是给legend用的， 所有在legend中需要显示的分组数据，都用groupField'
+            },
+            sort : {
+                detail: '排序，默认不排序，可以配置为asc,desc',
+                default: null
+            },
+            startAngle: {
+                detail: '其实角度',
+                default: -90
+            },
+            startAngle: {
+                detail: '全部角度',
+                default: 360
+            },
+            node: {
+                detail: '单个节点（扇形）配置',
+                propertys : {
+                    radius: {
+                        detail: '半径',
+                        default: null,
+                        documentation: '每个扇形单元的半径，也可以配置一个字段，就成了丁格尔玫瑰图'
+                    },
+                    innerRadius: {
+                        detail: '内径',
+                        default: 0
+                    },
+                    outRadius: {
+                        detail: '外径',
+                        default: null
+                    },
+                    minRadius: {
+                        detail: '最小的半径厚度',
+                        default: 10,
+                        documentation: 'outRadius - innerRadius ， 也就是radius的最小值'
+                    },
+                    moveDis : {
+                        detail: 'hover偏移量',
+                        default: 15,
+                        documentation: '要预留moveDis位置来hover sector 的时候外扩'
+                    },
+                    fillStyle: {
+                        detail: '单个图形背景色',
+                        default: null
+                    },
+                    focus: {
+                        detail: '图形的hover设置',
+                        propertys: {
+                            enabled: {
+                                detail: '是否开启',
+                                default: true
+                            }
                         }
-                    }
-                },
-                select: {
-                    detail: '图形的选中效果',
-                    propertys: {
-                        enabled: {
-                            detail: '是否开启',
-                            default: true
-                        },
-                        radius: {
-                            detail: '选中效果图形的半径厚度',
-                            default: 5
-                        },
-                        alpha: {
-                            detail: '选中效果图形的透明度',
-                            default: 0.7
+                    },
+                    select: {
+                        detail: '图形的选中效果',
+                        propertys: {
+                            enabled: {
+                                detail: '是否开启',
+                                default: true
+                            },
+                            radius: {
+                                detail: '选中效果图形的半径厚度',
+                                default: 5
+                            },
+                            alpha: {
+                                detail: '选中效果图形的透明度',
+                                default: 0.7
+                            }
                         }
                     }
                 }
-            }
-        },
-        label: {
-            detail: 'label',
-            propertys: {
-                field: {
-                    detail: '获取label的字段',
-                    default: null
-                },
-                enabled: {
-                    detail: '是否开启',
-                    default: false
-                },
-                format: {
-                    detail: 'label的格式化函数，支持html',
-                    default: null
+            },
+            label: {
+                detail: 'label',
+                propertys: {
+                    field: {
+                        detail: '获取label的字段',
+                        default: null
+                    },
+                    enabled: {
+                        detail: '是否开启',
+                        default: false
+                    },
+                    format: {
+                        detail: 'label的格式化函数，支持html',
+                        default: null
+                    }
                 }
             }
         }
@@ -107,7 +109,7 @@ export default class PieGraphs extends GraphsBase
     {
         super( opt, app );
         this.type = "pie";
-        _.extend(true, this, getDefaultProps( PieGraphs.defaultProps ), opt);
+        _.extend(true, this, getDefaultProps( PieGraphs.defaultProps() ), opt);
 
         this.init();
     }

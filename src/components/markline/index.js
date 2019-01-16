@@ -8,55 +8,57 @@ const Text = Canvax.Display.Text;
 
 export default class MarkLine extends Component
 {
-    static defaultProps = {
-        markTo : {
-            detail : '标准哪个目标字段',
-            default : null
-        },
-        yVal : {
-            detail: '组件的值',
-            default: 0,
-            documentation: '可能是个function，均值计算就是个function'
-        },
-        line : {
-            detail : '线的配置',
-            propertys: {
-                strokeStyle : {
-                    detail : '线的颜色',
-                    default: '#999999'
-                },
-                lineWidth : {
-                    detail : '线宽',
-                    default: 1
-                },
-                lineType : {
-                    detail : '线样式',
-                    default: 'dashed'
+    static defaultProps(){
+        return {
+            markTo : {
+                detail : '标准哪个目标字段',
+                default : null
+            },
+            yVal : {
+                detail: '组件的值',
+                default: 0,
+                documentation: '可能是个function，均值计算就是个function'
+            },
+            line : {
+                detail : '线的配置',
+                propertys: {
+                    strokeStyle : {
+                        detail : '线的颜色',
+                        default: '#999999'
+                    },
+                    lineWidth : {
+                        detail : '线宽',
+                        default: 1
+                    },
+                    lineType : {
+                        detail : '线样式',
+                        default: 'dashed'
+                    }
                 }
-            }
-        },
-        label : {
-            detail : '文本',
-            propertys : {
-                enabled : {
-                    detail : '是否开启',
-                    default: false
-                },
-                fontColor: {
-                    detail : '文本字体颜色',
-                    default: '#999999'
-                },
-                fontSize: {
-                    detail : '文本字体大小',
-                    default: 12
-                },
-                text : {
-                    detail : '文本内容',
-                    default: null
-                },
-                format : {
-                    detail : '文本格式化函数',
-                    default: null
+            },
+            label : {
+                detail : '文本',
+                propertys : {
+                    enabled : {
+                        detail : '是否开启',
+                        default: false
+                    },
+                    fontColor: {
+                        detail : '文本字体颜色',
+                        default: '#999999'
+                    },
+                    fontSize: {
+                        detail : '文本字体大小',
+                        default: 12
+                    },
+                    text : {
+                        detail : '文本内容',
+                        default: null
+                    },
+                    format : {
+                        detail : '文本格式化函数',
+                        default: null
+                    }
                 }
             }
         }
@@ -80,7 +82,7 @@ export default class MarkLine extends Component
         this.sprite  = new Sprite();
         this.app.graphsSprite.addChild( this.sprite );
 
-        _.extend(true, this, getDefaultProps( MarkLine.defaultProps ), opt);
+        _.extend(true, this, getDefaultProps( MarkLine.defaultProps() ), opt);
     }
 
     draw( ){

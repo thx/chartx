@@ -7,8 +7,8 @@ const Line = Canvax.Shapes.Line;
 
 export default class xAxis extends Axis
 {
-    static defaultProps = {
-       
+    static defaultProps(){
+       return {}
     }
 
     constructor(opt, data, _coord)
@@ -33,7 +33,7 @@ export default class xAxis extends Axis
         this.sprite = null;
         this.isH = false; //是否为横向转向的x轴
 
-        _.extend( true, this, getDefaultProps( xAxis.defaultProps ) , opt);
+        _.extend( true, this, getDefaultProps( xAxis.defaultProps() ) , opt);
         this.init(opt);
     }
 

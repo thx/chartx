@@ -5,14 +5,16 @@ import { _, getDefaultProps } from "mmvis"
 export default class LineGraphs extends GraphsBase
 {
 
-    static defaultProps = {
-        field : {
-            detail : '字段配置，支持二维数组格式',
-            default: null
-        },
-        yAxisAlign : {
-            detail: '绘制在哪根y轴上面',
-            default: 'left'
+    static defaultProps(){
+        return {
+            field : {
+                detail : '字段配置，支持二维数组格式',
+                default: null
+            },
+            yAxisAlign : {
+                detail: '绘制在哪根y轴上面',
+                default: 'left'
+            }
         }
     }
 
@@ -26,7 +28,7 @@ export default class LineGraphs extends GraphsBase
         
         this.groups = []; //群组集合
 
-        _.extend(true, this, getDefaultProps( LineGraphs.defaultProps ), opt);
+        _.extend(true, this, getDefaultProps( LineGraphs.defaultProps() ), opt);
 
         this.init();
     }

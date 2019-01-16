@@ -5,131 +5,133 @@ const Circle = Canvax.Shapes.Circle;
 
 export default class PlanetGroup
 {
-    static defaultProps = {
-        sort : {
-            detail: '排序',
-            default: 'desc'
-        },
-        sortField: {
-            detail: '用来排序的字段',
-            default: 'null'
-        },
-        node: {
-            detail: '单个数据节点图形配置',
-            propertys : {
-                maxRadius: {
-                    detail: '最大半径',
-                    default:30
-                },
-                minRadius: {
-                    detail: '最小半径',
-                    default: 5
-                },
-                radius: {
-                    detail: '半径',
-                    default:15,
-                    documentation: '也可以是个function,也可以配置{field:"pv"}来设置字段， 自动计算r'
-                },
-                lineWidth: {
-                    detail: '描边线宽',
-                    default: 1
-                },
-                strokeStyle: {
-                    detail: '描边颜色',
-                    default:'#ffffff'
-                },
-                fillStyle: {
-                    detail: '图形填充色',
-                    default:'#f2fbfb'
-                },
-                lineAlpha: {
-                    detail: '边框透明度',
-                    default: 0.6
-                },
-
-                focus: {
-                    detail: 'hover态设置',
-                    propertys: {
-                        enabled: {
-                            detail: '是否开启',
-                            default:true
-                        },
-                        lineAlpha: {
-                            detail: 'hover时候边框透明度',
-                            default: 0.7
-                        },
-                        lineWidth: {
-                            detail: 'hover时候边框大小',
-                            default: 2
-                        },
-                        strokeStyle: {
-                            detail: 'hover时候边框颜色',
-                            default: '#fff'
+    static defaultProps(){
+        return {
+            sort : {
+                detail: '排序',
+                default: 'desc'
+            },
+            sortField: {
+                detail: '用来排序的字段',
+                default: 'null'
+            },
+            node: {
+                detail: '单个数据节点图形配置',
+                propertys : {
+                    maxRadius: {
+                        detail: '最大半径',
+                        default:30
+                    },
+                    minRadius: {
+                        detail: '最小半径',
+                        default: 5
+                    },
+                    radius: {
+                        detail: '半径',
+                        default:15,
+                        documentation: '也可以是个function,也可以配置{field:"pv"}来设置字段， 自动计算r'
+                    },
+                    lineWidth: {
+                        detail: '描边线宽',
+                        default: 1
+                    },
+                    strokeStyle: {
+                        detail: '描边颜色',
+                        default:'#ffffff'
+                    },
+                    fillStyle: {
+                        detail: '图形填充色',
+                        default:'#f2fbfb'
+                    },
+                    lineAlpha: {
+                        detail: '边框透明度',
+                        default: 0.6
+                    },
+    
+                    focus: {
+                        detail: 'hover态设置',
+                        propertys: {
+                            enabled: {
+                                detail: '是否开启',
+                                default:true
+                            },
+                            lineAlpha: {
+                                detail: 'hover时候边框透明度',
+                                default: 0.7
+                            },
+                            lineWidth: {
+                                detail: 'hover时候边框大小',
+                                default: 2
+                            },
+                            strokeStyle: {
+                                detail: 'hover时候边框颜色',
+                                default: '#fff'
+                            }
                         }
-                    }
-                },
-
-                select: {
-                    detail: '选中态设置',
-                    propertys: {
-                        enabled: {
-                            detail: '是否开启',
-                            default:false
-                        },
-                        lineAlpha: {
-                            detail: '选中时候边框透明度',
-                            default:1
-                        },
-                        lineWidth: {
-                            detail: '选中时候边框大小',
-                            default:2
-                        },
-                        strokeStyle: {
-                            detail: '选中时候边框颜色',
-                            default:'#fff'
-                        },
-                        triggerEventType: {
-                            detail: '触发事件',
-                            default:'click'
+                    },
+    
+                    select: {
+                        detail: '选中态设置',
+                        propertys: {
+                            enabled: {
+                                detail: '是否开启',
+                                default:false
+                            },
+                            lineAlpha: {
+                                detail: '选中时候边框透明度',
+                                default:1
+                            },
+                            lineWidth: {
+                                detail: '选中时候边框大小',
+                                default:2
+                            },
+                            strokeStyle: {
+                                detail: '选中时候边框颜色',
+                                default:'#fff'
+                            },
+                            triggerEventType: {
+                                detail: '触发事件',
+                                default:'click'
+                            }
                         }
                     }
                 }
-            }
-        },
-        label: {
-            detail: '文本设置',
-            propertys: {
-                enabled: {
-                    detail: '是否开启',
-                    default:true
-                },
-                fontColor: {
-                    detail: '文本颜色',
-                    default:'#666666'
-                },
-                fontSize: {
-                    detail: '文本字体大小',
-                    default:13
-                },
-                textAlign: {
-                    detail: '水平对齐方式',
-                    default:'center'
-                },
-                verticalAlign: {
-                    detail: '基线对齐方式',
-                    default: 'middle'
-                },
-                position: {
-                    detail: '文本布局位置',
-                    default:'center'
-                },
-                offsetX: {
-                    detail: 'x方向偏移量',
-                    default:0
-                },
-                offsetY: {
-                    detail: 'y方向偏移量',
-                    default:0
+            },
+            label: {
+                detail: '文本设置',
+                propertys: {
+                    enabled: {
+                        detail: '是否开启',
+                        default:true
+                    },
+                    fontColor: {
+                        detail: '文本颜色',
+                        default:'#666666'
+                    },
+                    fontSize: {
+                        detail: '文本字体大小',
+                        default:13
+                    },
+                    textAlign: {
+                        detail: '水平对齐方式',
+                        default:'center'
+                    },
+                    verticalAlign: {
+                        detail: '基线对齐方式',
+                        default: 'middle'
+                    },
+                    position: {
+                        detail: '文本布局位置',
+                        default:'center'
+                    },
+                    offsetX: {
+                        detail: 'x方向偏移量',
+                        default:0
+                    },
+                    offsetY: {
+                        detail: 'y方向偏移量',
+                        default:0
+                    }
                 }
             }
         }
@@ -169,7 +171,7 @@ export default class PlanetGroup
         this.maxRingNum = 0;
         this.ringNum = 0;
 
-        _.extend( true, this, getDefaultProps(PlanetGroup.defaultProps) , opt );
+        _.extend( true, this, getDefaultProps( PlanetGroup.defaultProps() ) , opt );
 
         //circle.maxRadius 绝对不能大于最大 占位 pit.radius
         if( this.node.maxRadius > this.pit.radius ){

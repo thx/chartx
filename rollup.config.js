@@ -40,7 +40,8 @@ export default [
         
         ],
         plugins: [
-           
+            resolve({ jsnext: true, main: true, browser: true }), 
+            commonjs(),
             babel({
                 exclude: /node_modules\/(?!.*@*(mmvis|canvax)\/).*/,
                 externalHelpers: true,
@@ -55,15 +56,9 @@ export default [
                     ]
                 ],
                 plugins: [
-                    "@babel/plugin-external-helpers",
-                    [
-                        "@babel/plugin-proposal-class-properties",
-                        { "loose": true }
-                    ]
+                    "@babel/plugin-external-helpers"
                 ]
-            }),
-            resolve({ jsnext: true, main: true, browser: true }), 
-            commonjs()
+            })
             //uglify()
         ]
     },
@@ -75,7 +70,8 @@ export default [
             format : "iife"
         },
         plugins: [
-           
+            resolve({ jsnext: true, main: true, browser: true }), 
+            commonjs(),
             babel({
                 exclude: /node_modules\/(?!.*@*(mmvis|canvax)\/).*/,
                 externalHelpers: true,
@@ -90,15 +86,9 @@ export default [
                     ]
                 ],
                 plugins: [
-                    "@babel/plugin-external-helpers",
-                    [
-                        "@babel/plugin-proposal-class-properties",
-                        { "loose": false }
-                    ]
+                    "@babel/plugin-external-helpers"
                 ]
-            }),
-            resolve({ jsnext: true, main: true, browser: true }), 
-            commonjs()
+            })
             //uglify()
         ]
     }

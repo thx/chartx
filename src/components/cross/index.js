@@ -7,34 +7,36 @@ const Line = Canvax.Shapes.Line;
 export default class Cross extends Component
 {
 
-    static defaultProps = {
-        aimPoint : {
-            detail : '准心位置',
-            propertys : {
-                x : {
-                    detail : 'x',
-                    default: 0
-                },
-                y : {
-                    detail : 'y',
-                    default: 0
+    static defaultProps(){
+        return {
+            aimPoint : {
+                detail : '准心位置',
+                propertys : {
+                    x : {
+                        detail : 'x',
+                        default: 0
+                    },
+                    y : {
+                        detail : 'y',
+                        default: 0
+                    }
                 }
-            }
-        },
-        line : {
-            detail : '线配置',
-            propertys : {
-                strokeStyle : {
-                    detail : '线颜色',
-                    default: '#cccccc'
-                },
-                lineWidth: {
-                    detail : '线宽',
-                    default: 1
-                },
-                lineType: {
-                    detail : '线样式类型',
-                    default: 'solid'
+            },
+            line : {
+                detail : '线配置',
+                propertys : {
+                    strokeStyle : {
+                        detail : '线颜色',
+                        default: '#cccccc'
+                    },
+                    lineWidth: {
+                        detail : '线宽',
+                        default: 1
+                    },
+                    lineType: {
+                        detail : '线样式类型',
+                        default: 'solid'
+                    }
                 }
             }
         }
@@ -56,7 +58,7 @@ export default class Cross extends Component
         this._hLine = null; //横向的线
         this._vLine = null; //竖向的线
        
-        _.extend( true, this, getDefaultProps( Cross.defaultProps ), opt );
+        _.extend( true, this, getDefaultProps( Cross.defaultProps() ), opt );
 
         this._yAxis = this.app.getComponent({name:'coord'})._yAxis[ this.yAxisAlign=="left"?0:1 ];
         this.sprite  = new Canvax.Display.Sprite();

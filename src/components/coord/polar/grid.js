@@ -7,54 +7,56 @@ const Polygon = Canvax.Shapes.Polygon;
 
 export default class polarGrid extends event.Dispatcher
 {
-    static defaultProps = {
-        enabled : {
-            detail : '是否开启grid',
-            default: false
-        },
-        ring : {
-            detail : '环背景线',
-            propertys : {
-                shapeType: {
-                    detail : '线的图形样式，默认poly，可选circle',
-                    default: 'poly'
-                },
-                lineType:{
-                    detail : '线条样式，sold实线，dashed虚线',
-                    default: 'sold'
-                },
-                lineWidth: {
-                    detail : '线宽',
-                    default: 1
-                },
-                strokeStyle: {
-                    detail : '线颜色',
-                    default : '#e5e5e5'
-                },
-                fillStyle : {
-                    detail : '环填充色,支持函数配置',
-                    default: null
-                },
-                fillAlpha : {
-                    detail : '环填充的透明度',
-                    default: 0.5
+    static defaultProps(){
+        return {
+            enabled : {
+                detail : '是否开启grid',
+                default: false
+            },
+            ring : {
+                detail : '环背景线',
+                propertys : {
+                    shapeType: {
+                        detail : '线的图形样式，默认poly，可选circle',
+                        default: 'poly'
+                    },
+                    lineType:{
+                        detail : '线条样式，sold实线，dashed虚线',
+                        default: 'sold'
+                    },
+                    lineWidth: {
+                        detail : '线宽',
+                        default: 1
+                    },
+                    strokeStyle: {
+                        detail : '线颜色',
+                        default : '#e5e5e5'
+                    },
+                    fillStyle : {
+                        detail : '环填充色,支持函数配置',
+                        default: null
+                    },
+                    fillAlpha : {
+                        detail : '环填充的透明度',
+                        default: 0.5
+                    }
                 }
-            }
-        },
-        ray : {
-            detail : '射线',
-            propertys: {
-                enabled : {
-                    detail : '是否开启',
-                    default: true
-                },
-                lineWidth  : {
-                    detail : '线宽',
-                    default: 1
-                },
-                strokeStyle : {
-                    detail  : '线颜色',
-                    default : '#e5e5e5'
+            },
+            ray : {
+                detail : '射线',
+                propertys: {
+                    enabled : {
+                        detail : '是否开启',
+                        default: true
+                    },
+                    lineWidth  : {
+                        detail : '线宽',
+                        default: 1
+                    },
+                    strokeStyle : {
+                        detail  : '线颜色',
+                        default : '#e5e5e5'
+                    }
                 }
             }
         }
@@ -79,7 +81,7 @@ export default class polarGrid extends event.Dispatcher
 
         this.induce = null; //最外层的那个网，用来触发事件
 
-        _.extend( true, this, getDefaultProps( polarGrid.defaultProps ), opt );
+        _.extend( true, this, getDefaultProps( polarGrid.defaultProps() ), opt );
 
         this.init(opt);
     }

@@ -8,55 +8,57 @@ const Line = Canvax.Shapes.Line;
 
 export default class Tips extends Component {
 
-    static defaultProps = {
-        enabled : {
-            detail: '是否开启Tips',
-            default: true
-        },
-        content : {
-            detail : '自定义tips的内容（html）',
-            default: null
-        },
-        borderRadius : {
-            detail  : 'tips的边框圆角半径',
-            default : 5
-        },
-        strokeStyle: {
-            detail : 'tips边框颜色',
-            default: '#ccc'
-        },
-        fillStyle : {
-            detail : 'tips背景色',
-            default: 'rgba(255,255,255,0.95)'
-        },
-        fontColor : {
-            detail: 'tips文本颜色',
-            default: '#999999'
-        },
-        positionOfPoint: {
-            detail : '在触发点的位置',
-            default: 'right'
-        },
-        offsetX : {
-            detail: 'tips内容到鼠标位置的偏移量x',
-            default: 10
-        },
-        offsetY : {
-            detail: 'tips内容到鼠标位置的偏移量y',
-            default: 10
-        },
-        positionInRange : {
-            detail : 'tip的浮层是否限定在画布区域',
-            default: true
-        },
-        pointer : {
-            detail : '触发tips的时候的指针样式',
-            default: 'line',
-            documentation: 'tips的指针,默认为直线，可选为："line" | "region"(柱状图中一般用region)'
-        },
-        pointerAnim : {
-            detail: 'tips移动的时候，指针是否开启动画',
-            default: true
+    static defaultProps(){
+        return {
+            enabled : {
+                detail: '是否开启Tips',
+                default: true
+            },
+            content : {
+                detail : '自定义tips的内容（html）',
+                default: null
+            },
+            borderRadius : {
+                detail  : 'tips的边框圆角半径',
+                default : 5
+            },
+            strokeStyle: {
+                detail : 'tips边框颜色',
+                default: '#ccc'
+            },
+            fillStyle : {
+                detail : 'tips背景色',
+                default: 'rgba(255,255,255,0.95)'
+            },
+            fontColor : {
+                detail: 'tips文本颜色',
+                default: '#999999'
+            },
+            positionOfPoint: {
+                detail : '在触发点的位置',
+                default: 'right'
+            },
+            offsetX : {
+                detail: 'tips内容到鼠标位置的偏移量x',
+                default: 10
+            },
+            offsetY : {
+                detail: 'tips内容到鼠标位置的偏移量y',
+                default: 10
+            },
+            positionInRange : {
+                detail : 'tip的浮层是否限定在画布区域',
+                default: true
+            },
+            pointer : {
+                detail : '触发tips的时候的指针样式',
+                default: 'line',
+                documentation: 'tips的指针,默认为直线，可选为："line" | "region"(柱状图中一般用region)'
+            },
+            pointerAnim : {
+                detail: 'tips移动的时候，指针是否开启动画',
+                default: true
+            }
         }
     }
 
@@ -91,7 +93,7 @@ export default class Tips extends Component {
             me._tipDom = null;
         });
 
-        _.extend(true, this, getDefaultProps(Tips.defaultProps), opt);
+        _.extend(true, this, getDefaultProps( Tips.defaultProps() ), opt);
         
     }
 

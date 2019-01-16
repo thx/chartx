@@ -7,77 +7,79 @@ const Circle = Canvax.Shapes.Circle
 
 export default class Legend extends Component
 {
-    static defaultProps = {
-        data : {
-            detail : '图例数据',
-            default: [],
-            documentation: '\
-                数据结构为：{name: "uv", color: "#ff8533", field: "" ...}\
-                如果手动传入数据只需要前面这三个 enabled: true, ind: 0\
-                外部只需要传field和fillStyle就行了\
-                '
-        },
-        position : {
-            detail : '图例位置',
-            documentation: '图例所在的方向top,right,bottom,left',
-            default: 'top'
-        },
-        direction: {
-            detail : '图例布局方向',
-            default: 'h',
-            documentation: '横向 top,bottom --> h left,right -- >v'
-        },
-        icon : {
-            detail : '图标设置',
-            propertys : {
-                height : {
-                    detail : '高',
-                    default : 26
-                },
-                width : {
-                    detail : '图标宽',
-                    default : 'auto'
-                },
-                shapeType : {
-                    detail : '图标的图形类型，目前只实现了圆形',
-                    default: 'circle'
-                },
-                radius : {
-                    detail : '图标（circle）半径',
-                    default: 5
-                },
-                lineWidth : {
-                    detail : '图标描边宽度',
-                    default: 1
-                },
-                fillStyle : {
-                    detail : '图标颜色，一般会从data里面取，这里是默认色',
-                    default: '#999'
-                } 
-            }
-        },
-        label : {
-            detail : '文本配置',
-            propertys: {
-                textAlign :{
-                    detail : '水平对齐方式',
-                    default: 'left'
-                },
-                textBaseline : {
-                    detail : '文本基线对齐方式',
-                    default: 'middle'
-                },
-                fontColor : {
-                    detail : '文本颜色',
-                    default: '#333333'
-                },
-                cursor : {
-                    detail : '鼠标样式',
-                    default: 'pointer'
-                },
-                format : {
-                    detail : '文本格式化处理函数',
-                    default: null
+    static defaultProps(){
+        return {
+            data : {
+                detail : '图例数据',
+                default: [],
+                documentation: '\
+                    数据结构为：{name: "uv", color: "#ff8533", field: "" ...}\
+                    如果手动传入数据只需要前面这三个 enabled: true, ind: 0\
+                    外部只需要传field和fillStyle就行了\
+                    '
+            },
+            position : {
+                detail : '图例位置',
+                documentation: '图例所在的方向top,right,bottom,left',
+                default: 'top'
+            },
+            direction: {
+                detail : '图例布局方向',
+                default: 'h',
+                documentation: '横向 top,bottom --> h left,right -- >v'
+            },
+            icon : {
+                detail : '图标设置',
+                propertys : {
+                    height : {
+                        detail : '高',
+                        default : 26
+                    },
+                    width : {
+                        detail : '图标宽',
+                        default : 'auto'
+                    },
+                    shapeType : {
+                        detail : '图标的图形类型，目前只实现了圆形',
+                        default: 'circle'
+                    },
+                    radius : {
+                        detail : '图标（circle）半径',
+                        default: 5
+                    },
+                    lineWidth : {
+                        detail : '图标描边宽度',
+                        default: 1
+                    },
+                    fillStyle : {
+                        detail : '图标颜色，一般会从data里面取，这里是默认色',
+                        default: '#999'
+                    } 
+                }
+            },
+            label : {
+                detail : '文本配置',
+                propertys: {
+                    textAlign :{
+                        detail : '水平对齐方式',
+                        default: 'left'
+                    },
+                    textBaseline : {
+                        detail : '文本基线对齐方式',
+                        default: 'middle'
+                    },
+                    fontColor : {
+                        detail : '文本颜色',
+                        default: '#333333'
+                    },
+                    cursor : {
+                        detail : '鼠标样式',
+                        default: 'pointer'
+                    },
+                    format : {
+                        detail : '文本格式化处理函数',
+                        default: null
+                    }
                 }
             }
         }
@@ -88,7 +90,7 @@ export default class Legend extends Component
         super(opt, app);
         this.name = "legend";
 
-        _.extend( true, this, getDefaultProps( Legend.defaultProps ), opt );
+        _.extend( true, this, getDefaultProps( Legend.defaultProps() ), opt );
 
         /* data的数据结构为
         [

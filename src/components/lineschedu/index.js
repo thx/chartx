@@ -4,38 +4,40 @@ import { _, getDefaultProps } from "mmvis"
 
 export default class lineSchedu extends Component
 {
-    static defaultProps = {
-        lineField : {
-            detail : '对应的line字段',
-            default: null
-        },
-        style : {
-            detail: '默认色',
-            default: '#3995ff'
-        },
-        fillStyle : {
-            detail: '节点填充色',
-            default: "#ffffff"
-        },
-        lineWidth : {
-            detail : '线宽',
-            default: 2
-        },
-        radius : {
-            detail : '圆点半径',
-            default: 6
-        },
-        timeFontSize : {
-            detail: '时间文本大小',
-            default: 14
-        },
-        timeFontColor: {
-            detail : '时间文本颜色',
-            default: '#606060'
-        },
-        listFontSize: {
-            detail : '列表信息文本大小',
-            default: 12
+    static defaultProps(){
+        return {
+            lineField : {
+                detail : '对应的line字段',
+                default: null
+            },
+            style : {
+                detail: '默认色',
+                default: '#3995ff'
+            },
+            fillStyle : {
+                detail: '节点填充色',
+                default: "#ffffff"
+            },
+            lineWidth : {
+                detail : '线宽',
+                default: 2
+            },
+            radius : {
+                detail : '圆点半径',
+                default: 6
+            },
+            timeFontSize : {
+                detail: '时间文本大小',
+                default: 14
+            },
+            timeFontColor: {
+                detail : '时间文本颜色',
+                default: '#606060'
+            },
+            listFontSize: {
+                detail : '列表信息文本大小',
+                default: 12
+            }
         }
     }
 
@@ -44,7 +46,7 @@ export default class lineSchedu extends Component
         super(opt, app);
         this.name = "lineSchedu";
 
-        _.extend(true, this , getDefaultProps(lineSchedu.defaultProps), opt );
+        _.extend(true, this , getDefaultProps( lineSchedu.defaultProps() ), opt );
 
         this.lineDatas = null;
         this.sprite = new Canvax.Display.Sprite();

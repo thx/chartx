@@ -688,7 +688,7 @@ var chartx_props = (function () {
     return target;
   };
 
-  var defaultProps = {
+  var _defaultProps = {
     layoutType: {
       detail: '布局方式',
       default: 'proportion'
@@ -740,6 +740,13 @@ var chartx_props = (function () {
   var axis =
   /*#__PURE__*/
   function () {
+    _createClass(axis, null, [{
+      key: "defaultProps",
+      value: function defaultProps() {
+        return _defaultProps;
+      }
+    }]);
+
     function axis(opt, dataOrg) {
       _classCallCheck(this, axis);
 
@@ -755,8 +762,9 @@ var chartx_props = (function () {
       //    ]   
       // ]
       this._opt = _.clone(opt);
-      this.dataOrg = dataOrg || [];
-      this._dataSectionLayout = []; //和dataSection一一对应的，每个值的pos，//get xxx OfPos的时候，要先来这里做一次寻找
+      this.dataOrg = dataOrg || []; //3d中有引用到
+
+      this.dataSectionLayout = []; //和dataSection一一对应的，每个值的pos，//get xxx OfPos的时候，要先来这里做一次寻找
       //轴总长
 
       this._axisLength = 1;
@@ -773,7 +781,7 @@ var chartx_props = (function () {
       this._min = null;
       this._max = null;
 
-      _.extend(true, this, getDefaultProps(defaultProps), opt);
+      _.extend(true, this, getDefaultProps(_defaultProps), opt);
     }
 
     _createClass(axis, [{

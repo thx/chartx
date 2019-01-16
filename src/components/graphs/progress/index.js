@@ -4,104 +4,106 @@ import { _, getDefaultProps } from "mmvis"
 
 export default class Progress extends GraphsBase
 {
-    static defaultProps = {
-        node : {
-            detail : '进度条设置',
-            propertys : {
-                width : {
-                    detail: '进度条的宽度',
-                    default : 20
-                },
-                radius : {
-                    detail : '进度条两端的圆角半径',
-                    default : 10, //默认为width的一半
-                },
-                fillStyle : {
-                    detail : '进度条的填充色',
-                    documentation : '可以是单个颜色，也可以是数组，也可以是一个函数,也可以是个lineargradient',
-                    default : null
-                }
-            }
-        },
-        label : {
-            detail : '进度值文本',
-            propertys : {
-                enabled   : {
-                    detail : '是否启用label',
-                    default: 'true'
-                },
-                fontColor : {
-                    detail : 'label颜色',
-                    default : '#666'
-                },
-                fontSize  : {
-                    detail : 'label文本大小',
-                    default: 26
-                },
-                format    : {
-                    detail : 'label格式化处理函数',
-                    default: function(val, nodeData){
-                        return val.toFixed(0)
+    static defaultProps(){
+        return {
+            node : {
+                detail : '进度条设置',
+                propertys : {
+                    width : {
+                        detail: '进度条的宽度',
+                        default : 20
+                    },
+                    radius : {
+                        detail : '进度条两端的圆角半径',
+                        default : 10, //默认为width的一半
+                    },
+                    fillStyle : {
+                        detail : '进度条的填充色',
+                        documentation : '可以是单个颜色，也可以是数组，也可以是一个函数,也可以是个lineargradient',
+                        default : null
                     }
-                },
-                lineWidth : {
-                    detail : 'label文本描边线宽',
-                    default: null
-                },
-                strokeStyle : {
-                    detail : 'label描边颜色',
-                    default: null
-                },
-                
-                rotation : {
-                    detail : 'label旋转角度',
-                    default: 0
-                },
-                textAlign :{
-                    detail : 'label textAlign',
-                    default:  'center',
-                    values :  ['left','center','right']
-                },  //left center right
-                verticalAlign : {
-                    detail : 'label verticalAlign',
-                    default: 'middle',
-                    values : [ 'top', 'middle', 'bottom' ]
-                }, //top middle bottom
-                position : {
-                    detail : 'label位置',
-                    default: 'origin'
-                }, 
-                offsetX : {
-                    detail : 'label在x方向的偏移量',
-                    default: 0
-                },
-                offsetY : {
-                    detail : 'label在y方向的偏移量',
-                    default: 0
                 }
+            },
+            label : {
+                detail : '进度值文本',
+                propertys : {
+                    enabled   : {
+                        detail : '是否启用label',
+                        default: 'true'
+                    },
+                    fontColor : {
+                        detail : 'label颜色',
+                        default : '#666'
+                    },
+                    fontSize  : {
+                        detail : 'label文本大小',
+                        default: 26
+                    },
+                    format    : {
+                        detail : 'label格式化处理函数',
+                        default: function(val, nodeData){
+                            return val.toFixed(0)
+                        }
+                    },
+                    lineWidth : {
+                        detail : 'label文本描边线宽',
+                        default: null
+                    },
+                    strokeStyle : {
+                        detail : 'label描边颜色',
+                        default: null
+                    },
+                    
+                    rotation : {
+                        detail : 'label旋转角度',
+                        default: 0
+                    },
+                    textAlign :{
+                        detail : 'label textAlign',
+                        default:  'center',
+                        values :  ['left','center','right']
+                    },  //left center right
+                    verticalAlign : {
+                        detail : 'label verticalAlign',
+                        default: 'middle',
+                        values : [ 'top', 'middle', 'bottom' ]
+                    }, //top middle bottom
+                    position : {
+                        detail : 'label位置',
+                        default: 'origin'
+                    }, 
+                    offsetX : {
+                        detail : 'label在x方向的偏移量',
+                        default: 0
+                    },
+                    offsetY : {
+                        detail : 'label在y方向的偏移量',
+                        default: 0
+                    }
+                }
+            },
+            bgEnabled : {
+                detail : '是否开启背景',
+                default : true
+            },
+            bgColor : {
+                detail : '进度条背景颜色',
+                default : '#f7f7f7'
+            },
+            radius : {
+                detail : '半径',
+                default : null
+            },
+            allAngle : {
+                detail : '总角度',
+                documentation: '默认为null，则和坐标系同步',
+                default : null
+            },
+            startAngle : {
+                detail : '其实角度',
+                documentation: '默认为null，则和坐标系同步',
+                default : null
             }
-        },
-        bgEnabled : {
-            detail : '是否开启背景',
-            default : true
-        },
-        bgColor : {
-            detail : '进度条背景颜色',
-            default : '#f7f7f7'
-        },
-        radius : {
-            detail : '半径',
-            default : null
-        },
-        allAngle : {
-            detail : '总角度',
-            documentation: '默认为null，则和坐标系同步',
-            default : null
-        },
-        startAngle : {
-            detail : '其实角度',
-            documentation: '默认为null，则和坐标系同步',
-            default : null
         }
     }
 
@@ -110,7 +112,7 @@ export default class Progress extends GraphsBase
         super(opt, app);
         this.type = "progress";
 
-        _.extend( true, this, getDefaultProps( Progress.defaultProps ), opt );
+        _.extend( true, this, getDefaultProps( Progress.defaultProps() ), opt );
         
         this.bgNodeData = null;//背景的nodeData数据，和data里面的结构保持一致
         this.init();

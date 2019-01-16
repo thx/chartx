@@ -11,67 +11,69 @@ const Rect = Canvax.Shapes.Rect;
 
 export default class sankeyGraphs extends GraphsBase
 {
-    static defaultProps = {
-        keyField: {
-            detail: 'key字段',
-            default: null
-        },
-        valueField: {
-            detail: 'value字段',
-            default: 'value'
-        },
-        parentField: {
-            detail: 'parent字段',
-            default: null
-        },
-        node : {
-            detail: 'node',
-            propertys: {
-                width: {
-                    detail: '节点宽',
-                    default: 18
-                },
-                padding: {
-                    detail: '节点间距',
-                    default: 10
-                },
-                fillStyle: {
-                    detail: '节点背景色',
-                    default: null
+    static defaultProps(){
+        return {
+            keyField: {
+                detail: 'key字段',
+                default: null
+            },
+            valueField: {
+                detail: 'value字段',
+                default: 'value'
+            },
+            parentField: {
+                detail: 'parent字段',
+                default: null
+            },
+            node : {
+                detail: 'node',
+                propertys: {
+                    width: {
+                        detail: '节点宽',
+                        default: 18
+                    },
+                    padding: {
+                        detail: '节点间距',
+                        default: 10
+                    },
+                    fillStyle: {
+                        detail: '节点背景色',
+                        default: null
+                    }
                 }
-            }
-        },
-        line: {
-            detail: '线设置',
-            propertys: {
-                strokeStyle: {
-                    detail: '线颜色',
-                    default: 'blue'
-                },
-                alpha: {
-                    detail: '线透明度',
-                    default: 0.3
+            },
+            line: {
+                detail: '线设置',
+                propertys: {
+                    strokeStyle: {
+                        detail: '线颜色',
+                        default: 'blue'
+                    },
+                    alpha: {
+                        detail: '线透明度',
+                        default: 0.3
+                    }
                 }
-            }
-        },
-        label: {
-            detail: '文本设置',
-            propertys: {
-                fontColor: {
-                    detail: '文本颜色',
-                    default: '#666666'
-                },
-                fontSize: {
-                    detail: '文本字体大小',
-                    default: 12
-                },
-                textAlign: {
-                    detail: '水平对齐方式',
-                    default: 'left'
-                },
-                verticalAlign: {
-                    detail: '垂直对齐方式',
-                    default: 'middle'
+            },
+            label: {
+                detail: '文本设置',
+                propertys: {
+                    fontColor: {
+                        detail: '文本颜色',
+                        default: '#666666'
+                    },
+                    fontSize: {
+                        detail: '文本字体大小',
+                        default: 12
+                    },
+                    textAlign: {
+                        detail: '水平对齐方式',
+                        default: 'left'
+                    },
+                    verticalAlign: {
+                        detail: '垂直对齐方式',
+                        default: 'middle'
+                    }
                 }
             }
         }
@@ -81,7 +83,7 @@ export default class sankeyGraphs extends GraphsBase
         super( opt, app );
         this.type = "sankey";
 
-        _.extend( true, this, getDefaultProps(sankeyGraphs.defaultProps), opt );
+        _.extend( true, this, getDefaultProps( sankeyGraphs.defaultProps() ), opt );
 
         this.init( );
     }

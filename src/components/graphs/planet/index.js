@@ -10,91 +10,93 @@ const Rect = Canvax.Shapes.Rect;
 
 export default class PlanetGraphs extends GraphsBase
 {
-    static defaultProps = {
-        field: {
-            detail : '字段设置',
-            default: null
-        },
-        center: {
-            detail: '中心点设置',
-            propertys : {
-                enabled: {
-                    detail: '是否显示中心',
-                    default: true
-                },
-                text : {
-                    detail: '中心区域文本',
-                    default: 'center'
-                },
-                radius: {
-                    detail: '中心圆半径',
-                    default: 30
-                },
-                fillStyle: {
-                    detail: '中心背景色',
-                    default: '#70629e'
-                },
-                fontSize: {
-                    detail: '中心字体大小',
-                    default: 15
-                },
-                fontColor: {
-                    detail: '中心字体颜色',
-                    default: '#ffffff'
-                },
-                margin : {
-                    detail: '中区区域和外围可绘图区域距离',
-                    default: 20
-                }
-            }
-        },
-        selectInds: {
-            detail: '选中的数据索引',
-            default: []
-        },
-
-        grid: {
-            detail: '星系图自己的grid',
-            propertys: {
-                rings: {
-                    detail: '环配置',
-                    propertys: {
-                        fillStyle: {
-                            detail: '背景色',
-                            default: null
-                        },
-                        strokeStyle: {
-                            detail: '环线色',
-                            default: null
-                        },
-                        lineWidth: {
-                            detail: '环线宽',
-                            default: 1
-                        },
-                        count: {
-                            detail: '分几环',
-                            default: 3
-                        }
+    static defaultProps(){
+        return {
+            field: {
+                detail : '字段设置',
+                default: null
+            },
+            center: {
+                detail: '中心点设置',
+                propertys : {
+                    enabled: {
+                        detail: '是否显示中心',
+                        default: true
+                    },
+                    text : {
+                        detail: '中心区域文本',
+                        default: 'center'
+                    },
+                    radius: {
+                        detail: '中心圆半径',
+                        default: 30
+                    },
+                    fillStyle: {
+                        detail: '中心背景色',
+                        default: '#70629e'
+                    },
+                    fontSize: {
+                        detail: '中心字体大小',
+                        default: 15
+                    },
+                    fontColor: {
+                        detail: '中心字体颜色',
+                        default: '#ffffff'
+                    },
+                    margin : {
+                        detail: '中区区域和外围可绘图区域距离',
+                        default: 20
                     }
-                },
-                rays: {
-                    detail: '射线配置',
-                    propertys: {
-                        count: {
-                            detail: '射线数量',
-                            default: 0
-                        },
-                        globalAlpha: {
-                            detail: '线透明度',
-                            default: 0.4
-                        },
-                        strokeStyle: {
-                            detail: '线色',
-                            default: '#10519D'
-                        },
-                        lineWidth: {
-                            detail: '线宽',
-                            default: 1
+                }
+            },
+            selectInds: {
+                detail: '选中的数据索引',
+                default: []
+            },
+    
+            grid: {
+                detail: '星系图自己的grid',
+                propertys: {
+                    rings: {
+                        detail: '环配置',
+                        propertys: {
+                            fillStyle: {
+                                detail: '背景色',
+                                default: null
+                            },
+                            strokeStyle: {
+                                detail: '环线色',
+                                default: null
+                            },
+                            lineWidth: {
+                                detail: '环线宽',
+                                default: 1
+                            },
+                            count: {
+                                detail: '分几环',
+                                default: 3
+                            }
+                        }
+                    },
+                    rays: {
+                        detail: '射线配置',
+                        propertys: {
+                            count: {
+                                detail: '射线数量',
+                                default: 0
+                            },
+                            globalAlpha: {
+                                detail: '线透明度',
+                                default: 0.4
+                            },
+                            strokeStyle: {
+                                detail: '线色',
+                                default: '#10519D'
+                            },
+                            lineWidth: {
+                                detail: '线宽',
+                                default: 1
+                            }
                         }
                     }
                 }
@@ -118,7 +120,7 @@ export default class PlanetGraphs extends GraphsBase
             }
         };
 
-        _.extend( true, this , getDefaultProps(PlanetGraphs.defaultProps), opt );
+        _.extend( true, this , getDefaultProps( PlanetGraphs.defaultProps() ), opt );
 
         if( this.center.radius == 0 || !this.center.enabled ){
             this.center.radius = 0;

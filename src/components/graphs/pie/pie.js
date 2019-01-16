@@ -3,10 +3,8 @@
 import Canvax from "canvax"
 import { _,event } from "mmvis"
 
-
 const Sector = Canvax.Shapes.Sector
 const Path = Canvax.Shapes.Path
-const Rect = Canvax.Shapes.Rect
 const AnimationFrame = Canvax.AnimationFrame
 
 export default class Pie extends event.Dispatcher

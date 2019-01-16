@@ -6,69 +6,71 @@ const Rect = Canvax.Shapes.Rect;
 
 export default class rectGrid extends event.Dispatcher
 {
-    static defaultProps = {
-        enabled : {
-            detail : '是否开启grid绘制',
-            default: true
-        },
-        oneDimension : {
-            detail : '一维方向的网格线',
-            propertys : {
-                enabled : {
-                    detail : '是否开启',
-                    default: true
-                },
-                data : [],
-                lineType : {
-                    detail : '线的样式，虚线或者实现',
-                    default: 'solid'
-                },
-                lineWidth : {
-                    detail : '线宽',
-                    default: 1
-                },
-                strokeStyle : {
-                    detail : '线颜色',
-                    default: '#f0f0f0'
+    static defaultProps(){
+        return {
+            enabled : {
+                detail : '是否开启grid绘制',
+                default: true
+            },
+            oneDimension : {
+                detail : '一维方向的网格线',
+                propertys : {
+                    enabled : {
+                        detail : '是否开启',
+                        default: true
+                    },
+                    data : [],
+                    lineType : {
+                        detail : '线的样式，虚线或者实现',
+                        default: 'solid'
+                    },
+                    lineWidth : {
+                        detail : '线宽',
+                        default: 1
+                    },
+                    strokeStyle : {
+                        detail : '线颜色',
+                        default: '#f0f0f0'
+                    }
                 }
-            }
-        },
-        twoDimension : {
-            detail : '二维方向的网格线',
-            propertys : {
-                enabled : {
-                    detail : '是否开启',
-                    default: false
-                },
-                data : [],
-                lineType : {
-                    detail : '线的样式，虚线或者实现',
-                    default: 'solid'
-                },
-                lineWidth : {
-                    detail : '线宽',
-                    default: 1
-                },
-                strokeStyle : {
-                    detail : '线颜色',
-                    default: '#f0f0f0'
+            },
+            twoDimension : {
+                detail : '二维方向的网格线',
+                propertys : {
+                    enabled : {
+                        detail : '是否开启',
+                        default: false
+                    },
+                    data : [],
+                    lineType : {
+                        detail : '线的样式，虚线或者实现',
+                        default: 'solid'
+                    },
+                    lineWidth : {
+                        detail : '线宽',
+                        default: 1
+                    },
+                    strokeStyle : {
+                        detail : '线颜色',
+                        default: '#f0f0f0'
+                    }
                 }
-            }
-        },
-        fill : {
-            detail : '背景',
-            propertys : {
-                enabled : {
-                    detail : '是否开启',
-                    default: false
-                },
-                fillStyle : {
-                    detail : '背景颜色',
-                    default: null
-                },
-                alpha : {
-                    detail : '背景透明度',
-                    default: null
+            },
+            fill : {
+                detail : '背景',
+                propertys : {
+                    enabled : {
+                        detail : '是否开启',
+                        default: false
+                    },
+                    fillStyle : {
+                        detail : '背景颜色',
+                        default: null
+                    },
+                    alpha : {
+                        detail : '背景透明度',
+                        default: null
+                    }
                 }
             }
         }
@@ -77,7 +79,7 @@ export default class rectGrid extends event.Dispatcher
     constructor( opt, app )
     {
         super( opt, app);
-        _.extend( true, this, getDefaultProps( rectGrid.defaultProps ) );
+        _.extend( true, this, getDefaultProps( rectGrid.defaultProps() ) );
 
         this.width  = 0;   
         this.height = 0;

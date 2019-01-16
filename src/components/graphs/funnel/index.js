@@ -8,66 +8,68 @@ const Polygon = Canvax.Shapes.Polygon;
 
 export default class FunnelGraphs extends GraphsBase
 {
-    static defaultProps = {
-        field : {
-            detail : '字段配置',
-            default: null
-        },
-        sort: {
-            detail : '排序规则',
-            default: null
-        },
-        maxNodeWidth: {
-            detail: '最大的元素宽',
-            default: null
-        },
-        minNodeWidth: {
-            detail: '最小的元素宽',
-            default: 0
-        },
-        minVal : {
-            detail: '漏斗的塔尖',
-            default: 0
-        },
-        node : {
-            detail: '单个元素图形配置',
-            propertys : {
-                height: {
-                    detail: '高',
-                    default: 0,
-                    documentation : '漏斗单元高，如果options没有设定， 就会被自动计算为 this.height/dataOrg.length'
-                }
-            }
-        },
-        label : {
-            detail: '文本配置',
-            propertys: {
-                enabled: {
-                    detail: '是否开启文本',
-                    default: true
-                },
-                textAlign: {
-                    detail: '文本布局位置(left,center,right)',
-                    default: 'center'
-                },
-                textBaseline: {
-                    detail: '文本基线对齐方式',
-                    default: 'middle'
-                },
-                format : {
-                    detail: '文本格式化处理函数',
-                    default: function( num ){ 
-                        return numAddSymbol( num );
+    static defaultProps(){
+        return {
+            field : {
+                detail : '字段配置',
+                default: null
+            },
+            sort: {
+                detail : '排序规则',
+                default: null
+            },
+            maxNodeWidth: {
+                detail: '最大的元素宽',
+                default: null
+            },
+            minNodeWidth: {
+                detail: '最小的元素宽',
+                default: 0
+            },
+            minVal : {
+                detail: '漏斗的塔尖',
+                default: 0
+            },
+            node : {
+                detail: '单个元素图形配置',
+                propertys : {
+                    height: {
+                        detail: '高',
+                        default: 0,
+                        documentation : '漏斗单元高，如果options没有设定， 就会被自动计算为 this.height/dataOrg.length'
                     }
-                },
-                fontSize: {
-                    detail: '文本字体大小',
-                    default: 13
-                },
-                fontColor: {
-                    detail: '文本颜色',
-                    default: '#ffffff',
-                    documentation: 'align为center的时候的颜色，align为其他属性时候取node的颜色'
+                }
+            },
+            label : {
+                detail: '文本配置',
+                propertys: {
+                    enabled: {
+                        detail: '是否开启文本',
+                        default: true
+                    },
+                    textAlign: {
+                        detail: '文本布局位置(left,center,right)',
+                        default: 'center'
+                    },
+                    textBaseline: {
+                        detail: '文本基线对齐方式',
+                        default: 'middle'
+                    },
+                    format : {
+                        detail: '文本格式化处理函数',
+                        default: function( num ){ 
+                            return numAddSymbol( num );
+                        }
+                    },
+                    fontSize: {
+                        detail: '文本字体大小',
+                        default: 13
+                    },
+                    fontColor: {
+                        detail: '文本颜色',
+                        default: '#ffffff',
+                        documentation: 'align为center的时候的颜色，align为其他属性时候取node的颜色'
+                    }
                 }
             }
         }
@@ -84,7 +86,7 @@ export default class FunnelGraphs extends GraphsBase
         this._maxVal = null;
         this._minVal = null;
 
-        _.extend( true, this , getDefaultProps(FunnelGraphs.defaultProps), opt );
+        _.extend( true, this , getDefaultProps( FunnelGraphs.defaultProps() ), opt );
 
         this.init( );
     }

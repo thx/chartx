@@ -7,82 +7,84 @@ const Text = Canvax.Display.Text;
 
 export default class CloudGraphs extends GraphsBase
 {
-    static defaultProps = {
-        field : {
-            detail : '字段配置',
-            default: null
-        },
-        node : {
-            detail : '节点文字配置',
-            propertys : {
-                fontFamily : {
-                    detail: '字体设置',
-                    default: 'Impact'
-                },
-                fontColor : {
-                    detail: '文字颜色',
-                    default: '#999'
-                },
-                fontSize : {
-                    detail: '文本字体大小',
-                    default: function(){
-                        //fontSize默认12-50的随机值
-                        return this.minFontSize + Math.random() * this.maxFontSize;
-                    }
-                },
-                maxFontSize: {
-                    detail: '文本最大字体大小',
-                    default: 30
-                },
-                minFontSize: {
-                    detail: '文本最小字体大小',
-                    default: 16
-                },
-                fontWeight: {
-                    detail : 'fontWeight',
-                    default: 'normal'
-                },
-                format : {
-                    detail: '文本格式化处理函数',
-                    default: null
-                },
-                padding : {
-                    detail: '文本间距',
-                    default: 10
-                },
-                rotation : {
-                    detail: '文本旋转角度',
-                    default: function(){
-                        return (~~(Math.random() * 6) - 3) * 30;
-                    }
-                },
-                strokeStyle: {
-                    detail: '文本描边颜色',
-                    default: null
-                },
-                select : {
-                    detail: '文本选中效果',
-                    propertys: {
-                        enabled: {
-                            detail: '是否开启选中',
-                            default: true
-                        },
-                        lineWidth: {
-                            detail: '选中后的文本描边宽',
-                            default: 2
-                        },
-                        strokeStyle: {
-                            detail: '选中后的文本描边色',
-                            default: '#666'
+    static defaultProps(){
+        return {
+            field : {
+                detail : '字段配置',
+                default: null
+            },
+            node : {
+                detail : '节点文字配置',
+                propertys : {
+                    fontFamily : {
+                        detail: '字体设置',
+                        default: 'Impact'
+                    },
+                    fontColor : {
+                        detail: '文字颜色',
+                        default: '#999'
+                    },
+                    fontSize : {
+                        detail: '文本字体大小',
+                        default: function(){
+                            //fontSize默认12-50的随机值
+                            return this.minFontSize + Math.random() * this.maxFontSize;
                         }
-                    }
-                },
-                focus : {
-                    detail: '文本hover效果',
-                    propertys: {
-                        enabled: {
-                            detail: '是否开启hover效果',
-                            default: true
+                    },
+                    maxFontSize: {
+                        detail: '文本最大字体大小',
+                        default: 30
+                    },
+                    minFontSize: {
+                        detail: '文本最小字体大小',
+                        default: 16
+                    },
+                    fontWeight: {
+                        detail : 'fontWeight',
+                        default: 'normal'
+                    },
+                    format : {
+                        detail: '文本格式化处理函数',
+                        default: null
+                    },
+                    padding : {
+                        detail: '文本间距',
+                        default: 10
+                    },
+                    rotation : {
+                        detail: '文本旋转角度',
+                        default: function(){
+                            return (~~(Math.random() * 6) - 3) * 30;
+                        }
+                    },
+                    strokeStyle: {
+                        detail: '文本描边颜色',
+                        default: null
+                    },
+                    select : {
+                        detail: '文本选中效果',
+                        propertys: {
+                            enabled: {
+                                detail: '是否开启选中',
+                                default: true
+                            },
+                            lineWidth: {
+                                detail: '选中后的文本描边宽',
+                                default: 2
+                            },
+                            strokeStyle: {
+                                detail: '选中后的文本描边色',
+                                default: '#666'
+                            }
+                        }
+                    },
+                    focus : {
+                        detail: '文本hover效果',
+                        propertys: {
+                            enabled: {
+                                detail: '是否开启hover效果',
+                                default: true
+                            }
                         }
                     }
                 }
@@ -102,7 +104,7 @@ export default class CloudGraphs extends GraphsBase
             _minFontSizeVal : null,//fontSizer如果配置为一个field的话， 找出这个field数据的最小值
         };
 
-        _.extend( true, this , getDefaultProps( CloudGraphs.defaultProps ), opt );
+        _.extend( true, this , getDefaultProps( CloudGraphs.defaultProps() ), opt );
 
         this.node.fontColor = function( nodeData ){
             return me.app.getTheme( nodeData.iNode )

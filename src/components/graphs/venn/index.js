@@ -12,92 +12,94 @@ const Circle = Canvax.Shapes.Circle;
 
 export default class VennGraphs extends GraphsBase
 {
-    static defaultProps = {
-        keyField: {
-            detail: 'key字段',
-            default: 'name'
-        },
-        valueField: {
-            detail: 'value字段',
-            default: 'value'
-        },
-        node: {
-            detail: '单个节点配置',
-            propertys: {
-                strokeStyle: {
-                    detail: '边框颜色',
-                    default: null
-                },
-                lineWidth: {
-                    detail: '边框大小',
-                    default: 2
-                },
-                lineAlpha: {
-                    detail: '边框透明度',
-                    default: 0
-                },
-                fillStyle: {
-                    detail: '背景色',
-                    default: null
-                },
-                fillAlpha: {
-                    detail: '背景透明度',
-                    default: 0.25
-                },
-                focus: {
-                    detail: 'hover设置',
-                    propertys: {
-                        enabled: {
-                            detail: '是否开启',
-                            default:true
-                        },
-                        lineAlpha: {
-                            detail: '边框透明度',
-                            default: 0.3
+    static defaultProps(){
+        return {
+            keyField: {
+                detail: 'key字段',
+                default: 'name'
+            },
+            valueField: {
+                detail: 'value字段',
+                default: 'value'
+            },
+            node: {
+                detail: '单个节点配置',
+                propertys: {
+                    strokeStyle: {
+                        detail: '边框颜色',
+                        default: null
+                    },
+                    lineWidth: {
+                        detail: '边框大小',
+                        default: 2
+                    },
+                    lineAlpha: {
+                        detail: '边框透明度',
+                        default: 0
+                    },
+                    fillStyle: {
+                        detail: '背景色',
+                        default: null
+                    },
+                    fillAlpha: {
+                        detail: '背景透明度',
+                        default: 0.25
+                    },
+                    focus: {
+                        detail: 'hover设置',
+                        propertys: {
+                            enabled: {
+                                detail: '是否开启',
+                                default:true
+                            },
+                            lineAlpha: {
+                                detail: '边框透明度',
+                                default: 0.3
+                            }
                         }
-                    }
-                },
-                select: {
-                    detail: '选中设置',
-                    propertys: {
-                        enabled: {
-                            detail: '是否开启',
-                            default:true
-                        },
-                        lineWidth: {
-                            detail: '描边宽度',
-                            default: 2
-                        },
-                        strokeStyle: {
-                            detail: '描边颜色',
-                            default: '#666666'
+                    },
+                    select: {
+                        detail: '选中设置',
+                        propertys: {
+                            enabled: {
+                                detail: '是否开启',
+                                default:true
+                            },
+                            lineWidth: {
+                                detail: '描边宽度',
+                                default: 2
+                            },
+                            strokeStyle: {
+                                detail: '描边颜色',
+                                default: '#666666'
+                            }
                         }
                     }
                 }
-            }
-        },
-        label: {
-            detail: '文本设置',
-            propertys: {
-                field: {
-                    detail: '获取文本的字段',
-                    default: null
-                },
-                fontSize: {
-                    detail: '字体大小',
-                    default: 14
-                },
-                fontColor: {
-                    detail: '文本颜色',
-                    default: null
-                },
-                fontWeight: {
-                    detail: 'fontWeight',
-                    default: 'normal'
-                },
-                showInter: {
-                    detail: '是否显示相交部分的文本',
-                    default:true
+            },
+            label: {
+                detail: '文本设置',
+                propertys: {
+                    field: {
+                        detail: '获取文本的字段',
+                        default: null
+                    },
+                    fontSize: {
+                        detail: '字体大小',
+                        default: 14
+                    },
+                    fontColor: {
+                        detail: '文本颜色',
+                        default: null
+                    },
+                    fontWeight: {
+                        detail: 'fontWeight',
+                        default: 'normal'
+                    },
+                    showInter: {
+                        detail: '是否显示相交部分的文本',
+                        default:true
+                    }
                 }
             }
         }
@@ -110,7 +112,7 @@ export default class VennGraphs extends GraphsBase
 
         this.vennData = null;
 
-        _.extend( true, this , getDefaultProps(VennGraphs.defaultProps), opt );
+        _.extend( true, this , getDefaultProps( VennGraphs.defaultProps() ), opt );
 
         //_trimGraphs后，计算出来本次data的一些属性
         this._dataCircleLen = 0;

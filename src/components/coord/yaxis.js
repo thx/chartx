@@ -7,14 +7,16 @@ const Line = Canvax.Shapes.Line;
 
 export default class yAxis extends Axis
 {
-    static defaultProps = {
-        align : {
-            detail : '左右轴设置',
-            default: 'left'
-        },
-        layoutType : {
-            detail : '布局方式',
-            default: 'proportion'
+    static defaultProps(){
+        return {
+            align : {
+                detail : '左右轴设置',
+                default: 'left'
+            },
+            layoutType : {
+                detail : '布局方式',
+                default: 'proportion'
+            }
         }
     }
 

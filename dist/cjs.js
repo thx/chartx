@@ -710,7 +710,7 @@ var getDefaultProps = function getDefaultProps(dProps) {
   return target;
 };
 
-var defaultProps = {
+var _defaultProps = {
   layoutType: {
     detail: '布局方式',
     default: 'proportion'
@@ -762,6 +762,13 @@ var defaultProps = {
 var axis =
 /*#__PURE__*/
 function () {
+  _createClass(axis, null, [{
+    key: "defaultProps",
+    value: function defaultProps() {
+      return _defaultProps;
+    }
+  }]);
+
   function axis(opt, dataOrg) {
     _classCallCheck(this, axis);
 
@@ -777,8 +784,9 @@ function () {
     //    ]   
     // ]
     this._opt = _.clone(opt);
-    this.dataOrg = dataOrg || [];
-    this._dataSectionLayout = []; //和dataSection一一对应的，每个值的pos，//get xxx OfPos的时候，要先来这里做一次寻找
+    this.dataOrg = dataOrg || []; //3d中有引用到
+
+    this.dataSectionLayout = []; //和dataSection一一对应的，每个值的pos，//get xxx OfPos的时候，要先来这里做一次寻找
     //轴总长
 
     this._axisLength = 1;
@@ -795,7 +803,7 @@ function () {
     this._min = null;
     this._max = null;
 
-    _.extend(true, this, getDefaultProps(defaultProps), opt);
+    _.extend(true, this, getDefaultProps(_defaultProps), opt);
   }
 
   _createClass(axis, [{
@@ -12950,6 +12958,47 @@ var coordBase =
 function (_Component) {
   _inherits(coordBase, _Component);
 
+  _createClass(coordBase, null, [{
+    key: "defaultProps",
+    value: function defaultProps() {
+      return {
+        type: {
+          detail: '坐标系组件',
+          documentation: "坐标系组件，可选值有'rect'（二维直角坐标系）,'polar'（二维极坐标系）,'box'（三维直角坐标系） ",
+          insertText: "type: ",
+          default: "",
+          values: ["rect", "polar", "box", "polar3d"]
+        },
+        width: {
+          detail: '坐标系width',
+          default: 0
+        },
+        height: {
+          detail: '坐标系height',
+          default: 0
+        },
+        origin: {
+          detail: '坐标系原点',
+          propertys: {
+            x: {
+              detail: '原点x位置',
+              default: 0
+            },
+            y: {
+              detail: '原点x位置',
+              default: 0
+            }
+          }
+        },
+        _children: _defineProperty({
+          rect: {},
+          polar: {},
+          box: {}
+        }, "polar", {})
+      };
+    }
+  }]);
+
   function coordBase(opt, app) {
     var _this;
 
@@ -12957,7 +13006,7 @@ function (_Component) {
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(coordBase).call(this, opt, app));
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(coordBase.defaultProps));
+    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(coordBase.defaultProps()));
 
     _this.name = "coord";
     _this._opt = opt;
@@ -13235,42 +13284,6 @@ function (_Component) {
   return coordBase;
 }(component);
 
-coordBase.defaultProps = {
-  type: {
-    detail: '坐标系组件',
-    documentation: "坐标系组件，可选值有'rect'（二维直角坐标系）,'polar'（二维极坐标系）,'box'（三维直角坐标系） ",
-    insertText: "type: ",
-    default: "",
-    values: ["rect", "polar", "box", "polar3d"]
-  },
-  width: {
-    detail: '坐标系width',
-    default: 0
-  },
-  height: {
-    detail: '坐标系height',
-    default: 0
-  },
-  origin: {
-    detail: '坐标系原点',
-    propertys: {
-      x: {
-        detail: '原点x位置',
-        default: 0
-      },
-      y: {
-        detail: '原点x位置',
-        default: 0
-      }
-    }
-  },
-  _children: _defineProperty({
-    rect: {},
-    polar: {},
-    box: {}
-  }, "polar", {})
-};
-
 /**
  * 数字千分位加','号
  * @param  {[Number]} $n [数字]
@@ -13348,6 +13361,171 @@ var Axis =
 function (_baseAxis) {
   _inherits(Axis, _baseAxis);
 
+  _createClass(Axis, null, [{
+    key: "defaultProps",
+    value: function defaultProps() {
+      return {
+        field: {
+          detail: '轴字段配置',
+          documentation: '目前x轴的field只支持单维度设置，也就是说只支持一条x轴',
+          default: []
+        },
+        layoutType: {
+          detail: '布局方式',
+          default: 'rule'
+        },
+        width: {
+          detail: '轴宽',
+          default: 0
+        },
+        height: {
+          detail: '轴高',
+          default: 0
+        },
+        enabled: {
+          detail: '是否显示轴',
+          default: true
+        },
+        animation: {
+          detail: '是否开启动画',
+          default: true
+        },
+        title: {
+          detail: '轴名称',
+          propertys: {
+            shapeType: "text",
+            textAlign: {
+              detail: '水平对齐方式',
+              default: 'center'
+            },
+            textBaseline: {
+              detail: '基线对齐方式',
+              default: 'middle'
+            },
+            strokeStyle: {
+              detail: '文本描边颜色',
+              default: null
+            },
+            lineHeight: {
+              detail: '行高',
+              default: 0
+            },
+            text: {
+              detail: '轴名称的内容',
+              default: ''
+            },
+            fontColor: {
+              detail: '颜色',
+              default: '#999'
+            },
+            fontSize: {
+              detail: '字体大小',
+              default: 12
+            }
+          }
+        },
+        tickLine: {
+          detail: '刻度线',
+          propertys: {
+            enabled: {
+              detail: '是否开启',
+              default: true
+            },
+            lineWidth: {
+              detail: '刻度线宽',
+              default: 1
+            },
+            lineLength: {
+              detail: '刻度线长度',
+              default: 4
+            },
+            distance: {
+              detail: '和前面一个元素的距离',
+              default: 2
+            },
+            strokeStyle: {
+              detail: '描边颜色',
+              default: '#cccccc'
+            }
+          }
+        },
+        axisLine: {
+          detail: '轴线配置',
+          propertys: {
+            enabled: {
+              detail: '是否有轴线',
+              default: true
+            },
+            position: {
+              detail: '轴线的位置',
+              documentation: 'default在align的位置（left，right），可选 "center" 和 具体的值',
+              default: 'default'
+            },
+            lineWidth: {
+              detail: '轴线宽度',
+              default: 1
+            },
+            strokeStyle: {
+              detail: '轴线的颜色',
+              default: '#cccccc'
+            }
+          }
+        },
+        label: {
+          detail: '刻度文本',
+          propertys: {
+            enabled: {
+              detail: '是否显示刻度文本',
+              default: true
+            },
+            fontColor: {
+              detail: '文本颜色',
+              default: '#999'
+            },
+            fontSize: {
+              detail: '字体大小',
+              default: 12
+            },
+            rotation: {
+              detail: '旋转角度',
+              default: 0
+            },
+            format: {
+              detail: 'label文本的格式化处理函数',
+              default: null
+            },
+            distance: {
+              detail: '和轴线之间的间距',
+              default: 2
+            },
+            textAlign: {
+              detail: '水平方向对齐方式',
+              default: 'center'
+            },
+            lineHeight: {
+              detail: '文本的行高',
+              default: 1
+            },
+            evade: {
+              detail: '是否开启逃避算法,目前的逃避只是隐藏',
+              default: true
+            }
+          }
+        },
+        filter: {
+          detail: '过滤函数',
+          documentation: '可以用来过滤哪些yaxis 的 节点是否显示已经颜色之类的',
+          default: null
+        },
+        trimLayout: {
+          detail: '自定义的显示规则函数',
+          documentation: '如果用户有手动的 trimLayout ，那么就全部visible为true，然后调用用户自己的过滤程序',
+          default: null
+        }
+      };
+    }
+  }]);
+
   function Axis(opt, dataOrg, _coord) {
     var _this;
 
@@ -13355,7 +13533,7 @@ function (_baseAxis) {
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(Axis).call(this, opt, dataOrg));
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(Axis.defaultProps));
+    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(Axis.defaultProps()));
 
     return _this;
   }
@@ -13375,172 +13553,19 @@ function (_baseAxis) {
   return Axis;
 }(axis);
 
-Axis.defaultProps = {
-  field: {
-    detail: '轴字段配置',
-    documentation: '目前x轴的field只支持单维度设置，也就是说只支持一条x轴',
-    default: []
-  },
-  layoutType: {
-    detail: '布局方式',
-    default: 'rule'
-  },
-  width: {
-    detail: '轴宽',
-    default: 0
-  },
-  height: {
-    detail: '轴高',
-    default: 0
-  },
-  enabled: {
-    detail: '是否显示轴',
-    default: true
-  },
-  animation: {
-    detail: '是否开启动画',
-    default: true
-  },
-  title: {
-    detail: '轴名称',
-    propertys: {
-      shapeType: "text",
-      textAlign: {
-        detail: '水平对齐方式',
-        default: 'center'
-      },
-      textBaseline: {
-        detail: '基线对齐方式',
-        default: 'middle'
-      },
-      strokeStyle: {
-        detail: '文本描边颜色',
-        default: null
-      },
-      lineHeight: {
-        detail: '行高',
-        default: 0
-      },
-      text: {
-        detail: '轴名称的内容',
-        default: ''
-      },
-      fontColor: {
-        detail: '颜色',
-        default: '#999'
-      },
-      fontSize: {
-        detail: '字体大小',
-        default: 12
-      }
-    }
-  },
-  tickLine: {
-    detail: '刻度线',
-    propertys: {
-      enabled: {
-        detail: '是否开启',
-        default: true
-      },
-      lineWidth: {
-        detail: '刻度线宽',
-        default: 1
-      },
-      lineLength: {
-        detail: '刻度线长度',
-        default: 4
-      },
-      distance: {
-        detail: '和前面一个元素的距离',
-        default: 2
-      },
-      strokeStyle: {
-        detail: '描边颜色',
-        default: '#cccccc'
-      }
-    }
-  },
-  axisLine: {
-    detail: '轴线配置',
-    propertys: {
-      enabled: {
-        detail: '是否有轴线',
-        default: true
-      },
-      position: {
-        detail: '轴线的位置',
-        documentation: 'default在align的位置（left，right），可选 "center" 和 具体的值',
-        default: 'default'
-      },
-      lineWidth: {
-        detail: '轴线宽度',
-        default: 1
-      },
-      strokeStyle: {
-        detail: '轴线的颜色',
-        default: '#cccccc'
-      }
-    }
-  },
-  label: {
-    detail: '刻度文本',
-    propertys: {
-      enabled: {
-        detail: '是否显示刻度文本',
-        default: true
-      },
-      fontColor: {
-        detail: '文本颜色',
-        default: '#999'
-      },
-      fontSize: {
-        detail: '字体大小',
-        default: 12
-      },
-      rotation: {
-        detail: '旋转角度',
-        default: 0
-      },
-      format: {
-        detail: 'label文本的格式化处理函数',
-        default: null
-      },
-      distance: {
-        detail: '和轴线之间的间距',
-        default: 2
-      },
-      textAlign: {
-        detail: '水平方向对齐方式',
-        default: 'center'
-      },
-      lineHeight: {
-        detail: '文本的行高',
-        default: 1
-      },
-      evade: {
-        detail: '是否开启逃避算法,目前的逃避只是隐藏',
-        default: true
-      }
-    }
-  },
-  filter: {
-    detail: '过滤函数',
-    documentation: '可以用来过滤哪些yaxis 的 节点是否显示已经颜色之类的',
-    default: null
-  },
-  trimLayout: {
-    detail: '自定义的显示规则函数',
-    documentation: '如果用户有手动的 trimLayout ，那么就全部visible为true，然后调用用户自己的过滤程序',
-    default: null
-  }
-};
-
 var Line$1 = Canvax.Shapes.Line;
 
 var xAxis =
 /*#__PURE__*/
 function (_Axis) {
   _inherits(xAxis, _Axis);
+
+  _createClass(xAxis, null, [{
+    key: "defaultProps",
+    value: function defaultProps() {
+      return {};
+    }
+  }]);
 
   function xAxis(opt, data, _coord) {
     var _this;
@@ -13567,7 +13592,7 @@ function (_Axis) {
     _this.sprite = null;
     _this.isH = false; //是否为横向转向的x轴
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(xAxis.defaultProps), opt);
+    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(xAxis.defaultProps()), opt);
 
     _this.init(opt);
 
@@ -14098,14 +14123,28 @@ function (_Axis) {
   return xAxis;
 }(Axis);
 
-xAxis.defaultProps = {};
-
 var Line$2 = Canvax.Shapes.Line;
 
 var yAxis =
 /*#__PURE__*/
 function (_Axis) {
   _inherits(yAxis, _Axis);
+
+  _createClass(yAxis, null, [{
+    key: "defaultProps",
+    value: function defaultProps() {
+      return {
+        align: {
+          detail: '左右轴设置',
+          default: 'left'
+        },
+        layoutType: {
+          detail: '布局方式',
+          default: 'proportion'
+        }
+      };
+    }
+  }]);
 
   function yAxis(opt, data, _coord) {
     var _this;
@@ -14575,17 +14614,6 @@ function (_Axis) {
   return yAxis;
 }(Axis);
 
-yAxis.defaultProps = {
-  align: {
-    detail: '左右轴设置',
-    default: 'left'
-  },
-  layoutType: {
-    detail: '布局方式',
-    default: 'proportion'
-  }
-};
-
 var Line$3 = Canvax.Shapes.Line;
 var Rect$1 = Canvax.Shapes.Rect;
 
@@ -14594,6 +14622,79 @@ var rectGrid =
 function (_event$Dispatcher) {
   _inherits(rectGrid, _event$Dispatcher);
 
+  _createClass(rectGrid, null, [{
+    key: "defaultProps",
+    value: function defaultProps() {
+      return {
+        enabled: {
+          detail: '是否开启grid绘制',
+          default: true
+        },
+        oneDimension: {
+          detail: '一维方向的网格线',
+          propertys: {
+            enabled: {
+              detail: '是否开启',
+              default: true
+            },
+            data: [],
+            lineType: {
+              detail: '线的样式，虚线或者实现',
+              default: 'solid'
+            },
+            lineWidth: {
+              detail: '线宽',
+              default: 1
+            },
+            strokeStyle: {
+              detail: '线颜色',
+              default: '#f0f0f0'
+            }
+          }
+        },
+        twoDimension: {
+          detail: '二维方向的网格线',
+          propertys: {
+            enabled: {
+              detail: '是否开启',
+              default: false
+            },
+            data: [],
+            lineType: {
+              detail: '线的样式，虚线或者实现',
+              default: 'solid'
+            },
+            lineWidth: {
+              detail: '线宽',
+              default: 1
+            },
+            strokeStyle: {
+              detail: '线颜色',
+              default: '#f0f0f0'
+            }
+          }
+        },
+        fill: {
+          detail: '背景',
+          propertys: {
+            enabled: {
+              detail: '是否开启',
+              default: false
+            },
+            fillStyle: {
+              detail: '背景颜色',
+              default: null
+            },
+            alpha: {
+              detail: '背景透明度',
+              default: null
+            }
+          }
+        }
+      };
+    }
+  }]);
+
   function rectGrid(opt, app) {
     var _this;
 
@@ -14601,7 +14702,7 @@ function (_event$Dispatcher) {
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(rectGrid).call(this, opt, app));
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(rectGrid.defaultProps));
+    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(rectGrid.defaultProps()));
 
     _this.width = 0;
     _this.height = 0;
@@ -14745,78 +14846,25 @@ function (_event$Dispatcher) {
   return rectGrid;
 }(Dispatcher);
 
-rectGrid.defaultProps = {
-  enabled: {
-    detail: '是否开启grid绘制',
-    default: true
-  },
-  oneDimension: {
-    detail: '一维方向的网格线',
-    propertys: {
-      enabled: {
-        detail: '是否开启',
-        default: true
-      },
-      data: [],
-      lineType: {
-        detail: '线的样式，虚线或者实现',
-        default: 'solid'
-      },
-      lineWidth: {
-        detail: '线宽',
-        default: 1
-      },
-      strokeStyle: {
-        detail: '线颜色',
-        default: '#f0f0f0'
-      }
-    }
-  },
-  twoDimension: {
-    detail: '二维方向的网格线',
-    propertys: {
-      enabled: {
-        detail: '是否开启',
-        default: false
-      },
-      data: [],
-      lineType: {
-        detail: '线的样式，虚线或者实现',
-        default: 'solid'
-      },
-      lineWidth: {
-        detail: '线宽',
-        default: 1
-      },
-      strokeStyle: {
-        detail: '线颜色',
-        default: '#f0f0f0'
-      }
-    }
-  },
-  fill: {
-    detail: '背景',
-    propertys: {
-      enabled: {
-        detail: '是否开启',
-        default: false
-      },
-      fillStyle: {
-        detail: '背景颜色',
-        default: null
-      },
-      alpha: {
-        detail: '背景透明度',
-        default: null
-      }
-    }
-  }
-};
-
 var Rect$2 =
 /*#__PURE__*/
 function (_coordBase) {
   _inherits(Rect, _coordBase);
+
+  _createClass(Rect, null, [{
+    key: "defaultProps",
+    value: function defaultProps() {
+      return {
+        horizontal: {
+          detail: '横向翻转坐标系',
+          documentation: "横向翻转坐标系",
+          insertText: "horizontal: ",
+          default: false,
+          values: [true, false]
+        }
+      };
+    }
+  }]);
 
   function Rect(opt, app) {
     var _this;
@@ -14825,7 +14873,7 @@ function (_coordBase) {
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(Rect).call(this, opt, app));
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(Rect.defaultProps), _this.setDefaultOpt(opt, app));
+    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(Rect.defaultProps()), _this.setDefaultOpt(opt, app));
 
     _this.type = "rect";
     _this._xAxis = null;
@@ -15402,21 +15450,6 @@ function (_coordBase) {
   return Rect;
 }(coordBase);
 
-Rect$2.defaultProps = {
-  horizontal: {
-    detail: '横向翻转坐标系',
-    documentation: "横向翻转坐标系",
-    insertText: "horizontal: ",
-    default: false,
-    values: [true, false]
-  },
-  _children: {
-    xAxis: {},
-    yAxis: {},
-    grid: {}
-  }
-};
-
 var Line$4 = Canvax.Shapes.Line;
 var Circle$2 = Canvax.Shapes.Circle;
 var Polygon$2 = Canvax.Shapes.Polygon;
@@ -15425,6 +15458,64 @@ var polarGrid =
 /*#__PURE__*/
 function (_event$Dispatcher) {
   _inherits(polarGrid, _event$Dispatcher);
+
+  _createClass(polarGrid, null, [{
+    key: "defaultProps",
+    value: function defaultProps() {
+      return {
+        enabled: {
+          detail: '是否开启grid',
+          default: false
+        },
+        ring: {
+          detail: '环背景线',
+          propertys: {
+            shapeType: {
+              detail: '线的图形样式，默认poly，可选circle',
+              default: 'poly'
+            },
+            lineType: {
+              detail: '线条样式，sold实线，dashed虚线',
+              default: 'sold'
+            },
+            lineWidth: {
+              detail: '线宽',
+              default: 1
+            },
+            strokeStyle: {
+              detail: '线颜色',
+              default: '#e5e5e5'
+            },
+            fillStyle: {
+              detail: '环填充色,支持函数配置',
+              default: null
+            },
+            fillAlpha: {
+              detail: '环填充的透明度',
+              default: 0.5
+            }
+          }
+        },
+        ray: {
+          detail: '射线',
+          propertys: {
+            enabled: {
+              detail: '是否开启',
+              default: true
+            },
+            lineWidth: {
+              detail: '线宽',
+              default: 1
+            },
+            strokeStyle: {
+              detail: '线颜色',
+              default: '#e5e5e5'
+            }
+          }
+        }
+      };
+    }
+  }]);
 
   function polarGrid(opt, app) {
     var _this;
@@ -15445,7 +15536,7 @@ function (_event$Dispatcher) {
 
     _this.induce = null; //最外层的那个网，用来触发事件
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(polarGrid.defaultProps), opt);
+    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(polarGrid.defaultProps()), opt);
 
     _this.init(opt);
 
@@ -15570,63 +15661,109 @@ function (_event$Dispatcher) {
   return polarGrid;
 }(Dispatcher);
 
-polarGrid.defaultProps = {
-  enabled: {
-    detail: '是否开启grid',
-    default: false
-  },
-  ring: {
-    detail: '环背景线',
-    propertys: {
-      shapeType: {
-        detail: '线的图形样式，默认poly，可选circle',
-        default: 'poly'
-      },
-      lineType: {
-        detail: '线条样式，sold实线，dashed虚线',
-        default: 'sold'
-      },
-      lineWidth: {
-        detail: '线宽',
-        default: 1
-      },
-      strokeStyle: {
-        detail: '线颜色',
-        default: '#e5e5e5'
-      },
-      fillStyle: {
-        detail: '环填充色,支持函数配置',
-        default: null
-      },
-      fillAlpha: {
-        detail: '环填充的透明度',
-        default: 0.5
-      }
-    }
-  },
-  ray: {
-    detail: '射线',
-    propertys: {
-      enabled: {
-        detail: '是否开启',
-        default: true
-      },
-      lineWidth: {
-        detail: '线宽',
-        default: 1
-      },
-      strokeStyle: {
-        detail: '线颜色',
-        default: '#e5e5e5'
-      }
-    }
-  }
-};
-
 var Polar$2 =
 /*#__PURE__*/
 function (_coorBase) {
   _inherits(Polar$$1, _coorBase);
+
+  _createClass(Polar$$1, null, [{
+    key: "defaultProps",
+    value: function defaultProps() {
+      return {
+        allAngle: {
+          detail: '坐标系总角度',
+          documentation: "",
+          default: 360,
+          values: [0, 360]
+        },
+        startAngle: {
+          detail: '坐标系其实角度',
+          documentation: "",
+          default: 0,
+          values: [0, 360]
+        },
+        radius: {
+          detail: '坐标系的最大半径',
+          documentation: "默认自动计算view的高宽，如果squareRange==true，则会取Math.min(width,height)",
+          default: 'auto',
+          values: null
+        },
+        aAxis: {
+          detail: '角度轴',
+          documentation: "类似直角坐标系中的x轴",
+          propertys: {
+            data: [],
+            angleList: [],
+            //对应layoutType下的角度list
+            layoutData: [],
+            //aAxis.data的 label.format后版本
+            field: {
+              detail: '数据字段',
+              documentation: "",
+              default: ''
+            },
+            layoutType: {
+              detail: '布局类型',
+              documentation: "",
+              default: 'proportion'
+            },
+            beginAngle: {
+              detail: '起始角度',
+              documentation: "",
+              default: -90
+            },
+            enabled: {
+              detail: '是否显示',
+              documentation: "",
+              default: false
+            },
+            label: {
+              detail: '文本配置',
+              documentation: '',
+              propertys: {
+                enabled: {
+                  detail: '是否显示',
+                  documentation: "",
+                  default: true
+                },
+                format: {
+                  detail: 'label的格式化处理函数',
+                  documentation: "",
+                  default: null
+                },
+                fontColor: {
+                  detail: 'label颜色',
+                  documentation: '',
+                  default: "#666"
+                }
+              }
+            }
+          }
+        },
+        rAxis: {
+          detail: '半径维度轴',
+          documentation: '类似直角坐标系中的y轴维度',
+          propertys: {
+            field: {
+              detail: '数据字段',
+              documentation: "",
+              default: ''
+            },
+            dataSection: {
+              detail: '轴的显示数据',
+              documentation: "默认根据源数据中自动计算，用户也可以手动指定",
+              default: false
+            },
+            enabled: {
+              detail: '是否显示',
+              documentation: "",
+              default: false
+            }
+          }
+        }
+      };
+    }
+  }]);
 
   function Polar$$1(opt, app) {
     var _this;
@@ -15636,7 +15773,7 @@ function (_coorBase) {
     _this = _possibleConstructorReturn(this, _getPrototypeOf(Polar$$1).call(this, opt, app));
     _this.type = "polar";
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(Polar$$1.defaultProps), _this.setDefaultOpt(opt, app));
+    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(Polar$$1.defaultProps()), _this.setDefaultOpt(opt, app));
 
     _this.init(opt);
 
@@ -16391,106 +16528,28 @@ function (_coorBase) {
   return Polar$$1;
 }(coordBase);
 
-Polar$2.defaultProps = {
-  allAngle: {
-    detail: '坐标系总角度',
-    documentation: "",
-    default: 360,
-    values: [0, 360]
-  },
-  startAngle: {
-    detail: '坐标系其实角度',
-    documentation: "",
-    default: 0,
-    values: [0, 360]
-  },
-  radius: {
-    detail: '坐标系的最大半径',
-    documentation: "默认自动计算view的高宽，如果squareRange==true，则会取Math.min(width,height)",
-    default: 'auto',
-    values: null
-  },
-  aAxis: {
-    detail: '角度轴',
-    documentation: "类似直角坐标系中的x轴",
-    propertys: {
-      data: [],
-      angleList: [],
-      //对应layoutType下的角度list
-      layoutData: [],
-      //aAxis.data的 label.format后版本
-      field: {
-        detail: '数据字段',
-        documentation: "",
-        default: ''
-      },
-      layoutType: {
-        detail: '布局类型',
-        documentation: "",
-        default: 'proportion'
-      },
-      beginAngle: {
-        detail: '起始角度',
-        documentation: "",
-        default: -90
-      },
-      enabled: {
-        detail: '是否显示',
-        documentation: "",
-        default: false
-      },
-      label: {
-        detail: '文本配置',
-        documentation: '',
-        propertys: {
-          enabled: {
-            detail: '是否显示',
-            documentation: "",
-            default: true
-          },
-          format: {
-            detail: 'label的格式化处理函数',
-            documentation: "",
-            default: null
-          },
-          fontColor: {
-            detail: 'label颜色',
-            documentation: '',
-            default: "#666"
-          }
-        }
-      }
-    }
-  },
-  rAxis: {
-    detail: '半径维度轴',
-    documentation: '类似直角坐标系中的y轴维度',
-    propertys: {
-      field: {
-        detail: '数据字段',
-        documentation: "",
-        default: ''
-      },
-      dataSection: {
-        detail: '轴的显示数据',
-        documentation: "默认根据源数据中自动计算，用户也可以手动指定",
-        default: false
-      },
-      enabled: {
-        detail: '是否显示',
-        documentation: "",
-        default: false
-      }
-    }
-  }
-};
-
 var AnimationFrame$1 = Canvax.AnimationFrame;
 
 var GraphsBase =
 /*#__PURE__*/
 function (_Component) {
   _inherits(GraphsBase, _Component);
+
+  _createClass(GraphsBase, null, [{
+    key: "defaultProps",
+    value: function defaultProps() {
+      return {
+        animation: {
+          detail: '是否开启入场动画',
+          default: true
+        },
+        aniDuration: {
+          detail: '动画时长',
+          default: 500
+        }
+      };
+    }
+  }]);
 
   function GraphsBase(opt, app) {
     var _this;
@@ -16499,7 +16558,7 @@ function (_Component) {
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(GraphsBase).call(this, opt, app)); //这里不能把opt个extend进this
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(GraphsBase.defaultProps));
+    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(GraphsBase.defaultProps()));
 
     _this.name = "graphs"; //这里所有的opts都要透传给 group
 
@@ -16642,17 +16701,6 @@ function (_Component) {
   return GraphsBase;
 }(component);
 
-GraphsBase.defaultProps = {
-  animation: {
-    detail: '是否开启入场动画',
-    default: true
-  },
-  aniDuration: {
-    detail: '动画时长',
-    default: 500
-  }
-};
-
 var AnimationFrame$2 = Canvax.AnimationFrame;
 var Rect$3 = Canvax.Shapes.Rect;
 
@@ -16660,6 +16708,166 @@ var BarGraphs =
 /*#__PURE__*/
 function (_GraphsBase) {
   _inherits(BarGraphs, _GraphsBase);
+
+  _createClass(BarGraphs, null, [{
+    key: "defaultProps",
+    value: function defaultProps() {
+      return {
+        field: {
+          detail: '字段设置',
+          documentation: '支持二维数组格式的设置，一维方向就是横向分组，二维方向就是纵向的堆叠',
+          default: null
+        },
+        yAxisAlign: {
+          detail: '绘制在哪根y轴上面',
+          default: 'left'
+        },
+        absolute: {
+          detail: '是否脱离graphs的位置计算',
+          documentation: '\
+                    trimGraphs的时候是否需要和其他的 bar graphs一起并排计算，\
+                    true的话这个就会和别的重叠,\
+                    和css中得absolute概念一致，脱离文档流的绝对定位',
+          default: false
+        },
+        proportion: {
+          detail: '比例柱状图',
+          default: false
+        },
+        node: {
+          detail: '单个数据对应的图形设置',
+          propertys: {
+            width: {
+              detail: 'bar的宽度',
+              default: 0
+            },
+            maxWidth: {
+              detail: '最大width',
+              default: 50
+            },
+            minWidth: {
+              detail: '最小width',
+              default: 1
+            },
+            minHeight: {
+              detail: '最小height',
+              default: 0
+            },
+            radius: {
+              detail: '叶子节点的圆角半径',
+              default: 3
+            },
+            fillStyle: {
+              detail: 'bar填充色',
+              default: null
+            },
+            fillAlpha: {
+              detail: 'bar透明度',
+              default: 0.95
+            },
+            xDis: {
+              detail: '单分组内bar之间的间隔',
+              default: null
+            },
+            filter: {
+              detail: 'bar过滤处理器',
+              default: null
+            }
+          }
+        },
+        label: {
+          detail: '文本设置',
+          propertys: {
+            enabled: {
+              detail: '是否开启',
+              default: false
+            },
+            fontColor: {
+              detail: '文本颜色',
+              default: null,
+              documentation: '如果有设置text.fontColor那么优先使用fontColor'
+            },
+            fontSize: {
+              detail: '文本字体大小',
+              default: 12
+            },
+            format: {
+              detail: '文本格式化处理函数',
+              default: null
+            },
+            lineWidth: {
+              detail: '文本描边线宽',
+              default: 0
+            },
+            strokeStyle: {
+              detail: '文本描边颜色',
+              default: null
+            },
+            rotation: {
+              detail: '旋转角度',
+              default: 0
+            },
+            textAlign: {
+              detail: '水平对齐方式',
+              documentation: 'left center right',
+              default: 'center'
+            },
+            verticalAlign: {
+              detail: '垂直基线对齐方式',
+              documentation: 'top middle bottom',
+              default: 'bottom'
+            },
+            position: {
+              detail: '文本布局位置',
+              documentation: 'top,topRight,right,rightBottom,bottom,bottomLeft,left,leftTop,center',
+              default: 'top'
+            },
+            offsetX: {
+              detail: 'x偏移量',
+              default: 0
+            },
+            offsetY: {
+              detail: 'y偏移量',
+              default: 0
+            }
+          }
+        },
+        select: {
+          detail: '分组选中',
+          documentation: '\
+                    分组的选中，不是选中具体的某个node，这里的选中靠groupRegion来表现出来,\
+                    目前只有在第一个graphs bar 上配置有效',
+          propertys: {
+            enabled: {
+              detail: '是否开启',
+              default: false
+            },
+            inds: {
+              detail: '选中的分组索引集合',
+              documentation: '选中的列的索引集合,注意，这里的ind不是当前视图的ind，而是加上了dataFrame.range.start的全局ind',
+              default: []
+            },
+            width: {
+              detail: '选中态背景宽度',
+              default: 1
+            },
+            alpha: {
+              detail: '选中态背景透明度',
+              default: 0.2
+            },
+            fillStyle: {
+              detail: '选中态背景填充色',
+              default: null
+            },
+            triggerEventType: {
+              detail: '触发选中效果的事件',
+              default: 'click'
+            }
+          }
+        }
+      };
+    }
+  }]);
 
   function BarGraphs(opt, app) {
     var _this;
@@ -16683,7 +16891,7 @@ function (_GraphsBase) {
     _this._barsLen = 0;
     _this.txtsSp = null;
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(BarGraphs.defaultProps), opt);
+    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(BarGraphs.defaultProps()), opt);
 
     _this.init();
 
@@ -17681,161 +17889,6 @@ function (_GraphsBase) {
   return BarGraphs;
 }(GraphsBase);
 
-BarGraphs.defaultProps = {
-  field: {
-    detail: '字段设置',
-    documentation: '支持二维数组格式的设置，一维方向就是横向分组，二维方向就是纵向的堆叠',
-    default: null
-  },
-  yAxisAlign: {
-    detail: '绘制在哪根y轴上面',
-    default: 'left'
-  },
-  absolute: {
-    detail: '是否脱离graphs的位置计算',
-    documentation: '\
-                trimGraphs的时候是否需要和其他的 bar graphs一起并排计算，\
-                true的话这个就会和别的重叠,\
-                和css中得absolute概念一致，脱离文档流的绝对定位',
-    default: false
-  },
-  proportion: {
-    detail: '比例柱状图',
-    default: false
-  },
-  node: {
-    detail: '单个数据对应的图形设置',
-    propertys: {
-      width: {
-        detail: 'bar的宽度',
-        default: 0
-      },
-      maxWidth: {
-        detail: '最大width',
-        default: 50
-      },
-      minWidth: {
-        detail: '最小width',
-        default: 1
-      },
-      minHeight: {
-        detail: '最小height',
-        default: 0
-      },
-      radius: {
-        detail: '叶子节点的圆角半径',
-        default: 3
-      },
-      fillStyle: {
-        detail: 'bar填充色',
-        default: null
-      },
-      fillAlpha: {
-        detail: 'bar透明度',
-        default: 0.95
-      },
-      xDis: {
-        detail: '单分组内bar之间的间隔',
-        default: null
-      },
-      filter: {
-        detail: 'bar过滤处理器',
-        default: null
-      }
-    }
-  },
-  label: {
-    detail: '文本设置',
-    propertys: {
-      enabled: {
-        detail: '是否开启',
-        default: false
-      },
-      fontColor: {
-        detail: '文本颜色',
-        default: null,
-        documentation: '如果有设置text.fontColor那么优先使用fontColor'
-      },
-      fontSize: {
-        detail: '文本字体大小',
-        default: 12
-      },
-      format: {
-        detail: '文本格式化处理函数',
-        default: null
-      },
-      lineWidth: {
-        detail: '文本描边线宽',
-        default: 0
-      },
-      strokeStyle: {
-        detail: '文本描边颜色',
-        default: null
-      },
-      rotation: {
-        detail: '旋转角度',
-        default: 0
-      },
-      textAlign: {
-        detail: '水平对齐方式',
-        documentation: 'left center right',
-        default: 'center'
-      },
-      verticalAlign: {
-        detail: '垂直基线对齐方式',
-        documentation: 'top middle bottom',
-        default: 'bottom'
-      },
-      position: {
-        detail: '文本布局位置',
-        documentation: 'top,topRight,right,rightBottom,bottom,bottomLeft,left,leftTop,center',
-        default: 'top'
-      },
-      offsetX: {
-        detail: 'x偏移量',
-        default: 0
-      },
-      offsetY: {
-        detail: 'y偏移量',
-        default: 0
-      }
-    }
-  },
-  select: {
-    detail: '分组选中',
-    documentation: '\
-                分组的选中，不是选中具体的某个node，这里的选中靠groupRegion来表现出来,\
-                目前只有在第一个graphs bar 上配置有效',
-    propertys: {
-      enabled: {
-        detail: '是否开启',
-        default: false
-      },
-      inds: {
-        detail: '选中的分组索引集合',
-        documentation: '选中的列的索引集合,注意，这里的ind不是当前视图的ind，而是加上了dataFrame.range.start的全局ind',
-        default: []
-      },
-      width: {
-        detail: '选中态背景宽度',
-        default: 1
-      },
-      alpha: {
-        detail: '选中态背景透明度',
-        default: 0.2
-      },
-      fillStyle: {
-        detail: '选中态背景填充色',
-        default: null
-      },
-      triggerEventType: {
-        detail: '触发选中效果的事件',
-        default: 'click'
-      }
-    }
-  }
-};
-
 var AnimationFrame$3 = Canvax.AnimationFrame;
 var BrokenLine$1 = Canvax.Shapes.BrokenLine;
 var Circle$3 = Canvax.Shapes.Circle;
@@ -17845,6 +17898,111 @@ var LineGraphsGroup =
 /*#__PURE__*/
 function (_event$Dispatcher) {
   _inherits(LineGraphsGroup, _event$Dispatcher);
+
+  _createClass(LineGraphsGroup, null, [{
+    key: "defaultProps",
+    value: function defaultProps() {
+      return {
+        line: {
+          detail: '线配置',
+          propertys: {
+            enabled: {
+              detail: '是否开启',
+              default: true
+            },
+            strokeStyle: {
+              detail: '线的颜色',
+              default: undefined //不会覆盖掉constructor中的定义
+
+            },
+            lineWidth: {
+              detail: '线的宽度',
+              default: 2
+            },
+            lineType: {
+              detail: '线的样式',
+              default: 'solid'
+            },
+            smooth: {
+              detail: '是否平滑处理',
+              default: true
+            }
+          }
+        },
+        node: {
+          detail: '单个数据节点配置，对应线上的小icon图形',
+          propertys: {
+            enabled: {
+              detail: '是否开启',
+              default: true
+            },
+            corner: {
+              detail: '拐角才有节点',
+              default: false
+            },
+            radius: {
+              detail: '节点半径',
+              default: 3
+            },
+            fillStyle: {
+              detail: '节点图形的背景色',
+              default: '#ffffff'
+            },
+            strokeStyle: {
+              detail: '节点图形的描边色，默认和line.strokeStyle保持一致',
+              default: null
+            },
+            lineWidth: {
+              detail: '节点图形边宽大小',
+              default: 2
+            }
+          }
+        },
+        label: {
+          detail: '文本配置',
+          propertys: {
+            enabled: {
+              detail: '是否开启',
+              default: false
+            },
+            fontColor: {
+              detail: '文本颜色',
+              default: null
+            },
+            strokeStyle: {
+              detail: '文本描边色',
+              default: null
+            },
+            fontSize: {
+              detail: '文本字体大小',
+              default: 12
+            },
+            format: {
+              detail: '文本格式化处理函数',
+              default: null
+            }
+          }
+        },
+        area: {
+          detail: '面积区域配置',
+          propertys: {
+            enabled: {
+              detail: '是否开启',
+              default: true
+            },
+            fillStyle: {
+              detail: '面积背景色',
+              default: null
+            },
+            alpha: {
+              detail: '面积透明度',
+              default: 0.2
+            }
+          }
+        }
+      };
+    }
+  }]);
 
   function LineGraphsGroup(fieldMap, iGroup, opt, ctx, h, w) {
     var _this;
@@ -17874,7 +18032,7 @@ function (_event$Dispatcher) {
 
     _this._bline = null;
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(LineGraphsGroup.defaultProps), opt); //TODO group中得field不能直接用opt中得field， 必须重新设置， 
+    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(LineGraphsGroup.defaultProps()), opt); //TODO group中得field不能直接用opt中得field， 必须重新设置， 
     //group中得field只有一个值，代表一条折线, 后面要扩展extend方法，可以控制过滤哪些key值不做extend
 
 
@@ -18485,110 +18643,26 @@ function (_event$Dispatcher) {
   return LineGraphsGroup;
 }(Dispatcher);
 
-LineGraphsGroup.defaultProps = {
-  line: {
-    detail: '线配置',
-    propertys: {
-      enabled: {
-        detail: '是否开启',
-        default: true
-      },
-      strokeStyle: {
-        detail: '线的颜色',
-        default: undefined //不会覆盖掉constructor中的定义
-
-      },
-      lineWidth: {
-        detail: '线的宽度',
-        default: 2
-      },
-      lineType: {
-        detail: '线的样式',
-        default: 'solid'
-      },
-      smooth: {
-        detail: '是否平滑处理',
-        default: true
-      }
-    }
-  },
-  node: {
-    detail: '单个数据节点配置，对应线上的小icon图形',
-    propertys: {
-      enabled: {
-        detail: '是否开启',
-        default: true
-      },
-      corner: {
-        detail: '拐角才有节点',
-        default: false
-      },
-      radius: {
-        detail: '节点半径',
-        default: 3
-      },
-      fillStyle: {
-        detail: '节点图形的背景色',
-        default: '#ffffff'
-      },
-      strokeStyle: {
-        detail: '节点图形的描边色，默认和line.strokeStyle保持一致',
-        default: null
-      },
-      lineWidth: {
-        detail: '节点图形边宽大小',
-        default: 2
-      }
-    }
-  },
-  label: {
-    detail: '文本配置',
-    propertys: {
-      enabled: {
-        detail: '是否开启',
-        default: false
-      },
-      fontColor: {
-        detail: '文本颜色',
-        default: null
-      },
-      strokeStyle: {
-        detail: '文本描边色',
-        default: null
-      },
-      fontSize: {
-        detail: '文本字体大小',
-        default: 12
-      },
-      format: {
-        detail: '文本格式化处理函数',
-        default: null
-      }
-    }
-  },
-  area: {
-    detail: '面积区域配置',
-    propertys: {
-      enabled: {
-        detail: '是否开启',
-        default: true
-      },
-      fillStyle: {
-        detail: '面积背景色',
-        default: null
-      },
-      alpha: {
-        detail: '面积透明度',
-        default: 0.2
-      }
-    }
-  }
-};
-
 var LineGraphs =
 /*#__PURE__*/
 function (_GraphsBase) {
   _inherits(LineGraphs, _GraphsBase);
+
+  _createClass(LineGraphs, null, [{
+    key: "defaultProps",
+    value: function defaultProps() {
+      return {
+        field: {
+          detail: '字段配置，支持二维数组格式',
+          default: null
+        },
+        yAxisAlign: {
+          detail: '绘制在哪根y轴上面',
+          default: 'left'
+        }
+      };
+    }
+  }]);
 
   function LineGraphs(opt, app) {
     var _this;
@@ -18600,7 +18674,7 @@ function (_GraphsBase) {
     _this.enabledField = null;
     _this.groups = []; //群组集合
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(LineGraphs.defaultProps), opt);
+    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(LineGraphs.defaultProps()), opt);
 
     _this.init();
 
@@ -18856,17 +18930,6 @@ function (_GraphsBase) {
   return LineGraphs;
 }(GraphsBase);
 
-LineGraphs.defaultProps = {
-  field: {
-    detail: '字段配置，支持二维数组格式',
-    default: null
-  },
-  yAxisAlign: {
-    detail: '绘制在哪根y轴上面',
-    default: 'left'
-  }
-};
-
 var Circle$4 = Canvax.Shapes.Circle;
 var Rect$4 = Canvax.Shapes.Rect;
 var Line$5 = Canvax.Shapes.Line;
@@ -18875,6 +18938,188 @@ var ScatGraphs =
 /*#__PURE__*/
 function (_GraphsBase) {
   _inherits(ScatGraphs, _GraphsBase);
+
+  _createClass(ScatGraphs, null, [{
+    key: "defaultProps",
+    value: function defaultProps() {
+      return {
+        field: {
+          detail: '字段配置',
+          default: null
+        },
+        aniOrigin: {
+          detail: '节点动画的原点',
+          default: 'default',
+          documentation: '可选的还有center（坐标正中）、origin（坐标原点）'
+        },
+        node: {
+          detail: '单数据节点图形设置',
+          propertys: {
+            shapeType: {
+              detail: '图形类型',
+              default: 'circle',
+              documentation: '节点的现状可以是圆 ，也可以是rect，也可以是三角形，后面两种后面实现'
+            },
+            maxRadius: {
+              detail: '节点最大半径',
+              default: 25
+            },
+            minRadius: {
+              detail: '节点最小半径',
+              default: 5
+            },
+            radius: {
+              detail: '半径',
+              default: null
+            },
+            normalRadius: {
+              detail: '默认半径',
+              default: 15
+            },
+            fillStyle: {
+              detail: '节点景色',
+              default: null
+            },
+            fillAlpha: {
+              detail: '节点透明度',
+              default: 0.8
+            },
+            strokeStyle: {
+              detail: '节点描边颜色',
+              default: null
+            },
+            lineWidth: {
+              detail: '节点描边线宽',
+              default: 0
+            },
+            lineAlpha: {
+              detail: '节点描边透明度',
+              default: 0
+            },
+            focus: {
+              detail: "节点hover态设置",
+              propertys: {
+                enabled: {
+                  detail: '是否开启',
+                  default: true
+                },
+                lineWidth: {
+                  detail: 'hover后的边框大小',
+                  default: 6
+                },
+                lineAlpha: {
+                  detail: 'hover后的边框透明度',
+                  default: 0.2
+                },
+                fillAlpha: {
+                  detail: 'hover后的背景透明度',
+                  default: 0.8
+                }
+              }
+            },
+            select: {
+              detail: "节点选中态设置",
+              propertys: {
+                enabled: {
+                  detail: '是否开启',
+                  default: false
+                },
+                lineWidth: {
+                  detail: '选中后的边框大小',
+                  default: 8
+                },
+                lineAlpha: {
+                  detail: '选中后的边框透明度',
+                  default: 0.4
+                },
+                fillAlpha: {
+                  detail: '选中后的背景透明度',
+                  default: 1
+                }
+              }
+            }
+          }
+        },
+        line: {
+          detail: '每个节点和指标轴线的连线',
+          propertys: {
+            enabled: {
+              detail: '是否开启',
+              default: false
+            },
+            lineWidth: {
+              detail: '连线宽',
+              default: 1
+            },
+            strokeStyle: {
+              detail: '连线颜色',
+              default: '#ccc'
+            },
+            lineType: {
+              detail: '连线类型',
+              default: 'dashed'
+            }
+          }
+        },
+        label: {
+          detail: '文本设置',
+          propertys: {
+            enabled: {
+              detail: '是否开启',
+              default: true
+            },
+            field: {
+              detail: '获取label的字段',
+              default: null
+            },
+            format: {
+              detail: 'label格式化处理函数',
+              default: function _default(txt, nodeData) {
+                return txt;
+              }
+            },
+            fontSize: {
+              detail: 'label字体大小',
+              default: 13
+            },
+            fontColor: {
+              detail: '字体颜色',
+              default: '#888'
+            },
+            strokeStyle: {
+              detail: '字体描边颜色',
+              default: '#ffffff'
+            },
+            lineWidth: {
+              detail: '描边大小',
+              default: 0
+            },
+            textAlign: {
+              detail: '水平对齐方式',
+              default: 'center'
+            },
+            verticalAlign: {
+              detail: '垂直基线对齐方式',
+              default: 'middle'
+            },
+            position: {
+              detail: '文本布局位置',
+              documentation: 'auto(目前等于center，还未实现),center,top,right,bottom,left',
+              default: 'center'
+            },
+            offsetX: {
+              detail: 'x方向偏移量',
+              default: 0
+            },
+            offsetY: {
+              detail: 'y方向偏移量',
+              default: 0
+            }
+          }
+        }
+      };
+    }
+  }]);
 
   function ScatGraphs(opt, app) {
     var _this;
@@ -18888,7 +19133,7 @@ function (_GraphsBase) {
     _this._rMaxValue = null;
     _this._rMinValue = null;
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(ScatGraphs.defaultProps), opt);
+    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(ScatGraphs.defaultProps()), opt);
 
     _this.init();
 
@@ -19465,186 +19710,8 @@ function (_GraphsBase) {
   return ScatGraphs;
 }(GraphsBase);
 
-ScatGraphs.defaultProps = {
-  field: {
-    detail: '字段配置',
-    default: null
-  },
-  aniOrigin: {
-    detail: '节点动画的原点',
-    default: 'default',
-    documentation: '可选的还有center（坐标正中）、origin（坐标原点）'
-  },
-  node: {
-    detail: '单数据节点图形设置',
-    propertys: {
-      shapeType: {
-        detail: '图形类型',
-        default: 'circle',
-        documentation: '节点的现状可以是圆 ，也可以是rect，也可以是三角形，后面两种后面实现'
-      },
-      maxRadius: {
-        detail: '节点最大半径',
-        default: 25
-      },
-      minRadius: {
-        detail: '节点最小半径',
-        default: 5
-      },
-      radius: {
-        detail: '半径',
-        default: null
-      },
-      normalRadius: {
-        detail: '默认半径',
-        default: 15
-      },
-      fillStyle: {
-        detail: '节点景色',
-        default: null
-      },
-      fillAlpha: {
-        detail: '节点透明度',
-        default: 0.8
-      },
-      strokeStyle: {
-        detail: '节点描边颜色',
-        default: null
-      },
-      lineWidth: {
-        detail: '节点描边线宽',
-        default: 0
-      },
-      lineAlpha: {
-        detail: '节点描边透明度',
-        default: 0
-      },
-      focus: {
-        detail: "节点hover态设置",
-        propertys: {
-          enabled: {
-            detail: '是否开启',
-            default: true
-          },
-          lineWidth: {
-            detail: 'hover后的边框大小',
-            default: 6
-          },
-          lineAlpha: {
-            detail: 'hover后的边框透明度',
-            default: 0.2
-          },
-          fillAlpha: {
-            detail: 'hover后的背景透明度',
-            default: 0.8
-          }
-        }
-      },
-      select: {
-        detail: "节点选中态设置",
-        propertys: {
-          enabled: {
-            detail: '是否开启',
-            default: false
-          },
-          lineWidth: {
-            detail: '选中后的边框大小',
-            default: 8
-          },
-          lineAlpha: {
-            detail: '选中后的边框透明度',
-            default: 0.4
-          },
-          fillAlpha: {
-            detail: '选中后的背景透明度',
-            default: 1
-          }
-        }
-      }
-    }
-  },
-  line: {
-    detail: '每个节点和指标轴线的连线',
-    propertys: {
-      enabled: {
-        detail: '是否开启',
-        default: false
-      },
-      lineWidth: {
-        detail: '连线宽',
-        default: 1
-      },
-      strokeStyle: {
-        detail: '连线颜色',
-        default: '#ccc'
-      },
-      lineType: {
-        detail: '连线类型',
-        default: 'dashed'
-      }
-    }
-  },
-  label: {
-    detail: '文本设置',
-    propertys: {
-      enabled: {
-        detail: '是否开启',
-        default: true
-      },
-      field: {
-        detail: '获取label的字段',
-        default: null
-      },
-      format: {
-        detail: 'label格式化处理函数',
-        default: function _default(txt, nodeData) {
-          return txt;
-        }
-      },
-      fontSize: {
-        detail: 'label字体大小',
-        default: 13
-      },
-      fontColor: {
-        detail: '字体颜色',
-        default: '#888'
-      },
-      strokeStyle: {
-        detail: '字体描边颜色',
-        default: '#ffffff'
-      },
-      lineWidth: {
-        detail: '描边大小',
-        default: 0
-      },
-      textAlign: {
-        detail: '水平对齐方式',
-        default: 'center'
-      },
-      verticalAlign: {
-        detail: '垂直基线对齐方式',
-        default: 'middle'
-      },
-      position: {
-        detail: '文本布局位置',
-        documentation: 'auto(目前等于center，还未实现),center,top,right,bottom,left',
-        default: 'center'
-      },
-      offsetX: {
-        detail: 'x方向偏移量',
-        default: 0
-      },
-      offsetY: {
-        detail: 'y方向偏移量',
-        default: 0
-      }
-    }
-  }
-};
-
 var Sector$1 = Canvax.Shapes.Sector;
 var Path$2 = Canvax.Shapes.Path;
-var Rect$5 = Canvax.Shapes.Rect;
 var AnimationFrame$4 = Canvax.AnimationFrame;
 
 var Pie =
@@ -20280,12 +20347,113 @@ function (_event$Dispatcher) {
   return Pie;
 }(Dispatcher);
 
-var _PieGraphs$defaultPro;
-
 var PieGraphs =
 /*#__PURE__*/
 function (_GraphsBase) {
   _inherits(PieGraphs, _GraphsBase);
+
+  _createClass(PieGraphs, null, [{
+    key: "defaultProps",
+    value: function defaultProps() {
+      var _ref;
+
+      return _ref = {
+        field: {
+          detail: '字段配置',
+          default: null
+        },
+        groupField: {
+          detail: '分组字段',
+          default: null,
+          documentation: 'groupField主要是给legend用的， 所有在legend中需要显示的分组数据，都用groupField'
+        },
+        sort: {
+          detail: '排序，默认不排序，可以配置为asc,desc',
+          default: null
+        },
+        startAngle: {
+          detail: '其实角度',
+          default: -90
+        }
+      }, _defineProperty(_ref, "startAngle", {
+        detail: '全部角度',
+        default: 360
+      }), _defineProperty(_ref, "node", {
+        detail: '单个节点（扇形）配置',
+        propertys: {
+          radius: {
+            detail: '半径',
+            default: null,
+            documentation: '每个扇形单元的半径，也可以配置一个字段，就成了丁格尔玫瑰图'
+          },
+          innerRadius: {
+            detail: '内径',
+            default: 0
+          },
+          outRadius: {
+            detail: '外径',
+            default: null
+          },
+          minRadius: {
+            detail: '最小的半径厚度',
+            default: 10,
+            documentation: 'outRadius - innerRadius ， 也就是radius的最小值'
+          },
+          moveDis: {
+            detail: 'hover偏移量',
+            default: 15,
+            documentation: '要预留moveDis位置来hover sector 的时候外扩'
+          },
+          fillStyle: {
+            detail: '单个图形背景色',
+            default: null
+          },
+          focus: {
+            detail: '图形的hover设置',
+            propertys: {
+              enabled: {
+                detail: '是否开启',
+                default: true
+              }
+            }
+          },
+          select: {
+            detail: '图形的选中效果',
+            propertys: {
+              enabled: {
+                detail: '是否开启',
+                default: true
+              },
+              radius: {
+                detail: '选中效果图形的半径厚度',
+                default: 5
+              },
+              alpha: {
+                detail: '选中效果图形的透明度',
+                default: 0.7
+              }
+            }
+          }
+        }
+      }), _defineProperty(_ref, "label", {
+        detail: 'label',
+        propertys: {
+          field: {
+            detail: '获取label的字段',
+            default: null
+          },
+          enabled: {
+            detail: '是否开启',
+            default: false
+          },
+          format: {
+            detail: 'label的格式化函数，支持html',
+            default: null
+          }
+        }
+      }), _ref;
+    }
+  }]);
 
   function PieGraphs(opt, app) {
     var _this;
@@ -20295,7 +20463,7 @@ function (_GraphsBase) {
     _this = _possibleConstructorReturn(this, _getPrototypeOf(PieGraphs).call(this, opt, app));
     _this.type = "pie";
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(PieGraphs.defaultProps), opt);
+    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(PieGraphs.defaultProps()), opt);
 
     _this.init();
 
@@ -20685,102 +20853,6 @@ function (_GraphsBase) {
   return PieGraphs;
 }(GraphsBase);
 
-PieGraphs.defaultProps = (_PieGraphs$defaultPro = {
-  field: {
-    detail: '字段配置',
-    default: null
-  },
-  groupField: {
-    detail: '分组字段',
-    default: null,
-    documentation: 'groupField主要是给legend用的， 所有在legend中需要显示的分组数据，都用groupField'
-  },
-  sort: {
-    detail: '排序，默认不排序，可以配置为asc,desc',
-    default: null
-  },
-  startAngle: {
-    detail: '其实角度',
-    default: -90
-  }
-}, _defineProperty(_PieGraphs$defaultPro, "startAngle", {
-  detail: '全部角度',
-  default: 360
-}), _defineProperty(_PieGraphs$defaultPro, "node", {
-  detail: '单个节点（扇形）配置',
-  propertys: {
-    radius: {
-      detail: '半径',
-      default: null,
-      documentation: '每个扇形单元的半径，也可以配置一个字段，就成了丁格尔玫瑰图'
-    },
-    innerRadius: {
-      detail: '内径',
-      default: 0
-    },
-    outRadius: {
-      detail: '外径',
-      default: null
-    },
-    minRadius: {
-      detail: '最小的半径厚度',
-      default: 10,
-      documentation: 'outRadius - innerRadius ， 也就是radius的最小值'
-    },
-    moveDis: {
-      detail: 'hover偏移量',
-      default: 15,
-      documentation: '要预留moveDis位置来hover sector 的时候外扩'
-    },
-    fillStyle: {
-      detail: '单个图形背景色',
-      default: null
-    },
-    focus: {
-      detail: '图形的hover设置',
-      propertys: {
-        enabled: {
-          detail: '是否开启',
-          default: true
-        }
-      }
-    },
-    select: {
-      detail: '图形的选中效果',
-      propertys: {
-        enabled: {
-          detail: '是否开启',
-          default: true
-        },
-        radius: {
-          detail: '选中效果图形的半径厚度',
-          default: 5
-        },
-        alpha: {
-          detail: '选中效果图形的透明度',
-          default: 0.7
-        }
-      }
-    }
-  }
-}), _defineProperty(_PieGraphs$defaultPro, "label", {
-  detail: 'label',
-  propertys: {
-    field: {
-      detail: '获取label的字段',
-      default: null
-    },
-    enabled: {
-      detail: '是否开启',
-      default: false
-    },
-    format: {
-      detail: 'label的格式化函数，支持html',
-      default: null
-    }
-  }
-}), _PieGraphs$defaultPro);
-
 var Polygon$3 = Canvax.Shapes.Polygon;
 var Circle$5 = Canvax.Shapes.Circle;
 
@@ -20788,6 +20860,73 @@ var RadarGraphs =
 /*#__PURE__*/
 function (_GraphsBase) {
   _inherits(RadarGraphs, _GraphsBase);
+
+  _createClass(RadarGraphs, null, [{
+    key: "defaultProps",
+    value: function defaultProps() {
+      return {
+        field: {
+          detail: '字段配置',
+          default: null
+        },
+        line: {
+          detail: '线配置',
+          propertys: {
+            enabled: {
+              detail: '是否显示',
+              default: true
+            },
+            lineWidth: {
+              detail: '线宽',
+              default: 2
+            },
+            strokeStyle: {
+              detail: '线颜色',
+              default: null
+            }
+          }
+        },
+        area: {
+          detail: '面积区域配置',
+          propertys: {
+            enabled: {
+              detail: '是否显示',
+              default: true
+            },
+            fillStyle: {
+              detail: '面积背景色',
+              default: null
+            },
+            fillAlpha: {
+              detail: '面积透明度',
+              default: 0.1
+            }
+          }
+        },
+        node: {
+          detail: '线上面的单数据节点图形配置',
+          propertys: {
+            enabled: {
+              detail: '是否显示',
+              default: true
+            },
+            strokeStyle: {
+              detail: '边框色',
+              default: '#ffffff'
+            },
+            radius: {
+              detail: '半径',
+              default: 4
+            },
+            lineWidth: {
+              detail: '边框大小',
+              default: 1
+            }
+          }
+        }
+      };
+    }
+  }]);
 
   function RadarGraphs(opt, app) {
     var _this;
@@ -20803,7 +20942,7 @@ function (_GraphsBase) {
       //}
     };
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(RadarGraphs.defaultProps), opt);
+    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(RadarGraphs.defaultProps()), opt);
 
     _this.init();
 
@@ -21111,68 +21250,6 @@ function (_GraphsBase) {
 
   return RadarGraphs;
 }(GraphsBase);
-
-RadarGraphs.defaultProps = {
-  field: {
-    detail: '字段配置',
-    default: null
-  },
-  line: {
-    detail: '线配置',
-    propertys: {
-      enabled: {
-        detail: '是否显示',
-        default: true
-      },
-      lineWidth: {
-        detail: '线宽',
-        default: 2
-      },
-      strokeStyle: {
-        detail: '线颜色',
-        default: null
-      }
-    }
-  },
-  area: {
-    detail: '面积区域配置',
-    propertys: {
-      enabled: {
-        detail: '是否显示',
-        default: true
-      },
-      fillStyle: {
-        detail: '面积背景色',
-        default: null
-      },
-      fillAlpha: {
-        detail: '面积透明度',
-        default: 0.1
-      }
-    }
-  },
-  node: {
-    detail: '线上面的单数据节点图形配置',
-    propertys: {
-      enabled: {
-        detail: '是否显示',
-        default: true
-      },
-      strokeStyle: {
-        detail: '边框色',
-        default: '#ffffff'
-      },
-      radius: {
-        detail: '半径',
-        default: 4
-      },
-      lineWidth: {
-        detail: '边框大小',
-        default: 1
-      }
-    }
-  }
-};
 
 var noop = {
   value: function value() {}
@@ -21737,6 +21814,94 @@ var CloudGraphs =
 function (_GraphsBase) {
   _inherits(CloudGraphs, _GraphsBase);
 
+  _createClass(CloudGraphs, null, [{
+    key: "defaultProps",
+    value: function defaultProps() {
+      return {
+        field: {
+          detail: '字段配置',
+          default: null
+        },
+        node: {
+          detail: '节点文字配置',
+          propertys: {
+            fontFamily: {
+              detail: '字体设置',
+              default: 'Impact'
+            },
+            fontColor: {
+              detail: '文字颜色',
+              default: '#999'
+            },
+            fontSize: {
+              detail: '文本字体大小',
+              default: function _default() {
+                //fontSize默认12-50的随机值
+                return this.minFontSize + Math.random() * this.maxFontSize;
+              }
+            },
+            maxFontSize: {
+              detail: '文本最大字体大小',
+              default: 30
+            },
+            minFontSize: {
+              detail: '文本最小字体大小',
+              default: 16
+            },
+            fontWeight: {
+              detail: 'fontWeight',
+              default: 'normal'
+            },
+            format: {
+              detail: '文本格式化处理函数',
+              default: null
+            },
+            padding: {
+              detail: '文本间距',
+              default: 10
+            },
+            rotation: {
+              detail: '文本旋转角度',
+              default: function _default() {
+                return (~~(Math.random() * 6) - 3) * 30;
+              }
+            },
+            strokeStyle: {
+              detail: '文本描边颜色',
+              default: null
+            },
+            select: {
+              detail: '文本选中效果',
+              propertys: {
+                enabled: {
+                  detail: '是否开启选中',
+                  default: true
+                },
+                lineWidth: {
+                  detail: '选中后的文本描边宽',
+                  default: 2
+                },
+                strokeStyle: {
+                  detail: '选中后的文本描边色',
+                  default: '#666'
+                }
+              }
+            },
+            focus: {
+              detail: '文本hover效果',
+              propertys: {
+                enabled: {
+                  detail: '是否开启hover效果',
+                  default: true
+                }
+              }
+            }
+          }
+        }
+      };
+    }
+  }]);
+
   function CloudGraphs(opt, app) {
     var _this;
 
@@ -21755,7 +21920,7 @@ function (_GraphsBase) {
 
     };
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(CloudGraphs.defaultProps), opt);
+    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(CloudGraphs.defaultProps()), opt);
 
     _this.node.fontColor = function (nodeData) {
       return me.app.getTheme(nodeData.iNode);
@@ -21980,94 +22145,144 @@ function (_GraphsBase) {
   return CloudGraphs;
 }(GraphsBase);
 
-CloudGraphs.defaultProps = {
-  field: {
-    detail: '字段配置',
-    default: null
-  },
-  node: {
-    detail: '节点文字配置',
-    propertys: {
-      fontFamily: {
-        detail: '字体设置',
-        default: 'Impact'
-      },
-      fontColor: {
-        detail: '文字颜色',
-        default: '#999'
-      },
-      fontSize: {
-        detail: '文本字体大小',
-        default: function _default() {
-          //fontSize默认12-50的随机值
-          return this.minFontSize + Math.random() * this.maxFontSize;
-        }
-      },
-      maxFontSize: {
-        detail: '文本最大字体大小',
-        default: 30
-      },
-      minFontSize: {
-        detail: '文本最小字体大小',
-        default: 16
-      },
-      fontWeight: {
-        detail: 'fontWeight',
-        default: 'normal'
-      },
-      format: {
-        detail: '文本格式化处理函数',
-        default: null
-      },
-      padding: {
-        detail: '文本间距',
-        default: 10
-      },
-      rotation: {
-        detail: '文本旋转角度',
-        default: function _default() {
-          return (~~(Math.random() * 6) - 3) * 30;
-        }
-      },
-      strokeStyle: {
-        detail: '文本描边颜色',
-        default: null
-      },
-      select: {
-        detail: '文本选中效果',
-        propertys: {
-          enabled: {
-            detail: '是否开启选中',
-            default: true
-          },
-          lineWidth: {
-            detail: '选中后的文本描边宽',
-            default: 2
-          },
-          strokeStyle: {
-            detail: '选中后的文本描边色',
-            default: '#666'
-          }
-        }
-      },
-      focus: {
-        detail: '文本hover效果',
-        propertys: {
-          enabled: {
-            detail: '是否开启hover效果',
-            default: true
-          }
-        }
-      }
-    }
-  }
-};
-
 var Circle$6 = Canvax.Shapes.Circle;
 
 var PlanetGroup =
 /*#__PURE__*/
 function () {
+  _createClass(PlanetGroup, null, [{
+    key: "defaultProps",
+    value: function defaultProps() {
+      return {
+        sort: {
+          detail: '排序',
+          default: 'desc'
+        },
+        sortField: {
+          detail: '用来排序的字段',
+          default: 'null'
+        },
+        node: {
+          detail: '单个数据节点图形配置',
+          propertys: {
+            maxRadius: {
+              detail: '最大半径',
+              default: 30
+            },
+            minRadius: {
+              detail: '最小半径',
+              default: 5
+            },
+            radius: {
+              detail: '半径',
+              default: 15,
+              documentation: '也可以是个function,也可以配置{field:"pv"}来设置字段， 自动计算r'
+            },
+            lineWidth: {
+              detail: '描边线宽',
+              default: 1
+            },
+            strokeStyle: {
+              detail: '描边颜色',
+              default: '#ffffff'
+            },
+            fillStyle: {
+              detail: '图形填充色',
+              default: '#f2fbfb'
+            },
+            lineAlpha: {
+              detail: '边框透明度',
+              default: 0.6
+            },
+            focus: {
+              detail: 'hover态设置',
+              propertys: {
+                enabled: {
+                  detail: '是否开启',
+                  default: true
+                },
+                lineAlpha: {
+                  detail: 'hover时候边框透明度',
+                  default: 0.7
+                },
+                lineWidth: {
+                  detail: 'hover时候边框大小',
+                  default: 2
+                },
+                strokeStyle: {
+                  detail: 'hover时候边框颜色',
+                  default: '#fff'
+                }
+              }
+            },
+            select: {
+              detail: '选中态设置',
+              propertys: {
+                enabled: {
+                  detail: '是否开启',
+                  default: false
+                },
+                lineAlpha: {
+                  detail: '选中时候边框透明度',
+                  default: 1
+                },
+                lineWidth: {
+                  detail: '选中时候边框大小',
+                  default: 2
+                },
+                strokeStyle: {
+                  detail: '选中时候边框颜色',
+                  default: '#fff'
+                },
+                triggerEventType: {
+                  detail: '触发事件',
+                  default: 'click'
+                }
+              }
+            }
+          }
+        },
+        label: {
+          detail: '文本设置',
+          propertys: {
+            enabled: {
+              detail: '是否开启',
+              default: true
+            },
+            fontColor: {
+              detail: '文本颜色',
+              default: '#666666'
+            },
+            fontSize: {
+              detail: '文本字体大小',
+              default: 13
+            },
+            textAlign: {
+              detail: '水平对齐方式',
+              default: 'center'
+            },
+            verticalAlign: {
+              detail: '基线对齐方式',
+              default: 'middle'
+            },
+            position: {
+              detail: '文本布局位置',
+              default: 'center'
+            },
+            offsetX: {
+              detail: 'x方向偏移量',
+              default: 0
+            },
+            offsetY: {
+              detail: 'y方向偏移量',
+              default: 0
+            }
+          }
+        }
+      };
+    }
+  }]);
+
   function PlanetGroup(opt, dataFrame$$1, _graphs) {
     _classCallCheck(this, PlanetGroup);
 
@@ -22096,7 +22311,7 @@ function () {
     this.maxRingNum = 0;
     this.ringNum = 0;
 
-    _.extend(true, this, getDefaultProps(PlanetGroup.defaultProps), opt); //circle.maxRadius 绝对不能大于最大 占位 pit.radius
+    _.extend(true, this, getDefaultProps(PlanetGroup.defaultProps()), opt); //circle.maxRadius 绝对不能大于最大 占位 pit.radius
 
 
     if (this.node.maxRadius > this.pit.radius) {
@@ -22708,143 +22923,111 @@ function () {
   return PlanetGroup;
 }();
 
-PlanetGroup.defaultProps = {
-  sort: {
-    detail: '排序',
-    default: 'desc'
-  },
-  sortField: {
-    detail: '用来排序的字段',
-    default: 'null'
-  },
-  node: {
-    detail: '单个数据节点图形配置',
-    propertys: {
-      maxRadius: {
-        detail: '最大半径',
-        default: 30
-      },
-      minRadius: {
-        detail: '最小半径',
-        default: 5
-      },
-      radius: {
-        detail: '半径',
-        default: 15,
-        documentation: '也可以是个function,也可以配置{field:"pv"}来设置字段， 自动计算r'
-      },
-      lineWidth: {
-        detail: '描边线宽',
-        default: 1
-      },
-      strokeStyle: {
-        detail: '描边颜色',
-        default: '#ffffff'
-      },
-      fillStyle: {
-        detail: '图形填充色',
-        default: '#f2fbfb'
-      },
-      lineAlpha: {
-        detail: '边框透明度',
-        default: 0.6
-      },
-      focus: {
-        detail: 'hover态设置',
-        propertys: {
-          enabled: {
-            detail: '是否开启',
-            default: true
-          },
-          lineAlpha: {
-            detail: 'hover时候边框透明度',
-            default: 0.7
-          },
-          lineWidth: {
-            detail: 'hover时候边框大小',
-            default: 2
-          },
-          strokeStyle: {
-            detail: 'hover时候边框颜色',
-            default: '#fff'
-          }
-        }
-      },
-      select: {
-        detail: '选中态设置',
-        propertys: {
-          enabled: {
-            detail: '是否开启',
-            default: false
-          },
-          lineAlpha: {
-            detail: '选中时候边框透明度',
-            default: 1
-          },
-          lineWidth: {
-            detail: '选中时候边框大小',
-            default: 2
-          },
-          strokeStyle: {
-            detail: '选中时候边框颜色',
-            default: '#fff'
-          },
-          triggerEventType: {
-            detail: '触发事件',
-            default: 'click'
-          }
-        }
-      }
-    }
-  },
-  label: {
-    detail: '文本设置',
-    propertys: {
-      enabled: {
-        detail: '是否开启',
-        default: true
-      },
-      fontColor: {
-        detail: '文本颜色',
-        default: '#666666'
-      },
-      fontSize: {
-        detail: '文本字体大小',
-        default: 13
-      },
-      textAlign: {
-        detail: '水平对齐方式',
-        default: 'center'
-      },
-      verticalAlign: {
-        detail: '基线对齐方式',
-        default: 'middle'
-      },
-      position: {
-        detail: '文本布局位置',
-        default: 'center'
-      },
-      offsetX: {
-        detail: 'x方向偏移量',
-        default: 0
-      },
-      offsetY: {
-        detail: 'y方向偏移量',
-        default: 0
-      }
-    }
-  }
-};
-
 var Text$2 = Canvax.Display.Text;
 var Circle$7 = Canvax.Shapes.Circle;
 var Line$6 = Canvax.Shapes.Line;
-var Rect$6 = Canvax.Shapes.Rect;
+var Rect$5 = Canvax.Shapes.Rect;
 
 var PlanetGraphs =
 /*#__PURE__*/
 function (_GraphsBase) {
   _inherits(PlanetGraphs, _GraphsBase);
+
+  _createClass(PlanetGraphs, null, [{
+    key: "defaultProps",
+    value: function defaultProps() {
+      return {
+        field: {
+          detail: '字段设置',
+          default: null
+        },
+        center: {
+          detail: '中心点设置',
+          propertys: {
+            enabled: {
+              detail: '是否显示中心',
+              default: true
+            },
+            text: {
+              detail: '中心区域文本',
+              default: 'center'
+            },
+            radius: {
+              detail: '中心圆半径',
+              default: 30
+            },
+            fillStyle: {
+              detail: '中心背景色',
+              default: '#70629e'
+            },
+            fontSize: {
+              detail: '中心字体大小',
+              default: 15
+            },
+            fontColor: {
+              detail: '中心字体颜色',
+              default: '#ffffff'
+            },
+            margin: {
+              detail: '中区区域和外围可绘图区域距离',
+              default: 20
+            }
+          }
+        },
+        selectInds: {
+          detail: '选中的数据索引',
+          default: []
+        },
+        grid: {
+          detail: '星系图自己的grid',
+          propertys: {
+            rings: {
+              detail: '环配置',
+              propertys: {
+                fillStyle: {
+                  detail: '背景色',
+                  default: null
+                },
+                strokeStyle: {
+                  detail: '环线色',
+                  default: null
+                },
+                lineWidth: {
+                  detail: '环线宽',
+                  default: 1
+                },
+                count: {
+                  detail: '分几环',
+                  default: 3
+                }
+              }
+            },
+            rays: {
+              detail: '射线配置',
+              propertys: {
+                count: {
+                  detail: '射线数量',
+                  default: 0
+                },
+                globalAlpha: {
+                  detail: '线透明度',
+                  default: 0.4
+                },
+                strokeStyle: {
+                  detail: '线色',
+                  default: '#10519D'
+                },
+                lineWidth: {
+                  detail: '线宽',
+                  default: 1
+                }
+              }
+            }
+          }
+        }
+      };
+    }
+  }]);
 
   function PlanetGraphs(opt, app) {
     var _this;
@@ -22864,7 +23047,7 @@ function (_GraphsBase) {
       }
     };
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(PlanetGraphs.defaultProps), opt);
+    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(PlanetGraphs.defaultProps()), opt);
 
     if (_this.center.radius == 0 || !_this.center.enabled) {
       _this.center.radius = 0;
@@ -23058,7 +23241,7 @@ function (_GraphsBase) {
         }
       }
 
-      var _clipRect = new Rect$6({
+      var _clipRect = new Rect$5({
         name: "clipRect",
         context: {
           x: _coord.origin.x - me.app.width / 2,
@@ -23268,97 +23451,6 @@ function (_GraphsBase) {
   return PlanetGraphs;
 }(GraphsBase);
 
-PlanetGraphs.defaultProps = {
-  field: {
-    detail: '字段设置',
-    default: null
-  },
-  center: {
-    detail: '中心点设置',
-    propertys: {
-      enabled: {
-        detail: '是否显示中心',
-        default: true
-      },
-      text: {
-        detail: '中心区域文本',
-        default: 'center'
-      },
-      radius: {
-        detail: '中心圆半径',
-        default: 30
-      },
-      fillStyle: {
-        detail: '中心背景色',
-        default: '#70629e'
-      },
-      fontSize: {
-        detail: '中心字体大小',
-        default: 15
-      },
-      fontColor: {
-        detail: '中心字体颜色',
-        default: '#ffffff'
-      },
-      margin: {
-        detail: '中区区域和外围可绘图区域距离',
-        default: 20
-      }
-    }
-  },
-  selectInds: {
-    detail: '选中的数据索引',
-    default: []
-  },
-  grid: {
-    detail: '星系图自己的grid',
-    propertys: {
-      rings: {
-        detail: '环配置',
-        propertys: {
-          fillStyle: {
-            detail: '背景色',
-            default: null
-          },
-          strokeStyle: {
-            detail: '环线色',
-            default: null
-          },
-          lineWidth: {
-            detail: '环线宽',
-            default: 1
-          },
-          count: {
-            detail: '分几环',
-            default: 3
-          }
-        }
-      },
-      rays: {
-        detail: '射线配置',
-        propertys: {
-          count: {
-            detail: '射线数量',
-            default: 0
-          },
-          globalAlpha: {
-            detail: '线透明度',
-            default: 0.4
-          },
-          strokeStyle: {
-            detail: '线色',
-            default: '#10519D'
-          },
-          lineWidth: {
-            detail: '线宽',
-            default: 1
-          }
-        }
-      }
-    }
-  }
-};
-
 var Text$3 = Canvax.Display.Text;
 var Polygon$4 = Canvax.Shapes.Polygon;
 
@@ -23366,6 +23458,76 @@ var FunnelGraphs =
 /*#__PURE__*/
 function (_GraphsBase) {
   _inherits(FunnelGraphs, _GraphsBase);
+
+  _createClass(FunnelGraphs, null, [{
+    key: "defaultProps",
+    value: function defaultProps() {
+      return {
+        field: {
+          detail: '字段配置',
+          default: null
+        },
+        sort: {
+          detail: '排序规则',
+          default: null
+        },
+        maxNodeWidth: {
+          detail: '最大的元素宽',
+          default: null
+        },
+        minNodeWidth: {
+          detail: '最小的元素宽',
+          default: 0
+        },
+        minVal: {
+          detail: '漏斗的塔尖',
+          default: 0
+        },
+        node: {
+          detail: '单个元素图形配置',
+          propertys: {
+            height: {
+              detail: '高',
+              default: 0,
+              documentation: '漏斗单元高，如果options没有设定， 就会被自动计算为 this.height/dataOrg.length'
+            }
+          }
+        },
+        label: {
+          detail: '文本配置',
+          propertys: {
+            enabled: {
+              detail: '是否开启文本',
+              default: true
+            },
+            textAlign: {
+              detail: '文本布局位置(left,center,right)',
+              default: 'center'
+            },
+            textBaseline: {
+              detail: '文本基线对齐方式',
+              default: 'middle'
+            },
+            format: {
+              detail: '文本格式化处理函数',
+              default: function _default(num) {
+                return numAddSymbol(num);
+              }
+            },
+            fontSize: {
+              detail: '文本字体大小',
+              default: 13
+            },
+            fontColor: {
+              detail: '文本颜色',
+              default: '#ffffff',
+              documentation: 'align为center的时候的颜色，align为其他属性时候取node的颜色'
+            }
+          }
+        }
+      };
+    }
+  }]);
 
   function FunnelGraphs(opt, app) {
     var _this;
@@ -23381,7 +23543,7 @@ function (_GraphsBase) {
     _this._maxVal = null;
     _this._minVal = null;
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(FunnelGraphs.defaultProps), opt);
+    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(FunnelGraphs.defaultProps()), opt);
 
     _this.init();
 
@@ -23586,71 +23748,6 @@ function (_GraphsBase) {
 
   return FunnelGraphs;
 }(GraphsBase);
-
-FunnelGraphs.defaultProps = {
-  field: {
-    detail: '字段配置',
-    default: null
-  },
-  sort: {
-    detail: '排序规则',
-    default: null
-  },
-  maxNodeWidth: {
-    detail: '最大的元素宽',
-    default: null
-  },
-  minNodeWidth: {
-    detail: '最小的元素宽',
-    default: 0
-  },
-  minVal: {
-    detail: '漏斗的塔尖',
-    default: 0
-  },
-  node: {
-    detail: '单个元素图形配置',
-    propertys: {
-      height: {
-        detail: '高',
-        default: 0,
-        documentation: '漏斗单元高，如果options没有设定， 就会被自动计算为 this.height/dataOrg.length'
-      }
-    }
-  },
-  label: {
-    detail: '文本配置',
-    propertys: {
-      enabled: {
-        detail: '是否开启文本',
-        default: true
-      },
-      textAlign: {
-        detail: '文本布局位置(left,center,right)',
-        default: 'center'
-      },
-      textBaseline: {
-        detail: '文本基线对齐方式',
-        default: 'middle'
-      },
-      format: {
-        detail: '文本格式化处理函数',
-        default: function _default(num) {
-          return numAddSymbol(num);
-        }
-      },
-      fontSize: {
-        detail: '文本字体大小',
-        default: 13
-      },
-      fontColor: {
-        detail: '文本颜色',
-        default: '#ffffff',
-        documentation: 'align为center的时候的颜色，align为其他属性时候取node的颜色'
-      }
-    }
-  }
-};
 
 /** finds the zeros of a function, given two starting points (which must
  * have opposite signs */
@@ -25022,6 +25119,102 @@ var VennGraphs =
 function (_GraphsBase) {
   _inherits(VennGraphs, _GraphsBase);
 
+  _createClass(VennGraphs, null, [{
+    key: "defaultProps",
+    value: function defaultProps() {
+      return {
+        keyField: {
+          detail: 'key字段',
+          default: 'name'
+        },
+        valueField: {
+          detail: 'value字段',
+          default: 'value'
+        },
+        node: {
+          detail: '单个节点配置',
+          propertys: {
+            strokeStyle: {
+              detail: '边框颜色',
+              default: null
+            },
+            lineWidth: {
+              detail: '边框大小',
+              default: 2
+            },
+            lineAlpha: {
+              detail: '边框透明度',
+              default: 0
+            },
+            fillStyle: {
+              detail: '背景色',
+              default: null
+            },
+            fillAlpha: {
+              detail: '背景透明度',
+              default: 0.25
+            },
+            focus: {
+              detail: 'hover设置',
+              propertys: {
+                enabled: {
+                  detail: '是否开启',
+                  default: true
+                },
+                lineAlpha: {
+                  detail: '边框透明度',
+                  default: 0.3
+                }
+              }
+            },
+            select: {
+              detail: '选中设置',
+              propertys: {
+                enabled: {
+                  detail: '是否开启',
+                  default: true
+                },
+                lineWidth: {
+                  detail: '描边宽度',
+                  default: 2
+                },
+                strokeStyle: {
+                  detail: '描边颜色',
+                  default: '#666666'
+                }
+              }
+            }
+          }
+        },
+        label: {
+          detail: '文本设置',
+          propertys: {
+            field: {
+              detail: '获取文本的字段',
+              default: null
+            },
+            fontSize: {
+              detail: '字体大小',
+              default: 14
+            },
+            fontColor: {
+              detail: '文本颜色',
+              default: null
+            },
+            fontWeight: {
+              detail: 'fontWeight',
+              default: 'normal'
+            },
+            showInter: {
+              detail: '是否显示相交部分的文本',
+              default: true
+            }
+          }
+        }
+      };
+    }
+  }]);
+
   function VennGraphs(opt, app) {
     var _this;
 
@@ -25031,7 +25224,7 @@ function (_GraphsBase) {
     _this.type = "venn";
     _this.vennData = null;
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(VennGraphs.defaultProps), opt); //_trimGraphs后，计算出来本次data的一些属性
+    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(VennGraphs.defaultProps()), opt); //_trimGraphs后，计算出来本次data的一些属性
 
 
     _this._dataCircleLen = 0;
@@ -25420,98 +25613,6 @@ function (_GraphsBase) {
 
   return VennGraphs;
 }(GraphsBase); //venn computeTextCentres 需要的相关代码 begin
-
-
-VennGraphs.defaultProps = {
-  keyField: {
-    detail: 'key字段',
-    default: 'name'
-  },
-  valueField: {
-    detail: 'value字段',
-    default: 'value'
-  },
-  node: {
-    detail: '单个节点配置',
-    propertys: {
-      strokeStyle: {
-        detail: '边框颜色',
-        default: null
-      },
-      lineWidth: {
-        detail: '边框大小',
-        default: 2
-      },
-      lineAlpha: {
-        detail: '边框透明度',
-        default: 0
-      },
-      fillStyle: {
-        detail: '背景色',
-        default: null
-      },
-      fillAlpha: {
-        detail: '背景透明度',
-        default: 0.25
-      },
-      focus: {
-        detail: 'hover设置',
-        propertys: {
-          enabled: {
-            detail: '是否开启',
-            default: true
-          },
-          lineAlpha: {
-            detail: '边框透明度',
-            default: 0.3
-          }
-        }
-      },
-      select: {
-        detail: '选中设置',
-        propertys: {
-          enabled: {
-            detail: '是否开启',
-            default: true
-          },
-          lineWidth: {
-            detail: '描边宽度',
-            default: 2
-          },
-          strokeStyle: {
-            detail: '描边颜色',
-            default: '#666666'
-          }
-        }
-      }
-    }
-  },
-  label: {
-    detail: '文本设置',
-    propertys: {
-      field: {
-        detail: '获取文本的字段',
-        default: null
-      },
-      fontSize: {
-        detail: '字体大小',
-        default: 14
-      },
-      fontColor: {
-        detail: '文本颜色',
-        default: null
-      },
-      fontWeight: {
-        detail: 'fontWeight',
-        default: 'normal'
-      },
-      showInter: {
-        detail: '是否显示相交部分的文本',
-        default: true
-      }
-    }
-  }
-};
 
 function getOverlappingCircles(circles) {
   var ret = {},
@@ -26027,6 +26128,56 @@ var sunburstGraphs =
 function (_GraphsBase) {
   _inherits(sunburstGraphs, _GraphsBase);
 
+  _createClass(sunburstGraphs, null, [{
+    key: "defaultProps",
+    value: function defaultProps() {
+      return {
+        keyField: {
+          detail: 'key字段',
+          default: 'name'
+        },
+        valueField: {
+          detail: 'value字段',
+          default: 'value'
+        },
+        parentField: {
+          detail: 'parent字段',
+          default: 'parent'
+        },
+        node: {
+          detail: '单个节点图形设置',
+          propertys: {
+            strokeStyle: {
+              detail: '描边色',
+              default: '#ffffff'
+            },
+            lineWidth: {
+              detail: '描边线宽',
+              default: 1
+            },
+            lineAlpha: {
+              detail: '描边边框透明度',
+              default: 1
+            },
+            fillStyle: {
+              detail: '背景色',
+              default: null
+            },
+            fillAlpha: {
+              detail: '背景透明度',
+              default: 1
+            },
+            blurAlpha: {
+              detail: '非激活状态透明度',
+              documentation: '比如选中其中一项，其他不先关的要降低透明度',
+              default: 0.4
+            }
+          }
+        }
+      };
+    }
+  }]);
+
   function sunburstGraphs(opt, app) {
     var _this;
 
@@ -26035,7 +26186,7 @@ function (_GraphsBase) {
     _this = _possibleConstructorReturn(this, _getPrototypeOf(sunburstGraphs).call(this, opt, app));
     _this.type = "sunburst";
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(sunburstGraphs.defaultProps), opt);
+    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(sunburstGraphs.defaultProps()), opt);
 
     _this.data = []; //布局算法布局后的数据
 
@@ -26289,51 +26440,6 @@ function (_GraphsBase) {
 
   return sunburstGraphs;
 }(GraphsBase);
-
-sunburstGraphs.defaultProps = {
-  keyField: {
-    detail: 'key字段',
-    default: 'name'
-  },
-  valueField: {
-    detail: 'value字段',
-    default: 'value'
-  },
-  parentField: {
-    detail: 'parent字段',
-    default: 'parent'
-  },
-  node: {
-    detail: '单个节点图形设置',
-    propertys: {
-      strokeStyle: {
-        detail: '描边色',
-        default: '#ffffff'
-      },
-      lineWidth: {
-        detail: '描边线宽',
-        default: 1
-      },
-      lineAlpha: {
-        detail: '描边边框透明度',
-        default: 1
-      },
-      fillStyle: {
-        detail: '背景色',
-        default: null
-      },
-      fillAlpha: {
-        detail: '背景透明度',
-        default: 1
-      },
-      blurAlpha: {
-        detail: '非激活状态透明度',
-        documentation: '比如选中其中一项，其他不先关的要降低透明度',
-        default: 0.4
-      }
-    }
-  }
-};
 
 function sankeyLayout () {
   var sankey = {},
@@ -26904,12 +27010,83 @@ function sankeyLayout () {
 }
 
 var Path$4 = Canvax.Shapes.Path;
-var Rect$7 = Canvax.Shapes.Rect;
+var Rect$6 = Canvax.Shapes.Rect;
 
 var sankeyGraphs =
 /*#__PURE__*/
 function (_GraphsBase) {
   _inherits(sankeyGraphs, _GraphsBase);
+
+  _createClass(sankeyGraphs, null, [{
+    key: "defaultProps",
+    value: function defaultProps() {
+      return {
+        keyField: {
+          detail: 'key字段',
+          default: null
+        },
+        valueField: {
+          detail: 'value字段',
+          default: 'value'
+        },
+        parentField: {
+          detail: 'parent字段',
+          default: null
+        },
+        node: {
+          detail: 'node',
+          propertys: {
+            width: {
+              detail: '节点宽',
+              default: 18
+            },
+            padding: {
+              detail: '节点间距',
+              default: 10
+            },
+            fillStyle: {
+              detail: '节点背景色',
+              default: null
+            }
+          }
+        },
+        line: {
+          detail: '线设置',
+          propertys: {
+            strokeStyle: {
+              detail: '线颜色',
+              default: 'blue'
+            },
+            alpha: {
+              detail: '线透明度',
+              default: 0.3
+            }
+          }
+        },
+        label: {
+          detail: '文本设置',
+          propertys: {
+            fontColor: {
+              detail: '文本颜色',
+              default: '#666666'
+            },
+            fontSize: {
+              detail: '文本字体大小',
+              default: 12
+            },
+            textAlign: {
+              detail: '水平对齐方式',
+              default: 'left'
+            },
+            verticalAlign: {
+              detail: '垂直对齐方式',
+              default: 'middle'
+            }
+          }
+        }
+      };
+    }
+  }]);
 
   function sankeyGraphs(opt, app) {
     var _this;
@@ -26919,7 +27096,7 @@ function (_GraphsBase) {
     _this = _possibleConstructorReturn(this, _getPrototypeOf(sankeyGraphs).call(this, opt, app));
     _this.type = "sankey";
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(sankeyGraphs.defaultProps), opt);
+    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(sankeyGraphs.defaultProps()), opt);
 
     _this.init();
 
@@ -27038,7 +27215,7 @@ function (_GraphsBase) {
       _.each(nodes, function (node, i) {
         var nodeColor = me._getColor(me.node.fillStyle, node, i);
 
-        var nodeEl = new Rect$7({
+        var nodeEl = new Rect$6({
           xyToInt: false,
           context: {
             x: node.x,
@@ -27141,76 +27318,118 @@ function (_GraphsBase) {
   return sankeyGraphs;
 }(GraphsBase);
 
-sankeyGraphs.defaultProps = {
-  keyField: {
-    detail: 'key字段',
-    default: null
-  },
-  valueField: {
-    detail: 'value字段',
-    default: 'value'
-  },
-  parentField: {
-    detail: 'parent字段',
-    default: null
-  },
-  node: {
-    detail: 'node',
-    propertys: {
-      width: {
-        detail: '节点宽',
-        default: 18
-      },
-      padding: {
-        detail: '节点间距',
-        default: 10
-      },
-      fillStyle: {
-        detail: '节点背景色',
-        default: null
-      }
-    }
-  },
-  line: {
-    detail: '线设置',
-    propertys: {
-      strokeStyle: {
-        detail: '线颜色',
-        default: 'blue'
-      },
-      alpha: {
-        detail: '线透明度',
-        default: 0.3
-      }
-    }
-  },
-  label: {
-    detail: '文本设置',
-    propertys: {
-      fontColor: {
-        detail: '文本颜色',
-        default: '#666666'
-      },
-      fontSize: {
-        detail: '文本字体大小',
-        default: 12
-      },
-      textAlign: {
-        detail: '水平对齐方式',
-        default: 'left'
-      },
-      verticalAlign: {
-        detail: '垂直对齐方式',
-        default: 'middle'
-      }
-    }
-  }
-};
-
 var Progress =
 /*#__PURE__*/
 function (_GraphsBase) {
   _inherits(Progress, _GraphsBase);
+
+  _createClass(Progress, null, [{
+    key: "defaultProps",
+    value: function defaultProps() {
+      return {
+        node: {
+          detail: '进度条设置',
+          propertys: {
+            width: {
+              detail: '进度条的宽度',
+              default: 20
+            },
+            radius: {
+              detail: '进度条两端的圆角半径',
+              default: 10 //默认为width的一半
+
+            },
+            fillStyle: {
+              detail: '进度条的填充色',
+              documentation: '可以是单个颜色，也可以是数组，也可以是一个函数,也可以是个lineargradient',
+              default: null
+            }
+          }
+        },
+        label: {
+          detail: '进度值文本',
+          propertys: {
+            enabled: {
+              detail: '是否启用label',
+              default: 'true'
+            },
+            fontColor: {
+              detail: 'label颜色',
+              default: '#666'
+            },
+            fontSize: {
+              detail: 'label文本大小',
+              default: 26
+            },
+            format: {
+              detail: 'label格式化处理函数',
+              default: function _default(val, nodeData) {
+                return val.toFixed(0);
+              }
+            },
+            lineWidth: {
+              detail: 'label文本描边线宽',
+              default: null
+            },
+            strokeStyle: {
+              detail: 'label描边颜色',
+              default: null
+            },
+            rotation: {
+              detail: 'label旋转角度',
+              default: 0
+            },
+            textAlign: {
+              detail: 'label textAlign',
+              default: 'center',
+              values: ['left', 'center', 'right']
+            },
+            //left center right
+            verticalAlign: {
+              detail: 'label verticalAlign',
+              default: 'middle',
+              values: ['top', 'middle', 'bottom']
+            },
+            //top middle bottom
+            position: {
+              detail: 'label位置',
+              default: 'origin'
+            },
+            offsetX: {
+              detail: 'label在x方向的偏移量',
+              default: 0
+            },
+            offsetY: {
+              detail: 'label在y方向的偏移量',
+              default: 0
+            }
+          }
+        },
+        bgEnabled: {
+          detail: '是否开启背景',
+          default: true
+        },
+        bgColor: {
+          detail: '进度条背景颜色',
+          default: '#f7f7f7'
+        },
+        radius: {
+          detail: '半径',
+          default: null
+        },
+        allAngle: {
+          detail: '总角度',
+          documentation: '默认为null，则和坐标系同步',
+          default: null
+        },
+        startAngle: {
+          detail: '其实角度',
+          documentation: '默认为null，则和坐标系同步',
+          default: null
+        }
+      };
+    }
+  }]);
 
   function Progress(opt, app) {
     var _this;
@@ -27220,7 +27439,7 @@ function (_GraphsBase) {
     _this = _possibleConstructorReturn(this, _getPrototypeOf(Progress).call(this, opt, app));
     _this.type = "progress";
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(Progress.defaultProps), opt);
+    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(Progress.defaultProps()), opt);
 
     _this.bgNodeData = null; //背景的nodeData数据，和data里面的结构保持一致
 
@@ -27542,109 +27761,6 @@ function (_GraphsBase) {
   return Progress;
 }(GraphsBase);
 
-Progress.defaultProps = {
-  node: {
-    detail: '进度条设置',
-    propertys: {
-      width: {
-        detail: '进度条的宽度',
-        default: 20
-      },
-      radius: {
-        detail: '进度条两端的圆角半径',
-        default: 10 //默认为width的一半
-
-      },
-      fillStyle: {
-        detail: '进度条的填充色',
-        documentation: '可以是单个颜色，也可以是数组，也可以是一个函数,也可以是个lineargradient',
-        default: null
-      }
-    }
-  },
-  label: {
-    detail: '进度值文本',
-    propertys: {
-      enabled: {
-        detail: '是否启用label',
-        default: 'true'
-      },
-      fontColor: {
-        detail: 'label颜色',
-        default: '#666'
-      },
-      fontSize: {
-        detail: 'label文本大小',
-        default: 26
-      },
-      format: {
-        detail: 'label格式化处理函数',
-        default: function _default(val, nodeData) {
-          return val.toFixed(0);
-        }
-      },
-      lineWidth: {
-        detail: 'label文本描边线宽',
-        default: null
-      },
-      strokeStyle: {
-        detail: 'label描边颜色',
-        default: null
-      },
-      rotation: {
-        detail: 'label旋转角度',
-        default: 0
-      },
-      textAlign: {
-        detail: 'label textAlign',
-        default: 'center',
-        values: ['left', 'center', 'right']
-      },
-      //left center right
-      verticalAlign: {
-        detail: 'label verticalAlign',
-        default: 'middle',
-        values: ['top', 'middle', 'bottom']
-      },
-      //top middle bottom
-      position: {
-        detail: 'label位置',
-        default: 'origin'
-      },
-      offsetX: {
-        detail: 'label在x方向的偏移量',
-        default: 0
-      },
-      offsetY: {
-        detail: 'label在y方向的偏移量',
-        default: 0
-      }
-    }
-  },
-  bgEnabled: {
-    detail: '是否开启背景',
-    default: true
-  },
-  bgColor: {
-    detail: '进度条背景颜色',
-    default: '#f7f7f7'
-  },
-  radius: {
-    detail: '半径',
-    default: null
-  },
-  allAngle: {
-    detail: '总角度',
-    documentation: '默认为null，则和坐标系同步',
-    default: null
-  },
-  startAngle: {
-    detail: '其实角度',
-    documentation: '默认为null，则和坐标系同步',
-    default: null
-  }
-};
-
 /**
  * 每个组件中对外影响的时候，要抛出一个trigger对象
  * 上面的comp属性就是触发这个trigger的组件本身
@@ -27667,6 +27783,87 @@ var Legend =
 function (_Component) {
   _inherits(Legend, _Component);
 
+  _createClass(Legend, null, [{
+    key: "defaultProps",
+    value: function defaultProps() {
+      return {
+        data: {
+          detail: '图例数据',
+          default: [],
+          documentation: '\
+                    数据结构为：{name: "uv", color: "#ff8533", field: "" ...}\
+                    如果手动传入数据只需要前面这三个 enabled: true, ind: 0\
+                    外部只需要传field和fillStyle就行了\
+                    '
+        },
+        position: {
+          detail: '图例位置',
+          documentation: '图例所在的方向top,right,bottom,left',
+          default: 'top'
+        },
+        direction: {
+          detail: '图例布局方向',
+          default: 'h',
+          documentation: '横向 top,bottom --> h left,right -- >v'
+        },
+        icon: {
+          detail: '图标设置',
+          propertys: {
+            height: {
+              detail: '高',
+              default: 26
+            },
+            width: {
+              detail: '图标宽',
+              default: 'auto'
+            },
+            shapeType: {
+              detail: '图标的图形类型，目前只实现了圆形',
+              default: 'circle'
+            },
+            radius: {
+              detail: '图标（circle）半径',
+              default: 5
+            },
+            lineWidth: {
+              detail: '图标描边宽度',
+              default: 1
+            },
+            fillStyle: {
+              detail: '图标颜色，一般会从data里面取，这里是默认色',
+              default: '#999'
+            }
+          }
+        },
+        label: {
+          detail: '文本配置',
+          propertys: {
+            textAlign: {
+              detail: '水平对齐方式',
+              default: 'left'
+            },
+            textBaseline: {
+              detail: '文本基线对齐方式',
+              default: 'middle'
+            },
+            fontColor: {
+              detail: '文本颜色',
+              default: '#333333'
+            },
+            cursor: {
+              detail: '鼠标样式',
+              default: 'pointer'
+            },
+            format: {
+              detail: '文本格式化处理函数',
+              default: null
+            }
+          }
+        }
+      };
+    }
+  }]);
+
   function Legend(opt, app) {
     var _this;
 
@@ -27675,7 +27872,7 @@ function (_Component) {
     _this = _possibleConstructorReturn(this, _getPrototypeOf(Legend).call(this, opt, app));
     _this.name = "legend";
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(Legend.defaultProps), opt);
+    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(Legend.defaultProps()), opt);
     /* data的数据结构为
     [
         //descartes中用到的时候还会带入yAxis
@@ -27934,89 +28131,157 @@ function (_Component) {
   return Legend;
 }(component);
 
-Legend.defaultProps = {
-  data: {
-    detail: '图例数据',
-    default: [],
-    documentation: '\
-                数据结构为：{name: "uv", color: "#ff8533", field: "" ...}\
-                如果手动传入数据只需要前面这三个 enabled: true, ind: 0\
-                外部只需要传field和fillStyle就行了\
-                '
-  },
-  position: {
-    detail: '图例位置',
-    documentation: '图例所在的方向top,right,bottom,left',
-    default: 'top'
-  },
-  direction: {
-    detail: '图例布局方向',
-    default: 'h',
-    documentation: '横向 top,bottom --> h left,right -- >v'
-  },
-  icon: {
-    detail: '图标设置',
-    propertys: {
-      height: {
-        detail: '高',
-        default: 26
-      },
-      width: {
-        detail: '图标宽',
-        default: 'auto'
-      },
-      shapeType: {
-        detail: '图标的图形类型，目前只实现了圆形',
-        default: 'circle'
-      },
-      radius: {
-        detail: '图标（circle）半径',
-        default: 5
-      },
-      lineWidth: {
-        detail: '图标描边宽度',
-        default: 1
-      },
-      fillStyle: {
-        detail: '图标颜色，一般会从data里面取，这里是默认色',
-        default: '#999'
-      }
-    }
-  },
-  label: {
-    detail: '文本配置',
-    propertys: {
-      textAlign: {
-        detail: '水平对齐方式',
-        default: 'left'
-      },
-      textBaseline: {
-        detail: '文本基线对齐方式',
-        default: 'middle'
-      },
-      fontColor: {
-        detail: '文本颜色',
-        default: '#333333'
-      },
-      cursor: {
-        detail: '鼠标样式',
-        default: 'pointer'
-      },
-      format: {
-        detail: '文本格式化处理函数',
-        default: null
-      }
-    }
-  }
-};
-
 var Line$7 = Canvax.Shapes.Line;
-var Rect$8 = Canvax.Shapes.Rect;
+var Rect$7 = Canvax.Shapes.Rect;
 
 var dataZoom =
 /*#__PURE__*/
 function (_Component) {
   _inherits(dataZoom, _Component);
+
+  _createClass(dataZoom, null, [{
+    key: "defaultProps",
+    value: function defaultProps() {
+      return {
+        position: {
+          detail: '位置',
+          default: 'bottom'
+        },
+        direction: {
+          detail: '方向',
+          default: 'h'
+        },
+        height: {
+          detail: '高',
+          default: 26
+        },
+        width: {
+          detail: '宽',
+          default: 100
+        },
+        color: {
+          detail: '颜色',
+          default: '#008ae6'
+        },
+        range: {
+          detail: '范围设置',
+          propertys: {
+            start: {
+              detail: '开始位置',
+              default: 0
+            },
+            end: {
+              detail: '结束位置，默认为null，表示到最后',
+              default: null
+            },
+            max: {
+              detail: '可以外围控制智能在哪个区间拖动',
+              default: null
+            },
+            min: {
+              detail: '最少至少选中了几个数据',
+              default: 1
+            }
+          }
+        },
+        left: {
+          detail: '左边按钮',
+          propertys: {
+            eventEnabled: {
+              detail: '是否响应事件',
+              default: true
+            },
+            fillStyle: {
+              detail: '颜色，默认取组件.color',
+              default: null
+            }
+          }
+        },
+        right: {
+          detail: '右边按钮',
+          propertys: {
+            eventEnabled: {
+              detail: '是否响应事件',
+              default: true
+            },
+            fillStyle: {
+              detail: '颜色，默认取组件.color',
+              default: null
+            }
+          }
+        },
+        center: {
+          detail: '中间位置设置',
+          propertys: {
+            eventEnabled: {
+              detail: '是否响应事件',
+              default: true
+            },
+            fillStyle: {
+              detail: '填充色',
+              default: '#000000'
+            },
+            alpha: {
+              detail: '透明度',
+              default: 0.015
+            }
+          }
+        },
+        bg: {
+          detail: '背景设置',
+          propertys: {
+            enabled: {
+              detail: '是否开启',
+              default: true
+            },
+            fillStyle: {
+              detail: '填充色',
+              default: ''
+            },
+            strokeStyle: {
+              detail: '边框色',
+              default: '#e6e6e6'
+            },
+            lineWidth: {
+              detail: '线宽',
+              default: 1
+            }
+          }
+        },
+        underline: {
+          detail: 'underline',
+          propertys: {
+            enabled: {
+              detail: '是否开启',
+              default: true
+            },
+            strokeStyle: {
+              detail: '线条色',
+              default: null
+            },
+            lineWidth: {
+              detail: '线宽',
+              default: 2
+            }
+          }
+        },
+        btnOut: {
+          detail: 'left,right按钮突出的大小',
+          default: 6
+        },
+        btnHeight: {
+          detail: 'left,right按钮高',
+          default: 20,
+          documentation: 'left,right按钮的高，不在left，right下面，统一在这个属性里， 以为要强制保持一致'
+        },
+        btnWidth: {
+          detail: 'left,right按钮的宽',
+          default: 8,
+          documentation: 'left,right按钮的宽，不在left，right下面，统一在这个属性里， 以为要强制保持一致'
+        }
+      };
+    }
+  }]);
 
   function dataZoom(opt, app) {
     var _this;
@@ -28060,7 +28325,7 @@ function (_Component) {
 
     app.stage.addChild(_this.sprite); //预设默认的opt.dataZoom
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(dataZoom.defaultProps), opt);
+    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(dataZoom.defaultProps()), opt);
 
     _this.layout();
 
@@ -28317,7 +28582,7 @@ function (_Component) {
             onUpdate: setLines
           });
         } else {
-          me._bgRect = new Rect$8({
+          me._bgRect = new Rect$7({
             context: bgRectCtx
           });
           me.dataZoomBg.addChild(me._bgRect);
@@ -28362,7 +28627,7 @@ function (_Component) {
           onUpdate: setLines
         });
       } else {
-        me._btnLeft = new Rect$8({
+        me._btnLeft = new Rect$7({
           id: 'btnLeft',
           dragEnabled: me.left.eventEnabled,
           context: btnLeftCtx
@@ -28413,7 +28678,7 @@ function (_Component) {
           onUpdate: setLines
         });
       } else {
-        me._btnRight = new Rect$8({
+        me._btnRight = new Rect$7({
           id: 'btnRight',
           dragEnabled: me.right.eventEnabled,
           context: btnRightCtx
@@ -28460,7 +28725,7 @@ function (_Component) {
         });
       } else {
         //中间矩形拖拽区域
-        this.rangeRect = new Rect$8({
+        this.rangeRect = new Rect$7({
           id: 'btnCenter',
           dragEnabled: true,
           context: rangeRectCtx
@@ -28674,145 +28939,6 @@ function (_Component) {
   return dataZoom;
 }(component);
 
-dataZoom.defaultProps = {
-  position: {
-    detail: '位置',
-    default: 'bottom'
-  },
-  direction: {
-    detail: '方向',
-    default: 'h'
-  },
-  height: {
-    detail: '高',
-    default: 26
-  },
-  width: {
-    detail: '宽',
-    default: 100
-  },
-  color: {
-    detail: '颜色',
-    default: '#008ae6'
-  },
-  range: {
-    detail: '范围设置',
-    propertys: {
-      start: {
-        detail: '开始位置',
-        default: 0
-      },
-      end: {
-        detail: '结束位置，默认为null，表示到最后',
-        default: null
-      },
-      max: {
-        detail: '可以外围控制智能在哪个区间拖动',
-        default: null
-      },
-      min: {
-        detail: '最少至少选中了几个数据',
-        default: 1
-      }
-    }
-  },
-  left: {
-    detail: '左边按钮',
-    propertys: {
-      eventEnabled: {
-        detail: '是否响应事件',
-        default: true
-      },
-      fillStyle: {
-        detail: '颜色，默认取组件.color',
-        default: null
-      }
-    }
-  },
-  right: {
-    detail: '右边按钮',
-    propertys: {
-      eventEnabled: {
-        detail: '是否响应事件',
-        default: true
-      },
-      fillStyle: {
-        detail: '颜色，默认取组件.color',
-        default: null
-      }
-    }
-  },
-  center: {
-    detail: '中间位置设置',
-    propertys: {
-      eventEnabled: {
-        detail: '是否响应事件',
-        default: true
-      },
-      fillStyle: {
-        detail: '填充色',
-        default: '#000000'
-      },
-      alpha: {
-        detail: '透明度',
-        default: 0.015
-      }
-    }
-  },
-  bg: {
-    detail: '背景设置',
-    propertys: {
-      enabled: {
-        detail: '是否开启',
-        default: true
-      },
-      fillStyle: {
-        detail: '填充色',
-        default: ''
-      },
-      strokeStyle: {
-        detail: '边框色',
-        default: '#e6e6e6'
-      },
-      lineWidth: {
-        detail: '线宽',
-        default: 1
-      }
-    }
-  },
-  underline: {
-    detail: 'underline',
-    propertys: {
-      enabled: {
-        detail: '是否开启',
-        default: true
-      },
-      strokeStyle: {
-        detail: '线条色',
-        default: null
-      },
-      lineWidth: {
-        detail: '线宽',
-        default: 2
-      }
-    }
-  },
-  btnOut: {
-    detail: 'left,right按钮突出的大小',
-    default: 6
-  },
-  btnHeight: {
-    detail: 'left,right按钮高',
-    default: 20,
-    documentation: 'left,right按钮的高，不在left，right下面，统一在这个属性里， 以为要强制保持一致'
-  },
-  btnWidth: {
-    detail: 'left,right按钮的宽',
-    default: 8,
-    documentation: 'left,right按钮的宽，不在left，right下面，统一在这个属性里， 以为要强制保持一致'
-  }
-};
-
 var BrokenLine$2 = Canvax.Shapes.BrokenLine;
 var Sprite$1 = Canvax.Display.Sprite;
 var Text$5 = Canvax.Display.Text;
@@ -28821,6 +28947,65 @@ var MarkLine =
 /*#__PURE__*/
 function (_Component) {
   _inherits(MarkLine, _Component);
+
+  _createClass(MarkLine, null, [{
+    key: "defaultProps",
+    value: function defaultProps() {
+      return {
+        markTo: {
+          detail: '标准哪个目标字段',
+          default: null
+        },
+        yVal: {
+          detail: '组件的值',
+          default: 0,
+          documentation: '可能是个function，均值计算就是个function'
+        },
+        line: {
+          detail: '线的配置',
+          propertys: {
+            strokeStyle: {
+              detail: '线的颜色',
+              default: '#999999'
+            },
+            lineWidth: {
+              detail: '线宽',
+              default: 1
+            },
+            lineType: {
+              detail: '线样式',
+              default: 'dashed'
+            }
+          }
+        },
+        label: {
+          detail: '文本',
+          propertys: {
+            enabled: {
+              detail: '是否开启',
+              default: false
+            },
+            fontColor: {
+              detail: '文本字体颜色',
+              default: '#999999'
+            },
+            fontSize: {
+              detail: '文本字体大小',
+              default: 12
+            },
+            text: {
+              detail: '文本内容',
+              default: null
+            },
+            format: {
+              detail: '文本格式化函数',
+              default: null
+            }
+          }
+        }
+      };
+    }
+  }]);
 
   function MarkLine(opt, app) {
     var _this;
@@ -28840,7 +29025,7 @@ function (_Component) {
 
     _this.app.graphsSprite.addChild(_this.sprite);
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(MarkLine.defaultProps), opt);
+    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(MarkLine.defaultProps()), opt);
 
     return _this;
   }
@@ -29056,67 +29241,70 @@ function (_Component) {
   return MarkLine;
 }(component);
 
-MarkLine.defaultProps = {
-  markTo: {
-    detail: '标准哪个目标字段',
-    default: null
-  },
-  yVal: {
-    detail: '组件的值',
-    default: 0,
-    documentation: '可能是个function，均值计算就是个function'
-  },
-  line: {
-    detail: '线的配置',
-    propertys: {
-      strokeStyle: {
-        detail: '线的颜色',
-        default: '#999999'
-      },
-      lineWidth: {
-        detail: '线宽',
-        default: 1
-      },
-      lineType: {
-        detail: '线样式',
-        default: 'dashed'
-      }
-    }
-  },
-  label: {
-    detail: '文本',
-    propertys: {
-      enabled: {
-        detail: '是否开启',
-        default: false
-      },
-      fontColor: {
-        detail: '文本字体颜色',
-        default: '#999999'
-      },
-      fontSize: {
-        detail: '文本字体大小',
-        default: 12
-      },
-      text: {
-        detail: '文本内容',
-        default: null
-      },
-      format: {
-        detail: '文本格式化函数',
-        default: null
-      }
-    }
-  }
-};
-
-var Rect$9 = Canvax.Shapes.Rect;
+var Rect$8 = Canvax.Shapes.Rect;
 var Line$8 = Canvax.Shapes.Line;
 
 var Tips =
 /*#__PURE__*/
 function (_Component) {
   _inherits(Tips, _Component);
+
+  _createClass(Tips, null, [{
+    key: "defaultProps",
+    value: function defaultProps() {
+      return {
+        enabled: {
+          detail: '是否开启Tips',
+          default: true
+        },
+        content: {
+          detail: '自定义tips的内容（html）',
+          default: null
+        },
+        borderRadius: {
+          detail: 'tips的边框圆角半径',
+          default: 5
+        },
+        strokeStyle: {
+          detail: 'tips边框颜色',
+          default: '#ccc'
+        },
+        fillStyle: {
+          detail: 'tips背景色',
+          default: 'rgba(255,255,255,0.95)'
+        },
+        fontColor: {
+          detail: 'tips文本颜色',
+          default: '#999999'
+        },
+        positionOfPoint: {
+          detail: '在触发点的位置',
+          default: 'right'
+        },
+        offsetX: {
+          detail: 'tips内容到鼠标位置的偏移量x',
+          default: 10
+        },
+        offsetY: {
+          detail: 'tips内容到鼠标位置的偏移量y',
+          default: 10
+        },
+        positionInRange: {
+          detail: 'tip的浮层是否限定在画布区域',
+          default: true
+        },
+        pointer: {
+          detail: '触发tips的时候的指针样式',
+          default: 'line',
+          documentation: 'tips的指针,默认为直线，可选为："line" | "region"(柱状图中一般用region)'
+        },
+        pointerAnim: {
+          detail: 'tips移动的时候，指针是否开启动画',
+          default: true
+        }
+      };
+    }
+  }]);
 
   function Tips(opt, app) {
     var _this;
@@ -29152,7 +29340,7 @@ function (_Component) {
       me._tipDom = null;
     });
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(Tips.defaultProps), opt);
+    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(Tips.defaultProps()), opt);
 
     return _this;
   }
@@ -29438,7 +29626,7 @@ function (_Component) {
         if (this.pointer == "region") {
           var regionWidth = _coord._xAxis.getCellLengthOfPos(x);
 
-          el = new Rect$9({
+          el = new Rect$8({
             //xyToInt : false,
             context: {
               width: regionWidth,
@@ -29539,64 +29727,55 @@ function (_Component) {
   return Tips;
 }(component);
 
-Tips.defaultProps = {
-  enabled: {
-    detail: '是否开启Tips',
-    default: true
-  },
-  content: {
-    detail: '自定义tips的内容（html）',
-    default: null
-  },
-  borderRadius: {
-    detail: 'tips的边框圆角半径',
-    default: 5
-  },
-  strokeStyle: {
-    detail: 'tips边框颜色',
-    default: '#ccc'
-  },
-  fillStyle: {
-    detail: 'tips背景色',
-    default: 'rgba(255,255,255,0.95)'
-  },
-  fontColor: {
-    detail: 'tips文本颜色',
-    default: '#999999'
-  },
-  positionOfPoint: {
-    detail: '在触发点的位置',
-    default: 'right'
-  },
-  offsetX: {
-    detail: 'tips内容到鼠标位置的偏移量x',
-    default: 10
-  },
-  offsetY: {
-    detail: 'tips内容到鼠标位置的偏移量y',
-    default: 10
-  },
-  positionInRange: {
-    detail: 'tip的浮层是否限定在画布区域',
-    default: true
-  },
-  pointer: {
-    detail: '触发tips的时候的指针样式',
-    default: 'line',
-    documentation: 'tips的指针,默认为直线，可选为："line" | "region"(柱状图中一般用region)'
-  },
-  pointerAnim: {
-    detail: 'tips移动的时候，指针是否开启动画',
-    default: true
-  }
-};
-
 var Line$9 = Canvax.Shapes.Line;
 
 var barTgi =
 /*#__PURE__*/
 function (_Component) {
   _inherits(barTgi, _Component);
+
+  _createClass(barTgi, null, [{
+    key: "defaultProps",
+    value: function defaultProps() {
+      return {
+        field: {
+          detail: '字段配置',
+          default: null
+        },
+        barField: {
+          detail: '这个bartgi组件对应的bar Graph 的field',
+          default: null
+        },
+        yAxisAlign: {
+          detail: '这个bartgi组件回到到哪个y轴',
+          default: 'left'
+        },
+        standardVal: {
+          detail: 'tgi标准线',
+          default: 100
+        },
+        line: {
+          detail: 'bar对应的tgi线配置',
+          propertys: {
+            lineWidth: {
+              detail: '线宽',
+              default: 3
+            },
+            strokeStyle: {
+              detail: '线颜色',
+              default: function _default(val, i) {
+                if (val >= this.standardVal) {
+                  return "#43cbb5";
+                } else {
+                  return "#ff6060";
+                }
+              }
+            }
+          }
+        }
+      };
+    }
+  }]);
 
   function barTgi(opt, app) {
     var _this;
@@ -29630,7 +29809,7 @@ function (_Component) {
     };
     */
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(barTgi.defaultProps), opt);
+    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(barTgi.defaultProps()), opt);
 
     _this._yAxis = _this.app.getComponent({
       name: 'coord'
@@ -29719,48 +29898,88 @@ function (_Component) {
   return barTgi;
 }(component);
 
-barTgi.defaultProps = {
-  field: {
-    detail: '字段配置',
-    default: null
-  },
-  barField: {
-    detail: '这个bartgi组件对应的bar Graph 的field',
-    default: null
-  },
-  yAxisAlign: {
-    detail: '这个bartgi组件回到到哪个y轴',
-    default: 'left'
-  },
-  standardVal: {
-    detail: 'tgi标准线',
-    default: 100
-  },
-  line: {
-    detail: 'bar对应的tgi线配置',
-    propertys: {
-      lineWidth: {
-        detail: '线宽',
-        default: 3
-      },
-      strokeStyle: {
-        detail: '线颜色',
-        default: function _default(val, i) {
-          if (val >= this.standardVal) {
-            return "#43cbb5";
-          } else {
-            return "#ff6060";
-          }
-        }
-      }
-    }
-  }
-};
-
 var barGuide =
 /*#__PURE__*/
 function (_Component) {
   _inherits(barGuide, _Component);
+
+  _createClass(barGuide, null, [{
+    key: "defaultProps",
+    value: function defaultProps() {
+      return {
+        field: {
+          detail: '字段配置',
+          default: null
+        },
+        barField: {
+          detail: '这个guide对应的bar Graph 的field',
+          default: null
+        },
+        yAxisAlign: {
+          detail: '这个guide组件回到到哪个y轴',
+          default: 'left'
+        },
+        node: {
+          detail: '单个节点配置',
+          propertys: {
+            shapeType: {
+              detail: '节点绘制的图形类型',
+              default: 'circle'
+            },
+            lineWidth: {
+              detail: '图表描边线宽',
+              default: 3
+            },
+            radius: {
+              detail: '图形半径',
+              default: 6
+            },
+            fillStyle: {
+              detail: '填充色',
+              default: '#19dea1'
+            },
+            strokeStyle: {
+              detail: '描边色',
+              default: '#fff'
+            }
+          }
+        },
+        label: {
+          detail: '文本配置',
+          propertys: {
+            fontSize: {
+              detail: '字体大小',
+              default: 12
+            },
+            fontColor: {
+              detail: '字体颜色',
+              default: '#19dea1'
+            },
+            verticalAlign: {
+              detail: '垂直对齐方式',
+              default: 'bottom'
+            },
+            textAlign: {
+              detail: '水平对齐方式',
+              default: 'center'
+            },
+            strokeStyle: {
+              detail: '文本描边颜色',
+              default: '#fff'
+            },
+            lineWidth: {
+              detail: '文本描边线宽',
+              default: 0
+            },
+            format: {
+              detail: '文本格式处理函数',
+              default: null
+            }
+          }
+        }
+      };
+    }
+  }]);
 
   function barGuide(opt, app) {
     var _this;
@@ -29774,7 +29993,7 @@ function (_Component) {
     _this._yAxis = null;
     _this.sprite = null;
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(barGuide.defaultProps), opt);
+    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(barGuide.defaultProps()), opt);
 
     _this._yAxis = _this.app.getComponent({
       name: 'coord'
@@ -29880,79 +30099,6 @@ function (_Component) {
   return barGuide;
 }(component);
 
-barGuide.defaultProps = {
-  field: {
-    detail: '字段配置',
-    default: null
-  },
-  barField: {
-    detail: '这个guide对应的bar Graph 的field',
-    default: null
-  },
-  yAxisAlign: {
-    detail: '这个guide组件回到到哪个y轴',
-    default: 'left'
-  },
-  node: {
-    detail: '单个节点配置',
-    propertys: {
-      shapeType: {
-        detail: '节点绘制的图形类型',
-        default: 'circle'
-      },
-      lineWidth: {
-        detail: '图表描边线宽',
-        default: 3
-      },
-      radius: {
-        detail: '图形半径',
-        default: 6
-      },
-      fillStyle: {
-        detail: '填充色',
-        default: '#19dea1'
-      },
-      strokeStyle: {
-        detail: '描边色',
-        default: '#fff'
-      }
-    }
-  },
-  label: {
-    detail: '文本配置',
-    propertys: {
-      fontSize: {
-        detail: '字体大小',
-        default: 12
-      },
-      fontColor: {
-        detail: '字体颜色',
-        default: '#19dea1'
-      },
-      verticalAlign: {
-        detail: '垂直对齐方式',
-        default: 'bottom'
-      },
-      textAlign: {
-        detail: '水平对齐方式',
-        default: 'center'
-      },
-      strokeStyle: {
-        detail: '文本描边颜色',
-        default: '#fff'
-      },
-      lineWidth: {
-        detail: '文本描边线宽',
-        default: 0
-      },
-      format: {
-        detail: '文本格式处理函数',
-        default: null
-      }
-    }
-  }
-};
-
 var theme =
 /*#__PURE__*/
 function (_Component) {
@@ -30011,6 +30157,34 @@ var waterMark =
 function (_Component) {
   _inherits(waterMark, _Component);
 
+  _createClass(waterMark, null, [{
+    key: "defaultProps",
+    value: function defaultProps() {
+      return {
+        text: {
+          detail: '水印内容',
+          default: 'chartx'
+        },
+        fontSize: {
+          detail: '字体大小',
+          default: 20
+        },
+        fontColor: {
+          detail: '水印颜色',
+          default: '#cccccc'
+        },
+        alpha: {
+          detail: '水印透明度',
+          default: 0.2
+        },
+        rotation: {
+          detail: '水印旋转角度',
+          default: 45
+        }
+      };
+    }
+  }]);
+
   function waterMark(opt, app) {
     var _this;
 
@@ -30021,7 +30195,7 @@ function (_Component) {
     _this.width = _this.app.width;
     _this.height = _this.app.height;
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(waterMark.defaultProps), opt);
+    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(waterMark.defaultProps()), opt);
 
     _this.spripte = new Canvax.Display.Sprite({
       id: "watermark"
@@ -30072,35 +30246,50 @@ function (_Component) {
   return waterMark;
 }(component);
 
-waterMark.defaultProps = {
-  text: {
-    detail: '水印内容',
-    default: 'chartx'
-  },
-  fontSize: {
-    detail: '字体大小',
-    default: 20
-  },
-  fontColor: {
-    detail: '水印颜色',
-    default: '#cccccc'
-  },
-  alpha: {
-    detail: '水印透明度',
-    default: 0.2
-  },
-  rotation: {
-    detail: '水印旋转角度',
-    default: 45
-  }
-};
-
 var Line$a = Canvax.Shapes.Line;
 
 var Cross =
 /*#__PURE__*/
 function (_Component) {
   _inherits(Cross, _Component);
+
+  _createClass(Cross, null, [{
+    key: "defaultProps",
+    value: function defaultProps() {
+      return {
+        aimPoint: {
+          detail: '准心位置',
+          propertys: {
+            x: {
+              detail: 'x',
+              default: 0
+            },
+            y: {
+              detail: 'y',
+              default: 0
+            }
+          }
+        },
+        line: {
+          detail: '线配置',
+          propertys: {
+            strokeStyle: {
+              detail: '线颜色',
+              default: '#cccccc'
+            },
+            lineWidth: {
+              detail: '线宽',
+              default: 1
+            },
+            lineType: {
+              detail: '线样式类型',
+              default: 'solid'
+            }
+          }
+        }
+      };
+    }
+  }]);
 
   function Cross(opt, app) {
     var _this;
@@ -30118,7 +30307,7 @@ function (_Component) {
 
     _this._vLine = null; //竖向的线
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(Cross.defaultProps), opt);
+    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(Cross.defaultProps()), opt);
 
     _this._yAxis = _this.app.getComponent({
       name: 'coord'
@@ -30190,43 +30379,50 @@ function (_Component) {
   return Cross;
 }(component);
 
-Cross.defaultProps = {
-  aimPoint: {
-    detail: '准心位置',
-    propertys: {
-      x: {
-        detail: 'x',
-        default: 0
-      },
-      y: {
-        detail: 'y',
-        default: 0
-      }
-    }
-  },
-  line: {
-    detail: '线配置',
-    propertys: {
-      strokeStyle: {
-        detail: '线颜色',
-        default: '#cccccc'
-      },
-      lineWidth: {
-        detail: '线宽',
-        default: 1
-      },
-      lineType: {
-        detail: '线样式类型',
-        default: 'solid'
-      }
-    }
-  }
-};
-
 var lineSchedu =
 /*#__PURE__*/
 function (_Component) {
   _inherits(lineSchedu, _Component);
+
+  _createClass(lineSchedu, null, [{
+    key: "defaultProps",
+    value: function defaultProps() {
+      return {
+        lineField: {
+          detail: '对应的line字段',
+          default: null
+        },
+        style: {
+          detail: '默认色',
+          default: '#3995ff'
+        },
+        fillStyle: {
+          detail: '节点填充色',
+          default: "#ffffff"
+        },
+        lineWidth: {
+          detail: '线宽',
+          default: 2
+        },
+        radius: {
+          detail: '圆点半径',
+          default: 6
+        },
+        timeFontSize: {
+          detail: '时间文本大小',
+          default: 14
+        },
+        timeFontColor: {
+          detail: '时间文本颜色',
+          default: '#606060'
+        },
+        listFontSize: {
+          detail: '列表信息文本大小',
+          default: 12
+        }
+      };
+    }
+  }]);
 
   function lineSchedu(opt, app) {
     var _this;
@@ -30236,7 +30432,7 @@ function (_Component) {
     _this = _possibleConstructorReturn(this, _getPrototypeOf(lineSchedu).call(this, opt, app));
     _this.name = "lineSchedu";
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(lineSchedu.defaultProps), opt);
+    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(lineSchedu.defaultProps()), opt);
 
     _this.lineDatas = null;
     _this.sprite = new Canvax.Display.Sprite();
@@ -30392,41 +30588,6 @@ function (_Component) {
 
   return lineSchedu;
 }(component);
-
-lineSchedu.defaultProps = {
-  lineField: {
-    detail: '对应的line字段',
-    default: null
-  },
-  style: {
-    detail: '默认色',
-    default: '#3995ff'
-  },
-  fillStyle: {
-    detail: '节点填充色',
-    default: "#ffffff"
-  },
-  lineWidth: {
-    detail: '线宽',
-    default: 2
-  },
-  radius: {
-    detail: '圆点半径',
-    default: 6
-  },
-  timeFontSize: {
-    detail: '时间文本大小',
-    default: 14
-  },
-  timeFontColor: {
-    detail: '时间文本颜色',
-    default: '#606060'
-  },
-  listFontSize: {
-    detail: '列表信息文本大小',
-    default: 12
-  }
-};
 
 global$1.registerComponent(Chart, 'chart'); //global.registerComponent( emptyCoord, 'coord' );
 

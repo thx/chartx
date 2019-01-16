@@ -7,63 +7,65 @@ const Circle = Canvax.Shapes.Circle;
 
 export default class RadarGraphs extends GraphsBase
 {
-    static defaultProps = {
-        field: {
-            detail:'字段配置',
-            default: null
-        },
-        line: {
-            detail: '线配置',
-            propertys: {
-                enabled: {
-                    detail: '是否显示',
-                    default:true
-                },
-                lineWidth: {
-                    detail: '线宽',
-                    default: 2
-                },
-                strokeStyle: {
-                    detail: '线颜色',
-                    default:null
+    static defaultProps(){
+        return {
+            field: {
+                detail:'字段配置',
+                default: null
+            },
+            line: {
+                detail: '线配置',
+                propertys: {
+                    enabled: {
+                        detail: '是否显示',
+                        default:true
+                    },
+                    lineWidth: {
+                        detail: '线宽',
+                        default: 2
+                    },
+                    strokeStyle: {
+                        detail: '线颜色',
+                        default:null
+                    }
                 }
-            }
-        },
-        area: {
-            detail: '面积区域配置',
-            propertys: {
-                enabled: {
-                    detail: '是否显示',
-                    default:true
-                },
-                fillStyle: {
-                    detail: '面积背景色',
-                    default: null
-                },
-                fillAlpha: {
-                    detail: '面积透明度',
-                    default:0.1
+            },
+            area: {
+                detail: '面积区域配置',
+                propertys: {
+                    enabled: {
+                        detail: '是否显示',
+                        default:true
+                    },
+                    fillStyle: {
+                        detail: '面积背景色',
+                        default: null
+                    },
+                    fillAlpha: {
+                        detail: '面积透明度',
+                        default:0.1
+                    }
                 }
-            }
-        },
-        node: {
-            detail: '线上面的单数据节点图形配置',
-            propertys: {
-                enabled: {
-                    detail: '是否显示',
-                    default:true
-                },
-                strokeStyle: {
-                    detail: '边框色',
-                    default: '#ffffff'
-                },
-                radius: {
-                    detail: '半径',
-                    default:4
-                },
-                lineWidth: {
-                    detail: '边框大小',
-                    default:1
+            },
+            node: {
+                detail: '线上面的单数据节点图形配置',
+                propertys: {
+                    enabled: {
+                        detail: '是否显示',
+                        default:true
+                    },
+                    strokeStyle: {
+                        detail: '边框色',
+                        default: '#ffffff'
+                    },
+                    radius: {
+                        detail: '半径',
+                        default:4
+                    },
+                    lineWidth: {
+                        detail: '边框大小',
+                        default:1
+                    }
                 }
             }
         }
@@ -82,7 +84,7 @@ export default class RadarGraphs extends GraphsBase
             //}
         };
 
-        _.extend( true, this , getDefaultProps(RadarGraphs.defaultProps), opt );
+        _.extend( true, this , getDefaultProps( RadarGraphs.defaultProps() ), opt );
 
         this.init();
     }

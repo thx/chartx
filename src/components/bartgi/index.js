@@ -6,44 +6,46 @@ const Line = Canvax.Shapes.Line
 
 export default class barTgi extends Component
 {
-    static defaultProps = {
-        field : {
-            detail : '字段配置',
-            default: null
-        },
-        barField : {
-            detail: '这个bartgi组件对应的bar Graph 的field',
-            default: null
-        },
-        yAxisAlign : {
-            detail : '这个bartgi组件回到到哪个y轴',
-            default: 'left'
-        },
-        standardVal : {
-            detail : 'tgi标准线',
-            default: 100
-        },
-        line : {
-            detail : 'bar对应的tgi线配置',
-            propertys : {
-                lineWidth : {
-                    detail : '线宽',
-                    default : 3
-                },
-                strokeStyle : {
-                    detail : '线颜色',
-                    default : function( val, i ){
-                        if( val >= this.standardVal ){
-                            return "#43cbb5"
-                        } else {
-                            return "#ff6060"
+    static defaultProps(){
+        return {
+            field : {
+                detail : '字段配置',
+                default: null
+            },
+            barField : {
+                detail: '这个bartgi组件对应的bar Graph 的field',
+                default: null
+            },
+            yAxisAlign : {
+                detail : '这个bartgi组件回到到哪个y轴',
+                default: 'left'
+            },
+            standardVal : {
+                detail : 'tgi标准线',
+                default: 100
+            },
+            line : {
+                detail : 'bar对应的tgi线配置',
+                propertys : {
+                    lineWidth : {
+                        detail : '线宽',
+                        default : 3
+                    },
+                    strokeStyle : {
+                        detail : '线颜色',
+                        default : function( val, i ){
+                            if( val >= this.standardVal ){
+                                return "#43cbb5"
+                            } else {
+                                return "#ff6060"
+                            }
                         }
                     }
                 }
             }
         }
     }
-
+    
     constructor( opt, app )
     {
         super(opt, app);
@@ -80,7 +82,7 @@ export default class barTgi extends Component
         */
 
         
-        _.extend( true, this, getDefaultProps( barTgi.defaultProps ), opt );
+        _.extend( true, this, getDefaultProps( barTgi.defaultProps() ), opt );
         
         this._yAxis = this.app.getComponent({name:'coord'})._yAxis[ this.yAxisAlign=="left"?0:1 ];
         this.sprite  = new Canvax.Display.Sprite();

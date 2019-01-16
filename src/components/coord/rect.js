@@ -8,26 +8,23 @@ import { _,getDefaultProps,event } from "mmvis"
 
 export default class Rect extends coordBase
 {
-    static defaultProps = {
-        horizontal : {
-            detail : '横向翻转坐标系',
-            documentation : "横向翻转坐标系",
-            insertText    : "horizontal: ",
-            default       : false,
-            values        : [true, false]
-        },
-        _children  : {
-            xAxis  : {},
-            yAxis  : {},
-            grid   : {}
-        }
-    } 
+    static defaultProps(){
+        return {
+            horizontal : {
+                detail : '横向翻转坐标系',
+                documentation : "横向翻转坐标系",
+                insertText    : "horizontal: ",
+                default       : false,
+                values        : [true, false]
+            }
+        } 
+    }
 
     constructor( opt, app )
     {
         
         super( opt, app );
-        _.extend( true, this, getDefaultProps( Rect.defaultProps ), this.setDefaultOpt( opt, app ) );
+        _.extend( true, this, getDefaultProps( Rect.defaultProps() ), this.setDefaultOpt( opt, app ) );
         
         this.type = "rect";
         

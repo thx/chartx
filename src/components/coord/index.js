@@ -4,40 +4,42 @@ import { _,getDefaultProps } from "mmvis"
 
 export default class coordBase extends Component
 {
-    static defaultProps = {
-        type : {
-            detail : '坐标系组件',
-            documentation : "坐标系组件，可选值有'rect'（二维直角坐标系）,'polar'（二维极坐标系）,'box'（三维直角坐标系） ",
-            insertText    : "type: ",
-            default       : "",
-            values        : ["rect","polar","box","polar3d"]
-        },
-        width : {
-            detail : '坐标系width',
-            default: 0
-        },
-        height : {
-            detail : '坐标系height',
-            default: 0
-        },
-        origin : {
-            detail : '坐标系原点',
-            propertys : {
-                x : {
-                    detail : '原点x位置',
-                    default : 0
-                },
-                y : {
-                    detail : '原点x位置',
-                    default : 0
+    static defaultProps(){
+        return {
+            type : {
+                detail : '坐标系组件',
+                documentation : "坐标系组件，可选值有'rect'（二维直角坐标系）,'polar'（二维极坐标系）,'box'（三维直角坐标系） ",
+                insertText    : "type: ",
+                default       : "",
+                values        : ["rect","polar","box","polar3d"]
+            },
+            width : {
+                detail : '坐标系width',
+                default: 0
+            },
+            height : {
+                detail : '坐标系height',
+                default: 0
+            },
+            origin : {
+                detail : '坐标系原点',
+                propertys : {
+                    x : {
+                        detail : '原点x位置',
+                        default : 0
+                    },
+                    y : {
+                        detail : '原点x位置',
+                        default : 0
+                    }
                 }
+            },
+            _children  : {
+                rect  : {},
+                polar : {},
+                box   : {},
+                polar : {}
             }
-        },
-        _children  : {
-            rect  : {},
-            polar : {},
-            box   : {},
-            polar : {}
         }
     }
     
@@ -45,7 +47,7 @@ export default class coordBase extends Component
 	constructor(opt, app){
         
         super(opt, app);
-        _.extend( true, this, getDefaultProps( coordBase.defaultProps ) ); 
+        _.extend( true, this, getDefaultProps( coordBase.defaultProps() ) ); 
 
         this.name = "coord";
 

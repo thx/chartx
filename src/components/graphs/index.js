@@ -6,14 +6,16 @@ const AnimationFrame = Canvax.AnimationFrame;
 
 export default class GraphsBase extends Component
 {
-    static defaultProps = {
-        animation : {
-            detail : '是否开启入场动画',
-            default: true
-        },
-        aniDuration: {
-            detail: '动画时长',
-            default: 500
+    static defaultProps(){
+        return {
+            animation : {
+                detail : '是否开启入场动画',
+                default: true
+            },
+            aniDuration: {
+                detail: '动画时长',
+                default: 500
+            }
         }
     }
 
@@ -21,7 +23,7 @@ export default class GraphsBase extends Component
     {
         super( opt, app );
         //这里不能把opt个extend进this
-        _.extend(true, this, getDefaultProps( GraphsBase.defaultProps ));
+        _.extend(true, this, getDefaultProps( GraphsBase.defaultProps() ));
         this.name = "graphs";
 
         //这里所有的opts都要透传给 group

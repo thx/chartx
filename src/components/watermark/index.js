@@ -8,26 +8,28 @@ import Component from "../component"
 export default class waterMark extends Component
 {
 
-    static defaultProps = {
-        text : {
-            detail : '水印内容',
-            default: 'chartx'
-        },
-        fontSize: {
-            detail : '字体大小',
-            default: 20
-        },
-        fontColor : {
-            detail : '水印颜色',
-            default: '#cccccc'
-        },
-        alpha : {
-            detail: '水印透明度',
-            default: 0.2
-        },
-        rotation : {
-            detail: '水印旋转角度',
-            default: 45
+    static defaultProps(){
+        return {
+            text : {
+                detail : '水印内容',
+                default: 'chartx'
+            },
+            fontSize: {
+                detail : '字体大小',
+                default: 20
+            },
+            fontColor : {
+                detail : '水印颜色',
+                default: '#cccccc'
+            },
+            alpha : {
+                detail: '水印透明度',
+                default: 0.2
+            },
+            rotation : {
+                detail: '水印旋转角度',
+                default: 45
+            }
         }
     }
 
@@ -39,7 +41,7 @@ export default class waterMark extends Component
         this.width = this.app.width;
         this.height = this.app.height;
 
-        _.extend( true, this, getDefaultProps(waterMark.defaultProps) , opt );
+        _.extend( true, this, getDefaultProps( waterMark.defaultProps() ) , opt );
 
         this.spripte = new Canvax.Display.Sprite({
             id : "watermark"

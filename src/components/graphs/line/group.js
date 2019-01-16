@@ -10,100 +10,102 @@ const Path = Canvax.Shapes.Path;
 
 export default class LineGraphsGroup extends event.Dispatcher
 {
-    static defaultProps = {
-        line : {
-            detail : '线配置',
-            propertys : {
-                enabled : {
-                    detail: '是否开启',
-                    default: true
-                },
-                strokeStyle: {
-                    detail: '线的颜色',
-                    default: undefined //不会覆盖掉constructor中的定义
-                },
-                lineWidth: {
-                    detail: '线的宽度',
-                    default: 2
-                },
-                lineType: {
-                    detail: '线的样式',
-                    default:'solid'
-                },
-                smooth: {
-                    detail: '是否平滑处理',
-                    default: true
+    static defaultProps(){
+        return {
+            line : {
+                detail : '线配置',
+                propertys : {
+                    enabled : {
+                        detail: '是否开启',
+                        default: true
+                    },
+                    strokeStyle: {
+                        detail: '线的颜色',
+                        default: undefined //不会覆盖掉constructor中的定义
+                    },
+                    lineWidth: {
+                        detail: '线的宽度',
+                        default: 2
+                    },
+                    lineType: {
+                        detail: '线的样式',
+                        default:'solid'
+                    },
+                    smooth: {
+                        detail: '是否平滑处理',
+                        default: true
+                    }
                 }
-            }
-        },
-        node : {
-            detail: '单个数据节点配置，对应线上的小icon图形',
-            propertys: {
-                enabled : {
-                    detail: '是否开启',
-                    default: true
-                },
-                corner: {
-                    detail: '拐角才有节点',
-                    default: false
-                },
-                radius: {
-                    detail: '节点半径',
-                    default: 3
-                },
-                fillStyle: {
-                    detail: '节点图形的背景色',
-                    default: '#ffffff'
-                },
-                strokeStyle: {
-                    detail: '节点图形的描边色，默认和line.strokeStyle保持一致',
-                    default: null
-                },
-                lineWidth: {
-                    detail: '节点图形边宽大小',
-                    default: 2
+            },
+            node : {
+                detail: '单个数据节点配置，对应线上的小icon图形',
+                propertys: {
+                    enabled : {
+                        detail: '是否开启',
+                        default: true
+                    },
+                    corner: {
+                        detail: '拐角才有节点',
+                        default: false
+                    },
+                    radius: {
+                        detail: '节点半径',
+                        default: 3
+                    },
+                    fillStyle: {
+                        detail: '节点图形的背景色',
+                        default: '#ffffff'
+                    },
+                    strokeStyle: {
+                        detail: '节点图形的描边色，默认和line.strokeStyle保持一致',
+                        default: null
+                    },
+                    lineWidth: {
+                        detail: '节点图形边宽大小',
+                        default: 2
+                    }
                 }
-            }
-        },
-        label: {
-            detail: '文本配置',
-            propertys : {
-                enabled: {
-                    detail: '是否开启',
-                    default: false
-                },
-                fontColor: {
-                    detail: '文本颜色',
-                    default: null
-                },
-                strokeStyle: {
-                    detail: '文本描边色',
-                    default: null
-                },
-                fontSize: {
-                    detail: '文本字体大小',
-                    default: 12
-                },
-                format: {
-                    detail: '文本格式化处理函数',
-                    default: null
+            },
+            label: {
+                detail: '文本配置',
+                propertys : {
+                    enabled: {
+                        detail: '是否开启',
+                        default: false
+                    },
+                    fontColor: {
+                        detail: '文本颜色',
+                        default: null
+                    },
+                    strokeStyle: {
+                        detail: '文本描边色',
+                        default: null
+                    },
+                    fontSize: {
+                        detail: '文本字体大小',
+                        default: 12
+                    },
+                    format: {
+                        detail: '文本格式化处理函数',
+                        default: null
+                    }
                 }
-            }
-        },
-        area: {
-            detail: '面积区域配置',
-            propertys : {
-                enabled : {
-                    detail: '是否开启',
-                    default: true
-                },
-                fillStyle: {
-                    detail: '面积背景色',
-                    default: null
-                },
-                alpha: {
-                    detail: '面积透明度',
-                    default: 0.2
+            },
+            area: {
+                detail: '面积区域配置',
+                propertys : {
+                    enabled : {
+                        detail: '是否开启',
+                        default: true
+                    },
+                    fillStyle: {
+                        detail: '面积背景色',
+                        default: null
+                    },
+                    alpha: {
+                        detail: '面积透明度',
+                        default: 0.2
+                    }
                 }
             }
         }
@@ -136,7 +138,7 @@ export default class LineGraphsGroup extends event.Dispatcher
         this._currPointList = []; //brokenline 动画中的当前状态
         this._bline = null;
 
-        _.extend(true, this, getDefaultProps(LineGraphsGroup.defaultProps), opt );
+        _.extend(true, this, getDefaultProps( LineGraphsGroup.defaultProps() ), opt );
 
         //TODO group中得field不能直接用opt中得field， 必须重新设置， 
         //group中得field只有一个值，代表一条折线, 后面要扩展extend方法，可以控制过滤哪些key值不做extend
