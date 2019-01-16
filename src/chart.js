@@ -480,8 +480,6 @@ export default class Chart extends event.Dispatcher
         return arr;
     }
     
-
-
     //从graphs里面去根据opt做一一对比，比对成功为true
     //count为要查询的数量， 如果为1，则
     getGraph( opt ){

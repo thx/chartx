@@ -39,6 +39,7 @@ export default {
     
     ],
     plugins: [
+       
         babel({
             exclude: /node_modules\/(?!.*@*(mmvis|canvax)\/).*/,
             externalHelpers: true,
@@ -47,14 +48,14 @@ export default {
                 [
                     "@babel/preset-env",
                     {
-                    "modules": false
+                    "modules": false,
+                    "loose": false 
                     }
                 ]
             ],
             plugins: [
                 "@babel/plugin-external-helpers",
-                "@babel/plugin-proposal-class-properties",
-                "@babel/plugin-transform-new-target",
+                "@babel/plugin-proposal-class-properties"
             ]
         }),
         resolve({ jsnext: true, main: true, browser: true }), 
