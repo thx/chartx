@@ -1,7 +1,7 @@
-var rollup = require('rollup');
-var babel = require('rollup-plugin-babel');
-var commonjs = require('rollup-plugin-commonjs');
-var resolve = require('rollup-plugin-node-resolve');
+import babel from 'rollup-plugin-babel'
+import commonjs from 'rollup-plugin-commonjs'
+import resolve from 'rollup-plugin-node-resolve'
+import {uglify} from 'rollup-plugin-uglify';
 
 // output format - 'amd', 'cjs', 'es6', 'iife', 'umd'
 // amd – 使用像requirejs一样的银木块定义
@@ -12,15 +12,17 @@ var resolve = require('rollup-plugin-node-resolve');
 
 export default [
     {
-        input : 'src/index.js',
+        input : 'src/props.js',
         output: [
             {
-            file : "dist/chartx.js",
-            name : "Chartx",
-            format : "iife"
+                file : "dist/chartx.js",
+                name : "Chartx",
+                format : "umd"
             }
         ],
         plugins: [
+            resolve({ jsnext: true, main: true, browser: true }), 
+            commonjs(),
             babel({
                 exclude: /node_modules\/(?!.*@*(mmvis|canvax)\/).*/,
                 externalHelpers: true,
@@ -37,10 +39,7 @@ export default [
                 plugins: [
                     "@babel/plugin-external-helpers"
                 ]
-            }),
-            resolve({ jsnext: true, main: true, browser: true }), 
-            commonjs()
-            //uglify()
+            })
         ]
     }
 ]
