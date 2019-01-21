@@ -1,8 +1,106 @@
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
   typeof define === 'function' && define.amd ? define(factory) :
-  (global = global || self, global.Chartx = factory());
-}(this, function () { 'use strict';
+  (global.Chartx = factory());
+}(this, (function () { 'use strict';
+
+  function _typeof(obj) {
+    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
+      _typeof = function (obj) {
+        return typeof obj;
+      };
+    } else {
+      _typeof = function (obj) {
+        return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+      };
+    }
+
+    return _typeof(obj);
+  }
+
+  function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+
+  function _defineProperties(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor) descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+
+  function _createClass(Constructor, protoProps, staticProps) {
+    if (protoProps) _defineProperties(Constructor.prototype, protoProps);
+    if (staticProps) _defineProperties(Constructor, staticProps);
+    return Constructor;
+  }
+
+  function _defineProperty(obj, key, value) {
+    if (key in obj) {
+      Object.defineProperty(obj, key, {
+        value: value,
+        enumerable: true,
+        configurable: true,
+        writable: true
+      });
+    } else {
+      obj[key] = value;
+    }
+
+    return obj;
+  }
+
+  function _inherits(subClass, superClass) {
+    if (typeof superClass !== "function" && superClass !== null) {
+      throw new TypeError("Super expression must either be null or a function");
+    }
+
+    subClass.prototype = Object.create(superClass && superClass.prototype, {
+      constructor: {
+        value: subClass,
+        writable: true,
+        configurable: true
+      }
+    });
+    if (superClass) _setPrototypeOf(subClass, superClass);
+  }
+
+  function _getPrototypeOf(o) {
+    _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) {
+      return o.__proto__ || Object.getPrototypeOf(o);
+    };
+    return _getPrototypeOf(o);
+  }
+
+  function _setPrototypeOf(o, p) {
+    _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) {
+      o.__proto__ = p;
+      return o;
+    };
+
+    return _setPrototypeOf(o, p);
+  }
+
+  function _assertThisInitialized(self) {
+    if (self === void 0) {
+      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+    }
+
+    return self;
+  }
+
+  function _possibleConstructorReturn(self, call) {
+    if (call && (typeof call === "object" || typeof call === "function")) {
+      return call;
+    }
+
+    return _assertThisInitialized(self);
+  }
 
   var _ = {};
   var breaker = {};
@@ -413,7 +511,7 @@
       i = 2;
     }
 
-    if (babelHelpers.typeof(target) !== "object" && !_.isFunction(target)) {
+    if (_typeof(target) !== "object" && !_.isFunction(target)) {
       target = {};
     }
 
@@ -611,12 +709,10 @@
     return target;
   };
 
-  //TODO 所有的get xxx OfVal 在非proportion下面如果数据有相同的情况，就会有风险
-
   var axis =
   /*#__PURE__*/
   function () {
-    babelHelpers.createClass(axis, null, [{
+    _createClass(axis, null, [{
       key: "defaultProps",
       value: function defaultProps() {
         return {
@@ -671,7 +767,8 @@
     }]);
 
     function axis(opt, dataOrg) {
-      babelHelpers.classCallCheck(this, axis);
+      _classCallCheck(this, axis);
+
       //源数据
       //这个是一个一定会有两层数组的数据结构，是一个标准的dataFrame数据
       // [ 
@@ -707,7 +804,7 @@
       _.extend(true, this, getDefaultProps(axis.defaultProps()), opt);
     }
 
-    babelHelpers.createClass(axis, [{
+    _createClass(axis, [{
       key: "resetDataOrg",
       value: function resetDataOrg(dataOrg) {
         //配置和数据变化
@@ -1392,6 +1489,7 @@
         return cellCount;
       }
     }]);
+
     return axis;
   }();
 
@@ -2108,7 +2206,9 @@
     function Polar() {
       var opt = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
       var dataFrame = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [];
-      babelHelpers.classCallCheck(this, Polar);
+
+      _classCallCheck(this, Polar);
+
       this._opt = _.clone(opt);
       this.dataFrame = dataFrame;
       this.axisLength = 1;
@@ -2123,7 +2223,7 @@
       this.minRadius = 0; //最小半径值 
     }
 
-    babelHelpers.createClass(Polar, [{
+    _createClass(Polar, [{
       key: "calculateProps",
       value: function calculateProps() {
         var _this = this;
@@ -2374,6 +2474,7 @@
         return points;
       }
     }]);
+
     return Polar;
   }();
 
@@ -2690,25 +2791,18 @@
     }
   };
 
-  /**
-   * Canvax
-   *
-   * @author 释剑 (李涛, litao.lt@alibaba-inc.com)
-   *
-   * 事件派发类
-   */
-
   var Dispatcher =
   /*#__PURE__*/
   function (_Manager) {
-    babelHelpers.inherits(Dispatcher, _Manager);
+    _inherits(Dispatcher, _Manager);
 
     function Dispatcher() {
-      babelHelpers.classCallCheck(this, Dispatcher);
-      return babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(Dispatcher).call(this));
+      _classCallCheck(this, Dispatcher);
+
+      return _possibleConstructorReturn(this, _getPrototypeOf(Dispatcher).call(this));
     }
 
-    babelHelpers.createClass(Dispatcher, [{
+    _createClass(Dispatcher, [{
       key: "on",
       value: function on(type, listener) {
         this._addEventListener(type, listener);
@@ -2870,6 +2964,7 @@
         return this;
       }
     }]);
+
     return Dispatcher;
   }(Manager);
 
@@ -3597,9 +3692,10 @@
     function Point() {
       var x = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
       var y = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
-      babelHelpers.classCallCheck(this, Point);
 
-      if (arguments.length == 1 && babelHelpers.typeof(arguments[0]) == 'object') {
+      _classCallCheck(this, Point);
+
+      if (arguments.length == 1 && _typeof(arguments[0]) == 'object') {
         var arg = arguments[0];
 
         if ("x" in arg && "y" in arg) {
@@ -3625,12 +3721,13 @@
       }
     }
 
-    babelHelpers.createClass(Point, [{
+    _createClass(Point, [{
       key: "toArray",
       value: function toArray() {
         return [this.x, this.y];
       }
     }]);
+
     return Point;
   }();
 
@@ -4734,15 +4831,6 @@
     taskList: _taskList
   };
 
-  /**
-   * Canvax
-   *
-   * @author 释剑 (李涛, litao.lt@alibaba-inc.com)
-   *
-   * 把canvax元素的context实现监听属性改动
-   * 来给整个引擎提供心跳包的触发机制
-   */
-
   function Observe(scope) {
     var stopRepeatAssign = true;
     var pmodel = {},
@@ -4760,7 +4848,8 @@
         //非 _Publics 中的值，都要先设置好对应的val到model上
         model[name] = val;
       }
-      var valueType = babelHelpers.typeof(val);
+
+      var valueType = _typeof(val);
 
       if (_.indexOf(Publics, name) > -1) {
         return;
@@ -4778,7 +4867,7 @@
           if (arguments.length) {
             //写操作
             //set 的 值的 类型
-            var neoType = babelHelpers.typeof(neo);
+            var neoType = _typeof(neo);
 
             if (stopRepeatAssign) {
               return; //阻止重复赋值
@@ -5013,24 +5102,17 @@
     PRECISION: 'mediump'
   };
 
-  /**
-   * Canvax
-   *
-   * @author 释剑 (李涛, litao.lt@alibaba-inc.com)
-   *
-   * 模拟as3 DisplayList 的 现实对象基类
-   */
-
   var DisplayObject =
   /*#__PURE__*/
   function (_event$Dispatcher) {
-    babelHelpers.inherits(DisplayObject, _event$Dispatcher);
+    _inherits(DisplayObject, _event$Dispatcher);
 
     function DisplayObject(opt) {
       var _this;
 
-      babelHelpers.classCallCheck(this, DisplayObject);
-      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(DisplayObject).call(this, opt)); //相对父级元素的矩阵
+      _classCallCheck(this, DisplayObject);
+
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(DisplayObject).call(this, opt)); //相对父级元素的矩阵
 
       _this._transform = null;
       _this.worldTransform = null; //_transform如果有修改，则_transformChange为true，renderer的时候worldTransform
@@ -5054,13 +5136,14 @@
       _this.id = opt.id || Utils.createId(_this.type);
       _this._trackList = []; //一个元素可以追踪另外元素的变动
 
-      _this.init.apply(babelHelpers.assertThisInitialized(babelHelpers.assertThisInitialized(_this)), arguments); //所有属性准备好了后，先要计算一次this._updateTransform()得到_tansform
+      _this.init.apply(_assertThisInitialized(_assertThisInitialized(_this)), arguments); //所有属性准备好了后，先要计算一次this._updateTransform()得到_tansform
 
 
       _this._updateTransform();
 
       _this._tweens = [];
-      var me = babelHelpers.assertThisInitialized(babelHelpers.assertThisInitialized(_this));
+
+      var me = _assertThisInitialized(_assertThisInitialized(_this));
 
       _this.on("destroy", function () {
         me.cleanAnimates();
@@ -5069,7 +5152,7 @@
       return _this;
     }
 
-    babelHelpers.createClass(DisplayObject, [{
+    _createClass(DisplayObject, [{
       key: "init",
       value: function init() {}
     }, {
@@ -5729,27 +5812,21 @@
         delete this.context;
       }
     }]);
+
     return DisplayObject;
   }(Dispatcher);
-
-  /** 
-   * Canvax
-   *
-   * @author 释剑 (李涛, litao.lt@alibaba-inc.com)
-   *
-   * 模拟as3的DisplayList 中的容器类
-   */
 
   var DisplayObjectContainer =
   /*#__PURE__*/
   function (_DisplayObject) {
-    babelHelpers.inherits(DisplayObjectContainer, _DisplayObject);
+    _inherits(DisplayObjectContainer, _DisplayObject);
 
     function DisplayObjectContainer(opt) {
       var _this;
 
-      babelHelpers.classCallCheck(this, DisplayObjectContainer);
-      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(DisplayObjectContainer).call(this, opt));
+      _classCallCheck(this, DisplayObjectContainer);
+
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(DisplayObjectContainer).call(this, opt));
       _this.children = [];
       _this.mouseChildren = []; //所有的容器默认支持event 检测，因为 可能有里面的shape是eventEnable是true的
       //如果用户有强制的需求让容器下的所有元素都 不可检测，可以调用
@@ -5759,7 +5836,7 @@
       return _this;
     }
 
-    babelHelpers.createClass(DisplayObjectContainer, [{
+    _createClass(DisplayObjectContainer, [{
       key: "addChild",
       value: function addChild(child, index$$1) {
         if (!child) {
@@ -5972,30 +6049,22 @@
         return result;
       }
     }]);
+
     return DisplayObjectContainer;
   }(DisplayObject);
-
-  /**
-   * Canvax
-   *
-   * @author 释剑 (李涛, litao.lt@alibaba-inc.com)
-   *
-   * stage 类， 再as3中，stage则代表整个舞台。是唯一的根节点
-   * 但是再canvax中，因为分层设计的需要。stage 舞台 同样代表一个canvas元素，但是不是再整个引擎设计
-   * 里面， 不是唯一的根节点。而是会交由canvax类来统一管理其层级
-   */
 
   var Stage =
   /*#__PURE__*/
   function (_DisplayObjectContain) {
-    babelHelpers.inherits(Stage, _DisplayObjectContain);
+    _inherits(Stage, _DisplayObjectContain);
 
     function Stage(opt) {
       var _this;
 
-      babelHelpers.classCallCheck(this, Stage);
+      _classCallCheck(this, Stage);
+
       opt.type = "stage";
-      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(Stage).call(this, opt));
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(Stage).call(this, opt));
       _this.canvas = null;
       _this.ctx = null; //渲染的时候由renderer决定,这里不做初始值
       //stage正在渲染中
@@ -6006,7 +6075,7 @@
     } //由canvax的afterAddChild 回调
 
 
-    babelHelpers.createClass(Stage, [{
+    _createClass(Stage, [{
       key: "initStage",
       value: function initStage(canvas, width, height) {
         var self = this;
@@ -6034,6 +6103,7 @@
         this.parent && this.parent.heartBeat(opt);
       }
     }]);
+
     return Stage;
   }(DisplayObjectContainer);
 
@@ -6044,7 +6114,9 @@
       var type = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : RENDERER_TYPE.UNKNOWN;
       var app = arguments.length > 1 ? arguments[1] : undefined;
       var options = arguments.length > 2 ? arguments[2] : undefined;
-      babelHelpers.classCallCheck(this, SystemRenderer);
+
+      _classCallCheck(this, SystemRenderer);
+
       this.type = type; //2canvas,1webgl
 
       this.app = app;
@@ -6067,7 +6139,7 @@
     } //如果引擎处于静默状态的话，就会启动
 
 
-    babelHelpers.createClass(SystemRenderer, [{
+    _createClass(SystemRenderer, [{
       key: "startEnter",
       value: function startEnter() {
         var self = this;
@@ -6199,6 +6271,7 @@
         }
       }
     }]);
+
     return SystemRenderer;
   }();
 
@@ -6206,7 +6279,8 @@
   /*#__PURE__*/
   function () {
     function CanvasGraphicsRenderer(renderer) {
-      babelHelpers.classCallCheck(this, CanvasGraphicsRenderer);
+      _classCallCheck(this, CanvasGraphicsRenderer);
+
       this.renderer = renderer;
     }
     /**
@@ -6215,7 +6289,7 @@
     */
 
 
-    babelHelpers.createClass(CanvasGraphicsRenderer, [{
+    _createClass(CanvasGraphicsRenderer, [{
       key: "render",
       value: function render(displayObject, stage, globalAlpha, isClip) {
         var renderer = this.renderer;
@@ -6336,25 +6410,28 @@
         }
       }
     }]);
+
     return CanvasGraphicsRenderer;
   }();
 
   var CanvasRenderer =
   /*#__PURE__*/
   function (_SystemRenderer) {
-    babelHelpers.inherits(CanvasRenderer, _SystemRenderer);
+    _inherits(CanvasRenderer, _SystemRenderer);
 
     function CanvasRenderer(app) {
       var _this;
 
       var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-      babelHelpers.classCallCheck(this, CanvasRenderer);
-      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(CanvasRenderer).call(this, RENDERER_TYPE.CANVAS, app, options));
-      _this.CGR = new CanvasGraphicsRenderer(babelHelpers.assertThisInitialized(babelHelpers.assertThisInitialized(_this)));
+
+      _classCallCheck(this, CanvasRenderer);
+
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(CanvasRenderer).call(this, RENDERER_TYPE.CANVAS, app, options));
+      _this.CGR = new CanvasGraphicsRenderer(_assertThisInitialized(_assertThisInitialized(_this)));
       return _this;
     }
 
-    babelHelpers.createClass(CanvasRenderer, [{
+    _createClass(CanvasRenderer, [{
       key: "render",
       value: function render(app) {
         var me = this;
@@ -6466,6 +6543,7 @@
         ctx.clearRect(0, 0, this.app.width, this.app.height);
       }
     }]);
+
     return CanvasRenderer;
   }(SystemRenderer);
 
@@ -6480,31 +6558,20 @@
        */
   }
 
-  /**
-   * Application {{PKG_VERSION}}
-   *
-   * @author 释剑 (李涛, litao.lt@alibaba-inc.com)
-   *
-   * 主引擎 类
-   *
-   * 负责所有canvas的层级管理，和心跳机制的实现,捕获到心跳包后 
-   * 分发到对应的stage(canvas)来绘制对应的改动
-   * 然后 默认有实现了shape的 mouseover  mouseout  drag 事件
-   *
-   **/
-
   var Application =
   /*#__PURE__*/
   function (_DisplayObjectContain) {
-    babelHelpers.inherits(Application, _DisplayObjectContain);
+    _inherits(Application, _DisplayObjectContain);
 
     function Application(opt) {
       var _this;
 
       var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-      babelHelpers.classCallCheck(this, Application);
+
+      _classCallCheck(this, Application);
+
       opt.type = "canvax";
-      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(Application).call(this, opt));
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(Application).call(this, opt));
       _this._cid = new Date().getTime() + "_" + Math.floor(Math.random() * 100);
       _this.el = $.query(opt.el);
       _this.width = parseInt("width" in opt || _this.el.offsetWidth, 10);
@@ -6521,7 +6588,7 @@
       _this.lastGetRO = 0; //最后一次获取 viewOffset 的时间
 
       _this.webGL = opt.webGL;
-      _this.renderer = autoRenderer(babelHelpers.assertThisInitialized(babelHelpers.assertThisInitialized(_this)), options);
+      _this.renderer = autoRenderer(_assertThisInitialized(_assertThisInitialized(_this)), options);
       _this.event = null; //是否阻止浏览器默认事件的执行
 
       _this.preventDefault = true;
@@ -6543,7 +6610,7 @@
       return _this;
     }
 
-    babelHelpers.createClass(Application, [{
+    _createClass(Application, [{
       key: "registEvent",
       value: function registEvent(opt) {
         //初始化事件委托到root元素上面
@@ -6686,27 +6753,21 @@
         return canvas.toDataURL();
       }
     }]);
+
     return Application;
   }(DisplayObjectContainer);
-
-  /**
-   * Canvax
-   *
-   * @author 释剑 (李涛, litao.lt@alibaba-inc.com)
-   *
-   * 模拟as3 中 的sprite类，目前还只是个简单的容易。
-   */
 
   var Sprite =
   /*#__PURE__*/
   function (_DisplayObjectContain) {
-    babelHelpers.inherits(Sprite, _DisplayObjectContain);
+    _inherits(Sprite, _DisplayObjectContain);
 
     function Sprite(opt) {
-      babelHelpers.classCallCheck(this, Sprite);
+      _classCallCheck(this, Sprite);
+
       opt = Utils.checkOpt(opt);
       opt.type = "sprite";
-      return babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(Sprite).call(this, opt));
+      return _possibleConstructorReturn(this, _getPrototypeOf(Sprite).call(this, opt));
     }
 
     return Sprite;
@@ -6716,7 +6777,8 @@
   /*#__PURE__*/
   function () {
     function GraphicsData(lineWidth, strokeStyle, lineAlpha, fillStyle, fillAlpha, shape) {
-      babelHelpers.classCallCheck(this, GraphicsData);
+      _classCallCheck(this, GraphicsData);
+
       this.lineWidth = lineWidth;
       this.strokeStyle = strokeStyle;
       this.lineAlpha = lineAlpha;
@@ -6731,7 +6793,7 @@
       this.line = true;
     }
 
-    babelHelpers.createClass(GraphicsData, [{
+    _createClass(GraphicsData, [{
       key: "clone",
       value: function clone() {
         var cloneGraphicsData = new GraphicsData(this.lineWidth, this.strokeStyle, this.lineAlpha, this.fillStyle, this.fillAlpha, this.shape);
@@ -6778,6 +6840,7 @@
         this.holes = null;
       }
     }]);
+
     return GraphicsData;
   }();
 
@@ -7080,7 +7143,9 @@
       var y = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
       var width = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
       var height = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 0;
-      babelHelpers.classCallCheck(this, Rectangle);
+
+      _classCallCheck(this, Rectangle);
+
       this.x = x;
       this.y = y;
       this.width = width;
@@ -7089,7 +7154,7 @@
       this.closed = true;
     }
 
-    babelHelpers.createClass(Rectangle, [{
+    _createClass(Rectangle, [{
       key: "clone",
       value: function clone() {
         return new Rectangle(this.x, this.y, this.width, this.height);
@@ -7135,6 +7200,7 @@
         return false;
       }
     }]);
+
     return Rectangle;
   }();
 
@@ -7145,7 +7211,9 @@
       var x = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
       var y = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
       var radius = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
-      babelHelpers.classCallCheck(this, Circle);
+
+      _classCallCheck(this, Circle);
+
       this.x = x;
       this.y = y;
       this.radius = radius;
@@ -7153,7 +7221,7 @@
       this.closed = true;
     }
 
-    babelHelpers.createClass(Circle, [{
+    _createClass(Circle, [{
       key: "clone",
       value: function clone() {
         return new Circle(this.x, this.y, this.radius);
@@ -7178,6 +7246,7 @@
         return new Rectangle(this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2);
       }
     }]);
+
     return Circle;
   }();
 
@@ -7189,7 +7258,9 @@
       var y = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
       var width = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
       var height = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 0;
-      babelHelpers.classCallCheck(this, Ellipse);
+
+      _classCallCheck(this, Ellipse);
+
       this.x = x;
       this.y = y;
       this.width = width;
@@ -7198,7 +7269,7 @@
       this.closed = true;
     }
 
-    babelHelpers.createClass(Ellipse, [{
+    _createClass(Ellipse, [{
       key: "clone",
       value: function clone() {
         return new Ellipse(this.x, this.y, this.width, this.height);
@@ -7222,6 +7293,7 @@
         return new Rectangle(this.x - this.width, this.y - this.height, this.width, this.height);
       }
     }]);
+
     return Ellipse;
   }();
 
@@ -7233,7 +7305,8 @@
         points[_key] = arguments[_key];
       }
 
-      babelHelpers.classCallCheck(this, Polygon);
+      _classCallCheck(this, Polygon);
+
       var point_0 = points[0];
 
       if (Array.isArray(point_0)) {
@@ -7255,7 +7328,7 @@
       this.type = SHAPES.POLY;
     }
 
-    babelHelpers.createClass(Polygon, [{
+    _createClass(Polygon, [{
       key: "clone",
       value: function clone() {
         return new Polygon(this.points.slice());
@@ -7301,6 +7374,7 @@
         return wn;
       }
     }]);
+
     return Polygon;
   }();
 
@@ -7327,17 +7401,12 @@
     return path;
   }
 
-  /*
-  * Graphics绘图法则
-  * 单个grahics实例里的fill line 样式属性，都从对应shape.context 中获取
-  * 
-  */
-
   var Graphics =
   /*#__PURE__*/
   function () {
     function Graphics(shape) {
-      babelHelpers.classCallCheck(this, Graphics);
+      _classCallCheck(this, Graphics);
+
       this.lineWidth = 1;
       this.strokeStyle = null;
       this.lineAlpha = 1;
@@ -7363,7 +7432,7 @@
       };
     }
 
-    babelHelpers.createClass(Graphics, [{
+    _createClass(Graphics, [{
       key: "setStyle",
       value: function setStyle(context) {
         //从 shape 中把绘图需要的style属性同步过来
@@ -7794,26 +7863,20 @@
         this._webGL = null;
       }
     }]);
+
     return Graphics;
   }();
-
-  /**
-   * Canvax
-   *
-   * @author 释剑 (李涛, litao.lt@alibaba-inc.com)
-   *
-   * 模拟as3 DisplayList 中的shape 类
-   */
 
   var Shape =
   /*#__PURE__*/
   function (_DisplayObject) {
-    babelHelpers.inherits(Shape, _DisplayObject);
+    _inherits(Shape, _DisplayObject);
 
     function Shape(opt) {
       var _this;
 
-      babelHelpers.classCallCheck(this, Shape);
+      _classCallCheck(this, Shape);
+
       opt = Utils.checkOpt(opt);
       var styleContext = {
         cursor: opt.context.cursor || "default",
@@ -7842,7 +7905,7 @@
       if (opt.id === undefined && opt.type !== undefined) {
         opt.id = Utils.createId(opt.type);
       }
-      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(Shape).call(this, opt)); //over的时候如果有修改样式，就为true
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(Shape).call(this, opt)); //over的时候如果有修改样式，就为true
 
       _this._hoverClass = false;
       _this.hoverClone = true; //是否开启在hover的时候clone一份到active stage 中 
@@ -7872,7 +7935,7 @@
       return _this;
     }
 
-    babelHelpers.createClass(Shape, [{
+    _createClass(Shape, [{
       key: "_draw",
       value: function _draw(graphics) {
         if (graphics.graphicsData.length == 0) {
@@ -7936,26 +7999,20 @@
         }
       }
     }]);
+
     return Shape;
   }(DisplayObject);
-
-  /**
-   * Canvax--Text
-   *
-   * @author 释剑 (李涛, litao.lt@alibaba-inc.com)
-   *
-   * 文本 类
-   **/
 
   var Text =
   /*#__PURE__*/
   function (_DisplayObject) {
-    babelHelpers.inherits(Text, _DisplayObject);
+    _inherits(Text, _DisplayObject);
 
     function Text(text, opt) {
       var _this;
 
-      babelHelpers.classCallCheck(this, Text);
+      _classCallCheck(this, Text);
+
       opt.type = "text";
 
       if (text === null || text === undefined) {
@@ -7977,7 +8034,7 @@
         backgroundColor: null,
         textBackgroundColor: null
       }, opt.context);
-      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(Text).call(this, opt));
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(Text).call(this, opt));
       _this._reNewline = /\r?\n/;
       _this.fontProperts = ["fontStyle", "fontVariant", "fontWeight", "fontSize", "fontFamily"];
       _this.context.font = _this._getFontDeclaration();
@@ -7987,7 +8044,7 @@
       return _this;
     }
 
-    babelHelpers.createClass(Text, [{
+    _createClass(Text, [{
       key: "$watch",
       value: function $watch(name, value, preValue) {
         //context属性有变化的监听函数
@@ -8249,6 +8306,7 @@
         };
       }
     }]);
+
     return Text;
   }(DisplayObject);
 
@@ -8527,26 +8585,16 @@
     isValibPoint: isValibPoint
   };
 
-  /**
-   * Canvax
-   *
-   * @author 释剑 (李涛, litao.lt@alibaba-inc.com)
-   *
-   * 折线 类
-   *
-   * 对应context的属性有
-   * @pointList 各个顶角坐标
-   **/
-
   var BrokenLine =
   /*#__PURE__*/
   function (_Shape) {
-    babelHelpers.inherits(BrokenLine, _Shape);
+    _inherits(BrokenLine, _Shape);
 
     function BrokenLine(opt) {
       var _this;
 
-      babelHelpers.classCallCheck(this, BrokenLine);
+      _classCallCheck(this, BrokenLine);
+
       opt = Utils.checkOpt(opt);
 
       var _context = _.extend({
@@ -8562,13 +8610,13 @@
       }
       opt.context = _context;
       opt.type = "brokenline";
-      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(BrokenLine).call(this, opt)); //保存好原始值
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(BrokenLine).call(this, opt)); //保存好原始值
 
       _this._pointList = _context.pointList;
       return _this;
     }
 
-    babelHelpers.createClass(BrokenLine, [{
+    _createClass(BrokenLine, [{
       key: "watch",
       value: function watch(name, value, preValue) {
         if (name == "pointList" || name == "smooth" || name == "lineType") {
@@ -8672,29 +8720,18 @@
         return this;
       }
     }]);
+
     return BrokenLine;
   }(Shape);
-
-  /**
-   * Canvax
-   *
-   * @author 释剑 (李涛, litao.lt@alibaba-inc.com)
-   *
-   * 圆形 类
-   *
-   * 坐标原点再圆心
-   *
-   * 对应context的属性有
-   * @r 圆半径
-   **/
 
   var Circle$1 =
   /*#__PURE__*/
   function (_Shape) {
-    babelHelpers.inherits(Circle, _Shape);
+    _inherits(Circle, _Shape);
 
     function Circle(opt) {
-      babelHelpers.classCallCheck(this, Circle);
+      _classCallCheck(this, Circle);
+
       //opt = Utils.checkOpt( opt );
       //默认情况下面，circle不需要把xy进行parentInt转换
 
@@ -8714,10 +8751,10 @@
           r: 0
         }
       }, Utils.checkOpt(opt));
-      return babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(Circle).call(this, opt));
+      return _possibleConstructorReturn(this, _getPrototypeOf(Circle).call(this, opt));
     }
 
-    babelHelpers.createClass(Circle, [{
+    _createClass(Circle, [{
       key: "watch",
       value: function watch(name, value, preValue) {
         if (name == "r") {
@@ -8735,27 +8772,17 @@
         graphics.drawCircle(0, 0, r);
       }
     }]);
+
     return Circle;
   }(Shape);
-
-  /**
-   * Canvax
-   *
-   * @author 释剑 (李涛, litao.lt@alibaba-inc.com)
-   *
-   * Path 类，Path主要用于把svgpath 字符串转换为pointList，然后构建graphicsData
-   *
-   * 对应context的属性有
-   * @path path串
-   **/
 
   var Path =
   /*#__PURE__*/
   function (_Shape) {
-    babelHelpers.inherits(Path, _Shape);
+    _inherits(Path, _Shape);
 
     function Path(opt) {
-      babelHelpers.classCallCheck(this, Path);
+      _classCallCheck(this, Path);
 
       var _context = _.extend({
         pointList: [],
@@ -8776,10 +8803,10 @@
       opt.context = _context;
       opt.__parsePathData = null;
       opt.type = "path";
-      return babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(Path).call(this, opt));
+      return _possibleConstructorReturn(this, _getPrototypeOf(Path).call(this, opt));
     }
 
-    babelHelpers.createClass(Path, [{
+    _createClass(Path, [{
       key: "watch",
       value: function watch(name, value, preValue) {
         if (name == "path") {
@@ -9110,30 +9137,20 @@
         return this;
       }
     }]);
+
     return Path;
   }(Shape);
-
-  /**
-   * Canvax
-   * @author 释剑 (李涛, litao.lt@alibaba-inc.com)
-   *
-   * 水滴形 类
-   * 派生自Path类
-   *
-   * 对应context的属性有
-   * @hr 水滴横宽（中心到水平边缘最宽处距离）
-   * @vr 水滴纵高（中心到尖端距离）
-   **/
 
   var Droplet =
   /*#__PURE__*/
   function (_Path) {
-    babelHelpers.inherits(Droplet, _Path);
+    _inherits(Droplet, _Path);
 
     function Droplet(opt) {
       var _this;
 
-      babelHelpers.classCallCheck(this, Droplet);
+      _classCallCheck(this, Droplet);
+
       opt = _.extend({
         type: "droplet",
         context: {
@@ -9144,13 +9161,13 @@
         }
       }, Utils.checkOpt(opt));
 
-      var my = _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(Droplet).call(this, opt));
+      var my = _this = _possibleConstructorReturn(this, _getPrototypeOf(Droplet).call(this, opt));
 
       _this.context.$model.path = _this.createPath();
       return _this;
     }
 
-    babelHelpers.createClass(Droplet, [{
+    _createClass(Droplet, [{
       key: "watch",
       value: function watch(name, value, preValue) {
         if (name == "hr" || name == "vr") {
@@ -9166,29 +9183,18 @@
         return ps;
       }
     }]);
+
     return Droplet;
   }(Path);
-
-  /**
-   * Canvax
-   *
-   * @author 释剑 (李涛, litao.lt@alibaba-inc.com)
-   *
-   * 椭圆形 类
-   *
-   * 对应context的属性有 
-   *
-   * @hr 椭圆横轴半径
-   * @vr 椭圆纵轴半径
-   */
 
   var Ellipse$1 =
   /*#__PURE__*/
   function (_Shape) {
-    babelHelpers.inherits(Ellipse, _Shape);
+    _inherits(Ellipse, _Shape);
 
     function Ellipse(opt) {
-      babelHelpers.classCallCheck(this, Ellipse);
+      _classCallCheck(this, Ellipse);
+
       opt = _.extend({
         type: "ellipse",
         context: {
@@ -9198,10 +9204,10 @@
 
         }
       }, Utils.checkOpt(opt));
-      return babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(Ellipse).call(this, opt));
+      return _possibleConstructorReturn(this, _getPrototypeOf(Ellipse).call(this, opt));
     }
 
-    babelHelpers.createClass(Ellipse, [{
+    _createClass(Ellipse, [{
       key: "watch",
       value: function watch(name, value, preValue) {
         if (name == "hr" || name == "vr") {
@@ -9214,27 +9220,17 @@
         graphics.drawEllipse(0, 0, this.context.$model.hr * 2, this.context.$model.vr * 2);
       }
     }]);
+
     return Ellipse;
   }(Shape);
-
-  /**
-   * Canvax
-   *
-   * @author 释剑 (李涛, litao.lt@alibaba-inc.com)
-   *
-   * 多边形 类  （不规则）
-   *
-   * 对应context的属性有
-   * @pointList 多边形各个顶角坐标
-   **/
 
   var Polygon$1 =
   /*#__PURE__*/
   function (_Shape) {
-    babelHelpers.inherits(Polygon, _Shape);
+    _inherits(Polygon, _Shape);
 
     function Polygon(opt) {
-      babelHelpers.classCallCheck(this, Polygon);
+      _classCallCheck(this, Polygon);
 
       var _context = _.extend({
         lineType: null,
@@ -9257,10 +9253,10 @@
       }
       opt.context = _context;
       opt.type = "polygon";
-      return babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(Polygon).call(this, opt));
+      return _possibleConstructorReturn(this, _getPrototypeOf(Polygon).call(this, opt));
     }
 
-    babelHelpers.createClass(Polygon, [{
+    _createClass(Polygon, [{
       key: "watch",
       value: function watch(name, value, preValue) {
         //调用parent的setGraphics
@@ -9318,31 +9314,17 @@
         return;
       }
     }]);
+
     return Polygon;
   }(Shape);
-
-  /**
-   * Canvax
-   *
-   * @author 释剑 (李涛, litao.lt@alibaba-inc.com)
-   *
-   * 正n边形（n>=3）
-   *
-   * 对应context的属性有 
-   *
-   * @r 正n边形外接圆半径
-   * @r 指明正几边形
-   *
-   * @pointList 私有，从上面的r和n计算得到的边界值的集合
-   */
 
   var Isogon =
   /*#__PURE__*/
   function (_Polygon) {
-    babelHelpers.inherits(Isogon, _Polygon);
+    _inherits(Isogon, _Polygon);
 
     function Isogon(opt) {
-      babelHelpers.classCallCheck(this, Isogon);
+      _classCallCheck(this, Isogon);
 
       var _context = _.extend({
         pointList: [],
@@ -9356,10 +9338,10 @@
       _context.pointList = myMath.getIsgonPointList(_context.n, _context.r);
       opt.context = _context;
       opt.type = "isogon";
-      return babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(Isogon).call(this, opt));
+      return _possibleConstructorReturn(this, _getPrototypeOf(Isogon).call(this, opt));
     }
 
-    babelHelpers.createClass(Isogon, [{
+    _createClass(Isogon, [{
       key: "watch",
       value: function watch(name, value, preValue) {
         if (name == "r" || name == "n") {
@@ -9372,28 +9354,17 @@
         }
       }
     }]);
+
     return Isogon;
   }(Polygon$1);
-
-  /**
-   * Canvax
-   *
-   * @author 释剑 (李涛, litao.lt@alibaba-inc.com)
-   *
-   * 线条 类
-   *
-   *
-   * 对应context的属性有
-   * @lineType  可选 虚线 实现 的 类型
-   **/
 
   var Line =
   /*#__PURE__*/
   function (_Shape) {
-    babelHelpers.inherits(Line, _Shape);
+    _inherits(Line, _Shape);
 
     function Line(opt) {
-      babelHelpers.classCallCheck(this, Line);
+      _classCallCheck(this, Line);
 
       var _context = _.extend({
         lineType: null,
@@ -9416,10 +9387,10 @@
 
       opt.context = _context;
       opt.type = "line";
-      return babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(Line).call(this, opt));
+      return _possibleConstructorReturn(this, _getPrototypeOf(Line).call(this, opt));
     }
 
-    babelHelpers.createClass(Line, [{
+    _createClass(Line, [{
       key: "watch",
       value: function watch(name, value, preValue) {
         //并不清楚是start.x 还是end.x， 当然，这并不重要
@@ -9441,30 +9412,17 @@
         return this;
       }
     }]);
+
     return Line;
   }(Shape);
-
-  /**
-   * Canvax
-   *
-   * @author 释剑 (李涛, litao.lt@alibaba-inc.com)
-   *
-   * 矩现 类  （不规则）
-   *
-   *
-   * 对应context的属性有
-   * @width 宽度
-   * @height 高度
-   * @radius 如果是圆角的，则为【上右下左】顺序的圆角半径数组
-   **/
 
   var Rect =
   /*#__PURE__*/
   function (_Shape) {
-    babelHelpers.inherits(Rect, _Shape);
+    _inherits(Rect, _Shape);
 
     function Rect(opt) {
-      babelHelpers.classCallCheck(this, Rect);
+      _classCallCheck(this, Rect);
 
       var _context = _.extend({
         width: 0,
@@ -9474,10 +9432,10 @@
 
       opt.context = _context;
       opt.type = "rect";
-      return babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(Rect).call(this, opt));
+      return _possibleConstructorReturn(this, _getPrototypeOf(Rect).call(this, opt));
     }
 
-    babelHelpers.createClass(Rect, [{
+    _createClass(Rect, [{
       key: "watch",
       value: function watch(name, value, preValue) {
         if (name == "width" || name == "height" || name == "radius") {
@@ -9534,32 +9492,17 @@
         return;
       }
     }]);
+
     return Rect;
   }(Shape);
-
-  /**
-   * Canvax
-   *
-   * @author 释剑 (李涛, litao.lt@alibaba-inc.com)
-   *
-   * 扇形 类
-   *
-   * 坐标原点再圆心
-   *
-   * 对应context的属性有
-   * @r0 默认为0，内圆半径指定后将出现内弧，同时扇边长度 = r - r0
-   * @r  必须，外圆半径
-   * @startAngle 起始角度(0, 360)
-   * @endAngle   结束角度(0, 360)
-   **/
 
   var Sector =
   /*#__PURE__*/
   function (_Shape) {
-    babelHelpers.inherits(Sector, _Shape);
+    _inherits(Sector, _Shape);
 
     function Sector(opt) {
-      babelHelpers.classCallCheck(this, Sector);
+      _classCallCheck(this, Sector);
 
       var _context = _.extend({
         pointList: [],
@@ -9581,10 +9524,10 @@
       opt.isRing = false; //是否为一个圆环
 
       opt.type = "sector";
-      return babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(Sector).call(this, opt));
+      return _possibleConstructorReturn(this, _getPrototypeOf(Sector).call(this, opt));
     }
 
-    babelHelpers.createClass(Sector, [{
+    _createClass(Sector, [{
       key: "watch",
       value: function watch(name, value, preValue) {
         if (name == "r0" || name == "r" || name == "startAngle" || name == "endAngle" || name == "clockwise") {
@@ -9674,6 +9617,7 @@
 
       }
     }]);
+
     return Sector;
   }(Shape);
 
@@ -9709,13 +9653,14 @@
   var Chart =
   /*#__PURE__*/
   function (_event$Dispatcher) {
-    babelHelpers.inherits(Chart, _event$Dispatcher);
+    _inherits(Chart, _event$Dispatcher);
 
     function Chart(node, data, opt, componentModules) {
       var _this;
 
-      babelHelpers.classCallCheck(this, Chart);
-      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(Chart).call(this));
+      _classCallCheck(this, Chart);
+
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(Chart).call(this));
       _this.componentModules = componentModules;
       _this._node = node;
       _this._data = data;
@@ -9765,7 +9710,7 @@
       return _this;
     }
 
-    babelHelpers.createClass(Chart, [{
+    _createClass(Chart, [{
       key: "init",
       value: function init() {
         var me = this; //init全部用 this._opt
@@ -10440,19 +10385,21 @@
         });
       }
     }]);
+
     return Chart;
   }(Dispatcher);
 
   var component =
   /*#__PURE__*/
   function (_event$Dispatcher) {
-    babelHelpers.inherits(component, _event$Dispatcher);
+    _inherits(component, _event$Dispatcher);
 
     function component(opt, app) {
       var _this;
 
-      babelHelpers.classCallCheck(this, component);
-      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(component).call(this, opt, app));
+      _classCallCheck(this, component);
+
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(component).call(this, opt, app));
       _this.name = "component"; //组件名称
 
       _this.type = null; //组件子类型，比如 Graphs组件下面的bar,line,scat等
@@ -10479,7 +10426,7 @@
       return _this;
     }
 
-    babelHelpers.createClass(component, [{
+    _createClass(component, [{
       key: "init",
       value: function init(opt, data) {}
     }, {
@@ -10503,21 +10450,23 @@
       key: "layout",
       value: function layout() {}
     }]);
+
     return component;
   }(Dispatcher);
 
   var coorBase =
   /*#__PURE__*/
   function (_Component) {
-    babelHelpers.inherits(coorBase, _Component);
+    _inherits(coorBase, _Component);
 
     function coorBase(opt, app) {
       var _this;
 
-      babelHelpers.classCallCheck(this, coorBase);
-      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(coorBase).call(this, opt, app));
+      _classCallCheck(this, coorBase);
 
-      _.extend(true, babelHelpers.assertThisInitialized(babelHelpers.assertThisInitialized(_this)), getDefaultProps((this instanceof coorBase ? this.constructor : void 0).defaultProps));
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(coorBase).call(this, opt, app));
+
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps((this instanceof coorBase ? this.constructor : void 0).defaultProps));
 
       _this.name = "coord";
       _this._opt = opt;
@@ -10552,7 +10501,7 @@
     } //和原始field结构保持一致，但是对应的field换成 {field: , enabled:...}结构
 
 
-    babelHelpers.createClass(coorBase, [{
+    _createClass(coorBase, [{
       key: "setFieldsMap",
       value: function setFieldsMap(axisExp) {
         var me = this;
@@ -10566,7 +10515,7 @@
           }
         });
 
-        function _set(fields) {
+        function _set$$1(fields) {
           if (_.isString(fields)) {
             fields = [fields];
           }
@@ -10589,12 +10538,12 @@
             }
 
             if (_.isArray(fields[i])) {
-              clone_fields[i] = _set(fields[i], fieldInd);
+              clone_fields[i] = _set$$1(fields[i], fieldInd);
             }
           }
           return clone_fields;
         }
-        return _set(fieldsArr);
+        return _set$$1(fieldsArr);
       } //设置 fieldsMap 中对应field 的 enabled状态
 
     }, {
@@ -10798,10 +10747,11 @@
         return arr;
       }
     }]);
+
     return coorBase;
   }(component);
 
-  babelHelpers.defineProperty(coorBase, "defaultProps", {
+  _defineProperty(coorBase, "defaultProps", {
     type: {
       detail: '坐标系组件',
       documentation: "坐标系组件，可选值有'rect'（二维直角坐标系）,'polar'（二维极坐标系）,'box'（三维直角坐标系） ",
@@ -10809,7 +10759,7 @@
       default: "",
       values: ["rect", "polar", "box", "polar3d"]
     },
-    _children: babelHelpers.defineProperty({
+    _children: _defineProperty({
       rect: {},
       polar: {},
       box: {}
@@ -10893,13 +10843,14 @@
   var xAxis =
   /*#__PURE__*/
   function (_axis) {
-    babelHelpers.inherits(xAxis, _axis);
+    _inherits(xAxis, _axis);
 
     function xAxis(opt, data, _coord) {
       var _this;
 
-      babelHelpers.classCallCheck(this, xAxis);
-      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(xAxis).call(this, opt, data.org));
+      _classCallCheck(this, xAxis);
+
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(xAxis).call(this, opt, data.org));
       _this.type = "xAxis";
       _this._opt = opt;
       _this._coord = _coord || {};
@@ -10986,7 +10937,7 @@
       return _this;
     }
 
-    babelHelpers.createClass(xAxis, [{
+    _createClass(xAxis, [{
       key: "init",
       value: function init(opt, data) {
         _.extend(true, this, opt);
@@ -11491,6 +11442,7 @@
         checkOver(0);
       }
     }]);
+
     return xAxis;
   }(axis);
 
@@ -11499,13 +11451,14 @@
   var yAxis =
   /*#__PURE__*/
   function (_axis) {
-    babelHelpers.inherits(yAxis, _axis);
+    _inherits(yAxis, _axis);
 
     function yAxis(opt, data, _coord) {
       var _this;
 
-      babelHelpers.classCallCheck(this, yAxis);
-      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(yAxis).call(this, opt, data.org));
+      _classCallCheck(this, yAxis);
+
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(yAxis).call(this, opt, data.org));
       _this.type = "yAxis";
       _this._opt = opt;
       _this.width = null; //第一次计算后就会有值
@@ -11592,7 +11545,7 @@
       return _this;
     }
 
-    babelHelpers.createClass(yAxis, [{
+    _createClass(yAxis, [{
       key: "init",
       value: function init(opt, data) {
         _.extend(true, this, opt);
@@ -12009,6 +11962,7 @@
         return res;
       }
     }]);
+
     return yAxis;
   }(axis);
 
@@ -12018,13 +11972,14 @@
   var descartesGrid =
   /*#__PURE__*/
   function (_event$Dispatcher) {
-    babelHelpers.inherits(descartesGrid, _event$Dispatcher);
+    _inherits(descartesGrid, _event$Dispatcher);
 
     function descartesGrid(opt, app) {
       var _this;
 
-      babelHelpers.classCallCheck(this, descartesGrid);
-      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(descartesGrid).call(this, opt, app));
+      _classCallCheck(this, descartesGrid);
+
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(descartesGrid).call(this, opt, app));
       _this.width = 0;
       _this.height = 0;
       _this.app = app; //该组件被添加到的目标图表项目，
@@ -12076,7 +12031,7 @@
       return _this;
     }
 
-    babelHelpers.createClass(descartesGrid, [{
+    _createClass(descartesGrid, [{
       key: "init",
       value: function init(opt) {
         _.extend(true, this, opt);
@@ -12205,6 +12160,7 @@
         }
       }
     }]);
+
     return descartesGrid;
   }(Dispatcher);
 
@@ -12213,13 +12169,14 @@
   var _default =
   /*#__PURE__*/
   function (_coorBase) {
-    babelHelpers.inherits(_default, _coorBase);
+    _inherits(_default, _coorBase);
 
     function _default(opt, app) {
       var _this;
 
-      babelHelpers.classCallCheck(this, _default);
-      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(_default).call(this, opt, app));
+      _classCallCheck(this, _default);
+
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(_default).call(this, opt, app));
       _this.type = "rect";
       _this._xAxis = null;
       _this._yAxis = [];
@@ -12227,14 +12184,14 @@
       _this._yAxisRight = null;
       _this._grid = null;
 
-      _.extend(true, babelHelpers.assertThisInitialized(babelHelpers.assertThisInitialized(_this)), getDefaultProps((this instanceof _default ? this.constructor : void 0).defaultProps), _this.setDefaultOpt(opt, app));
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps((this instanceof _default ? this.constructor : void 0).defaultProps), _this.setDefaultOpt(opt, app));
 
       _this.init(opt);
 
       return _this;
     }
 
-    babelHelpers.createClass(_default, [{
+    _createClass(_default, [{
       key: "setDefaultOpt",
       value: function setDefaultOpt(coordOpt, app) {
         var coord = {
@@ -12793,10 +12750,11 @@
         };
       }
     }]);
+
     return _default;
   }(coorBase);
 
-  babelHelpers.defineProperty(_default, "defaultProps", {
+  _defineProperty(_default, "defaultProps", {
     horizontal: {
       detail: '横向翻转坐标系',
       documentation: "横向翻转坐标系",
@@ -12818,13 +12776,14 @@
   var polarGrid =
   /*#__PURE__*/
   function (_event$Dispatcher) {
-    babelHelpers.inherits(polarGrid, _event$Dispatcher);
+    _inherits(polarGrid, _event$Dispatcher);
 
     function polarGrid(opt, app) {
       var _this;
 
-      babelHelpers.classCallCheck(this, polarGrid);
-      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(polarGrid).call(this, opt, app));
+      _classCallCheck(this, polarGrid);
+
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(polarGrid).call(this, opt, app));
       _this.width = 0;
       _this.height = 0;
       _this.app = app; //该组件被添加到的目标图表项目，
@@ -12862,7 +12821,7 @@
       return _this;
     }
 
-    babelHelpers.createClass(polarGrid, [{
+    _createClass(polarGrid, [{
       key: "init",
       value: function init(opt) {
         _.extend(true, this, opt);
@@ -12978,31 +12937,31 @@
         return color$$1;
       }
     }]);
+
     return polarGrid;
   }(Dispatcher);
-
-  //极坐标 坐标轴
 
   var _default$1 =
   /*#__PURE__*/
   function (_coorBase) {
-    babelHelpers.inherits(_default, _coorBase);
+    _inherits(_default, _coorBase);
 
     function _default(opt, app) {
       var _this;
 
-      babelHelpers.classCallCheck(this, _default);
-      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(_default).call(this, opt, app));
+      _classCallCheck(this, _default);
+
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(_default).call(this, opt, app));
       _this.type = "polar";
 
-      _.extend(true, babelHelpers.assertThisInitialized(babelHelpers.assertThisInitialized(_this)), getDefaultProps((this instanceof _default ? this.constructor : void 0).defaultProps), _this.setDefaultOpt(opt, app));
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps((this instanceof _default ? this.constructor : void 0).defaultProps), _this.setDefaultOpt(opt, app));
 
       _this.init(opt);
 
       return _this;
     }
 
-    babelHelpers.createClass(_default, [{
+    _createClass(_default, [{
       key: "setDefaultOpt",
       value: function setDefaultOpt(coordOpt, app) {
         var coord = {
@@ -13746,10 +13705,11 @@
       key: "getSizeAndOrigin",
       value: function getSizeAndOrigin() {}
     }]);
+
     return _default;
   }(coorBase);
 
-  babelHelpers.defineProperty(_default$1, "defaultProps", {
+  _defineProperty(_default$1, "defaultProps", {
     allAngle: {
       detail: '坐标系总角度',
       documentation: "",
@@ -13854,13 +13814,14 @@
   var GraphsBase =
   /*#__PURE__*/
   function (_Component) {
-    babelHelpers.inherits(GraphsBase, _Component);
+    _inherits(GraphsBase, _Component);
 
     function GraphsBase(opt, app) {
       var _this;
 
-      babelHelpers.classCallCheck(this, GraphsBase);
-      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(GraphsBase).call(this, opt, app));
+      _classCallCheck(this, GraphsBase);
+
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(GraphsBase).call(this, opt, app));
       _this.name = "graphs"; //这里所有的opts都要透传给 group
 
       _this._opt = opt || {};
@@ -13888,7 +13849,8 @@
       _this.app.graphsSprite.addChild(_this.sprite);
 
       _this._growTween = null;
-      var me = babelHelpers.assertThisInitialized(babelHelpers.assertThisInitialized(_this));
+
+      var me = _assertThisInitialized(_assertThisInitialized(_this));
 
       _this.sprite.on("destroy", function () {
         if (me._growTween) {
@@ -13900,7 +13862,7 @@
       return _this;
     }
 
-    babelHelpers.createClass(GraphsBase, [{
+    _createClass(GraphsBase, [{
       key: "tipsPointerOf",
       value: function tipsPointerOf(e) {}
     }, {
@@ -14001,6 +13963,7 @@
         });
       }
     }]);
+
     return GraphsBase;
   }(component);
 
@@ -14010,13 +13973,14 @@
   var BarGraphs =
   /*#__PURE__*/
   function (_GraphsBase) {
-    babelHelpers.inherits(BarGraphs, _GraphsBase);
+    _inherits(BarGraphs, _GraphsBase);
 
     function BarGraphs(opt, app) {
       var _this;
 
-      babelHelpers.classCallCheck(this, BarGraphs);
-      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(BarGraphs).call(this, opt, app));
+      _classCallCheck(this, BarGraphs);
+
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(BarGraphs).call(this, opt, app));
       _this.type = "bar";
       _this.field = null;
       _this.enabledField = null;
@@ -14077,14 +14041,14 @@
       _this._barsLen = 0;
       _this.txtsSp = null;
 
-      _.extend(true, babelHelpers.assertThisInitialized(babelHelpers.assertThisInitialized(_this)), opt);
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), opt);
 
       _this.init();
 
       return _this;
     }
 
-    babelHelpers.createClass(BarGraphs, [{
+    _createClass(BarGraphs, [{
       key: "init",
       value: function init() {
         this.barsSp = new Canvax.Display.Sprite({
@@ -15071,6 +15035,7 @@
         return selectOpt;
       }
     }]);
+
     return BarGraphs;
   }(GraphsBase);
 
@@ -15083,13 +15048,14 @@
   var LineGraphsGroup =
   /*#__PURE__*/
   function (_event$Dispatcher) {
-    babelHelpers.inherits(LineGraphsGroup, _event$Dispatcher);
+    _inherits(LineGraphsGroup, _event$Dispatcher);
 
     function LineGraphsGroup(fieldMap, iGroup, opt, ctx, h, w) {
       var _this;
 
-      babelHelpers.classCallCheck(this, LineGraphsGroup);
-      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(LineGraphsGroup).call(this));
+      _classCallCheck(this, LineGraphsGroup);
+
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(LineGraphsGroup).call(this));
       _this._opt = opt;
       _this.fieldMap = fieldMap;
       _this.field = null; //在extend之后要重新设置
@@ -15145,7 +15111,7 @@
 
       _this._bline = null;
 
-      _.extend(true, babelHelpers.assertThisInitialized(babelHelpers.assertThisInitialized(_this)), opt); //TODO group中得field不能直接用opt中得field， 必须重新设置， 
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), opt); //TODO group中得field不能直接用opt中得field， 必须重新设置， 
       //group中得field只有一个值，代表一条折线, 后面要扩展extend方法，可以控制过滤哪些key值不做extend
 
 
@@ -15156,7 +15122,7 @@
       return _this;
     }
 
-    babelHelpers.createClass(LineGraphsGroup, [{
+    _createClass(LineGraphsGroup, [{
       key: "init",
       value: function init(opt) {
         this.sprite = new Canvax.Display.Sprite();
@@ -15752,6 +15718,7 @@
         return path;
       }
     }]);
+
     return LineGraphsGroup;
   }(Dispatcher);
 
@@ -15760,13 +15727,14 @@
   var LineGraphs =
   /*#__PURE__*/
   function (_GraphsBase) {
-    babelHelpers.inherits(LineGraphs, _GraphsBase);
+    _inherits(LineGraphs, _GraphsBase);
 
     function LineGraphs(opt, app) {
       var _this;
 
-      babelHelpers.classCallCheck(this, LineGraphs);
-      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(LineGraphs).call(this, opt, app));
+      _classCallCheck(this, LineGraphs);
+
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(LineGraphs).call(this, opt, app));
       _this.type = "line"; //默认给左轴
 
       _this.yAxisAlign = "left";
@@ -15774,14 +15742,14 @@
       _this.enabledField = null;
       _this.groups = []; //群组集合
 
-      _.extend(true, babelHelpers.assertThisInitialized(babelHelpers.assertThisInitialized(_this)), opt);
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), opt);
 
       _this.init(_this._opt);
 
       return _this;
     }
 
-    babelHelpers.createClass(LineGraphs, [{
+    _createClass(LineGraphs, [{
       key: "init",
       value: function init(opt) {
         opt.yAxisAlign && (this.yAxisAlign = opt.yAxisAlign);
@@ -16028,6 +15996,7 @@
         return _nodesInfoList;
       }
     }]);
+
     return LineGraphs;
   }(GraphsBase);
 
@@ -16038,13 +16007,14 @@
   var ScatGraphs =
   /*#__PURE__*/
   function (_GraphsBase) {
-    babelHelpers.inherits(ScatGraphs, _GraphsBase);
+    _inherits(ScatGraphs, _GraphsBase);
 
     function ScatGraphs(opt, app) {
       var _this;
 
-      babelHelpers.classCallCheck(this, ScatGraphs);
-      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(ScatGraphs).call(this, opt, app));
+      _classCallCheck(this, ScatGraphs);
+
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(ScatGraphs).call(this, opt, app));
       _this.type = "scat";
       _this.field = null; //TODO:待开发，用groupField来做分组，比如分组出男女两组，然后方便做图例（目前没给scat实现合适的图例）
 
@@ -16108,7 +16078,7 @@
 
       _this.aniOrigin = "default"; //center（坐标正中） origin（坐标原点）
 
-      _.extend(true, babelHelpers.assertThisInitialized(babelHelpers.assertThisInitialized(_this)), opt); //计算半径的时候需要用到， 每次执行_trimGraphs都必须要初始化一次
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), opt); //计算半径的时候需要用到， 每次执行_trimGraphs都必须要初始化一次
 
 
       _this._rData = null;
@@ -16120,7 +16090,7 @@
       return _this;
     }
 
-    babelHelpers.createClass(ScatGraphs, [{
+    _createClass(ScatGraphs, [{
       key: "init",
       value: function init() {
         this._shapesp = new Canvax.Display.Sprite({
@@ -16686,10 +16656,10 @@
         nodeData.selected = false;
       }
     }]);
+
     return ScatGraphs;
   }(GraphsBase);
 
-  //单环pie
   var Sector$1 = Canvax.Shapes.Sector;
   var Path$2 = Canvax.Shapes.Path;
   var Rect$7 = Canvax.Shapes.Rect;
@@ -16698,13 +16668,14 @@
   var Pie =
   /*#__PURE__*/
   function (_event$Dispatcher) {
-    babelHelpers.inherits(Pie, _event$Dispatcher);
+    _inherits(Pie, _event$Dispatcher);
 
     function Pie(_graphs, data) {
       var _this;
 
-      babelHelpers.classCallCheck(this, Pie);
-      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(Pie).call(this));
+      _classCallCheck(this, Pie);
+
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(Pie).call(this));
       _this.width = 0;
       _this.height = 0;
       _this.origin = {
@@ -16730,7 +16701,7 @@
       return _this;
     }
 
-    babelHelpers.createClass(Pie, [{
+    _createClass(Pie, [{
       key: "init",
       value: function init() {
         this.sprite = new Canvax.Display.Sprite();
@@ -17323,19 +17294,21 @@
         }
       }
     }]);
+
     return Pie;
   }(Dispatcher);
 
   var PieGraphs =
   /*#__PURE__*/
   function (_GraphsBase) {
-    babelHelpers.inherits(PieGraphs, _GraphsBase);
+    _inherits(PieGraphs, _GraphsBase);
 
     function PieGraphs(opt, app) {
       var _this;
 
-      babelHelpers.classCallCheck(this, PieGraphs);
-      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(PieGraphs).call(this, opt, app));
+      _classCallCheck(this, PieGraphs);
+
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(PieGraphs).call(this, opt, app));
       _this.type = "pie";
       _this.field = null;
       _this.sort = null; //默认不排序，可以配置为asc,desc
@@ -17380,7 +17353,7 @@
       return _this;
     }
 
-    babelHelpers.createClass(PieGraphs, [{
+    _createClass(PieGraphs, [{
       key: "init",
       value: function init(opt) {
         _.extend(true, this, opt); //初步设置下data，主要legend等需要用到
@@ -17761,6 +17734,7 @@
         this._pie.unselectOf(nodeData);
       }
     }]);
+
     return PieGraphs;
   }(GraphsBase);
 
@@ -17770,13 +17744,14 @@
   var RadarGraphs =
   /*#__PURE__*/
   function (_GraphsBase) {
-    babelHelpers.inherits(RadarGraphs, _GraphsBase);
+    _inherits(RadarGraphs, _GraphsBase);
 
     function RadarGraphs(opt, app) {
       var _this;
 
-      babelHelpers.classCallCheck(this, RadarGraphs);
-      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(RadarGraphs).call(this, opt, app));
+      _classCallCheck(this, RadarGraphs);
+
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(RadarGraphs).call(this, opt, app));
       _this.type = "radar";
       _this.field = null;
       _this.enabledField = null;
@@ -17805,14 +17780,14 @@
         //}
       };
 
-      _.extend(true, babelHelpers.assertThisInitialized(babelHelpers.assertThisInitialized(_this)), opt);
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), opt);
 
       _this.init();
 
       return _this;
     }
 
-    babelHelpers.createClass(RadarGraphs, [{
+    _createClass(RadarGraphs, [{
       key: "init",
       value: function init() {}
     }, {
@@ -18110,6 +18085,7 @@
         return _nodesInfoList;
       }
     }]);
+
     return RadarGraphs;
   }(GraphsBase);
 
@@ -18165,8 +18141,8 @@
       if (callback != null && typeof callback !== "function") throw new Error("invalid callback: " + callback);
 
       while (++i < n) {
-        if (t = (typename = T[i]).type) _[t] = set(_[t], typename.name, callback);else if (callback == null) for (t in _) {
-          _[t] = set(_[t], typename.name, null);
+        if (t = (typename = T[i]).type) _[t] = set$1(_[t], typename.name, callback);else if (callback == null) for (t in _) {
+          _[t] = set$1(_[t], typename.name, null);
         }
       }
 
@@ -18209,7 +18185,7 @@
     }
   }
 
-  function set(type, name, callback) {
+  function set$1(type, name, callback) {
     for (var i = 0, n = type.length; i < n; ++i) {
       if (type[i].name === name) {
         type[i] = noop, type = type.slice(0, i).concat(type.slice(i + 1));
@@ -18674,16 +18650,19 @@
   var CloudGraphs =
   /*#__PURE__*/
   function (_GraphsBase) {
-    babelHelpers.inherits(CloudGraphs, _GraphsBase);
+    _inherits(CloudGraphs, _GraphsBase);
 
     function CloudGraphs(opt, app) {
       var _this;
 
-      babelHelpers.classCallCheck(this, CloudGraphs);
-      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(CloudGraphs).call(this, opt, app));
+      _classCallCheck(this, CloudGraphs);
+
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(CloudGraphs).call(this, opt, app));
       _this.type = "cloud";
       _this.field = null;
-      var me = babelHelpers.assertThisInitialized(babelHelpers.assertThisInitialized(_this)); //坚持一个数据节点的设置都在一个node下面
+
+      var me = _assertThisInitialized(_assertThisInitialized(_this)); //坚持一个数据节点的设置都在一个node下面
+
 
       _this.node = {
         fontFamily: "Impact",
@@ -18719,14 +18698,14 @@
         }
       };
 
-      _.extend(true, babelHelpers.assertThisInitialized(babelHelpers.assertThisInitialized(_this)), opt);
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), opt);
 
       _this.init();
 
       return _this;
     }
 
-    babelHelpers.createClass(CloudGraphs, [{
+    _createClass(CloudGraphs, [{
       key: "init",
       value: function init() {}
     }, {
@@ -18931,6 +18910,7 @@
         nodeData.selected = false;
       }
     }]);
+
     return CloudGraphs;
   }(GraphsBase);
 
@@ -18941,7 +18921,8 @@
   /*#__PURE__*/
   function () {
     function PlanetGroup(opt, dataFrame$$1, _graphs) {
-      babelHelpers.classCallCheck(this, PlanetGroup);
+      _classCallCheck(this, PlanetGroup);
+
       this._opt = opt;
       this.dataFrame = dataFrame$$1;
       this._graphs = _graphs;
@@ -19018,7 +18999,7 @@
       this.init();
     }
 
-    babelHelpers.createClass(PlanetGroup, [{
+    _createClass(PlanetGroup, [{
       key: "init",
       value: function init() {
 
@@ -19617,6 +19598,7 @@
         }
       }
     }]);
+
     return PlanetGroup;
   }();
 
@@ -19628,16 +19610,19 @@
   var PlanetGraphs =
   /*#__PURE__*/
   function (_GraphsBase) {
-    babelHelpers.inherits(PlanetGraphs, _GraphsBase);
+    _inherits(PlanetGraphs, _GraphsBase);
 
     function PlanetGraphs(opt, app) {
       var _this;
 
-      babelHelpers.classCallCheck(this, PlanetGraphs);
-      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(PlanetGraphs).call(this, opt, app));
+      _classCallCheck(this, PlanetGraphs);
+
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(PlanetGraphs).call(this, opt, app));
       _this.type = "planet";
       _this.field = null;
-      var me = babelHelpers.assertThisInitialized(babelHelpers.assertThisInitialized(_this)); //圆心原点坐标
+
+      var me = _assertThisInitialized(_assertThisInitialized(_this)); //圆心原点坐标
+
 
       _this.center = {
         enabled: true,
@@ -19673,7 +19658,7 @@
       };
       _this.selectInds = []; //源数据中__index__的集合，外面可以传入这个数据进来设置选中
 
-      _.extend(true, babelHelpers.assertThisInitialized(babelHelpers.assertThisInitialized(_this)), opt);
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), opt);
 
       if (_this.center.radius == 0 || !_this.center.enabled) {
         _this.center.radius = 0;
@@ -19686,7 +19671,7 @@
       return _this;
     }
 
-    babelHelpers.createClass(PlanetGraphs, [{
+    _createClass(PlanetGraphs, [{
       key: "init",
       value: function init() {
         this.gridSp = new Canvax.Display.Sprite({
@@ -20073,6 +20058,7 @@
         return arr;
       }
     }]);
+
     return PlanetGraphs;
   }(GraphsBase);
 
@@ -20082,13 +20068,14 @@
   var FunnelGraphs =
   /*#__PURE__*/
   function (_GraphsBase) {
-    babelHelpers.inherits(FunnelGraphs, _GraphsBase);
+    _inherits(FunnelGraphs, _GraphsBase);
 
     function FunnelGraphs(opt, app) {
       var _this;
 
-      babelHelpers.classCallCheck(this, FunnelGraphs);
-      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(FunnelGraphs).call(this, opt, app));
+      _classCallCheck(this, FunnelGraphs);
+
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(FunnelGraphs).call(this, opt, app));
       _this.type = "funnel";
       _this.field = null;
       _this.dataOrg = []; //this.dataFrame.getFieldData( this.field )
@@ -20134,14 +20121,14 @@
         textBaseline: "middle"
       };
 
-      _.extend(true, babelHelpers.assertThisInitialized(babelHelpers.assertThisInitialized(_this)), opt);
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), opt);
 
       _this.init();
 
       return _this;
     }
 
-    babelHelpers.createClass(FunnelGraphs, [{
+    _createClass(FunnelGraphs, [{
       key: "init",
       value: function init() {}
     }, {
@@ -20346,6 +20333,7 @@
         });
       }
     }]);
+
     return FunnelGraphs;
   }(GraphsBase);
 
@@ -21717,13 +21705,14 @@
   var VennGraphs =
   /*#__PURE__*/
   function (_GraphsBase) {
-    babelHelpers.inherits(VennGraphs, _GraphsBase);
+    _inherits(VennGraphs, _GraphsBase);
 
     function VennGraphs(opt, app) {
       var _this;
 
-      babelHelpers.classCallCheck(this, VennGraphs);
-      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(VennGraphs).call(this, opt, app));
+      _classCallCheck(this, VennGraphs);
+
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(VennGraphs).call(this, opt, app));
       _this.type = "venn"; //this.field = null;
 
       _this.keyField = null;
@@ -21757,7 +21746,7 @@
       };
       _this.vennData = null;
 
-      _.extend(true, babelHelpers.assertThisInitialized(babelHelpers.assertThisInitialized(_this)), opt); //_trimGraphs后，计算出来本次data的一些属性
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), opt); //_trimGraphs后，计算出来本次data的一些属性
 
 
       _this._dataCircleLen = 0;
@@ -21769,7 +21758,7 @@
       return _this;
     }
 
-    babelHelpers.createClass(VennGraphs, [{
+    _createClass(VennGraphs, [{
       key: "init",
       value: function init() {
         this.venn_circles = new Canvax.Display.Sprite({
@@ -22143,6 +22132,7 @@
         nodeData.selected = false;
       }
     }]);
+
     return VennGraphs;
   }(GraphsBase); //venn computeTextCentres 需要的相关代码 begin
 
@@ -22653,22 +22643,20 @@
     return Hierarchy.layout_hierarchyRebind(partition, hierarchy);
   }
 
-  /*
-  * 太阳图
-  */
   var Sector$2 = Canvax.Shapes.Sector;
   var Circle$9 = Canvax.Shapes.Circle;
 
   var sunburstGraphs =
   /*#__PURE__*/
   function (_GraphsBase) {
-    babelHelpers.inherits(sunburstGraphs, _GraphsBase);
+    _inherits(sunburstGraphs, _GraphsBase);
 
     function sunburstGraphs(opt, app) {
       var _this;
 
-      babelHelpers.classCallCheck(this, sunburstGraphs);
-      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(sunburstGraphs).call(this, opt, app));
+      _classCallCheck(this, sunburstGraphs);
+
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(sunburstGraphs).call(this, opt, app));
       _this.type = "sunburst";
       _this.keyField = "name"; //key, parent指向的值
 
@@ -22688,7 +22676,7 @@
         }
       };
 
-      _.extend(true, babelHelpers.assertThisInitialized(babelHelpers.assertThisInitialized(_this)), opt);
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), opt);
 
       _this.data = []; //布局算法布局后的数据
 
@@ -22699,7 +22687,7 @@
       return _this;
     }
 
-    babelHelpers.createClass(sunburstGraphs, [{
+    _createClass(sunburstGraphs, [{
       key: "init",
       value: function init() {}
     }, {
@@ -22939,6 +22927,7 @@
         }
       }
     }]);
+
     return sunburstGraphs;
   }(GraphsBase);
 
@@ -23510,22 +23499,20 @@
     return sankey;
   }
 
-  /*
-  * 太阳图
-  */
   var Path$4 = Canvax.Shapes.Path;
   var Rect$9 = Canvax.Shapes.Rect;
 
   var sankeyGraphs =
   /*#__PURE__*/
   function (_GraphsBase) {
-    babelHelpers.inherits(sankeyGraphs, _GraphsBase);
+    _inherits(sankeyGraphs, _GraphsBase);
 
     function sankeyGraphs(opt, app) {
       var _this;
 
-      babelHelpers.classCallCheck(this, sankeyGraphs);
-      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(sankeyGraphs).call(this, opt, app));
+      _classCallCheck(this, sankeyGraphs);
+
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(sankeyGraphs).call(this, opt, app));
       _this.type = "sankey";
       _this.keyField = null; //key, parent指向的值
 
@@ -23568,14 +23555,14 @@
         offsetY: 0
       };
 
-      _.extend(true, babelHelpers.assertThisInitialized(babelHelpers.assertThisInitialized(_this)), opt);
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), opt);
 
       _this.init();
 
       return _this;
     }
 
-    babelHelpers.createClass(sankeyGraphs, [{
+    _createClass(sankeyGraphs, [{
       key: "init",
       value: function init() {
         this._links = new Canvax.Display.Sprite();
@@ -23786,22 +23773,24 @@
         });
       }
     }]);
+
     return sankeyGraphs;
   }(GraphsBase);
 
   var Progress =
   /*#__PURE__*/
   function (_GraphsBase) {
-    babelHelpers.inherits(Progress, _GraphsBase);
+    _inherits(Progress, _GraphsBase);
 
     function Progress(opt, app) {
       var _this;
 
-      babelHelpers.classCallCheck(this, Progress);
-      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(Progress).call(this, opt, app));
+      _classCallCheck(this, Progress);
+
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(Progress).call(this, opt, app));
       _this.type = "progress";
 
-      _.extend(true, babelHelpers.assertThisInitialized(babelHelpers.assertThisInitialized(_this)), getDefaultProps((this instanceof Progress ? this.constructor : void 0).defaultProps), opt);
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps((this instanceof Progress ? this.constructor : void 0).defaultProps), opt);
 
       _this.bgNodeData = null; //背景的nodeData数据，和data里面的结构保持一致
 
@@ -23810,7 +23799,7 @@
       return _this;
     }
 
-    babelHelpers.createClass(Progress, [{
+    _createClass(Progress, [{
       key: "init",
       value: function init() {}
     }, {
@@ -24119,10 +24108,11 @@
         return style;
       }
     }]);
+
     return Progress;
   }(GraphsBase);
 
-  babelHelpers.defineProperty(Progress, "defaultProps", {
+  _defineProperty(Progress, "defaultProps", {
     node: {
       detail: '进度条设置',
       propertys: {
@@ -24233,7 +24223,9 @@
    */
   var Trigger = function Trigger(comp) {
     var params = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-    babelHelpers.classCallCheck(this, Trigger);
+
+    _classCallCheck(this, Trigger);
+
     this.comp = comp;
     this.params = params;
   };
@@ -24243,13 +24235,14 @@
   var Legend =
   /*#__PURE__*/
   function (_Component) {
-    babelHelpers.inherits(Legend, _Component);
+    _inherits(Legend, _Component);
 
     function Legend(opt, app) {
       var _this;
 
-      babelHelpers.classCallCheck(this, Legend);
-      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(Legend).call(this, opt, app));
+      _classCallCheck(this, Legend);
+
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(Legend).call(this, opt, app));
       _this.name = "legend";
       /* data的数据结构为
       [
@@ -24292,7 +24285,7 @@
 
       _this.direction = "h"; //横向 top,bottom --> h left,right -- >v
 
-      _.extend(true, babelHelpers.assertThisInitialized(babelHelpers.assertThisInitialized(_this)), {
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), {
         icon: {
           onChecked: function onChecked(obj) {
             app.show(obj.name, new Trigger(this, obj));
@@ -24328,7 +24321,7 @@
       return _this;
     }
 
-    babelHelpers.createClass(Legend, [{
+    _createClass(Legend, [{
       key: "_getLegendData",
       value: function _getLegendData(opt) {
         var legendData = opt.data;
@@ -24541,6 +24534,7 @@
         };
       }
     }]);
+
     return Legend;
   }(component);
 
@@ -24599,13 +24593,14 @@
   var dataZoom =
   /*#__PURE__*/
   function (_Component) {
-    babelHelpers.inherits(dataZoom, _Component);
+    _inherits(dataZoom, _Component);
 
     function dataZoom(opt, app) {
       var _this;
 
-      babelHelpers.classCallCheck(this, dataZoom);
-      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(dataZoom).call(this, opt, app));
+      _classCallCheck(this, dataZoom);
+
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(dataZoom).call(this, opt, app));
       _this.name = "dataZoom";
       _this._cloneChart = null;
       _this.count = 1; //把w 均为为多少个区间， 同样多节点的line 和  bar， 这个count相差一
@@ -24642,7 +24637,7 @@
 
       app.stage.addChild(_this.sprite); //预设默认的opt.dataZoom
 
-      _.extend(true, babelHelpers.assertThisInitialized(babelHelpers.assertThisInitialized(_this)), defaultProps, opt);
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), defaultProps, opt);
 
       _this.layout();
 
@@ -24650,7 +24645,7 @@
     } //datazoom begin
 
 
-    babelHelpers.createClass(dataZoom, [{
+    _createClass(dataZoom, [{
       key: "layout",
       value: function layout() {
         var app = this.app;
@@ -25252,6 +25247,7 @@
         this._cloneChart.cloneEl.parentNode.removeChild(this._cloneChart.cloneEl);
       }
     }]);
+
     return dataZoom;
   }(component);
 
@@ -25262,13 +25258,14 @@
   var MarkLine =
   /*#__PURE__*/
   function (_Component) {
-    babelHelpers.inherits(MarkLine, _Component);
+    _inherits(MarkLine, _Component);
 
     function MarkLine(opt, app) {
       var _this;
 
-      babelHelpers.classCallCheck(this, MarkLine);
-      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(MarkLine).call(this, opt, app));
+      _classCallCheck(this, MarkLine);
+
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(MarkLine).call(this, opt, app));
       _this.name = "markLine";
       _this._yAxis = null;
       _this.field = null;
@@ -25301,11 +25298,11 @@
 
       _this.app.graphsSprite.addChild(_this.sprite);
 
-      opt && _.extend(true, babelHelpers.assertThisInitialized(babelHelpers.assertThisInitialized(_this)), opt);
+      opt && _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), opt);
       return _this;
     }
 
-    babelHelpers.createClass(MarkLine, [{
+    _createClass(MarkLine, [{
       key: "draw",
       value: function draw() {
         this._calculateProps();
@@ -25513,6 +25510,7 @@
         return str;
       }
     }]);
+
     return MarkLine;
   }(component);
 
@@ -25522,13 +25520,14 @@
   var Tips =
   /*#__PURE__*/
   function (_Component) {
-    babelHelpers.inherits(Tips, _Component);
+    _inherits(Tips, _Component);
 
     function Tips(opt, app) {
       var _this;
 
-      babelHelpers.classCallCheck(this, Tips);
-      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(Tips).call(this, opt, app));
+      _classCallCheck(this, Tips);
+
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(Tips).call(this, opt, app));
       _this.name = "tips";
       _this.tipDomContainer = _this.app.canvax.domView;
       _this.cW = 0; //容器的width
@@ -25572,18 +25571,18 @@
 
       _this.app.stage.addChild(_this.sprite);
 
-      var me = babelHelpers.assertThisInitialized(babelHelpers.assertThisInitialized(_this));
+      var me = _assertThisInitialized(_assertThisInitialized(_this));
 
       _this.sprite.on("destroy", function () {
         me._tipDom = null;
       });
 
-      _.extend(true, babelHelpers.assertThisInitialized(babelHelpers.assertThisInitialized(_this)), opt);
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), opt);
 
       return _this;
     }
 
-    babelHelpers.createClass(Tips, [{
+    _createClass(Tips, [{
       key: "show",
       value: function show(e) {
         if (!this.enabled) return;
@@ -25752,7 +25751,7 @@
           }
           var style = node.color || node.fillStyle || node.strokeStyle;
           var name = node.name || node.field;
-          var value = babelHelpers.typeof(node.value) == "object" ? JSON.stringify(node.value) : numAddSymbol(node.value);
+          var value = _typeof(node.value) == "object" ? JSON.stringify(node.value) : numAddSymbol(node.value);
           str += "<div style='line-height:1.5;font-size:12px;padding:0 4px;'>";
 
           if (style) {
@@ -25961,6 +25960,7 @@
         }
       }
     }]);
+
     return Tips;
   }(component);
 
@@ -25969,13 +25969,14 @@
   var barTgi =
   /*#__PURE__*/
   function (_Component) {
-    babelHelpers.inherits(barTgi, _Component);
+    _inherits(barTgi, _Component);
 
     function barTgi(opt, app) {
       var _this;
 
-      babelHelpers.classCallCheck(this, barTgi);
-      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(barTgi).call(this, opt, app));
+      _classCallCheck(this, barTgi);
+
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(barTgi).call(this, opt, app));
       _this.name = "barTgi";
       _this.field = null;
       _this.barField = null;
@@ -26000,7 +26001,7 @@
         }
       };
 
-      _.extend(true, babelHelpers.assertThisInitialized(babelHelpers.assertThisInitialized(_this)), opt);
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), opt);
 
       _this._yAxis = _this.app.getComponent({
         name: 'coord'
@@ -26012,7 +26013,7 @@
       return _this;
     }
 
-    babelHelpers.createClass(barTgi, [{
+    _createClass(barTgi, [{
       key: "reset",
       value: function reset(opt) {
         _.extend(true, this, opt);
@@ -26085,19 +26086,21 @@
         return res;
       }
     }]);
+
     return barTgi;
   }(component);
 
   var _default$2 =
   /*#__PURE__*/
   function (_Component) {
-    babelHelpers.inherits(_default, _Component);
+    _inherits(_default, _Component);
 
     function _default(opt, app) {
       var _this;
 
-      babelHelpers.classCallCheck(this, _default);
-      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(_default).call(this, opt, app));
+      _classCallCheck(this, _default);
+
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(_default).call(this, opt, app));
       _this.name = "barGuide";
       _this.field = null;
       _this.barField = null;
@@ -26106,7 +26109,7 @@
       _this._yAxis = null;
       _this.yAxisAlign = "left";
       _this.sprite = null;
-      _this.node = babelHelpers.defineProperty({
+      _this.node = _defineProperty({
         lineWidth: 3,
         shapeType: "circle",
         radius: 6,
@@ -26125,7 +26128,7 @@
         }
       };
 
-      _.extend(true, babelHelpers.assertThisInitialized(babelHelpers.assertThisInitialized(_this)), opt);
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), opt);
 
       _this._yAxis = _this.app.getComponent({
         name: 'coord'
@@ -26137,7 +26140,7 @@
       return _this;
     }
 
-    babelHelpers.createClass(_default, [{
+    _createClass(_default, [{
       key: "reset",
       value: function reset(opt) {
         _.extend(true, this, opt);
@@ -26221,29 +26224,27 @@
         return res;
       }
     }]);
+
     return _default;
   }(component);
-
-  /**
-   * 皮肤组件，不是一个具体的ui组件
-   */
 
   var theme =
   /*#__PURE__*/
   function (_Component) {
-    babelHelpers.inherits(theme, _Component);
+    _inherits(theme, _Component);
 
     function theme(_theme, app) {
       var _this;
 
-      babelHelpers.classCallCheck(this, theme);
-      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(theme).call(this, _theme, app));
+      _classCallCheck(this, theme);
+
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(theme).call(this, _theme, app));
       _this.name = "theme";
       _this.colors = _theme || [];
       return _this;
     }
 
-    babelHelpers.createClass(theme, [{
+    _createClass(theme, [{
       key: "set",
       value: function set(colors) {
         this.colors = colors;
@@ -26276,24 +26277,23 @@
         return colors;
       }
     }]);
+
     return theme;
   }(component);
 
-  /**
-   * 水印组件
-   */
   var Text$7 = Canvax.Display.Text;
 
   var waterMark =
   /*#__PURE__*/
   function (_Component) {
-    babelHelpers.inherits(waterMark, _Component);
+    _inherits(waterMark, _Component);
 
     function waterMark(opt, app) {
       var _this;
 
-      babelHelpers.classCallCheck(this, waterMark);
-      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(waterMark).call(this, opt, app));
+      _classCallCheck(this, waterMark);
+
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(waterMark).call(this, opt, app));
       _this.name = "waterMark";
       _this.width = _this.app.width;
       _this.height = _this.app.height;
@@ -26305,7 +26305,7 @@
       _this.alpha = 0.2;
       _this.rotation = 45;
 
-      _.extend(true, babelHelpers.assertThisInitialized(babelHelpers.assertThisInitialized(_this)), opt);
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), opt);
 
       _this.spripte = new Canvax.Display.Sprite({
         id: "watermark"
@@ -26318,7 +26318,7 @@
       return _this;
     }
 
-    babelHelpers.createClass(waterMark, [{
+    _createClass(waterMark, [{
       key: "draw",
       value: function draw() {
         var textEl = new Canvax.Display.Text(this.text, {
@@ -26354,6 +26354,7 @@
         }
       }
     }]);
+
     return waterMark;
   }(component);
 
@@ -26364,13 +26365,14 @@
   var MarkLine$1 =
   /*#__PURE__*/
   function (_Component) {
-    babelHelpers.inherits(MarkLine, _Component);
+    _inherits(MarkLine, _Component);
 
     function MarkLine(opt, app) {
       var _this;
 
-      babelHelpers.classCallCheck(this, MarkLine);
-      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(MarkLine).call(this, opt, app));
+      _classCallCheck(this, MarkLine);
+
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(MarkLine).call(this, opt, app));
       _this.name = "cross";
       _this.width = opt.width || 0;
       _this.height = opt.height || 0; //x,y都是准心的 x轴方向和y方向的 value值，不是真实的px，需要
@@ -26412,7 +26414,7 @@
 
       _this._vLine = null; //竖向的线
 
-      opt && _.extend(true, babelHelpers.assertThisInitialized(babelHelpers.assertThisInitialized(_this)), opt);
+      opt && _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), opt);
       _this._yAxis = _this.app.getComponent({
         name: 'coord'
       })._yAxis[_this.yAxisAlign == "left" ? 0 : 1];
@@ -26423,7 +26425,7 @@
       return _this;
     }
 
-    babelHelpers.createClass(MarkLine, [{
+    _createClass(MarkLine, [{
       key: "draw",
       value: function draw() {
         var me = this;
@@ -26479,19 +26481,21 @@
         me.sprite.addChild(me._vLine);
       }
     }]);
+
     return MarkLine;
   }(component);
 
   var _default$3 =
   /*#__PURE__*/
   function (_Component) {
-    babelHelpers.inherits(_default, _Component);
+    _inherits(_default, _Component);
 
     function _default(opt, app) {
       var _this;
 
-      babelHelpers.classCallCheck(this, _default);
-      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(_default).call(this, opt, app));
+      _classCallCheck(this, _default);
+
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(_default).call(this, opt, app));
       _this.name = "lineSchedu";
       _this.data = null;
       _this.lineDatas = null;
@@ -26505,7 +26509,7 @@
       _this.listFontSize = 12;
       _this.listFontColor = null;
 
-      _.extend(true, babelHelpers.assertThisInitialized(babelHelpers.assertThisInitialized(_this)), opt);
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), opt);
 
       _this.sprite = new Canvax.Display.Sprite();
 
@@ -26514,7 +26518,7 @@
       return _this;
     }
 
-    babelHelpers.createClass(_default, [{
+    _createClass(_default, [{
       key: "reset",
       value: function reset(opt) {
         _.extend(true, this, opt);
@@ -26658,6 +26662,7 @@
         return y;
       }
     }]);
+
     return _default;
   }(component);
 
@@ -26705,4 +26710,4 @@
 
   return chartx;
 
-}));
+})));
