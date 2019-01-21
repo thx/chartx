@@ -12,7 +12,7 @@ import {uglify} from 'rollup-plugin-uglify';
 
 export default [
     {
-        input : 'src/props.js',
+        input : 'src/index.js',
         output: [
             {
                 file : "dist/chartx.js",
