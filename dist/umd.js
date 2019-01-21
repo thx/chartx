@@ -1,5 +1,8 @@
-var Chartx = (function () {
-  'use strict';
+(function (global, factory) {
+  typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
+  typeof define === 'function' && define.amd ? define(factory) :
+  (global = global || self, global.Chartx = factory());
+}(this, function () { 'use strict';
 
   var _ = {};
   var breaker = {};
@@ -28093,4 +28096,4 @@ var Chartx = (function () {
 
   return chartx;
 
-}());
+}));

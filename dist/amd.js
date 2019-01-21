@@ -1,5 +1,4 @@
-var Chartx = (function () {
-  'use strict';
+define(function () { 'use strict';
 
   var _ = {};
   var breaker = {};
@@ -28093,4 +28092,4 @@ var Chartx = (function () {
 
   return chartx;
 
-}());
+});
