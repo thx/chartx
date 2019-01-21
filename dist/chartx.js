@@ -10456,6 +10456,26 @@ var Chartx = (function () {
   function (_Component) {
     _inherits(coorBase, _Component);
 
+    _createClass(coorBase, null, [{
+      key: "defaultProps",
+      value: function defaultProps() {
+        return {
+          type: {
+            detail: '坐标系组件',
+            documentation: "坐标系组件，可选值有'rect'（二维直角坐标系）,'polar'（二维极坐标系）,'box'（三维直角坐标系） ",
+            insertText: "type: ",
+            default: "",
+            values: ["rect", "polar", "box", "polar3d"]
+          },
+          _children: _defineProperty({
+            rect: {},
+            polar: {},
+            box: {}
+          }, "polar", {})
+        };
+      }
+    }]);
+
     function coorBase(opt, app) {
       var _this;
 
@@ -10463,7 +10483,7 @@ var Chartx = (function () {
 
       _this = _possibleConstructorReturn(this, _getPrototypeOf(coorBase).call(this, opt, app));
 
-      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps((this instanceof coorBase ? this.constructor : void 0).defaultProps));
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(coorBase.defaultProps()));
 
       _this.name = "coord";
       _this._opt = opt;
@@ -10747,21 +10767,6 @@ var Chartx = (function () {
 
     return coorBase;
   }(component);
-
-  _defineProperty(coorBase, "defaultProps", {
-    type: {
-      detail: '坐标系组件',
-      documentation: "坐标系组件，可选值有'rect'（二维直角坐标系）,'polar'（二维极坐标系）,'box'（三维直角坐标系） ",
-      insertText: "type: ",
-      default: "",
-      values: ["rect", "polar", "box", "polar3d"]
-    },
-    _children: _defineProperty({
-      rect: {},
-      polar: {},
-      box: {}
-    }, "polar", {})
-  });
 
   /**
    * 数字千分位加','号
@@ -12163,17 +12168,37 @@ var Chartx = (function () {
 
   var Rect$2 = Canvax.Shapes.Rect;
 
-  var _default =
+  var rectCoord =
   /*#__PURE__*/
   function (_coorBase) {
-    _inherits(_default, _coorBase);
+    _inherits(rectCoord, _coorBase);
 
-    function _default(opt, app) {
+    _createClass(rectCoord, null, [{
+      key: "defaultProps",
+      value: function defaultProps() {
+        return {
+          horizontal: {
+            detail: '横向翻转坐标系',
+            documentation: "横向翻转坐标系",
+            insertText: "horizontal: ",
+            default: false,
+            values: [true, false]
+          },
+          _children: {
+            xAxis: {},
+            yAxis: {},
+            grid: {}
+          }
+        };
+      }
+    }]);
+
+    function rectCoord(opt, app) {
       var _this;
 
-      _classCallCheck(this, _default);
+      _classCallCheck(this, rectCoord);
 
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(_default).call(this, opt, app));
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(rectCoord).call(this, opt, app));
       _this.type = "rect";
       _this._xAxis = null;
       _this._yAxis = [];
@@ -12181,14 +12206,14 @@ var Chartx = (function () {
       _this._yAxisRight = null;
       _this._grid = null;
 
-      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps((this instanceof _default ? this.constructor : void 0).defaultProps), _this.setDefaultOpt(opt, app));
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(rectCoord.defaultProps), _this.setDefaultOpt(opt, app));
 
       _this.init(opt);
 
       return _this;
     }
 
-    _createClass(_default, [{
+    _createClass(rectCoord, [{
       key: "setDefaultOpt",
       value: function setDefaultOpt(coordOpt, app) {
         var coord = {
@@ -12748,23 +12773,8 @@ var Chartx = (function () {
       }
     }]);
 
-    return _default;
+    return rectCoord;
   }(coorBase);
-
-  _defineProperty(_default, "defaultProps", {
-    horizontal: {
-      detail: '横向翻转坐标系',
-      documentation: "横向翻转坐标系",
-      insertText: "horizontal: ",
-      default: false,
-      values: [true, false]
-    },
-    _children: {
-      xAxis: {},
-      yAxis: {},
-      grid: {}
-    }
-  });
 
   var Line$4 = Canvax.Shapes.Line;
   var Circle$2 = Canvax.Shapes.Circle;
@@ -12938,27 +12948,132 @@ var Chartx = (function () {
     return polarGrid;
   }(Dispatcher);
 
-  var _default$1 =
+  var Polar$1 =
   /*#__PURE__*/
   function (_coorBase) {
-    _inherits(_default, _coorBase);
+    _inherits(Polar$$1, _coorBase);
 
-    function _default(opt, app) {
+    _createClass(Polar$$1, null, [{
+      key: "defaultProps",
+      value: function defaultProps() {
+        return {
+          allAngle: {
+            detail: '坐标系总角度',
+            documentation: "",
+            default: 360,
+            values: [0, 360]
+          },
+          startAngle: {
+            detail: '坐标系其实角度',
+            documentation: "",
+            default: 0,
+            values: [0, 360]
+          },
+          squareRange: {
+            detail: '是否正方形的坐标区域',
+            documentation: "",
+            default: true,
+            values: [true, false]
+          },
+          radius: {
+            detail: '坐标系的最大半径',
+            documentation: "默认自动计算view的高宽，如果squareRange==true，则会取Math.min(width,height)",
+            default: 'auto',
+            values: null
+          },
+          aAxis: {
+            detail: '角度轴',
+            documentation: "类似直角坐标系中的x轴",
+            propertys: {
+              data: [],
+              angleList: [],
+              //对应layoutType下的角度list
+              layoutData: [],
+              //aAxis.data的 label.format后版本
+              field: {
+                detail: '数据字段',
+                documentation: "",
+                default: ''
+              },
+              layoutType: {
+                detail: '布局类型',
+                documentation: "",
+                default: 'proportion'
+              },
+              beginAngle: {
+                detail: '起始角度',
+                documentation: "",
+                default: -90
+              },
+              enabled: {
+                detail: '是否显示',
+                documentation: "",
+                default: false
+              },
+              label: {
+                detail: '文本配置',
+                documentation: '',
+                propertys: {
+                  enabled: {
+                    detail: '是否显示',
+                    documentation: "",
+                    default: true
+                  },
+                  format: {
+                    detail: 'label的格式化处理函数',
+                    documentation: "",
+                    default: null
+                  },
+                  fontColor: {
+                    detail: 'label颜色',
+                    documentation: '',
+                    default: "#666"
+                  }
+                }
+              }
+            }
+          },
+          rAxis: {
+            detail: '半径维度轴',
+            documentation: '类似直角坐标系中的y轴维度',
+            propertys: {
+              field: {
+                detail: '数据字段',
+                documentation: "",
+                default: ''
+              },
+              dataSection: {
+                detail: '轴的显示数据',
+                documentation: "默认根据源数据中自动计算，用户也可以手动指定",
+                default: false
+              },
+              enabled: {
+                detail: '是否显示',
+                documentation: "",
+                default: false
+              }
+            }
+          }
+        };
+      }
+    }]);
+
+    function Polar$$1(opt, app) {
       var _this;
 
-      _classCallCheck(this, _default);
+      _classCallCheck(this, Polar$$1);
 
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(_default).call(this, opt, app));
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(Polar$$1).call(this, opt, app));
       _this.type = "polar";
 
-      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps((this instanceof _default ? this.constructor : void 0).defaultProps), _this.setDefaultOpt(opt, app));
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(Polar$$1.defaultProps()), _this.setDefaultOpt(opt, app));
 
       _this.init(opt);
 
       return _this;
     }
 
-    _createClass(_default, [{
+    _createClass(Polar$$1, [{
       key: "setDefaultOpt",
       value: function setDefaultOpt(coordOpt, app) {
         var coord = {
@@ -13703,108 +13818,8 @@ var Chartx = (function () {
       value: function getSizeAndOrigin() {}
     }]);
 
-    return _default;
+    return Polar$$1;
   }(coorBase);
-
-  _defineProperty(_default$1, "defaultProps", {
-    allAngle: {
-      detail: '坐标系总角度',
-      documentation: "",
-      default: 360,
-      values: [0, 360]
-    },
-    startAngle: {
-      detail: '坐标系其实角度',
-      documentation: "",
-      default: 0,
-      values: [0, 360]
-    },
-    squareRange: {
-      detail: '是否正方形的坐标区域',
-      documentation: "",
-      default: true,
-      values: [true, false]
-    },
-    radius: {
-      detail: '坐标系的最大半径',
-      documentation: "默认自动计算view的高宽，如果squareRange==true，则会取Math.min(width,height)",
-      default: 'auto',
-      values: null
-    },
-    aAxis: {
-      detail: '角度轴',
-      documentation: "类似直角坐标系中的x轴",
-      propertys: {
-        data: [],
-        angleList: [],
-        //对应layoutType下的角度list
-        layoutData: [],
-        //aAxis.data的 label.format后版本
-        field: {
-          detail: '数据字段',
-          documentation: "",
-          default: ''
-        },
-        layoutType: {
-          detail: '布局类型',
-          documentation: "",
-          default: 'proportion'
-        },
-        beginAngle: {
-          detail: '起始角度',
-          documentation: "",
-          default: -90
-        },
-        enabled: {
-          detail: '是否显示',
-          documentation: "",
-          default: false
-        },
-        label: {
-          detail: '文本配置',
-          documentation: '',
-          propertys: {
-            enabled: {
-              detail: '是否显示',
-              documentation: "",
-              default: true
-            },
-            format: {
-              detail: 'label的格式化处理函数',
-              documentation: "",
-              default: null
-            },
-            fontColor: {
-              detail: 'label颜色',
-              documentation: '',
-              default: "#666"
-            }
-          }
-        }
-      }
-    },
-    rAxis: {
-      detail: '半径维度轴',
-      documentation: '类似直角坐标系中的y轴维度',
-      propertys: {
-        field: {
-          detail: '数据字段',
-          documentation: "",
-          default: ''
-        },
-        dataSection: {
-          detail: '轴的显示数据',
-          documentation: "默认根据源数据中自动计算，用户也可以手动指定",
-          default: false
-        },
-        enabled: {
-          detail: '是否显示',
-          documentation: "",
-          default: false
-        }
-      }
-    }
-  });
 
   var AnimationFrame$1 = Canvax.AnimationFrame;
 
@@ -23779,6 +23794,114 @@ var Chartx = (function () {
   function (_GraphsBase) {
     _inherits(Progress, _GraphsBase);
 
+    _createClass(Progress, null, [{
+      key: "defaultProps",
+      value: function defaultProps() {
+        return {
+          node: {
+            detail: '进度条设置',
+            propertys: {
+              width: {
+                detail: '进度条的宽度',
+                default: 20
+              },
+              radius: {
+                detail: '进度条两端的圆角半径',
+                default: 10 //默认为width的一半
+
+              },
+              fillStyle: {
+                detail: '进度条的填充色',
+                documentation: '可以是单个颜色，也可以是数组，也可以是一个函数,也可以是个lineargradient',
+                default: null
+              }
+            }
+          },
+          label: {
+            detail: '进度值文本',
+            propertys: {
+              enabled: {
+                detail: '是否启用label',
+                default: 'true'
+              },
+              fontColor: {
+                detail: 'label颜色',
+                default: '#666'
+              },
+              fontSize: {
+                detail: 'label文本大小',
+                default: 26
+              },
+              format: {
+                detail: 'label格式化处理函数',
+                default: function _default(val, nodeData) {
+                  return val.toFixed(0);
+                }
+              },
+              lineWidth: {
+                detail: 'label文本描边线宽',
+                default: null
+              },
+              strokeStyle: {
+                detail: 'label描边颜色',
+                default: null
+              },
+              rotation: {
+                detail: 'label旋转角度',
+                default: 0
+              },
+              align: {
+                detail: 'label align',
+                default: 'center',
+                values: ['left', 'center', 'right']
+              },
+              //left center right
+              verticalAlign: {
+                detail: 'label verticalAlign',
+                default: 'middle',
+                values: ['top', 'middle', 'bottom']
+              },
+              //top middle bottom
+              position: {
+                detail: 'label位置',
+                default: 'origin'
+              },
+              offsetX: {
+                detail: 'label在x方向的偏移量',
+                default: 0
+              },
+              offsetY: {
+                detail: 'label在y方向的偏移量',
+                default: 0
+              }
+            }
+          },
+          bgEnabled: {
+            detail: '是否开启背景',
+            default: true
+          },
+          bgColor: {
+            detail: '进度条背景颜色',
+            default: '#f7f7f7'
+          },
+          radius: {
+            detail: '半径',
+            default: null
+          },
+          allAngle: {
+            detail: '总角度',
+            documentation: '默认为null，则和坐标系同步',
+            default: null
+          },
+          startAngle: {
+            detail: '其实角度',
+            documentation: '默认为null，则和坐标系同步',
+            default: null
+          }
+        };
+      }
+    }]);
+
     function Progress(opt, app) {
       var _this;
 
@@ -23787,7 +23910,7 @@ var Chartx = (function () {
       _this = _possibleConstructorReturn(this, _getPrototypeOf(Progress).call(this, opt, app));
       _this.type = "progress";
 
-      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps((this instanceof Progress ? this.constructor : void 0).defaultProps), opt);
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(Progress.defaultProps()), opt);
 
       _this.bgNodeData = null; //背景的nodeData数据，和data里面的结构保持一致
 
@@ -24108,109 +24231,6 @@ var Chartx = (function () {
 
     return Progress;
   }(GraphsBase);
-
-  _defineProperty(Progress, "defaultProps", {
-    node: {
-      detail: '进度条设置',
-      propertys: {
-        width: {
-          detail: '进度条的宽度',
-          default: 20
-        },
-        radius: {
-          detail: '进度条两端的圆角半径',
-          default: 10 //默认为width的一半
-
-        },
-        fillStyle: {
-          detail: '进度条的填充色',
-          documentation: '可以是单个颜色，也可以是数组，也可以是一个函数,也可以是个lineargradient',
-          default: null
-        }
-      }
-    },
-    label: {
-      detail: '进度值文本',
-      propertys: {
-        enabled: {
-          detail: '是否启用label',
-          default: 'true'
-        },
-        fontColor: {
-          detail: 'label颜色',
-          default: '#666'
-        },
-        fontSize: {
-          detail: 'label文本大小',
-          default: 26
-        },
-        format: {
-          detail: 'label格式化处理函数',
-          default: function _default(val, nodeData) {
-            return val.toFixed(0);
-          }
-        },
-        lineWidth: {
-          detail: 'label文本描边线宽',
-          default: null
-        },
-        strokeStyle: {
-          detail: 'label描边颜色',
-          default: null
-        },
-        rotation: {
-          detail: 'label旋转角度',
-          default: 0
-        },
-        align: {
-          detail: 'label align',
-          default: 'center',
-          values: ['left', 'center', 'right']
-        },
-        //left center right
-        verticalAlign: {
-          detail: 'label verticalAlign',
-          default: 'middle',
-          values: ['top', 'middle', 'bottom']
-        },
-        //top middle bottom
-        position: {
-          detail: 'label位置',
-          default: 'origin'
-        },
-        offsetX: {
-          detail: 'label在x方向的偏移量',
-          default: 0
-        },
-        offsetY: {
-          detail: 'label在y方向的偏移量',
-          default: 0
-        }
-      }
-    },
-    bgEnabled: {
-      detail: '是否开启背景',
-      default: true
-    },
-    bgColor: {
-      detail: '进度条背景颜色',
-      default: '#f7f7f7'
-    },
-    radius: {
-      detail: '半径',
-      default: null
-    },
-    allAngle: {
-      detail: '总角度',
-      documentation: '默认为null，则和坐标系同步',
-      default: null
-    },
-    startAngle: {
-      detail: '其实角度',
-      documentation: '默认为null，则和坐标系同步',
-      default: null
-    }
-  });
 
   /**
    * 每个组件中对外影响的时候，要抛出一个trigger对象
@@ -26087,7 +26107,7 @@ var Chartx = (function () {
     return barTgi;
   }(component);
 
-  var _default$2 =
+  var _default =
   /*#__PURE__*/
   function (_Component) {
     _inherits(_default, _Component);
@@ -26482,7 +26502,7 @@ var Chartx = (function () {
     return MarkLine;
   }(component);
 
-  var _default$3 =
+  var _default$1 =
   /*#__PURE__*/
   function (_Component) {
     _inherits(_default, _Component);
@@ -26665,8 +26685,8 @@ var Chartx = (function () {
 
   global$1.registerComponent(Chart, 'chart'); //global.registerComponent( emptyCoord, 'coord' );
 
-  global$1.registerComponent(_default, 'coord', 'rect');
-  global$1.registerComponent(_default$1, 'coord', 'polar');
+  global$1.registerComponent(rectCoord, 'coord', 'rect');
+  global$1.registerComponent(Polar$1, 'coord', 'polar');
   global$1.registerComponent(BarGraphs, 'graphs', 'bar');
   global$1.registerComponent(LineGraphs, 'graphs', 'line');
   global$1.registerComponent(ScatGraphs, 'graphs', 'scat');
@@ -26685,10 +26705,10 @@ var Chartx = (function () {
   global$1.registerComponent(MarkLine, 'markLine');
   global$1.registerComponent(Tips, 'tips');
   global$1.registerComponent(barTgi, 'barTgi');
-  global$1.registerComponent(_default$2, 'barGuide');
+  global$1.registerComponent(_default, 'barGuide');
   global$1.registerComponent(waterMark, 'waterMark');
   global$1.registerComponent(MarkLine$1, 'cross');
-  global$1.registerComponent(_default$3, 'lineSchedu'); //皮肤设定begin ---------------
+  global$1.registerComponent(_default$1, 'lineSchedu'); //皮肤设定begin ---------------
   //如果数据库中有项目皮肤
 
   var projectTheme = []; //从数据库中查询出来设计师设置的项目皮肤

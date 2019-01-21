@@ -7,21 +7,23 @@ import { _,getDefaultProps,event } from "mmvis"
 
 const Rect = Canvax.Shapes.Rect;
 
-export default class extends coorBase
+export default class rectCoord extends coorBase
 {
-    static defaultProps = {
-        horizontal : {
-            detail : '横向翻转坐标系',
-            documentation : "横向翻转坐标系",
-            insertText    : "horizontal: ",
-            default       : false,
-            values        : [true, false]
-        },
-        _children  : {
-            xAxis  : {},
-            yAxis  : {},
-            grid   : {}
-        }
+    static defaultProps(){
+        return {
+            horizontal : {
+                detail : '横向翻转坐标系',
+                documentation : "横向翻转坐标系",
+                insertText    : "horizontal: ",
+                default       : false,
+                values        : [true, false]
+            },
+            _children  : {
+                xAxis  : {},
+                yAxis  : {},
+                grid   : {}
+            }
+        } 
     } 
 
     constructor( opt, app )
@@ -37,7 +39,7 @@ export default class extends coorBase
         this._yAxisRight = null;
         this._grid  = null;
 
-        _.extend( true, this, getDefaultProps( new.target.defaultProps ), this.setDefaultOpt( opt, app ) );
+        _.extend( true, this, getDefaultProps( rectCoord.defaultProps ), this.setDefaultOpt( opt, app ) );
 
         this.init(opt);
     }

@@ -18,115 +18,118 @@ import Canvax from "canvax"
 import Grid from "./polar/grid"
 import { dataSection,_,getDefaultProps,event } from "mmvis"
 
-export default class extends coorBase
+export default class Polar extends coorBase
 {
-    static defaultProps = {
-        allAngle : {
-            detail : '坐标系总角度',
-            documentation : "",
-            default       : 360,
-            values        : [0, 360]
-        },
-        startAngle : {
-            detail : '坐标系其实角度',
-            documentation : "",
-            default       : 0,
-            values        : [0, 360]
-        },
-        squareRange : {
-            detail : '是否正方形的坐标区域',
-            documentation : "",
-            default       : true,
-            values        : [true, false]
-        },
-        
-        radius : {
-            detail : '坐标系的最大半径',
-            documentation : "默认自动计算view的高宽，如果squareRange==true，则会取Math.min(width,height)",
-            default       : 'auto',
-            values        : null
-        },
-        aAxis : {
-            detail : '角度轴',
-            documentation : "类似直角坐标系中的x轴",
-            propertys     : {
-                
-                data : [],
-                angleList : [], //对应layoutType下的角度list
-                layoutData : [], //aAxis.data的 label.format后版本
-
-                field : {
-                    detail : '数据字段',
-                    documentation : "",
-                    default       : ''
-                },
-                layoutType : {
-                    detail : '布局类型',
-                    documentation : "",
-                    default       : 'proportion'
-                },
-                beginAngle : {
-                    detail : '起始角度',
-                    documentation : "",
-                    default       : -90
-                },
-                enabled : {
-                    detail : '是否显示',
-                    documentation : "",
-                    default       : false
-                },
-                label : {
-                    detail : '文本配置',
-                    documentation : '',
-                    propertys : {
-                        enabled : {
-                            detail : '是否显示',
-                            documentation : "",
-                            default       : true
-                        },
-                        format  : {
-                            detail : 'label的格式化处理函数',
-                            documentation : "",
-                            default : null
-                        },
-                        fontColor: {
-                            detail : 'label颜色',
-                            documentation: '',
-                            default : "#666"
+    static defaultProps(){
+        return {
+            allAngle : {
+                detail : '坐标系总角度',
+                documentation : "",
+                default       : 360,
+                values        : [0, 360]
+            },
+            startAngle : {
+                detail : '坐标系其实角度',
+                documentation : "",
+                default       : 0,
+                values        : [0, 360]
+            },
+            squareRange : {
+                detail : '是否正方形的坐标区域',
+                documentation : "",
+                default       : true,
+                values        : [true, false]
+            },
+            
+            radius : {
+                detail : '坐标系的最大半径',
+                documentation : "默认自动计算view的高宽，如果squareRange==true，则会取Math.min(width,height)",
+                default       : 'auto',
+                values        : null
+            },
+            aAxis : {
+                detail : '角度轴',
+                documentation : "类似直角坐标系中的x轴",
+                propertys     : {
+                    
+                    data : [],
+                    angleList : [], //对应layoutType下的角度list
+                    layoutData : [], //aAxis.data的 label.format后版本
+    
+                    field : {
+                        detail : '数据字段',
+                        documentation : "",
+                        default       : ''
+                    },
+                    layoutType : {
+                        detail : '布局类型',
+                        documentation : "",
+                        default       : 'proportion'
+                    },
+                    beginAngle : {
+                        detail : '起始角度',
+                        documentation : "",
+                        default       : -90
+                    },
+                    enabled : {
+                        detail : '是否显示',
+                        documentation : "",
+                        default       : false
+                    },
+                    label : {
+                        detail : '文本配置',
+                        documentation : '',
+                        propertys : {
+                            enabled : {
+                                detail : '是否显示',
+                                documentation : "",
+                                default       : true
+                            },
+                            format  : {
+                                detail : 'label的格式化处理函数',
+                                documentation : "",
+                                default : null
+                            },
+                            fontColor: {
+                                detail : 'label颜色',
+                                documentation: '',
+                                default : "#666"
+                            }
                         }
                     }
                 }
-            }
-        },
-        rAxis : {
-            detail : '半径维度轴',
-            documentation: '类似直角坐标系中的y轴维度',
-            propertys : {
-                field : {
-                    detail : '数据字段',
-                    documentation : "",
-                    default       : ''
-                },
-                dataSection : {
-                    detail : '轴的显示数据',
-                    documentation : "默认根据源数据中自动计算，用户也可以手动指定",
-                    default       : false
-                },
-                enabled : {
-                    detail : '是否显示',
-                    documentation : "",
-                    default       : false
+            },
+            rAxis : {
+                detail : '半径维度轴',
+                documentation: '类似直角坐标系中的y轴维度',
+                propertys : {
+                    field : {
+                        detail : '数据字段',
+                        documentation : "",
+                        default       : ''
+                    },
+                    dataSection : {
+                        detail : '轴的显示数据',
+                        documentation : "默认根据源数据中自动计算，用户也可以手动指定",
+                        default       : false
+                    },
+                    enabled : {
+                        detail : '是否显示',
+                        documentation : "",
+                        default       : false
+                    }
                 }
             }
-        }
-    } 
+        } 
+    }
+    
 
     constructor( opt , app )
     {
         super( opt , app );
         this.type  = "polar";
         
-        _.extend( true, this, getDefaultProps( new.target.defaultProps ), this.setDefaultOpt( opt, app ) );
+        _.extend( true, this, getDefaultProps( Polar.defaultProps() ), this.setDefaultOpt( opt, app ) );
 
         this.init(opt);
     }
