@@ -9648,9 +9648,7 @@
   Canvax.AnimationFrame = AnimationFrame;
   Canvax.utils = Utils;
 
-  var _padding = 20; //为了能通过Chartx.Canvax 拿到渲染引擎
-
-  global$1.Canvax = Canvax;
+  var _padding = 20;
 
   var Chart =
   /*#__PURE__*/

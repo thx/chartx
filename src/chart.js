@@ -3,9 +3,6 @@ import { _ , dataFrame, $ , global , event } from "mmvis"
 
 const _padding = 20;
 
-//为了能通过Chartx.Canvax 拿到渲染引擎
-global.Canvax = Canvax;
-
 export default class Chart extends event.Dispatcher
 {
     constructor( node, data, opt, componentModules )

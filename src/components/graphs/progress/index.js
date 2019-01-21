@@ -105,7 +105,8 @@ export default class Progress extends GraphsBase
                 default : null
             }
         }
-    }
+    } 
+    
 
     constructor(opt, app)
     {
