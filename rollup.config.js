@@ -13,27 +13,35 @@ var { uglify } = require('rollup-plugin-uglify');
 
 export default {
     input : 'src/index.js',
-    output: [{
+    output: [
+    {
         file : "dist/chartx.js",
         name : "Chartx",
         format : "iife"
-    },{
+    },
+    
+    {
         file : "dist/cjs.js",
         name : "Chartx",
         format: "cjs"
-    },{
+    },
+    {
         file : "dist/amd.js",
         name : "Chartx",
         format: "amd"
-    },{
+    },
+    {
         file : "dist/es.js",
         name : "Chartx",
         format: "es"
-    },{
+    },
+    {
         file : "dist/umd.js",
         name : "Chartx",
         format: "umd"
-    }],
+    }
+    
+    ],
     plugins: [
         babel({
             exclude: /node_modules\/(?!.*@*(mmvis|canvax)\/).*/,

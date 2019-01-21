@@ -1,106 +1,8 @@
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
   typeof define === 'function' && define.amd ? define(factory) :
-  (global.Chartx = factory());
-}(this, (function () { 'use strict';
-
-  function _typeof(obj) {
-    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
-      _typeof = function (obj) {
-        return typeof obj;
-      };
-    } else {
-      _typeof = function (obj) {
-        return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-      };
-    }
-
-    return _typeof(obj);
-  }
-
-  function _classCallCheck(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-
-  function _defineProperties(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor) descriptor.writable = true;
-      Object.defineProperty(target, descriptor.key, descriptor);
-    }
-  }
-
-  function _createClass(Constructor, protoProps, staticProps) {
-    if (protoProps) _defineProperties(Constructor.prototype, protoProps);
-    if (staticProps) _defineProperties(Constructor, staticProps);
-    return Constructor;
-  }
-
-  function _defineProperty(obj, key, value) {
-    if (key in obj) {
-      Object.defineProperty(obj, key, {
-        value: value,
-        enumerable: true,
-        configurable: true,
-        writable: true
-      });
-    } else {
-      obj[key] = value;
-    }
-
-    return obj;
-  }
-
-  function _inherits(subClass, superClass) {
-    if (typeof superClass !== "function" && superClass !== null) {
-      throw new TypeError("Super expression must either be null or a function");
-    }
-
-    subClass.prototype = Object.create(superClass && superClass.prototype, {
-      constructor: {
-        value: subClass,
-        writable: true,
-        configurable: true
-      }
-    });
-    if (superClass) _setPrototypeOf(subClass, superClass);
-  }
-
-  function _getPrototypeOf(o) {
-    _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) {
-      return o.__proto__ || Object.getPrototypeOf(o);
-    };
-    return _getPrototypeOf(o);
-  }
-
-  function _setPrototypeOf(o, p) {
-    _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) {
-      o.__proto__ = p;
-      return o;
-    };
-
-    return _setPrototypeOf(o, p);
-  }
-
-  function _assertThisInitialized(self) {
-    if (self === void 0) {
-      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
-    }
-
-    return self;
-  }
-
-  function _possibleConstructorReturn(self, call) {
-    if (call && (typeof call === "object" || typeof call === "function")) {
-      return call;
-    }
-
-    return _assertThisInitialized(self);
-  }
+  (global = global || self, global.Chartx = factory());
+}(this, function () { 'use strict';
 
   var _ = {};
   var breaker = {};
@@ -511,7 +413,7 @@
       i = 2;
     }
 
-    if (_typeof(target) !== "object" && !_.isFunction(target)) {
+    if (babelHelpers.typeof(target) !== "object" && !_.isFunction(target)) {
       target = {};
     }
 
@@ -526,7 +428,7 @@
           src = target[name];
           copy = options[name];
 
-          if (target === copy) {
+          if (target === copy || copy === undefined) {
             continue;
           }
 
@@ -687,11 +589,6 @@
     return JSON.parse(JSON.stringify(data));
   };
 
-  var is3dOpt = function is3dOpt(opt) {
-    var chartx3dCoordTypes = ["box", "polar3d", "cube"];
-    return opt.coord && opt.coord.type && chartx3dCoordTypes.indexOf(opt.coord.type) > -1;
-  };
-
   var getDefaultProps = function getDefaultProps(dProps) {
     var target = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
@@ -714,12 +611,67 @@
     return target;
   };
 
+  //TODO 所有的get xxx OfVal 在非proportion下面如果数据有相同的情况，就会有风险
+
   var axis =
   /*#__PURE__*/
   function () {
-    function axis(opt, dataOrg) {
-      _classCallCheck(this, axis);
+    babelHelpers.createClass(axis, null, [{
+      key: "defaultProps",
+      value: function defaultProps() {
+        return {
+          layoutType: {
+            detail: '布局方式',
+            default: 'proportion'
+          },
+          dataSection: {
+            detail: '轴数据集',
+            default: []
+          },
+          sectionHandler: {
+            detail: '自定义dataSection的计算公式',
+            default: null
+          },
+          waterLine: {
+            detail: '水位线',
+            default: null,
+            documentation: '水位data，需要混入 计算 dataSection， 如果有设置waterLine， dataSection的最高水位不会低于这个值'
+          },
+          middleweight: {
+            detail: '区间等分线',
+            default: null,
+            documentation: '如果middleweight有设置的话 dataSectionGroup 为被middleweight分割出来的n个数组>..[ [0,50 , 100],[100,500,1000] ]'
+          },
+          symmetric: {
+            detail: '自动正负对称',
+            default: false,
+            documentation: 'proportion下，是否需要设置数据为正负对称的数据，比如 [ 0,5,10 ] = > [ -10, 0 10 ]，象限坐标系的时候需要'
+          },
+          origin: {
+            detail: '轴的起源值',
+            default: null,
+            documentation: '\
+                    1，如果数据中又正数和负数，则默认为0 <br />\
+                    2，如果dataSection最小值小于0，则baseNumber为最小值<br />\
+                    3，如果dataSection最大值大于0，则baseNumber为最大值<br />\
+                    4，也可以由用户在第2、3种情况下强制配置为0，则section会补充满从0开始的刻度值\
+                '
+          },
+          sort: {
+            detail: '排序',
+            default: null
+          },
+          posParseToInt: {
+            detail: '是否位置计算取整',
+            default: false,
+            documentation: '比如在柱状图中，有得时候需要高精度的能间隔1px的柱子，那么x轴的计算也必须要都是整除的'
+          }
+        };
+      }
+    }]);
 
+    function axis(opt, dataOrg) {
+      babelHelpers.classCallCheck(this, axis);
       //源数据
       //这个是一个一定会有两层数组的数据结构，是一个标准的dataFrame数据
       // [ 
@@ -732,11 +684,13 @@
       //    ]   
       // ]
       this._opt = _.clone(opt);
-      this.dataOrg = dataOrg || [];
-      this._dataSectionLayout = []; //和dataSection一一对应的，每个值的pos，//get xxx OfPos的时候，要先来这里做一次寻找
-      //轴总长
+      this.dataOrg = dataOrg || []; //3d中有引用到
 
-      this._axisLength = 1;
+      this.dataSectionLayout = []; //和dataSection一一对应的，每个值的pos，//get xxx OfPos的时候，要先来这里做一次寻找
+      //轴总长
+      //3d中有引用到
+
+      this.axisLength = 1;
       this._cellCount = null;
       this._cellLength = null; //数据变动的时候要置空
       //默认的 dataSectionGroup = [ dataSection ], dataSection 其实就是 dataSectionGroup 去重后的一维版本
@@ -750,10 +704,10 @@
       this._min = null;
       this._max = null;
 
-      _.extend(true, this, getDefaultProps(axis.defaultProps), opt);
+      _.extend(true, this, getDefaultProps(axis.defaultProps()), opt);
     }
 
-    _createClass(axis, [{
+    babelHelpers.createClass(axis, [{
       key: "resetDataOrg",
       value: function resetDataOrg(dataOrg) {
         //配置和数据变化
@@ -766,7 +720,7 @@
     }, {
       key: "setAxisLength",
       value: function setAxisLength(length) {
-        this._axisLength = length;
+        this.axisLength = length;
         this.calculateProps();
       }
     }, {
@@ -799,7 +753,7 @@
           this.originPos = this.getPosOfVal(this.origin);
         }
 
-        this._dataSectionLayout = [];
+        this.dataSectionLayout = [];
 
         _.each(this.dataSection, function (val, i) {
           var ind = i;
@@ -811,8 +765,7 @@
             ind: i,
             val: val
           }), 10);
-
-          me._dataSectionLayout.push({
+          me.dataSectionLayout.push({
             val: val,
             ind: ind,
             pos: pos
@@ -1088,7 +1041,7 @@
       value: function _getOriginTrans(origin) {
         var pos = 0;
         var dsgLen = this.dataSectionGroup.length;
-        var groupLength = this._axisLength / dsgLen;
+        var groupLength = this.axisLength / dsgLen;
 
         for (var i = 0, l = dsgLen; i < l; i++) {
           var ds = this.dataSectionGroup[i];
@@ -1128,7 +1081,7 @@
 
         var layoutData;
 
-        _.each(this._dataSectionLayout, function (item) {
+        _.each(this.dataSectionLayout, function (item) {
           if (item[prop] === opt[prop]) {
             layoutData = item;
           }
@@ -1140,7 +1093,7 @@
       key: "getPosOfVal",
       value: function getPosOfVal(val) {
         /* val可能会重复，so 这里得到的会有问题，先去掉
-        //先检查下 _dataSectionLayout 中有没有对应的记录
+        //先检查下 dataSectionLayout 中有没有对应的记录
         var _pos = this._getLayoutDataOf({ val : val }).pos;
         if( _pos != undefined ){
             return _pos;
@@ -1153,7 +1106,7 @@
     }, {
       key: "getPosOfInd",
       value: function getPosOfInd(ind) {
-        //先检查下 _dataSectionLayout 中有没有对应的记录
+        //先检查下 dataSectionLayout 中有没有对应的记录
         var _pos = this._getLayoutDataOf({
           ind: ind
         }).pos;
@@ -1176,7 +1129,7 @@
 
         if (this.layoutType == "proportion") {
           var dsgLen = this.dataSectionGroup.length;
-          var groupLength = this._axisLength / dsgLen;
+          var groupLength = this.axisLength / dsgLen;
 
           for (var i = 0, l = dsgLen; i < l; i++) {
             var ds = this.dataSectionGroup[i];
@@ -1207,7 +1160,7 @@
         } else {
           if (cellCount == 1) {
             //如果只有一数据，那么就全部默认在正中间
-            pos = this._axisLength / 2;
+            pos = this.axisLength / 2;
           } else {
             //TODO 这里在非proportion情况下，如果没有opt.ind 那么getIndexOfVal 其实是有风险的，
             //因为可能有多个数据的val一样
@@ -1216,16 +1169,16 @@
             if (valInd != -1) {
               if (this.layoutType == "rule") {
                 //line 的xaxis就是 rule
-                pos = valInd / (cellCount - 1) * this._axisLength;
+                pos = valInd / (cellCount - 1) * this.axisLength;
               }
 
               if (this.layoutType == "peak") {
                 //bar的xaxis就是 peak
 
                 /*
-                pos = (this._axisLength/cellCount) 
+                pos = (this.axisLength/cellCount) 
                       * (valInd+1) 
-                      - (this._axisLength/cellCount)/2;
+                      - (this.axisLength/cellCount)/2;
                 */
                 var _cellLength = this.getCellLength();
 
@@ -1241,7 +1194,7 @@
     }, {
       key: "getValOfPos",
       value: function getValOfPos(pos) {
-        //先检查下 _dataSectionLayout 中有没有对应的记录
+        //先检查下 dataSectionLayout 中有没有对应的记录
         var _val = this._getLayoutDataOf({
           pos: pos
         }).val;
@@ -1255,7 +1208,7 @@
     }, {
       key: "getValOfInd",
       value: function getValOfInd(ind) {
-        //先检查下 _dataSectionLayout 中有没有对应的记录
+        //先检查下 dataSectionLayout 中有没有对应的记录
         var _val = this._getLayoutDataOf({
           ind: ind
         }).val;
@@ -1285,7 +1238,7 @@
         var val;
 
         if (this.layoutType == "proportion") {
-          var groupLength = this._axisLength / this.dataSectionGroup.length;
+          var groupLength = this.axisLength / this.dataSectionGroup.length;
 
           _.each(this.dataSectionGroup, function (ds, i) {
             if (parseInt(ind / groupLength) == i || i == me.dataSectionGroup.length - 1) {
@@ -1305,7 +1258,7 @@
     }, {
       key: "getIndexOfPos",
       value: function getIndexOfPos(pos) {
-        //先检查下 _dataSectionLayout 中有没有对应的记录
+        //先检查下 dataSectionLayout 中有没有对应的记录
         var _ind = this._getLayoutDataOf({
           pos: pos
         }).ind;
@@ -1347,7 +1300,7 @@
         var valInd = -1;
 
         if (this.layoutType == "proportion") {
-          //先检查下 _dataSectionLayout 中有没有对应的记录
+          //先检查下 dataSectionLayout 中有没有对应的记录
           var _ind = this._getLayoutDataOf({
             val: val
           }).ind;
@@ -1379,8 +1332,8 @@
           return this._cellLength;
         }
 
-        var _axisLength = this._axisLength;
-        var cellLength = _axisLength;
+        var axisLength = this.axisLength;
+        var cellLength = axisLength;
 
         var cellCount = this._getCellCount();
 
@@ -1389,13 +1342,13 @@
             cellLength = 1;
           } else {
             //默认按照 peak 也就是柱状图的需要的布局方式
-            cellLength = _axisLength / cellCount;
+            cellLength = axisLength / cellCount;
 
             if (this.layoutType == "rule") {
               if (cellCount == 1) {
-                cellLength = _axisLength / 2;
+                cellLength = axisLength / 2;
               } else {
-                cellLength = _axisLength / (cellCount - 1);
+                cellLength = axisLength / (cellCount - 1);
               }
             }
 
@@ -1429,7 +1382,7 @@
         var cellCount = 0;
 
         if (this.layoutType == "proportion") {
-          cellCount = this._axisLength;
+          cellCount = this.axisLength;
         } else {
           if (this.dataOrg.length && this.dataOrg[0].length && this.dataOrg[0][0].length) {
             cellCount = this.dataOrg[0][0].length;
@@ -1439,58 +1392,8 @@
         return cellCount;
       }
     }]);
-
     return axis;
   }();
-
-  _defineProperty(axis, "defaultProps", {
-    layoutType: {
-      detail: '布局方式',
-      default: 'proportion'
-    },
-    dataSection: {
-      detail: '轴数据集',
-      default: []
-    },
-    sectionHandler: {
-      detail: '自定义dataSection的计算公式',
-      default: null
-    },
-    waterLine: {
-      detail: '水位线',
-      default: null,
-      documentation: '水位data，需要混入 计算 dataSection， 如果有设置waterLine， dataSection的最高水位不会低于这个值'
-    },
-    middleweight: {
-      detail: '区间等分线',
-      default: null,
-      documentation: '如果middleweight有设置的话 dataSectionGroup 为被middleweight分割出来的n个数组>..[ [0,50 , 100],[100,500,1000] ]'
-    },
-    symmetric: {
-      detail: '自动正负对称',
-      default: false,
-      documentation: 'proportion下，是否需要设置数据为正负对称的数据，比如 [ 0,5,10 ] = > [ -10, 0 10 ]，象限坐标系的时候需要'
-    },
-    origin: {
-      detail: '轴的起源值',
-      default: null,
-      documentation: '\
-                1，如果数据中又正数和负数，则默认为0 <br />\
-                2，如果dataSection最小值小于0，则baseNumber为最小值<br />\
-                3，如果dataSection最大值大于0，则baseNumber为最大值<br />\
-                4，也可以由用户在第2、3种情况下强制配置为0，则section会补充满从0开始的刻度值\
-            '
-    },
-    sort: {
-      detail: '排序',
-      default: null
-    },
-    posParseToInt: {
-      detail: '是否位置计算取整',
-      default: false,
-      documentation: '比如在柱状图中，有得时候需要高精度的能间隔1px的柱子，那么x轴的计算也必须要都是整除的'
-    }
-  });
 
   /**
   * 把原始的数据
@@ -1873,6 +1776,40 @@
     }
   };
 
+  var parse = {
+    _eval: function _eval(code, target, paramName, paramValue) {
+      return paramName ? new Function(paramName, code + "; return ".concat(target, ";"))(paramValue) : new Function(code + "; return ".concat(target, ";"))();
+    },
+    parse: function parse(code, range, data, variablesFromComponent) {
+      try {
+        var isVariablesDefined = range && range.length && range.length === 2 && range[1] > range[0]; // 若未定义
+
+        if (!isVariablesDefined) {
+          return this._eval(code, 'options');
+        }
+
+        var variablesInCode = this._eval(code, 'variables');
+
+        if (typeof variablesInCode === 'function') {
+          variablesInCode = variablesInCode(data) || {};
+        }
+
+        var variables = {};
+
+        if (variablesFromComponent !== undefined) {
+          variables = typeof variablesFromComponent === 'function' ? variablesFromComponent(data) : variablesFromComponent;
+        }
+
+        variables = _.extend(true, {}, variablesInCode, variables);
+        var codeWithoutVariables = code.slice(0, range[0]) + code.slice(range[1]);
+        return this._eval(codeWithoutVariables, 'options', 'variables', variables);
+      } catch (e) {
+        console.log('parse error');
+        return {};
+      }
+    }
+  };
+
   //图表皮肤
   var globalAnimationEnabled = true; //是否开启全局的动画开关
 
@@ -1902,9 +1839,9 @@
         delete me.instances[chart_id];
       }
 
-      var dimension = 2;
+      var dimension = 2; //3d图表的话，本地调试的时候自己在全局chartx3d上面提供is3dOpt变量
 
-      if (is3dOpt(_opt)) {
+      if (me.__dimension == 3 || me.is3dOpt && me.is3dOpt(_opt)) {
         dimension = 3;
       }
 
@@ -1953,7 +1890,7 @@
         suffix: '_JSON_FUN_SUFFIX]]'
       };
 
-      var parse = function parse(string) {
+      var parse$$1 = function parse$$1(string) {
         return JSON.parse(string, function (key, value) {
           if (typeof value === 'string' && value.indexOf(JsonSerialize.suffix) > 0 && value.indexOf(JsonSerialize.prefix) == 0) {
             return new Function('return ' + value.replace(JsonSerialize.prefix, '').replace(JsonSerialize.suffix, ''))();
@@ -1962,7 +1899,22 @@
         }) || {};
       };
 
-      var opt = parse(decodeURIComponent(this.options[chartPark_cid] || {}));
+      var opt = parse$$1(decodeURIComponent(this.options[chartPark_cid] || {}));
+
+      if (userOptions) {
+        opt = _.extend(true, opt, userOptions);
+      }
+      return opt;
+    },
+    getOptionsNew: function getOptionsNew(chartPark_cid, userOptions, data, variables) {
+      if (!this.options[chartPark_cid]) {
+        return userOptions || {};
+      }
+      var chartConfig = this.options[chartPark_cid] || {};
+      var code = decodeURIComponent(chartConfig.code);
+      var range = chartConfig.range; // var code = decodeURIComponent(this.options[chartPark_cid]);
+
+      var opt = parse.parse(code, range, data, variables);
 
       if (userOptions) {
         opt = _.extend(true, opt, userOptions);
@@ -2156,9 +2108,7 @@
     function Polar() {
       var opt = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
       var dataFrame = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [];
-
-      _classCallCheck(this, Polar);
-
+      babelHelpers.classCallCheck(this, Polar);
       this._opt = _.clone(opt);
       this.dataFrame = dataFrame;
       this.axisLength = 1;
@@ -2173,7 +2123,7 @@
       this.minRadius = 0; //最小半径值 
     }
 
-    _createClass(Polar, [{
+    babelHelpers.createClass(Polar, [{
       key: "calculateProps",
       value: function calculateProps() {
         var _this = this;
@@ -2423,86 +2373,79 @@
 
         return points;
       }
-    }], [{
-      key: "filterPointsInRect",
-      value: function filterPointsInRect(points, origin, width, height) {
-        for (var i = 0, l = points.length; i < l; i++) {
-          if (!Polar.checkPointInRect(points[i], origin, width, height)) {
-            //该点不在root rect范围内，去掉
-            points.splice(i, 1);
-            i--, l--;
-          }
-        }
-        return points;
-      }
-    }, {
-      key: "checkPointInRect",
-      value: function checkPointInRect(p, origin, width, height) {
-        var _tansRoot = {
-          x: p.x + origin.x,
-          y: p.y + origin.y
-        };
-        return !(_tansRoot.x < 0 || _tansRoot.x > width || _tansRoot.y < 0 || _tansRoot.y > height);
-      } //检查由n个相交点分割出来的圆弧是否在rect内
-
-    }, {
-      key: "checkArcInRect",
-      value: function checkArcInRect(arc, r, origin, width, height) {
-        var start = arc[0];
-        var to = arc[1];
-        var differenceR = to.radian - start.radian;
-
-        if (to.radian < start.radian) {
-          differenceR = Math.PI * 2 + to.radian - start.radian;
-        }
-        var middleR = (start.radian + differenceR / 2) % (Math.PI * 2);
-        return Polar.checkPointInRect(Polar.getPointInRadianOfR(middleR, r), origin, width, height);
-      } //获取某个点相对圆心的弧度值
-
-    }, {
-      key: "getRadianInPoint",
-      value: function getRadianInPoint(point) {
-        var pi2 = Math.PI * 2;
-        return (Math.atan2(point.y, point.x) + pi2) % pi2;
-      } //获取某个弧度方向，半径为r的时候的point坐标点位置
-
-    }, {
-      key: "getPointInRadianOfR",
-      value: function getPointInRadianOfR(radian, r) {
-        var pi = Math.PI;
-        var x = Math.cos(radian) * r;
-
-        if (radian == pi / 2 || radian == pi * 3 / 2) {
-          //90度或者270度的时候
-          x = 0;
-        }
-        var y = Math.sin(radian) * r;
-
-        if (radian % pi == 0) {
-          y = 0;
-        }
-        return {
-          x: x,
-          y: y
-        };
-      }
-    }, {
-      key: "getROfNum",
-      value: function getROfNum(num, dataSection, width, height) {
-        var r = 0;
-
-        var maxNum = _.max(dataSection);
-
-        var minNum = 0; //Math.min( this.rAxis.dataSection );
-
-        var maxR = parseInt(Math.max(width, height) / 2);
-        r = maxR * ((num - minNum) / (maxNum - minNum));
-        return r;
-      }
     }]);
-
     return Polar;
   }();
+
+  Polar.filterPointsInRect = function (points, origin, width, height) {
+    for (var i = 0, l = points.length; i < l; i++) {
+      if (!Polar.checkPointInRect(points[i], origin, width, height)) {
+        //该点不在root rect范围内，去掉
+        points.splice(i, 1);
+        i--, l--;
+      }
+    }
+    return points;
+  };
+
+  Polar.checkPointInRect = function (p, origin, width, height) {
+    var _tansRoot = {
+      x: p.x + origin.x,
+      y: p.y + origin.y
+    };
+    return !(_tansRoot.x < 0 || _tansRoot.x > width || _tansRoot.y < 0 || _tansRoot.y > height);
+  }; //检查由n个相交点分割出来的圆弧是否在rect内
+
+
+  Polar.checkArcInRect = function (arc, r, origin, width, height) {
+    var start = arc[0];
+    var to = arc[1];
+    var differenceR = to.radian - start.radian;
+
+    if (to.radian < start.radian) {
+      differenceR = Math.PI * 2 + to.radian - start.radian;
+    }
+    var middleR = (start.radian + differenceR / 2) % (Math.PI * 2);
+    return Polar.checkPointInRect(Polar.getPointInRadianOfR(middleR, r), origin, width, height);
+  }; //获取某个点相对圆心的弧度值
+
+
+  Polar.getRadianInPoint = function (point) {
+    var pi2 = Math.PI * 2;
+    return (Math.atan2(point.y, point.x) + pi2) % pi2;
+  }; //获取某个弧度方向，半径为r的时候的point坐标点位置
+
+
+  Polar.getPointInRadianOfR = function (radian, r) {
+    var pi = Math.PI;
+    var x = Math.cos(radian) * r;
+
+    if (radian == pi / 2 || radian == pi * 3 / 2) {
+      //90度或者270度的时候
+      x = 0;
+    }
+    var y = Math.sin(radian) * r;
+
+    if (radian % pi == 0) {
+      y = 0;
+    }
+    return {
+      x: x,
+      y: y
+    };
+  };
+
+  Polar.getROfNum = function (num, dataSection, width, height) {
+    var r = 0;
+
+    var maxNum = _.max(dataSection);
+
+    var minNum = 0; //Math.min( this.rAxis.dataSection );
+
+    var maxR = parseInt(Math.max(width, height) / 2);
+    r = maxR * ((num - minNum) / (maxNum - minNum));
+    return r;
+  };
 
   /**
    * Canvax
@@ -2747,18 +2690,25 @@
     }
   };
 
+  /**
+   * Canvax
+   *
+   * @author 释剑 (李涛, litao.lt@alibaba-inc.com)
+   *
+   * 事件派发类
+   */
+
   var Dispatcher =
   /*#__PURE__*/
   function (_Manager) {
-    _inherits(Dispatcher, _Manager);
+    babelHelpers.inherits(Dispatcher, _Manager);
 
     function Dispatcher() {
-      _classCallCheck(this, Dispatcher);
-
-      return _possibleConstructorReturn(this, _getPrototypeOf(Dispatcher).call(this));
+      babelHelpers.classCallCheck(this, Dispatcher);
+      return babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(Dispatcher).call(this));
     }
 
-    _createClass(Dispatcher, [{
+    babelHelpers.createClass(Dispatcher, [{
       key: "on",
       value: function on(type, listener) {
         this._addEventListener(type, listener);
@@ -2920,7 +2870,6 @@
         return this;
       }
     }]);
-
     return Dispatcher;
   }(Manager);
 
@@ -2930,2546 +2879,9 @@
    * @author 释剑 (李涛, litao.lt@alibaba-inc.com)
    *
    */
+  var _hammerEventTypes = ["pan", "panstart", "panmove", "panend", "pancancel", "panleft", "panright", "panup", "pandown", "press", "pressup", "swipe", "swipeleft", "swiperight", "swipeup", "swipedown", "tap"];
 
-
-  var contains = document && document.compareDocumentPosition ? function (parent, child) {
-    if (!child) {
-      return false;
-    }
-    return !!(parent.compareDocumentPosition(child) & 16);
-  } : function (parent, child) {
-    if (!child) {
-      return false;
-    }
-
-    return child !== child && (parent.contains ? parent.contains(child) : true);
-  };
-
-  var _$1 = {};
-  var breaker$1 = {};
-  var ArrayProto$1 = Array.prototype,
-      ObjProto$1 = Object.prototype,
-      FuncProto$1 = Function.prototype; // Create quick reference variables for speed access to core prototypes.
-
-  var push$1 = ArrayProto$1.push,
-      slice$1 = ArrayProto$1.slice,
-      concat$1 = ArrayProto$1.concat,
-      toString$1 = ObjProto$1.toString,
-      hasOwnProperty$1 = ObjProto$1.hasOwnProperty; // All **ECMAScript 5** native function implementations that we hope to use
-  // are declared here.
-
-  var nativeForEach$1 = ArrayProto$1.forEach,
-      nativeMap$1 = ArrayProto$1.map,
-      nativeFilter$1 = ArrayProto$1.filter,
-      nativeEvery$1 = ArrayProto$1.every,
-      nativeSome$1 = ArrayProto$1.some,
-      nativeIndexOf$1 = ArrayProto$1.indexOf,
-      nativeIsArray$1 = Array.isArray,
-      nativeKeys$1 = Object.keys,
-      nativeBind$1 = FuncProto$1.bind;
-
-  var shallowProperty$1 = function shallowProperty(key) {
-    return function (obj) {
-      return obj == null ? void 0 : obj[key];
-    };
-  };
-
-  var MAX_ARRAY_INDEX$1 = Math.pow(2, 53) - 1;
-  var getLength$1 = shallowProperty$1('length');
-
-  var isArrayLike$1 = function isArrayLike(collection) {
-    var length = getLength$1(collection);
-    return typeof length == 'number' && length >= 0 && length <= MAX_ARRAY_INDEX$1;
-  };
-
-  _$1.values = function (obj) {
-    var keys = _$1.keys(obj);
-
-    var length = keys.length;
-    var values = new Array(length);
-
-    for (var i = 0; i < length; i++) {
-      values[i] = obj[keys[i]];
-    }
-
-    return values;
-  };
-
-  _$1.keys = nativeKeys$1 || function (obj) {
-    if (obj !== Object(obj)) throw new TypeError('Invalid object');
-    var keys = [];
-
-    for (var key in obj) {
-      if (_$1.has(obj, key)) keys.push(key);
-    }
-
-    return keys;
-  };
-
-  _$1.has = function (obj, key) {
-    return hasOwnProperty$1.call(obj, key);
-  };
-
-  var each$1 = _$1.each = _$1.forEach = function (obj, iterator, context) {
-    if (obj == null) return;
-
-    if (nativeForEach$1 && obj.forEach === nativeForEach$1) {
-      obj.forEach(iterator, context);
-    } else if (obj.length === +obj.length) {
-      for (var i = 0, length = obj.length; i < length; i++) {
-        if (iterator.call(context, obj[i], i, obj) === breaker$1) return;
-      }
-    } else {
-      var keys = _$1.keys(obj);
-
-      for (var i = 0, length = keys.length; i < length; i++) {
-        if (iterator.call(context, obj[keys[i]], keys[i], obj) === breaker$1) return;
-      }
-    }
-  };
-
-  _$1.compact = function (array) {
-    return _$1.filter(array, _$1.identity);
-  };
-
-  _$1.filter = _$1.select = function (obj, iterator, context) {
-    var results = [];
-    if (obj == null) return results;
-    if (nativeFilter$1 && obj.filter === nativeFilter$1) return obj.filter(iterator, context);
-    each$1(obj, function (value, index, list) {
-      if (iterator.call(context, value, index, list)) results.push(value);
-    });
-    return results;
-  };
-
-  each$1(['Arguments', 'Function', 'String', 'Number', 'Date', 'RegExp'], function (name) {
-    _$1['is' + name] = function (obj) {
-      return toString$1.call(obj) == '[object ' + name + ']';
-    };
-  }); //if (!_.isArguments(arguments)) {
-
-  _$1.isArguments = function (obj) {
-    return !!(obj && _$1.has(obj, 'callee'));
-  }; //}
-
-
-  {
-    _$1.isFunction = function (obj) {
-      return typeof obj === 'function';
-    };
-  }
-
-  _$1.isFinite = function (obj) {
-    return isFinite(obj) && !isNaN(parseFloat(obj));
-  };
-
-  _$1.isNaN = function (obj) {
-    return _$1.isNumber(obj) && obj != +obj;
-  };
-
-  _$1.isBoolean = function (obj) {
-    return obj === true || obj === false || toString$1.call(obj) == '[object Boolean]';
-  };
-
-  _$1.isNull = function (obj) {
-    return obj === null;
-  };
-
-  _$1.isEmpty = function (obj) {
-    if (obj == null) return true;
-    if (_$1.isArray(obj) || _$1.isString(obj)) return obj.length === 0;
-
-    for (var key in obj) {
-      if (_$1.has(obj, key)) return false;
-    }
-
-    return true;
-  };
-
-  _$1.isElement = function (obj) {
-    return !!(obj && obj.nodeType === 1);
-  };
-
-  _$1.isArray = nativeIsArray$1 || function (obj) {
-    return toString$1.call(obj) == '[object Array]';
-  };
-
-  _$1.isObject = function (obj) {
-    return obj === Object(obj);
-  };
-
-  _$1.identity = function (value) {
-    return value;
-  };
-
-  _$1.indexOf = function (array, item, isSorted) {
-    if (array == null) return -1;
-    var i = 0,
-        length = array.length;
-
-    if (isSorted) {
-      if (typeof isSorted == 'number') {
-        i = isSorted < 0 ? Math.max(0, length + isSorted) : isSorted;
-      } else {
-        i = _$1.sortedIndex(array, item);
-        return array[i] === item ? i : -1;
-      }
-    }
-
-    if (nativeIndexOf$1 && array.indexOf === nativeIndexOf$1) return array.indexOf(item, isSorted);
-
-    for (; i < length; i++) {
-      if (array[i] === item) return i;
-    }
-
-    return -1;
-  };
-
-  _$1.isWindow = function (obj) {
-    return obj != null && obj == obj.window;
-  }; // Internal implementation of a recursive `flatten` function.
-
-
-  var flatten$1 = function flatten(input, shallow, output) {
-    if (shallow && _$1.every(input, _$1.isArray)) {
-      return concat$1.apply(output, input);
-    }
-
-    each$1(input, function (value) {
-      if (_$1.isArray(value) || _$1.isArguments(value)) {
-        shallow ? push$1.apply(output, value) : flatten(value, shallow, output);
-      } else {
-        output.push(value);
-      }
-    });
-    return output;
-  }; // Flatten out an array, either recursively (by default), or just one level.
-
-
-  _$1.flatten = function (array, shallow) {
-    return flatten$1(array, shallow, []);
-  };
-
-  _$1.every = _$1.all = function (obj, iterator, context) {
-    iterator || (iterator = _$1.identity);
-    var result = true;
-    if (obj == null) return result;
-    if (nativeEvery$1 && obj.every === nativeEvery$1) return obj.every(iterator, context);
-    each$1(obj, function (value, index, list) {
-      if (!(result = result && iterator.call(context, value, index, list))) return breaker$1;
-    });
-    return !!result;
-  }; // Return the minimum element (or element-based computation).
-
-
-  _$1.min = function (obj, iterator, context) {
-    if (!iterator && _$1.isArray(obj) && obj[0] === +obj[0] && obj.length < 65535) {
-      return Math.min.apply(Math, obj);
-    }
-
-    if (!iterator && _$1.isEmpty(obj)) return Infinity;
-    var result = {
-      computed: Infinity,
-      value: Infinity
-    };
-    each$1(obj, function (value, index, list) {
-      var computed = iterator ? iterator.call(context, value, index, list) : value;
-      computed < result.computed && (result = {
-        value: value,
-        computed: computed
-      });
-    });
-    return result.value;
-  }; // Return the maximum element or (element-based computation).
-  // Can't optimize arrays of integers longer than 65,535 elements.
-  // See [WebKit Bug 80797](https://bugs.webkit.org/show_bug.cgi?id=80797)
-
-
-  _$1.max = function (obj, iterator, context) {
-    if (!iterator && _$1.isArray(obj) && obj[0] === +obj[0] && obj.length < 65535) {
-      return Math.max.apply(Math, obj);
-    }
-
-    if (!iterator && _$1.isEmpty(obj)) return -Infinity;
-    var result = {
-      computed: -Infinity,
-      value: -Infinity
-    };
-    each$1(obj, function (value, index, list) {
-      var computed = iterator ? iterator.call(context, value, index, list) : value;
-      computed > result.computed && (result = {
-        value: value,
-        computed: computed
-      });
-    });
-    return result.value;
-  }; // Return the first value which passes a truth test. Aliased as `detect`.
-
-
-  _$1.find = _$1.detect = function (obj, iterator, context) {
-    var result;
-    any$1(obj, function (value, index, list) {
-      if (iterator.call(context, value, index, list)) {
-        result = value;
-        return true;
-      }
-    });
-    return result;
-  }; // Determine if at least one element in the object matches a truth test.
-  // Delegates to **ECMAScript 5**'s native `some` if available.
-  // Aliased as `any`.
-
-
-  var any$1 = _$1.some = _$1.any = function (obj, iterator, context) {
-    iterator || (iterator = _$1.identity);
-    var result = false;
-    if (obj == null) return result;
-    if (nativeSome$1 && obj.some === nativeSome$1) return obj.some(iterator, context);
-    each$1(obj, function (value, index, list) {
-      if (result || (result = iterator.call(context, value, index, list))) return breaker$1;
-    });
-    return !!result;
-  }; // Return a version of the array that does not contain the specified value(s).
-
-
-  _$1.without = function (array) {
-    return _$1.difference(array, slice$1.call(arguments, 1));
-  }; // Take the difference between one array and a number of other arrays.
-  // Only the elements present in just the first array will remain.
-
-
-  _$1.difference = function (array) {
-    var rest = concat$1.apply(ArrayProto$1, slice$1.call(arguments, 1));
-    return _$1.filter(array, function (value) {
-      return !_$1.contains(rest, value);
-    });
-  }; // Produce a duplicate-free version of the array. If the array has already
-  // been sorted, you have the option of using a faster algorithm.
-  // Aliased as `unique`.
-
-
-  _$1.uniq = _$1.unique = function (array, isSorted, iterator, context) {
-    if (_$1.isFunction(isSorted)) {
-      context = iterator;
-      iterator = isSorted;
-      isSorted = false;
-    }
-
-    var initial = iterator ? _$1.map(array, iterator, context) : array;
-    var results = [];
-    var seen = [];
-    each$1(initial, function (value, index) {
-      if (isSorted ? !index || seen[seen.length - 1] !== value : !_$1.contains(seen, value)) {
-        seen.push(value);
-        results.push(array[index]);
-      }
-    });
-    return results;
-  }; // Return the results of applying the iterator to each element.
-  // Delegates to **ECMAScript 5**'s native `map` if available.
-
-
-  _$1.map = _$1.collect = function (obj, iterator, context) {
-    var results = [];
-    if (obj == null) return results;
-    if (nativeMap$1 && obj.map === nativeMap$1) return obj.map(iterator, context);
-    each$1(obj, function (value, index, list) {
-      results.push(iterator.call(context, value, index, list));
-    });
-    return results;
-  }; // Determine if the array or object contains a given value (using `===`).
-  // Aliased as `include`.
-
-
-  _$1.contains = _$1.include = function (obj, target) {
-    if (obj == null) return false;
-    if (nativeIndexOf$1 && obj.indexOf === nativeIndexOf$1) return obj.indexOf(target) != -1;
-    return any$1(obj, function (value) {
-      return value === target;
-    });
-  }; // Convenience version of a common use case of `map`: fetching a property.
-
-
-  _$1.pluck = function (obj, key) {
-    return _$1.map(obj, function (value) {
-      return value[key];
-    });
-  }; // Return a random integer between min and max (inclusive).
-
-
-  _$1.random = function (min, max) {
-    if (max == null) {
-      max = min;
-      min = 0;
-    }
-
-    return min + Math.floor(Math.random() * (max - min + 1));
-  }; // Shuffle a collection.
-
-
-  _$1.shuffle = function (obj) {
-    return _$1.sample(obj, Infinity);
-  };
-
-  _$1.sample = function (obj, n, guard) {
-    if (n == null || guard) {
-      if (!isArrayLike$1(obj)) obj = _$1.values(obj);
-      return obj[_$1.random(obj.length - 1)];
-    }
-
-    var sample = isArrayLike$1(obj) ? _$1.clone(obj) : _$1.values(obj);
-    var length = getLength$1(sample);
-    n = Math.max(Math.min(n, length), 0);
-    var last = length - 1;
-
-    for (var index = 0; index < n; index++) {
-      var rand = _$1.random(index, last);
-
-      var temp = sample[index];
-      sample[index] = sample[rand];
-      sample[rand] = temp;
-    }
-
-    return sample.slice(0, n);
-  };
-  /**
-  *
-  *如果是深度extend，第一个参数就设置为true
-  */
-
-
-  _$1.extend = function () {
-    var options,
-        name,
-        src,
-        copy,
-        target = arguments[0] || {},
-        i = 1,
-        length = arguments.length,
-        deep = false;
-
-    if (typeof target === "boolean") {
-      deep = target;
-      target = arguments[1] || {};
-      i = 2;
-    }
-
-    if (_typeof(target) !== "object" && !_$1.isFunction(target)) {
-      target = {};
-    }
-
-    if (length === i) {
-      target = this;
-      --i;
-    }
-
-    for (; i < length; i++) {
-      if ((options = arguments[i]) != null) {
-        for (name in options) {
-          src = target[name];
-          copy = options[name];
-
-          if (target === copy) {
-            continue;
-          }
-
-          if (deep && copy && _$1.isObject(copy) && copy.constructor === Object) {
-            target[name] = _$1.extend(deep, src, copy);
-          } else {
-            target[name] = copy;
-          }
-        }
-      }
-    }
-
-    return target;
-  };
-
-  _$1.clone = function (obj) {
-    if (!_$1.isObject(obj)) return obj;
-    return _$1.isArray(obj) ? obj.slice() : _$1.extend(true, {}, obj);
-  }; //********补存一些数学常用方法,暂放在这里文件下,后期多了单独成立一个类库  */
-  // compute euclidian modulo of m % n
-  // https://en.wikipedia.org/wiki/Modulo_operation
-
-
-  _$1.euclideanModulo = function (n, m) {
-    return (n % m + m) % m;
-  };
-
-  _$1.DEG2RAD = Math.PI / 180;
-  _$1.RAD2DEG = 180 / Math.PI;
-
-  _$1.degToRad = function (degrees) {
-    return degrees * _$1.DEG2RAD;
-  };
-
-  _$1.radToDeg = function (radians) {
-    return radians * _$1.RAD2DEG;
-  };
-
-  function normalizeTickInterval$1(interval, magnitude) {
-    var normalized, i; // var multiples = [1, 2, 2.5, 5, 10];
-
-    var multiples = [1, 2, 5, 10]; // round to a tenfold of 1, 2, 2.5 or 5
-
-    normalized = interval / magnitude; // normalize the interval to the nearest multiple
-
-    for (var i = 0; i < multiples.length; i++) {
-      interval = multiples[i];
-
-      if (normalized <= (multiples[i] + (multiples[i + 1] || multiples[i])) / 2) {
-        break;
-      }
-    } // multiply back to the correct magnitude
-
-
-    interval *= magnitude;
-    return interval;
-  }
-
-  function correctFloat$1(num) {
-    return parseFloat(num.toPrecision(14));
-  }
-
-  function getLinearTickPositions$1(arr, $maxPart, $cfg) {
-    arr = _$1.without(arr, undefined, null, "");
-    var scale = $cfg && $cfg.scale ? parseFloat($cfg.scale) : 1; //返回的数组中的值 是否都为整数(思霏)  防止返回[8, 8.2, 8.4, 8.6, 8.8, 9]   应该返回[8, 9]
-
-    var isInt = $cfg && $cfg.isInt ? 1 : 0;
-
-    if (isNaN(scale)) {
-      scale = 1;
-    }
-
-    var max = _$1.max(arr);
-
-    var initMax = max;
-    max *= scale;
-
-    var min = _$1.min(arr);
-
-    if (min == max) {
-      if (max > 0) {
-        min = 0;
-        return [min, max]; // min= Math.round(max/2);
-      } else if (max < 0) {
-        return [max, 0]; //min = max*2;
-      } else {
-        max = 1;
-        return [0, max];
-      }
-    }
-
-    var length = max - min;
-
-    if (length) {
-      var tempmin = min; //保证min>0的时候不会出现负数
-
-      min -= length * 0.05; // S.log(min +":"+ tempmin)
-
-      if (min < 0 && tempmin >= 0) {
-        min = 0;
-      }
-
-      max += length * 0.05;
-    }
-
-    var tickInterval = (max - min) * 0.3; //72 / 365;
-
-    var magnitude = Math.pow(10, Math.floor(Math.log(tickInterval) / Math.LN10));
-    tickInterval = normalizeTickInterval$1(tickInterval, magnitude);
-
-    if (isInt) {
-      tickInterval = Math.ceil(tickInterval);
-    }
-
-    var pos,
-        lastPos,
-        roundedMin = correctFloat$1(Math.floor(min / tickInterval) * tickInterval),
-        roundedMax = correctFloat$1(Math.ceil(max / tickInterval) * tickInterval),
-        tickPositions = []; // Populate the intermediate values
-
-    pos = roundedMin;
-
-    while (pos <= roundedMax) {
-      // Place the tick on the rounded value
-      tickPositions.push(pos); // Always add the raw tickInterval, not the corrected one.
-
-      pos = correctFloat$1(pos + tickInterval); // If the interval is not big enough in the current min - max range to actually increase
-      // the loop variable, we need to break out to prevent endless loop. Issue #619
-
-      if (pos === lastPos) {
-        break;
-      } // Record the last value
-
-
-      lastPos = pos;
-    }
-
-    if (tickPositions.length >= 3) {
-      if (tickPositions[tickPositions.length - 2] >= initMax) {
-        tickPositions.pop();
-      }
-    }
-
-    return tickPositions;
-  }
-
-  var dataSection$1 = {
-    section: function section($arr, $maxPart, $cfg) {
-      return _$1.uniq(getLinearTickPositions$1($arr, $maxPart, $cfg));
-    }
-  };
-
-  var axis$1 =
-  /*#__PURE__*/
-  function () {
-    function axis(opt, dataOrg) {
-      _classCallCheck(this, axis);
-
-      //super();
-      this.layoutType = opt.layoutType || "proportion"; // rule , peak, proportion
-      //源数据
-      //这个是一个一定会有两层数组的数据结构，是一个标准的dataFrame数据
-      // [ 
-      //    [   
-      //        [1,2,3],  
-      //        [1,2,3]    //这样有堆叠的数据只会出现在proportion的axis里，至少目前是这样
-      //    ] 
-      //   ,[    
-      //        [1,2,3] 
-      //    ]   
-      // ]
-
-      this._opt = _$1.clone(opt);
-      this.dataOrg = dataOrg || [];
-      this.sectionHandler = null;
-      this.dataSection = []; //从原数据 dataOrg 中 结果 datasection 重新计算后的数据
-
-      this.dataSectionLayout = []; //和dataSection一一对应的，每个值的pos，//get xxx OfPos的时候，要先来这里做一次寻找
-      //轴总长
-
-      this.axisLength = 1;
-      this._cellCount = null;
-      this._cellLength = null; //数据变动的时候要置空
-      //下面三个目前yAxis中实现了，后续统一都会实现
-      //水位data，需要混入 计算 dataSection， 如果有设置waterLine， dataSection的最高水位不会低于这个值
-      //这个值主要用于第三方的markline等组件， 自己的y值超过了yaxis的范围的时候，需要纳入来修复yaxis的section区间
-
-      this.waterLine = null; //默认的 dataSectionGroup = [ dataSection ], dataSection 其实就是 dataSectionGroup 去重后的一维版本
-
-      this.dataSectionGroup = []; //如果middleweight有设置的话 dataSectionGroup 为被middleweight分割出来的n个数组>..[ [0,50 , 100],[100,500,1000] ]
-
-      this.middleweight = null;
-      this.symmetric = false; //proportion下，是否需要设置数据为正负对称的数据，比如 [ 0,5,10 ] = > [ -10, 0 10 ]，象限坐标系的时候需要
-      //1，如果数据中又正数和负数，则默认为0，
-      //2，如果dataSection最小值小于0，则baseNumber为最小值，
-      //3，如果dataSection最大值大于0，则baseNumber为最大值
-      //也可以由用户在第2、3种情况下强制配置为0，则section会补充满从0开始的刻度值
-
-      this.origin = null;
-      this.originPos = 0; //value为 origin 对应的pos位置
-
-      this._originTrans = 0; //当设置的 origin 和datasection的min不同的时候，
-      //min,max不需要外面配置，没意义
-
-      this._min = null;
-      this._max = null; //"asc" 排序，默认从小到大, desc为从大到小
-      //之所以不设置默认值为asc，是要用 null 来判断用户是否进行了配置
-
-      this.sort = null;
-      this.posParseToInt = false; //比如在柱状图中，有得时候需要高精度的能间隔1px的柱子，那么x轴的计算也必须要都是整除的
-    }
-
-    _createClass(axis, [{
-      key: "resetDataOrg",
-      value: function resetDataOrg(dataOrg) {
-        //配置和数据变化
-        this.dataSection = [];
-        this.dataSectionGroup = [];
-        this.dataOrg = dataOrg;
-        this._cellCount = null;
-        this._cellLength = null;
-      }
-    }, {
-      key: "setAxisLength",
-      value: function setAxisLength(length) {
-        this.axisLength = length;
-        this.calculateProps();
-      }
-    }, {
-      key: "calculateProps",
-      value: function calculateProps() {
-        var me = this;
-
-        if (this.layoutType == "proportion") {
-          if (this._min == null) {
-            this._min = _$1.min(this.dataSection);
-          }
-
-          if (this._max == null) {
-            this._max = _$1.max(this.dataSection);
-          }
-          //如果用户设置了origin，那么就已用户的设置为准
-
-          if (!("origin" in this._opt)) {
-            this.origin = 0; //this.dataSection[0];//_.min( this.dataSection );
-
-            if (_$1.max(this.dataSection) < 0) {
-              this.origin = _$1.max(this.dataSection);
-            }
-
-            if (_$1.min(this.dataSection) > 0) {
-              this.origin = _$1.min(this.dataSection);
-            }
-          }
-          this._originTrans = this._getOriginTrans(this.origin);
-          this.originPos = this.getPosOfVal(this.origin);
-        }
-
-        this.dataSectionLayout = [];
-
-        _$1.each(this.dataSection, function (val, i) {
-          var ind = i;
-
-          if (me.layoutType == "proportion") {
-            ind = me.getIndexOfVal(val);
-          }
-          var pos = parseInt(me.getPosOf({
-            ind: i,
-            val: val
-          }), 10);
-          me.dataSectionLayout.push({
-            val: val,
-            ind: ind,
-            pos: pos
-          });
-        });
-      }
-    }, {
-      key: "getDataSection",
-      value: function getDataSection() {
-        //对外返回的dataSection
-        return this.dataSection;
-      }
-    }, {
-      key: "setDataSection",
-      value: function setDataSection(_dataSection) {
-        var me = this; //如果用户没有配置dataSection，或者用户传了，但是传了个空数组，则自己组装dataSection
-
-        if (_$1.isEmpty(_dataSection) && _$1.isEmpty(this._opt.dataSection)) {
-          if (this.layoutType == "proportion") {
-            var arr = this._getDataSection();
-
-            if ("origin" in me._opt) {
-              arr.push(me._opt.origin);
-            }
-
-            if (arr.length == 1) {
-              arr.push(arr[0] * .5);
-            }
-
-            if (this.waterLine) {
-              arr.push(this.waterLine);
-            }
-
-            if (this.symmetric) {
-              //如果需要处理为对称数据
-              var _min = _$1.min(arr);
-
-              var _max = _$1.max(arr);
-
-              if (Math.abs(_min) > Math.abs(_max)) {
-                arr.push(Math.abs(_min));
-              } else {
-                arr.push(-Math.abs(_max));
-              }
-            }
-
-            for (var ai = 0, al = arr.length; ai < al; ai++) {
-              arr[ai] = Number(arr[ai]);
-
-              if (isNaN(arr[ai])) {
-                arr.splice(ai, 1);
-                ai--;
-                al--;
-              }
-            }
-
-            if (_$1.isFunction(this.sectionHandler)) {
-              this.dataSection = this.sectionHandler(arr);
-            }
-
-            if (!this.dataSection || !this.dataSection.length) {
-              this.dataSection = dataSection$1.section(arr, 3);
-            }
-
-            if (this.symmetric) {
-              //可能得到的区间是偶数， 非对称，强行补上
-              var _min = _$1.min(this.dataSection);
-
-              var _max = _$1.max(this.dataSection);
-
-              if (Math.abs(_min) > Math.abs(_max)) {
-                this.dataSection.push(Math.abs(_min));
-              } else {
-                this.dataSection.unshift(-Math.abs(_max));
-              }
-            }
-
-            if (this.dataSection.length == 0) {
-              this.dataSection = [0];
-            }
-
-            this.dataSectionGroup = [_$1.clone(this.dataSection)];
-
-            this._middleweight(); //如果有middleweight配置，需要根据配置来重新矫正下datasection
-
-
-            this._sort();
-          } else {
-            //非proportion 也就是 rule peak 模式下面
-            this.dataSection = _$1.flatten(this.dataOrg); //this._getDataSection();
-
-            this.dataSectionGroup = [this.dataSection];
-          }
-        } else {
-          this.dataSection = _dataSection || this._opt.dataSection;
-          this.dataSectionGroup = [this.dataSection];
-        }
-      }
-    }, {
-      key: "_getDataSection",
-      value: function _getDataSection() {
-        //如果有堆叠，比如[ ["uv","pv"], "click" ]
-        //那么这个 this.dataOrg， 也是个对应的结构
-        //vLen就会等于2
-        var vLen = 1;
-
-        _$1.each(this.dataOrg, function (arr) {
-          vLen = Math.max(arr.length, vLen);
-        });
-
-        if (vLen == 1) {
-          return this._oneDimensional();
-        }
-
-        if (vLen > 1) {
-          return this._twoDimensional();
-        }
-      }
-    }, {
-      key: "_oneDimensional",
-      value: function _oneDimensional() {
-        var arr = _$1.flatten(this.dataOrg); //_.flatten( data.org );
-
-
-        for (var i = 0, il = arr.length; i < il; i++) {
-          arr[i] = arr[i] || 0;
-        }
-        return arr;
-      } //二维的yAxis设置，肯定是堆叠的比如柱状图，后续也会做堆叠的折线图， 就是面积图
-
-    }, {
-      key: "_twoDimensional",
-      value: function _twoDimensional() {
-        var d = this.dataOrg;
-        var arr = [];
-        var min;
-
-        _$1.each(d, function (d, i) {
-          if (!d.length) {
-            return;
-          }
-
-          if (!_$1.isArray(d[0])) {
-            arr.push(d);
-            return;
-          }
-          var varr = [];
-          var len = d[0].length;
-          var vLen = d.length;
-
-          for (var i = 0; i < len; i++) {
-            var up_count = 0;
-            var up_i = 0;
-            var down_count = 0;
-            var down_i = 0;
-
-            for (var ii = 0; ii < vLen; ii++) {
-              var _val = d[ii][i];
-
-              if (!_val && _val !== 0) {
-                continue;
-              }
-              min == undefined && (min = _val);
-              min = Math.min(min, _val);
-
-              if (_val >= 0) {
-                up_count += _val;
-                up_i++;
-              } else {
-                down_count += _val;
-                down_i++;
-              }
-            }
-
-            up_i && varr.push(up_count);
-            down_i && varr.push(down_count);
-          }
-          arr.push(varr);
-        });
-
-        arr.push(min);
-        return _$1.flatten(arr);
-      } //val 要被push到datasection 中去的 值
-      //主要是用在markline等组件中，当自己的y值超出了yaxis的范围
-
-    }, {
-      key: "setWaterLine",
-      value: function setWaterLine(val) {
-        if (val <= this.waterLine) return;
-        this.waterLine = val;
-
-        if (val < _$1.min(this.dataSection) || val > _$1.max(this.dataSection)) {
-          //waterLine不再当前section的区间内，需要重新计算整个datasection    
-          this.setDataSection();
-          this.calculateProps();
-        }
-      }
-    }, {
-      key: "_sort",
-      value: function _sort() {
-        if (this.sort) {
-          var sort = this._getSortType();
-
-          if (sort == "desc") {
-            this.dataSection.reverse(); //dataSectionGroup 从里到外全部都要做一次 reverse， 这样就可以对应上 dataSection.reverse()
-
-            _$1.each(this.dataSectionGroup, function (dsg, i) {
-              dsg.reverse();
-            });
-
-            this.dataSectionGroup.reverse(); //dataSectionGroup reverse end
-          }
-        }
-      }
-    }, {
-      key: "_getSortType",
-      value: function _getSortType() {
-        var _sort;
-
-        if (_$1.isString(this.sort)) {
-          _sort = this.sort;
-        }
-
-        if (!_sort) {
-          _sort = "asc";
-        }
-
-        return _sort;
-      }
-    }, {
-      key: "_middleweight",
-      value: function _middleweight() {
-        if (this.middleweight) {
-          //支持多个量级的设置
-          if (!_$1.isArray(this.middleweight)) {
-            this.middleweight = [this.middleweight];
-          }
-
-          var dMin = _$1.min(this.dataSection);
-
-          var dMax = _$1.max(this.dataSection);
-
-          var newDS = [dMin];
-          var newDSG = [];
-
-          for (var i = 0, l = this.middleweight.length; i < l; i++) {
-            var preMiddleweight = dMin;
-
-            if (i > 0) {
-              preMiddleweight = this.middleweight[i - 1];
-            }
-            var middleVal = preMiddleweight + parseInt((this.middleweight[i] - preMiddleweight) / 2);
-            newDS.push(middleVal);
-            newDS.push(this.middleweight[i]);
-            newDSG.push([preMiddleweight, middleVal, this.middleweight[i]]);
-          }
-          var lastMW = this.middleweight.slice(-1)[0];
-
-          if (dMax > lastMW) {
-            newDS.push(lastMW + (dMax - lastMW) / 2);
-            newDS.push(dMax);
-            newDSG.push([lastMW, lastMW + (dMax - lastMW) / 2, dMax]);
-          } //好了。 到这里用简单的规则重新拼接好了新的 dataSection
-
-
-          this.dataSection = newDS;
-          this.dataSectionGroup = newDSG;
-        }
-      } //origin 对应 this.origin 的值
-
-    }, {
-      key: "_getOriginTrans",
-      value: function _getOriginTrans(origin) {
-        var pos = 0;
-        var dsgLen = this.dataSectionGroup.length;
-        var groupLength = this.axisLength / dsgLen;
-
-        for (var i = 0, l = dsgLen; i < l; i++) {
-          var ds = this.dataSectionGroup[i];
-
-          if (this.layoutType == "proportion") {
-            var min = _$1.min(ds);
-
-            var max = _$1.max(ds);
-
-            var amountABS = Math.abs(max - min);
-
-            if (origin >= min && origin <= max) {
-              pos = (origin - min) / amountABS * groupLength + i * groupLength;
-              break;
-            }
-          }
-        }
-
-        if (this.sort == "desc") {
-          //如果是倒序的
-          pos = -(groupLength - pos);
-        }
-        return parseInt(pos);
-      } //opt { val ind pos } 一次只能传一个
-
-    }, {
-      key: "_getLayoutDataOf",
-      value: function _getLayoutDataOf(opt) {
-        var props = ["val", "ind", "pos"];
-        var prop;
-
-        _$1.each(props, function (_p) {
-          if (_p in opt) {
-            prop = _p;
-          }
-        });
-
-        var layoutData;
-
-        _$1.each(this.dataSectionLayout, function (item) {
-          if (item[prop] === opt[prop]) {
-            layoutData = item;
-          }
-        });
-
-        return layoutData || {};
-      }
-    }, {
-      key: "getPosOfVal",
-      value: function getPosOfVal(val) {
-        /* val可能会重复，so 这里得到的会有问题，先去掉
-        //先检查下 dataSectionLayout 中有没有对应的记录
-        var _pos = this._getLayoutDataOf({ val : val }).pos;
-        if( _pos != undefined ){
-            return _pos;
-        };
-        */
-        return this.getPosOf({
-          val: val
-        });
-      }
-    }, {
-      key: "getPosOfInd",
-      value: function getPosOfInd(ind) {
-        //先检查下 dataSectionLayout 中有没有对应的记录
-        var _pos = this._getLayoutDataOf({
-          ind: ind
-        }).pos;
-
-        if (_pos != undefined) {
-          return _pos;
-        }
-        return this.getPosOf({
-          ind: ind
-        });
-      } //opt {val, ind} val 或者ind 一定有一个
-
-    }, {
-      key: "getPosOf",
-      value: function getPosOf(opt) {
-        var pos;
-
-        var cellCount = this._getCellCount(); //dataOrg上面的真实数据节点数，把轴分成了多少个节点
-
-
-        if (this.layoutType == "proportion") {
-          var dsgLen = this.dataSectionGroup.length;
-          var groupLength = this.axisLength / dsgLen;
-
-          for (var i = 0, l = dsgLen; i < l; i++) {
-            var ds = this.dataSectionGroup[i];
-
-            var min = _$1.min(ds);
-
-            var max = _$1.max(ds);
-
-            var val = "val" in opt ? opt.val : this.getValOfInd(opt.ind);
-
-            if (val >= min && val <= max) {
-              var _origin = this.origin; //如果 origin 并不在这个区间
-
-              if (_origin < min || _origin > max) {
-                _origin = min;
-              }
-              var maxGroupDisABS = Math.max(Math.abs(max - _origin), Math.abs(_origin - min));
-              var amountABS = Math.abs(max - min);
-              var h = maxGroupDisABS / amountABS * groupLength;
-              pos = (val - _origin) / maxGroupDisABS * h + i * groupLength;
-
-              if (isNaN(pos)) {
-                pos = parseInt(i * groupLength);
-              }
-              break;
-            }
-          }
-        } else {
-          if (cellCount == 1) {
-            //如果只有一数据，那么就全部默认在正中间
-            pos = this.axisLength / 2;
-          } else {
-            //TODO 这里在非proportion情况下，如果没有opt.ind 那么getIndexOfVal 其实是有风险的，
-            //因为可能有多个数据的val一样
-            var valInd = "ind" in opt ? opt.ind : this.getIndexOfVal(opt.val);
-
-            if (valInd != -1) {
-              if (this.layoutType == "rule") {
-                //line 的xaxis就是 rule
-                pos = valInd / (cellCount - 1) * this.axisLength;
-              }
-
-              if (this.layoutType == "peak") {
-                //bar的xaxis就是 peak
-
-                /*
-                pos = (this.axisLength/cellCount) 
-                      * (valInd+1) 
-                      - (this.axisLength/cellCount)/2;
-                */
-                var _cellLength = this.getCellLength();
-
-                pos = _cellLength * (valInd + 1) - _cellLength / 2;
-              }
-            }
-          }
-        }
-        !pos && (pos = 0);
-        pos = Number(pos.toFixed(1)) + this._originTrans;
-        return Math.abs(pos);
-      }
-    }, {
-      key: "getValOfPos",
-      value: function getValOfPos(pos) {
-        //先检查下 dataSectionLayout 中有没有对应的记录
-        var _val = this._getLayoutDataOf({
-          pos: pos
-        }).val;
-
-        if (_val != undefined) {
-          return _val;
-        }
-        return this._getValOfInd(this.getIndexOfPos(pos));
-      } //ds可选
-
-    }, {
-      key: "getValOfInd",
-      value: function getValOfInd(ind) {
-        //先检查下 dataSectionLayout 中有没有对应的记录
-        var _val = this._getLayoutDataOf({
-          ind: ind
-        }).val;
-
-        if (_val != undefined) {
-          return _val;
-        }
-        return this._getValOfInd(ind);
-        /*
-        if (this.layoutType == "proportion") {
-        
-        } else {
-            //这里的index是直接的对应dataOrg的索引
-            var org = ds ? ds : _.flatten(this.dataOrg);
-            return org[ind];
-        };
-        */
-      } //这里的ind
-
-    }, {
-      key: "_getValOfInd",
-      value: function _getValOfInd(ind, ds) {
-        var me = this;
-
-        var org = _$1.flatten(this.dataOrg);
-
-        var val;
-
-        if (this.layoutType == "proportion") {
-          var groupLength = this.axisLength / this.dataSectionGroup.length;
-
-          _$1.each(this.dataSectionGroup, function (ds, i) {
-            if (parseInt(ind / groupLength) == i || i == me.dataSectionGroup.length - 1) {
-              var min = _$1.min(ds);
-
-              var max = _$1.max(ds);
-
-              val = min + (max - min) / groupLength * (ind - groupLength * i);
-              return false;
-            }
-          });
-        } else {
-          val = org[ind];
-        }
-        return val;
-      }
-    }, {
-      key: "getIndexOfPos",
-      value: function getIndexOfPos(pos) {
-        //先检查下 dataSectionLayout 中有没有对应的记录
-        var _ind = this._getLayoutDataOf({
-          pos: pos
-        }).ind;
-
-        if (_ind != undefined) {
-          return _ind;
-        }
-        var ind = 0;
-        var cellLength = this.getCellLengthOfPos(pos);
-
-        var cellCount = this._getCellCount();
-
-        if (this.layoutType == "proportion") {
-          //proportion中的index以像素为单位 所以，传入的像素值就是index
-          return pos;
-        } else {
-          if (this.layoutType == "peak") {
-            ind = parseInt(pos / cellLength);
-
-            if (ind == cellCount) {
-              ind = cellCount - 1;
-            }
-          }
-
-          if (this.layoutType == "rule") {
-            ind = parseInt((pos + cellLength / 2) / cellLength);
-
-            if (cellCount == 1) {
-              //如果只有一个数据
-              ind = 0;
-            }
-          }
-        }
-        return ind;
-      }
-    }, {
-      key: "getIndexOfVal",
-      value: function getIndexOfVal(val) {
-        var valInd = -1;
-
-        if (this.layoutType == "proportion") {
-          //先检查下 dataSectionLayout 中有没有对应的记录
-          var _ind = this._getLayoutDataOf({
-            val: val
-          }).ind;
-
-          if (_ind != undefined) {
-            return _ind;
-          }
-          //所以这里要返回pos
-
-          valInd = this.getPosOfVal(val);
-        } else {
-          _$1.each(this.dataOrg, function (arr) {
-            _$1.each(arr, function (list) {
-              var _ind = _$1.indexOf(list, val);
-
-              if (_ind != -1) {
-                valInd = _ind;
-              }
-            });
-          });
-        }
-
-        return valInd;
-      }
-    }, {
-      key: "getCellLength",
-      value: function getCellLength() {
-        if (this._cellLength !== null) {
-          return this._cellLength;
-        }
-
-        var axisLength = this.axisLength;
-        var cellLength = axisLength;
-
-        var cellCount = this._getCellCount();
-
-        if (cellCount) {
-          if (this.layoutType == "proportion") {
-            cellLength = 1;
-          } else {
-            //默认按照 peak 也就是柱状图的需要的布局方式
-            cellLength = axisLength / cellCount;
-
-            if (this.layoutType == "rule") {
-              if (cellCount == 1) {
-                cellLength = axisLength / 2;
-              } else {
-                cellLength = axisLength / (cellCount - 1);
-              }
-            }
-
-            if (this.posParseToInt) {
-              cellLength = parseInt(cellLength);
-            }
-          }
-        }
-        this._cellLength = cellLength;
-        return cellLength;
-      } //这个getCellLengthOfPos接口主要是给tips用，因为tips中只有x信息
-
-    }, {
-      key: "getCellLengthOfPos",
-      value: function getCellLengthOfPos(pos) {
-        return this.getCellLength();
-      } //pos目前没用到，给后续的高级功能预留接口
-
-    }, {
-      key: "getCellLengthOfInd",
-      value: function getCellLengthOfInd(pos) {
-        return this.getCellLength();
-      }
-    }, {
-      key: "_getCellCount",
-      value: function _getCellCount() {
-        if (this._cellCount !== null) {
-          return this._cellCount;
-        }
-
-        var cellCount = 0;
-
-        if (this.layoutType == "proportion") {
-          cellCount = this.axisLength;
-        } else {
-          if (this.dataOrg.length && this.dataOrg[0].length && this.dataOrg[0][0].length) {
-            cellCount = this.dataOrg[0][0].length;
-          }
-        }
-        this._cellCount = cellCount;
-        return cellCount;
-      }
-    }]);
-
-    return axis;
-  }();
-
-  /**
-  * 把原始的数据
-  * field1 field2 field3
-  *   1      2      3
-  *   2      3      4
-  * 这样的数据格式转换为内部的
-  * [{field:'field1',index:0,data:[1,2]} ......]
-  * 这样的结构化数据格式。
-  */
-
-  var RESOLUTION$1 = typeof window !== 'undefined' ? window.devicePixelRatio : 1;
-
-  var addOrRmoveEventHand$1 = function addOrRmoveEventHand(domHand, ieHand) {
-    if (document[domHand]) {
-      var eventDomFn = function eventDomFn(el, type, fn) {
-        if (el.length) {
-          for (var i = 0; i < el.length; i++) {
-            eventDomFn(el[i], type, fn);
-          }
-        } else {
-          el[domHand](type, fn, false);
-        }
-      };
-      return eventDomFn;
-    } else {
-      var eventFn = function eventFn(el, type, fn) {
-        if (el.length) {
-          for (var i = 0; i < el.length; i++) {
-            eventFn(el[i], type, fn);
-          }
-        } else {
-          el[ieHand]("on" + type, function () {
-            return fn.call(el, window.event);
-          });
-        }
-      };
-      return eventFn;
-    }
-  };
-
-  var $$1 = {
-    // dom操作相关代码
-    query: function query(el) {
-      if (_$1.isString(el)) {
-        return document.getElementById(el);
-      }
-
-      if (el.nodeType == 1) {
-        //则为一个element本身
-        return el;
-      }
-
-      if (el.length) {
-        return el[0];
-      }
-
-      return null;
-    },
-    offset: function offset(el) {
-      var box = el.getBoundingClientRect(),
-          doc = el.ownerDocument,
-          body = doc.body,
-          docElem = doc.documentElement,
-          // for ie  
-      clientTop = docElem.clientTop || body.clientTop || 0,
-          clientLeft = docElem.clientLeft || body.clientLeft || 0,
-          // In Internet Explorer 7 getBoundingClientRect property is treated as physical, 
-      // while others are logical. Make all logical, like in IE8. 
-      zoom = 1;
-
-      if (body.getBoundingClientRect) {
-        var bound = body.getBoundingClientRect();
-        zoom = (bound.right - bound.left) / body.clientWidth;
-      }
-
-      if (zoom > 1) {
-        clientTop = 0;
-        clientLeft = 0;
-      }
-
-      var top = box.top / zoom + (window.pageYOffset || docElem && docElem.scrollTop / zoom || body.scrollTop / zoom) - clientTop,
-          left = box.left / zoom + (window.pageXOffset || docElem && docElem.scrollLeft / zoom || body.scrollLeft / zoom) - clientLeft;
-      return {
-        top: top,
-        left: left
-      };
-    },
-    addEvent: addOrRmoveEventHand$1("addEventListener", "attachEvent"),
-    removeEvent: addOrRmoveEventHand$1("removeEventListener", "detachEvent"),
-    pageX: function pageX(e) {
-      if (e.pageX) return e.pageX;else if (e.clientX) return e.clientX + (document.documentElement.scrollLeft ? document.documentElement.scrollLeft : document.body.scrollLeft);else return null;
-    },
-    pageY: function pageY(e) {
-      if (e.pageY) return e.pageY;else if (e.clientY) return e.clientY + (document.documentElement.scrollTop ? document.documentElement.scrollTop : document.body.scrollTop);else return null;
-    },
-
-    /**
-     * 创建dom
-     * @param {string} id dom id 待用
-     * @param {string} type : dom type， such as canvas, div etc.
-     */
-    createCanvas: function createCanvas(_width, _height, id) {
-      var canvas = document.createElement("canvas");
-      canvas.style.position = 'absolute';
-      canvas.style.width = _width + 'px';
-      canvas.style.height = _height + 'px';
-      canvas.style.left = 0;
-      canvas.style.top = 0;
-      canvas.setAttribute('width', _width * RESOLUTION$1);
-      canvas.setAttribute('height', _height * RESOLUTION$1);
-      canvas.setAttribute('id', id);
-      return canvas;
-    },
-    createView: function createView(_width, _height, id) {
-      var view = document.createElement("div");
-      view.className = "canvax-view";
-      view.style.cssText += "position:relative;width:100%;height:100%;";
-      var stageView = document.createElement("div");
-      stageView.style.cssText += "position:absolute;width:" + _width + "px;height:" + _height + "px;"; //用来存放一些dom元素
-
-      var domView = document.createElement("div");
-      domView.style.cssText += "position:absolute;width:" + _width + "px;height:" + _height + "px;";
-      view.appendChild(stageView);
-      view.appendChild(domView);
-      return {
-        view: view,
-        stageView: stageView,
-        domView: domView
-      };
-    } //dom相关代码结束
-
-  };
-
-  /**
-   * 系统皮肤
-   */
-  var _colors$1 = ["#ff8533", "#73ace6", "#82d982", "#e673ac", "#cd6bed", "#8282d9", "#c0e650", "#e6ac73", "#6bcded", "#73e6ac", "#ed6bcd", "#9966cc"];
-  var globalTheme$1 = {
-    colors: _colors$1,
-    set: function set(colors) {
-      this.colors = colors;
-      /*
-      var me = this;
-      _.each( colors, function( color , i ){
-          me.colors[i] = color;
-      } );
-      */
-
-      return this.colors;
-    },
-    get: function get() {
-      return this.colors;
-    }
-  };
-
-  var cloneOptions$1 = function cloneOptions(opt) {
-    return _$1.clone(opt);
-  };
-
-  var cloneData$1 = function cloneData(data) {
-    return JSON.parse(JSON.stringify(data));
-  };
-
-  var is3dOpt$1 = function is3dOpt(opt) {
-    var chartx3dCoordTypes = ["box", "polar3d"];
-    return opt.coord && opt.coord.type && chartx3dCoordTypes.indexOf(opt.coord.type) > -1;
-  };
-
-  //图表皮肤
-  var globalAnimationEnabled$1 = true; //是否开启全局的动画开关
-
-  var global$2 = {
-    create: function create(el, _data, _opt) {
-      var chart = null;
-      var me = this;
-      var data = cloneData$1(_data);
-      var opt = cloneOptions$1(_opt);
-
-      var _destroy = function _destroy() {
-        me.instances[chart.id] = null;
-        delete me.instances[chart.id];
-      }; //这个el如果之前有绘制过图表，那么就要在instances中找到图表实例，然后销毁
-
-
-      var chart_id = $$1.query(el).getAttribute("chart_id");
-
-      if (chart_id != undefined) {
-        var _chart = me.instances[chart_id];
-
-        if (_chart) {
-          _chart.destroy();
-
-          _chart.off && _chart.off("destroy", _destroy);
-        }
-        delete me.instances[chart_id];
-      }
-
-      var dimension = 2;
-
-      if (is3dOpt$1(_opt)) {
-        dimension = 3;
-      }
-
-      var componentModules = me._getComponentModules(dimension); //如果用户没有配置coord，说明这个图表是一个默认目标系的图表，比如标签云
-
-
-      var Chart = me._getComponentModule('chart', dimension); //try {
-
-
-      chart = new Chart(el, data, opt, componentModules);
-
-      if (chart) {
-        chart.draw();
-        me.instances[chart.id] = chart;
-        chart.on("destroy", _destroy);
-      }
-      //    throw "Chatx Error：" + err
-      //};
-
-      return chart;
-    },
-    setGlobalTheme: function setGlobalTheme(colors) {
-      globalTheme$1.set(colors);
-    },
-    getGlobalTheme: function getGlobalTheme() {
-      return globalTheme$1.get();
-    },
-    instances: {},
-    getChart: function getChart(chartId) {
-      return this.instances[chartId];
-    },
-    resize: function resize() {
-      //调用全局的这个resize方法，会把当前所有的 chart instances 都执行一遍resize
-      for (var c in this.instances) {
-        this.instances[c].resize();
-      }
-    },
-    //第二个参数是用户要用来覆盖chartpark中的配置的options
-    getOptions: function getOptions(chartPark_cid, userOptions) {
-      //chartPark_cid,chartpark中的图表id
-      if (!this.options[chartPark_cid]) {
-        return userOptions || {};
-      }
-      var JsonSerialize = {
-        prefix: '[[JSON_FUN_PREFIX_',
-        suffix: '_JSON_FUN_SUFFIX]]'
-      };
-
-      var parse = function parse(string) {
-        return JSON.parse(string, function (key, value) {
-          if (typeof value === 'string' && value.indexOf(JsonSerialize.suffix) > 0 && value.indexOf(JsonSerialize.prefix) == 0) {
-            return new Function('return ' + value.replace(JsonSerialize.prefix, '').replace(JsonSerialize.suffix, ''))();
-          }
-          return value;
-        }) || {};
-      };
-
-      var opt = parse(decodeURIComponent(this.options[chartPark_cid] || {}));
-
-      if (userOptions) {
-        opt = _$1.extend(true, opt, userOptions);
-      }
-      return opt;
-    },
-    components: {
-      c_2d: {
-        /*
-        modules:{
-            coord : {
-                empty : ..,
-                rect  : ..,
-                ...
-            },
-            graphs : {
-                //empty : .., //一般只有coord才会有empty
-                bar   : ..,
-                ...
-            }
-        },
-        get: function( name, type ){}
-        */
-      },
-      c_3d: {//所有3d组件,同上
-      }
-    },
-    _getComponentModules: function _getComponentModules(dimension) {
-      var comps = this.components.c_2d;
-
-      if (dimension == 3) {
-        comps = this.components.c_3d;
-      }
-
-      if (!comps.modules) {
-        comps.modules = {};
-      }
-
-      if (!comps.get) {
-        comps.get = function (name, type) {
-          if (!type) {
-            type = "empty";
-          }
-          name = name.toLowerCase();
-          type = type.toLowerCase();
-          var _module = comps.modules[name];
-
-          if (_module && _module[type]) {
-            return _module[type];
-          }
-        };
-      }
-      return comps;
-    },
-
-    /**
-     * @param {compModule} 要注册进去的模块名称
-     * @param {name} 要获取的comp名称
-     * @param { dimension,type } 后面可以传传两个参数 
-     * @param { dimension } 如果有四个参数，那么第三个肯定是type，第四个肯定是dimension 
-     */
-    registerComponent: function registerComponent(compModule, name) {
-      var dimension = 2;
-      var type = "empty";
-
-      if (arguments.length == 3) {
-        var arg2 = arguments[2];
-
-        if (_$1.isNumber(arg2)) {
-          if (arg2 == 3) {
-            dimension = 3;
-          }
-        }
-
-        if (_$1.isString(arg2)) {
-          type = arg2;
-        }
-      }
-
-      if (arguments.length == 4) {
-        //那么肯定是有传 type  dimension 两个值
-        type = arguments[2];
-
-        if (arguments[3] == 3) {
-          dimension = 3;
-        }
-      }
-
-      var comps = this._getComponentModules(dimension).modules;
-
-      name = name.toLowerCase();
-      type = type.toLowerCase();
-      var _comp = comps[name];
-
-      if (!_comp) {
-        _comp = comps[name] = {};
-      }
-
-      if (!_comp[type]) {
-        _comp[type] = compModule;
-      }
-      return comps;
-    },
-
-    /**
-     * 
-     * @param {name} 要获取的comp名称
-     * @param { dimension,type } 后面可以传传两个参数 
-     * @param { dimension } 如果有三个参数，那么第二个肯定是type，第三个肯定是dimension 
-     */
-    _getComponentModule: function _getComponentModule(name) {
-      var dimension = 2;
-      var type = "empty";
-
-      if (arguments.length == 2) {
-        var arg1 = arguments[1];
-
-        if (_$1.isNumber(arg1)) {
-          if (arg1 == 3) {
-            dimension = 3;
-          }
-        }
-
-        if (_$1.isString(arg1)) {
-          type = arg1;
-        }
-      }
-
-      if (arguments.length == 3) {
-        //那么肯定是有传 type  dimension 两个值
-        type = arguments[1];
-
-        if (arguments[2] == 3) {
-          dimension = 3;
-        }
-      }
-      name = name.toLowerCase();
-      type = type.toLowerCase();
-
-      var _comp = this._getComponentModules(dimension).modules[name];
-
-      return _comp ? _comp[type] : undefined;
-    },
-    setAnimationEnabled: function setAnimationEnabled(bool) {
-      globalAnimationEnabled$1 = bool;
-    },
-    getAnimationEnabled: function getAnimationEnabled(bool) {
-      return globalAnimationEnabled$1;
-    }
-  };
-
-  //十六进制颜色值的正则表达式
-
-  var aRound$1 = 360; //一圈的度数
-
-  var Cos$1 = Math.cos;
-  var Sin$1 = Math.sin;
-
-  var Polar$1 =
-  /*#__PURE__*/
-  function () {
-    function Polar() {
-      var opt = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-      var dataFrame = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [];
-
-      _classCallCheck(this, Polar);
-
-      this._opt = _$1.clone(opt);
-      this.dataFrame = dataFrame;
-      this.axisLength = 1;
-      this.dataOrg = [];
-      this.startAngle = this._opt.startAngle;
-      this.allAngles = Math.min(360, this._opt.allAngles);
-      this.sort = this._opt.sort;
-      this.layoutData = []; //和dataSection一一对应的，每个值的pos,agend,dregg,centerPos
-
-      this.maxRadius = 0; //最大半径值
-
-      this.minRadius = 0; //最小半径值 
-    }
-
-    _createClass(Polar, [{
-      key: "calculateProps",
-      value: function calculateProps() {
-        var _this = this;
-
-        var axisLength = 0;
-        var percentage = 0;
-        var currentAngle = 0;
-        var opt = this._opt;
-        var angle, endAngle, cosV, sinV, midAngle, quadrant;
-        var percentFixedNum = 2;
-        var outRadius = opt.node.outRadius;
-        var innerRadius = opt.node.innerRadius;
-        var moveDis = opt.node.moveDis;
-        this.layoutData.forEach(function (item, i) {
-          if (!item.enabled) return;
-          axisLength += isNaN(+item.value) ? 0 : +item.value;
-
-          if (item.radiusField) {
-            _this.maxRadius = Math.max(item.radiusValue, axisLength);
-            _this.minRadius = Math.min(item.radiusValue, axisLength);
-          }
-        });
-        this.axisLength = axisLength;
-
-        if (axisLength > 0) {
-          //原始算法
-          // currentAngle = + opt.startAngle % 360;
-          // limitAngle = opt.allAngles + me.startAngle % me.allAngles;
-          //新的算法
-          //这里只是计算每个扇区的初始位置,所以这里求模就可以啦
-          currentAngle = _$1.euclideanModulo(this.startAngle, aRound$1); // opt.allAngles = opt.allAngles > 0 ? opt.allAngles : aRound;
-          // limitAngle = opt.allAngles + _.euclideanModulo(opt.startAngle, opt.allAngles);
-
-          this.layoutData.forEach(function (item, i) {
-            percentage = item.value / axisLength; //enabled为false的sec，比率就设置为0
-
-            if (!item.enabled) {
-              percentage = 0;
-            }
-            angle = _this.allAngles * percentage; //旧的算法
-            // endAngle = currentAngle + angle > limitAngle ? limitAngle : me.currentAngle + angle;
-
-            endAngle = currentAngle + angle;
-            midAngle = currentAngle + angle * 0.5;
-            cosV = Cos$1(_$1.degToRad(midAngle));
-            sinV = Sin$1(_$1.degToRad(midAngle));
-            cosV = cosV.toFixed(5);
-            sinV = sinV.toFixed(5);
-            quadrant = _this.getAuadrant(midAngle); //如果用户在配置中制定了半径字段,这里需要计算相对的半径比例值
-
-            if (!!item.radiusField) {
-              // var _rr = Number(item.rowData[opt.node.radius]);
-              outRadius = parseInt((opt.node.outRadius - opt.node.innerRadius) * ((item.radiusValue - _this.minRadius) / (_this.maxRadius - _this.minRadius)) + opt.node.innerRadius);
-            }
-
-            _$1.extend(item, {
-              outRadius: outRadius,
-              innerRadius: innerRadius,
-              startAngle: currentAngle,
-              //起始角度
-              endAngle: endAngle,
-              //结束角度
-              midAngle: midAngle,
-              //中间角度
-              moveDis: moveDis,
-              outOffsetx: moveDis * 0.7 * cosV,
-              //focus的事实外扩后圆心的坐标x
-              outOffsety: moveDis * 0.7 * sinV,
-              //focus的事实外扩后圆心的坐标y
-              centerx: outRadius * cosV,
-              centery: outRadius * sinV,
-              outx: (outRadius + moveDis) * cosV,
-              outy: (outRadius + moveDis) * sinV,
-              edgex: (outRadius + moveDis) * cosV,
-              edgey: (outRadius + moveDis) * sinV,
-              orginPercentage: percentage,
-              percentage: (percentage * 100).toFixed(percentFixedNum),
-              quadrant: quadrant,
-              //象限
-              isRightSide: quadrant == 1 || quadrant == 4 ? 1 : 0,
-              cosV: cosV,
-              sinV: sinV
-            });
-
-            currentAngle += angle;
-          });
-        }
-      }
-      /**
-       *  重设数据后,需要调用setDataFrame与calculateProps 重新计算layoutData
-       * @param {ArryObject} dataFrame 
-       */
-
-    }, {
-      key: "resetData",
-      value: function resetData(dataFrame) {
-        this.dataFrame = dataFrame || [];
-        this.axisLength = 1;
-        this.dataOrg = [];
-        this.startAngle = this._opt.startAngle || -90;
-        this.allAngles = this._opt.allAngles || 360;
-        this.layoutData = [];
-      }
-    }, {
-      key: "setOption",
-      value: function setOption() {
-        var opt = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-        Object.assign(this._opt, opt);
-        this.startAngle = this._opt.startAngle;
-        this.allAngles = Math.min(360, this._opt.allAngles);
-        this.sort = this._opt.sort;
-      }
-    }, {
-      key: "setDataFrame",
-      value: function setDataFrame(dataFrame) {
-        var _this2 = this;
-
-        var data = [];
-        var opt = this._opt;
-        var field = opt.field;
-        var labelField = opt.groupField || opt.label.field || opt.field;
-        var radiusField = opt.node.radius;
-        dataFrame = dataFrame || this.dataFrame;
-        this.dataFrame = dataFrame;
-        this.dataOrg = [];
-
-        for (var i = 0, l = dataFrame.length; i < l; i++) {
-          var rowData = dataFrame.getRowDataAt(i);
-          var layoutData = {
-            rowData: rowData,
-            //把这一行数据给到layoutData引用起来
-            enabled: true,
-            //是否启用，显示在列表中
-            value: rowData[field],
-            label: rowData[labelField],
-            iNode: i
-          };
-          this.dataOrg.push(rowData[field]);
-
-          if (this._isFiled(radiusField, layoutData)) {
-            layoutData.radiusField = radiusField;
-            layoutData.radiusValue = rowData[radiusField];
-          }
-
-          data.push(layoutData);
-        }
-
-        if (this.sort) {
-          this.dataOrg = [];
-          data.sort(function (a, b) {
-            if (_this2.sort == 'asc') {
-              return a.value - b.value;
-            } else {
-              return b.value - a.value;
-            }
-          }); //重新设定下ind
-
-          _$1.each(data, function (d, i) {
-            d.iNode = i;
-
-            _this2.dataOrg.push(d);
-          });
-        }
-        this.layoutData = data;
-        return data;
-      }
-    }, {
-      key: "getLayoutData",
-      value: function getLayoutData() {
-        return this.layoutData || [];
-      }
-    }, {
-      key: "_isFiled",
-      value: function _isFiled(field, layoutData) {
-        return field && _$1.isString(field) && field in layoutData.rowData;
-      }
-    }, {
-      key: "getAuadrant",
-      value: function getAuadrant(ang) {
-        //获取象限
-        ang = _$1.euclideanModulo(ang, aRound$1);
-        var angleRatio = parseInt(ang / 90);
-        var _quadrant = 0;
-
-        switch (angleRatio) {
-          case 0:
-            _quadrant = 1;
-            break;
-
-          case 1:
-            _quadrant = 2;
-            break;
-
-          case 2:
-            _quadrant = 3;
-            break;
-
-          case 3:
-          case 4:
-            _quadrant = 4;
-            break;
-        }
-
-        return _quadrant;
-      }
-      /**
-       * 通过值或者索引返回数据集对象
-       * @param {Object} opt {val:xxx} 或 {ind:xxx} 
-       */
-
-    }, {
-      key: "_getLayoutDataOf",
-      value: function _getLayoutDataOf(opt) {
-        //先提供 具体值 和 索引的计算
-        var props = [{
-          val: "value"
-        }, {
-          ind: "iNode"
-        }];
-        var prop = props[Object.keys(opt)[0]];
-        var layoutData;
-
-        _$1.each(this.layoutData, function (item) {
-          if (item[prop] === opt[prop]) {
-            layoutData = item;
-          }
-        });
-
-        return layoutData || {};
-      }
-    }, {
-      key: "getRadiansAtR",
-      value: function getRadiansAtR() {//基类不实现
-      }
-    }, {
-      key: "getPointsOfR",
-      value: function getPointsOfR(r, angleList) {
-        var points = [];
-
-        _$1.each(angleList, function (_a) {
-          //弧度
-          var _r = Math.PI * _a / 180;
-
-          var point = Polar.getPointInRadianOfR(_r, r);
-          points.push(point);
-        });
-
-        return points;
-      }
-    }], [{
-      key: "filterPointsInRect",
-      value: function filterPointsInRect(points, origin, width, height) {
-        for (var i = 0, l = points.length; i < l; i++) {
-          if (!Polar.checkPointInRect(points[i], origin, width, height)) {
-            //该点不在root rect范围内，去掉
-            points.splice(i, 1);
-            i--, l--;
-          }
-        }
-        return points;
-      }
-    }, {
-      key: "checkPointInRect",
-      value: function checkPointInRect(p, origin, width, height) {
-        var _tansRoot = {
-          x: p.x + origin.x,
-          y: p.y + origin.y
-        };
-        return !(_tansRoot.x < 0 || _tansRoot.x > width || _tansRoot.y < 0 || _tansRoot.y > height);
-      } //检查由n个相交点分割出来的圆弧是否在rect内
-
-    }, {
-      key: "checkArcInRect",
-      value: function checkArcInRect(arc, r, origin, width, height) {
-        var start = arc[0];
-        var to = arc[1];
-        var differenceR = to.radian - start.radian;
-
-        if (to.radian < start.radian) {
-          differenceR = Math.PI * 2 + to.radian - start.radian;
-        }
-        var middleR = (start.radian + differenceR / 2) % (Math.PI * 2);
-        return Polar.checkPointInRect(Polar.getPointInRadianOfR(middleR, r), origin, width, height);
-      } //获取某个点相对圆心的弧度值
-
-    }, {
-      key: "getRadianInPoint",
-      value: function getRadianInPoint(point) {
-        var pi2 = Math.PI * 2;
-        return (Math.atan2(point.y, point.x) + pi2) % pi2;
-      } //获取某个弧度方向，半径为r的时候的point坐标点位置
-
-    }, {
-      key: "getPointInRadianOfR",
-      value: function getPointInRadianOfR(radian, r) {
-        var pi = Math.PI;
-        var x = Math.cos(radian) * r;
-
-        if (radian == pi / 2 || radian == pi * 3 / 2) {
-          //90度或者270度的时候
-          x = 0;
-        }
-        var y = Math.sin(radian) * r;
-
-        if (radian % pi == 0) {
-          y = 0;
-        }
-        return {
-          x: x,
-          y: y
-        };
-      }
-    }, {
-      key: "getROfNum",
-      value: function getROfNum(num, dataSection, width, height) {
-        var r = 0;
-
-        var maxNum = _$1.max(dataSection);
-
-        var minNum = 0; //Math.min( this.rAxis.dataSection );
-
-        var maxR = parseInt(Math.max(width, height) / 2);
-        r = maxR * ((num - minNum) / (maxNum - minNum));
-        return r;
-      }
-    }]);
-
-    return Polar;
-  }();
-
-  /**
-   * Canvax
-   *
-   * @author 释剑 (李涛, litao.lt@alibaba-inc.com)
-   *
-   * canvas 上委托的事件管理
-   */
-
-  var Event$1 = function Event(evt) {
-    var eventType = "CanvaxEvent";
-
-    if (_$1.isString(evt)) {
-      eventType = evt;
-    }
-
-    if (_$1.isObject(evt) && evt.type) {
-      eventType = evt.type;
-    }
-    this.target = null;
-    this.currentTarget = null;
-    this.type = eventType;
-    this.point = null;
-    this._stopPropagation = false; //默认不阻止事件冒泡
-  };
-
-  Event$1.prototype = {
-    stopPropagation: function stopPropagation() {
-      this._stopPropagation = true;
-    }
-  };
-
-  /**
-   * Canvax
-   *
-   * @author 释剑 (李涛, litao.lt@alibaba-inc.com)
-   *
-   * canvas 上委托的事件管理
-   */
-  var _mouseEvents$1 = 'mousedown mouseup mouseover mousemove mouseout click dblclick';
-  var types$1 = {
-    _types: _mouseEvents$1.split(/,| /),
-    register: function register(evts) {
-      if (!evts) {
-        return;
-      }
-
-      if (_$1.isString(evts)) {
-        evts = evts.split(/,| /);
-      }
-      this._types = _mouseEvents$1.split(/,| /).concat(evts);
-    },
-    get: function get() {
-      return this._types;
-    }
-  };
-
-  /**
-   * Canvax
-   *
-   * @author 释剑 (李涛, litao.lt@alibaba-inc.com)
-   *
-   * 事件管理类
-   */
-  /**
-   * 构造函数.
-   * @name EventDispatcher
-   * @class EventDispatcher类是可调度事件的类的基类，它允许显示列表上的任何对象都是一个事件目标。
-   */
-
-  var Manager$1 = function Manager() {
-    //事件映射表，格式为：{type1:[listener1, listener2], type2:[listener3, listener4]}
-    this._eventMap = {};
-  };
-
-  Manager$1.prototype = {
-    /**
-     * 判断events里面是否有用户交互事件
-     */
-    _setEventEnable: function _setEventEnable() {
-      var hasInteractionEvent = false;
-
-      for (var t in this._eventMap) {
-        if (_$1.indexOf(types$1.get(), t) > -1) {
-          hasInteractionEvent = true;
-        }
-      }
-      this._eventEnabled = hasInteractionEvent;
-    },
-
-    /*
-     * 注册事件侦听器对象，以使侦听器能够接收事件通知。
-     */
-    _addEventListener: function _addEventListener(_type, listener) {
-      if (typeof listener != "function") {
-        //listener必须是个function呐亲
-        return false;
-      }
-
-      var addResult = true;
-      var self = this;
-      var types = _type;
-
-      if (_$1.isString(_type)) {
-        types = _type.split(/,| /);
-      }
-
-      _$1.each(types, function (type) {
-        var map = self._eventMap[type];
-
-        if (!map) {
-          map = self._eventMap[type] = [];
-          map.push(listener); //self._eventEnabled = true;
-
-          self._setEventEnable();
-
-          return true;
-        }
-
-        if (_$1.indexOf(map, listener) == -1) {
-          map.push(listener); //self._eventEnabled = true;
-
-          self._setEventEnable();
-
-          return true;
-        }
-
-        addResult = false;
-      });
-
-      return addResult;
-    },
-
-    /**
-     * 删除事件侦听器。
-     */
-    _removeEventListener: function _removeEventListener(type, listener) {
-      if (arguments.length == 1) return this.removeEventListenerByType(type);
-      var map = this._eventMap[type];
-
-      if (!map) {
-        return false;
-      }
-
-      for (var i = 0; i < map.length; i++) {
-        var li = map[i];
-
-        if (li === listener) {
-          map.splice(i, 1);
-
-          if (map.length == 0) {
-            delete this._eventMap[type];
-
-            this._setEventEnable(); //如果这个如果这个时候child没有任何事件侦听
-
-            /*
-            if(_.isEmpty(this._eventMap)){
-                //那么该元素不再接受事件的检测
-                this._eventEnabled = false;
-            }
-            */
-
-          }
-
-          return true;
-        }
-      }
-
-      return false;
-    },
-
-    /**
-     * 删除指定类型的所有事件侦听器。
-     */
-    _removeEventListenerByType: function _removeEventListenerByType(type) {
-      var map = this._eventMap[type];
-
-      if (!map) {
-        delete this._eventMap[type];
-
-        this._setEventEnable(); //如果这个如果这个时候child没有任何事件侦听
-
-        /*
-        if(_.isEmpty(this._eventMap)){
-            //那么该元素不再接受事件的检测
-            this._eventEnabled = false;
-        }
-        */
-
-
-        return true;
-      }
-
-      return false;
-    },
-
-    /**
-     * 删除所有事件侦听器。
-     */
-    _removeAllEventListeners: function _removeAllEventListeners() {
-      this._eventMap = {};
-      this._eventEnabled = false;
-    },
-
-    /**
-    * 派发事件，调用事件侦听器。
-    */
-    _dispatchEvent: function _dispatchEvent(e) {
-      var map = this._eventMap[e.type];
-
-      if (map) {
-        if (!e.target) e.target = this;
-        map = map.slice();
-
-        for (var i = 0; i < map.length; i++) {
-          var listener = map[i];
-
-          if (typeof listener == "function") {
-            listener.call(this, e);
-          }
-        }
-      }
-
-      if (!e._stopPropagation) {
-        //向上冒泡
-        if (this.parent) {
-          e.currentTarget = this.parent;
-
-          this.parent._dispatchEvent(e);
-        }
-      }
-
-      return true;
-    },
-
-    /**
-       * 检查是否为指定事件类型注册了任何侦听器。
-       */
-    _hasEventListener: function _hasEventListener(type) {
-      var map = this._eventMap[type];
-      return map != null && map.length > 0;
-    }
-  };
-
-  var Dispatcher$1 =
-  /*#__PURE__*/
-  function (_Manager) {
-    _inherits(Dispatcher, _Manager);
-
-    function Dispatcher() {
-      _classCallCheck(this, Dispatcher);
-
-      return _possibleConstructorReturn(this, _getPrototypeOf(Dispatcher).call(this));
-    }
-
-    _createClass(Dispatcher, [{
-      key: "on",
-      value: function on(type, listener) {
-        this._addEventListener(type, listener);
-
-        return this;
-      }
-    }, {
-      key: "addEventListener",
-      value: function addEventListener(type, listener) {
-        this._addEventListener(type, listener);
-
-        return this;
-      }
-    }, {
-      key: "un",
-      value: function un(type, listener) {
-        this._removeEventListener(type, listener);
-
-        return this;
-      }
-    }, {
-      key: "removeEventListener",
-      value: function removeEventListener(type, listener) {
-        this._removeEventListener(type, listener);
-
-        return this;
-      }
-    }, {
-      key: "removeEventListenerByType",
-      value: function removeEventListenerByType(type) {
-        this._removeEventListenerByType(type);
-
-        return this;
-      }
-    }, {
-      key: "removeAllEventListeners",
-      value: function removeAllEventListeners() {
-        this._removeAllEventListeners();
-
-        return this;
-      } //params 要传给evt的eventhandler处理函数的参数，会被merge到Canvax event中
-
-    }, {
-      key: "fire",
-      value: function fire(eventType, params) {
-        //{currentTarget,point,target,type,_stopPropagation}
-        var e = new Event$1(eventType);
-
-        if (params) {
-          for (var p in params) {
-            if (p != "type") {
-              e[p] = params[p];
-            } //然后，currentTarget要修正为自己
-
-
-            e.currentTarget = this;
-          }
-        }
-        var me = this;
-
-        _$1.each(eventType.split(" "), function (eType) {
-          e.currentTarget = me;
-          me.dispatchEvent(e);
-        });
-
-        return this;
-      }
-    }, {
-      key: "dispatchEvent",
-      value: function dispatchEvent(evt) {
-        //this instanceof DisplayObjectContainer ==> this.children
-        //TODO: 这里import DisplayObjectContainer 的话，在displayObject里面的import EventDispatcher from "../event/EventDispatcher";
-        //会得到一个undefined，感觉是成了一个循环依赖的问题，所以这里换用简单的判断来判断自己是一个容易，拥有children
-        if (this.children && evt.point) {
-          var target = this.getObjectsUnderPoint(evt.point, 1)[0];
-
-          if (target) {
-            target.dispatchEvent(evt);
-          }
-
-          return;
-        }
-
-        if (this.context && evt.type == "mouseover") {
-          //记录dispatchEvent之前的心跳
-          var preHeartBeat = this._heartBeatNum;
-          var pregAlpha = this.context.$model.globalAlpha;
-
-          this._dispatchEvent(evt);
-
-          if (preHeartBeat != this._heartBeatNum) {
-            this._hoverClass = true;
-
-            if (this.hoverClone) {
-              var canvax = this.getStage().parent; //然后clone一份obj，添加到_bufferStage 中
-
-              var activShape = this.clone(true);
-              activShape._transform = this.getConcatenatedMatrix();
-
-              canvax._bufferStage.addChildAt(activShape, 0); //然后把自己隐藏了
-              //用一个临时变量_globalAlpha 来存储自己之前的alpha
-
-
-              this._globalAlpha = pregAlpha;
-              this.context.globalAlpha = 0;
-            }
-          }
-
-          return;
-        }
-
-        this._dispatchEvent(evt);
-
-        if (this.context && evt.type == "mouseout") {
-          if (this._hoverClass && this.hoverClone) {
-            //说明刚刚over的时候有添加样式
-            var canvax = this.getStage().parent;
-            this._hoverClass = false;
-
-            canvax._bufferStage.removeChildById(this.id);
-
-            if (this._globalAlpha) {
-              this.context.globalAlpha = this._globalAlpha;
-              delete this._globalAlpha;
-            }
-          }
-        }
-
-        return this;
-      }
-    }, {
-      key: "hasEvent",
-      value: function hasEvent(type) {
-        return this._hasEventListener(type);
-      }
-    }, {
-      key: "hasEventListener",
-      value: function hasEventListener(type) {
-        return this._hasEventListener(type);
-      }
-    }, {
-      key: "hover",
-      value: function hover(overFun, outFun) {
-        this.on("mouseover", overFun);
-        this.on("mouseout", outFun);
-        return this;
-      }
-    }, {
-      key: "once",
-      value: function once(type, listener) {
-        var me = this;
-
-        var onceHandle = function onceHandle() {
-          listener.apply(me, arguments);
-          this.un(type, onceHandle);
-        };
-
-        this.on(type, onceHandle);
-        return this;
-      }
-    }]);
-
-    return Dispatcher;
-  }(Manager$1);
-
-  /**
-   * Canvax
-   *
-   * @author 释剑 (李涛, litao.lt@alibaba-inc.com)
-   *
-   */
-  var _hammerEventTypes$1 = ["pan", "panstart", "panmove", "panend", "pancancel", "panleft", "panright", "panup", "pandown", "press", "pressup", "swipe", "swipeleft", "swiperight", "swipeup", "swipedown", "tap"];
-
-  var Handler$1 = function Handler(canvax, opt) {
+  var Handler = function Handler(canvax, opt) {
     this.canvax = canvax;
     this.curPoints = [{
       x: 0,
@@ -5492,11 +2904,11 @@
       end: "panend"
     };
 
-    _$1.extend(true, this, opt);
+    _.extend(true, this, opt);
   }; //这样的好处是document.compareDocumentPosition只会在定义的时候执行一次。
 
 
-  var contains$1 = document && document.compareDocumentPosition ? function (parent, child) {
+  var contains = document && document.compareDocumentPosition ? function (parent, child) {
     if (!child) {
       return false;
     }
@@ -5508,7 +2920,7 @@
 
     return child !== child && (parent.contains ? parent.contains(child) : true);
   };
-  Handler$1.prototype = {
+  Handler.prototype = {
     init: function init() {
       //依次添加上浏览器的自带事件侦听
       var me = this;
@@ -5516,14 +2928,14 @@
       if (me.target.nodeType == undefined) {
         //如果target.nodeType没有的话， 说明该target为一个jQuery对象 or kissy 对象or hammer对象
         //即为第三方库，那么就要对接第三方库的事件系统。默认实现hammer的大部分事件系统
-        types$1.register(_hammerEventTypes$1);
+        types.register(_hammerEventTypes);
       }
 
-      _$1.each(types$1.get(), function (type) {
+      _.each(types.get(), function (type) {
         //不再关心浏览器环境是否 'ontouchstart' in window 
         //而是直接只管传给事件模块的是一个原生dom还是 jq对象 or hammer对象等
         if (me.target.nodeType == 1) {
-          $$1.addEvent(me.target, type, function (e) {
+          $.addEvent(me.target, type, function (e) {
             me.__mouseHandler(e);
           });
         } else {
@@ -5543,8 +2955,8 @@
       var root = me.canvax;
       root.updateViewOffset();
       me.curPoints = [{
-        x: $$1.pageX(e) - root.viewOffset.left,
-        y: $$1.pageY(e) - root.viewOffset.top
+        x: $.pageX(e) - root.viewOffset.left,
+        y: $.pageY(e) - root.viewOffset.top
       }]; //理论上来说，这里拿到point了后，就要计算这个point对应的target来push到curPointsTarget里，
       //但是因为在drag的时候其实是可以不用计算对应target的。
       //所以放在了下面的me.__getcurPointsTarget( e , curMousePoint );常规mousemove中执行
@@ -5570,7 +2982,7 @@
         }
       }
 
-      if (e.type == "mouseup" || e.type == "mouseout" && !contains$1(root.view, e.toElement || e.relatedTarget)) {
+      if (e.type == "mouseup" || e.type == "mouseout" && !contains(root.view, e.toElement || e.relatedTarget)) {
         if (me._draging == true) {
           //说明刚刚在拖动
           me._dragEnd(e, curMouseTarget, 0);
@@ -5582,7 +2994,7 @@
       }
 
       if (e.type == "mouseout") {
-        if (!contains$1(root.view, e.toElement || e.relatedTarget)) {
+        if (!contains(root.view, e.toElement || e.relatedTarget)) {
           me.__getcurPointsTarget(e, curMousePoint, true);
         }
       } else if (e.type == "mousemove") {
@@ -5645,7 +3057,7 @@
       if (oldObj && !oldObj.context) {
         oldObj = null;
       }
-      var e = new Event$1(e);
+      var e = new Event(e);
 
       if (e.type == "mousemove" && oldObj && oldObj._hoverClass && oldObj.hoverClone && oldObj.pointChkPriority && oldObj.getChildInPoint(point)) {
         //小优化,鼠标move的时候。计算频率太大，所以。做此优化
@@ -5730,7 +3142,7 @@
         if (e.type == me.drag.start) {
           //dragstart的时候touch已经准备好了target， curPointsTarget 里面只要有一个是有效的
           //就认为drags开始
-          _$1.each(me.curPointsTarget, function (child, i) {
+          _.each(me.curPointsTarget, function (child, i) {
             if (child && child.dragEnabled) {
               //只要有一个元素就认为正在准备drag了
               me._draging = true; //有可能该child没有hover style
@@ -5751,7 +3163,7 @@
 
         if (e.type == me.drag.move) {
           if (me._draging) {
-            _$1.each(me.curPointsTarget, function (child, i) {
+            _.each(me.curPointsTarget, function (child, i) {
               if (child && child.dragEnabled) {
                 me._dragIngHander(e, child, i);
               }
@@ -5761,7 +3173,7 @@
 
         if (e.type == me.drag.end) {
           if (me._draging) {
-            _$1.each(me.curPointsTarget, function (child, i) {
+            _.each(me.curPointsTarget, function (child, i) {
               if (child && child.dragEnabled) {
                 me._dragEnd(e, child, 0);
 
@@ -5785,10 +3197,10 @@
       var root = me.canvax;
       var curTouchs = [];
 
-      _$1.each(e.point, function (touch) {
+      _.each(e.point, function (touch) {
         curTouchs.push({
-          x: $$1.pageX(touch) - root.viewOffset.left,
-          y: $$1.pageY(touch) - root.viewOffset.top
+          x: $.pageX(touch) - root.viewOffset.left,
+          y: $.pageY(touch) - root.viewOffset.top
         });
       });
 
@@ -5799,7 +3211,7 @@
       var root = me.canvax;
       var touchesTarget = [];
 
-      _$1.each(touchs, function (touch) {
+      _.each(touchs, function (touch) {
         touchesTarget.push(root.getObjectsUnderPoint(touch, 1)[0]);
       });
 
@@ -5821,10 +3233,10 @@
       var me = this;
       var hasChild = false;
 
-      _$1.each(childs, function (child, i) {
+      _.each(childs, function (child, i) {
         if (child) {
           hasChild = true;
-          var ce = new Event$1(e);
+          var ce = new Event(e);
           ce.target = ce.currentTarget = child || this;
           ce.stagePoint = me.curPoints[i];
           ce.point = ce.target.globalToLocal(ce.stagePoint);
@@ -6001,7 +3413,7 @@
       return opt;
     }
   };
-  Utils._pixelCtx = Utils.initElement($$1.createCanvas(1, 1, "_pixelCanvas")).getContext('2d');
+  Utils._pixelCtx = Utils.initElement($.createCanvas(1, 1, "_pixelCanvas")).getContext('2d');
 
   /**
    * Canvax
@@ -6185,10 +3597,9 @@
     function Point() {
       var x = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
       var y = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+      babelHelpers.classCallCheck(this, Point);
 
-      _classCallCheck(this, Point);
-
-      if (arguments.length == 1 && _typeof(arguments[0]) == 'object') {
+      if (arguments.length == 1 && babelHelpers.typeof(arguments[0]) == 'object') {
         var arg = arguments[0];
 
         if ("x" in arg && "y" in arg) {
@@ -6214,13 +3625,12 @@
       }
     }
 
-    _createClass(Point, [{
+    babelHelpers.createClass(Point, [{
       key: "toArray",
       value: function toArray() {
         return [this.x, this.y];
       }
     }]);
-
     return Point;
   }();
 
@@ -7241,7 +4651,7 @@
    */
 
   function registTween(options) {
-    var opt = _$1.extend({
+    var opt = _.extend({
       from: null,
       to: null,
       duration: 500,
@@ -7256,7 +4666,7 @@
 
     }, options);
 
-    if (!global$2.getAnimationEnabled()) {
+    if (!global$1.getAnimationEnabled()) {
       //如果全局动画被禁用，那么下面两项强制设置为0
       //TODO:其实应该直接执行回调函数的
       opt.duration = 0;
@@ -7324,6 +4734,15 @@
     taskList: _taskList
   };
 
+  /**
+   * Canvax
+   *
+   * @author 释剑 (李涛, litao.lt@alibaba-inc.com)
+   *
+   * 把canvax元素的context实现监听属性改动
+   * 来给整个引擎提供心跳包的触发机制
+   */
+
   function Observe(scope) {
     var stopRepeatAssign = true;
     var pmodel = {},
@@ -7337,14 +4756,13 @@
     var Publics = _Publics;
 
     function loop(name, val) {
-      if (_$1.indexOf(_Publics, name) === -1) {
+      if (_.indexOf(_Publics, name) === -1) {
         //非 _Publics 中的值，都要先设置好对应的val到model上
         model[name] = val;
       }
+      var valueType = babelHelpers.typeof(val);
 
-      var valueType = _typeof(val);
-
-      if (_$1.indexOf(Publics, name) > -1) {
+      if (_.indexOf(Publics, name) > -1) {
         return;
       }
 
@@ -7360,7 +4778,7 @@
           if (arguments.length) {
             //写操作
             //set 的 值的 类型
-            var neoType = _typeof(neo);
+            var neoType = babelHelpers.typeof(neo);
 
             if (stopRepeatAssign) {
               return; //阻止重复赋值
@@ -7416,7 +4834,7 @@
     }
     pmodel = defineProperties(pmodel, accessores, Publics); //生成一个空的ViewModel
 
-    _$1.forEach(Publics, function (name) {
+    _.forEach(Publics, function (name) {
       if (scope[name]) {
         //然后为函数等不被监控的属性赋值
         if (typeof scope[name] == "function") {
@@ -7595,17 +5013,24 @@
     PRECISION: 'mediump'
   };
 
+  /**
+   * Canvax
+   *
+   * @author 释剑 (李涛, litao.lt@alibaba-inc.com)
+   *
+   * 模拟as3 DisplayList 的 现实对象基类
+   */
+
   var DisplayObject =
   /*#__PURE__*/
   function (_event$Dispatcher) {
-    _inherits(DisplayObject, _event$Dispatcher);
+    babelHelpers.inherits(DisplayObject, _event$Dispatcher);
 
     function DisplayObject(opt) {
       var _this;
 
-      _classCallCheck(this, DisplayObject);
-
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(DisplayObject).call(this, opt)); //相对父级元素的矩阵
+      babelHelpers.classCallCheck(this, DisplayObject);
+      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(DisplayObject).call(this, opt)); //相对父级元素的矩阵
 
       _this._transform = null;
       _this.worldTransform = null; //_transform如果有修改，则_transformChange为true，renderer的时候worldTransform
@@ -7629,14 +5054,13 @@
       _this.id = opt.id || Utils.createId(_this.type);
       _this._trackList = []; //一个元素可以追踪另外元素的变动
 
-      _this.init.apply(_assertThisInitialized(_assertThisInitialized(_this)), arguments); //所有属性准备好了后，先要计算一次this._updateTransform()得到_tansform
+      _this.init.apply(babelHelpers.assertThisInitialized(babelHelpers.assertThisInitialized(_this)), arguments); //所有属性准备好了后，先要计算一次this._updateTransform()得到_tansform
 
 
       _this._updateTransform();
 
       _this._tweens = [];
-
-      var me = _assertThisInitialized(_assertThisInitialized(_this));
+      var me = babelHelpers.assertThisInitialized(babelHelpers.assertThisInitialized(_this));
 
       _this.on("destroy", function () {
         me.cleanAnimates();
@@ -7645,7 +5069,7 @@
       return _this;
     }
 
-    _createClass(DisplayObject, [{
+    babelHelpers.createClass(DisplayObject, [{
       key: "init",
       value: function init() {}
     }, {
@@ -7692,7 +5116,7 @@
 
         };
 
-        _$1.extend(true, _contextATTRS, opt.context); //有些引擎内部设置context属性的时候是不用上报心跳的，比如做热点检测的时候
+        _.extend(true, _contextATTRS, opt.context); //有些引擎内部设置context属性的时候是不用上报心跳的，比如做热点检测的时候
 
 
         self._notWatch = false; //不需要发心跳信息
@@ -7713,7 +5137,7 @@
             obj._globalAlphaChange = true;
           }
 
-          if (_$1.indexOf(TRANSFORM_PROPS, name) > -1) {
+          if (_.indexOf(TRANSFORM_PROPS, name) > -1) {
             obj._updateTransform();
 
             obj._transformChange = true;
@@ -7749,14 +5173,14 @@
     }, {
       key: "track",
       value: function track(el) {
-        if (_$1.indexOf(this._trackList, el) == -1) {
+        if (_.indexOf(this._trackList, el) == -1) {
           this._trackList.push(el);
         }
       }
     }, {
       key: "untrack",
       value: function untrack(el) {
-        var ind = _$1.indexOf(this._trackList, el);
+        var ind = _.indexOf(this._trackList, el);
 
         if (ind > -1) {
           this._trackList.splice(ind, 1);
@@ -7773,7 +5197,7 @@
       value: function clone(myself) {
         var conf = {
           id: this.id,
-          context: _$1.clone(this.context.$model),
+          context: _.clone(this.context.$model),
           isClone: true
         };
         var newObj;
@@ -7907,7 +5331,7 @@
     }, {
       key: "setEventEnable",
       value: function setEventEnable(bool) {
-        if (_$1.isBoolean(bool)) {
+        if (_.isBoolean(bool)) {
           this._eventEnabled = bool;
           return true;
         }
@@ -7923,7 +5347,7 @@
         if (!this.parent) {
           return;
         }
-        return _$1.indexOf(this.parent.children, this);
+        return _.indexOf(this.parent.children, this);
       }
       /*
        *元素在z轴方向向下移动
@@ -7940,7 +5364,7 @@
         var fromIndex = this.getIndex();
         var toIndex = 0;
 
-        if (_$1.isNumber(num)) {
+        if (_.isNumber(num)) {
           if (num == 0) {
             //原地不动
             return;
@@ -7971,7 +5395,7 @@
         var pcl = this.parent.children.length;
         var toIndex = pcl;
 
-        if (_$1.isNumber(num)) {
+        if (_.isNumber(num)) {
           if (num == 0) {
             //原地不动
             return;
@@ -8169,9 +5593,9 @@
         var from = null;
 
         for (var p in to) {
-          if (_$1.isObject(to[p])) {
+          if (_.isObject(to[p])) {
             //options必须传递一份copy出去，比如到下一个animate
-            this.animate(to[p], _$1.extend({}, options), context[p]); //如果是个object
+            this.animate(to[p], _.extend({}, options), context[p]); //如果是个object
 
             continue;
           }
@@ -8305,21 +5729,27 @@
         delete this.context;
       }
     }]);
-
     return DisplayObject;
-  }(Dispatcher$1);
+  }(Dispatcher);
+
+  /** 
+   * Canvax
+   *
+   * @author 释剑 (李涛, litao.lt@alibaba-inc.com)
+   *
+   * 模拟as3的DisplayList 中的容器类
+   */
 
   var DisplayObjectContainer =
   /*#__PURE__*/
   function (_DisplayObject) {
-    _inherits(DisplayObjectContainer, _DisplayObject);
+    babelHelpers.inherits(DisplayObjectContainer, _DisplayObject);
 
     function DisplayObjectContainer(opt) {
       var _this;
 
-      _classCallCheck(this, DisplayObjectContainer);
-
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(DisplayObjectContainer).call(this, opt));
+      babelHelpers.classCallCheck(this, DisplayObjectContainer);
+      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(DisplayObjectContainer).call(this, opt));
       _this.children = [];
       _this.mouseChildren = []; //所有的容器默认支持event 检测，因为 可能有里面的shape是eventEnable是true的
       //如果用户有强制的需求让容器下的所有元素都 不可检测，可以调用
@@ -8329,7 +5759,7 @@
       return _this;
     }
 
-    _createClass(DisplayObjectContainer, [{
+    babelHelpers.createClass(DisplayObjectContainer, [{
       key: "addChild",
       value: function addChild(child, index$$1) {
         if (!child) {
@@ -8372,7 +5802,7 @@
     }, {
       key: "removeChild",
       value: function removeChild(child) {
-        return this.removeChildAt(_$1.indexOf(this.children, child));
+        return this.removeChildAt(_.indexOf(this.children, child));
       }
     }, {
       key: "removeChildAt",
@@ -8481,14 +5911,14 @@
     }, {
       key: "getChildIndex",
       value: function getChildIndex(child) {
-        return _$1.indexOf(this.children, child);
+        return _.indexOf(this.children, child);
       }
     }, {
       key: "setChildIndex",
       value: function setChildIndex(child, index$$1) {
         if (child.parent != this) return;
 
-        var oldIndex = _$1.indexOf(this.children, child);
+        var oldIndex = _.indexOf(this.children, child);
 
         if (index$$1 == oldIndex) return;
         this.children.splice(oldIndex, 1);
@@ -8542,22 +5972,30 @@
         return result;
       }
     }]);
-
     return DisplayObjectContainer;
   }(DisplayObject);
+
+  /**
+   * Canvax
+   *
+   * @author 释剑 (李涛, litao.lt@alibaba-inc.com)
+   *
+   * stage 类， 再as3中，stage则代表整个舞台。是唯一的根节点
+   * 但是再canvax中，因为分层设计的需要。stage 舞台 同样代表一个canvas元素，但是不是再整个引擎设计
+   * 里面， 不是唯一的根节点。而是会交由canvax类来统一管理其层级
+   */
 
   var Stage =
   /*#__PURE__*/
   function (_DisplayObjectContain) {
-    _inherits(Stage, _DisplayObjectContain);
+    babelHelpers.inherits(Stage, _DisplayObjectContain);
 
     function Stage(opt) {
       var _this;
 
-      _classCallCheck(this, Stage);
-
+      babelHelpers.classCallCheck(this, Stage);
       opt.type = "stage";
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(Stage).call(this, opt));
+      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(Stage).call(this, opt));
       _this.canvas = null;
       _this.ctx = null; //渲染的时候由renderer决定,这里不做初始值
       //stage正在渲染中
@@ -8568,7 +6006,7 @@
     } //由canvax的afterAddChild 回调
 
 
-    _createClass(Stage, [{
+    babelHelpers.createClass(Stage, [{
       key: "initStage",
       value: function initStage(canvas, width, height) {
         var self = this;
@@ -8596,7 +6034,6 @@
         this.parent && this.parent.heartBeat(opt);
       }
     }]);
-
     return Stage;
   }(DisplayObjectContainer);
 
@@ -8607,9 +6044,7 @@
       var type = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : RENDERER_TYPE.UNKNOWN;
       var app = arguments.length > 1 ? arguments[1] : undefined;
       var options = arguments.length > 2 ? arguments[2] : undefined;
-
-      _classCallCheck(this, SystemRenderer);
-
+      babelHelpers.classCallCheck(this, SystemRenderer);
       this.type = type; //2canvas,1webgl
 
       this.app = app;
@@ -8632,7 +6067,7 @@
     } //如果引擎处于静默状态的话，就会启动
 
 
-    _createClass(SystemRenderer, [{
+    babelHelpers.createClass(SystemRenderer, [{
       key: "startEnter",
       value: function startEnter() {
         var self = this;
@@ -8671,7 +6106,7 @@
       value: function _convertCanvax(opt) {
         var me = this;
 
-        _$1.each(me.app.children, function (stage) {
+        _.each(me.app.children, function (stage) {
           stage.context[opt.name] = opt.value;
         });
       }
@@ -8746,7 +6181,7 @@
           }
         } else {
           //无条件要求全部刷新，一般用在resize等。
-          _$1.each(self.app.children, function (stage, i) {
+          _.each(self.app.children, function (stage, i) {
             self.app.convertStages[stage.id] = {
               stage: stage,
               convertShapes: {}
@@ -8764,7 +6199,6 @@
         }
       }
     }]);
-
     return SystemRenderer;
   }();
 
@@ -8772,8 +6206,7 @@
   /*#__PURE__*/
   function () {
     function CanvasGraphicsRenderer(renderer) {
-      _classCallCheck(this, CanvasGraphicsRenderer);
-
+      babelHelpers.classCallCheck(this, CanvasGraphicsRenderer);
       this.renderer = renderer;
     }
     /**
@@ -8782,7 +6215,7 @@
     */
 
 
-    _createClass(CanvasGraphicsRenderer, [{
+    babelHelpers.createClass(CanvasGraphicsRenderer, [{
       key: "render",
       value: function render(displayObject, stage, globalAlpha, isClip) {
         var renderer = this.renderer;
@@ -8903,34 +6336,31 @@
         }
       }
     }]);
-
     return CanvasGraphicsRenderer;
   }();
 
   var CanvasRenderer =
   /*#__PURE__*/
   function (_SystemRenderer) {
-    _inherits(CanvasRenderer, _SystemRenderer);
+    babelHelpers.inherits(CanvasRenderer, _SystemRenderer);
 
     function CanvasRenderer(app) {
       var _this;
 
       var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-
-      _classCallCheck(this, CanvasRenderer);
-
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(CanvasRenderer).call(this, RENDERER_TYPE.CANVAS, app, options));
-      _this.CGR = new CanvasGraphicsRenderer(_assertThisInitialized(_assertThisInitialized(_this)));
+      babelHelpers.classCallCheck(this, CanvasRenderer);
+      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(CanvasRenderer).call(this, RENDERER_TYPE.CANVAS, app, options));
+      _this.CGR = new CanvasGraphicsRenderer(babelHelpers.assertThisInitialized(babelHelpers.assertThisInitialized(_this)));
       return _this;
     }
 
-    _createClass(CanvasRenderer, [{
+    babelHelpers.createClass(CanvasRenderer, [{
       key: "render",
       value: function render(app) {
         var me = this;
         me.app = app;
 
-        _$1.each(_$1.values(app.convertStages), function (convertStage) {
+        _.each(_.values(app.convertStages), function (convertStage) {
           me.renderStage(convertStage.stage);
         });
 
@@ -9036,7 +6466,6 @@
         ctx.clearRect(0, 0, this.app.width, this.app.height);
       }
     }]);
-
     return CanvasRenderer;
   }(SystemRenderer);
 
@@ -9051,25 +6480,36 @@
        */
   }
 
+  /**
+   * Application {{PKG_VERSION}}
+   *
+   * @author 释剑 (李涛, litao.lt@alibaba-inc.com)
+   *
+   * 主引擎 类
+   *
+   * 负责所有canvas的层级管理，和心跳机制的实现,捕获到心跳包后 
+   * 分发到对应的stage(canvas)来绘制对应的改动
+   * 然后 默认有实现了shape的 mouseover  mouseout  drag 事件
+   *
+   **/
+
   var Application =
   /*#__PURE__*/
   function (_DisplayObjectContain) {
-    _inherits(Application, _DisplayObjectContain);
+    babelHelpers.inherits(Application, _DisplayObjectContain);
 
     function Application(opt) {
       var _this;
 
       var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-
-      _classCallCheck(this, Application);
-
+      babelHelpers.classCallCheck(this, Application);
       opt.type = "canvax";
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(Application).call(this, opt));
+      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(Application).call(this, opt));
       _this._cid = new Date().getTime() + "_" + Math.floor(Math.random() * 100);
-      _this.el = $$1.query(opt.el);
+      _this.el = $.query(opt.el);
       _this.width = parseInt("width" in opt || _this.el.offsetWidth, 10);
       _this.height = parseInt("height" in opt || _this.el.offsetHeight, 10);
-      var viewObj = $$1.createView(_this.width, _this.height, _this._cid);
+      var viewObj = $.createView(_this.width, _this.height, _this._cid);
       _this.view = viewObj.view;
       _this.stageView = viewObj.stageView;
       _this.domView = viewObj.domView;
@@ -9077,11 +6517,11 @@
 
       _this.el.appendChild(_this.view);
 
-      _this.viewOffset = $$1.offset(_this.view);
+      _this.viewOffset = $.offset(_this.view);
       _this.lastGetRO = 0; //最后一次获取 viewOffset 的时间
 
       _this.webGL = opt.webGL;
-      _this.renderer = autoRenderer(_assertThisInitialized(_assertThisInitialized(_this)), options);
+      _this.renderer = autoRenderer(babelHelpers.assertThisInitialized(babelHelpers.assertThisInitialized(_this)), options);
       _this.event = null; //是否阻止浏览器默认事件的执行
 
       _this.preventDefault = true;
@@ -9103,11 +6543,11 @@
       return _this;
     }
 
-    _createClass(Application, [{
+    babelHelpers.createClass(Application, [{
       key: "registEvent",
       value: function registEvent(opt) {
         //初始化事件委托到root元素上面
-        this.event = new Handler$1(this, opt);
+        this.event = new Handler(this, opt);
         this.event.init();
         return this.event;
       }
@@ -9138,7 +6578,7 @@
         //this.view.style.width  = this.width +"px";
         //this.view.style.height = this.height+"px";
 
-        this.viewOffset = $$1.offset(this.view);
+        this.viewOffset = $.offset(this.view);
         this.context.$model.width = this.width;
         this.context.$model.height = this.height;
         var me = this;
@@ -9150,7 +6590,7 @@
           canvas.setAttribute("height", me.height * Utils._devicePixelRatio);
         };
 
-        _$1.each(this.children, function (s, i) {
+        _.each(this.children, function (s, i) {
           s.context.$model.width = me.width;
           s.context.$model.height = me.height;
           reSizeCanvas(s.canvas);
@@ -9188,7 +6628,7 @@
         var now = new Date().getTime();
 
         if (now - this.lastGetRO > 1000) {
-          this.viewOffset = $$1.offset(this.view);
+          this.viewOffset = $.offset(this.view);
           this.lastGetRO = now;
         }
       }
@@ -9198,7 +6638,7 @@
         var canvas;
 
         if (!stage.canvas) {
-          canvas = $$1.createCanvas(this.context.$model.width, this.context.$model.height, stage.id);
+          canvas = $.createCanvas(this.context.$model.width, this.context.$model.height, stage.id);
         } else {
           canvas = stage.canvas;
         }
@@ -9236,31 +6676,37 @@
     }, {
       key: "toDataURL",
       value: function toDataURL() {
-        var canvas = $$1.createCanvas(this.width, this.height, "curr_base64_canvas");
+        var canvas = $.createCanvas(this.width, this.height, "curr_base64_canvas");
         var ctx = canvas.getContext("2d");
 
-        _$1.each(this.children, function (stage) {
+        _.each(this.children, function (stage) {
           ctx.drawImage(stage.canvas, 0, 0);
         });
 
         return canvas.toDataURL();
       }
     }]);
-
     return Application;
   }(DisplayObjectContainer);
+
+  /**
+   * Canvax
+   *
+   * @author 释剑 (李涛, litao.lt@alibaba-inc.com)
+   *
+   * 模拟as3 中 的sprite类，目前还只是个简单的容易。
+   */
 
   var Sprite =
   /*#__PURE__*/
   function (_DisplayObjectContain) {
-    _inherits(Sprite, _DisplayObjectContain);
+    babelHelpers.inherits(Sprite, _DisplayObjectContain);
 
     function Sprite(opt) {
-      _classCallCheck(this, Sprite);
-
+      babelHelpers.classCallCheck(this, Sprite);
       opt = Utils.checkOpt(opt);
       opt.type = "sprite";
-      return _possibleConstructorReturn(this, _getPrototypeOf(Sprite).call(this, opt));
+      return babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(Sprite).call(this, opt));
     }
 
     return Sprite;
@@ -9270,8 +6716,7 @@
   /*#__PURE__*/
   function () {
     function GraphicsData(lineWidth, strokeStyle, lineAlpha, fillStyle, fillAlpha, shape) {
-      _classCallCheck(this, GraphicsData);
-
+      babelHelpers.classCallCheck(this, GraphicsData);
       this.lineWidth = lineWidth;
       this.strokeStyle = strokeStyle;
       this.lineAlpha = lineAlpha;
@@ -9286,7 +6731,7 @@
       this.line = true;
     }
 
-    _createClass(GraphicsData, [{
+    babelHelpers.createClass(GraphicsData, [{
       key: "clone",
       value: function clone() {
         var cloneGraphicsData = new GraphicsData(this.lineWidth, this.strokeStyle, this.lineAlpha, this.fillStyle, this.fillAlpha, this.shape);
@@ -9333,7 +6778,6 @@
         this.holes = null;
       }
     }]);
-
     return GraphicsData;
   }();
 
@@ -9636,9 +7080,7 @@
       var y = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
       var width = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
       var height = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 0;
-
-      _classCallCheck(this, Rectangle);
-
+      babelHelpers.classCallCheck(this, Rectangle);
       this.x = x;
       this.y = y;
       this.width = width;
@@ -9647,7 +7089,7 @@
       this.closed = true;
     }
 
-    _createClass(Rectangle, [{
+    babelHelpers.createClass(Rectangle, [{
       key: "clone",
       value: function clone() {
         return new Rectangle(this.x, this.y, this.width, this.height);
@@ -9693,7 +7135,6 @@
         return false;
       }
     }]);
-
     return Rectangle;
   }();
 
@@ -9704,9 +7145,7 @@
       var x = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
       var y = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
       var radius = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
-
-      _classCallCheck(this, Circle);
-
+      babelHelpers.classCallCheck(this, Circle);
       this.x = x;
       this.y = y;
       this.radius = radius;
@@ -9714,7 +7153,7 @@
       this.closed = true;
     }
 
-    _createClass(Circle, [{
+    babelHelpers.createClass(Circle, [{
       key: "clone",
       value: function clone() {
         return new Circle(this.x, this.y, this.radius);
@@ -9739,7 +7178,6 @@
         return new Rectangle(this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2);
       }
     }]);
-
     return Circle;
   }();
 
@@ -9751,9 +7189,7 @@
       var y = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
       var width = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
       var height = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 0;
-
-      _classCallCheck(this, Ellipse);
-
+      babelHelpers.classCallCheck(this, Ellipse);
       this.x = x;
       this.y = y;
       this.width = width;
@@ -9762,7 +7198,7 @@
       this.closed = true;
     }
 
-    _createClass(Ellipse, [{
+    babelHelpers.createClass(Ellipse, [{
       key: "clone",
       value: function clone() {
         return new Ellipse(this.x, this.y, this.width, this.height);
@@ -9786,7 +7222,6 @@
         return new Rectangle(this.x - this.width, this.y - this.height, this.width, this.height);
       }
     }]);
-
     return Ellipse;
   }();
 
@@ -9798,8 +7233,7 @@
         points[_key] = arguments[_key];
       }
 
-      _classCallCheck(this, Polygon);
-
+      babelHelpers.classCallCheck(this, Polygon);
       var point_0 = points[0];
 
       if (Array.isArray(point_0)) {
@@ -9821,7 +7255,7 @@
       this.type = SHAPES.POLY;
     }
 
-    _createClass(Polygon, [{
+    babelHelpers.createClass(Polygon, [{
       key: "clone",
       value: function clone() {
         return new Polygon(this.points.slice());
@@ -9867,7 +7301,6 @@
         return wn;
       }
     }]);
-
     return Polygon;
   }();
 
@@ -9894,12 +7327,17 @@
     return path;
   }
 
+  /*
+  * Graphics绘图法则
+  * 单个grahics实例里的fill line 样式属性，都从对应shape.context 中获取
+  * 
+  */
+
   var Graphics =
   /*#__PURE__*/
   function () {
     function Graphics(shape) {
-      _classCallCheck(this, Graphics);
-
+      babelHelpers.classCallCheck(this, Graphics);
       this.lineWidth = 1;
       this.strokeStyle = null;
       this.lineAlpha = 1;
@@ -9925,7 +7363,7 @@
       };
     }
 
-    _createClass(Graphics, [{
+    babelHelpers.createClass(Graphics, [{
       key: "setStyle",
       value: function setStyle(context) {
         //从 shape 中把绘图需要的style属性同步过来
@@ -9940,7 +7378,7 @@
         //TODO: 后面需要修改, 能精准的确定是修改 graphicsData 中的哪个data
 
         if (this.graphicsData.length) {
-          _$1.each(this.graphicsData, function (gd, i) {
+          _.each(this.graphicsData, function (gd, i) {
             gd.synsStyle(g);
           });
         }
@@ -10356,20 +7794,26 @@
         this._webGL = null;
       }
     }]);
-
     return Graphics;
   }();
+
+  /**
+   * Canvax
+   *
+   * @author 释剑 (李涛, litao.lt@alibaba-inc.com)
+   *
+   * 模拟as3 DisplayList 中的shape 类
+   */
 
   var Shape =
   /*#__PURE__*/
   function (_DisplayObject) {
-    _inherits(Shape, _DisplayObject);
+    babelHelpers.inherits(Shape, _DisplayObject);
 
     function Shape(opt) {
       var _this;
 
-      _classCallCheck(this, Shape);
-
+      babelHelpers.classCallCheck(this, Shape);
       opt = Utils.checkOpt(opt);
       var styleContext = {
         cursor: opt.context.cursor || "default",
@@ -10391,14 +7835,14 @@
         lineWidth: opt.context.lineWidth || null
       };
 
-      var _context = _$1.extend(true, styleContext, opt.context);
+      var _context = _.extend(true, styleContext, opt.context);
 
       opt.context = _context;
 
       if (opt.id === undefined && opt.type !== undefined) {
         opt.id = Utils.createId(opt.type);
       }
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(Shape).call(this, opt)); //over的时候如果有修改样式，就为true
+      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(Shape).call(this, opt)); //over的时候如果有修改样式，就为true
 
       _this._hoverClass = false;
       _this.hoverClone = true; //是否开启在hover的时候clone一份到active stage 中 
@@ -10428,7 +7872,7 @@
       return _this;
     }
 
-    _createClass(Shape, [{
+    babelHelpers.createClass(Shape, [{
       key: "_draw",
       value: function _draw(graphics) {
         if (graphics.graphicsData.length == 0) {
@@ -10448,7 +7892,7 @@
     }, {
       key: "$watch",
       value: function $watch(name, value, preValue) {
-        if (_$1.indexOf(STYLE_PROPS, name) > -1) {
+        if (_.indexOf(STYLE_PROPS, name) > -1) {
           this.graphics.setStyle(this.context);
         }
 
@@ -10492,26 +7936,32 @@
         }
       }
     }]);
-
     return Shape;
   }(DisplayObject);
+
+  /**
+   * Canvax--Text
+   *
+   * @author 释剑 (李涛, litao.lt@alibaba-inc.com)
+   *
+   * 文本 类
+   **/
 
   var Text =
   /*#__PURE__*/
   function (_DisplayObject) {
-    _inherits(Text, _DisplayObject);
+    babelHelpers.inherits(Text, _DisplayObject);
 
     function Text(text, opt) {
       var _this;
 
-      _classCallCheck(this, Text);
-
+      babelHelpers.classCallCheck(this, Text);
       opt.type = "text";
 
       if (text === null || text === undefined) {
         text = "";
       }
-      opt.context = _$1.extend({
+      opt.context = _.extend({
         font: "",
         fontSize: 13,
         //字体大小默认13
@@ -10527,7 +7977,7 @@
         backgroundColor: null,
         textBackgroundColor: null
       }, opt.context);
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(Text).call(this, opt));
+      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(Text).call(this, opt));
       _this._reNewline = /\r?\n/;
       _this.fontProperts = ["fontStyle", "fontVariant", "fontWeight", "fontSize", "fontFamily"];
       _this.context.font = _this._getFontDeclaration();
@@ -10537,11 +7987,11 @@
       return _this;
     }
 
-    _createClass(Text, [{
+    babelHelpers.createClass(Text, [{
       key: "$watch",
       value: function $watch(name, value, preValue) {
         //context属性有变化的监听函数
-        if (_$1.indexOf(this.fontProperts, name) >= 0) {
+        if (_.indexOf(this.fontProperts, name) >= 0) {
           this.context[name] = value; //如果修改的是font的某个内容，就重新组装一遍font的值，
           //然后通知引擎这次对context的修改上报心跳
 
@@ -10556,7 +8006,7 @@
         // 简单判断不做严格类型检测
         for (var p in style) {
           if (p != "textBaseline" && p in ctx) {
-            if (style[p] || _$1.isNumber(style[p])) {
+            if (style[p] || _.isNumber(style[p])) {
               if (p == "globalAlpha") {
                 //透明度要从父节点继承
                 //ctx[p] = style[p] * globalAlpha; //render里面已经做过相乘了，不需要重新*
@@ -10625,7 +8075,7 @@
         var self = this;
         var fontArr = [];
 
-        _$1.each(this.fontProperts, function (p) {
+        _.each(this.fontProperts, function (p) {
           var fontP = self.context[p];
 
           if (p == "fontSize") {
@@ -10799,7 +8249,6 @@
         };
       }
     }]);
-
     return Text;
   }(DisplayObject);
 
@@ -10815,10 +8264,10 @@
     var vx = 0,
         vy = 0;
 
-    if (arguments.length == 1 && _$1.isObject(x)) {
+    if (arguments.length == 1 && _.isObject(x)) {
       var arg = arguments[0];
 
-      if (_$1.isArray(arg)) {
+      if (_.isArray(arg)) {
         vx = arg[0];
         vy = arg[1];
       } else if (arg.hasOwnProperty("x") && arg.hasOwnProperty("y")) {
@@ -10908,7 +8357,7 @@
       var w2 = w * w;
       var w3 = w * w2;
       var rp = [interpolate(p0[0], p1[0], p2[0], p3[0], w, w2, w3), interpolate(p0[1], p1[1], p2[1], p3[1], w, w2, w3)];
-      _$1.isFunction(smoothFilter) && smoothFilter(rp);
+      _.isFunction(smoothFilter) && smoothFilter(rp);
       ret.push(rp);
     }
 
@@ -11014,7 +8463,7 @@
     var Len = pList.length;
     var _currList = [];
 
-    _$1.each(pList, function (point, i) {
+    _.each(pList, function (point, i) {
       if (isNotValibPoint(point)) {
         //undefined , [ number, null] 等结构
         if (_currList.length) {
@@ -11044,7 +8493,7 @@
       points: pList
     };
 
-    if (_$1.isFunction(smoothFilter)) {
+    if (_.isFunction(smoothFilter)) {
       obj.smoothFilter = smoothFilter;
     }
 
@@ -11057,7 +8506,7 @@
   }
 
   function isNotValibPoint(point) {
-    var res = !point || _$1.isArray(point) && point.length >= 2 && (!_$1.isNumber(point[0]) || !_$1.isNumber(point[1])) || "x" in point && !_$1.isNumber(point.x) || "y" in point && !_$1.isNumber(point.y);
+    var res = !point || _.isArray(point) && point.length >= 2 && (!_.isNumber(point[0]) || !_.isNumber(point[1])) || "x" in point && !_.isNumber(point.x) || "y" in point && !_.isNumber(point.y);
     return res;
   }
 
@@ -11078,19 +8527,29 @@
     isValibPoint: isValibPoint
   };
 
+  /**
+   * Canvax
+   *
+   * @author 释剑 (李涛, litao.lt@alibaba-inc.com)
+   *
+   * 折线 类
+   *
+   * 对应context的属性有
+   * @pointList 各个顶角坐标
+   **/
+
   var BrokenLine =
   /*#__PURE__*/
   function (_Shape) {
-    _inherits(BrokenLine, _Shape);
+    babelHelpers.inherits(BrokenLine, _Shape);
 
     function BrokenLine(opt) {
       var _this;
 
-      _classCallCheck(this, BrokenLine);
-
+      babelHelpers.classCallCheck(this, BrokenLine);
       opt = Utils.checkOpt(opt);
 
-      var _context = _$1.extend({
+      var _context = _.extend({
         lineType: null,
         smooth: false,
         pointList: [],
@@ -11103,13 +8562,13 @@
       }
       opt.context = _context;
       opt.type = "brokenline";
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(BrokenLine).call(this, opt)); //保存好原始值
+      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(BrokenLine).call(this, opt)); //保存好原始值
 
       _this._pointList = _context.pointList;
       return _this;
     }
 
-    _createClass(BrokenLine, [{
+    babelHelpers.createClass(BrokenLine, [{
       key: "watch",
       value: function watch(name, value, preValue) {
         if (name == "pointList" || name == "smooth" || name == "lineType") {
@@ -11213,18 +8672,29 @@
         return this;
       }
     }]);
-
     return BrokenLine;
   }(Shape);
+
+  /**
+   * Canvax
+   *
+   * @author 释剑 (李涛, litao.lt@alibaba-inc.com)
+   *
+   * 圆形 类
+   *
+   * 坐标原点再圆心
+   *
+   * 对应context的属性有
+   * @r 圆半径
+   **/
 
   var Circle$1 =
   /*#__PURE__*/
   function (_Shape) {
-    _inherits(Circle, _Shape);
+    babelHelpers.inherits(Circle, _Shape);
 
     function Circle(opt) {
-      _classCallCheck(this, Circle);
-
+      babelHelpers.classCallCheck(this, Circle);
       //opt = Utils.checkOpt( opt );
       //默认情况下面，circle不需要把xy进行parentInt转换
 
@@ -11237,17 +8707,17 @@
           }
       };
       */
-      opt = _$1.extend(true, {
+      opt = _.extend(true, {
         type: "circle",
         xyToInt: false,
         context: {
           r: 0
         }
       }, Utils.checkOpt(opt));
-      return _possibleConstructorReturn(this, _getPrototypeOf(Circle).call(this, opt));
+      return babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(Circle).call(this, opt));
     }
 
-    _createClass(Circle, [{
+    babelHelpers.createClass(Circle, [{
       key: "watch",
       value: function watch(name, value, preValue) {
         if (name == "r") {
@@ -11265,19 +8735,29 @@
         graphics.drawCircle(0, 0, r);
       }
     }]);
-
     return Circle;
   }(Shape);
+
+  /**
+   * Canvax
+   *
+   * @author 释剑 (李涛, litao.lt@alibaba-inc.com)
+   *
+   * Path 类，Path主要用于把svgpath 字符串转换为pointList，然后构建graphicsData
+   *
+   * 对应context的属性有
+   * @path path串
+   **/
 
   var Path =
   /*#__PURE__*/
   function (_Shape) {
-    _inherits(Path, _Shape);
+    babelHelpers.inherits(Path, _Shape);
 
     function Path(opt) {
-      _classCallCheck(this, Path);
+      babelHelpers.classCallCheck(this, Path);
 
-      var _context = _$1.extend({
+      var _context = _.extend({
         pointList: [],
         //从下面的path中计算得到的边界点的集合
         path: "" //字符串 必须，路径。例如:M 0 0 L 0 10 L 10 10 Z (一个三角形)
@@ -11296,10 +8776,10 @@
       opt.context = _context;
       opt.__parsePathData = null;
       opt.type = "path";
-      return _possibleConstructorReturn(this, _getPrototypeOf(Path).call(this, opt));
+      return babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(Path).call(this, opt));
     }
 
-    _createClass(Path, [{
+    babelHelpers.createClass(Path, [{
       key: "watch",
       value: function watch(name, value, preValue) {
         if (name == "path") {
@@ -11320,11 +8800,11 @@
 
         this.__parsePathData = [];
 
-        var paths = _$1.compact(data.replace(/[Mm]/g, "\\r$&").split('\\r'));
+        var paths = _.compact(data.replace(/[Mm]/g, "\\r$&").split('\\r'));
 
         var me = this;
 
-        _$1.each(paths, function (pathStr) {
+        _.each(paths, function (pathStr) {
           me.__parsePathData.push(me._parseChildPathData(pathStr));
         });
 
@@ -11630,21 +9110,31 @@
         return this;
       }
     }]);
-
     return Path;
   }(Shape);
+
+  /**
+   * Canvax
+   * @author 释剑 (李涛, litao.lt@alibaba-inc.com)
+   *
+   * 水滴形 类
+   * 派生自Path类
+   *
+   * 对应context的属性有
+   * @hr 水滴横宽（中心到水平边缘最宽处距离）
+   * @vr 水滴纵高（中心到尖端距离）
+   **/
 
   var Droplet =
   /*#__PURE__*/
   function (_Path) {
-    _inherits(Droplet, _Path);
+    babelHelpers.inherits(Droplet, _Path);
 
     function Droplet(opt) {
       var _this;
 
-      _classCallCheck(this, Droplet);
-
-      opt = _$1.extend({
+      babelHelpers.classCallCheck(this, Droplet);
+      opt = _.extend({
         type: "droplet",
         context: {
           hr: 0,
@@ -11654,13 +9144,13 @@
         }
       }, Utils.checkOpt(opt));
 
-      var my = _this = _possibleConstructorReturn(this, _getPrototypeOf(Droplet).call(this, opt));
+      var my = _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(Droplet).call(this, opt));
 
       _this.context.$model.path = _this.createPath();
       return _this;
     }
 
-    _createClass(Droplet, [{
+    babelHelpers.createClass(Droplet, [{
       key: "watch",
       value: function watch(name, value, preValue) {
         if (name == "hr" || name == "vr") {
@@ -11676,19 +9166,30 @@
         return ps;
       }
     }]);
-
     return Droplet;
   }(Path);
+
+  /**
+   * Canvax
+   *
+   * @author 释剑 (李涛, litao.lt@alibaba-inc.com)
+   *
+   * 椭圆形 类
+   *
+   * 对应context的属性有 
+   *
+   * @hr 椭圆横轴半径
+   * @vr 椭圆纵轴半径
+   */
 
   var Ellipse$1 =
   /*#__PURE__*/
   function (_Shape) {
-    _inherits(Ellipse, _Shape);
+    babelHelpers.inherits(Ellipse, _Shape);
 
     function Ellipse(opt) {
-      _classCallCheck(this, Ellipse);
-
-      opt = _$1.extend({
+      babelHelpers.classCallCheck(this, Ellipse);
+      opt = _.extend({
         type: "ellipse",
         context: {
           hr: 0,
@@ -11697,10 +9198,10 @@
 
         }
       }, Utils.checkOpt(opt));
-      return _possibleConstructorReturn(this, _getPrototypeOf(Ellipse).call(this, opt));
+      return babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(Ellipse).call(this, opt));
     }
 
-    _createClass(Ellipse, [{
+    babelHelpers.createClass(Ellipse, [{
       key: "watch",
       value: function watch(name, value, preValue) {
         if (name == "hr" || name == "vr") {
@@ -11713,19 +9214,29 @@
         graphics.drawEllipse(0, 0, this.context.$model.hr * 2, this.context.$model.vr * 2);
       }
     }]);
-
     return Ellipse;
   }(Shape);
+
+  /**
+   * Canvax
+   *
+   * @author 释剑 (李涛, litao.lt@alibaba-inc.com)
+   *
+   * 多边形 类  （不规则）
+   *
+   * 对应context的属性有
+   * @pointList 多边形各个顶角坐标
+   **/
 
   var Polygon$1 =
   /*#__PURE__*/
   function (_Shape) {
-    _inherits(Polygon, _Shape);
+    babelHelpers.inherits(Polygon, _Shape);
 
     function Polygon(opt) {
-      _classCallCheck(this, Polygon);
+      babelHelpers.classCallCheck(this, Polygon);
 
-      var _context = _$1.extend({
+      var _context = _.extend({
         lineType: null,
         smooth: false,
         pointList: [],
@@ -11746,10 +9257,10 @@
       }
       opt.context = _context;
       opt.type = "polygon";
-      return _possibleConstructorReturn(this, _getPrototypeOf(Polygon).call(this, opt));
+      return babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(Polygon).call(this, opt));
     }
 
-    _createClass(Polygon, [{
+    babelHelpers.createClass(Polygon, [{
       key: "watch",
       value: function watch(name, value, preValue) {
         //调用parent的setGraphics
@@ -11807,19 +9318,33 @@
         return;
       }
     }]);
-
     return Polygon;
   }(Shape);
+
+  /**
+   * Canvax
+   *
+   * @author 释剑 (李涛, litao.lt@alibaba-inc.com)
+   *
+   * 正n边形（n>=3）
+   *
+   * 对应context的属性有 
+   *
+   * @r 正n边形外接圆半径
+   * @r 指明正几边形
+   *
+   * @pointList 私有，从上面的r和n计算得到的边界值的集合
+   */
 
   var Isogon =
   /*#__PURE__*/
   function (_Polygon) {
-    _inherits(Isogon, _Polygon);
+    babelHelpers.inherits(Isogon, _Polygon);
 
     function Isogon(opt) {
-      _classCallCheck(this, Isogon);
+      babelHelpers.classCallCheck(this, Isogon);
 
-      var _context = _$1.extend({
+      var _context = _.extend({
         pointList: [],
         //从下面的r和n计算得到的边界值的集合
         r: 0,
@@ -11831,10 +9356,10 @@
       _context.pointList = myMath.getIsgonPointList(_context.n, _context.r);
       opt.context = _context;
       opt.type = "isogon";
-      return _possibleConstructorReturn(this, _getPrototypeOf(Isogon).call(this, opt));
+      return babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(Isogon).call(this, opt));
     }
 
-    _createClass(Isogon, [{
+    babelHelpers.createClass(Isogon, [{
       key: "watch",
       value: function watch(name, value, preValue) {
         if (name == "r" || name == "n") {
@@ -11847,19 +9372,30 @@
         }
       }
     }]);
-
     return Isogon;
   }(Polygon$1);
+
+  /**
+   * Canvax
+   *
+   * @author 释剑 (李涛, litao.lt@alibaba-inc.com)
+   *
+   * 线条 类
+   *
+   *
+   * 对应context的属性有
+   * @lineType  可选 虚线 实现 的 类型
+   **/
 
   var Line =
   /*#__PURE__*/
   function (_Shape) {
-    _inherits(Line, _Shape);
+    babelHelpers.inherits(Line, _Shape);
 
     function Line(opt) {
-      _classCallCheck(this, Line);
+      babelHelpers.classCallCheck(this, Line);
 
-      var _context = _$1.extend({
+      var _context = _.extend({
         lineType: null,
         //可选 虚线 实现 的 类型
         start: {
@@ -11880,10 +9416,10 @@
 
       opt.context = _context;
       opt.type = "line";
-      return _possibleConstructorReturn(this, _getPrototypeOf(Line).call(this, opt));
+      return babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(Line).call(this, opt));
     }
 
-    _createClass(Line, [{
+    babelHelpers.createClass(Line, [{
       key: "watch",
       value: function watch(name, value, preValue) {
         //并不清楚是start.x 还是end.x， 当然，这并不重要
@@ -11905,19 +9441,32 @@
         return this;
       }
     }]);
-
     return Line;
   }(Shape);
+
+  /**
+   * Canvax
+   *
+   * @author 释剑 (李涛, litao.lt@alibaba-inc.com)
+   *
+   * 矩现 类  （不规则）
+   *
+   *
+   * 对应context的属性有
+   * @width 宽度
+   * @height 高度
+   * @radius 如果是圆角的，则为【上右下左】顺序的圆角半径数组
+   **/
 
   var Rect =
   /*#__PURE__*/
   function (_Shape) {
-    _inherits(Rect, _Shape);
+    babelHelpers.inherits(Rect, _Shape);
 
     function Rect(opt) {
-      _classCallCheck(this, Rect);
+      babelHelpers.classCallCheck(this, Rect);
 
-      var _context = _$1.extend({
+      var _context = _.extend({
         width: 0,
         height: 0,
         radius: []
@@ -11925,10 +9474,10 @@
 
       opt.context = _context;
       opt.type = "rect";
-      return _possibleConstructorReturn(this, _getPrototypeOf(Rect).call(this, opt));
+      return babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(Rect).call(this, opt));
     }
 
-    _createClass(Rect, [{
+    babelHelpers.createClass(Rect, [{
       key: "watch",
       value: function watch(name, value, preValue) {
         if (name == "width" || name == "height" || name == "radius") {
@@ -11985,19 +9534,34 @@
         return;
       }
     }]);
-
     return Rect;
   }(Shape);
+
+  /**
+   * Canvax
+   *
+   * @author 释剑 (李涛, litao.lt@alibaba-inc.com)
+   *
+   * 扇形 类
+   *
+   * 坐标原点再圆心
+   *
+   * 对应context的属性有
+   * @r0 默认为0，内圆半径指定后将出现内弧，同时扇边长度 = r - r0
+   * @r  必须，外圆半径
+   * @startAngle 起始角度(0, 360)
+   * @endAngle   结束角度(0, 360)
+   **/
 
   var Sector =
   /*#__PURE__*/
   function (_Shape) {
-    _inherits(Sector, _Shape);
+    babelHelpers.inherits(Sector, _Shape);
 
     function Sector(opt) {
-      _classCallCheck(this, Sector);
+      babelHelpers.classCallCheck(this, Sector);
 
-      var _context = _$1.extend({
+      var _context = _.extend({
         pointList: [],
         //边界点的集合,私有，从下面的属性计算的来
         r0: 0,
@@ -12017,10 +9581,10 @@
       opt.isRing = false; //是否为一个圆环
 
       opt.type = "sector";
-      return _possibleConstructorReturn(this, _getPrototypeOf(Sector).call(this, opt));
+      return babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(Sector).call(this, opt));
     }
 
-    _createClass(Sector, [{
+    babelHelpers.createClass(Sector, [{
       key: "watch",
       value: function watch(name, value, preValue) {
         if (name == "r0" || name == "r" || name == "startAngle" || name == "endAngle" || name == "clockwise") {
@@ -12110,7 +9674,6 @@
 
       }
     }]);
-
     return Sector;
   }(Shape);
 
@@ -12141,21 +9704,18 @@
   Canvax.AnimationFrame = AnimationFrame;
   Canvax.utils = Utils;
 
-  var _padding = 20; //为了能通过Chartx.Canvax 拿到渲染引擎
-
-  global$1.Canvax = Canvax;
+  var _padding = 20;
 
   var Chart =
   /*#__PURE__*/
   function (_event$Dispatcher) {
-    _inherits(Chart, _event$Dispatcher);
+    babelHelpers.inherits(Chart, _event$Dispatcher);
 
     function Chart(node, data, opt, componentModules) {
       var _this;
 
-      _classCallCheck(this, Chart);
-
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(Chart).call(this));
+      babelHelpers.classCallCheck(this, Chart);
+      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(Chart).call(this));
       _this.componentModules = componentModules;
       _this._node = node;
       _this._data = data;
@@ -12205,7 +9765,7 @@
       return _this;
     }
 
-    _createClass(Chart, [{
+    babelHelpers.createClass(Chart, [{
       key: "init",
       value: function init() {
         var me = this; //init全部用 this._opt
@@ -12880,21 +10440,19 @@
         });
       }
     }]);
-
     return Chart;
   }(Dispatcher);
 
   var component =
   /*#__PURE__*/
   function (_event$Dispatcher) {
-    _inherits(component, _event$Dispatcher);
+    babelHelpers.inherits(component, _event$Dispatcher);
 
     function component(opt, app) {
       var _this;
 
-      _classCallCheck(this, component);
-
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(component).call(this, opt, app));
+      babelHelpers.classCallCheck(this, component);
+      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(component).call(this, opt, app));
       _this.name = "component"; //组件名称
 
       _this.type = null; //组件子类型，比如 Graphs组件下面的bar,line,scat等
@@ -12921,7 +10479,7 @@
       return _this;
     }
 
-    _createClass(component, [{
+    babelHelpers.createClass(component, [{
       key: "init",
       value: function init(opt, data) {}
     }, {
@@ -12945,23 +10503,21 @@
       key: "layout",
       value: function layout() {}
     }]);
-
     return component;
   }(Dispatcher);
 
   var coorBase =
   /*#__PURE__*/
   function (_Component) {
-    _inherits(coorBase, _Component);
+    babelHelpers.inherits(coorBase, _Component);
 
     function coorBase(opt, app) {
       var _this;
 
-      _classCallCheck(this, coorBase);
+      babelHelpers.classCallCheck(this, coorBase);
+      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(coorBase).call(this, opt, app));
 
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(coorBase).call(this, opt, app));
-
-      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps((this instanceof coorBase ? this.constructor : void 0).defaultProps));
+      _.extend(true, babelHelpers.assertThisInitialized(babelHelpers.assertThisInitialized(_this)), getDefaultProps((this instanceof coorBase ? this.constructor : void 0).defaultProps));
 
       _this.name = "coord";
       _this._opt = opt;
@@ -12996,7 +10552,7 @@
     } //和原始field结构保持一致，但是对应的field换成 {field: , enabled:...}结构
 
 
-    _createClass(coorBase, [{
+    babelHelpers.createClass(coorBase, [{
       key: "setFieldsMap",
       value: function setFieldsMap(axisExp) {
         var me = this;
@@ -13010,7 +10566,7 @@
           }
         });
 
-        function _set$$1(fields) {
+        function _set(fields) {
           if (_.isString(fields)) {
             fields = [fields];
           }
@@ -13033,12 +10589,12 @@
             }
 
             if (_.isArray(fields[i])) {
-              clone_fields[i] = _set$$1(fields[i], fieldInd);
+              clone_fields[i] = _set(fields[i], fieldInd);
             }
           }
           return clone_fields;
         }
-        return _set$$1(fieldsArr);
+        return _set(fieldsArr);
       } //设置 fieldsMap 中对应field 的 enabled状态
 
     }, {
@@ -13242,11 +10798,10 @@
         return arr;
       }
     }]);
-
     return coorBase;
   }(component);
 
-  _defineProperty(coorBase, "defaultProps", {
+  babelHelpers.defineProperty(coorBase, "defaultProps", {
     type: {
       detail: '坐标系组件',
       documentation: "坐标系组件，可选值有'rect'（二维直角坐标系）,'polar'（二维极坐标系）,'box'（三维直角坐标系） ",
@@ -13254,7 +10809,7 @@
       default: "",
       values: ["rect", "polar", "box", "polar3d"]
     },
-    _children: _defineProperty({
+    _children: babelHelpers.defineProperty({
       rect: {},
       polar: {},
       box: {}
@@ -13338,14 +10893,13 @@
   var xAxis =
   /*#__PURE__*/
   function (_axis) {
-    _inherits(xAxis, _axis);
+    babelHelpers.inherits(xAxis, _axis);
 
     function xAxis(opt, data, _coord) {
       var _this;
 
-      _classCallCheck(this, xAxis);
-
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(xAxis).call(this, opt, data.org));
+      babelHelpers.classCallCheck(this, xAxis);
+      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(xAxis).call(this, opt, data.org));
       _this.type = "xAxis";
       _this._opt = opt;
       _this._coord = _coord || {};
@@ -13432,7 +10986,7 @@
       return _this;
     }
 
-    _createClass(xAxis, [{
+    babelHelpers.createClass(xAxis, [{
       key: "init",
       value: function init(opt, data) {
         _.extend(true, this, opt);
@@ -13937,7 +11491,6 @@
         checkOver(0);
       }
     }]);
-
     return xAxis;
   }(axis);
 
@@ -13946,14 +11499,13 @@
   var yAxis =
   /*#__PURE__*/
   function (_axis) {
-    _inherits(yAxis, _axis);
+    babelHelpers.inherits(yAxis, _axis);
 
     function yAxis(opt, data, _coord) {
       var _this;
 
-      _classCallCheck(this, yAxis);
-
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(yAxis).call(this, opt, data.org));
+      babelHelpers.classCallCheck(this, yAxis);
+      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(yAxis).call(this, opt, data.org));
       _this.type = "yAxis";
       _this._opt = opt;
       _this.width = null; //第一次计算后就会有值
@@ -14040,7 +11592,7 @@
       return _this;
     }
 
-    _createClass(yAxis, [{
+    babelHelpers.createClass(yAxis, [{
       key: "init",
       value: function init(opt, data) {
         _.extend(true, this, opt);
@@ -14457,7 +12009,6 @@
         return res;
       }
     }]);
-
     return yAxis;
   }(axis);
 
@@ -14467,14 +12018,13 @@
   var descartesGrid =
   /*#__PURE__*/
   function (_event$Dispatcher) {
-    _inherits(descartesGrid, _event$Dispatcher);
+    babelHelpers.inherits(descartesGrid, _event$Dispatcher);
 
     function descartesGrid(opt, app) {
       var _this;
 
-      _classCallCheck(this, descartesGrid);
-
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(descartesGrid).call(this, opt, app));
+      babelHelpers.classCallCheck(this, descartesGrid);
+      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(descartesGrid).call(this, opt, app));
       _this.width = 0;
       _this.height = 0;
       _this.app = app; //该组件被添加到的目标图表项目，
@@ -14526,7 +12076,7 @@
       return _this;
     }
 
-    _createClass(descartesGrid, [{
+    babelHelpers.createClass(descartesGrid, [{
       key: "init",
       value: function init(opt) {
         _.extend(true, this, opt);
@@ -14655,7 +12205,6 @@
         }
       }
     }]);
-
     return descartesGrid;
   }(Dispatcher);
 
@@ -14664,14 +12213,13 @@
   var _default =
   /*#__PURE__*/
   function (_coorBase) {
-    _inherits(_default, _coorBase);
+    babelHelpers.inherits(_default, _coorBase);
 
     function _default(opt, app) {
       var _this;
 
-      _classCallCheck(this, _default);
-
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(_default).call(this, opt, app));
+      babelHelpers.classCallCheck(this, _default);
+      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(_default).call(this, opt, app));
       _this.type = "rect";
       _this._xAxis = null;
       _this._yAxis = [];
@@ -14679,14 +12227,14 @@
       _this._yAxisRight = null;
       _this._grid = null;
 
-      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps((this instanceof _default ? this.constructor : void 0).defaultProps), _this.setDefaultOpt(opt, app));
+      _.extend(true, babelHelpers.assertThisInitialized(babelHelpers.assertThisInitialized(_this)), getDefaultProps((this instanceof _default ? this.constructor : void 0).defaultProps), _this.setDefaultOpt(opt, app));
 
       _this.init(opt);
 
       return _this;
     }
 
-    _createClass(_default, [{
+    babelHelpers.createClass(_default, [{
       key: "setDefaultOpt",
       value: function setDefaultOpt(coordOpt, app) {
         var coord = {
@@ -15245,11 +12793,10 @@
         };
       }
     }]);
-
     return _default;
   }(coorBase);
 
-  _defineProperty(_default, "defaultProps", {
+  babelHelpers.defineProperty(_default, "defaultProps", {
     horizontal: {
       detail: '横向翻转坐标系',
       documentation: "横向翻转坐标系",
@@ -15271,14 +12818,13 @@
   var polarGrid =
   /*#__PURE__*/
   function (_event$Dispatcher) {
-    _inherits(polarGrid, _event$Dispatcher);
+    babelHelpers.inherits(polarGrid, _event$Dispatcher);
 
     function polarGrid(opt, app) {
       var _this;
 
-      _classCallCheck(this, polarGrid);
-
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(polarGrid).call(this, opt, app));
+      babelHelpers.classCallCheck(this, polarGrid);
+      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(polarGrid).call(this, opt, app));
       _this.width = 0;
       _this.height = 0;
       _this.app = app; //该组件被添加到的目标图表项目，
@@ -15316,7 +12862,7 @@
       return _this;
     }
 
-    _createClass(polarGrid, [{
+    babelHelpers.createClass(polarGrid, [{
       key: "init",
       value: function init(opt) {
         _.extend(true, this, opt);
@@ -15432,31 +12978,31 @@
         return color$$1;
       }
     }]);
-
     return polarGrid;
   }(Dispatcher);
+
+  //极坐标 坐标轴
 
   var _default$1 =
   /*#__PURE__*/
   function (_coorBase) {
-    _inherits(_default, _coorBase);
+    babelHelpers.inherits(_default, _coorBase);
 
     function _default(opt, app) {
       var _this;
 
-      _classCallCheck(this, _default);
-
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(_default).call(this, opt, app));
+      babelHelpers.classCallCheck(this, _default);
+      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(_default).call(this, opt, app));
       _this.type = "polar";
 
-      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps((this instanceof _default ? this.constructor : void 0).defaultProps), _this.setDefaultOpt(opt, app));
+      _.extend(true, babelHelpers.assertThisInitialized(babelHelpers.assertThisInitialized(_this)), getDefaultProps((this instanceof _default ? this.constructor : void 0).defaultProps), _this.setDefaultOpt(opt, app));
 
       _this.init(opt);
 
       return _this;
     }
 
-    _createClass(_default, [{
+    babelHelpers.createClass(_default, [{
       key: "setDefaultOpt",
       value: function setDefaultOpt(coordOpt, app) {
         var coord = {
@@ -16200,11 +13746,10 @@
       key: "getSizeAndOrigin",
       value: function getSizeAndOrigin() {}
     }]);
-
     return _default;
   }(coorBase);
 
-  _defineProperty(_default$1, "defaultProps", {
+  babelHelpers.defineProperty(_default$1, "defaultProps", {
     allAngle: {
       detail: '坐标系总角度',
       documentation: "",
@@ -16309,14 +13854,13 @@
   var GraphsBase =
   /*#__PURE__*/
   function (_Component) {
-    _inherits(GraphsBase, _Component);
+    babelHelpers.inherits(GraphsBase, _Component);
 
     function GraphsBase(opt, app) {
       var _this;
 
-      _classCallCheck(this, GraphsBase);
-
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(GraphsBase).call(this, opt, app));
+      babelHelpers.classCallCheck(this, GraphsBase);
+      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(GraphsBase).call(this, opt, app));
       _this.name = "graphs"; //这里所有的opts都要透传给 group
 
       _this._opt = opt || {};
@@ -16344,8 +13888,7 @@
       _this.app.graphsSprite.addChild(_this.sprite);
 
       _this._growTween = null;
-
-      var me = _assertThisInitialized(_assertThisInitialized(_this));
+      var me = babelHelpers.assertThisInitialized(babelHelpers.assertThisInitialized(_this));
 
       _this.sprite.on("destroy", function () {
         if (me._growTween) {
@@ -16357,7 +13900,7 @@
       return _this;
     }
 
-    _createClass(GraphsBase, [{
+    babelHelpers.createClass(GraphsBase, [{
       key: "tipsPointerOf",
       value: function tipsPointerOf(e) {}
     }, {
@@ -16458,7 +14001,6 @@
         });
       }
     }]);
-
     return GraphsBase;
   }(component);
 
@@ -16468,14 +14010,13 @@
   var BarGraphs =
   /*#__PURE__*/
   function (_GraphsBase) {
-    _inherits(BarGraphs, _GraphsBase);
+    babelHelpers.inherits(BarGraphs, _GraphsBase);
 
     function BarGraphs(opt, app) {
       var _this;
 
-      _classCallCheck(this, BarGraphs);
-
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(BarGraphs).call(this, opt, app));
+      babelHelpers.classCallCheck(this, BarGraphs);
+      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(BarGraphs).call(this, opt, app));
       _this.type = "bar";
       _this.field = null;
       _this.enabledField = null;
@@ -16536,14 +14077,14 @@
       _this._barsLen = 0;
       _this.txtsSp = null;
 
-      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), opt);
+      _.extend(true, babelHelpers.assertThisInitialized(babelHelpers.assertThisInitialized(_this)), opt);
 
       _this.init();
 
       return _this;
     }
 
-    _createClass(BarGraphs, [{
+    babelHelpers.createClass(BarGraphs, [{
       key: "init",
       value: function init() {
         this.barsSp = new Canvax.Display.Sprite({
@@ -17530,7 +15071,6 @@
         return selectOpt;
       }
     }]);
-
     return BarGraphs;
   }(GraphsBase);
 
@@ -17543,14 +15083,13 @@
   var LineGraphsGroup =
   /*#__PURE__*/
   function (_event$Dispatcher) {
-    _inherits(LineGraphsGroup, _event$Dispatcher);
+    babelHelpers.inherits(LineGraphsGroup, _event$Dispatcher);
 
     function LineGraphsGroup(fieldMap, iGroup, opt, ctx, h, w) {
       var _this;
 
-      _classCallCheck(this, LineGraphsGroup);
-
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(LineGraphsGroup).call(this));
+      babelHelpers.classCallCheck(this, LineGraphsGroup);
+      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(LineGraphsGroup).call(this));
       _this._opt = opt;
       _this.fieldMap = fieldMap;
       _this.field = null; //在extend之后要重新设置
@@ -17606,7 +15145,7 @@
 
       _this._bline = null;
 
-      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), opt); //TODO group中得field不能直接用opt中得field， 必须重新设置， 
+      _.extend(true, babelHelpers.assertThisInitialized(babelHelpers.assertThisInitialized(_this)), opt); //TODO group中得field不能直接用opt中得field， 必须重新设置， 
       //group中得field只有一个值，代表一条折线, 后面要扩展extend方法，可以控制过滤哪些key值不做extend
 
 
@@ -17617,7 +15156,7 @@
       return _this;
     }
 
-    _createClass(LineGraphsGroup, [{
+    babelHelpers.createClass(LineGraphsGroup, [{
       key: "init",
       value: function init(opt) {
         this.sprite = new Canvax.Display.Sprite();
@@ -18213,7 +15752,6 @@
         return path;
       }
     }]);
-
     return LineGraphsGroup;
   }(Dispatcher);
 
@@ -18222,14 +15760,13 @@
   var LineGraphs =
   /*#__PURE__*/
   function (_GraphsBase) {
-    _inherits(LineGraphs, _GraphsBase);
+    babelHelpers.inherits(LineGraphs, _GraphsBase);
 
     function LineGraphs(opt, app) {
       var _this;
 
-      _classCallCheck(this, LineGraphs);
-
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(LineGraphs).call(this, opt, app));
+      babelHelpers.classCallCheck(this, LineGraphs);
+      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(LineGraphs).call(this, opt, app));
       _this.type = "line"; //默认给左轴
 
       _this.yAxisAlign = "left";
@@ -18237,14 +15774,14 @@
       _this.enabledField = null;
       _this.groups = []; //群组集合
 
-      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), opt);
+      _.extend(true, babelHelpers.assertThisInitialized(babelHelpers.assertThisInitialized(_this)), opt);
 
       _this.init(_this._opt);
 
       return _this;
     }
 
-    _createClass(LineGraphs, [{
+    babelHelpers.createClass(LineGraphs, [{
       key: "init",
       value: function init(opt) {
         opt.yAxisAlign && (this.yAxisAlign = opt.yAxisAlign);
@@ -18491,7 +16028,6 @@
         return _nodesInfoList;
       }
     }]);
-
     return LineGraphs;
   }(GraphsBase);
 
@@ -18502,14 +16038,13 @@
   var ScatGraphs =
   /*#__PURE__*/
   function (_GraphsBase) {
-    _inherits(ScatGraphs, _GraphsBase);
+    babelHelpers.inherits(ScatGraphs, _GraphsBase);
 
     function ScatGraphs(opt, app) {
       var _this;
 
-      _classCallCheck(this, ScatGraphs);
-
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(ScatGraphs).call(this, opt, app));
+      babelHelpers.classCallCheck(this, ScatGraphs);
+      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(ScatGraphs).call(this, opt, app));
       _this.type = "scat";
       _this.field = null; //TODO:待开发，用groupField来做分组，比如分组出男女两组，然后方便做图例（目前没给scat实现合适的图例）
 
@@ -18573,7 +16108,7 @@
 
       _this.aniOrigin = "default"; //center（坐标正中） origin（坐标原点）
 
-      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), opt); //计算半径的时候需要用到， 每次执行_trimGraphs都必须要初始化一次
+      _.extend(true, babelHelpers.assertThisInitialized(babelHelpers.assertThisInitialized(_this)), opt); //计算半径的时候需要用到， 每次执行_trimGraphs都必须要初始化一次
 
 
       _this._rData = null;
@@ -18585,7 +16120,7 @@
       return _this;
     }
 
-    _createClass(ScatGraphs, [{
+    babelHelpers.createClass(ScatGraphs, [{
       key: "init",
       value: function init() {
         this._shapesp = new Canvax.Display.Sprite({
@@ -19151,10 +16686,10 @@
         nodeData.selected = false;
       }
     }]);
-
     return ScatGraphs;
   }(GraphsBase);
 
+  //单环pie
   var Sector$1 = Canvax.Shapes.Sector;
   var Path$2 = Canvax.Shapes.Path;
   var Rect$7 = Canvax.Shapes.Rect;
@@ -19163,14 +16698,13 @@
   var Pie =
   /*#__PURE__*/
   function (_event$Dispatcher) {
-    _inherits(Pie, _event$Dispatcher);
+    babelHelpers.inherits(Pie, _event$Dispatcher);
 
     function Pie(_graphs, data) {
       var _this;
 
-      _classCallCheck(this, Pie);
-
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(Pie).call(this));
+      babelHelpers.classCallCheck(this, Pie);
+      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(Pie).call(this));
       _this.width = 0;
       _this.height = 0;
       _this.origin = {
@@ -19196,7 +16730,7 @@
       return _this;
     }
 
-    _createClass(Pie, [{
+    babelHelpers.createClass(Pie, [{
       key: "init",
       value: function init() {
         this.sprite = new Canvax.Display.Sprite();
@@ -19789,21 +17323,19 @@
         }
       }
     }]);
-
     return Pie;
   }(Dispatcher);
 
   var PieGraphs =
   /*#__PURE__*/
   function (_GraphsBase) {
-    _inherits(PieGraphs, _GraphsBase);
+    babelHelpers.inherits(PieGraphs, _GraphsBase);
 
     function PieGraphs(opt, app) {
       var _this;
 
-      _classCallCheck(this, PieGraphs);
-
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(PieGraphs).call(this, opt, app));
+      babelHelpers.classCallCheck(this, PieGraphs);
+      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(PieGraphs).call(this, opt, app));
       _this.type = "pie";
       _this.field = null;
       _this.sort = null; //默认不排序，可以配置为asc,desc
@@ -19848,7 +17380,7 @@
       return _this;
     }
 
-    _createClass(PieGraphs, [{
+    babelHelpers.createClass(PieGraphs, [{
       key: "init",
       value: function init(opt) {
         _.extend(true, this, opt); //初步设置下data，主要legend等需要用到
@@ -20229,7 +17761,6 @@
         this._pie.unselectOf(nodeData);
       }
     }]);
-
     return PieGraphs;
   }(GraphsBase);
 
@@ -20239,14 +17770,13 @@
   var RadarGraphs =
   /*#__PURE__*/
   function (_GraphsBase) {
-    _inherits(RadarGraphs, _GraphsBase);
+    babelHelpers.inherits(RadarGraphs, _GraphsBase);
 
     function RadarGraphs(opt, app) {
       var _this;
 
-      _classCallCheck(this, RadarGraphs);
-
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(RadarGraphs).call(this, opt, app));
+      babelHelpers.classCallCheck(this, RadarGraphs);
+      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(RadarGraphs).call(this, opt, app));
       _this.type = "radar";
       _this.field = null;
       _this.enabledField = null;
@@ -20275,14 +17805,14 @@
         //}
       };
 
-      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), opt);
+      _.extend(true, babelHelpers.assertThisInitialized(babelHelpers.assertThisInitialized(_this)), opt);
 
       _this.init();
 
       return _this;
     }
 
-    _createClass(RadarGraphs, [{
+    babelHelpers.createClass(RadarGraphs, [{
       key: "init",
       value: function init() {}
     }, {
@@ -20580,7 +18110,6 @@
         return _nodesInfoList;
       }
     }]);
-
     return RadarGraphs;
   }(GraphsBase);
 
@@ -20636,8 +18165,8 @@
       if (callback != null && typeof callback !== "function") throw new Error("invalid callback: " + callback);
 
       while (++i < n) {
-        if (t = (typename = T[i]).type) _[t] = set$1(_[t], typename.name, callback);else if (callback == null) for (t in _) {
-          _[t] = set$1(_[t], typename.name, null);
+        if (t = (typename = T[i]).type) _[t] = set(_[t], typename.name, callback);else if (callback == null) for (t in _) {
+          _[t] = set(_[t], typename.name, null);
         }
       }
 
@@ -20680,7 +18209,7 @@
     }
   }
 
-  function set$1(type, name, callback) {
+  function set(type, name, callback) {
     for (var i = 0, n = type.length; i < n; ++i) {
       if (type[i].name === name) {
         type[i] = noop, type = type.slice(0, i).concat(type.slice(i + 1));
@@ -21145,19 +18674,16 @@
   var CloudGraphs =
   /*#__PURE__*/
   function (_GraphsBase) {
-    _inherits(CloudGraphs, _GraphsBase);
+    babelHelpers.inherits(CloudGraphs, _GraphsBase);
 
     function CloudGraphs(opt, app) {
       var _this;
 
-      _classCallCheck(this, CloudGraphs);
-
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(CloudGraphs).call(this, opt, app));
+      babelHelpers.classCallCheck(this, CloudGraphs);
+      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(CloudGraphs).call(this, opt, app));
       _this.type = "cloud";
       _this.field = null;
-
-      var me = _assertThisInitialized(_assertThisInitialized(_this)); //坚持一个数据节点的设置都在一个node下面
-
+      var me = babelHelpers.assertThisInitialized(babelHelpers.assertThisInitialized(_this)); //坚持一个数据节点的设置都在一个node下面
 
       _this.node = {
         fontFamily: "Impact",
@@ -21193,14 +18719,14 @@
         }
       };
 
-      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), opt);
+      _.extend(true, babelHelpers.assertThisInitialized(babelHelpers.assertThisInitialized(_this)), opt);
 
       _this.init();
 
       return _this;
     }
 
-    _createClass(CloudGraphs, [{
+    babelHelpers.createClass(CloudGraphs, [{
       key: "init",
       value: function init() {}
     }, {
@@ -21405,7 +18931,6 @@
         nodeData.selected = false;
       }
     }]);
-
     return CloudGraphs;
   }(GraphsBase);
 
@@ -21416,8 +18941,7 @@
   /*#__PURE__*/
   function () {
     function PlanetGroup(opt, dataFrame$$1, _graphs) {
-      _classCallCheck(this, PlanetGroup);
-
+      babelHelpers.classCallCheck(this, PlanetGroup);
       this._opt = opt;
       this.dataFrame = dataFrame$$1;
       this._graphs = _graphs;
@@ -21494,7 +19018,7 @@
       this.init();
     }
 
-    _createClass(PlanetGroup, [{
+    babelHelpers.createClass(PlanetGroup, [{
       key: "init",
       value: function init() {
 
@@ -22093,7 +19617,6 @@
         }
       }
     }]);
-
     return PlanetGroup;
   }();
 
@@ -22105,19 +19628,16 @@
   var PlanetGraphs =
   /*#__PURE__*/
   function (_GraphsBase) {
-    _inherits(PlanetGraphs, _GraphsBase);
+    babelHelpers.inherits(PlanetGraphs, _GraphsBase);
 
     function PlanetGraphs(opt, app) {
       var _this;
 
-      _classCallCheck(this, PlanetGraphs);
-
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(PlanetGraphs).call(this, opt, app));
+      babelHelpers.classCallCheck(this, PlanetGraphs);
+      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(PlanetGraphs).call(this, opt, app));
       _this.type = "planet";
       _this.field = null;
-
-      var me = _assertThisInitialized(_assertThisInitialized(_this)); //圆心原点坐标
-
+      var me = babelHelpers.assertThisInitialized(babelHelpers.assertThisInitialized(_this)); //圆心原点坐标
 
       _this.center = {
         enabled: true,
@@ -22153,7 +19673,7 @@
       };
       _this.selectInds = []; //源数据中__index__的集合，外面可以传入这个数据进来设置选中
 
-      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), opt);
+      _.extend(true, babelHelpers.assertThisInitialized(babelHelpers.assertThisInitialized(_this)), opt);
 
       if (_this.center.radius == 0 || !_this.center.enabled) {
         _this.center.radius = 0;
@@ -22166,7 +19686,7 @@
       return _this;
     }
 
-    _createClass(PlanetGraphs, [{
+    babelHelpers.createClass(PlanetGraphs, [{
       key: "init",
       value: function init() {
         this.gridSp = new Canvax.Display.Sprite({
@@ -22553,7 +20073,6 @@
         return arr;
       }
     }]);
-
     return PlanetGraphs;
   }(GraphsBase);
 
@@ -22563,14 +20082,13 @@
   var FunnelGraphs =
   /*#__PURE__*/
   function (_GraphsBase) {
-    _inherits(FunnelGraphs, _GraphsBase);
+    babelHelpers.inherits(FunnelGraphs, _GraphsBase);
 
     function FunnelGraphs(opt, app) {
       var _this;
 
-      _classCallCheck(this, FunnelGraphs);
-
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(FunnelGraphs).call(this, opt, app));
+      babelHelpers.classCallCheck(this, FunnelGraphs);
+      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(FunnelGraphs).call(this, opt, app));
       _this.type = "funnel";
       _this.field = null;
       _this.dataOrg = []; //this.dataFrame.getFieldData( this.field )
@@ -22616,14 +20134,14 @@
         textBaseline: "middle"
       };
 
-      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), opt);
+      _.extend(true, babelHelpers.assertThisInitialized(babelHelpers.assertThisInitialized(_this)), opt);
 
       _this.init();
 
       return _this;
     }
 
-    _createClass(FunnelGraphs, [{
+    babelHelpers.createClass(FunnelGraphs, [{
       key: "init",
       value: function init() {}
     }, {
@@ -22828,7 +20346,6 @@
         });
       }
     }]);
-
     return FunnelGraphs;
   }(GraphsBase);
 
@@ -24200,14 +21717,13 @@
   var VennGraphs =
   /*#__PURE__*/
   function (_GraphsBase) {
-    _inherits(VennGraphs, _GraphsBase);
+    babelHelpers.inherits(VennGraphs, _GraphsBase);
 
     function VennGraphs(opt, app) {
       var _this;
 
-      _classCallCheck(this, VennGraphs);
-
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(VennGraphs).call(this, opt, app));
+      babelHelpers.classCallCheck(this, VennGraphs);
+      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(VennGraphs).call(this, opt, app));
       _this.type = "venn"; //this.field = null;
 
       _this.keyField = null;
@@ -24241,7 +21757,7 @@
       };
       _this.vennData = null;
 
-      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), opt); //_trimGraphs后，计算出来本次data的一些属性
+      _.extend(true, babelHelpers.assertThisInitialized(babelHelpers.assertThisInitialized(_this)), opt); //_trimGraphs后，计算出来本次data的一些属性
 
 
       _this._dataCircleLen = 0;
@@ -24253,7 +21769,7 @@
       return _this;
     }
 
-    _createClass(VennGraphs, [{
+    babelHelpers.createClass(VennGraphs, [{
       key: "init",
       value: function init() {
         this.venn_circles = new Canvax.Display.Sprite({
@@ -24627,7 +22143,6 @@
         nodeData.selected = false;
       }
     }]);
-
     return VennGraphs;
   }(GraphsBase); //venn computeTextCentres 需要的相关代码 begin
 
@@ -25138,20 +22653,22 @@
     return Hierarchy.layout_hierarchyRebind(partition, hierarchy);
   }
 
+  /*
+  * 太阳图
+  */
   var Sector$2 = Canvax.Shapes.Sector;
   var Circle$9 = Canvax.Shapes.Circle;
 
   var sunburstGraphs =
   /*#__PURE__*/
   function (_GraphsBase) {
-    _inherits(sunburstGraphs, _GraphsBase);
+    babelHelpers.inherits(sunburstGraphs, _GraphsBase);
 
     function sunburstGraphs(opt, app) {
       var _this;
 
-      _classCallCheck(this, sunburstGraphs);
-
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(sunburstGraphs).call(this, opt, app));
+      babelHelpers.classCallCheck(this, sunburstGraphs);
+      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(sunburstGraphs).call(this, opt, app));
       _this.type = "sunburst";
       _this.keyField = "name"; //key, parent指向的值
 
@@ -25171,7 +22688,7 @@
         }
       };
 
-      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), opt);
+      _.extend(true, babelHelpers.assertThisInitialized(babelHelpers.assertThisInitialized(_this)), opt);
 
       _this.data = []; //布局算法布局后的数据
 
@@ -25182,7 +22699,7 @@
       return _this;
     }
 
-    _createClass(sunburstGraphs, [{
+    babelHelpers.createClass(sunburstGraphs, [{
       key: "init",
       value: function init() {}
     }, {
@@ -25422,7 +22939,6 @@
         }
       }
     }]);
-
     return sunburstGraphs;
   }(GraphsBase);
 
@@ -25994,20 +23510,22 @@
     return sankey;
   }
 
+  /*
+  * 太阳图
+  */
   var Path$4 = Canvax.Shapes.Path;
   var Rect$9 = Canvax.Shapes.Rect;
 
   var sankeyGraphs =
   /*#__PURE__*/
   function (_GraphsBase) {
-    _inherits(sankeyGraphs, _GraphsBase);
+    babelHelpers.inherits(sankeyGraphs, _GraphsBase);
 
     function sankeyGraphs(opt, app) {
       var _this;
 
-      _classCallCheck(this, sankeyGraphs);
-
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(sankeyGraphs).call(this, opt, app));
+      babelHelpers.classCallCheck(this, sankeyGraphs);
+      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(sankeyGraphs).call(this, opt, app));
       _this.type = "sankey";
       _this.keyField = null; //key, parent指向的值
 
@@ -26050,14 +23568,14 @@
         offsetY: 0
       };
 
-      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), opt);
+      _.extend(true, babelHelpers.assertThisInitialized(babelHelpers.assertThisInitialized(_this)), opt);
 
       _this.init();
 
       return _this;
     }
 
-    _createClass(sankeyGraphs, [{
+    babelHelpers.createClass(sankeyGraphs, [{
       key: "init",
       value: function init() {
         this._links = new Canvax.Display.Sprite();
@@ -26268,24 +23786,22 @@
         });
       }
     }]);
-
     return sankeyGraphs;
   }(GraphsBase);
 
   var Progress =
   /*#__PURE__*/
   function (_GraphsBase) {
-    _inherits(Progress, _GraphsBase);
+    babelHelpers.inherits(Progress, _GraphsBase);
 
     function Progress(opt, app) {
       var _this;
 
-      _classCallCheck(this, Progress);
-
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(Progress).call(this, opt, app));
+      babelHelpers.classCallCheck(this, Progress);
+      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(Progress).call(this, opt, app));
       _this.type = "progress";
 
-      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps((this instanceof Progress ? this.constructor : void 0).defaultProps), opt);
+      _.extend(true, babelHelpers.assertThisInitialized(babelHelpers.assertThisInitialized(_this)), getDefaultProps((this instanceof Progress ? this.constructor : void 0).defaultProps), opt);
 
       _this.bgNodeData = null; //背景的nodeData数据，和data里面的结构保持一致
 
@@ -26294,7 +23810,7 @@
       return _this;
     }
 
-    _createClass(Progress, [{
+    babelHelpers.createClass(Progress, [{
       key: "init",
       value: function init() {}
     }, {
@@ -26603,11 +24119,10 @@
         return style;
       }
     }]);
-
     return Progress;
   }(GraphsBase);
 
-  _defineProperty(Progress, "defaultProps", {
+  babelHelpers.defineProperty(Progress, "defaultProps", {
     node: {
       detail: '进度条设置',
       propertys: {
@@ -26718,9 +24233,7 @@
    */
   var Trigger = function Trigger(comp) {
     var params = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-
-    _classCallCheck(this, Trigger);
-
+    babelHelpers.classCallCheck(this, Trigger);
     this.comp = comp;
     this.params = params;
   };
@@ -26730,14 +24243,13 @@
   var Legend =
   /*#__PURE__*/
   function (_Component) {
-    _inherits(Legend, _Component);
+    babelHelpers.inherits(Legend, _Component);
 
     function Legend(opt, app) {
       var _this;
 
-      _classCallCheck(this, Legend);
-
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(Legend).call(this, opt, app));
+      babelHelpers.classCallCheck(this, Legend);
+      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(Legend).call(this, opt, app));
       _this.name = "legend";
       /* data的数据结构为
       [
@@ -26780,7 +24292,7 @@
 
       _this.direction = "h"; //横向 top,bottom --> h left,right -- >v
 
-      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), {
+      _.extend(true, babelHelpers.assertThisInitialized(babelHelpers.assertThisInitialized(_this)), {
         icon: {
           onChecked: function onChecked(obj) {
             app.show(obj.name, new Trigger(this, obj));
@@ -26816,7 +24328,7 @@
       return _this;
     }
 
-    _createClass(Legend, [{
+    babelHelpers.createClass(Legend, [{
       key: "_getLegendData",
       value: function _getLegendData(opt) {
         var legendData = opt.data;
@@ -27029,7 +24541,6 @@
         };
       }
     }]);
-
     return Legend;
   }(component);
 
@@ -27088,14 +24599,13 @@
   var dataZoom =
   /*#__PURE__*/
   function (_Component) {
-    _inherits(dataZoom, _Component);
+    babelHelpers.inherits(dataZoom, _Component);
 
     function dataZoom(opt, app) {
       var _this;
 
-      _classCallCheck(this, dataZoom);
-
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(dataZoom).call(this, opt, app));
+      babelHelpers.classCallCheck(this, dataZoom);
+      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(dataZoom).call(this, opt, app));
       _this.name = "dataZoom";
       _this._cloneChart = null;
       _this.count = 1; //把w 均为为多少个区间， 同样多节点的line 和  bar， 这个count相差一
@@ -27132,7 +24642,7 @@
 
       app.stage.addChild(_this.sprite); //预设默认的opt.dataZoom
 
-      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), defaultProps, opt);
+      _.extend(true, babelHelpers.assertThisInitialized(babelHelpers.assertThisInitialized(_this)), defaultProps, opt);
 
       _this.layout();
 
@@ -27140,7 +24650,7 @@
     } //datazoom begin
 
 
-    _createClass(dataZoom, [{
+    babelHelpers.createClass(dataZoom, [{
       key: "layout",
       value: function layout() {
         var app = this.app;
@@ -27742,7 +25252,6 @@
         this._cloneChart.cloneEl.parentNode.removeChild(this._cloneChart.cloneEl);
       }
     }]);
-
     return dataZoom;
   }(component);
 
@@ -27753,14 +25262,13 @@
   var MarkLine =
   /*#__PURE__*/
   function (_Component) {
-    _inherits(MarkLine, _Component);
+    babelHelpers.inherits(MarkLine, _Component);
 
     function MarkLine(opt, app) {
       var _this;
 
-      _classCallCheck(this, MarkLine);
-
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(MarkLine).call(this, opt, app));
+      babelHelpers.classCallCheck(this, MarkLine);
+      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(MarkLine).call(this, opt, app));
       _this.name = "markLine";
       _this._yAxis = null;
       _this.field = null;
@@ -27793,11 +25301,11 @@
 
       _this.app.graphsSprite.addChild(_this.sprite);
 
-      opt && _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), opt);
+      opt && _.extend(true, babelHelpers.assertThisInitialized(babelHelpers.assertThisInitialized(_this)), opt);
       return _this;
     }
 
-    _createClass(MarkLine, [{
+    babelHelpers.createClass(MarkLine, [{
       key: "draw",
       value: function draw() {
         this._calculateProps();
@@ -28005,7 +25513,6 @@
         return str;
       }
     }]);
-
     return MarkLine;
   }(component);
 
@@ -28015,14 +25522,13 @@
   var Tips =
   /*#__PURE__*/
   function (_Component) {
-    _inherits(Tips, _Component);
+    babelHelpers.inherits(Tips, _Component);
 
     function Tips(opt, app) {
       var _this;
 
-      _classCallCheck(this, Tips);
-
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(Tips).call(this, opt, app));
+      babelHelpers.classCallCheck(this, Tips);
+      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(Tips).call(this, opt, app));
       _this.name = "tips";
       _this.tipDomContainer = _this.app.canvax.domView;
       _this.cW = 0; //容器的width
@@ -28066,18 +25572,18 @@
 
       _this.app.stage.addChild(_this.sprite);
 
-      var me = _assertThisInitialized(_assertThisInitialized(_this));
+      var me = babelHelpers.assertThisInitialized(babelHelpers.assertThisInitialized(_this));
 
       _this.sprite.on("destroy", function () {
         me._tipDom = null;
       });
 
-      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), opt);
+      _.extend(true, babelHelpers.assertThisInitialized(babelHelpers.assertThisInitialized(_this)), opt);
 
       return _this;
     }
 
-    _createClass(Tips, [{
+    babelHelpers.createClass(Tips, [{
       key: "show",
       value: function show(e) {
         if (!this.enabled) return;
@@ -28246,7 +25752,7 @@
           }
           var style = node.color || node.fillStyle || node.strokeStyle;
           var name = node.name || node.field;
-          var value = _typeof(node.value) == "object" ? JSON.stringify(node.value) : numAddSymbol(node.value);
+          var value = babelHelpers.typeof(node.value) == "object" ? JSON.stringify(node.value) : numAddSymbol(node.value);
           str += "<div style='line-height:1.5;font-size:12px;padding:0 4px;'>";
 
           if (style) {
@@ -28455,7 +25961,6 @@
         }
       }
     }]);
-
     return Tips;
   }(component);
 
@@ -28464,14 +25969,13 @@
   var barTgi =
   /*#__PURE__*/
   function (_Component) {
-    _inherits(barTgi, _Component);
+    babelHelpers.inherits(barTgi, _Component);
 
     function barTgi(opt, app) {
       var _this;
 
-      _classCallCheck(this, barTgi);
-
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(barTgi).call(this, opt, app));
+      babelHelpers.classCallCheck(this, barTgi);
+      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(barTgi).call(this, opt, app));
       _this.name = "barTgi";
       _this.field = null;
       _this.barField = null;
@@ -28496,7 +26000,7 @@
         }
       };
 
-      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), opt);
+      _.extend(true, babelHelpers.assertThisInitialized(babelHelpers.assertThisInitialized(_this)), opt);
 
       _this._yAxis = _this.app.getComponent({
         name: 'coord'
@@ -28508,7 +26012,7 @@
       return _this;
     }
 
-    _createClass(barTgi, [{
+    babelHelpers.createClass(barTgi, [{
       key: "reset",
       value: function reset(opt) {
         _.extend(true, this, opt);
@@ -28581,21 +26085,19 @@
         return res;
       }
     }]);
-
     return barTgi;
   }(component);
 
   var _default$2 =
   /*#__PURE__*/
   function (_Component) {
-    _inherits(_default, _Component);
+    babelHelpers.inherits(_default, _Component);
 
     function _default(opt, app) {
       var _this;
 
-      _classCallCheck(this, _default);
-
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(_default).call(this, opt, app));
+      babelHelpers.classCallCheck(this, _default);
+      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(_default).call(this, opt, app));
       _this.name = "barGuide";
       _this.field = null;
       _this.barField = null;
@@ -28604,7 +26106,7 @@
       _this._yAxis = null;
       _this.yAxisAlign = "left";
       _this.sprite = null;
-      _this.node = _defineProperty({
+      _this.node = babelHelpers.defineProperty({
         lineWidth: 3,
         shapeType: "circle",
         radius: 6,
@@ -28623,7 +26125,7 @@
         }
       };
 
-      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), opt);
+      _.extend(true, babelHelpers.assertThisInitialized(babelHelpers.assertThisInitialized(_this)), opt);
 
       _this._yAxis = _this.app.getComponent({
         name: 'coord'
@@ -28635,7 +26137,7 @@
       return _this;
     }
 
-    _createClass(_default, [{
+    babelHelpers.createClass(_default, [{
       key: "reset",
       value: function reset(opt) {
         _.extend(true, this, opt);
@@ -28719,27 +26221,29 @@
         return res;
       }
     }]);
-
     return _default;
   }(component);
+
+  /**
+   * 皮肤组件，不是一个具体的ui组件
+   */
 
   var theme =
   /*#__PURE__*/
   function (_Component) {
-    _inherits(theme, _Component);
+    babelHelpers.inherits(theme, _Component);
 
     function theme(_theme, app) {
       var _this;
 
-      _classCallCheck(this, theme);
-
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(theme).call(this, _theme, app));
+      babelHelpers.classCallCheck(this, theme);
+      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(theme).call(this, _theme, app));
       _this.name = "theme";
       _this.colors = _theme || [];
       return _this;
     }
 
-    _createClass(theme, [{
+    babelHelpers.createClass(theme, [{
       key: "set",
       value: function set(colors) {
         this.colors = colors;
@@ -28772,23 +26276,24 @@
         return colors;
       }
     }]);
-
     return theme;
   }(component);
 
+  /**
+   * 水印组件
+   */
   var Text$7 = Canvax.Display.Text;
 
   var waterMark =
   /*#__PURE__*/
   function (_Component) {
-    _inherits(waterMark, _Component);
+    babelHelpers.inherits(waterMark, _Component);
 
     function waterMark(opt, app) {
       var _this;
 
-      _classCallCheck(this, waterMark);
-
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(waterMark).call(this, opt, app));
+      babelHelpers.classCallCheck(this, waterMark);
+      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(waterMark).call(this, opt, app));
       _this.name = "waterMark";
       _this.width = _this.app.width;
       _this.height = _this.app.height;
@@ -28800,7 +26305,7 @@
       _this.alpha = 0.2;
       _this.rotation = 45;
 
-      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), opt);
+      _.extend(true, babelHelpers.assertThisInitialized(babelHelpers.assertThisInitialized(_this)), opt);
 
       _this.spripte = new Canvax.Display.Sprite({
         id: "watermark"
@@ -28813,7 +26318,7 @@
       return _this;
     }
 
-    _createClass(waterMark, [{
+    babelHelpers.createClass(waterMark, [{
       key: "draw",
       value: function draw() {
         var textEl = new Canvax.Display.Text(this.text, {
@@ -28849,7 +26354,6 @@
         }
       }
     }]);
-
     return waterMark;
   }(component);
 
@@ -28860,14 +26364,13 @@
   var MarkLine$1 =
   /*#__PURE__*/
   function (_Component) {
-    _inherits(MarkLine, _Component);
+    babelHelpers.inherits(MarkLine, _Component);
 
     function MarkLine(opt, app) {
       var _this;
 
-      _classCallCheck(this, MarkLine);
-
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(MarkLine).call(this, opt, app));
+      babelHelpers.classCallCheck(this, MarkLine);
+      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(MarkLine).call(this, opt, app));
       _this.name = "cross";
       _this.width = opt.width || 0;
       _this.height = opt.height || 0; //x,y都是准心的 x轴方向和y方向的 value值，不是真实的px，需要
@@ -28909,7 +26412,7 @@
 
       _this._vLine = null; //竖向的线
 
-      opt && _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), opt);
+      opt && _.extend(true, babelHelpers.assertThisInitialized(babelHelpers.assertThisInitialized(_this)), opt);
       _this._yAxis = _this.app.getComponent({
         name: 'coord'
       })._yAxis[_this.yAxisAlign == "left" ? 0 : 1];
@@ -28920,7 +26423,7 @@
       return _this;
     }
 
-    _createClass(MarkLine, [{
+    babelHelpers.createClass(MarkLine, [{
       key: "draw",
       value: function draw() {
         var me = this;
@@ -28976,21 +26479,19 @@
         me.sprite.addChild(me._vLine);
       }
     }]);
-
     return MarkLine;
   }(component);
 
   var _default$3 =
   /*#__PURE__*/
   function (_Component) {
-    _inherits(_default, _Component);
+    babelHelpers.inherits(_default, _Component);
 
     function _default(opt, app) {
       var _this;
 
-      _classCallCheck(this, _default);
-
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(_default).call(this, opt, app));
+      babelHelpers.classCallCheck(this, _default);
+      _this = babelHelpers.possibleConstructorReturn(this, babelHelpers.getPrototypeOf(_default).call(this, opt, app));
       _this.name = "lineSchedu";
       _this.data = null;
       _this.lineDatas = null;
@@ -29004,7 +26505,7 @@
       _this.listFontSize = 12;
       _this.listFontColor = null;
 
-      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), opt);
+      _.extend(true, babelHelpers.assertThisInitialized(babelHelpers.assertThisInitialized(_this)), opt);
 
       _this.sprite = new Canvax.Display.Sprite();
 
@@ -29013,7 +26514,7 @@
       return _this;
     }
 
-    _createClass(_default, [{
+    babelHelpers.createClass(_default, [{
       key: "reset",
       value: function reset(opt) {
         _.extend(true, this, opt);
@@ -29157,7 +26658,6 @@
         return y;
       }
     }]);
-
     return _default;
   }(component);
 
@@ -29205,4 +26705,4 @@
 
   return chartx;
 
-})));
+}));
