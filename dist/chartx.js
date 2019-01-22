@@ -1,8 +1,8 @@
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
   typeof define === 'function' && define.amd ? define(factory) :
-  (global.Chartx = factory());
-}(this, (function () { 'use strict';
+  (global = global || self, global.Chartx = factory());
+}(this, function () { 'use strict';
 
   function _typeof(obj) {
     if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
@@ -12357,6 +12357,11 @@
             insertText: "horizontal: ",
             default: false,
             values: [true, false]
+          },
+          _props: {
+            xAxis: xAxis,
+            yAxis: yAxis,
+            grid: rectGrid
           }
         };
       }
@@ -28129,4 +28134,4 @@
 
   return chartx;
 
-})));
+}));

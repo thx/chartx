@@ -16,8 +16,13 @@ export default class Rect extends coordBase
                 insertText    : "horizontal: ",
                 default       : false,
                 values        : [true, false]
+            },
+            _props : {
+                xAxis : xAxisConstructor,
+                yAxis : yAxisConstructor,
+                grid  : Grid
             }
-        } 
+        };
     }
 
     constructor( opt, app )

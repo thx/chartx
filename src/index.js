@@ -3,14 +3,16 @@ import { global } from "mmvis"
 
 import Chart from "./chart"
 
-//空坐标系，当一些非坐标系图表，就直接创建在emptyCoord上面
-//import emptyCoord from "./components/coord/index"
+//-----------------------------------------------
 
+//坐标系基类，配置props用
+import Coord from "./components/coord/index"
 //坐标系
 import Rect from "./components/coord/rect"
 import Polar from "./components/coord/polar"
-
-
+//-----------------------------------------------
+//graph基类，配置props用
+import Graphs from "./components/graphs/index"
 //graphs
 import Bar from "./components/graphs/bar/index"
 import Line from "./components/graphs/line/index"
@@ -24,7 +26,7 @@ import Venn from "./components/graphs/venn/index"
 import Sunburst from "./components/graphs/sunburst/index"
 import Sankey from "./components/graphs/sankey/index"
 import Progress from "./components/graphs/progress/index"
-
+//-----------------------------------------------
 //components
 import Legend from "./components/legend/index"
 import DataZoom from "./components/datazoom/index"
@@ -36,6 +38,24 @@ import Theme from "./components/theme/index"
 import WaterMark from "./components/watermark/index"
 import Cross from "./components/cross/index"
 import lineSchedu from "./components/lineschedu/index"
+
+
+//设置全量的props
+var props = {
+    coord : {
+        detail: '坐标系',
+        model : Coord,
+        types : { //model中type对应的值的modle
+            rect : Rect,
+            polar: Polar
+        }
+    }
+};
+
+
+
+
+
 
 global.registerComponent( Chart, 'chart' );
 
@@ -65,7 +85,10 @@ global.registerComponent( BarTgi, 'barTgi' );
 global.registerComponent( BarGuide, 'barGuide' );
 global.registerComponent( WaterMark, 'waterMark' );
 global.registerComponent( Cross, 'cross' );
-global.registerComponent( lineSchedu, 'lineSchedu' )
+global.registerComponent( lineSchedu, 'lineSchedu' );
+
+
+
 
 //皮肤设定begin ---------------
 //如果数据库中有项目皮肤
@@ -82,5 +105,8 @@ var chartx = {
 for( var p in global ){
     chartx[ p ] = global[ p ];
 };
+
+
+
 
 export default chartx;

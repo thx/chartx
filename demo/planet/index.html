@@ -226,6 +226,13 @@ var options = {
 
 window.planet = Chartx.create("canvasTest" , data , options)
 
+setTimeout( function(){
+                    
+    $("#canvasTest").width(800);
+    planet.resize();
+
+} , 1000)
+
             </textarea></form>
         </td>
         <td style="padding:0 10px;" id="td-vr">

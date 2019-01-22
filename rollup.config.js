@@ -17,7 +17,7 @@ export default [
             {
                 file : "dist/chartx.js",
                 name : "Chartx",
-                format : "umd"
+                format : "iife"
             }
         ],
         plugins: [
@@ -25,7 +25,6 @@ export default [
             commonjs(),
             babel({
                 exclude: /node_modules\/(?!.*@*(mmvis|canvax)\/).*/,
-                externalHelpers: true,
                 babelrc: false,
                 presets: [
                     [
@@ -36,9 +35,7 @@ export default [
                         }
                     ]
                 ],
-                plugins: [
-                    "@babel/plugin-external-helpers"
-                ]
+                plugins: [ ]
             })
         ]
     }
