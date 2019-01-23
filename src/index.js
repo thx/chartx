@@ -74,6 +74,7 @@ if( projectTheme && projectTheme.length ){
 };
 //皮肤设定end -----------------
 
+
 var chartx = {
     options : {}
 };

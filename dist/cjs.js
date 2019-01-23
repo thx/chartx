@@ -11360,24 +11360,40 @@ function (_axis) {
     key: "_checkOver",
     value: function _checkOver() {
       var me = this;
-      var arr = me.layoutData; //现在的柱状图的自定义datasection有缺陷
+      var arr = me.layoutData;
+      var l = arr.length;
+      var textAlign = me.label.textAlign; //如果用户设置不想要做重叠检测
 
-      if (me.trimLayout) {
-        //如果用户有手动的 trimLayout ，那么就全部visible为true，然后调用用户自己的过滤程序
-        //trimLayout就事把arr种的每个元素的visible设置为true和false的过程
-        me.trimLayout(arr);
-        return;
-      }
-
-      if (!this.label.evade) {
+      if (!this.label.evade || me.trimLayout) {
         _.each(arr, function (layoutItem) {
           layoutItem.visible = true;
         });
 
+        if (me.trimLayout) {
+          //如果用户有手动的 trimLayout ，那么就全部visible为true，然后调用用户自己的过滤程序
+          //trimLayout就事把arr种的每个元素的visible设置为true和false的过程
+          me.trimLayout(arr);
+        }
+        //首先找到最后一个visible的label
+
+        var lastNode;
+
+        for (var i = l - 1; i >= 0; i--) {
+          if (lastNode) break;
+          if (arr[i].visible) lastNode = arr[i];
+        }
+
+        if (lastNode) {
+          if (textAlign == "center" && lastNode.x + lastNode.textWidth / 2 > me.width) {
+            lastNode._text_x = me.width - lastNode.textWidth / 2 + me._getRootPR();
+          }
+
+          if (textAlign == "left" && lastNode.x + lastNode.textWidth > me.width) {
+            lastNode._text_x = me.width - lastNode.textWidth;
+          }
+        }
         return;
       }
-      var l = arr.length;
-      var textAlign = me.label.textAlign;
 
       function checkOver(i) {
         var curr = arr[i];
@@ -11415,15 +11431,14 @@ function (_axis) {
             //next是最后一个
             if (textAlign == "center" && next.x + nextWidth / 2 > me.width) {
               next_left_x = me.width - nextWidth;
-              next._text_x = me.width - nextWidth / 2;
+              next._text_x = me.width - nextWidth / 2 + me._getRootPR();
             }
 
             if (textAlign == "left" && next.x + nextWidth > me.width) {
               next_left_x = me.width - nextWidth;
               next._text_x = me.width - nextWidth;
             }
-          } //重叠，容许2px的误差
-
+          }
 
           if (next_left_x - curr_right_x < -2) {
             if (ii == l - 2) {
@@ -24346,9 +24361,8 @@ function (_Component) {
         _.each(legendData, function (item, i) {
           item.enabled = true;
           item.ind = i;
-        });
+        }); //delete opt.data;
 
-        delete opt.data;
       } else {
         legendData = this.app.getLegendData();
       }
