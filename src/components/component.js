@@ -1,16 +1,28 @@
 import Canvax from "canvax"
 import {event} from "mmvis"
 
-export default class component extends event.Dispatcher
+export default class Component extends event.Dispatcher
 {
+    static defaultProps(){
+        return {
+            enabled : {
+                detail : '是否开启该组件',
+                default: false
+            }
+        }
+    }
+
+    static _isComponentRoot(){return true}
+
     constructor(opt, app)
     {
         super( opt, app );
+        _.extend( true, this, getDefaultProps( Component.defaultProps() ) , opt );
 
         this.name = "component"; //组件名称
         this.type = null; //组件子类型，比如 Graphs组件下面的bar,line,scat等
 
-        this.enabled = false; //是否加载该组件
+        //this.enabled = false; //是否加载该组件
         this._opt = opt;
         this.app = app; //这个组件挂在哪个app上面（图表）
         

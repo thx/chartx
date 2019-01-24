@@ -102,7 +102,7 @@
     return _assertThisInitialized(self);
   }
 
-  var _ = {};
+  var _$1 = {};
   var breaker = {};
   var ArrayProto = Array.prototype,
       ObjProto = Object.prototype,
@@ -139,8 +139,8 @@
     return typeof length == 'number' && length >= 0 && length <= MAX_ARRAY_INDEX;
   };
 
-  _.values = function (obj) {
-    var keys = _.keys(obj);
+  _$1.values = function (obj) {
+    var keys = _$1.keys(obj);
 
     var length = keys.length;
     var values = new Array(length);
@@ -152,22 +152,22 @@
     return values;
   };
 
-  _.keys = nativeKeys || function (obj) {
+  _$1.keys = nativeKeys || function (obj) {
     if (obj !== Object(obj)) throw new TypeError('Invalid object');
     var keys = [];
 
     for (var key in obj) {
-      if (_.has(obj, key)) keys.push(key);
+      if (_$1.has(obj, key)) keys.push(key);
     }
 
     return keys;
   };
 
-  _.has = function (obj, key) {
+  _$1.has = function (obj, key) {
     return hasOwnProperty.call(obj, key);
   };
 
-  var each = _.each = _.forEach = function (obj, iterator, context) {
+  var each = _$1.each = _$1.forEach = function (obj, iterator, context) {
     if (obj == null) return;
 
     if (nativeForEach && obj.forEach === nativeForEach) {
@@ -177,7 +177,7 @@
         if (iterator.call(context, obj[i], i, obj) === breaker) return;
       }
     } else {
-      var keys = _.keys(obj);
+      var keys = _$1.keys(obj);
 
       for (var i = 0, length = keys.length; i < length; i++) {
         if (iterator.call(context, obj[keys[i]], keys[i], obj) === breaker) return;
@@ -185,11 +185,11 @@
     }
   };
 
-  _.compact = function (array) {
-    return _.filter(array, _.identity);
+  _$1.compact = function (array) {
+    return _$1.filter(array, _$1.identity);
   };
 
-  _.filter = _.select = function (obj, iterator, context) {
+  _$1.filter = _$1.select = function (obj, iterator, context) {
     var results = [];
     if (obj == null) return results;
     if (nativeFilter && obj.filter === nativeFilter) return obj.filter(iterator, context);
@@ -200,66 +200,66 @@
   };
 
   each(['Arguments', 'Function', 'String', 'Number', 'Date', 'RegExp'], function (name) {
-    _['is' + name] = function (obj) {
+    _$1['is' + name] = function (obj) {
       return toString.call(obj) == '[object ' + name + ']';
     };
   }); //if (!_.isArguments(arguments)) {
 
-  _.isArguments = function (obj) {
-    return !!(obj && _.has(obj, 'callee'));
+  _$1.isArguments = function (obj) {
+    return !!(obj && _$1.has(obj, 'callee'));
   }; //}
 
 
   {
-    _.isFunction = function (obj) {
+    _$1.isFunction = function (obj) {
       return typeof obj === 'function';
     };
   }
 
-  _.isFinite = function (obj) {
+  _$1.isFinite = function (obj) {
     return isFinite(obj) && !isNaN(parseFloat(obj));
   };
 
-  _.isNaN = function (obj) {
-    return _.isNumber(obj) && obj != +obj;
+  _$1.isNaN = function (obj) {
+    return _$1.isNumber(obj) && obj != +obj;
   };
 
-  _.isBoolean = function (obj) {
+  _$1.isBoolean = function (obj) {
     return obj === true || obj === false || toString.call(obj) == '[object Boolean]';
   };
 
-  _.isNull = function (obj) {
+  _$1.isNull = function (obj) {
     return obj === null;
   };
 
-  _.isEmpty = function (obj) {
+  _$1.isEmpty = function (obj) {
     if (obj == null) return true;
-    if (_.isArray(obj) || _.isString(obj)) return obj.length === 0;
+    if (_$1.isArray(obj) || _$1.isString(obj)) return obj.length === 0;
 
     for (var key in obj) {
-      if (_.has(obj, key)) return false;
+      if (_$1.has(obj, key)) return false;
     }
 
     return true;
   };
 
-  _.isElement = function (obj) {
+  _$1.isElement = function (obj) {
     return !!(obj && obj.nodeType === 1);
   };
 
-  _.isArray = nativeIsArray || function (obj) {
+  _$1.isArray = nativeIsArray || function (obj) {
     return toString.call(obj) == '[object Array]';
   };
 
-  _.isObject = function (obj) {
+  _$1.isObject = function (obj) {
     return obj === Object(obj);
   };
 
-  _.identity = function (value) {
+  _$1.identity = function (value) {
     return value;
   };
 
-  _.indexOf = function (array, item, isSorted) {
+  _$1.indexOf = function (array, item, isSorted) {
     if (array == null) return -1;
     var i = 0,
         length = array.length;
@@ -268,7 +268,7 @@
       if (typeof isSorted == 'number') {
         i = isSorted < 0 ? Math.max(0, length + isSorted) : isSorted;
       } else {
-        i = _.sortedIndex(array, item);
+        i = _$1.sortedIndex(array, item);
         return array[i] === item ? i : -1;
       }
     }
@@ -282,18 +282,18 @@
     return -1;
   };
 
-  _.isWindow = function (obj) {
+  _$1.isWindow = function (obj) {
     return obj != null && obj == obj.window;
   }; // Internal implementation of a recursive `flatten` function.
 
 
   var flatten = function flatten(input, shallow, output) {
-    if (shallow && _.every(input, _.isArray)) {
+    if (shallow && _$1.every(input, _$1.isArray)) {
       return concat.apply(output, input);
     }
 
     each(input, function (value) {
-      if (_.isArray(value) || _.isArguments(value)) {
+      if (_$1.isArray(value) || _$1.isArguments(value)) {
         shallow ? push.apply(output, value) : flatten(value, shallow, output);
       } else {
         output.push(value);
@@ -303,12 +303,12 @@
   }; // Flatten out an array, either recursively (by default), or just one level.
 
 
-  _.flatten = function (array, shallow) {
+  _$1.flatten = function (array, shallow) {
     return flatten(array, shallow, []);
   };
 
-  _.every = _.all = function (obj, iterator, context) {
-    iterator || (iterator = _.identity);
+  _$1.every = _$1.all = function (obj, iterator, context) {
+    iterator || (iterator = _$1.identity);
     var result = true;
     if (obj == null) return result;
     if (nativeEvery && obj.every === nativeEvery) return obj.every(iterator, context);
@@ -319,12 +319,12 @@
   }; // Return the minimum element (or element-based computation).
 
 
-  _.min = function (obj, iterator, context) {
-    if (!iterator && _.isArray(obj) && obj[0] === +obj[0] && obj.length < 65535) {
+  _$1.min = function (obj, iterator, context) {
+    if (!iterator && _$1.isArray(obj) && obj[0] === +obj[0] && obj.length < 65535) {
       return Math.min.apply(Math, obj);
     }
 
-    if (!iterator && _.isEmpty(obj)) return Infinity;
+    if (!iterator && _$1.isEmpty(obj)) return Infinity;
     var result = {
       computed: Infinity,
       value: Infinity
@@ -342,12 +342,12 @@
   // See [WebKit Bug 80797](https://bugs.webkit.org/show_bug.cgi?id=80797)
 
 
-  _.max = function (obj, iterator, context) {
-    if (!iterator && _.isArray(obj) && obj[0] === +obj[0] && obj.length < 65535) {
+  _$1.max = function (obj, iterator, context) {
+    if (!iterator && _$1.isArray(obj) && obj[0] === +obj[0] && obj.length < 65535) {
       return Math.max.apply(Math, obj);
     }
 
-    if (!iterator && _.isEmpty(obj)) return -Infinity;
+    if (!iterator && _$1.isEmpty(obj)) return -Infinity;
     var result = {
       computed: -Infinity,
       value: -Infinity
@@ -363,7 +363,7 @@
   }; // Return the first value which passes a truth test. Aliased as `detect`.
 
 
-  _.find = _.detect = function (obj, iterator, context) {
+  _$1.find = _$1.detect = function (obj, iterator, context) {
     var result;
     any(obj, function (value, index, list) {
       if (iterator.call(context, value, index, list)) {
@@ -377,8 +377,8 @@
   // Aliased as `any`.
 
 
-  var any = _.some = _.any = function (obj, iterator, context) {
-    iterator || (iterator = _.identity);
+  var any = _$1.some = _$1.any = function (obj, iterator, context) {
+    iterator || (iterator = _$1.identity);
     var result = false;
     if (obj == null) return result;
     if (nativeSome && obj.some === nativeSome) return obj.some(iterator, context);
@@ -389,34 +389,34 @@
   }; // Return a version of the array that does not contain the specified value(s).
 
 
-  _.without = function (array) {
-    return _.difference(array, slice.call(arguments, 1));
+  _$1.without = function (array) {
+    return _$1.difference(array, slice.call(arguments, 1));
   }; // Take the difference between one array and a number of other arrays.
   // Only the elements present in just the first array will remain.
 
 
-  _.difference = function (array) {
+  _$1.difference = function (array) {
     var rest = concat.apply(ArrayProto, slice.call(arguments, 1));
-    return _.filter(array, function (value) {
-      return !_.contains(rest, value);
+    return _$1.filter(array, function (value) {
+      return !_$1.contains(rest, value);
     });
   }; // Produce a duplicate-free version of the array. If the array has already
   // been sorted, you have the option of using a faster algorithm.
   // Aliased as `unique`.
 
 
-  _.uniq = _.unique = function (array, isSorted, iterator, context) {
-    if (_.isFunction(isSorted)) {
+  _$1.uniq = _$1.unique = function (array, isSorted, iterator, context) {
+    if (_$1.isFunction(isSorted)) {
       context = iterator;
       iterator = isSorted;
       isSorted = false;
     }
 
-    var initial = iterator ? _.map(array, iterator, context) : array;
+    var initial = iterator ? _$1.map(array, iterator, context) : array;
     var results = [];
     var seen = [];
     each(initial, function (value, index) {
-      if (isSorted ? !index || seen[seen.length - 1] !== value : !_.contains(seen, value)) {
+      if (isSorted ? !index || seen[seen.length - 1] !== value : !_$1.contains(seen, value)) {
         seen.push(value);
         results.push(array[index]);
       }
@@ -426,7 +426,7 @@
   // Delegates to **ECMAScript 5**'s native `map` if available.
 
 
-  _.map = _.collect = function (obj, iterator, context) {
+  _$1.map = _$1.collect = function (obj, iterator, context) {
     var results = [];
     if (obj == null) return results;
     if (nativeMap && obj.map === nativeMap) return obj.map(iterator, context);
@@ -438,7 +438,7 @@
   // Aliased as `include`.
 
 
-  _.contains = _.include = function (obj, target) {
+  _$1.contains = _$1.include = function (obj, target) {
     if (obj == null) return false;
     if (nativeIndexOf && obj.indexOf === nativeIndexOf) return obj.indexOf(target) != -1;
     return any(obj, function (value) {
@@ -447,14 +447,14 @@
   }; // Convenience version of a common use case of `map`: fetching a property.
 
 
-  _.pluck = function (obj, key) {
-    return _.map(obj, function (value) {
+  _$1.pluck = function (obj, key) {
+    return _$1.map(obj, function (value) {
       return value[key];
     });
   }; // Return a random integer between min and max (inclusive).
 
 
-  _.random = function (min, max) {
+  _$1.random = function (min, max) {
     if (max == null) {
       max = min;
       min = 0;
@@ -464,23 +464,23 @@
   }; // Shuffle a collection.
 
 
-  _.shuffle = function (obj) {
-    return _.sample(obj, Infinity);
+  _$1.shuffle = function (obj) {
+    return _$1.sample(obj, Infinity);
   };
 
-  _.sample = function (obj, n, guard) {
+  _$1.sample = function (obj, n, guard) {
     if (n == null || guard) {
-      if (!isArrayLike(obj)) obj = _.values(obj);
-      return obj[_.random(obj.length - 1)];
+      if (!isArrayLike(obj)) obj = _$1.values(obj);
+      return obj[_$1.random(obj.length - 1)];
     }
 
-    var sample = isArrayLike(obj) ? _.clone(obj) : _.values(obj);
+    var sample = isArrayLike(obj) ? _$1.clone(obj) : _$1.values(obj);
     var length = getLength(sample);
     n = Math.max(Math.min(n, length), 0);
     var last = length - 1;
 
     for (var index = 0; index < n; index++) {
-      var rand = _.random(index, last);
+      var rand = _$1.random(index, last);
 
       var temp = sample[index];
       sample[index] = sample[rand];
@@ -495,7 +495,7 @@
   */
 
 
-  _.extend = function () {
+  _$1.extend = function () {
     var options,
         name,
         src,
@@ -511,7 +511,7 @@
       i = 2;
     }
 
-    if (_typeof(target) !== "object" && !_.isFunction(target)) {
+    if (_typeof(target) !== "object" && !_$1.isFunction(target)) {
       target = {};
     }
 
@@ -530,8 +530,8 @@
             continue;
           }
 
-          if (deep && copy && _.isObject(copy) && copy.constructor === Object) {
-            target[name] = _.extend(deep, src, copy);
+          if (deep && copy && _$1.isObject(copy) && copy.constructor === Object) {
+            target[name] = _$1.extend(deep, src, copy);
           } else {
             target[name] = copy;
           }
@@ -542,27 +542,27 @@
     return target;
   };
 
-  _.clone = function (obj) {
-    if (!_.isObject(obj)) return obj;
-    return _.isArray(obj) ? obj.slice() : _.extend(true, {}, obj);
+  _$1.clone = function (obj) {
+    if (!_$1.isObject(obj)) return obj;
+    return _$1.isArray(obj) ? obj.slice() : _$1.extend(true, {}, obj);
   }; //********补存一些数学常用方法,暂放在这里文件下,后期多了单独成立一个类库  */
   // compute euclidian modulo of m % n
   // https://en.wikipedia.org/wiki/Modulo_operation
 
 
-  _.euclideanModulo = function (n, m) {
+  _$1.euclideanModulo = function (n, m) {
     return (n % m + m) % m;
   };
 
-  _.DEG2RAD = Math.PI / 180;
-  _.RAD2DEG = 180 / Math.PI;
+  _$1.DEG2RAD = Math.PI / 180;
+  _$1.RAD2DEG = 180 / Math.PI;
 
-  _.degToRad = function (degrees) {
-    return degrees * _.DEG2RAD;
+  _$1.degToRad = function (degrees) {
+    return degrees * _$1.DEG2RAD;
   };
 
-  _.radToDeg = function (radians) {
-    return radians * _.RAD2DEG;
+  _$1.radToDeg = function (radians) {
+    return radians * _$1.RAD2DEG;
   };
 
   function normalizeTickInterval(interval, magnitude) {
@@ -590,7 +590,7 @@
   }
 
   function getLinearTickPositions(arr, $maxPart, $cfg) {
-    arr = _.without(arr, undefined, null, "");
+    arr = _$1.without(arr, undefined, null, "");
     var scale = $cfg && $cfg.scale ? parseFloat($cfg.scale) : 1; //返回的数组中的值 是否都为整数(思霏)  防止返回[8, 8.2, 8.4, 8.6, 8.8, 9]   应该返回[8, 9]
 
     var isInt = $cfg && $cfg.isInt ? 1 : 0;
@@ -599,12 +599,12 @@
       scale = 1;
     }
 
-    var max = _.max(arr);
+    var max = _$1.max(arr);
 
     var initMax = max;
     max *= scale;
 
-    var min = _.min(arr);
+    var min = _$1.min(arr);
 
     if (min == max) {
       if (max > 0) {
@@ -675,26 +675,26 @@
 
   var dataSection = {
     section: function section($arr, $maxPart, $cfg) {
-      return _.uniq(getLinearTickPositions($arr, $maxPart, $cfg));
+      return _$1.uniq(getLinearTickPositions($arr, $maxPart, $cfg));
     }
   };
 
   var cloneOptions = function cloneOptions(opt) {
-    return _.clone(opt);
+    return _$1.clone(opt);
   };
 
   var cloneData = function cloneData(data) {
     return JSON.parse(JSON.stringify(data));
   };
 
-  var getDefaultProps = function getDefaultProps(dProps) {
+  var getDefaultProps$1 = function getDefaultProps(dProps) {
     var target = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
     for (var p in dProps) {
       if (!!p.indexOf("_")) {
         if (!dProps[p] || !dProps[p].propertys) {
           //如果这个属性没有子属性了，那么就说明这个已经是叶子节点了
-          if (_.isObject(dProps[p]) && !_.isFunction(dProps[p]) && !_.isArray(dProps[p])) {
+          if (_$1.isObject(dProps[p]) && !_$1.isFunction(dProps[p]) && !_$1.isArray(dProps[p])) {
             target[p] = dProps[p].default;
           } else {
             target[p] = dProps[p];
@@ -780,7 +780,7 @@
       //        [1,2,3] 
       //    ]   
       // ]
-      this._opt = _.clone(opt);
+      this._opt = _$1.clone(opt);
       this.dataOrg = dataOrg || []; //3d中有引用到
 
       this.dataSectionLayout = []; //和dataSection一一对应的，每个值的pos，//get xxx OfPos的时候，要先来这里做一次寻找
@@ -801,7 +801,7 @@
       this._min = null;
       this._max = null;
 
-      _.extend(true, this, getDefaultProps(axis.defaultProps()), opt);
+      _$1.extend(true, this, getDefaultProps$1(axis.defaultProps()), opt);
     }
 
     _createClass(axis, [{
@@ -827,23 +827,23 @@
 
         if (this.layoutType == "proportion") {
           if (this._min == null) {
-            this._min = _.min(this.dataSection);
+            this._min = _$1.min(this.dataSection);
           }
 
           if (this._max == null) {
-            this._max = _.max(this.dataSection);
+            this._max = _$1.max(this.dataSection);
           }
           //如果用户设置了origin，那么就已用户的设置为准
 
           if (!("origin" in this._opt)) {
             this.origin = 0; //this.dataSection[0];//_.min( this.dataSection );
 
-            if (_.max(this.dataSection) < 0) {
-              this.origin = _.max(this.dataSection);
+            if (_$1.max(this.dataSection) < 0) {
+              this.origin = _$1.max(this.dataSection);
             }
 
-            if (_.min(this.dataSection) > 0) {
-              this.origin = _.min(this.dataSection);
+            if (_$1.min(this.dataSection) > 0) {
+              this.origin = _$1.min(this.dataSection);
             }
           }
           this._originTrans = this._getOriginTrans(this.origin);
@@ -852,7 +852,7 @@
 
         this.dataSectionLayout = [];
 
-        _.each(this.dataSection, function (val, i) {
+        _$1.each(this.dataSection, function (val, i) {
           var ind = i;
 
           if (me.layoutType == "proportion") {
@@ -880,7 +880,7 @@
       value: function setDataSection(_dataSection) {
         var me = this; //如果用户没有配置dataSection，或者用户传了，但是传了个空数组，则自己组装dataSection
 
-        if (_.isEmpty(_dataSection) && _.isEmpty(this._opt.dataSection)) {
+        if (_$1.isEmpty(_dataSection) && _$1.isEmpty(this._opt.dataSection)) {
           if (this.layoutType == "proportion") {
             var arr = this._getDataSection();
 
@@ -898,9 +898,9 @@
 
             if (this.symmetric) {
               //如果需要处理为对称数据
-              var _min = _.min(arr);
+              var _min = _$1.min(arr);
 
-              var _max = _.max(arr);
+              var _max = _$1.max(arr);
 
               if (Math.abs(_min) > Math.abs(_max)) {
                 arr.push(Math.abs(_min));
@@ -919,7 +919,7 @@
               }
             }
 
-            if (_.isFunction(this.sectionHandler)) {
+            if (_$1.isFunction(this.sectionHandler)) {
               this.dataSection = this.sectionHandler(arr);
             }
 
@@ -929,9 +929,9 @@
 
             if (this.symmetric) {
               //可能得到的区间是偶数， 非对称，强行补上
-              var _min = _.min(this.dataSection);
+              var _min = _$1.min(this.dataSection);
 
-              var _max = _.max(this.dataSection);
+              var _max = _$1.max(this.dataSection);
 
               if (Math.abs(_min) > Math.abs(_max)) {
                 this.dataSection.push(Math.abs(_min));
@@ -944,7 +944,7 @@
               this.dataSection = [0];
             }
 
-            this.dataSectionGroup = [_.clone(this.dataSection)];
+            this.dataSectionGroup = [_$1.clone(this.dataSection)];
 
             this._middleweight(); //如果有middleweight配置，需要根据配置来重新矫正下datasection
 
@@ -952,7 +952,7 @@
             this._sort();
           } else {
             //非proportion 也就是 rule peak 模式下面
-            this.dataSection = _.flatten(this.dataOrg); //this._getDataSection();
+            this.dataSection = _$1.flatten(this.dataOrg); //this._getDataSection();
 
             this.dataSectionGroup = [this.dataSection];
           }
@@ -969,7 +969,7 @@
         //vLen就会等于2
         var vLen = 1;
 
-        _.each(this.dataOrg, function (arr) {
+        _$1.each(this.dataOrg, function (arr) {
           vLen = Math.max(arr.length, vLen);
         });
 
@@ -984,7 +984,7 @@
     }, {
       key: "_oneDimensional",
       value: function _oneDimensional() {
-        var arr = _.flatten(this.dataOrg); //_.flatten( data.org );
+        var arr = _$1.flatten(this.dataOrg); //_.flatten( data.org );
 
 
         for (var i = 0, il = arr.length; i < il; i++) {
@@ -1000,12 +1000,12 @@
         var arr = [];
         var min;
 
-        _.each(d, function (d, i) {
+        _$1.each(d, function (d, i) {
           if (!d.length) {
             return;
           }
 
-          if (!_.isArray(d[0])) {
+          if (!_$1.isArray(d[0])) {
             arr.push(d);
             return;
           }
@@ -1044,7 +1044,7 @@
         });
 
         arr.push(min);
-        return _.flatten(arr);
+        return _$1.flatten(arr);
       } //val 要被push到datasection 中去的 值
       //主要是用在markline等组件中，当自己的y值超出了yaxis的范围
 
@@ -1054,7 +1054,7 @@
         if (val <= this.waterLine) return;
         this.waterLine = val;
 
-        if (val < _.min(this.dataSection) || val > _.max(this.dataSection)) {
+        if (val < _$1.min(this.dataSection) || val > _$1.max(this.dataSection)) {
           //waterLine不再当前section的区间内，需要重新计算整个datasection    
           this.setDataSection();
           this.calculateProps();
@@ -1069,7 +1069,7 @@
           if (sort == "desc") {
             this.dataSection.reverse(); //dataSectionGroup 从里到外全部都要做一次 reverse， 这样就可以对应上 dataSection.reverse()
 
-            _.each(this.dataSectionGroup, function (dsg, i) {
+            _$1.each(this.dataSectionGroup, function (dsg, i) {
               dsg.reverse();
             });
 
@@ -1082,7 +1082,7 @@
       value: function _getSortType() {
         var _sort;
 
-        if (_.isString(this.sort)) {
+        if (_$1.isString(this.sort)) {
           _sort = this.sort;
         }
 
@@ -1097,13 +1097,13 @@
       value: function _middleweight() {
         if (this.middleweight) {
           //支持多个量级的设置
-          if (!_.isArray(this.middleweight)) {
+          if (!_$1.isArray(this.middleweight)) {
             this.middleweight = [this.middleweight];
           }
 
-          var dMin = _.min(this.dataSection);
+          var dMin = _$1.min(this.dataSection);
 
-          var dMax = _.max(this.dataSection);
+          var dMax = _$1.max(this.dataSection);
 
           var newDS = [dMin];
           var newDSG = [];
@@ -1144,9 +1144,9 @@
           var ds = this.dataSectionGroup[i];
 
           if (this.layoutType == "proportion") {
-            var min = _.min(ds);
+            var min = _$1.min(ds);
 
-            var max = _.max(ds);
+            var max = _$1.max(ds);
 
             var amountABS = Math.abs(max - min);
 
@@ -1170,7 +1170,7 @@
         var props = ["val", "ind", "pos"];
         var prop;
 
-        _.each(props, function (_p) {
+        _$1.each(props, function (_p) {
           if (_p in opt) {
             prop = _p;
           }
@@ -1178,7 +1178,7 @@
 
         var layoutData;
 
-        _.each(this.dataSectionLayout, function (item) {
+        _$1.each(this.dataSectionLayout, function (item) {
           if (item[prop] === opt[prop]) {
             layoutData = item;
           }
@@ -1231,9 +1231,9 @@
           for (var i = 0, l = dsgLen; i < l; i++) {
             var ds = this.dataSectionGroup[i];
 
-            var min = _.min(ds);
+            var min = _$1.min(ds);
 
-            var max = _.max(ds);
+            var max = _$1.max(ds);
 
             var val = "val" in opt ? opt.val : this.getValOfInd(opt.ind);
 
@@ -1330,18 +1330,18 @@
       value: function _getValOfInd(ind, ds) {
         var me = this;
 
-        var org = _.flatten(this.dataOrg);
+        var org = _$1.flatten(this.dataOrg);
 
         var val;
 
         if (this.layoutType == "proportion") {
           var groupLength = this.axisLength / this.dataSectionGroup.length;
 
-          _.each(this.dataSectionGroup, function (ds, i) {
+          _$1.each(this.dataSectionGroup, function (ds, i) {
             if (parseInt(ind / groupLength) == i || i == me.dataSectionGroup.length - 1) {
-              var min = _.min(ds);
+              var min = _$1.min(ds);
 
-              var max = _.max(ds);
+              var max = _$1.max(ds);
 
               val = min + (max - min) / groupLength * (ind - groupLength * i);
               return false;
@@ -1409,9 +1409,9 @@
 
           valInd = this.getPosOfVal(val);
         } else {
-          _.each(this.dataOrg, function (arr) {
-            _.each(arr, function (list) {
-              var _ind = _.indexOf(list, val);
+          _$1.each(this.dataOrg, function (arr) {
+            _$1.each(arr, function (list) {
+              var _ind = _$1.indexOf(list, val);
 
               if (_ind != -1) {
                 valInd = _ind;
@@ -1508,7 +1508,7 @@
       list = [];
     }
 
-    if (list.length > 0 && !_.isArray(list[0])) {
+    if (list.length > 0 && !_$1.isArray(list[0])) {
       var newArr = [];
       var fields = [];
       var fieldNum = 0;
@@ -1561,7 +1561,7 @@
       return dataFrame;
     }
 
-    if (data.length > 0 && !_.isArray(data[0])) {
+    if (data.length > 0 && !_$1.isArray(data[0])) {
       data = parse2MatrixData(data);
     }
     dataFrame.length = data.length - 1; //设置好数据区间end值
@@ -1569,7 +1569,7 @@
     dataFrame.range.end = dataFrame.length - 1; //然后检查opts中是否有dataZoom.range
 
     if (opt && opt.dataZoom && opt.dataZoom.range) {
-      _.extend(dataFrame.range, opt.dataZoom.range);
+      _$1.extend(dataFrame.range, opt.dataZoom.range);
     }
 
     if (data.length && data[0].length && !~data[0].indexOf("__index__")) {
@@ -1630,7 +1630,7 @@
         return data;
       }
 
-      if (!_.isArray($field)) {
+      if (!_$1.isArray($field)) {
         $field = [$field];
       }
 
@@ -1638,7 +1638,7 @@
 
       for (var i = 0, l = $field.length; i < l; i++) {
 
-        if (_.isArray($field[i])) {
+        if (_$1.isArray($field[i])) {
           newData.push(getDataOrg($field[i], format, totalList, lev + 1));
         } else {
           var _fieldData = newData;
@@ -1695,7 +1695,7 @@
         for (var i = dataFrame.range.start; i <= dataFrame.range.end; i++) {
           var matchNum = 0;
 
-          _.each(dataFrame.data, function (fd) {
+          _$1.each(dataFrame.data, function (fd) {
             if (fd.field in obj && fd.data[i] == obj[fd.field]) {
               matchNum++;
             }
@@ -1713,7 +1713,7 @@
     function _getFieldData(field) {
       var data;
 
-      _.each(dataFrame.data, function (d) {
+      _$1.each(dataFrame.data, function (d) {
         if (d.field == field) {
           data = d;
         }
@@ -1762,7 +1762,7 @@
   var $ = {
     // dom操作相关代码
     query: function query(el) {
-      if (_.isString(el)) {
+      if (_$1.isString(el)) {
         return document.getElementById(el);
       }
 
@@ -1898,7 +1898,7 @@
           variables = typeof variablesFromComponent === 'function' ? variablesFromComponent(data) : variablesFromComponent;
         }
 
-        variables = _.extend(true, {}, variablesInCode, variables);
+        variables = _$1.extend(true, {}, variablesInCode, variables);
         var codeWithoutVariables = code.slice(0, range[0]) + code.slice(range[1]);
         return this._eval(codeWithoutVariables, 'options', 'variables', variables);
       } catch (e) {
@@ -2000,7 +2000,7 @@
       var opt = parse$$1(decodeURIComponent(this.options[chartPark_cid] || {}));
 
       if (userOptions) {
-        opt = _.extend(true, opt, userOptions);
+        opt = _$1.extend(true, opt, userOptions);
       }
       return opt;
     },
@@ -2015,7 +2015,7 @@
       var opt = parse.parse(code, range, data, variables);
 
       if (userOptions) {
-        opt = _.extend(true, opt, userOptions);
+        opt = _$1.extend(true, opt, userOptions);
       }
       return opt;
     },
@@ -2081,13 +2081,13 @@
       if (arguments.length == 3) {
         var arg2 = arguments[2];
 
-        if (_.isNumber(arg2)) {
+        if (_$1.isNumber(arg2)) {
           if (arg2 == 3) {
             dimension = 3;
           }
         }
 
-        if (_.isString(arg2)) {
+        if (_$1.isString(arg2)) {
           type = arg2;
         }
       }
@@ -2130,13 +2130,13 @@
       if (arguments.length == 2) {
         var arg1 = arguments[1];
 
-        if (_.isNumber(arg1)) {
+        if (_$1.isNumber(arg1)) {
           if (arg1 == 3) {
             dimension = 3;
           }
         }
 
-        if (_.isString(arg1)) {
+        if (_$1.isString(arg1)) {
           type = arg1;
         }
       }
@@ -2209,7 +2209,7 @@
 
       _classCallCheck(this, Polar);
 
-      this._opt = _.clone(opt);
+      this._opt = _$1.clone(opt);
       this.dataFrame = dataFrame;
       this.axisLength = 1;
       this.dataOrg = [];
@@ -2254,7 +2254,7 @@
           // limitAngle = opt.allAngles + me.startAngle % me.allAngles;
           //新的算法
           //这里只是计算每个扇区的初始位置,所以这里求模就可以啦
-          currentAngle = _.euclideanModulo(this.startAngle, aRound); // opt.allAngles = opt.allAngles > 0 ? opt.allAngles : aRound;
+          currentAngle = _$1.euclideanModulo(this.startAngle, aRound); // opt.allAngles = opt.allAngles > 0 ? opt.allAngles : aRound;
           // limitAngle = opt.allAngles + _.euclideanModulo(opt.startAngle, opt.allAngles);
 
           this.layoutData.forEach(function (item, i) {
@@ -2268,8 +2268,8 @@
 
             endAngle = currentAngle + angle;
             midAngle = currentAngle + angle * 0.5;
-            cosV = Cos(_.degToRad(midAngle));
-            sinV = Sin(_.degToRad(midAngle));
+            cosV = Cos(_$1.degToRad(midAngle));
+            sinV = Sin(_$1.degToRad(midAngle));
             cosV = cosV.toFixed(5);
             sinV = sinV.toFixed(5);
             quadrant = _this.getAuadrant(midAngle); //如果用户在配置中制定了半径字段,这里需要计算相对的半径比例值
@@ -2279,7 +2279,7 @@
               outRadius = parseInt((opt.node.outRadius - opt.node.innerRadius) * ((item.radiusValue - _this.minRadius) / (_this.maxRadius - _this.minRadius)) + opt.node.innerRadius);
             }
 
-            _.extend(item, {
+            _$1.extend(item, {
               outRadius: outRadius,
               innerRadius: innerRadius,
               startAngle: currentAngle,
@@ -2381,7 +2381,7 @@
             }
           }); //重新设定下ind
 
-          _.each(data, function (d, i) {
+          _$1.each(data, function (d, i) {
             d.iNode = i;
 
             _this2.dataOrg.push(d);
@@ -2398,13 +2398,13 @@
     }, {
       key: "_isFiled",
       value: function _isFiled(field, layoutData) {
-        return field && _.isString(field) && field in layoutData.rowData;
+        return field && _$1.isString(field) && field in layoutData.rowData;
       }
     }, {
       key: "getAuadrant",
       value: function getAuadrant(ang) {
         //获取象限
-        ang = _.euclideanModulo(ang, aRound);
+        ang = _$1.euclideanModulo(ang, aRound);
         var angleRatio = parseInt(ang / 90);
         var _quadrant = 0;
 
@@ -2446,7 +2446,7 @@
         var prop = props[Object.keys(opt)[0]];
         var layoutData;
 
-        _.each(this.layoutData, function (item) {
+        _$1.each(this.layoutData, function (item) {
           if (item[prop] === opt[prop]) {
             layoutData = item;
           }
@@ -2463,7 +2463,7 @@
       value: function getPointsOfR(r, angleList) {
         var points = [];
 
-        _.each(angleList, function (_a) {
+        _$1.each(angleList, function (_a) {
           //弧度
           var _r = Math.PI * _a / 180;
 
@@ -2539,7 +2539,7 @@
   Polar.getROfNum = function (num, dataSection, width, height) {
     var r = 0;
 
-    var maxNum = _.max(dataSection);
+    var maxNum = _$1.max(dataSection);
 
     var minNum = 0; //Math.min( this.rAxis.dataSection );
 
@@ -2559,11 +2559,11 @@
   var Event = function Event(evt) {
     var eventType = "CanvaxEvent";
 
-    if (_.isString(evt)) {
+    if (_$1.isString(evt)) {
       eventType = evt;
     }
 
-    if (_.isObject(evt) && evt.type) {
+    if (_$1.isObject(evt) && evt.type) {
       eventType = evt.type;
     }
     this.target = null;
@@ -2594,7 +2594,7 @@
         return;
       }
 
-      if (_.isString(evts)) {
+      if (_$1.isString(evts)) {
         evts = evts.split(/,| /);
       }
       this._types = _mouseEvents.split(/,| /).concat(evts);
@@ -2630,7 +2630,7 @@
       var hasInteractionEvent = false;
 
       for (var t in this._eventMap) {
-        if (_.indexOf(types.get(), t) > -1) {
+        if (_$1.indexOf(types.get(), t) > -1) {
           hasInteractionEvent = true;
         }
       }
@@ -2650,11 +2650,11 @@
       var self = this;
       var types$$1 = _type;
 
-      if (_.isString(_type)) {
+      if (_$1.isString(_type)) {
         types$$1 = _type.split(/,| /);
       }
 
-      _.each(types$$1, function (type) {
+      _$1.each(types$$1, function (type) {
         var map = self._eventMap[type];
 
         if (!map) {
@@ -2666,7 +2666,7 @@
           return true;
         }
 
-        if (_.indexOf(map, listener) == -1) {
+        if (_$1.indexOf(map, listener) == -1) {
           map.push(listener); //self._eventEnabled = true;
 
           self._setEventEnable();
@@ -2863,7 +2863,7 @@
         }
         var me = this;
 
-        _.each(eventType.split(" "), function (eType) {
+        _$1.each(eventType.split(" "), function (eType) {
           e.currentTarget = me;
           me.dispatchEvent(e);
         });
@@ -2999,7 +2999,7 @@
       end: "panend"
     };
 
-    _.extend(true, this, opt);
+    _$1.extend(true, this, opt);
   }; //这样的好处是document.compareDocumentPosition只会在定义的时候执行一次。
 
 
@@ -3026,7 +3026,7 @@
         types.register(_hammerEventTypes);
       }
 
-      _.each(types.get(), function (type) {
+      _$1.each(types.get(), function (type) {
         //不再关心浏览器环境是否 'ontouchstart' in window 
         //而是直接只管传给事件模块的是一个原生dom还是 jq对象 or hammer对象等
         if (me.target.nodeType == 1) {
@@ -3237,7 +3237,7 @@
         if (e.type == me.drag.start) {
           //dragstart的时候touch已经准备好了target， curPointsTarget 里面只要有一个是有效的
           //就认为drags开始
-          _.each(me.curPointsTarget, function (child, i) {
+          _$1.each(me.curPointsTarget, function (child, i) {
             if (child && child.dragEnabled) {
               //只要有一个元素就认为正在准备drag了
               me._draging = true; //有可能该child没有hover style
@@ -3258,7 +3258,7 @@
 
         if (e.type == me.drag.move) {
           if (me._draging) {
-            _.each(me.curPointsTarget, function (child, i) {
+            _$1.each(me.curPointsTarget, function (child, i) {
               if (child && child.dragEnabled) {
                 me._dragIngHander(e, child, i);
               }
@@ -3268,7 +3268,7 @@
 
         if (e.type == me.drag.end) {
           if (me._draging) {
-            _.each(me.curPointsTarget, function (child, i) {
+            _$1.each(me.curPointsTarget, function (child, i) {
               if (child && child.dragEnabled) {
                 me._dragEnd(e, child, 0);
 
@@ -3292,7 +3292,7 @@
       var root = me.canvax;
       var curTouchs = [];
 
-      _.each(e.point, function (touch) {
+      _$1.each(e.point, function (touch) {
         curTouchs.push({
           x: $.pageX(touch) - root.viewOffset.left,
           y: $.pageY(touch) - root.viewOffset.top
@@ -3306,7 +3306,7 @@
       var root = me.canvax;
       var touchesTarget = [];
 
-      _.each(touchs, function (touch) {
+      _$1.each(touchs, function (touch) {
         touchesTarget.push(root.getObjectsUnderPoint(touch, 1)[0]);
       });
 
@@ -3328,7 +3328,7 @@
       var me = this;
       var hasChild = false;
 
-      _.each(childs, function (child, i) {
+      _$1.each(childs, function (child, i) {
         if (child) {
           hasChild = true;
           var ce = new Event(e);
@@ -4748,7 +4748,7 @@
    */
 
   function registTween(options) {
-    var opt = _.extend({
+    var opt = _$1.extend({
       from: null,
       to: null,
       duration: 500,
@@ -4844,14 +4844,14 @@
     var Publics = _Publics;
 
     function loop(name, val) {
-      if (_.indexOf(_Publics, name) === -1) {
+      if (_$1.indexOf(_Publics, name) === -1) {
         //非 _Publics 中的值，都要先设置好对应的val到model上
         model[name] = val;
       }
 
       var valueType = _typeof(val);
 
-      if (_.indexOf(Publics, name) > -1) {
+      if (_$1.indexOf(Publics, name) > -1) {
         return;
       }
 
@@ -4923,7 +4923,7 @@
     }
     pmodel = defineProperties(pmodel, accessores, Publics); //生成一个空的ViewModel
 
-    _.forEach(Publics, function (name) {
+    _$1.forEach(Publics, function (name) {
       if (scope[name]) {
         //然后为函数等不被监控的属性赋值
         if (typeof scope[name] == "function") {
@@ -5199,7 +5199,7 @@
 
         };
 
-        _.extend(true, _contextATTRS, opt.context); //有些引擎内部设置context属性的时候是不用上报心跳的，比如做热点检测的时候
+        _$1.extend(true, _contextATTRS, opt.context); //有些引擎内部设置context属性的时候是不用上报心跳的，比如做热点检测的时候
 
 
         self._notWatch = false; //不需要发心跳信息
@@ -5220,7 +5220,7 @@
             obj._globalAlphaChange = true;
           }
 
-          if (_.indexOf(TRANSFORM_PROPS, name) > -1) {
+          if (_$1.indexOf(TRANSFORM_PROPS, name) > -1) {
             obj._updateTransform();
 
             obj._transformChange = true;
@@ -5256,14 +5256,14 @@
     }, {
       key: "track",
       value: function track(el) {
-        if (_.indexOf(this._trackList, el) == -1) {
+        if (_$1.indexOf(this._trackList, el) == -1) {
           this._trackList.push(el);
         }
       }
     }, {
       key: "untrack",
       value: function untrack(el) {
-        var ind = _.indexOf(this._trackList, el);
+        var ind = _$1.indexOf(this._trackList, el);
 
         if (ind > -1) {
           this._trackList.splice(ind, 1);
@@ -5280,7 +5280,7 @@
       value: function clone(myself) {
         var conf = {
           id: this.id,
-          context: _.clone(this.context.$model),
+          context: _$1.clone(this.context.$model),
           isClone: true
         };
         var newObj;
@@ -5414,7 +5414,7 @@
     }, {
       key: "setEventEnable",
       value: function setEventEnable(bool) {
-        if (_.isBoolean(bool)) {
+        if (_$1.isBoolean(bool)) {
           this._eventEnabled = bool;
           return true;
         }
@@ -5430,7 +5430,7 @@
         if (!this.parent) {
           return;
         }
-        return _.indexOf(this.parent.children, this);
+        return _$1.indexOf(this.parent.children, this);
       }
       /*
        *元素在z轴方向向下移动
@@ -5447,7 +5447,7 @@
         var fromIndex = this.getIndex();
         var toIndex = 0;
 
-        if (_.isNumber(num)) {
+        if (_$1.isNumber(num)) {
           if (num == 0) {
             //原地不动
             return;
@@ -5478,7 +5478,7 @@
         var pcl = this.parent.children.length;
         var toIndex = pcl;
 
-        if (_.isNumber(num)) {
+        if (_$1.isNumber(num)) {
           if (num == 0) {
             //原地不动
             return;
@@ -5676,9 +5676,9 @@
         var from = null;
 
         for (var p in to) {
-          if (_.isObject(to[p])) {
+          if (_$1.isObject(to[p])) {
             //options必须传递一份copy出去，比如到下一个animate
-            this.animate(to[p], _.extend({}, options), context[p]); //如果是个object
+            this.animate(to[p], _$1.extend({}, options), context[p]); //如果是个object
 
             continue;
           }
@@ -5879,7 +5879,7 @@
     }, {
       key: "removeChild",
       value: function removeChild(child) {
-        return this.removeChildAt(_.indexOf(this.children, child));
+        return this.removeChildAt(_$1.indexOf(this.children, child));
       }
     }, {
       key: "removeChildAt",
@@ -5988,14 +5988,14 @@
     }, {
       key: "getChildIndex",
       value: function getChildIndex(child) {
-        return _.indexOf(this.children, child);
+        return _$1.indexOf(this.children, child);
       }
     }, {
       key: "setChildIndex",
       value: function setChildIndex(child, index$$1) {
         if (child.parent != this) return;
 
-        var oldIndex = _.indexOf(this.children, child);
+        var oldIndex = _$1.indexOf(this.children, child);
 
         if (index$$1 == oldIndex) return;
         this.children.splice(oldIndex, 1);
@@ -6178,7 +6178,7 @@
       value: function _convertCanvax(opt) {
         var me = this;
 
-        _.each(me.app.children, function (stage) {
+        _$1.each(me.app.children, function (stage) {
           stage.context[opt.name] = opt.value;
         });
       }
@@ -6253,7 +6253,7 @@
           }
         } else {
           //无条件要求全部刷新，一般用在resize等。
-          _.each(self.app.children, function (stage, i) {
+          _$1.each(self.app.children, function (stage, i) {
             self.app.convertStages[stage.id] = {
               stage: stage,
               convertShapes: {}
@@ -6437,7 +6437,7 @@
         var me = this;
         me.app = app;
 
-        _.each(_.values(app.convertStages), function (convertStage) {
+        _$1.each(_$1.values(app.convertStages), function (convertStage) {
           me.renderStage(convertStage.stage);
         });
 
@@ -6657,7 +6657,7 @@
           canvas.setAttribute("height", me.height * Utils._devicePixelRatio);
         };
 
-        _.each(this.children, function (s, i) {
+        _$1.each(this.children, function (s, i) {
           s.context.$model.width = me.width;
           s.context.$model.height = me.height;
           reSizeCanvas(s.canvas);
@@ -6746,7 +6746,7 @@
         var canvas = $.createCanvas(this.width, this.height, "curr_base64_canvas");
         var ctx = canvas.getContext("2d");
 
-        _.each(this.children, function (stage) {
+        _$1.each(this.children, function (stage) {
           ctx.drawImage(stage.canvas, 0, 0);
         });
 
@@ -7447,7 +7447,7 @@
         //TODO: 后面需要修改, 能精准的确定是修改 graphicsData 中的哪个data
 
         if (this.graphicsData.length) {
-          _.each(this.graphicsData, function (gd, i) {
+          _$1.each(this.graphicsData, function (gd, i) {
             gd.synsStyle(g);
           });
         }
@@ -7898,7 +7898,7 @@
         lineWidth: opt.context.lineWidth || null
       };
 
-      var _context = _.extend(true, styleContext, opt.context);
+      var _context = _$1.extend(true, styleContext, opt.context);
 
       opt.context = _context;
 
@@ -7955,7 +7955,7 @@
     }, {
       key: "$watch",
       value: function $watch(name, value, preValue) {
-        if (_.indexOf(STYLE_PROPS, name) > -1) {
+        if (_$1.indexOf(STYLE_PROPS, name) > -1) {
           this.graphics.setStyle(this.context);
         }
 
@@ -8018,7 +8018,7 @@
       if (text === null || text === undefined) {
         text = "";
       }
-      opt.context = _.extend({
+      opt.context = _$1.extend({
         font: "",
         fontSize: 13,
         //字体大小默认13
@@ -8048,7 +8048,7 @@
       key: "$watch",
       value: function $watch(name, value, preValue) {
         //context属性有变化的监听函数
-        if (_.indexOf(this.fontProperts, name) >= 0) {
+        if (_$1.indexOf(this.fontProperts, name) >= 0) {
           this.context[name] = value; //如果修改的是font的某个内容，就重新组装一遍font的值，
           //然后通知引擎这次对context的修改上报心跳
 
@@ -8063,7 +8063,7 @@
         // 简单判断不做严格类型检测
         for (var p in style) {
           if (p != "textBaseline" && p in ctx) {
-            if (style[p] || _.isNumber(style[p])) {
+            if (style[p] || _$1.isNumber(style[p])) {
               if (p == "globalAlpha") {
                 //透明度要从父节点继承
                 //ctx[p] = style[p] * globalAlpha; //render里面已经做过相乘了，不需要重新*
@@ -8132,7 +8132,7 @@
         var self = this;
         var fontArr = [];
 
-        _.each(this.fontProperts, function (p) {
+        _$1.each(this.fontProperts, function (p) {
           var fontP = self.context[p];
 
           if (p == "fontSize") {
@@ -8322,10 +8322,10 @@
     var vx = 0,
         vy = 0;
 
-    if (arguments.length == 1 && _.isObject(x)) {
+    if (arguments.length == 1 && _$1.isObject(x)) {
       var arg = arguments[0];
 
-      if (_.isArray(arg)) {
+      if (_$1.isArray(arg)) {
         vx = arg[0];
         vy = arg[1];
       } else if (arg.hasOwnProperty("x") && arg.hasOwnProperty("y")) {
@@ -8415,7 +8415,7 @@
       var w2 = w * w;
       var w3 = w * w2;
       var rp = [interpolate(p0[0], p1[0], p2[0], p3[0], w, w2, w3), interpolate(p0[1], p1[1], p2[1], p3[1], w, w2, w3)];
-      _.isFunction(smoothFilter) && smoothFilter(rp);
+      _$1.isFunction(smoothFilter) && smoothFilter(rp);
       ret.push(rp);
     }
 
@@ -8521,7 +8521,7 @@
     var Len = pList.length;
     var _currList = [];
 
-    _.each(pList, function (point, i) {
+    _$1.each(pList, function (point, i) {
       if (isNotValibPoint(point)) {
         //undefined , [ number, null] 等结构
         if (_currList.length) {
@@ -8551,7 +8551,7 @@
       points: pList
     };
 
-    if (_.isFunction(smoothFilter)) {
+    if (_$1.isFunction(smoothFilter)) {
       obj.smoothFilter = smoothFilter;
     }
 
@@ -8564,7 +8564,7 @@
   }
 
   function isNotValibPoint(point) {
-    var res = !point || _.isArray(point) && point.length >= 2 && (!_.isNumber(point[0]) || !_.isNumber(point[1])) || "x" in point && !_.isNumber(point.x) || "y" in point && !_.isNumber(point.y);
+    var res = !point || _$1.isArray(point) && point.length >= 2 && (!_$1.isNumber(point[0]) || !_$1.isNumber(point[1])) || "x" in point && !_$1.isNumber(point.x) || "y" in point && !_$1.isNumber(point.y);
     return res;
   }
 
@@ -8597,7 +8597,7 @@
 
       opt = Utils.checkOpt(opt);
 
-      var _context = _.extend({
+      var _context = _$1.extend({
         lineType: null,
         smooth: false,
         pointList: [],
@@ -8744,7 +8744,7 @@
           }
       };
       */
-      opt = _.extend(true, {
+      opt = _$1.extend(true, {
         type: "circle",
         xyToInt: false,
         context: {
@@ -8784,7 +8784,7 @@
     function Path(opt) {
       _classCallCheck(this, Path);
 
-      var _context = _.extend({
+      var _context = _$1.extend({
         pointList: [],
         //从下面的path中计算得到的边界点的集合
         path: "" //字符串 必须，路径。例如:M 0 0 L 0 10 L 10 10 Z (一个三角形)
@@ -8827,11 +8827,11 @@
 
         this.__parsePathData = [];
 
-        var paths = _.compact(data.replace(/[Mm]/g, "\\r$&").split('\\r'));
+        var paths = _$1.compact(data.replace(/[Mm]/g, "\\r$&").split('\\r'));
 
         var me = this;
 
-        _.each(paths, function (pathStr) {
+        _$1.each(paths, function (pathStr) {
           me.__parsePathData.push(me._parseChildPathData(pathStr));
         });
 
@@ -9151,7 +9151,7 @@
 
       _classCallCheck(this, Droplet);
 
-      opt = _.extend({
+      opt = _$1.extend({
         type: "droplet",
         context: {
           hr: 0,
@@ -9195,7 +9195,7 @@
     function Ellipse(opt) {
       _classCallCheck(this, Ellipse);
 
-      opt = _.extend({
+      opt = _$1.extend({
         type: "ellipse",
         context: {
           hr: 0,
@@ -9232,7 +9232,7 @@
     function Polygon(opt) {
       _classCallCheck(this, Polygon);
 
-      var _context = _.extend({
+      var _context = _$1.extend({
         lineType: null,
         smooth: false,
         pointList: [],
@@ -9326,7 +9326,7 @@
     function Isogon(opt) {
       _classCallCheck(this, Isogon);
 
-      var _context = _.extend({
+      var _context = _$1.extend({
         pointList: [],
         //从下面的r和n计算得到的边界值的集合
         r: 0,
@@ -9366,7 +9366,7 @@
     function Line(opt) {
       _classCallCheck(this, Line);
 
-      var _context = _.extend({
+      var _context = _$1.extend({
         lineType: null,
         //可选 虚线 实现 的 类型
         start: {
@@ -9424,7 +9424,7 @@
     function Rect(opt) {
       _classCallCheck(this, Rect);
 
-      var _context = _.extend({
+      var _context = _$1.extend({
         width: 0,
         height: 0,
         radius: []
@@ -9504,7 +9504,7 @@
     function Sector(opt) {
       _classCallCheck(this, Sector);
 
-      var _context = _.extend({
+      var _context = _$1.extend({
         pointList: [],
         //边界点的集合,私有，从下面的属性计算的来
         r0: 0,
@@ -9719,17 +9719,17 @@
 
         this.padding = this._getPadding(); //先依次init 处理 "theme", "coord", "graphs" 三个优先级最高的模块
 
-        _.each(this.__highModules, function (compName) {
+        _$1.each(this.__highModules, function (compName) {
           if (!opt[compName]) return;
 
-          var comps = _.flatten([opt[compName]]); //them是一个数组的组件。so特殊处理
+          var comps = _$1.flatten([opt[compName]]); //them是一个数组的组件。so特殊处理
 
 
           if (compName == "theme") {
             comps = [comps];
           }
 
-          _.each(comps, function (comp) {
+          _$1.each(comps, function (comp) {
             if ( //没有type的coord和没有field(or keyField)的graphs，都无效，不要创建该组件
             //关系图中是keyField
             compName == "coord" && !comp.type || compName == "graphs" && !comp.field && !comp.keyField) return;
@@ -9746,14 +9746,14 @@
 
         for (var _p in this._opt) {
           //非coord graphs theme，其实后面也可以统一的
-          if (_.indexOf(this.__highModules, _p) == -1) {
+          if (_$1.indexOf(this.__highModules, _p) == -1) {
             var comps = this._opt[_p]; //所有的组件都按照数组方式处理，这里，组件里面就不需要再这样处理了
 
-            if (!_.isArray(comps)) {
+            if (!_$1.isArray(comps)) {
               comps = [comps];
             }
 
-            _.each(comps, function (comp) {
+            _$1.each(comps, function (comp) {
               var compModule = me.componentModules.get(_p, comp.type);
 
               if (compModule) {
@@ -9806,13 +9806,13 @@
 
         var graphsCount = _graphs.length;
         var completeNum = 0;
-        opt = _.extend(opt, {
+        opt = _$1.extend(opt, {
           width: width,
           height: height,
           origin: origin
         });
 
-        _.each(_graphs, function (_g) {
+        _$1.each(_graphs, function (_g) {
           _g.on("complete", function (g) {
             completeNum++;
 
@@ -9829,7 +9829,7 @@
         for (var i = 0, l = this.components.length; i < l; i++) {
           var p = this.components[i];
 
-          if (_.indexOf(this.__highModules, p.name) == -1) {
+          if (_$1.indexOf(this.__highModules, p.name) == -1) {
             p.draw();
           }
         }
@@ -9874,7 +9874,7 @@
 
         function _horizontalText(el) {
           if (el.children) {
-            _.each(el.children, function (_el) {
+            _$1.each(el.children, function (_el) {
               _horizontalText(_el);
             });
           }
@@ -9888,7 +9888,7 @@
           }
         }
 
-        _.each(me.getComponents({
+        _$1.each(me.getComponents({
           name: 'graphs'
         }), function (_graphs) {
           _horizontalText(_graphs.sprite);
@@ -9900,7 +9900,7 @@
         var paddingVal = _padding;
 
         if (this._opt.coord && "padding" in this._opt.coord) {
-          if (!_.isObject(this._opt.coord.padding)) {
+          if (!_$1.isObject(this._opt.coord.padding)) {
             paddingVal = this._opt.coord.padding;
           }
         }
@@ -9912,8 +9912,8 @@
         };
 
         if (this._opt.coord && "padding" in this._opt.coord) {
-          if (_.isObject(this._opt.coord.padding)) {
-            paddingObj = _.extend(paddingObj, this._opt.coord.padding);
+          if (_$1.isObject(this._opt.coord.padding)) {
+            paddingObj = _$1.extend(paddingObj, this._opt.coord.padding);
           }
         }
         return paddingObj;
@@ -10025,7 +10025,7 @@
       value: function reset(opt, data) {
         !opt && (opt = {});
 
-        _.extend(true, this._opt, opt);
+        _$1.extend(true, this._opt, opt);
 
         if (data) {
           this._data = data;
@@ -10069,7 +10069,7 @@
           _coord.resetData(this.dataFrame, trigger);
         }
 
-        _.each(this.getComponents({
+        _$1.each(this.getComponents({
           name: 'graphs'
         }), function (_g) {
           _g.resetData(me.dataFrame, trigger);
@@ -10092,9 +10092,9 @@
       value: function componentsReset(trigger) {
         var me = this;
 
-        _.each(this.components, function (p, i) {
+        _$1.each(this.components, function (p, i) {
           //theme coord graphs额外处理
-          if (_.indexOf(me.__highModules, p.name) != -1) {
+          if (_$1.indexOf(me.__highModules, p.name) != -1) {
             return;
           }
 
@@ -10110,7 +10110,7 @@
       value: function getComponentById(id) {
         var comp;
 
-        _.each(this.components, function (c) {
+        _$1.each(this.components, function (c) {
           if (c.id && c.id == id) {
             comp = c;
             return false;
@@ -10142,7 +10142,7 @@
           return components;
         }
 
-        _.each(components, function (comp) {
+        _$1.each(components, function (comp) {
           var i = 0;
 
           for (var p in opt) {
@@ -10179,7 +10179,7 @@
       value: function getGraphById(id) {
         var _g;
 
-        _.each(this.getComponents({
+        _$1.each(this.getComponents({
           name: 'graphs'
         }), function (g) {
           if (g.id == id) {
@@ -10195,7 +10195,7 @@
     }, {
       key: "getCoord",
       value: function getCoord(opt) {
-        return this.getComponent(_.extend(true, {
+        return this.getComponent(_$1.extend(true, {
           name: 'coord'
         }, opt));
       } //只有field为多组数据的时候才需要legend，给到legend组件来调用
@@ -10207,15 +10207,15 @@
         var data = []; //这里涌来兼容pie等的图例，其实后续可以考虑后面所有的graphs都提供一个getLegendData的方法
         //那么就可以统一用这个方法， 下面的代码就可以去掉了
 
-        _.each(this.getComponents({
+        _$1.each(this.getComponents({
           name: 'graphs'
         }), function (_g) {
-          _.each(_g.getLegendData(), function (item) {
-            if (_.find(data, function (d) {
+          _$1.each(_g.getLegendData(), function (item) {
+            if (_$1.find(data, function (d) {
               return d.name == item.name;
             })) return;
 
-            var legendItem = _.extend(true, {}, item);
+            var legendItem = _$1.extend(true, {}, item);
 
             legendItem.color = item.fillStyle || item.color || item.style;
             data.push(legendItem);
@@ -10230,12 +10230,12 @@
           name: 'coord'
         });
 
-        _.each(_.flatten(_coord.fieldsMap), function (map, i) {
+        _$1.each(_$1.flatten(_coord.fieldsMap), function (map, i) {
           //因为yAxis上面是可以单独自己配置field的，所以，这部分要过滤出 legend data
           var isGraphsField = false;
 
-          _.each(me._opt.graphs, function (gopt) {
-            if (_.indexOf(_.flatten([gopt.field]), map.field) > -1) {
+          _$1.each(me._opt.graphs, function (gopt) {
+            if (_$1.indexOf(_$1.flatten([gopt.field]), map.field) > -1) {
               isGraphsField = true;
               return false;
             }
@@ -10265,7 +10265,7 @@
 
         _coord && _coord.show(field, trigger);
 
-        _.each(this.getComponents({
+        _$1.each(this.getComponents({
           name: 'graphs'
         }), function (_g) {
           _g.show(field, trigger);
@@ -10284,7 +10284,7 @@
 
         _coord && _coord.hide(field, trigger);
 
-        _.each(this.getComponents({
+        _$1.each(this.getComponents({
           name: 'graphs'
         }), function (_g) {
           _g.hide(field, trigger);
@@ -10308,7 +10308,7 @@
           if (_tips) {
             me._setTipsInfo.apply(me, [e]);
 
-            if (e.type == "mouseover") {
+            if (e.type == "mouseover" || e.type == "mousedown") {
               _tips.show(e);
 
               me._tipsPointerAtAllGraphs(e);
@@ -10328,7 +10328,7 @@
           }
 
           if (e.eventInfo) {
-            _.each(this.getGraphs(), function (graph) {
+            _$1.each(this.getGraphs(), function (graph) {
               graph.triggerEvent(e);
             });
           }
@@ -10356,7 +10356,7 @@
           var nodes = [];
           var iNode = e.eventInfo.iNode;
 
-          _.each(this.getComponents({
+          _$1.each(this.getComponents({
             name: 'graphs'
           }), function (_g) {
             nodes = nodes.concat(_g.getNodesAt(iNode));
@@ -10369,7 +10369,7 @@
     }, {
       key: "_tipsPointerAtAllGraphs",
       value: function _tipsPointerAtAllGraphs(e) {
-        _.each(this.getComponents({
+        _$1.each(this.getComponents({
           name: 'graphs'
         }), function (_g) {
           _g.tipsPointerOf(e);
@@ -10378,7 +10378,7 @@
     }, {
       key: "_tipsPointerHideAtAllGraphs",
       value: function _tipsPointerHideAtAllGraphs(e) {
-        _.each(this.getComponents({
+        _$1.each(this.getComponents({
           name: 'graphs'
         }), function (_g) {
           _g.tipsPointerHideOf(e);
@@ -10389,22 +10389,41 @@
     return Chart;
   }(Dispatcher);
 
-  var component =
+  var Component =
   /*#__PURE__*/
   function (_event$Dispatcher) {
-    _inherits(component, _event$Dispatcher);
+    _inherits(Component, _event$Dispatcher);
 
-    function component(opt, app) {
+    _createClass(Component, null, [{
+      key: "defaultProps",
+      value: function defaultProps() {
+        return {
+          enabled: {
+            detail: '是否开启该组件',
+            default: false
+          }
+        };
+      }
+    }, {
+      key: "_isComponentRoot",
+      value: function _isComponentRoot() {
+        return true;
+      }
+    }]);
+
+    function Component(opt, app) {
       var _this;
 
-      _classCallCheck(this, component);
+      _classCallCheck(this, Component);
 
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(component).call(this, opt, app));
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(Component).call(this, opt, app));
+
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(Component.defaultProps()), opt);
+
       _this.name = "component"; //组件名称
 
       _this.type = null; //组件子类型，比如 Graphs组件下面的bar,line,scat等
-
-      _this.enabled = false; //是否加载该组件
+      //this.enabled = false; //是否加载该组件
 
       _this._opt = opt;
       _this.app = app; //这个组件挂在哪个app上面（图表）
@@ -10426,7 +10445,7 @@
       return _this;
     }
 
-    _createClass(component, [{
+    _createClass(Component, [{
       key: "init",
       value: function init(opt, data) {}
     }, {
@@ -10451,7 +10470,7 @@
       value: function layout() {}
     }]);
 
-    return component;
+    return Component;
   }(Dispatcher);
 
   var coordBase =
@@ -10502,7 +10521,7 @@
 
       _this = _possibleConstructorReturn(this, _getPrototypeOf(coordBase).call(this, opt, app));
 
-      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(coordBase.defaultProps()));
+      _$1.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps$1(coordBase.defaultProps()));
 
       _this.name = "coord";
       _this._opt = opt;
@@ -10538,21 +10557,21 @@
         var axisType = axisExp.type || "yAxis";
         var fieldsArr = [];
 
-        _.each(this.getAxiss(axisExp), function (_axis) {
+        _$1.each(this.getAxiss(axisExp), function (_axis) {
           if (_axis.field) {
             fieldsArr = fieldsArr.concat(_axis.field);
           }
         });
 
         function _set$$1(fields) {
-          if (_.isString(fields)) {
+          if (_$1.isString(fields)) {
             fields = [fields];
           }
 
-          var clone_fields = _.clone(fields);
+          var clone_fields = _$1.clone(fields);
 
           for (var i = 0, l = fields.length; i < l; i++) {
-            if (_.isString(fields[i])) {
+            if (_$1.isString(fields[i])) {
               clone_fields[i] = {
                 field: fields[i],
                 enabled: true,
@@ -10566,7 +10585,7 @@
               });
             }
 
-            if (_.isArray(fields[i])) {
+            if (_$1.isArray(fields[i])) {
               clone_fields[i] = _set$$1(fields[i], fieldInd);
             }
           }
@@ -10581,8 +10600,8 @@
         var me = this;
 
         function set(maps) {
-          _.each(maps, function (map, i) {
-            if (_.isArray(map)) {
+          _$1.each(maps, function (map, i) {
+            if (_$1.isArray(map)) {
               set(map);
             } else if (map.field && map.field == field) {
               map.enabled = !map.enabled;
@@ -10599,8 +10618,8 @@
         var fieldMap = null;
 
         function get(maps) {
-          _.each(maps, function (map, i) {
-            if (_.isArray(map)) {
+          _$1.each(maps, function (map, i) {
+            if (_$1.isArray(map)) {
               get(map);
             } else if (map.field && map.field == field) {
               fieldMap = map;
@@ -10620,12 +10639,12 @@
         var enabledFields = [];
         var axisType = axis$$1 ? axis$$1.type : "yAxis";
 
-        _.each(this.fieldsMap, function (bamboo, b) {
-          if (_.isArray(bamboo)) {
+        _$1.each(this.fieldsMap, function (bamboo, b) {
+          if (_$1.isArray(bamboo)) {
             //多节竹子，堆叠
             var fields = []; //设置完fields后，返回这个group属于left还是right的axis
 
-            _.each(bamboo, function (obj, v) {
+            _$1.each(bamboo, function (obj, v) {
               if (obj[axisType] === axis$$1 && obj.field && obj.enabled) {
                 fields.push(obj.field);
               }
@@ -10649,10 +10668,10 @@
       value: function filterEnabledFields(fields) {
         var me = this;
         var arr = [];
-        if (!_.isArray(fields)) fields = [fields];
+        if (!_$1.isArray(fields)) fields = [fields];
 
-        _.each(fields, function (f) {
-          if (!_.isArray(f)) {
+        _$1.each(fields, function (f) {
+          if (!_$1.isArray(f)) {
             if (me.getFieldMapOf(f).enabled) {
               arr.push(f);
             }
@@ -10660,7 +10679,7 @@
             //如果这个是个纵向数据，说明就是堆叠配置
             var varr = [];
 
-            _.each(f, function (v_f) {
+            _$1.each(f, function (v_f) {
               if (me.getFieldMapOf(v_f).enabled) {
                 varr.push(v_f);
               }
@@ -10739,20 +10758,20 @@
           expCount++;
         }
 
-        _.each(this._axiss, function (item) {
+        _$1.each(this._axiss, function (item) {
           var i = 0;
 
           for (var p in opt) {
             if (p == 'field') {
               //字段的判断条件不同
-              var fs = _.flatten([item[p]]);
+              var fs = _$1.flatten([item[p]]);
 
-              var expFs = _.flatten([opt[p]]);
+              var expFs = _$1.flatten([opt[p]]);
 
               var inFs = true;
 
-              _.each(expFs, function (exp) {
-                if (_.indexOf(fs, exp) == -1) {
+              _$1.each(expFs, function (exp) {
+                if (_$1.indexOf(fs, exp) == -1) {
                   //任何一个field不再fs内， 说明配对不成功
                   inFs = false;
                 }
@@ -10778,7 +10797,7 @@
     }]);
 
     return coordBase;
-  }(component);
+  }(Component);
 
   /**
    * 数字千分位加','号
@@ -10818,7 +10837,7 @@
       y: 0
     };
 
-    if (_.isArray($arr[0])) {
+    if (_$1.isArray($arr[0])) {
       start.x = $arr[0][0];
       start.y = $arr[0][1];
       s = M + $arr[0][0] + ' ' + $arr[0][1];
@@ -10832,7 +10851,7 @@
           y = 0,
           item = $arr[a];
 
-      if (_.isArray(item)) {
+      if (_$1.isArray(item)) {
         x = item[0];
         y = item[1];
       } else {
@@ -11029,7 +11048,7 @@
 
       _this = _possibleConstructorReturn(this, _getPrototypeOf(Axis).call(this, opt, dataOrg));
 
-      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(Axis.defaultProps()));
+      _$1.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps$1(Axis.defaultProps()));
 
       return _this;
     }
@@ -11088,7 +11107,7 @@
       _this.sprite = null;
       _this.isH = false; //是否为横向转向的x轴
 
-      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(xAxis.defaultProps()), opt);
+      _$1.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps$1(xAxis.defaultProps()), opt);
 
       _this.init(opt);
 
@@ -11125,7 +11144,7 @@
         me._formatTextSection = [];
         me._textElements = [];
 
-        _.each(me.dataSection, function (val, i) {
+        _$1.each(me.dataSection, function (val, i) {
           me._formatTextSection[i] = me._getFormatText(val, i); //从_formatTextSection中取出对应的格式化后的文本
 
           var txt = new Canvax.Display.Text(me._formatTextSection[i], {
@@ -11152,13 +11171,13 @@
           this.field = field;
         }
 
-        this.field = _.flatten([this.field])[0];
+        this.field = _$1.flatten([this.field])[0];
       }
     }, {
       key: "draw",
       value: function draw(opt) {
         //首次渲染从 直角坐标系组件中会传入 opt,包含了width，origin等， 所有这个时候才能计算layoutData
-        opt && _.extend(true, this, opt);
+        opt && _$1.extend(true, this, opt);
         this.setAxisLength(this.width);
 
         this._trimXAxis();
@@ -11227,7 +11246,7 @@
           var _maxTextHeight = 0;
 
           if (this.label.enabled) {
-            _.each(me.dataSection, function (val, i) {
+            _$1.each(me.dataSection, function (val, i) {
               //从_formatTextSection中取出对应的格式化后的文本
               var txt = me._textElements[i];
               var textWidth = txt.getTextWidth();
@@ -11311,11 +11330,11 @@
       value: function _getFormatText(val) {
         var res = val;
 
-        if (_.isFunction(this.label.format)) {
+        if (_$1.isFunction(this.label.format)) {
           res = this.label.format.apply(this, arguments);
         }
 
-        if (_.isNumber(res) && this.layoutType == "proportion") {
+        if (_$1.isNumber(res) && this.layoutType == "proportion") {
           res = numAddSymbol(res);
         }
         return res;
@@ -11455,7 +11474,7 @@
             }
           }
 
-          _.isFunction(this.filter) && this.filter({
+          _$1.isFunction(this.filter) && this.filter({
             layoutData: arr,
             index: a,
             txt: xNode._txt,
@@ -11537,7 +11556,7 @@
         var textAlign = me.label.textAlign; //如果用户设置不想要做重叠检测
 
         if (!this.label.evade || me.trimLayout) {
-          _.each(arr, function (layoutItem) {
+          _$1.each(arr, function (layoutItem) {
             layoutItem.visible = true;
           });
 
@@ -11680,7 +11699,7 @@
       _this.sprite = null;
       _this.isH = false; //是否横向
 
-      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(yAxis.defaultProps()), opt);
+      _$1.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps$1(yAxis.defaultProps()), opt);
 
       _this.init(opt);
 
@@ -11730,7 +11749,7 @@
         }
         //先要矫正子啊field确保一定是个array
 
-        if (!_.isArray(this.field)) {
+        if (!_$1.isArray(this.field)) {
           this.field = [this.field];
         }
       }
@@ -11742,7 +11761,7 @@
     }, {
       key: "draw",
       value: function draw(opt) {
-        _.extend(true, this, opt || {});
+        _$1.extend(true, this, opt || {});
 
         this.height = parseInt(this.yMaxHeight - this._getYAxisDisLine());
         this.setAxisLength(this.height);
@@ -11837,7 +11856,7 @@
 
           var text = layoutData.value;
 
-          if (_.isFunction(me.label.format)) {
+          if (_$1.isFunction(me.label.format)) {
             text = me.label.format.apply(this, [text, i]);
           }
 
@@ -12024,7 +12043,7 @@
                 me.maxW = Math.max(me.maxW, txt.getTextWidth());
               }
 
-              _.isFunction(me.filter) && me.filter({
+              _$1.isFunction(me.filter) && me.filter({
                 layoutData: me.layoutData,
                 index: a,
                 txt: txt,
@@ -12111,7 +12130,7 @@
       value: function _getStyle(s) {
         var res = s;
 
-        if (_.isFunction(s)) {
+        if (_$1.isFunction(s)) {
           res = s.call(this, this);
         }
 
@@ -12213,7 +12232,7 @@
 
       _this = _possibleConstructorReturn(this, _getPrototypeOf(rectGrid).call(this, opt, app));
 
-      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(rectGrid.defaultProps()));
+      _$1.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps$1(rectGrid.defaultProps()));
 
       _this.width = 0;
       _this.height = 0;
@@ -12237,7 +12256,7 @@
     _createClass(rectGrid, [{
       key: "init",
       value: function init(opt) {
-        _.extend(true, this, opt);
+        _$1.extend(true, this, opt);
 
         this.sprite = new Canvax.Display.Sprite();
       }
@@ -12254,7 +12273,7 @@
     }, {
       key: "draw",
       value: function draw(opt) {
-        _.extend(true, this, opt); //this._configData(opt);
+        _$1.extend(true, this, opt); //this._configData(opt);
 
 
         this._widget();
@@ -12389,7 +12408,7 @@
 
       _this = _possibleConstructorReturn(this, _getPrototypeOf(Rect).call(this, opt, app));
 
-      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(Rect.defaultProps()), _this.setDefaultOpt(opt, app));
+      _$1.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps$1(Rect.defaultProps()), _this.setDefaultOpt(opt, app));
 
       _this.type = "rect";
       _this._xAxis = null;
@@ -12419,14 +12438,14 @@
           grid: {}
         };
 
-        _.extend(true, coord, coordOpt);
+        _$1.extend(true, coord, coordOpt);
 
         if (coord.yAxis) {
           var _nyarr = []; //TODO: 因为我们的deep extend 对于数组是整个对象引用过去，所以，这里需要
           //把每个子元素单独clone一遍，恩恩恩， 在canvax中优化extend对于array的处理
 
-          _.each(_.flatten([coord.yAxis]), function (yopt) {
-            _nyarr.push(_.clone(yopt));
+          _$1.each(_$1.flatten([coord.yAxis]), function (yopt) {
+            _nyarr.push(_$1.clone(yopt));
           });
 
           coord.yAxis = _nyarr;
@@ -12434,7 +12453,7 @@
           coord.yAxis = [];
         }
 
-        var graphsArr = _.flatten([app._opt.graphs]); //有graphs的就要用找到这个graphs.field来设置coord.yAxis
+        var graphsArr = _$1.flatten([app._opt.graphs]); //有graphs的就要用找到这个graphs.field来设置coord.yAxis
 
 
         for (var i = 0; i < graphsArr.length; i++) {
@@ -12453,7 +12472,7 @@
               align = "right";
             }
             var optsYaxisObj = null;
-            optsYaxisObj = _.find(coord.yAxis, function (obj, i) {
+            optsYaxisObj = _$1.find(coord.yAxis, function (obj, i) {
               return obj.align == align || !obj.align && i == (align == "left" ? 0 : 1);
             });
 
@@ -12472,12 +12491,12 @@
             if (!optsYaxisObj.field) {
               optsYaxisObj.field = [];
             } else {
-              if (!_.isArray(optsYaxisObj.field)) {
+              if (!_$1.isArray(optsYaxisObj.field)) {
                 optsYaxisObj.field = [optsYaxisObj.field];
               }
             }
 
-            if (_.isArray(graphs.field)) {
+            if (_$1.isArray(graphs.field)) {
               optsYaxisObj.field = optsYaxisObj.field.concat(graphs.field);
             } else {
               optsYaxisObj.field.push(graphs.field);
@@ -12489,7 +12508,7 @@
         var _lys = [],
             _rys = [];
 
-        _.each(coord.yAxis, function (yAxis$$1, i) {
+        _$1.each(coord.yAxis, function (yAxis$$1, i) {
           if (!yAxis$$1.align) {
             yAxis$$1.align = i ? "right" : "left";
           }
@@ -12506,19 +12525,19 @@
         if (coord.horizontal) {
           coord.xAxis.isH = true;
 
-          _.each(coord.yAxis, function (yAxis$$1) {
+          _$1.each(coord.yAxis, function (yAxis$$1) {
             yAxis$$1.isH = true;
           });
         }
 
         if ("enabled" in coord) {
           //如果有给直角坐标系做配置display，就直接通知到xAxis，yAxis，grid三个子组件
-          _.extend(true, coord.xAxis, {
+          _$1.extend(true, coord.xAxis, {
             enabled: coord.enabled
           });
 
-          _.each(coord.yAxis, function (yAxis$$1) {
-            _.extend(true, yAxis$$1, {
+          _$1.each(coord.yAxis, function (yAxis$$1) {
+            _$1.extend(true, yAxis$$1, {
               enabled: coord.enabled
             });
           });
@@ -12548,7 +12567,7 @@
 
         this._xAxis.resetData(_xAxisDataFrame);
 
-        _.each(this._yAxis, function (_yAxis) {
+        _$1.each(this._yAxis, function (_yAxis) {
           //这个_yAxis是具体的y轴实例
           var yAxisDataFrame = me.getAxisDataFrame(_yAxis.field);
 
@@ -12678,7 +12697,7 @@
           xAxisPosY = -this._yAxis[0].height / 2;
         }
 
-        if (_.isNumber(this._xAxis.axisLine.position)) {
+        if (_$1.isNumber(this._xAxis.axisLine.position)) {
           xAxisPosY = -this._yAxis[0].getPosOfVal(this._xAxis.axisLine.position);
         }
 
@@ -12686,7 +12705,7 @@
           this._xAxis._axisLine.context.y = xAxisPosY;
         }
 
-        _.each(this._yAxis, function (_yAxis) {
+        _$1.each(this._yAxis, function (_yAxis) {
           //这个_yAxis是具体的y轴实例
           var yAxisPosX;
 
@@ -12694,7 +12713,7 @@
             yAxisPosX = me._xAxis.width / 2;
           }
 
-          if (_.isNumber(_yAxis.axisLine.position)) {
+          if (_$1.isNumber(_yAxis.axisLine.position)) {
             yAxisPosX = me._xAxis.getPosOfVal(_yAxis.axisLine.position);
           }
 
@@ -12749,11 +12768,11 @@
         var yAxisLeft, yAxisRight;
         var yAxisLeftDataFrame, yAxisRightDataFrame; // yAxis 肯定是个数组
 
-        if (!_.isArray(yAxis$$1)) {
+        if (!_$1.isArray(yAxis$$1)) {
           yAxis$$1 = [yAxis$$1];
         }
 
-        yAxisLeft = _.find(yAxis$$1, function (ya) {
+        yAxisLeft = _$1.find(yAxis$$1, function (ya) {
           return ya.align == "left";
         });
 
@@ -12768,7 +12787,7 @@
           this._axiss.push(this._yAxisLeft);
         }
 
-        yAxisRight = _.find(yAxis$$1, function (ya) {
+        yAxisRight = _$1.find(yAxis$$1, function (ya) {
           return ya.align == "right";
         });
 
@@ -12795,7 +12814,7 @@
         var w = opt.h;
         var h = opt.w;
 
-        _.each([me.sprite.context], function (ctx) {
+        _$1.each([me.sprite.context], function (ctx) {
           ctx.x += (w - h) / 2;
           ctx.y += (h - w) / 2;
           var origin = {
@@ -12878,7 +12897,7 @@
         };
 
         if (e.eventInfo) {
-          obj = _.extend(obj, e.eventInfo); //把xNode信息写到eventInfo上面
+          obj = _$1.extend(obj, e.eventInfo); //把xNode信息写到eventInfo上面
 
           if (obj.xAxis) {
             e.eventInfo.xAxis = xNode;
@@ -12913,7 +12932,7 @@
 
         if (!("x" in _value)) {
           //如果没有传xval过来，要用iNode去xAxis的org去取
-          _value.x = _.flatten(_xAxis.dataOrg)[_iNode];
+          _value.x = _$1.flatten(_xAxis.dataOrg)[_iNode];
         }
         point.x = _xAxis.getPosOf({
           ind: _iNode,
@@ -13052,7 +13071,7 @@
 
       _this.induce = null; //最外层的那个网，用来触发事件
 
-      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(polarGrid.defaultProps()), opt);
+      _$1.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps$1(polarGrid.defaultProps()), opt);
 
       _this.init(opt);
 
@@ -13077,7 +13096,7 @@
     }, {
       key: "draw",
       value: function draw(opt) {
-        _.extend(true, this, opt);
+        _$1.extend(true, this, opt);
 
         this._widget();
 
@@ -13102,7 +13121,7 @@
       value: function _widget() {
         var me = this;
 
-        _.each(this.dataSection, function (num, i) {
+        _$1.each(this.dataSection, function (num, i) {
           if (num) {
             var r = me.app.getROfNum(num);
             var points = me.app.getPointsOfR(r);
@@ -13127,7 +13146,7 @@
             } else {
               ctx.pointList = [];
 
-              _.each(points, function (point, i) {
+              _$1.each(points, function (point, i) {
                 if (i < points.length) {
                   ctx.pointList.push([point.x, point.y]);
                 }
@@ -13149,7 +13168,7 @@
               me.sprite.addChild(me.induce);
             }
 
-            _.each(points, function (point) {
+            _$1.each(points, function (point) {
               var _line = new Line$4({
                 context: {
                   end: point,
@@ -13166,7 +13185,7 @@
     }, {
       key: "_getStyle",
       value: function _getStyle(color$$1, i) {
-        if (_.isArray(color$$1)) {
+        if (_$1.isArray(color$$1)) {
           return color$$1[i % color$$1.length];
         }
 
@@ -13289,7 +13308,7 @@
       _this = _possibleConstructorReturn(this, _getPrototypeOf(Polar$$1).call(this, opt, app));
       _this.type = "polar";
 
-      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(Polar$$1.defaultProps()), _this.setDefaultOpt(opt, app));
+      _$1.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps$1(Polar$$1.defaultProps()), _this.setDefaultOpt(opt, app));
 
       _this.init(opt);
 
@@ -13307,24 +13326,24 @@
           grid: {}
         };
 
-        _.extend(true, coord, coordOpt); //根据graphs.field 来 配置 coord.rAxis.field -------------------
+        _$1.extend(true, coord, coordOpt); //根据graphs.field 来 配置 coord.rAxis.field -------------------
 
 
-        if (!_.isArray(coord.rAxis.field)) {
+        if (!_$1.isArray(coord.rAxis.field)) {
           coord.rAxis.field = [coord.rAxis.field];
         }
 
-        var graphsArr = _.flatten([app._opt.graphs]); //有graphs的就要用找到这个graphs.field来设置coord.rAxis
+        var graphsArr = _$1.flatten([app._opt.graphs]); //有graphs的就要用找到这个graphs.field来设置coord.rAxis
 
 
         var arrs = [];
 
-        _.each(graphsArr, function (graphs) {
+        _$1.each(graphsArr, function (graphs) {
           if (graphs.field) {
             //没有配置field的话就不绘制这个 graphs了
             var _fs = graphs.field;
 
-            if (!_.isArray(_fs)) {
+            if (!_$1.isArray(_fs)) {
               _fs = [_fs];
             }
             arrs = arrs.concat(_fs);
@@ -13426,7 +13445,7 @@
         }
         var arr = [];
 
-        _.each(_.flatten([me.rAxis.field]), function (field) {
+        _$1.each(_$1.flatten([me.rAxis.field]), function (field) {
           arr = arr.concat(me.app.dataFrame.getFieldData(field));
         });
 
@@ -13465,17 +13484,17 @@
         for (var i = 0, l = parseInt((this.startAngle + this.allAngle) / 90) - parseInt(this.startAngle / 90); i <= l; i++) {
           var angle = parseInt(this.startAngle / 90) * 90 + i * 90;
 
-          if (_.indexOf(angles, angle) == -1 && angle > angles.slice(-1)[0]) {
+          if (_$1.indexOf(angles, angle) == -1 && angle > angles.slice(-1)[0]) {
             angles.push(angle);
           }
         }
         var lastAngle = this.startAngle + this.allAngle;
 
-        if (_.indexOf(angles, lastAngle) == -1) {
+        if (_$1.indexOf(angles, lastAngle) == -1) {
           angles.push(lastAngle);
         }
 
-        _.each(angles, function (angle) {
+        _$1.each(angles, function (angle) {
           angle = angle % 360;
 
           var _sin = Math.sin(angle * Math.PI / 180);
@@ -13529,7 +13548,7 @@
 
         var quadrantLines = [["right", "bottom"], ["bottom", "left"], ["left", "top"], ["top", "right"]];
 
-        _.each(angles, function (angle) {
+        _$1.each(angles, function (angle) {
           //判断这个angle在会和哪根边线相交
           angle = angle % 360;
           var quadrant = parseInt(angle / 90); //当前angle在第几象限，每个象限可能相交的边线不同
@@ -13553,7 +13572,7 @@
             _cos = 0;
           }
 
-          _.each(lines, function (line) {
+          _$1.each(lines, function (line) {
             var _r;
 
             if (line == "top" || line == "bottom") {
@@ -13575,7 +13594,7 @@
           });
         });
 
-        _r = _.min(anglesRadius); //};
+        _r = _$1.min(anglesRadius); //};
 
         this.radius = _r;
       }
@@ -13592,7 +13611,7 @@
         var _distances = [origin.x - _padding.left, //原点到left的距离
         vw + _padding.left - origin.x, //原点到右边的距离
         origin.y - _padding.top, vh + _padding.top - origin.y];
-        _r = _.max(_distances);
+        _r = _$1.max(_distances);
         return _r;
       } //获取极坐标系内任意半径上的弧度集合
       //[ [{point , radian} , {point , radian}] ... ]
@@ -13700,7 +13719,7 @@
           }]);
         } else {
           //分割多段
-          _.each(_rs, function (point, i) {
+          _$1.each(_rs, function (point, i) {
             var nextInd = i == _rs.length - 1 ? 0 : i + 1;
 
             var nextPoint = _rs.slice(nextInd, nextInd + 1)[0];
@@ -13792,7 +13811,7 @@
       value: function getROfNum(num) {
         var r = 0;
 
-        var maxNum = _.max(this.rAxis.dataSection);
+        var maxNum = _$1.max(this.rAxis.dataSection);
 
         var minNum = 0; //var _r = parseInt( Math.min( this.width, this.height ) / 2 );
 
@@ -13807,7 +13826,7 @@
         var me = this;
         var points = [];
 
-        _.each(me.aAxis.angleList, function (_a) {
+        _$1.each(me.aAxis.angleList, function (_a) {
           //弧度
           var _r = Math.PI * _a / 180;
 
@@ -13834,13 +13853,13 @@
         var allAngle = this.allAngle;
         var min = 0;
 
-        var max = _.max(aAxisArr);
+        var max = _$1.max(aAxisArr);
 
         if (this.aAxis.layoutType == "proportion") {
           max++;
         }
 
-        _.each(aAxisArr, function (p) {
+        _$1.each(aAxisArr, function (p) {
           //角度
           var _a = (allAngle * ((p - min) / (max - min)) + me.aAxis.beginAngle + allAngle) % allAngle;
 
@@ -13852,12 +13871,12 @@
       value: function _drawAAxis() {
         //绘制aAxis刻度尺
         var me = this;
-        var r = me.getROfNum(_.max(this.rAxis.dataSection));
+        var r = me.getROfNum(_$1.max(this.rAxis.dataSection));
         var points = me.getPointsOfR(r + 3);
         me._aAxisScaleSp.context.x = this.origin.x;
         me._aAxisScaleSp.context.y = this.origin.y;
 
-        _.each(this.aAxis.data, function (value, i) {
+        _$1.each(this.aAxis.data, function (value, i) {
           if (!me.aAxis.label.enabled) return;
           var point = points[i];
           var c = {
@@ -13865,9 +13884,9 @@
             y: point.y,
             fillStyle: me.aAxis.label.fontColor
           };
-          var text = _.isFunction(me.aAxis.label.format) ? me.aAxis.label.format(value) : value;
+          var text = _$1.isFunction(me.aAxis.label.format) ? me.aAxis.label.format(value) : value;
 
-          _.extend(c, me._getTextAlignForPoint(Math.atan2(point.y, point.x)));
+          _$1.extend(c, me._getTextAlignForPoint(Math.atan2(point.y, point.x)));
 
           me._aAxisScaleSp.addChild(new Canvax.Display.Text(text, {
             context: c
@@ -13972,7 +13991,7 @@
         var aAxisInd = 0;
         var aLen = me.aAxis.angleList.length;
 
-        _.each(me.aAxis.angleList, function (_a, i) {
+        _$1.each(me.aAxis.angleList, function (_a, i) {
           _a = (_a - me.aAxis.beginAngle) % me.allAngle;
           var nextInd = i + 1;
           var nextAngle = (me.aAxis.angleList[nextInd] - me.aAxis.beginAngle) % me.allAngle;
@@ -14028,7 +14047,7 @@
         }
 
         if (e.eventInfo) {
-          obj = _.extend(obj, e.eventInfo);
+          obj = _$1.extend(obj, e.eventInfo);
         }
         return obj;
       } //TODO待实现
@@ -14074,7 +14093,7 @@
 
       _this = _possibleConstructorReturn(this, _getPrototypeOf(GraphsBase).call(this, opt, app)); //这里不能把opt个extend进this
 
-      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(GraphsBase.defaultProps()));
+      _$1.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps$1(GraphsBase.defaultProps()));
 
       _this.name = "graphs"; //这里所有的opts都要透传给 group
 
@@ -14158,7 +14177,7 @@
         var trigger = e.eventInfo.trigger || this;
         var fn = trigger["on" + e.type];
 
-        if (fn && _.isFunction(fn)) {
+        if (fn && _$1.isFunction(fn)) {
 
           if (e.eventInfo && e.eventInfo.nodes && e.eventInfo.nodes.length) {
             //完整的nodes数据在e.eventInfo中有，但是添加第二个参数，如果nodes只有一个数据就返回单个，多个则数组
@@ -14170,7 +14189,7 @@
           } else {
             var _arr = [];
 
-            _.each(arguments, function (item, i) {
+            _$1.each(arguments, function (item, i) {
               if (!!i) {
                 _arr.push(item);
               }
@@ -14204,7 +14223,7 @@
           },
           duration: duration,
           onUpdate: function onUpdate(status) {
-            _.isFunction(callback) && callback(status.process);
+            _$1.isFunction(callback) && callback(status.process);
           },
           onComplete: function onComplete(status) {
             this._growTween = null;
@@ -14215,7 +14234,7 @@
     }]);
 
     return GraphsBase;
-  }(component);
+  }(Component);
 
   var AnimationFrame$2 = Canvax.AnimationFrame;
   var Rect$3 = Canvax.Shapes.Rect;
@@ -14407,7 +14426,7 @@
       _this._barsLen = 0;
       _this.txtsSp = null;
 
-      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(BarGraphs.defaultProps()), opt);
+      _$1.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps$1(BarGraphs.defaultProps()), opt);
 
       _this.init();
 
@@ -14433,9 +14452,9 @@
         var data = this.data;
         var _nodesInfoList = []; //节点信息集合
 
-        _.each(this.enabledField, function (fs, i) {
-          if (_.isArray(fs)) {
-            _.each(fs, function (_fs, ii) {
+        _$1.each(this.enabledField, function (fs, i) {
+          if (_$1.isArray(fs)) {
+            _$1.each(fs, function (_fs, ii) {
               //fs的结构两层到顶了
               var nodeData = data[_fs] ? data[_fs][index$$1] : null;
               nodeData && _nodesInfoList.push(nodeData);
@@ -14451,14 +14470,14 @@
     }, {
       key: "_getTargetField",
       value: function _getTargetField(b, v, i, field) {
-        if (_.isString(field)) {
+        if (_$1.isString(field)) {
           return field;
-        } else if (_.isArray(field)) {
+        } else if (_$1.isArray(field)) {
           var res = field[b];
 
-          if (_.isString(res)) {
+          if (_$1.isString(res)) {
             return res;
-          } else if (_.isArray(res)) {
+          } else if (_$1.isArray(res)) {
             return res[v];
           }
         }
@@ -14469,29 +14488,29 @@
         var me = this;
         var field = nodeData.field;
 
-        var _flattenField = _.flatten([this.field]);
+        var _flattenField = _$1.flatten([this.field]);
 
         var fieldMap = this.app.getComponent({
           name: 'coord'
         }).getFieldMapOf(field);
 
-        if (_.isFunction(color$$1)) {
+        if (_$1.isFunction(color$$1)) {
           color$$1 = color$$1.apply(this, [nodeData]);
         }
 
-        if (_.isString(color$$1)) {
+        if (_$1.isString(color$$1)) {
           color$$1 = color$$1;
         }
 
-        if (_.isArray(color$$1)) {
-          color$$1 = _.flatten(color$$1)[_.indexOf(_flattenField, field)];
+        if (_$1.isArray(color$$1)) {
+          color$$1 = _$1.flatten(color$$1)[_$1.indexOf(_flattenField, field)];
         }
 
         if (color$$1 && color$$1.lineargradient && color$$1.lineargradient.length) {
           if (nodeData.rectHeight != 0) {
             var _style = me.ctx.createLinearGradient(nodeData.x, nodeData.fromY + nodeData.rectHeight, nodeData.x, nodeData.fromY);
 
-            _.each(color$$1.lineargradient, function (item) {
+            _$1.each(color$$1.lineargradient, function (item) {
               _style.addColorStop(item.position, item.color);
             });
 
@@ -14512,7 +14531,7 @@
       key: "_getBarWidth",
       value: function _getBarWidth(cellWidth, ceilWidth2) {
         if (this.node.width) {
-          if (_.isFunction(this.node.width)) {
+          if (_$1.isFunction(this.node.width)) {
             this.node._width = this.node.width(cellWidth);
           } else {
             this.node._width = this.node.width;
@@ -14540,13 +14559,13 @@
     }, {
       key: "hide",
       value: function hide(field) {
-        _.each(this.barsSp.children, function (h_groupSp, h) {
+        _$1.each(this.barsSp.children, function (h_groupSp, h) {
           var _bar = h_groupSp.getChildById("bar_" + h + "_" + field);
 
           _bar && _bar.destroy();
         });
 
-        _.each(this.txtsSp.children, function (sp, h) {
+        _$1.each(this.txtsSp.children, function (sp, h) {
           var _label = sp.getChildById("text_" + h + "_" + field);
 
           _label && _label.destroy();
@@ -14575,7 +14594,7 @@
       value: function draw(opt) {
         !opt && (opt = {}); //第二个data参数去掉，直接trimgraphs获取最新的data
 
-        _.extend(true, this, opt);
+        _$1.extend(true, this, opt);
 
         var me = this;
         var animate = me.animation && !opt.resize;
@@ -14592,8 +14611,8 @@
         var itemW = 0;
         me.node._count = 0;
 
-        _.each(this.enabledField, function (h_group, i) {
-          h_group = _.flatten([h_group]);
+        _$1.each(this.enabledField, function (h_group, i) {
+          h_group = _$1.flatten([h_group]);
           /*
           //h_group为横向的分组。如果yAxis.field = ["uv","pv"]的话，
           //h_group就会为两组，一组代表uv 一组代表pv。
@@ -14633,7 +14652,7 @@
                 type: 'bar'
               });
 
-              _.each(barGraphs, function (graph, i) {
+              _$1.each(barGraphs, function (graph, i) {
                 if (graph == me) {
                   preGraphs = i;
                 }
@@ -14667,7 +14686,7 @@
                       width: groupRegionWidth,
                       height: me.height,
                       fillStyle: me._getGroupRegionStyle(h),
-                      globalAlpha: _.indexOf(me.select.inds, me.dataFrame.range.start + h) > -1 ? me.select.alpha : 0
+                      globalAlpha: _$1.indexOf(me.select.inds, me.dataFrame.range.start + h) > -1 ? me.select.alpha : 0
                     }
                   });
                   groupH.addChild(groupRegion);
@@ -14684,13 +14703,13 @@
                       //如果开启了图表的选中交互
                       var ind = me.dataFrame.range.start + this.iNode; //region触发的selected，需要把所有的graphs都执行一遍
 
-                      if (_.indexOf(me.select.inds, ind) > -1) {
+                      if (_$1.indexOf(me.select.inds, ind) > -1) {
                         //说明已经选中了
-                        _.each(barGraphs, function (barGraph) {
+                        _$1.each(barGraphs, function (barGraph) {
                           barGraph.unselectAt(ind);
                         });
                       } else {
-                        _.each(barGraphs, function (barGraph) {
+                        _$1.each(barGraphs, function (barGraph) {
                           barGraph.selectAt(ind);
                         });
                       }
@@ -14814,7 +14833,7 @@
               if (me.label.enabled) {
                 var value = nodeData.value;
 
-                if (_.isFunction(me.label.format)) {
+                if (_$1.isFunction(me.label.format)) {
                   var _formatc = me.label.format(value, nodeData);
 
                   if (_formatc !== undefined || _formatc !== null) {
@@ -14826,7 +14845,7 @@
                   continue;
                 }
 
-                if (_.isNumber(value)) {
+                if (_$1.isNumber(value)) {
                   value = numAddSymbol(value);
                 }
                 var textCtx = {
@@ -14901,11 +14920,11 @@
         var me = this;
         var _groupRegionStyle = me.select.fillStyle;
 
-        if (_.isArray(me.select.fillStyle)) {
+        if (_$1.isArray(me.select.fillStyle)) {
           _groupRegionStyle = me.select.fillStyle[iNode];
         }
 
-        if (_.isFunction(me.select.fillStyle)) {
+        if (_$1.isFunction(me.select.fillStyle)) {
           _groupRegionStyle = me.select.fillStyle.apply(this, [{
             iNode: iNode,
             rowData: me.dataFrame.getRowDataAt(iNode)
@@ -14937,7 +14956,7 @@
         var _preHLenOver = false;
 
         if (!this.absolute) {
-          _.each(me.app.getComponents({
+          _$1.each(me.app.getComponents({
             name: 'graphs',
             type: 'bar'
           }), function (_g) {
@@ -14985,24 +15004,24 @@
 
         var dataOrg = this.dataFrame.getDataOrg(this.enabledField); //dataOrg和field是一一对应的
 
-        _.each(dataOrg, function (hData, b) {
+        _$1.each(dataOrg, function (hData, b) {
           //hData，可以理解为一根竹子 横向的分组数据，这个hData上面还可能有纵向的堆叠
           //tempBarData 一根柱子的数据， 这个柱子是个数据，上面可以有n个子元素对应的竹节
           var tempBarData = [];
 
-          _.each(hData, function (vSectionData, v) {
+          _$1.each(hData, function (vSectionData, v) {
             tempBarData[v] = []; //vSectionData 代表某个字段下面的一组数据比如 uv
 
             me._dataLen = vSectionData.length; //vSectionData为具体的一个field对应的一组数据
 
-            _.each(vSectionData, function (val, i) {
+            _$1.each(vSectionData, function (val, i) {
               var vCount = val;
 
               if (me.proportion) {
                 //先计算总量
                 vCount = 0;
 
-                _.each(hData, function (team, ti) {
+                _$1.each(hData, function (team, ti) {
                   vCount += team[i];
                 });
               }
@@ -15104,11 +15123,11 @@
               var selectOpt = me.getGraphSelectOpt();
 
               if (selectOpt && selectOpt.inds && selectOpt.inds.length) {
-                if (_.indexOf(selectOpt.inds, i) > -1) {
+                if (_$1.indexOf(selectOpt.inds, i) > -1) {
                   nodeData.selected = true;
                 }
 
-                me.select.inds = _.clone(selectOpt.inds);
+                me.select.inds = _$1.clone(selectOpt.inds);
               }
 
               tempBarData[v].push(nodeData);
@@ -15243,7 +15262,7 @@
         }
         var sy = 1;
 
-        var optsions = _.extend({
+        var optsions = _$1.extend({
           delay: Math.min(1000 / this._barsLen, 80),
           easing: "Linear.None",
           //"Back.Out",
@@ -15252,8 +15271,8 @@
 
         var barCount = 0;
 
-        _.each(me.enabledField, function (h_group, g) {
-          h_group = _.flatten([h_group]);
+        _$1.each(me.enabledField, function (h_group, g) {
+          h_group = _$1.flatten([h_group]);
           var vLen = h_group.length;
           if (vLen == 0) return;
 
@@ -15307,10 +15326,10 @@
       key: "selectAt",
       value: function selectAt(ind) {
         var me = this;
-        if (_.indexOf(this.select.inds, ind) > -1) return;
+        if (_$1.indexOf(this.select.inds, ind) > -1) return;
         this.select.inds.push(ind);
 
-        _.each(this.data, function (list, f) {
+        _$1.each(this.data, function (list, f) {
           var nodeData = list[ind];
           nodeData.selected = true;
           me.setNodeElementStyle(nodeData);
@@ -15332,13 +15351,13 @@
       key: "unselectAt",
       value: function unselectAt(ind) {
         var me = this;
-        if (_.indexOf(this.select.inds, ind) == -1) return;
+        if (_$1.indexOf(this.select.inds, ind) == -1) return;
 
-        var _index = _.indexOf(this.select.inds, ind);
+        var _index = _$1.indexOf(this.select.inds, ind);
 
         this.select.inds.splice(_index, 1);
 
-        _.each(this.data, function (list, f) {
+        _$1.each(this.data, function (list, f) {
           var nodeData = list[ind];
           nodeData.selected = false;
           me.setNodeElementStyle(nodeData);
@@ -15361,7 +15380,7 @@
         var rowDatas = [];
         var me = this;
 
-        _.each(me.select.inds, function (ind) {
+        _$1.each(me.select.inds, function (ind) {
           var index$$1 = ind - me.dataFrame.range.start;
           rowDatas.push(me.dataFrame.getRowDataAt(index$$1));
         });
@@ -15390,7 +15409,7 @@
             type: 'bar'
           });
 
-          _.each(barGraphs, function (barGraph) {
+          _$1.each(barGraphs, function (barGraph) {
             if (selectOpt) return false;
 
             if (!selectOpt && barGraph._opt.select) {
@@ -15548,7 +15567,7 @@
 
       _this._bline = null;
 
-      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(LineGraphsGroup.defaultProps()), opt); //TODO group中得field不能直接用opt中得field， 必须重新设置， 
+      _$1.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps$1(LineGraphsGroup.defaultProps()), opt); //TODO group中得field不能直接用opt中得field， 必须重新设置， 
       //group中得field只有一个值，代表一条折线, 后面要扩展extend方法，可以控制过滤哪些key值不做extend
 
 
@@ -15567,7 +15586,7 @@
     }, {
       key: "draw",
       value: function draw(opt, data) {
-        _.extend(true, this, opt);
+        _$1.extend(true, this, opt);
 
         this.data = data;
 
@@ -15597,7 +15616,7 @@
           //这个时候可以先取线的style，和线保持一致
           color$$1 = this._getLineStrokeStyle(); //因为_getLineStrokeStyle返回的可能是个渐变对象，所以要用isString过滤掉
 
-          if (!color$$1 || !_.isString(color$$1)) {
+          if (!color$$1 || !_$1.isString(color$$1)) {
             //那么最后，取this.fieldMap.color
             color$$1 = this.fieldMap.color;
           }
@@ -15607,11 +15626,11 @@
     }, {
       key: "_getProp",
       value: function _getProp(s, iNode) {
-        if (_.isArray(s)) {
+        if (_$1.isArray(s)) {
           return s[this.iGroup];
         }
 
-        if (_.isFunction(s)) {
+        if (_$1.isFunction(s)) {
           var _nodesInfo = [];
 
           if (iNode != undefined) {
@@ -15656,7 +15675,7 @@
         };
 
         if (dataTrigger) {
-          _.extend(params, dataTrigger.params);
+          _$1.extend(params, dataTrigger.params);
         }
 
         if (params.left) {
@@ -15697,14 +15716,14 @@
         }
 
         function _update(list) {
-          me._bline.context.pointList = _.clone(list);
+          me._bline.context.pointList = _$1.clone(list);
           me._bline.context.strokeStyle = me._getLineStrokeStyle(list);
           me._area.context.path = me._fillLine(me._bline);
           me._area.context.fillStyle = me._getFillStyle();
           var iNode = 0;
 
-          _.each(list, function (point, i) {
-            if (_.isNumber(point[1])) {
+          _$1.each(list, function (point, i) {
+            if (_$1.isNumber(point[1])) {
               if (me._circles) {
                 var _circle = me._circles.getChildAt(iNode);
 
@@ -15758,7 +15777,7 @@
       value: function _getPointPosStr(list) {
         var obj = {};
 
-        _.each(list, function (p, i) {
+        _$1.each(list, function (p, i) {
           if (!p) {
             //折线图中这个节点可能没有
             return;
@@ -15801,7 +15820,7 @@
 
           for (var a = 0, al = me.data.length; a < al; a++) {
             var o = me.data[a];
-            list.push([o.x, _.isNumber(o.y) ? firstY : o.y]);
+            list.push([o.x, _$1.isNumber(o.y) ? firstY : o.y]);
           }
         } else {
           list = me._pointList;
@@ -15839,7 +15858,7 @@
           context: {
             path: me._fillLine(bline),
             fillStyle: me._getFillStyle(),
-            globalAlpha: _.isArray(me.area.alpha) ? 1 : me.area.alpha
+            globalAlpha: _$1.isArray(me.area.alpha) ? 1 : me.area.alpha
           }
         });
 
@@ -15862,7 +15881,7 @@
         for (var i = 0, l = this.data.length; i < l; i++) {
           var nodeData = this.data[i];
 
-          if (_.isNumber(nodeData.y)) {
+          if (_$1.isNumber(nodeData.y)) {
             if (_firstNode === null || this._yAxis.align == "right") {
               //_yAxis为右轴的话，
               _firstNode = nodeData;
@@ -15884,7 +15903,7 @@
 
         var _fillStyle = me._getProp(me.area.fillStyle) || me._getLineStrokeStyle(null, "fillStyle");
 
-        if (_.isArray(me.area.alpha) && !(_fillStyle instanceof CanvasGradient)) {
+        if (_$1.isArray(me.area.alpha) && !(_fillStyle instanceof CanvasGradient)) {
           //alpha如果是数组，那么就是渐变背景，那么就至少要有两个值
           //如果拿回来的style已经是个gradient了，那么就不管了
           me.area.alpha.length = 2;
@@ -15897,7 +15916,7 @@
             me.area.alpha[1] = 0;
           }
 
-          var topP = _.min(me._bline.context.pointList, function (p) {
+          var topP = _$1.min(me._bline.context.pointList, function (p) {
             return p[1];
           });
 
@@ -15932,11 +15951,11 @@
           //从bline中找到最高的点
           !pointList && (pointList = this._bline.context.pointList);
 
-          var topP = _.min(pointList, function (p) {
+          var topP = _$1.min(pointList, function (p) {
             return p[1];
           });
 
-          var bottomP = _.max(pointList, function (p) {
+          var bottomP = _$1.max(pointList, function (p) {
             return p[1];
           });
 
@@ -15952,7 +15971,7 @@
 
           _style = me.ctx.createLinearGradient(topP[0], topP[1], topP[0], bottomP[1]);
 
-          _.each(this._opt.line.strokeStyle.lineargradient, function (item, i) {
+          _$1.each(this._opt.line.strokeStyle.lineargradient, function (item, i) {
             _style.addColorStop(item.position, item.color);
           });
 
@@ -15984,7 +16003,7 @@
           for (var a = 0, al = list.length; a < al; a++) {
             var _point = me._currPointList[a];
 
-            if (!_point || !_.isNumber(_point[1])) {
+            if (!_point || !_$1.isNumber(_point[1])) {
               //折线图中有可能这个point为undefined
               continue;
             }
@@ -15999,7 +16018,7 @@
             var circle = me._circles.children[iNode];
 
             if (circle) {
-              _.extend(circle.context, context);
+              _$1.extend(circle.context, context);
             } else {
               circle = new Circle$3({
                 context: context
@@ -16051,7 +16070,7 @@
           for (var a = 0, al = list.length; a < al; a++) {
             var _point = list[a];
 
-            if (!_point || !_.isNumber(_point[1])) {
+            if (!_point || !_$1.isNumber(_point[1])) {
               //折线图中有可能这个point为undefined
               continue;
             }
@@ -16067,7 +16086,7 @@
             };
             var value = me.data[a].value;
 
-            if (_.isFunction(me.label.format)) {
+            if (_$1.isFunction(me.label.format)) {
               value = me.label.format(value, me.data[a]) || value;
             }
 
@@ -16079,7 +16098,7 @@
             if (_label) {
               _label.resetText(value);
 
-              _.extend(_label.context, context);
+              _$1.extend(_label.context, context);
             } else {
               _label = new Canvax.Display.Text(value, {
                 context: context
@@ -16120,14 +16139,14 @@
       key: "_fillLine",
       value: function _fillLine(bline) {
         //填充直线
-        var fillPath = _.clone(bline.context.pointList);
+        var fillPath = _$1.clone(bline.context.pointList);
 
         var path = "";
         var originPos = -this._yAxis.originPos;
         var _currPath = null;
 
-        _.each(fillPath, function (point, i) {
-          if (_.isNumber(point[1])) {
+        _$1.each(fillPath, function (point, i) {
+          if (_$1.isNumber(point[1])) {
             if (_currPath === null) {
               _currPath = [];
             }
@@ -16140,7 +16159,7 @@
             }
           }
 
-          if (i == fillPath.length - 1 && _.isNumber(point[1])) {
+          if (i == fillPath.length - 1 && _$1.isNumber(point[1])) {
             getOnePath();
           }
         });
@@ -16190,7 +16209,7 @@
       _this.enabledField = null;
       _this.groups = []; //群组集合
 
-      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(LineGraphs.defaultProps()), opt);
+      _$1.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps$1(LineGraphs.defaultProps()), opt);
 
       _this.init();
 
@@ -16207,7 +16226,7 @@
         this.width = opt.width;
         this.height = opt.height;
 
-        _.extend(true, this.origin, opt.origin);
+        _$1.extend(true, this.origin, opt.origin);
 
         this.sprite.context.x = this.origin.x;
         this.sprite.context.y = this.origin.y;
@@ -16234,7 +16253,7 @@
           me.data = me._trimGraphs();
         }
 
-        _.each(me.groups, function (g) {
+        _$1.each(me.groups, function (g) {
           g.resetData(me.data[g.field].data, dataTrigger);
         });
       }
@@ -16261,7 +16280,7 @@
         var tmpData = {};
         me.setEnabledField();
 
-        _.each(_.flatten(me.enabledField), function (field, i) {
+        _$1.each(_$1.flatten(me.enabledField), function (field, i) {
           //var maxValue = 0;
           var fieldMap = me.app.getComponent({
             name: 'coord'
@@ -16317,7 +16336,7 @@
         var gl = this.groups.length;
         var me = this;
 
-        _.each(this.groups, function (g, i) {
+        _$1.each(this.groups, function (g, i) {
           g._grow(function () {
             gi++;
             callback && callback(g);
@@ -16335,14 +16354,14 @@
       value: function show(field) {
         var me = this; //这个field不再这个graphs里面的，不相关
 
-        if (_.indexOf(_.flatten([me.field]), field) == -1) {
+        if (_$1.indexOf(_$1.flatten([me.field]), field) == -1) {
           return;
         }
         this.data = this._trimGraphs();
 
         this._setGroupsForYfield(this.data, field);
 
-        _.each(this.groups, function (g, i) {
+        _$1.each(this.groups, function (g, i) {
           g.resetData(me.data[g.field].data);
         });
       }
@@ -16358,7 +16377,7 @@
         this.groups.splice(i, 1)[0].destroy();
         this.data = this._trimGraphs();
 
-        _.each(this.groups, function (g, i) {
+        _$1.each(this.groups, function (g, i) {
           g.resetData(me.data[g.field].data);
         });
       }
@@ -16390,13 +16409,13 @@
         if (fields) {
           //如果有传入field参数，那么就说明只需要从data里面挑选指定的field来添加
           //一般用在add()执行的时候
-          fields = _.flatten([fields]);
+          fields = _$1.flatten([fields]);
         }
 
-        var _flattenField = _.flatten([this.field]);
+        var _flattenField = _$1.flatten([this.field]);
 
-        _.each(data, function (g, field) {
-          if (fields && _.indexOf(fields, field) == -1) {
+        _$1.each(data, function (g, field) {
+          if (fields && _$1.indexOf(fields, field) == -1) {
             //如果有传入fields，但是当前field不在fields里面的话，不需要处理
             //说明该group已经在graphs里面了
             return;
@@ -16405,7 +16424,7 @@
             name: 'coord'
           }).getFieldMapOf(field); //iGroup 是这条group在本graphs中的ind，而要拿整个图表层级的index， 就是fieldMap.ind
 
-          var iGroup = _.indexOf(_flattenField, field);
+          var iGroup = _$1.indexOf(_flattenField, field);
 
           var group = new LineGraphsGroup(fieldMap, iGroup, //不同于fieldMap.ind
           me._opt, me.ctx, me.height, me.width);
@@ -16434,7 +16453,7 @@
       value: function getNodesAt(ind) {
         var _nodesInfoList = []; //节点信息集合
 
-        _.each(this.groups, function (group) {
+        _$1.each(this.groups, function (group) {
           var node = group.getNodeInfoAt(ind);
           node && _nodesInfoList.push(node);
         });
@@ -16649,7 +16668,7 @@
       _this._rMaxValue = null;
       _this._rMinValue = null;
 
-      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(ScatGraphs.defaultProps()), opt);
+      _$1.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps$1(ScatGraphs.defaultProps()), opt);
 
       _this.init();
 
@@ -16677,7 +16696,7 @@
       value: function draw(opt) {
         !opt && (opt = {});
 
-        _.extend(true, this, opt);
+        _$1.extend(true, this, opt);
 
         this.data = this._trimGraphs();
 
@@ -16785,12 +16804,12 @@
         var rowData = nodeLayoutData.rowData;
 
         if (this.node.radius != null) {
-          if (_.isString(this.node.radius) && rowData[this.node.radius]) {
+          if (_$1.isString(this.node.radius) && rowData[this.node.radius]) {
             //如果配置了某个字段作为r，那么就要自动计算比例
             if (!this._rData && !this._rMaxValue && !this._rMinValue) {
               this._rData = this.dataFrame.getFieldData(this.node.radius);
-              this._rMaxValue = _.max(this._rData);
-              this._rMinValue = _.min(this._rData);
+              this._rMaxValue = _$1.max(this._rData);
+              this._rMinValue = _$1.min(this._rData);
             }
             var rVal = rowData[this.node.radius];
 
@@ -16801,7 +16820,7 @@
             }
           }
 
-          if (_.isFunction(this.node.radius)) {
+          if (_$1.isFunction(this.node.radius)) {
             r = this.node.radius(rowData);
           }
 
@@ -16816,7 +16835,7 @@
       key: "_setText",
       value: function _setText(nodeLayoutData) {
         if (this.label.field != null) {
-          if (_.isString(this.label.field) && nodeLayoutData.rowData[this.label.field]) {
+          if (_$1.isString(this.label.field) && nodeLayoutData.rowData[this.label.field]) {
             nodeLayoutData.label = this.label.format(nodeLayoutData.rowData[this.label.field], nodeLayoutData);
           }
         }
@@ -16838,11 +16857,11 @@
       value: function _getStyle(style, nodeLayoutData) {
         var _style = style;
 
-        if (_.isArray(style)) {
+        if (_$1.isArray(style)) {
           _style = style[nodeLayoutData.iGroup];
         }
 
-        if (_.isFunction(style)) {
+        if (_$1.isFunction(style)) {
           _style = style(nodeLayoutData);
         }
 
@@ -16862,11 +16881,11 @@
       value: function _setNodeType(nodeLayoutData) {
         var shapeType = this.node.shapeType;
 
-        if (_.isArray(shapeType)) {
+        if (_$1.isArray(shapeType)) {
           shapeType = shapeType[nodeLayoutData.iGroup];
         }
 
-        if (_.isFunction(shapeType)) {
+        if (_$1.isFunction(shapeType)) {
           shapeType = shapeType(nodeLayoutData);
         }
 
@@ -16900,7 +16919,7 @@
           }
         }
 
-        _.each(me.data, function (nodeData, iNode) {
+        _$1.each(me.data, function (nodeData, iNode) {
           var _context = me._getNodeContext(nodeData);
 
           var Shape = nodeData.shapeType == "circle" ? Circle$4 : Rect$4;
@@ -16986,7 +17005,7 @@
               });
               _labelContext = me._getTextContext(_label, _context); //_label.animate( _labelContext );
 
-              _.extend(_label.context, _labelContext);
+              _$1.extend(_label.context, _labelContext);
 
               me._textsp.addChild(_label);
             } else {
@@ -17139,7 +17158,7 @@
         var l = this.data.length - 1;
         var me = this;
 
-        _.each(this.data, function (nodeData) {
+        _$1.each(this.data, function (nodeData) {
           nodeData.nodeElement.animate({
             x: nodeData.x,
             y: nodeData.y,
@@ -17284,7 +17303,7 @@
       value: function draw(opt) {
         var me = this;
 
-        _.extend(true, this, opt);
+        _$1.extend(true, this, opt);
 
         this.sprite.context.x = me.origin.x;
         this.sprite.context.y = me.origin.y;
@@ -17511,7 +17530,7 @@
       value: function grow(callback) {
         var me = this;
 
-        _.each(me.sectors, function (sec, iNode) {
+        _$1.each(me.sectors, function (sec, iNode) {
           if (sec.context) {
             sec.context.r0 = 0;
             sec.context.r = 0;
@@ -17830,7 +17849,7 @@
           this.textSp.removeAllChildren();
         }
 
-        _.each(this.textList, function (lab) {
+        _$1.each(this.textList, function (lab) {
           me.domContainer.removeChild(lab.textEle);
         });
 
@@ -17842,7 +17861,7 @@
         if (this.textSp && this.textSp.context) {
           this.textSp.context.globalAlpha = 1;
 
-          _.each(this.textList, function (lab) {
+          _$1.each(this.textList, function (lab) {
             lab.textEle.style.visibility = "visible";
           });
         }
@@ -17853,7 +17872,7 @@
         if (this.textSp && this.textSp.context) {
           this.textSp.context.globalAlpha = 0;
 
-          _.each(this.textList, function (lab) {
+          _$1.each(this.textList, function (lab) {
             lab.textEle.style.visibility = "hidden";
           });
         }
@@ -17979,7 +17998,7 @@
       _this = _possibleConstructorReturn(this, _getPrototypeOf(PieGraphs).call(this, opt, app));
       _this.type = "pie";
 
-      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(PieGraphs.defaultProps()), opt);
+      _$1.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps$1(PieGraphs.defaultProps()), opt);
 
       _this.init();
 
@@ -18008,7 +18027,7 @@
           this.node.outRadius = parseInt(outRadius);
         }
 
-        if (this.node.radius !== null && _.isNumber(this.node.radius)) {
+        if (this.node.radius !== null && _$1.isNumber(this.node.radius)) {
           //如果用户有直接配置 radius，那么radius优先，用来计算
           this.node.radius = Math.max(this.node.radius, this.node.minRadius); //this.node.outRadius = this.node.innerRadius + this.node.radius;
 
@@ -18032,7 +18051,7 @@
       value: function draw(opt) {
         !opt && (opt = {});
 
-        _.extend(true, this, opt);
+        _$1.extend(true, this, opt);
 
         this._computerProps(); //这个时候就是真正的计算布局用得layoutdata了
 
@@ -18068,7 +18087,7 @@
       value: function _setEnabled(label, status) {
         var me = this;
 
-        _.each(this.data, function (item) {
+        _$1.each(this.data, function (item) {
           if (item.label === label) {
             item.enabled = status;
             return false;
@@ -18111,7 +18130,7 @@
             iNode: i
           };
 
-          if (_.isFunction(this.node.fillStyle)) {
+          if (_$1.isFunction(this.node.fillStyle)) {
             var _color = this.node.fontColor(layoutData);
 
             if (!_color) {
@@ -18130,7 +18149,7 @@
             }
           }); //重新设定下ind
 
-          _.each(data, function (d, i) {
+          _$1.each(data, function (d, i) {
             d.iNode = i;
           });
         }
@@ -18156,7 +18175,7 @@
             if (!data[i].enabled) continue;
             total += data[i].value;
 
-            if (me.node.radius && _.isString(me.node.radius) && me.node.radius in data[i].rowData) {
+            if (me.node.radius && _$1.isString(me.node.radius) && me.node.radius in data[i].rowData) {
               var _r = Number(data[i].rowData[me.node.radius]);
 
               maxRval = Math.max(maxRval, _r);
@@ -18231,14 +18250,14 @@
 
               var outRadius = me.node.outRadius;
 
-              if (me.node.radius && _.isString(me.node.radius) && me.node.radius in data[j].rowData) {
+              if (me.node.radius && _$1.isString(me.node.radius) && me.node.radius in data[j].rowData) {
                 var _rr = Number(data[j].rowData[me.node.radius]);
 
                 outRadius = parseInt((me.node.outRadius - me.node.innerRadius) * ((_rr - minRval) / (maxRval - minRval)) + me.node.innerRadius);
               }
               var moveDis = me.node.moveDis;
 
-              _.extend(data[j], {
+              _$1.extend(data[j], {
                 outRadius: outRadius,
                 innerRadius: me.node.innerRadius,
                 startAngle: me.currentAngle,
@@ -18289,7 +18308,7 @@
 
         if (this.label.enabled) {
           if (this.label.format) {
-            if (_.isFunction(this.label.format)) {
+            if (_$1.isFunction(this.label.format)) {
               str = this.label.format(itemData.label, itemData);
             }
           } else {
@@ -18316,7 +18335,7 @@
         //return this.data;
         var legendData = [];
 
-        _.each(this.data, function (item) {
+        _$1.each(this.data, function (item) {
           legendData.push({
             name: item.label,
             color: item.fillStyle,
@@ -18458,7 +18477,7 @@
         //}
       };
 
-      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(RadarGraphs.defaultProps()), opt);
+      _$1.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps$1(RadarGraphs.defaultProps()), opt);
 
       _this.init();
 
@@ -18473,7 +18492,7 @@
       value: function draw(opt) {
         !opt && (opt = {});
 
-        _.extend(true, this, opt);
+        _$1.extend(true, this, opt);
 
         this.data = this._trimGraphs();
 
@@ -18494,11 +18513,11 @@
 
         var iGroup = 0;
 
-        _.each(this.data, function (list, field) {
+        _$1.each(this.data, function (list, field) {
           var group = {};
           var pointList = [];
 
-          _.each(list, function (node, i) {
+          _$1.each(list, function (node, i) {
             pointList.push([node.point.x, node.point.y]);
           });
 
@@ -18544,7 +18563,7 @@
             //绘制圆点
             var _nodes = [];
 
-            _.each(list, function (node, i) {
+            _$1.each(list, function (node, i) {
               pointList.push([node.point.x, node.point.y]);
 
               var _node = new Circle$5({
@@ -18590,9 +18609,9 @@
         me.tipsPointerHideOf(e);
 
         if (e.eventInfo && e.eventInfo.nodes) {
-          _.each(e.eventInfo.nodes, function (eventNode) {
+          _$1.each(e.eventInfo.nodes, function (eventNode) {
             if (me.data[eventNode.field]) {
-              _.each(me.data[eventNode.field], function (n, i) {
+              _$1.each(me.data[eventNode.field], function (n, i) {
                 if (eventNode.iNode == i) {
                   me.focusOf(n);
                 } //else {
@@ -18609,8 +18628,8 @@
       value: function tipsPointerHideOf(e) {
         var me = this;
 
-        _.each(me.data, function (g, i) {
-          _.each(g, function (node) {
+        _$1.each(me.data, function (g, i) {
+          _$1.each(g, function (node) {
             me.unfocusOf(node);
           });
         });
@@ -18651,7 +18670,7 @@
         if (group) {
           group.area.context.visible = false;
 
-          _.each(group.nodes, function (element) {
+          _$1.each(group.nodes, function (element) {
             element.context.visible = false;
           });
         }
@@ -18669,7 +18688,7 @@
         if (group) {
           group.area.context.visible = true;
 
-          _.each(group.nodes, function (element) {
+          _$1.each(group.nodes, function (element) {
             element.context.visible = true;
           });
         }
@@ -18687,14 +18706,14 @@
         this.enabledField = _coord.filterEnabledFields(this.field);
         var data = {};
 
-        _.each(this.enabledField, function (field) {
+        _$1.each(this.enabledField, function (field) {
           var dataOrg = me.dataFrame.getFieldData(field);
 
           var fieldMap = _coord.getFieldMapOf(field);
 
           var arr = [];
 
-          _.each(_coord.aAxis.angleList, function (_a, i) {
+          _$1.each(_coord.aAxis.angleList, function (_a, i) {
             //弧度
             var _r = Math.PI * _a / 180;
 
@@ -18721,15 +18740,15 @@
       value: function _getStyle(style, iGroup, def, fieldMap) {
         var _s = def;
 
-        if (_.isString(style) || _.isNumber(style)) {
+        if (_$1.isString(style) || _$1.isNumber(style)) {
           _s = style;
         }
 
-        if (_.isArray(style)) {
+        if (_$1.isArray(style)) {
           _s = style[iGroup];
         }
 
-        if (_.isFunction(style)) {
+        if (_$1.isFunction(style)) {
           _s = style(iGroup, fieldMap);
         }
 
@@ -18747,9 +18766,9 @@
         var data = this.data;
         var _nodesInfoList = []; //节点信息集合
 
-        _.each(this.enabledField, function (fs, i) {
-          if (_.isArray(fs)) {
-            _.each(fs, function (_fs, ii) {
+        _$1.each(this.enabledField, function (fs, i) {
+          if (_$1.isArray(fs)) {
+            _$1.each(fs, function (_fs, ii) {
               //fs的结构两层到顶了
               var node = data[_fs][index$$1];
               node && _nodesInfoList.push(node);
@@ -19436,7 +19455,7 @@
 
       };
 
-      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(CloudGraphs.defaultProps()), opt);
+      _$1.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps$1(CloudGraphs.defaultProps()), opt);
 
       _this.node.fontColor = function (nodeData) {
         return me.app.getTheme(nodeData.iNode);
@@ -19455,7 +19474,7 @@
       value: function draw(opt) {
         !opt && (opt = {});
 
-        _.extend(true, this, opt);
+        _$1.extend(true, this, opt);
 
         this._drawGraphs();
 
@@ -19469,11 +19488,11 @@
         var me = this;
         var df = this.dataFrame;
 
-        var org = _.find(df.data, function (d) {
+        var org = _$1.find(df.data, function (d) {
           return d.field == me.field;
         });
 
-        var ind = _.indexOf(org.data, val);
+        var ind = _$1.indexOf(org.data, val);
 
         return ind;
       }
@@ -19482,11 +19501,11 @@
       value: function _getFontSize(rowData, val) {
         var size = this.node.minFontSize;
 
-        if (_.isFunction(this.node.fontSize)) {
+        if (_$1.isFunction(this.node.fontSize)) {
           size = this.node.fontSize(rowData);
         }
 
-        if (_.isString(this.node.fontSize) && this.node.fontSize in rowData) {
+        if (_$1.isString(this.node.fontSize) && this.node.fontSize in rowData) {
           var val = Number(rowData[this.node.fontSize]);
 
           if (!isNaN(val)) {
@@ -19494,7 +19513,7 @@
           }
         }
 
-        if (_.isNumber(this.node.fontSize)) {
+        if (_$1.isNumber(this.node.fontSize)) {
           size = this.node.fontSize;
         }
 
@@ -19505,7 +19524,7 @@
       value: function _getRotate(item, ind) {
         var rotation = this.node.rotation;
 
-        if (_.isFunction(this.node.rotation)) {
+        if (_$1.isFunction(this.node.rotation)) {
           rotation = this.node.rotation(item, ind) || 0;
         }
         return rotation;
@@ -19515,11 +19534,11 @@
       value: function _getFontColor(nodeData) {
         var color$$1;
 
-        if (_.isString(this.node.fontColor)) {
+        if (_$1.isString(this.node.fontColor)) {
           color$$1 = this.node.fontColor;
         }
 
-        if (_.isFunction(this.node.fontColor)) {
+        if (_$1.isFunction(this.node.fontColor)) {
           color$$1 = this.node.fontColor(nodeData);
         }
 
@@ -19535,8 +19554,8 @@
       value: function _drawGraphs() {
         var me = this; //查找fontSize的max和min
 
-        if (_.isString(this.node.fontSize)) {
-          _.each(me.dataFrame.getFieldData(this.node.fontSize), function (val) {
+        if (_$1.isString(this.node.fontSize)) {
+          _$1.each(me.dataFrame.getFieldData(this.node.fontSize), function (val) {
             me.node._maxFontSizeVal = Math.max(me.node._maxFontSizeVal, val);
             me.node._minFontSizeVal = Math.min(me.node._minFontSizeVal, val);
           });
@@ -19575,7 +19594,7 @@
           me.data = data;
           me.sprite.removeAllChildren();
 
-          _.each(data, function (tag, i) {
+          _$1.each(data, function (tag, i) {
             tag.iNode = i;
             tag.dataLen = data.length;
             tag.focused = false;
@@ -19827,7 +19846,7 @@
       this.maxRingNum = 0;
       this.ringNum = 0;
 
-      _.extend(true, this, getDefaultProps(PlanetGroup.defaultProps()), opt); //circle.maxRadius 绝对不能大于最大 占位 pit.radius
+      _$1.extend(true, this, getDefaultProps$1(PlanetGroup.defaultProps()), opt); //circle.maxRadius 绝对不能大于最大 占位 pit.radius
 
 
       if (this.node.maxRadius > this.pit.radius) {
@@ -19915,7 +19934,7 @@
             field: me.field,
             label: rowData[me.field],
             focused: false,
-            selected: !!~_.indexOf(this.selectInds, rowData.__index__)
+            selected: !!~_$1.indexOf(this.selectInds, rowData.__index__)
           };
           planets.push(planetLayoutData);
         }
@@ -19931,7 +19950,7 @@
             }
           }); //修正下 排序过后的 iNode
 
-          _.each(planets, function (planet, i) {
+          _$1.each(planets, function (planet, i) {
             planet.iNode = i;
           });
         }
@@ -19995,7 +20014,7 @@
         //计算每个环的最大可以创建星球数量,然后把所有的数量相加做分母。
         //然后计算自己的比例去 planets 里面拿对应比例的数据
 
-        _.each(_rings, function (ring, i) {
+        _$1.each(_rings, function (ring, i) {
           //先计算上这个轨道上排排站一共可以放的下多少个星球
           //一个星球需要多少弧度
           var minRadian = Math.asin(me.pit.radius / ring.radius) * 2;
@@ -20006,7 +20025,7 @@
           }
           var _count = 0;
 
-          _.each(ring.arcs, function (arc) {
+          _$1.each(ring.arcs, function (arc) {
             var _adiff = me._getDiffRadian(arc[0].radian, arc[1].radian);
 
             if (_adiff >= minRadian) {
@@ -20046,13 +20065,13 @@
           ring.max = _count;
           allplanetsMax += _count; //坑位做次随机乱序
 
-          ring.pits = _.shuffle(ring.pits);
+          ring.pits = _$1.shuffle(ring.pits);
         }); //allplanetsMax有了后作为分明， 可以给每个ring去分摊 planet 了
 
 
         var preAllCount = 0;
 
-        _.each(_rings, function (ring, i) {
+        _$1.each(_rings, function (ring, i) {
           if (preAllCount >= planets.length) {
             return false;
           }
@@ -20065,13 +20084,13 @@
           }
           preAllCount += num; //给每个萝卜分配一个坑位
 
-          _.each(ring.planets, function (planet, ii) {
+          _$1.each(ring.planets, function (planet, ii) {
             if (ii >= ring.pits.length) {
               //如果萝卜已经比这个ring上面的坑要多，就要扔掉， 没办法的
               return;
             }
 
-            var pits = _.filter(ring.pits, function (pit) {
+            var pits = _$1.filter(ring.pits, function (pit) {
               return !pit.hasRadish;
             });
 
@@ -20112,7 +20131,7 @@
           name: 'coord'
         });
 
-        _.each(this._rings, function (ring, i) {
+        _$1.each(this._rings, function (ring, i) {
           var _ringCtx = {
             rotation: 0
           };
@@ -20126,7 +20145,7 @@
             context: _ringCtx
           });
 
-          _.each(ring.planets, function (p, ii) {
+          _$1.each(ring.planets, function (p, ii) {
             if (!p.pit) {
               //如果这个萝卜没有足够的坑位可以放，很遗憾，只能扔掉了
               return;
@@ -20262,7 +20281,7 @@
             //只能用function的形式用户自定义实现
             //现在已经实现了center,bottom,auto，但是也还是先留着吧，也不碍事
 
-            if (_.isFunction(me.label.position)) {
+            if (_$1.isFunction(me.label.position)) {
               var _pos = me.label.position({
                 node: _circle,
                 circleR: r,
@@ -20325,12 +20344,12 @@
       value: function _getRProp(r, ringInd, iNode, nodeData) {
         var me = this;
 
-        if (_.isString(r) && _.indexOf(me.dataFrame.fields, r) > -1) {
+        if (_$1.isString(r) && _$1.indexOf(me.dataFrame.fields, r) > -1) {
           if (this.__rValMax == undefined && this.__rValMax == undefined) {
             this.__rValMax = 0;
             this.__rValMin = 0;
 
-            _.each(me.planets, function (planet) {
+            _$1.each(me.planets, function (planet) {
               me.__rValMax = Math.max(me.__rValMax, planet.rowData[r]);
               me.__rValMin = Math.min(me.__rValMin, planet.rowData[r]);
             });
@@ -20345,7 +20364,7 @@
       value: function _getProp(p, nodeData) {
         var iGroup = this.iGroup;
 
-        if (_.isFunction(p)) {
+        if (_$1.isFunction(p)) {
           return p.apply(this, [nodeData, iGroup]); //return p( nodeData );
         }
         return p;
@@ -20355,8 +20374,8 @@
       value: function getPlanetAt(target) {
         var planet = target;
 
-        if (_.isNumber(target)) {
-          _.each(this.planets, function (_planet) {
+        if (_$1.isNumber(target)) {
+          _$1.each(this.planets, function (_planet) {
             if (_planet.rowData.__index__ == target) {
               planet = _planet;
               return false;
@@ -20403,7 +20422,7 @@
     }, {
       key: "getSelectedNodes",
       value: function getSelectedNodes() {
-        return _.filter(this.planets, function (planet) {
+        return _$1.filter(this.planets, function (planet) {
           return planet.selected;
         });
       }
@@ -20563,7 +20582,7 @@
         }
       };
 
-      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(PlanetGraphs.defaultProps()), opt);
+      _$1.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps$1(PlanetGraphs.defaultProps()), opt);
 
       if (_this.center.radius == 0 || !_this.center.enabled) {
         _this.center.radius = 0;
@@ -20591,7 +20610,7 @@
       value: function draw(opt) {
         !opt && (opt = {});
 
-        _.extend(true, this, opt);
+        _$1.extend(true, this, opt);
 
         this._drawGroups();
 
@@ -20624,10 +20643,10 @@
 
         var _circleMaxR = this._getMaxR();
 
-        _.each(this.groupDataFrames, function (df, i) {
+        _$1.each(this.groupDataFrames, function (df, i) {
           var toR = groupRStart + maxRadius * (df.length / me.dataFrame.length);
 
-          var _g = new PlanetGroup(_.extend(true, {
+          var _g = new PlanetGroup(_$1.extend(true, {
             iGroup: i,
             groupLen: me.groupDataFrames.length,
             rRange: {
@@ -20650,7 +20669,7 @@
 
         me._drawBack();
 
-        _.each(me._ringGroups, function (_g) {
+        _$1.each(me._ringGroups, function (_g) {
           me.sprite.addChild(_g.sprite);
         });
       }
@@ -20775,7 +20794,7 @@
       value: function _getBackProp(p, i) {
         var res = null;
 
-        if (_.isFunction(p)) {
+        if (_$1.isFunction(p)) {
           res = p.apply(this, [{
             //iGroup : iGroup,
             scaleInd: i,
@@ -20785,11 +20804,11 @@
           }]);
         }
 
-        if (_.isString(p) || _.isNumber(p)) {
+        if (_$1.isString(p) || _$1.isNumber(p)) {
           res = p;
         }
 
-        if (_.isArray(p)) {
+        if (_$1.isArray(p)) {
           res = p[i];
         }
         return res;
@@ -20797,19 +20816,19 @@
     }, {
       key: "_dataGroupHandle",
       value: function _dataGroupHandle() {
-        var groupFieldInd = _.indexOf(this.dataFrame.fields, this.groupField);
+        var groupFieldInd = _$1.indexOf(this.dataFrame.fields, this.groupField);
 
         if (groupFieldInd >= 0) {
           //有分组字段，就还要对dataFrame中的数据分下组，然后给到 groupDataFrames
           var titles = this.dataFrame.org[0];
           var _dmap = {}; //以分组的字段值做为key
 
-          _.each(this.dataFrame.org, function (row, i) {
+          _$1.each(this.dataFrame.org, function (row, i) {
             if (i) {
               //从i==1 行开始，因为第一行是titles
               if (!_dmap[row[groupFieldInd]]) {
                 //如果没有记录，先创建
-                _dmap[row[groupFieldInd]] = [_.clone(titles)];
+                _dmap[row[groupFieldInd]] = [_$1.clone(titles)];
               }
 
               _dmap[row[groupFieldInd]].push(row);
@@ -20845,9 +20864,9 @@
       key: "getAgreeNodeData",
       value: function getAgreeNodeData(trigger, callback) {
 
-        _.each(this._ringGroups, function (_g) {
-          _.each(_g._rings, function (ring, i) {
-            _.each(ring.planets, function (data, ii) {
+        _$1.each(this._ringGroups, function (_g) {
+          _$1.each(_g._rings, function (ring, i) {
+            _$1.each(ring.planets, function (data, ii) {
               var rowData = data.rowData;
 
               if (trigger.params.name == rowData[trigger.params.field]) {
@@ -20866,8 +20885,8 @@
       value: function getLayoutNodes() {
         var nodes = [];
 
-        _.each(this._ringGroups, function (rg) {
-          _.each(rg.planets, function (node) {
+        _$1.each(this._ringGroups, function (rg) {
+          _$1.each(rg.planets, function (node) {
             if (node.pit) {
               nodes.push(node);
             }
@@ -20882,8 +20901,8 @@
       value: function getInvalidNodes() {
         var nodes = [];
 
-        _.each(this._ringGroups, function (rg) {
-          _.each(rg.planets, function (node) {
+        _$1.each(this._ringGroups, function (rg) {
+          _$1.each(rg.planets, function (node) {
             if (!node.pit) {
               nodes.push(node);
             }
@@ -20898,7 +20917,7 @@
       value: function selectAt(ind) {
         var me = this;
 
-        _.each(me._ringGroups, function (_g) {
+        _$1.each(me._ringGroups, function (_g) {
           _g.selectAt(ind);
         });
       } //selectAll
@@ -20908,7 +20927,7 @@
       value: function selectAll() {
         var me = this;
 
-        _.each(me.dataFrame.getFieldData("__index__"), function (_ind) {
+        _$1.each(me.dataFrame.getFieldData("__index__"), function (_ind) {
           me.selectAt(_ind);
         });
       } //ind 对应源数据中的index
@@ -20918,7 +20937,7 @@
       value: function unselectAt(ind) {
         var me = this;
 
-        _.each(me._ringGroups, function (_g) {
+        _$1.each(me._ringGroups, function (_g) {
           _g.unselectAt(ind);
         });
       } //unselectAll
@@ -20928,7 +20947,7 @@
       value: function unselectAll(ind) {
         var me = this;
 
-        _.each(me.dataFrame.getFieldData("__index__"), function (_ind) {
+        _$1.each(me.dataFrame.getFieldData("__index__"), function (_ind) {
           me.unselectAt(_ind);
         });
       } //获取所有的节点数据
@@ -20938,7 +20957,7 @@
       value: function getSelectedNodes() {
         var arr = [];
 
-        _.each(this._ringGroups, function (_g) {
+        _$1.each(this._ringGroups, function (_g) {
           arr = arr.concat(_g.getSelectedNodes());
         });
 
@@ -20950,10 +20969,10 @@
       value: function getSelectedRowList() {
         var arr = [];
 
-        _.each(this._ringGroups, function (_g) {
+        _$1.each(this._ringGroups, function (_g) {
           var rows = [];
 
-          _.each(_g.getSelectedNodes(), function (nodeData) {
+          _$1.each(_g.getSelectedNodes(), function (nodeData) {
             rows.push(nodeData.rowData);
           });
 
@@ -21059,7 +21078,7 @@
       _this._maxVal = null;
       _this._minVal = null;
 
-      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(FunnelGraphs.defaultProps()), opt);
+      _$1.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps$1(FunnelGraphs.defaultProps()), opt);
 
       _this.init();
 
@@ -21075,8 +21094,8 @@
         if (this.field) {
           this.dataOrg = this.dataFrame.getFieldData(this.field);
         }
-        this._maxVal = _.max(this.dataOrg);
-        this._minVal = _.min(this.dataOrg); //计算一些基础属性，比如maxNodeWidth等， 加入外面没有设置
+        this._maxVal = _$1.max(this.dataOrg);
+        this._minVal = _$1.min(this.dataOrg); //计算一些基础属性，比如maxNodeWidth等， 加入外面没有设置
 
         if (!this.maxNodeWidth) {
           this.maxNodeWidth = this.width * 0.7;
@@ -21091,7 +21110,7 @@
       value: function draw(opt) {
         !opt && (opt = {}); //第二个data参数去掉，直接trimgraphs获取最新的data
 
-        _.extend(true, this, opt);
+        _$1.extend(true, this, opt);
 
         var me = this;
         var animate = me.animation && !opt.resize;
@@ -21113,7 +21132,7 @@
 
         var layoutData = [];
 
-        _.each(this.dataOrg, function (num, i) {
+        _$1.each(this.dataOrg, function (num, i) {
           var ld = {
             type: "funnel",
             field: me.field,
@@ -21142,12 +21161,12 @@
           });
         }
 
-        _.each(layoutData, function (ld, i) {
+        _$1.each(layoutData, function (ld, i) {
           ld.iNode = i;
           ld.label = me.label.format(ld.value, ld);
         });
 
-        _.each(layoutData, function (ld, i) {
+        _$1.each(layoutData, function (ld, i) {
           ld.points = me._getPoints(ld, layoutData[i + 1], layoutData[i - 1]);
           ld.middlePoint = {
             x: 0,
@@ -21206,7 +21225,7 @@
       value: function _drawGraphs() {
         var me = this;
 
-        _.each(this.data, function (ld) {
+        _$1.each(this.data, function (ld) {
           var _polygon = new Polygon$4({
             context: {
               pointList: ld.points,
@@ -22740,7 +22759,7 @@
       _this.type = "venn";
       _this.vennData = null;
 
-      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(VennGraphs.defaultProps()), opt); //_trimGraphs后，计算出来本次data的一些属性
+      _$1.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps$1(VennGraphs.defaultProps()), opt); //_trimGraphs后，计算出来本次data的一些属性
 
 
       _this._dataCircleLen = 0;
@@ -22773,7 +22792,7 @@
       value: function draw(opt) {
         !opt && (opt = {});
 
-        _.extend(true, this, opt);
+        _$1.extend(true, this, opt);
 
         this.data = this._trimGraphs();
 
@@ -22824,7 +22843,7 @@
         var circleInd = 0;
         var pathInd = 0;
 
-        _.each(data, function (d, ind) {
+        _$1.each(data, function (d, ind) {
           if (d.label) {
             if (d.sets.length > 1 && !me.label.showInter) ; else {
               d.labelPosition = textCentres[d.nodeId];
@@ -22844,7 +22863,7 @@
             };
             me._dataPathLen++;
           } else if (d.sets.length == 1) {
-            d.shape = _.extend({
+            d.shape = _$1.extend({
               type: 'circle',
               circleInd: circleInd++
             }, circles[d.nodeId]);
@@ -22882,7 +22901,7 @@
             var val = rowData[p];
 
             if (p == me.keyField) {
-              if (!_.isArray(val)) {
+              if (!_$1.isArray(val)) {
                 val = val.split(/[,|]/);
               }
               obj.sets = val;
@@ -22904,11 +22923,11 @@
       value: function _getStyle(style, ind, nodeData, defColor) {
         var color$$1;
 
-        if (_.isString(style)) {
+        if (_$1.isString(style)) {
           color$$1 = style;
         }
 
-        if (_.isFunction(style)) {
+        if (_$1.isFunction(style)) {
           color$$1 = style(nodeData);
         }
 
@@ -22949,7 +22968,7 @@
         var pathInd = 0;
         var labelInd = 0;
 
-        _.each(this.data, function (nodeData, i) {
+        _$1.each(this.data, function (nodeData, i) {
           var shape = nodeData.shape;
 
           var _shape;
@@ -23702,7 +23721,7 @@
       _this = _possibleConstructorReturn(this, _getPrototypeOf(sunburstGraphs).call(this, opt, app));
       _this.type = "sunburst";
 
-      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(sunburstGraphs.defaultProps()), opt);
+      _$1.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps$1(sunburstGraphs.defaultProps()), opt);
 
       _this.data = []; //布局算法布局后的数据
 
@@ -23721,7 +23740,7 @@
       value: function draw(opt) {
         !opt && (opt = {});
 
-        _.extend(true, this, opt);
+        _$1.extend(true, this, opt);
 
         this.data = this._trimGraphs();
         this.dataGroup = this._getDataGroupOfDepth();
@@ -23752,11 +23771,11 @@
       value: function _getDataGroupOfDepth() {
         var map = {};
 
-        _.each(this.data, function (d) {
+        _$1.each(this.data, function (d) {
           map[d.depth] = [];
         });
 
-        _.each(this.data, function (d) {
+        _$1.each(this.data, function (d) {
           map[d.depth].push(d);
         });
 
@@ -23796,7 +23815,7 @@
                 obj.value = value;
               }
 
-              _.each(parentData, function (key, ki) {
+              _$1.each(parentData, function (key, ki) {
                 if (key === obj.name) {
                   //这个是obj的children
                   if (!obj.children) {
@@ -23820,8 +23839,8 @@
       value: function _widget() {
         var me = this;
 
-        _.each(this.dataGroup, function (group, g) {
-          _.each(group, function (layoutData, i) {
+        _$1.each(this.dataGroup, function (group, g) {
+          _$1.each(group, function (layoutData, i) {
             if (!layoutData.depth) {
               //最中间的大圆隐藏
               return;
@@ -23889,7 +23908,7 @@
         var nodes = [];
 
         if (iNode !== undefined) {
-          var node = _.find(this.data, function (item) {
+          var node = _$1.find(this.data, function (item) {
             return item.iNode == iNode;
           });
 
@@ -23902,7 +23921,7 @@
       value: function _focus(layoutData, group) {
         var me = this;
 
-        _.each(group, function (d) {
+        _$1.each(group, function (d) {
           if (d !== layoutData) {
             d.sector.context.globalAlpha = me.node.blurAlpha;
 
@@ -23918,7 +23937,7 @@
       key: "_unfocus",
       value: function _unfocus(layoutData, group) {
 
-        _.each(this.data, function (d) {
+        _$1.each(this.data, function (d) {
           d.sector && (d.sector.context.globalAlpha = 1);
         });
       }
@@ -23928,7 +23947,7 @@
         var me = this;
 
         if (d.children && d.children.length) {
-          _.each(d.children, function (child) {
+          _$1.each(d.children, function (child) {
             callback(child);
 
             me._focusChildren(child, callback);
@@ -23941,7 +23960,7 @@
         var me = this;
 
         if (layoutData.parent && layoutData.parent.sector && layoutData.parent.group) {
-          _.each(layoutData.parent.group, function (d) {
+          _$1.each(layoutData.parent.group, function (d) {
             if (d === layoutData.parent) {
               d.sector.context.globalAlpha = 1;
 
@@ -23965,33 +23984,33 @@
         nodes = [],
         links = [];
 
-    sankey.nodeWidth = function (_$$1) {
+    sankey.nodeWidth = function (_) {
       if (!arguments.length) return nodeWidth;
-      nodeWidth = +_$$1;
+      nodeWidth = +_;
       return sankey;
     };
 
-    sankey.nodePadding = function (_$$1) {
+    sankey.nodePadding = function (_) {
       if (!arguments.length) return nodePadding;
-      nodePadding = +_$$1;
+      nodePadding = +_;
       return sankey;
     };
 
-    sankey.nodes = function (_$$1) {
+    sankey.nodes = function (_) {
       if (!arguments.length) return nodes;
-      nodes = _$$1;
+      nodes = _;
       return sankey;
     };
 
-    sankey.links = function (_$$1) {
+    sankey.links = function (_) {
       if (!arguments.length) return links;
-      links = _$$1;
+      links = _;
       return sankey;
     };
 
-    sankey.size = function (_$$1) {
+    sankey.size = function (_) {
       if (!arguments.length) return size;
-      size = _$$1;
+      size = _;
       return sankey;
     };
 
@@ -24042,9 +24061,9 @@
         return path;
       }
 
-      link.curvature = function (_$$1) {
+      link.curvature = function (_) {
         if (!arguments.length) return curvature;
-        curvature = +_$$1;
+        curvature = +_;
         return link;
       };
 
@@ -24170,7 +24189,7 @@
         }
       } else {
         //ie解决方案
-        _.extend(ctor.prototype, properties);
+        _$1.extend(ctor.prototype, properties);
       }
     }
 
@@ -24612,7 +24631,7 @@
       _this = _possibleConstructorReturn(this, _getPrototypeOf(sankeyGraphs).call(this, opt, app));
       _this.type = "sankey";
 
-      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(sankeyGraphs.defaultProps()), opt);
+      _$1.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps$1(sankeyGraphs.defaultProps()), opt);
 
       _this.init();
 
@@ -24634,7 +24653,7 @@
       value: function draw(opt) {
         !opt && (opt = {});
 
-        _.extend(true, this, opt);
+        _$1.extend(true, this, opt);
 
         this.data = this._trimGraphs();
 
@@ -24655,7 +24674,7 @@
         var parentFields = me.dataFrame.getFieldData(me.parentField);
         var nodeMap = {}; //name:ind
 
-        _.each(keyDatas, function (key, i) {
+        _$1.each(keyDatas, function (key, i) {
           var nodeNames = [];
 
           if (me.parentField) {
@@ -24663,7 +24682,7 @@
           }
           nodeNames = nodeNames.concat(key.split(/[,|]/));
 
-          _.each(nodeNames, function (name) {
+          _$1.each(nodeNames, function (name) {
             if (nodeMap[name] === undefined) {
               nodeMap[name] = nodes.length;
               nodes.push({
@@ -24673,7 +24692,7 @@
           });
         });
 
-        _.each(keyDatas, function (key, i) {
+        _$1.each(keyDatas, function (key, i) {
           //var nodeNames = key.split(/[,|]/);
           var nodeNames = [];
 
@@ -24708,11 +24727,11 @@
         var me = this;
         var color$$1 = style;
 
-        if (_.isArray(color$$1)) {
+        if (_$1.isArray(color$$1)) {
           color$$1 = color$$1[ind];
         }
 
-        if (_.isFunction(color$$1)) {
+        if (_$1.isFunction(color$$1)) {
           color$$1 = color$$1(node);
         }
 
@@ -24728,7 +24747,7 @@
         var nodes = this.data.nodes();
         var me = this;
 
-        _.each(nodes, function (node, i) {
+        _$1.each(nodes, function (node, i) {
           var nodeColor = me._getColor(me.node.fillStyle, node, i);
 
           var nodeEl = new Rect$6({
@@ -24752,7 +24771,7 @@
         var links = this.data.links();
         var me = this;
 
-        _.each(links, function (link, i) {
+        _$1.each(links, function (link, i) {
           var linkColor = me._getColor(me.line.strokeStyle, link, i);
 
           var d = me.data.link()(link);
@@ -24797,7 +24816,7 @@
         var nodes = this.data.nodes();
         var me = this;
 
-        _.each(nodes, function (node) {
+        _$1.each(nodes, function (node) {
           var textAlign = me.label.textAlign;
           var x = node.x + me.data.nodeWidth() + 4;
           /*
@@ -24955,7 +24974,7 @@
       _this = _possibleConstructorReturn(this, _getPrototypeOf(Progress).call(this, opt, app));
       _this.type = "progress";
 
-      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(Progress.defaultProps()), opt);
+      _$1.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps$1(Progress.defaultProps()), opt);
 
       _this.bgNodeData = null; //背景的nodeData数据，和data里面的结构保持一致
 
@@ -24973,7 +24992,7 @@
         !opt && (opt = {});
         var me = this;
 
-        _.extend(true, this, opt);
+        _$1.extend(true, this, opt);
 
         me.grow(function (process) {
           me.data = me._trimGraphs(process);
@@ -25007,11 +25026,11 @@
         this.bgNodeData.fillStyle = this._getStyle(this.bgNodeData, this.bgColor);
         var data = {};
 
-        _.each(this.enabledField, function (field) {
+        _$1.each(this.enabledField, function (field) {
           var dataOrg = me.dataFrame.getFieldData(field);
           var nodeDatas = [];
 
-          _.each(dataOrg, function (val, i) {
+          _$1.each(dataOrg, function (val, i) {
             val *= scale;
             var preNodeData = nodeDatas.slice(-1)[0];
             var startAngle = preNodeData ? preNodeData.endAngle : _startAngle;
@@ -25085,7 +25104,7 @@
         };
 
         if (field) {
-          if (me.label.format && _.isFunction(me.label.format)) {
+          if (me.label.format && _$1.isFunction(me.label.format)) {
             nodeData.text = me.label.format(val, nodeData);
           }
         }
@@ -25125,8 +25144,8 @@
           me._bgPathElement.context.fillStyle = this.bgNodeData.fillStyle;
         }
 
-        _.each(this.data, function (nodeDatas) {
-          _.each(nodeDatas, function (nodeData, i) {
+        _$1.each(this.data, function (nodeDatas) {
+          _$1.each(nodeDatas, function (nodeData, i) {
             var pathStr = me._getPathStr(nodeData);
 
             var elId = "progress_bar_" + nodeData.field + "_" + i;
@@ -25173,7 +25192,7 @@
               if (labelElement) {
                 labelElement.resetText(nodeData.text);
 
-                _.extend(labelElement.context, lebelCxt);
+                _$1.extend(labelElement.context, lebelCxt);
               } else {
                 var labelElement = new Canvax.Display.Text(nodeData.text, {
                   id: labelId,
@@ -25193,7 +25212,7 @@
               };
 
               if (labelSymbolElement) {
-                _.extend(labelSymbolElement.context, lebelSymbolCxt);
+                _$1.extend(labelSymbolElement.context, lebelSymbolCxt);
               } else {
                 var labelSymbolElement = new Canvax.Display.Text("%", {
                   id: labelSymbolId,
@@ -25245,22 +25264,22 @@
         var style;
 
         if (prop) {
-          if (_.isString(prop)) {
+          if (_$1.isString(prop)) {
             style = prop;
           }
 
-          if (_.isArray(prop)) {
+          if (_$1.isArray(prop)) {
             style = prop[nodeData.iNode];
           }
 
-          if (_.isFunction(prop)) {
+          if (_$1.isFunction(prop)) {
             style = prop.apply(this, arguments);
           }
 
           if (prop && prop.lineargradient) {
             var style = me.ctx.createLinearGradient(nodeData.startOutPoint.x, nodeData.startOutPoint.y, nodeData.endOutPoint.x, nodeData.endOutPoint.y);
 
-            _.each(prop.lineargradient, function (item, i) {
+            _$1.each(prop.lineargradient, function (item, i) {
               style.addColorStop(item.position, item.color);
             });
           }
@@ -25388,7 +25407,7 @@
       _this = _possibleConstructorReturn(this, _getPrototypeOf(Legend).call(this, opt, app));
       _this.name = "legend";
 
-      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(Legend.defaultProps()), opt);
+      _$1.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps$1(Legend.defaultProps()), opt);
       /* data的数据结构为
       [
           //descartes中用到的时候还会带入yAxis
@@ -25431,7 +25450,7 @@
         var legendData = opt.data;
 
         if (legendData) {
-          _.each(legendData, function (item, i) {
+          _$1.each(legendData, function (item, i) {
             item.enabled = true;
             item.ind = i;
           }); //delete opt.data;
@@ -25500,7 +25519,7 @@
         var rows = 1;
         var isOver = false; //如果legend过多
 
-        _.each(this.data, function (obj, i) {
+        _$1.each(this.data, function (obj, i) {
           if (isOver) return;
 
           var _icon = new Circle$9({
@@ -25601,7 +25620,7 @@
           me.sprite.addChild(sprite);
           sprite.on("click", function (e) {
             //只有一个field的时候，不支持取消
-            if (_.filter(me.data, function (obj) {
+            if (_$1.filter(me.data, function (obj) {
               return obj.enabled;
             }).length == 1) {
               if (obj.enabled) {
@@ -25644,7 +25663,7 @@
     }]);
 
     return Legend;
-  }(component);
+  }(Component);
 
   var Line$7 = Canvax.Shapes.Line;
   var Rect$7 = Canvax.Shapes.Rect;
@@ -25840,7 +25859,7 @@
 
       app.stage.addChild(_this.sprite); //预设默认的opt.dataZoom
 
-      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(dataZoom.defaultProps()), opt);
+      _$1.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps$1(dataZoom.defaultProps()), opt);
 
       _this.layout();
 
@@ -25885,18 +25904,18 @@
 
         var graphsOpt = [];
 
-        _.each(app.getComponents({
+        _$1.each(app.getComponents({
           name: 'graphs'
         }), function (_g) {
           var _field = _g.enabledField || _g.field;
 
-          if (_.flatten([_field]).length) {
-            var _opt = _.extend(true, {}, _g._opt);
+          if (_$1.flatten([_field]).length) {
+            var _opt = _$1.extend(true, {}, _g._opt);
 
             _opt.field = _field;
 
             if (_g.type == "bar") {
-              _.extend(true, _opt, {
+              _$1.extend(true, _opt, {
                 node: {
                   fillStyle: "#ececec",
                   radius: 0
@@ -25910,7 +25929,7 @@
             }
 
             if (_g.type == "line") {
-              _.extend(true, _opt, {
+              _$1.extend(true, _opt, {
                 line: {
                   //lineWidth: 1,
                   strokeStyle: "#ececec"
@@ -25931,7 +25950,7 @@
             }
 
             if (_g.type == "scat") {
-              _.extend(true, _opt, {
+              _$1.extend(true, _opt, {
                 node: {
                   fillStyle: "#ececec"
                 }
@@ -25966,7 +25985,7 @@
         }).getSizeAndOrigin();
         var me = this; //初始化 datazoom 模块
 
-        _.extend(true, this, {
+        _$1.extend(true, this, {
           width: parseInt(coordInfo.width),
           pos: {
             x: coordInfo.origin.x
@@ -25977,7 +25996,7 @@
               right: range.end - app.dataFrame.range.end
             });
 
-            _.extend(app.dataFrame.range, range); //不想要重新构造dataFrame，所以第一个参数为null
+            _$1.extend(app.dataFrame.range, range); //不想要重新构造dataFrame，所以第一个参数为null
 
 
             app.resetData(null, trigger);
@@ -26022,7 +26041,7 @@
         var _preCount = this.count;
         var _preStart = this.range.start;
         var _preEnd = this.range.end;
-        opt && _.extend(true, this, opt);
+        opt && _$1.extend(true, this, opt);
         this._cloneChart = this._getCloneChart(); //cloneChart;
 
         this._computeAttrs(opt);
@@ -26452,7 +26471,7 @@
     }]);
 
     return dataZoom;
-  }(component);
+  }(Component);
 
   var BrokenLine$2 = Canvax.Shapes.BrokenLine;
   var Sprite$1 = Canvax.Display.Sprite;
@@ -26540,7 +26559,7 @@
 
       _this.app.graphsSprite.addChild(_this.sprite);
 
-      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(MarkLine.defaultProps()), opt);
+      _$1.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps$1(MarkLine.defaultProps()), opt);
 
       return _this;
     }
@@ -26564,7 +26583,7 @@
           name: 'coord'
         });
 
-        if (field && _.indexOf(this.app.dataFrame.fields, field) == -1) {
+        if (field && _$1.indexOf(this.app.dataFrame.fields, field) == -1) {
           //如果配置的字段不存在，则不绘制
           return;
         }
@@ -26572,10 +26591,10 @@
 
         if (field) {
           //如果有配置markTo就从 _coord._yAxis中找到这个markTo所属的yAxis对象
-          _.each(_coord._yAxis, function ($yAxis, yi) {
-            var fs = _.flatten([$yAxis.field]);
+          _$1.each(_coord._yAxis, function ($yAxis, yi) {
+            var fs = _$1.flatten([$yAxis.field]);
 
-            if (_.indexOf(fs, field) >= 0) {
+            if (_$1.indexOf(fs, field) >= 0) {
               _yAxis = $yAxis;
             }
           });
@@ -26597,7 +26616,7 @@
 
             var _count = 0;
 
-            _.each(_fdata, function (val) {
+            _$1.each(_fdata, function (val) {
               if (Number(val)) {
                 _count += val;
               }
@@ -26675,7 +26694,7 @@
     }, {
       key: "reset",
       value: function reset(opt) {
-        opt && _.extend(true, this, opt);
+        opt && _$1.extend(true, this, opt);
         var me = this;
 
         var y = this._getYPos();
@@ -26711,7 +26730,7 @@
           txt.context.x = this.width - txt.getTextWidth() - 5;
         }
 
-        if (_.isNumber(me.label.y)) {
+        if (_$1.isNumber(me.label.y)) {
           txt.context.y = me.label.y;
         } else {
           txt.context.y = y - txt.getTextHeight();
@@ -26723,7 +26742,7 @@
         var yVal = yVal || this.yVal;
         var y = yVal;
 
-        if (_.isFunction(yVal)) {
+        if (_$1.isFunction(yVal)) {
           y = yVal.apply(this);
         }
         return y;
@@ -26740,10 +26759,10 @@
 
         var yVal = this._getYVal();
 
-        if (_.isFunction(this.label.format)) {
+        if (_$1.isFunction(this.label.format)) {
           str = this.label.format(yVal, this);
         } else {
-          if (_.isString(this.label.text)) {
+          if (_$1.isString(this.label.text)) {
             str = this.label.text;
           } else {
             str = yVal;
@@ -26754,7 +26773,7 @@
     }]);
 
     return MarkLine;
-  }(component);
+  }(Component);
 
   var Rect$8 = Canvax.Shapes.Rect;
   var Line$8 = Canvax.Shapes.Line;
@@ -26855,7 +26874,7 @@
         me._tipDom = null;
       });
 
-      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(Tips.defaultProps()), opt);
+      _$1.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps$1(Tips.defaultProps()), opt);
 
       return _this;
     }
@@ -27004,7 +27023,7 @@
         var tipsContent;
 
         if (this.content) {
-          tipsContent = _.isFunction(this.content) ? this.content(e.eventInfo) : this.content;
+          tipsContent = _$1.isFunction(this.content) ? this.content(e.eventInfo) : this.content;
         } else {
           tipsContent = this._getDefaultContent(e.eventInfo);
         }
@@ -27023,7 +27042,7 @@
           str += "<div style='font-size:14px;border-bottom:1px solid #f0f0f0;padding:4px;margin-bottom:6px;'>" + info.title + "</div>";
         }
 
-        _.each(info.nodes, function (node, i) {
+        _$1.each(info.nodes, function (node, i) {
           if (!node.value && node.value !== 0) {
             return;
           }
@@ -27240,7 +27259,7 @@
     }]);
 
     return Tips;
-  }(component);
+  }(Component);
 
   var Line$9 = Canvax.Shapes.Line;
 
@@ -27324,7 +27343,7 @@
       };
       */
 
-      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(barTgi.defaultProps()), opt);
+      _$1.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps$1(barTgi.defaultProps()), opt);
 
       _this._yAxis = _this.app.getComponent({
         name: 'coord'
@@ -27339,7 +27358,7 @@
     _createClass(barTgi, [{
       key: "reset",
       value: function reset(opt) {
-        _.extend(true, this, opt);
+        _$1.extend(true, this, opt);
 
         this.barDatas = null;
         this.data = null;
@@ -27361,7 +27380,7 @@
         };
         this.setPosition();
 
-        _.each(me.app.getComponents({
+        _$1.each(me.app.getComponents({
           name: 'graphs'
         }), function (_g) {
           if (_g.type == "bar" && _g.data[me.barField]) {
@@ -27370,13 +27389,13 @@
           }
         });
 
-        this.data = _.flatten(me.app.dataFrame.getDataOrg(me.field));
+        this.data = _$1.flatten(me.app.dataFrame.getDataOrg(me.field));
 
         if (!this.barDatas) {
           return;
         }
 
-        _.each(this.data, function (tgi, i) {
+        _$1.each(this.data, function (tgi, i) {
           var y = -me._yAxis.getPosOfVal(tgi);
           var barData = me.barDatas[i];
 
@@ -27403,7 +27422,7 @@
       value: function _getProp(val, tgi, i) {
         var res = val;
 
-        if (_.isFunction(val)) {
+        if (_$1.isFunction(val)) {
           res = val.apply(this, [tgi, i]);
         }
         return res;
@@ -27411,7 +27430,7 @@
     }]);
 
     return barTgi;
-  }(component);
+  }(Component);
 
   var barGuide =
   /*#__PURE__*/
@@ -27508,7 +27527,7 @@
       _this._yAxis = null;
       _this.sprite = null;
 
-      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(barGuide.defaultProps()), opt);
+      _$1.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps$1(barGuide.defaultProps()), opt);
 
       _this._yAxis = _this.app.getComponent({
         name: 'coord'
@@ -27523,7 +27542,7 @@
     _createClass(barGuide, [{
       key: "reset",
       value: function reset(opt) {
-        _.extend(true, this, opt);
+        _$1.extend(true, this, opt);
 
         this.barDatas = null;
         this.data = null;
@@ -27545,7 +27564,7 @@
         };
         this.setPosition();
 
-        _.each(me.app.getComponents({
+        _$1.each(me.app.getComponents({
           name: 'graphs'
         }), function (_g) {
           if (_g.type == "bar" && _g.data[me.barField]) {
@@ -27554,13 +27573,13 @@
           }
         });
 
-        this.data = _.flatten(me.app.dataFrame.getDataOrg(me.field));
+        this.data = _$1.flatten(me.app.dataFrame.getDataOrg(me.field));
 
         if (!this.barDatas) {
           return;
         }
 
-        _.each(this.data, function (val, i) {
+        _$1.each(this.data, function (val, i) {
           var y = -me._yAxis.getPosOfVal(val);
           var barData = me.barDatas[i];
 
@@ -27577,7 +27596,7 @@
 
           var _label = val;
 
-          if (_.isFunction(me.label.format)) {
+          if (_$1.isFunction(me.label.format)) {
             _label = me.label.format(val, barData);
           }
 
@@ -27603,7 +27622,7 @@
       value: function _getProp(val, tgi, i) {
         var res = val;
 
-        if (_.isFunction(val)) {
+        if (_$1.isFunction(val)) {
           res = val.apply(this, [tgi, i]);
         }
 
@@ -27612,7 +27631,7 @@
     }]);
 
     return barGuide;
-  }(component);
+  }(Component);
 
   var theme =
   /*#__PURE__*/
@@ -27641,7 +27660,7 @@
       value: function get(ind) {
         var colors = this.colors;
 
-        if (!_.isArray(colors)) {
+        if (!_$1.isArray(colors)) {
           colors = [colors];
         }
         return colors;
@@ -27665,7 +27684,7 @@
     }]);
 
     return theme;
-  }(component);
+  }(Component);
 
   var waterMark =
   /*#__PURE__*/
@@ -27710,7 +27729,7 @@
       _this.width = _this.app.width;
       _this.height = _this.app.height;
 
-      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(waterMark.defaultProps()), opt);
+      _$1.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps$1(waterMark.defaultProps()), opt);
 
       _this.spripte = new Canvax.Display.Sprite({
         id: "watermark"
@@ -27759,7 +27778,7 @@
     }]);
 
     return waterMark;
-  }(component);
+  }(Component);
 
   var Line$a = Canvax.Shapes.Line;
 
@@ -27822,7 +27841,7 @@
 
       _this._vLine = null; //竖向的线
 
-      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(Cross.defaultProps()), opt);
+      _$1.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps$1(Cross.defaultProps()), opt);
 
       _this._yAxis = _this.app.getComponent({
         name: 'coord'
@@ -27892,7 +27911,7 @@
     }]);
 
     return Cross;
-  }(component);
+  }(Component);
 
   var lineSchedu =
   /*#__PURE__*/
@@ -27947,7 +27966,7 @@
       _this = _possibleConstructorReturn(this, _getPrototypeOf(lineSchedu).call(this, opt, app));
       _this.name = "lineSchedu";
 
-      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(lineSchedu.defaultProps()), opt);
+      _$1.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps$1(lineSchedu.defaultProps()), opt);
 
       _this.lineDatas = null;
       _this.sprite = new Canvax.Display.Sprite();
@@ -27960,7 +27979,7 @@
     _createClass(lineSchedu, [{
       key: "reset",
       value: function reset(opt) {
-        _.extend(true, this, opt);
+        _$1.extend(true, this, opt);
 
         this.lineDatas = null;
         this.sprite.removeAllChildren();
@@ -28024,7 +28043,7 @@
 
           var txtWidth = _title.getTextWidth();
 
-          var _list = new Canvax.Display.Text(_.flatten([me.list]).join("\n"), {
+          var _list = new Canvax.Display.Text(_$1.flatten([me.list]).join("\n"), {
             context: {
               y: txtHeight,
               fillStyle: this.listFontColor || this.style,
@@ -28102,7 +28121,7 @@
     }]);
 
     return lineSchedu;
-  }(component);
+  }(Component);
 
   global$1.registerComponent(Chart, 'chart'); //global.registerComponent( emptyCoord, 'coord' );
 
@@ -28145,6 +28164,78 @@
   for (var p in global$1) {
     chartx[p] = global$1[p];
   }
+
+  var allProps = {};
+
+  var allModules = global$1._getComponentModules().modules;
+
+  var _loop = function _loop() {
+    if (n == 'chart') return "continue";
+    allProps[n] = {
+      detail: n,
+      propertys: {} //typeMap: {}
+
+    };
+    allConstructorProps = {}; //整个原型链路上面的 defaultProps
+
+    protoModule = null;
+
+    for (mn in allModules[n]) {
+      if (protoModule) break;
+      protoModule = allModules[n][mn].prototype;
+    }
+
+    function _setProps(m) {
+      var constructorModule = m.constructor.__proto__; //m.constructor;
+
+      if (constructorModule._isComponentRoot) {
+        _setProps(constructorModule.prototype);
+      }
+
+      if (constructorModule.defaultProps && _$1.isFunction(constructorModule.defaultProps)) {
+        var _dprops = constructorModule.defaultProps();
+
+        _$1.extend(allConstructorProps, _dprops);
+      }
+    }
+
+    _setProps(protoModule);
+
+    _$1.extend(allProps[n].propertys, allConstructorProps);
+
+    for (mn in allModules[n]) {
+      module$1 = allModules[n][mn];
+      moduleProps = module$1.defaultProps ? module$1.defaultProps() : {};
+
+      for (key in allConstructorProps) {
+        if (!(key in moduleProps)) {
+          moduleProps[key] = allConstructorProps[key];
+        }
+      }
+
+      if (allConstructorProps.type) {
+        if (!allProps[n].typeMap) allProps[n].typeMap = {};
+        allProps[n].typeMap[mn] = moduleProps;
+      } else {
+        _$1.extend(allProps[n].propertys, moduleProps);
+      }
+    }
+  };
+
+  for (var n in allModules) {
+    var allConstructorProps;
+    var protoModule;
+    var mn;
+    var mn;
+    var module$1;
+    var moduleProps;
+    var key;
+
+    var _ret = _loop();
+
+    if (_ret === "continue") continue;
+  }
+  chartx.props = allProps; //计算全量的 props 属性用来提供智能提示 begin
 
   return chartx;
 

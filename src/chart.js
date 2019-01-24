@@ -595,7 +595,7 @@ export default class Chart extends event.Dispatcher
             var _coord = me.getComponent({name:'coord'});
             if( _tips ){
                 me._setTipsInfo.apply(me, [e]);
-                if( e.type == "mouseover" ){
+                if( e.type == "mouseover" || e.type == "mousedown" ){
                     _tips.show(e);
                     me._tipsPointerAtAllGraphs( e );
                 };

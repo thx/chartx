@@ -1,18 +1,15 @@
 
-import { global } from "mmvis"
+import { global,_ } from "mmvis"
 
 import Chart from "./chart"
 
 //-----------------------------------------------
 
-//坐标系基类，配置props用
-import Coord from "./components/coord/index"
 //坐标系
 import Rect from "./components/coord/rect"
 import Polar from "./components/coord/polar"
 //-----------------------------------------------
-//graph基类，配置props用
-import Graphs from "./components/graphs/index"
+
 //graphs
 import Bar from "./components/graphs/bar/index"
 import Line from "./components/graphs/line/index"
@@ -38,23 +35,6 @@ import Theme from "./components/theme/index"
 import WaterMark from "./components/watermark/index"
 import Cross from "./components/cross/index"
 import lineSchedu from "./components/lineschedu/index"
-
-
-//设置全量的props
-var props = {
-    coord : {
-        detail: '坐标系',
-        model : Coord,
-        types : { //model中type对应的值的modle
-            rect : Rect,
-            polar: Polar
-        }
-    }
-};
-
-
-
-
 
 
 global.registerComponent( Chart, 'chart' );
@@ -87,9 +67,6 @@ global.registerComponent( WaterMark, 'waterMark' );
 global.registerComponent( Cross, 'cross' );
 global.registerComponent( lineSchedu, 'lineSchedu' );
 
-
-
-
 //皮肤设定begin ---------------
 //如果数据库中有项目皮肤
 var projectTheme = []; //从数据库中查询出来设计师设置的项目皮肤
@@ -109,5 +86,58 @@ for( var p in global ){
 
 
 
+//计算全量的 props 属性用来提供智能提示 begin
+var allProps = {};
+var allModules = global._getComponentModules().modules;
+
+for( var n in allModules ){
+    if( n == 'chart' ) continue;
+
+    allProps[n] = {
+        detail : n,
+        propertys : {}
+        //typeMap: {}
+    };
+
+    var allConstructorProps = {}; //整个原型链路上面的 defaultProps
+    var protoModule = null;
+    for( var mn in allModules[n] ){
+        if( protoModule ) break;
+        protoModule = allModules[n][mn].prototype;
+    };
+    function _setProps( m ){
+        var constructorModule = m.constructor.__proto__; //m.constructor;
+        if( constructorModule._isComponentRoot ){
+            _setProps( constructorModule.prototype );
+        };
+        if( constructorModule.defaultProps && _.isFunction( constructorModule.defaultProps ) ){
+            var _dprops = constructorModule.defaultProps();
+            _.extend( allConstructorProps, _dprops );
+        };
+    };
+    _setProps( protoModule );
+
+    _.extend( allProps[n].propertys, allConstructorProps );
+
+    for( var mn in allModules[n] ){
+        var module = allModules[n][mn];
+        var moduleProps = module.defaultProps ? module.defaultProps() : {};
+        for( var key in allConstructorProps ){
+            if( !(key in moduleProps) ){
+                moduleProps[ key ] = allConstructorProps[key];
+            }
+        };
+
+        //如果原型上面是有type 属性的，那么说明，自己是type分类路由的一个分支，放到typeMap下面
+        if( allConstructorProps.type ){
+            if( !allProps[n].typeMap ) allProps[n].typeMap = {};
+            allProps[n].typeMap[ mn ] = moduleProps;
+        } else {
+            _.extend( allProps[n].propertys, moduleProps );
+        };  
+    };
+};
+chartx.props = allProps;
+//计算全量的 props 属性用来提供智能提示 begin
 
 export default chartx;
