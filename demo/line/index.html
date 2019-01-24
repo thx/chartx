@@ -207,8 +207,12 @@ var options = {
     theme: ["red","blue"]
 }
 
+try {
+    window.line = Chartx.create("canvasTest" , data , options)
+} catch(e){
 
-window.line = Chartx.create("canvasTest" , data , options)
+}
+
 
 setTimeout( function(){
     return;
