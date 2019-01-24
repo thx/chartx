@@ -133,7 +133,7 @@ export default class Legend extends Component
                 item.enabled = true;
                 item.ind = i;
             } );
-            delete opt.data;
+            //delete opt.data;
         } else {
             legendData = this.app.getLegendData();
         };

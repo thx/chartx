@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
+<title>xChart demo -- bar</title>
+
+<script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
+<script type="text/javascript" src="../../dist/chartx.js"></script>
+<!-- codemirror -->
+<script type="text/javascript" src="../../lib/codemirror/codemirror.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/active-line.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/javascript.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/matchbrackets.js"></script>
+<link rel="stylesheet" href="../../lib/codemirror/codemirror.css">
+<link rel="stylesheet" href="../../lib/codemirror/zenburn.css">
+<link rel="stylesheet" href="../../lib/codemirror/docs.css">
+<!-- codemirror end -->
+<!--bootstrap-->
+<script type="text/javascript" src="../../lib/bootstrap/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap-theme.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/docs.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap.min.css">
+<!--bootstrap end-->
+<script type="text/javascript" src="../../lib/demo.js"></script>
+<link rel="stylesheet" href="../../lib/demo.css">
+</head>
+<body >
+
+<table>
+    <tr>
+        <td id="td-vl">
+            <form><textarea id="code" name="code">
+
+//chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
+var data = [
+    ["group" , "name" , "pv" , "tgi"],
+    [  0     , "iphone" , 2312,  23  ],
+    [  0     , "360" , 23461,  231  ],
+    [  0     , "小米" , 23423,  423  ],
+    [  0     , "华为" , 645435,  223  ],
+    [  0     , "一加" , 45345,  233  ],
+    [  0     , "诺基亚" , 2334,  243  ],
+    [  0     , "云手机" , 1144,  223  ],
+    [  0     , "手机壳" , 8679,  213  ],
+    [  0     , "透明手机" , 899,  253  ],
+    [  0     , "圆弧边" , 860,  2113  ],
+    [  0     , "助手" , 5617,  2233  ],
+    [  0     , "皇子" , 644,  2563  ],
+    [  0     , "1024" , 36345,  2123  ],
+
+    /*
+    [  0     , "香格里拉" , 845,  253  ],
+    [  0     , "电风扇" , 2234,  263  ],
+    [  0     , "规定范围" , 2243,  2233  ],
+    [  0     , "水电费" , 87689,  1123  ],
+    [  0     , "哥惹我" , 1255,  867  ],
+    [  0     , "oppo" , 3345,  823  ],
+    [  0     , "观看" , 4543,  239  ],
+    [  0     , "好莱坞" , 3444,  2433  ],
+    [  0     , "大片" , 32232,  21343  ],
+    [  0     , "基地" , 765,  2563  ],
+    [  0     , "娃儿" , 4537,  923  ],
+    [  0     , "斯蒂芬森" , 887,  666  ],
+    [  0     , "认识" , 4345,  786  ],
+    [  0     , "水电费" , 45676,  567  ],
+    [  0     , "王二文" , 456,  345  ],
+    [  0     , "是否" , 11,  8567  ],
+    [  0     , "收拾收拾" , 123,  221  ],
+    */
+
+    [  1     , "皇子1" , 644,  2563  ],
+    [  1     , "10241" , 36345,  2123  ],
+    [  1     , "香格里拉1" , 845,  253  ],
+    [  1     , "电风扇1" , 2234,  263  ],
+    [  1     , "规定范围1" , 2243,  2233  ],
+    [  1     , "水电费1" , 87689,  1123  ],
+    [  1     , "哥惹我1" , 55,  867  ],
+    [  1     , "oppo1" , 345,  823  ],
+    [  1     , "观看1" , 4543,  239  ],
+    [  1     , "好莱坞1" , 3444,  2433  ],
+    [  1     , "大片1" , 32232,  21343  ],
+
+    [  2     , "皇子1" , 644,  2563  ],
+    [  2     , "10241" , 36345,  2123  ],
+    [  2     , "香格里拉1" , 845,  253  ],
+    [  2     , "电风扇1" , 2234,  263  ],
+    [  2     , "规定范围1" , 2243,  2233  ],
+    [  2     , "水电费1" , 87689,  1123  ],
+    [  2     , "哥惹我1" , 55,  867  ],
+    [  2     , "oppo1" , 345,  823  ],
+    [  2     , "观看1" , 4543,  239  ],
+    [  2     , "好莱坞1" , 3444,  2433  ],
+    [  2     , "大片1" , 32232,  21343  ]
+];
+
+var data = [
+["group","name","pv","tgi"],
+["明星名人","德云社相声","6628973","114.9"],
+["明星名人","恋爱先生","68029673","107.13"],
+["明星名人","欢乐喜剧人 第四季","46806912","104.37"],
+["明星名人","周杰伦","98202133","130.72"],
+["明星名人","火影忍者","33046414","108.42"],
+["明星名人","张学友","69611929","130.07"],
+["明星名人","锋味","19714430","107.95"],
+["明星名人","杨幂","167443147","122.59"],
+["明星名人","海绵宝宝","53738664","101.42"],
+["明星名人","林俊杰","43972682","125.61"],
+["明星名人","微微一笑很倾城","29070698","98.7"],
+["电影","小苹果","17603337","114.13"],
+["电影","迪丽热巴","123285843","126.09"],
+["电影","五月天","15607785","131.86"],
+["电影","赵丽颖","117993494","126.2"],
+["电影","微微一笑很倾城","29070698","98.92"],
+["电影","三生三世十里桃花","31716529","110.68"],
+["电影","战狼2","75014005","115.76"],
+["电影","三生三世十里桃花","31716529","110.44"],
+["动漫","玄幻","15092415","110.43"],
+["电视剧","海贼王","21165513","109.51"],
+["电视剧","鹿晗","86219612","135.04"],
+["电视剧","歌手 2018","28638434","105.87"],
+["电视剧","终极一班5","29219890","100.59"],
+["电视剧","西游记","77739115","115.85"],
+["电视剧","辽宁卫视春节联欢晚会 2018","28036622","105.38"],
+["动漫","瑞克·林顿","16881101","118.23"],
+["电视剧","恐龙","30648298","118.28"],
+["电视剧","捉妖记2","76058667","112.85"],
+["电视剧","江疏影","115321227","123.47"],
+["电视剧","欢乐颂","24199963","111.74"],
+["综艺","郭德纲","119859242","120.32"],
+["综艺","杨洋","78968637","131.17"],
+["综艺","妖猫传","41919229","109.43"],
+["综艺","谈判官 tv版","35978091","99.2"],
+["综艺","西游记","77739115","115.6"],
+["动漫","泽田镰作","39494030","115.55"],
+["综艺","易烊千玺","50300742","133.7"],
+["综艺","欢乐颂","24199963","111.5"],
+["综艺","唐人街探案2","92873895","115.25"],
+["综艺","郑爽","84542078","125.21"],
+["动漫","陈思诚","57093114","114.69"],
+["综艺","芳华","53976557","122.49"],
+["综艺","黄子韬","99583178","124.35"],
+["综艺","战狼","85102155","118.2"],
+["综艺","唐人街探案","91630464","119.02"],
+["综艺","柜中美人","45205788","102.44"],
+["综艺","寻秦记","48211231","114.57"],
+["综艺","周星驰","96160311","122.25"],
+["动漫","靳东","80750163","121.62"]
+];
+
+var data1 = [
+["group","name","pv","tgi"],
+["明星名人","德云社相声","6628973","114.9"]
+];
+
+
+
+var options = {
+    coord: {
+        type : "polar",
+        squareRange : false,
+        aAxis: {
+            enabled : false
+        },
+        grid : {
+            enabled : false
+        }
+    },
+    graphs : [
+        {
+            type : "planet",
+            field : "name",
+            sortField : "tgi",
+            center : {
+                fillStyle : "#1ad09f"
+            },
+            selectInds: [1,2,3],
+            node : {
+                radius : "pv",   
+                onclick : function(e){
+                    debugger
+                },
+                fillStyle : function(e){
+                    
+                    var color;
+                    switch( e.rowData.group ){
+                        case "明星名人":
+                            color = "#ff8533";
+                            break;
+                        case "电影":
+                            color = "#73ace6";
+                            break;
+                        case "电视剧":
+                            color = "#82d982";
+                            break;
+                        case "综艺":
+                            color = "#e673ac";
+                            break;
+                        case "动漫":
+                            color = "#cd6bed";
+                            break;
+                    }
+                    
+                    return color;
+                },
+                select : {
+                    enabled : true
+                }
+            },
+            grid : {
+                rings : {
+                    count : 10,
+                    fillStyle: [ "#A1C7FF" , "#B6D8FF", "#C1DFFF", "#CBE4FF","#D5E9FF","#DDEDFF","#E4F1FF","#EBF5FF","#F3F9FF","#F8FCFF"],
+                    strokeStyle: ["#85AAFF","#607AFF","#9AC9FF","#A1CCFF","#8FB8FF","#BBDAFF","#C2DEFF","#8FB8FF","#DBECFF","#E8F3FF" ]
+                },
+                rays : {
+                    count : 12
+                }
+            }
+        }
+    ],
+    tips : {},
+    legend : {
+        data : [
+            {name: "明星名人", color: "#ff8533" , field:"group"},
+            {name: "电影", color: "#73ace6" , field:"group"},
+            {name: "电视剧", color: "#82d982" , field:"group"},
+            {name: "综艺", color: "#e673ac" , field:"group"},
+            {name: "动漫", color: "#cd6bed" , field:"group"}
+        ]  
+    }
+};
+
+window.planet = Chartx.create("canvasTest" , data , options)
+setTimeout( function(){
+                    
+    $("#canvasTest").width(800);
+    planet.resize();
+
+} , 1000)
+            </textarea></form>
+        </td>
+        <td style="padding:0 10px;" id="td-vr">
+            <div id="chartdemo-r">
+            <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
+                <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
+
+                <h4>planet星系图</h4>
+                <p>
+                    联系人：@释剑
+                </p>
+            </div>
+            <div  class="test-c">
+                <div id="canvasTest" style='width:1000px;height:540px;'></div>
+            </div>
+
+            </div>
+        </td>
+    </tr>
+</table>
+
+    <script>
+
+    </script>
+</body> 
+</html>
+
+
