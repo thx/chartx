@@ -99,6 +99,12 @@ for( var n in allModules ){
         //typeMap: {}
     };
 
+    var _graphNames;
+    if( n == 'graphs' ){
+        _graphNames = _.map( allModules.graphs, function(val,key){return key} );
+        allProps.graphs.documentation = "可选的graphs类型有：\n" + _graphNames.join('\n');
+    };
+
     var allConstructorProps = {}; //整个原型链路上面的 defaultProps
     var protoModule = null;
     for( var mn in allModules[n] ){
@@ -107,7 +113,7 @@ for( var n in allModules ){
     };
     function _setProps( m ){
         var constructorModule = m.constructor.__proto__; //m.constructor;
-        if( constructorModule._isComponentRoot ){
+        if( !constructorModule._isComponentRoot ){
             _setProps( constructorModule.prototype );
         };
         if( constructorModule.defaultProps && _.isFunction( constructorModule.defaultProps ) ){
@@ -117,21 +123,77 @@ for( var n in allModules ){
     };
     _setProps( protoModule );
 
-    _.extend( allProps[n].propertys, allConstructorProps );
+    allProps[n].propertys = _.extend( allConstructorProps, allProps[n].propertys );
 
     for( var mn in allModules[n] ){
         var module = allModules[n][mn];
         var moduleProps = module.defaultProps ? module.defaultProps() : {};
-        for( var key in allConstructorProps ){
-            if( !(key in moduleProps) ){
-                moduleProps[ key ] = allConstructorProps[key];
+
+        //处理props上面所有的 _props 依赖 begin
+        function setChildProps( p ){
+            if( p._props ){
+                var _propsIsArray = _.isArray( p._props );
+                for( var k in p._props ){
+                    
+                    if( !_propsIsArray ){
+                        p[ k ] = {
+                            detail : k,
+                            propertys : {}
+                        };
+                    };
+                    
+                    var _module = p._props[k];
+                    if( _module.defaultProps ){
+
+                        var _moduleProps = _module.defaultProps();
+
+                        //先把ta原型上面的所有属性都添加到 _moduleProps 
+                        var allConstructorProps={}
+                        function _setProps( m ){
+                            if( m.__proto__.__proto__ ){
+                                _setProps( m.__proto__ );
+                            };
+                            if( m.defaultProps && _.isFunction( m.defaultProps ) ){
+                                var _dprops = m.defaultProps();
+                                if( _dprops._props ){
+                                    //如果子元素还有 _props 依赖， 那么就继续处理
+                                    setChildProps( _dprops );
+                                };
+                                _dprops && _.extend( allConstructorProps, _dprops );
+                            };
+                        };
+                        _setProps( _module.__proto__ );
+                        _moduleProps = _.extend( allConstructorProps, _moduleProps )
+
+                        if( _propsIsArray ){
+                            _.extend( p, _moduleProps );
+                        } else {
+                            p[k].propertys = _moduleProps;
+                            setChildProps( p[k].propertys );
+                        };
+
+                        
+                    };
+                }
             }
         };
+        setChildProps( moduleProps );
+        //处理props上面所有的 _props 依赖 end
+
+        //这里不能用下面的 extend 方法，
+        moduleProps = _.extend( {}, allConstructorProps, moduleProps );
 
         //如果原型上面是有type 属性的，那么说明，自己是type分类路由的一个分支，放到typeMap下面
         if( allConstructorProps.type ){
             if( !allProps[n].typeMap ) allProps[n].typeMap = {};
+
+            if( n == 'graphs' ){
+                moduleProps.type.values = _graphNames;
+                moduleProps.type.documentation = "可选的graphs类型有：\n" + _graphNames.join('\n');
+            };
+
             allProps[n].typeMap[ mn ] = moduleProps;
+            
         } else {
             _.extend( allProps[n].propertys, moduleProps );
         };  

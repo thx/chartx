@@ -12,9 +12,12 @@ export default class LineGraphs extends GraphsBase
                 default: null
             },
             yAxisAlign : {
-                detail: '绘制在哪根y轴上面',
+                detail : '绘制在哪根y轴上面',
                 default: 'left'
-            }
+            },
+            _props : [
+                Group
+            ]
         }
     }
 

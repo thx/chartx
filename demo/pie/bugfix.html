@@ -56,9 +56,10 @@ var options = {
             sort: "desc",
             animation: true,
             field: "value",
+            groupField: "name",
             label: {
                 enabled: true,
-                field: "name",
+                //field: "name",
                 format: function ( val,data ){
                     var rowData = data.rowData;
                     return "<div><span>"+rowData.name+"</span>：<span>"+rowData.value+"（"+ data.percentage +"%）</span></div>"

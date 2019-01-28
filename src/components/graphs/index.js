@@ -8,6 +8,12 @@ export default class GraphsBase extends Component
 {
     static defaultProps(){
         return {
+            type : {
+                detail : '绘图组件',
+                default       : "",
+                insertText    : "type: ",
+                values        : ["bar","line","pie","scat"] //具体的在index中批量设置，
+            },
             animation : {
                 detail : '是否开启入场动画',
                 default: true

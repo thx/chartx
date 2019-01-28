@@ -1,5 +1,5 @@
 import Canvax from "canvax"
-import {event} from "mmvis"
+import {event,getDefaultProps,_} from "mmvis"
 
 export default class Component extends event.Dispatcher
 {

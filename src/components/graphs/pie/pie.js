@@ -318,7 +318,7 @@ export default class Pie extends event.Dispatcher
 
         me._hideGrowLabel();
 
-        AnimationFrame.registTween({
+        var _tween = AnimationFrame.registTween({
             from: {
                 process: 0
             },
@@ -326,7 +326,7 @@ export default class Pie extends event.Dispatcher
                 process: 1
             },
             duration: 500,
-            onUpdate: function ( status ) {
+            onUpdate: function( status ) {
                 for (var i = 0; i < me.sectors.length; i++) {
                     var sec = me.sectors[i];
                     var nodeData = sec.nodeData;
@@ -370,13 +370,18 @@ export default class Pie extends event.Dispatcher
                 }
             },
             
-            onComplete: function () {
+            onComplete: function() {
+
+                //把下面me.sprite._tweens.push( _tween );的 动画实例删除
+                me.sprite._removeTween( _tween );
+
                 me._showGrowLabel();
                 me.completed = true;
 
                 callback && callback();
             }
         });
+        me.sprite._tweens.push( _tween );
     }
 
 

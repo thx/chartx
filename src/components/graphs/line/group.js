@@ -320,6 +320,9 @@ export default class LineGraphsGroup extends event.Dispatcher
                 _update( me._currPointList );
             },
             onComplete: function() {
+                
+                me.sprite._removeTween( me._growTween );
+
                 me._growTween = null;
                 //在动画结束后强制把目标状态绘制一次。
                 //解决在onUpdate中可能出现的异常会导致绘制有问题。
@@ -328,6 +331,8 @@ export default class LineGraphsGroup extends event.Dispatcher
                 callback && callback( me );
             }
         });
+
+        this.sprite._tweens.push( this._growTween );
     }
 
     _getPointPosStr(list)

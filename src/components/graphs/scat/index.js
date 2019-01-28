@@ -283,27 +283,27 @@ export default class ScatGraphs extends GraphsBase
             } );
 
             var nodeLayoutData = {
-                rowData  : rowData,
-                x        : point.pos.x,
-                y        : point.pos.y,
-                value    : point.value,
-                field    : this.field,
+                rowData    : rowData,
+                x          : point.pos.x,
+                y          : point.pos.y,
+                value      : point.value,
+                field      : this.field,
                 fieldColor : fieldMap.color,
-                iNode    : i,
+                iNode      : i,
 
-                focused  : false,
-                selected : false,
+                focused    : false,
+                selected   : false,
 
                 //下面的属性都单独设置
-                radius      : null,   //这里先不设置，在下面的_setR里单独设置
-                fillStyle   : null,
-                color       : null,
-                strokeStyle : null,
-                lineWidth : 0,
-                shapeType : null,
-                label : null,
+                radius     : null,   //这里先不设置，在下面的_setR里单独设置
+                fillStyle  : null,
+                color      : null,
+                strokeStyle: null,
+                lineWidth  : 0,
+                shapeType  : null,
+                label      : null,
 
-                nodeElement : null //对应的canvax 节点， 在widget之后赋值
+                nodeElement: null //对应的canvax 节点， 在widget之后赋值
             };
 
             this._setR( nodeLayoutData );

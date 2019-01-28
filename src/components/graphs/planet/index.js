@@ -53,7 +53,6 @@ export default class PlanetGraphs extends GraphsBase
                 detail: '选中的数据索引',
                 default: []
             },
-    
             grid: {
                 detail: '星系图自己的grid',
                 propertys: {
@@ -100,7 +99,10 @@ export default class PlanetGraphs extends GraphsBase
                         }
                     }
                 }
-            }
+            },
+            _props : [
+                Group
+            ]
         }
     }
     constructor(opt, app)
