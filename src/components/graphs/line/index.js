@@ -131,7 +131,7 @@ export default class LineGraphs extends GraphsBase
                     x        : point.pos.x,
                     y        : point.pos.y,
                     rowData  : me.dataFrame.getRowDataAt( b ),
-                    color    : fieldMap.color
+                    color    : fieldMap.color //默认设置皮肤颜色，动态的在group里面会被修改
                 };
 
                 _data.push( node );

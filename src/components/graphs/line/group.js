@@ -182,6 +182,10 @@ export default class LineGraphsGroup extends event.Dispatcher
             //这个时候可以先取线的style，和线保持一致
             color = this._getLineStrokeStyle();
 
+            if( s && s.lineargradient ){
+                color = s.lineargradient[ parseInt( s.lineargradient.length / 2 ) ].color
+            };
+
             //因为_getLineStrokeStyle返回的可能是个渐变对象，所以要用isString过滤掉
             if( !color || !_.isString( color ) ){
                 //那么最后，取this.fieldMap.color
@@ -391,25 +395,30 @@ export default class LineGraphsGroup extends event.Dispatcher
         
         me._currPointList = list;
 
+        var blineCtx = {
+            pointList: list,
+            lineWidth: me.line.lineWidth,
+            y: me.y,
+            strokeStyle : me._getLineStrokeStyle( list ), //_getLineStrokeStyle 在配置线性渐变的情况下会需要
+            smooth: me.line.smooth,
+            lineType: me._getProp(me.line.lineType),
+            smoothFilter: function(rp) {
+                //smooth为true的话，折线图需要对折线做一些纠正，不能超过底部
+                if (rp[1] > 0) {
+                    rp[1] = 0;
+                } else if( Math.abs(rp[1]) > me.h ) {
+                    rp[1] = -me.h;
+                }
+            },
+            lineCap: "round"
+        };
         var bline = new BrokenLine({ //线条
-            context: {
-                pointList: list,
-                lineWidth: me.line.lineWidth,
-                y: me.y,
-                strokeStyle : me._getLineStrokeStyle( list ), //_getLineStrokeStyle 在配置线性渐变的情况下会需要
-                smooth: me.line.smooth,
-                lineType: me._getProp(me.line.lineType),
-                smoothFilter: function(rp) {
-                    //smooth为true的话，折线图需要对折线做一些纠正，不能超过底部
-                    if (rp[1] > 0) {
-                        rp[1] = 0;
-                    } else if( Math.abs(rp[1]) > me.h ) {
-                        rp[1] = -me.h;
-                    }
-                },
-                lineCap: "round"
-            }
+            context: blineCtx
         });
+
+  
+
+
 
         if (!this.line.enabled) {
             bline.context.visible = false
@@ -555,7 +564,7 @@ export default class LineGraphsGroup extends event.Dispatcher
         var me = this;
         var list = me._currPointList;
 
-        if ((me.node.enabled || list.length == 1) && !!me.line.lineWidth) { //拐角的圆点
+        //if ((me.node.enabled || list.length == 1) && !!me.line.lineWidth) { //拐角的圆点
             if( !this._circles ){
                 this._circles = new Canvax.Display.Sprite({});
                 this.sprite.addChild(this._circles);
@@ -563,6 +572,14 @@ export default class LineGraphsGroup extends event.Dispatcher
             
             var iNode = 0; //这里不能和下面的a对等，以为list中有很多无效的节点
             for (var a = 0, al = list.length; a < al; a++) {
+
+                var _nodeColor = me._getColor( (me.node.strokeStyle || me.line.strokeStyle), a );
+                me.data[a].color = _nodeColor; //回写回data里，tips的是用的到
+                if( !me.node.enabled ){
+                    //不能写return， 是因为每个data的color还是需要计算一遍
+                    continue;
+                };
+
                 var _point = me._currPointList[a];
                 if( !_point || !_.isNumber( _point[1] ) ){
                     //折线图中有可能这个point为undefined
@@ -574,7 +591,7 @@ export default class LineGraphsGroup extends event.Dispatcher
                     y: _point[1],
                     r: me._getProp(me.node.radius, a),
                     lineWidth: me._getProp(me.node.lineWidth, a) || 2,
-                    strokeStyle: me._getColor( me.node.strokeStyle, a ),
+                    strokeStyle: _nodeColor,
                     fillStyle: me.node.fillStyle
                 };
 
@@ -610,7 +627,7 @@ export default class LineGraphsGroup extends event.Dispatcher
                     l--;
                 }
             };
-        };
+        //};
     }
 
     _createTexts()

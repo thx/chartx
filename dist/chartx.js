@@ -15603,7 +15603,11 @@ var Chartx = (function () {
 
         if (color$$1 === undefined || color$$1 === null) {
           //这个时候可以先取线的style，和线保持一致
-          color$$1 = this._getLineStrokeStyle(); //因为_getLineStrokeStyle返回的可能是个渐变对象，所以要用isString过滤掉
+          color$$1 = this._getLineStrokeStyle();
+
+          if (s && s.lineargradient) {
+            color$$1 = s.lineargradient[parseInt(s.lineargradient.length / 2)].color;
+          }
 
           if (!color$$1 || !_.isString(color$$1)) {
             //那么最后，取this.fieldMap.color
@@ -15819,26 +15823,27 @@ var Chartx = (function () {
           list = me._pointList;
         }
         me._currPointList = list;
+        var blineCtx = {
+          pointList: list,
+          lineWidth: me.line.lineWidth,
+          y: me.y,
+          strokeStyle: me._getLineStrokeStyle(list),
+          //_getLineStrokeStyle 在配置线性渐变的情况下会需要
+          smooth: me.line.smooth,
+          lineType: me._getProp(me.line.lineType),
+          smoothFilter: function smoothFilter(rp) {
+            //smooth为true的话，折线图需要对折线做一些纠正，不能超过底部
+            if (rp[1] > 0) {
+              rp[1] = 0;
+            } else if (Math.abs(rp[1]) > me.h) {
+              rp[1] = -me.h;
+            }
+          },
+          lineCap: "round"
+        };
         var bline = new BrokenLine$1({
           //线条
-          context: {
-            pointList: list,
-            lineWidth: me.line.lineWidth,
-            y: me.y,
-            strokeStyle: me._getLineStrokeStyle(list),
-            //_getLineStrokeStyle 在配置线性渐变的情况下会需要
-            smooth: me.line.smooth,
-            lineType: me._getProp(me.line.lineType),
-            smoothFilter: function smoothFilter(rp) {
-              //smooth为true的话，折线图需要对折线做一些纠正，不能超过底部
-              if (rp[1] > 0) {
-                rp[1] = 0;
-              } else if (Math.abs(rp[1]) > me.h) {
-                rp[1] = -me.h;
-              }
-            },
-            lineCap: "round"
-          }
+          context: blineCtx
         });
 
         if (!this.line.enabled) {
@@ -15983,65 +15988,70 @@ var Chartx = (function () {
       key: "_createNodes",
       value: function _createNodes() {
         var me = this;
-        var list = me._currPointList;
+        var list = me._currPointList; //if ((me.node.enabled || list.length == 1) && !!me.line.lineWidth) { //拐角的圆点
 
-        if ((me.node.enabled || list.length == 1) && !!me.line.lineWidth) {
-          //拐角的圆点
-          if (!this._circles) {
-            this._circles = new Canvax.Display.Sprite({});
-            this.sprite.addChild(this._circles);
+        if (!this._circles) {
+          this._circles = new Canvax.Display.Sprite({});
+          this.sprite.addChild(this._circles);
+        }
+        var iNode = 0; //这里不能和下面的a对等，以为list中有很多无效的节点
+
+        for (var a = 0, al = list.length; a < al; a++) {
+          var _nodeColor = me._getColor(me.node.strokeStyle || me.line.strokeStyle, a);
+
+          me.data[a].color = _nodeColor; //回写回data里，tips的是用的到
+
+          if (!me.node.enabled) {
+            //不能写return， 是因为每个data的color还是需要计算一遍
+            continue;
           }
-          var iNode = 0; //这里不能和下面的a对等，以为list中有很多无效的节点
+          var _point = me._currPointList[a];
 
-          for (var a = 0, al = list.length; a < al; a++) {
-            var _point = me._currPointList[a];
+          if (!_point || !_.isNumber(_point[1])) {
+            //折线图中有可能这个point为undefined
+            continue;
+          }
+          var context = {
+            x: _point[0],
+            y: _point[1],
+            r: me._getProp(me.node.radius, a),
+            lineWidth: me._getProp(me.node.lineWidth, a) || 2,
+            strokeStyle: _nodeColor,
+            fillStyle: me.node.fillStyle
+          };
+          var circle = me._circles.children[iNode];
 
-            if (!_point || !_.isNumber(_point[1])) {
-              //折线图中有可能这个point为undefined
-              continue;
-            }
-            var context = {
-              x: _point[0],
-              y: _point[1],
-              r: me._getProp(me.node.radius, a),
-              lineWidth: me._getProp(me.node.lineWidth, a) || 2,
-              strokeStyle: me._getColor(me.node.strokeStyle, a),
-              fillStyle: me.node.fillStyle
-            };
-            var circle = me._circles.children[iNode];
+          if (circle) {
+            _.extend(circle.context, context);
+          } else {
+            circle = new Circle$3({
+              context: context
+            });
 
-            if (circle) {
-              _.extend(circle.context, context);
-            } else {
-              circle = new Circle$3({
-                context: context
-              });
+            me._circles.addChild(circle);
+          }
 
-              me._circles.addChild(circle);
-            }
+          if (me.node.corner) {
+            //拐角才有节点
+            var y = me._pointList[a][1];
+            var pre = me._pointList[a - 1];
+            var next = me._pointList[a + 1];
 
-            if (me.node.corner) {
-              //拐角才有节点
-              var y = me._pointList[a][1];
-              var pre = me._pointList[a - 1];
-              var next = me._pointList[a + 1];
-
-              if (pre && next) {
-                if (y == pre[1] && y == next[1]) {
-                  circle.context.visible = false;
-                }
+            if (pre && next) {
+              if (y == pre[1] && y == next[1]) {
+                circle.context.visible = false;
               }
             }
-            iNode++;
           }
+          iNode++;
+        }
 
-          if (me._circles.children.length > iNode) {
-            for (var i = iNode, l = me._circles.children.length; i < l; i++) {
-              me._circles.children[i].destroy();
+        if (me._circles.children.length > iNode) {
+          for (var i = iNode, l = me._circles.children.length; i < l; i++) {
+            me._circles.children[i].destroy();
 
-              i--;
-              l--;
-            }
+            i--;
+            l--;
           }
         }
       }
@@ -16305,7 +16315,8 @@ var Chartx = (function () {
               x: point.pos.x,
               y: point.pos.y,
               rowData: me.dataFrame.getRowDataAt(b),
-              color: fieldMap.color
+              color: fieldMap.color //默认设置皮肤颜色，动态的在group里面会被修改
+
             };
 
             _data.push(node);
