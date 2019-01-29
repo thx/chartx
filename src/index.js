@@ -23,6 +23,7 @@ import Venn from "./components/graphs/venn/index"
 import Sunburst from "./components/graphs/sunburst/index"
 import Sankey from "./components/graphs/sankey/index"
 import Progress from "./components/graphs/progress/index"
+import Relation from "./components/graphs/relation/index"
 //-----------------------------------------------
 //components
 import Legend from "./components/legend/index"
@@ -54,7 +55,8 @@ global.registerComponent( Funnel, 'graphs', 'funnel' );
 global.registerComponent( Venn, 'graphs', 'venn' );
 global.registerComponent( Sunburst, 'graphs', 'sunburst' );
 global.registerComponent( Sankey, 'graphs', 'sankey' );
-global.registerComponent( Progress, 'graphs', 'progress' )
+global.registerComponent( Progress, 'graphs', 'progress' );
+global.registerComponent( Relation, 'graphs', 'relation' );
 
 global.registerComponent( Theme, 'theme' );
 global.registerComponent( Legend, 'legend' );

@@ -38,7 +38,8 @@
   "dependencies": {
     "mmvis": "^0.0.50",
     "canvax": "^2.0.26",
-    "fmin": "0.0.2"
+    "fmin": "0.0.2",
+    "dagre": "0.8.4"
   },
   "scripts": {
     "build": "rollup -c",

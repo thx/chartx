@@ -25308,6 +25308,90 @@ var Chartx = (function () {
     return Progress;
   }(GraphsBase);
 
+  var Rect$7 = Canvax.Shapes.Rect;
+  /**
+   * 关系图中 包括了  配置，数据，和布局数据，
+   * 默认用配置和数据可以完成绘图， 但是如果有布局数据，就绘图玩额外调用一次绘图，把布局数据传入修正布局效果
+   */
+
+  var Relation =
+  /*#__PURE__*/
+  function (_GraphsBase) {
+    _inherits(Relation, _GraphsBase);
+
+    _createClass(Relation, null, [{
+      key: "defaultProps",
+      value: function defaultProps() {
+        return {
+          keyField: {
+            detail: 'key字段设置',
+            documentation: '',
+            default: null
+          },
+          parentField: {
+            detail: '用来描述edge的parentField字段设置',
+            documentation: '',
+            default: null
+          }
+        };
+      }
+    }]);
+
+    function Relation(opt, app) {
+      var _this;
+
+      _classCallCheck(this, Relation);
+
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(Relation).call(this, opt, app));
+      _this.type = "relation";
+
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(Relation.defaultProps()), opt);
+
+      _this.init();
+
+      return _this;
+    }
+
+    _createClass(Relation, [{
+      key: "init",
+      value: function init() {
+        this.nodesSp = new Canvax.Display.Sprite({
+          id: "nodesSp"
+        });
+        this.edgesSp = new Canvax.Display.Sprite({
+          id: "nodesSp"
+        });
+        this.sprite.addChild(this.nodesSp);
+        this.sprite.addChild(this.edgesSp);
+        debugger;
+      }
+    }, {
+      key: "getNodesAt",
+      value: function getNodesAt(index$$1) {
+        //该index指当前
+        var data = this.data;
+        var _nodesInfoList = []; //节点信息集合
+
+        _.each(this.enabledField, function (fs, i) {
+          if (_.isArray(fs)) {
+            _.each(fs, function (_fs, ii) {
+              //fs的结构两层到顶了
+              var nodeData = data[_fs] ? data[_fs][index$$1] : null;
+              nodeData && _nodesInfoList.push(nodeData);
+            });
+          } else {
+            var nodeData = data[fs] ? data[fs][index$$1] : null;
+            nodeData && _nodesInfoList.push(nodeData);
+          }
+        });
+
+        return _nodesInfoList;
+      }
+    }]);
+
+    return Relation;
+  }(GraphsBase);
+
   /**
    * 每个组件中对外影响的时候，要抛出一个trigger对象
    * 上面的comp属性就是触发这个trigger的组件本身
@@ -25678,7 +25762,7 @@ var Chartx = (function () {
   }(Component);
 
   var Line$7 = Canvax.Shapes.Line;
-  var Rect$7 = Canvax.Shapes.Rect;
+  var Rect$8 = Canvax.Shapes.Rect;
 
   var dataZoom =
   /*#__PURE__*/
@@ -26128,7 +26212,7 @@ var Chartx = (function () {
               onUpdate: setLines
             });
           } else {
-            me._bgRect = new Rect$7({
+            me._bgRect = new Rect$8({
               context: bgRectCtx
             });
             me.dataZoomBg.addChild(me._bgRect);
@@ -26173,7 +26257,7 @@ var Chartx = (function () {
             onUpdate: setLines
           });
         } else {
-          me._btnLeft = new Rect$7({
+          me._btnLeft = new Rect$8({
             id: 'btnLeft',
             dragEnabled: me.left.eventEnabled,
             context: btnLeftCtx
@@ -26224,7 +26308,7 @@ var Chartx = (function () {
             onUpdate: setLines
           });
         } else {
-          me._btnRight = new Rect$7({
+          me._btnRight = new Rect$8({
             id: 'btnRight',
             dragEnabled: me.right.eventEnabled,
             context: btnRightCtx
@@ -26271,7 +26355,7 @@ var Chartx = (function () {
           });
         } else {
           //中间矩形拖拽区域
-          this.rangeRect = new Rect$7({
+          this.rangeRect = new Rect$8({
             id: 'btnCenter',
             dragEnabled: true,
             context: rangeRectCtx
@@ -26787,7 +26871,7 @@ var Chartx = (function () {
     return MarkLine;
   }(Component);
 
-  var Rect$8 = Canvax.Shapes.Rect;
+  var Rect$9 = Canvax.Shapes.Rect;
   var Line$8 = Canvax.Shapes.Line;
 
   var Tips =
@@ -27172,7 +27256,7 @@ var Chartx = (function () {
           if (this.pointer == "region") {
             var regionWidth = _coord._xAxis.getCellLengthOfPos(x);
 
-            el = new Rect$8({
+            el = new Rect$9({
               //xyToInt : false,
               context: {
                 width: regionWidth,
@@ -28151,6 +28235,7 @@ var Chartx = (function () {
   global$1.registerComponent(sunburstGraphs, 'graphs', 'sunburst');
   global$1.registerComponent(sankeyGraphs, 'graphs', 'sankey');
   global$1.registerComponent(Progress, 'graphs', 'progress');
+  global$1.registerComponent(Relation, 'graphs', 'relation');
   global$1.registerComponent(theme, 'theme');
   global$1.registerComponent(Legend, 'legend');
   global$1.registerComponent(dataZoom, 'dataZoom');
