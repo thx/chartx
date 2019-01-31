@@ -1,6 +1,6 @@
 import Canvax from "canvax"
 import GraphsBase from "../index"
-import { _, event, getDefaultProps } from "mmvis"
+import { _,global, event, getDefaultProps } from "mmvis"
 
 const AnimationFrame = Canvax.AnimationFrame;
 const Rect = Canvax.Shapes.Rect;
@@ -24,6 +24,36 @@ export default class Relation extends GraphsBase
                 documentation : '',
                 default: null
             },
+            line : {
+                detail : '节点间连线的配置',
+                propertys: {
+                    
+                }
+            },
+            node : {
+                detail : '单个节点的配置',
+                propertys: {
+                    maxWidth: {
+                        detail: '节点最大的width',
+                        default: 200
+                    }
+                }
+            },
+            layout: {
+                detail: '采用的布局引擎,比如dagre',
+                default: null
+            },
+            layoutOpts: {
+                detail: '布局引擎对应的配置,dagre详见dagre的官方wiki',
+                default: {}
+            },
+            layoutData: {
+                /**
+                 * nodes, edges, groups
+                 */
+                detail: '布局数据',
+                default: null
+            }
         }
     }
 
@@ -47,8 +77,41 @@ export default class Relation extends GraphsBase
         });
         this.sprite.addChild( this.nodesSp );
         this.sprite.addChild( this.edgesSp );
-        debugger
     }
+
+    draw( opt ){
+        this.layoutData = this._trimGraphs()
+        
+    }
+
+    _trimGraphs(){
+        var me = this;
+        var layoutData = {
+            nodes : [
+
+            ],
+            edges : [
+                
+            ]
+        };
+
+        if( this.layout == "dagre" ){
+            var layout = global.layout.dagre;
+            var g = new layout.graphlib.Graph();
+            g.setGraph( this.layoutOpts );
+            g.setDefaultEdgeLabel(function() {
+                //其实我到现在都还没搞明白setDefaultEdgeLabel的作用
+                return {
+
+                };
+            });
+
+        };
+
+        return layoutData
+    }
+
+
 
     getNodesAt(index)
     {

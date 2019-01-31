@@ -163,7 +163,7 @@ export default class Chart extends event.Dispatcher
         for( var i=0,l=this.components.length; i<l; i++ ){
             var p = this.components[i];
             if( _.indexOf( this.__highModules, p.name ) == -1 ){
-                p.draw();
+                p.draw( opt );
             };
         };
 

@@ -47,8 +47,8 @@
                 [204,834505,2160,11],
                 [224,885713,2272,12],
                 [252,954766,2424,13],
-                [280,1013232,2548,14],
-                [320,1082582,2718,15],
+                [280,1013232,,14],
+                [320,1082582,,15],
                 [360,1133168,2804,16],
                 [420,1188714,2900,17],
                 [508,1286570,3079,18],
@@ -69,12 +69,42 @@ var options = {
         {
             type: "line",
             field: "pv",
-            yAxisAlign: "left"
+            yAxisAlign: "left",
+            node: {
+                enabled : false
+            }
         },
         {
             type: "line",
             field: "click",
-            yAxisAlign: "right"
+            yAxisAlign: "right",
+            node: {
+                enabled : false
+            }
+            
+        }
+    ],
+    markcloumn: [
+        {
+            xVal : 100,
+            line : {
+                lineWidth: 2,
+                strokeStyle: "#829ae0"
+            }
+        }, 
+        {
+            xVal : 280,
+            line : {
+                lineWidth: 2,
+                strokeStyle: "#d1927f"
+            }
+        },
+        {
+            xVal : 500,
+            line : {
+                lineWidth: 2,
+                strokeStyle: "#d5d5d5"
+            }
         }
     ],
     tips : {}

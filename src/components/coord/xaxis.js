@@ -200,21 +200,32 @@ export default class xAxis extends Axis
     }
     
     getNodeInfoOfX( x ){
-        
         var ind = this.getIndexOfPos( x );
         var val = this.getValOfInd( ind );//this.getValOfPos(x);//
         var pos = this.getPosOf( {
             ind : ind,
             val : val
         } );
+        return this._getNodeInfo( ind, val, pos );
+    }
+
+    getNodeInfoOfVal( val ){
+        var ind = this.getIndexOfVal( val );
+        var pos = this.getPosOf( {
+            ind : ind,
+            val : val
+        } );
+        return this._getNodeInfo( ind, val, pos );
+    }
+
+    _getNodeInfo( ind,val,pos ){
         var o = {
             ind   : ind,
             value : val,
-            text  : this._getFormatText( val, ind), //text是format后的数据
+            text  : this._getFormatText( val, ind), //text是 format 后的数据
             x     : pos, //这里不能直接用鼠标的x
             field : this.field
         };
-
         return o;
     }
 

@@ -290,4 +290,14 @@ export default class LineGraphs extends GraphsBase
         } );
         return _nodesInfoList;
     }
+
+    getNodesOfPos( x )
+    {
+        var _nodesInfoList = []; //节点信息集合
+        _.each( this.groups, function( group ){
+            var node = group.getNodeInfoOfX( x );
+            node && _nodesInfoList.push( node );
+        } );
+        return _nodesInfoList;
+    }
 }

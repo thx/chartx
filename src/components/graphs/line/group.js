@@ -753,4 +753,80 @@ export default class LineGraphsGroup extends event.Dispatcher
 
         return path;
     }
+
+    //根据x方向的 val来 获取对应的node， 这个node可能刚好是一个node， 也可能两个node中间的某个位置
+    getNodeInfoOfX( x ){
+        var me = this;
+        var nodeInfo;
+        for( var i = 0,l = this.data.length; i<l; i++ ){
+            if( this.data[i].value !== null && Math.abs( this.data[i].x - x) <= 1 ){
+                //左右相差不到1px的，都算
+                nodeInfo = this.getNodeInfoAt(i);
+                return nodeInfo;
+            }
+        };
+
+        var getPointFromXInLine = function( x , line ){
+            var p = {x : x, y: 0};
+            p.y = line[0][1] + ((line[1][1]-line[0][1])/(line[1][0]-line[0][0])) * (x - line[0][0]);
+            return p;
+        };
+
+        var point;
+        var search = function( points ){
+
+            if( x<points[0][0] || x>points.slice(-1)[0][0] ){
+                return;
+            };
+
+            var midInd = parseInt(points.length / 2);
+            if( Math.abs(points[midInd][0] - x ) <= 1 ){
+                point = {
+                    x: points[midInd][0],
+                    y: points[midInd][1]
+                };
+                return;
+            };
+            var _pl = [];
+            if( x > points[midInd][0] ){
+                if( x < points[midInd+1][0]){
+                    point = getPointFromXInLine( x , [ points[midInd] , points[midInd+1] ] );
+                    return;
+                } else {
+                    _pl = points.slice( midInd+1 );
+                }
+            } else {
+                if( x > points[midInd-1][0] ){
+                    point = getPointFromXInLine( x , [ points[midInd-1] , points[midInd] ] );
+                    return;
+                } else {
+                    _pl = points.slice( 0 , midInd );
+                }
+            };
+            search(_pl);
+
+        };
+        
+        search( this._bline.context.pointList );
+        
+        if( !point || point.y == undefined ){
+            return null;
+        };
+
+        //和data 中数据的格式保持一致
+
+        var node = {
+            type    : "line",
+            iGroup  : me.iGroup,
+            iNode   : -1, //并非data中的数据，而是计算出来的数据
+            field   : me.field,
+            value   : this._yAxis.getValOfPos( -point.y ),
+            x       : point.x,
+            y       : point.y,
+            rowData : null, //非data中的数据，没有rowData
+            color   : me._getProp( me.node.strokeStyle ) || me._getLineStrokeStyle()
+        };
+
+        return node;
+    }
 }

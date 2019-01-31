@@ -1,5 +1,7 @@
 
 import { global,_ } from "mmvis"
+global.layout || ( global.layout = {} );
+
 
 import Chart from "./chart"
 
@@ -24,6 +26,10 @@ import Sunburst from "./components/graphs/sunburst/index"
 import Sankey from "./components/graphs/sankey/index"
 import Progress from "./components/graphs/progress/index"
 import Relation from "./components/graphs/relation/index"
+
+import dagre from "dagre"
+global.layout.dagre = dagre;
+
 //-----------------------------------------------
 //components
 import Legend from "./components/legend/index"
@@ -36,6 +42,7 @@ import Theme from "./components/theme/index"
 import WaterMark from "./components/watermark/index"
 import Cross from "./components/cross/index"
 import lineSchedu from "./components/lineschedu/index"
+import markCloumn from "./components/markcloumn/index"
 
 
 global.registerComponent( Chart, 'chart' );
@@ -68,6 +75,7 @@ global.registerComponent( BarGuide, 'barGuide' );
 global.registerComponent( WaterMark, 'waterMark' );
 global.registerComponent( Cross, 'cross' );
 global.registerComponent( lineSchedu, 'lineSchedu' );
+global.registerComponent( markCloumn, 'markcloumn' );
 
 //皮肤设定begin ---------------
 //如果数据库中有项目皮肤
