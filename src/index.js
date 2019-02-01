@@ -25,10 +25,12 @@ import Venn from "./components/graphs/venn/index"
 import Sunburst from "./components/graphs/sunburst/index"
 import Sankey from "./components/graphs/sankey/index"
 import Progress from "./components/graphs/progress/index"
-import Relation from "./components/graphs/relation/index"
 
+/*
+import Relation from "./components/graphs/relation/index"
 import dagre from "dagre"
 global.layout.dagre = dagre;
+*/
 
 //-----------------------------------------------
 //components
@@ -63,7 +65,8 @@ global.registerComponent( Venn, 'graphs', 'venn' );
 global.registerComponent( Sunburst, 'graphs', 'sunburst' );
 global.registerComponent( Sankey, 'graphs', 'sankey' );
 global.registerComponent( Progress, 'graphs', 'progress' );
-global.registerComponent( Relation, 'graphs', 'relation' );
+
+//global.registerComponent( Relation, 'graphs', 'relation' );
 
 global.registerComponent( Theme, 'theme' );
 global.registerComponent( Legend, 'legend' );
@@ -97,6 +100,7 @@ for( var p in global ){
 
 
 //计算全量的 props 属性用来提供智能提示 begin
+//这部分代码没必要部署到 打包的环境， 只是chartpark需要用来做智能提示， 自动化测试
 var allProps = {};
 var allModules = global._getComponentModules().modules;
 
