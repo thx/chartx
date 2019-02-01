@@ -113,8 +113,15 @@ var options = {
 
 
 window.line = Chartx.create("canvasTest" , data , options)
+line.on("complete",function(){
+    var comp = line.getComponent({ name:'markcloumn', id: 'cloumn1' });
+    comp.on("complete", function(){
+      debugger
+    });
+})
 
 setTimeout(function(){
+    return;
     var comp = line.getComponent({ name:'markcloumn', id: 'cloumn1' });
     comp.reset({
         xVal: 200

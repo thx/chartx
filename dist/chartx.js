@@ -28448,6 +28448,8 @@ var Chartx = (function () {
 
               me._nodes.addChild(_node);
             });
+
+            me.fire("complete");
           }
 
           if (_g.inited) {

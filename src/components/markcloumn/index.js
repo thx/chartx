@@ -178,6 +178,8 @@ export default class markCloumn extends Component
 
                     me._nodes.addChild( _node );
                 } );
+
+                me.fire("complete");
             };
             if( _g.inited ){
                 _f();
