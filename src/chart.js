@@ -642,8 +642,7 @@ export default class Chart extends event.Dispatcher
                 nodes = nodes.concat( _g.getNodesAt( iNode ) );
             } );
             e.eventInfo.nodes = nodes;
-        };
-       
+        }
      }
  
      //把这个point拿来给每一个graphs执行一次测试，给graphs上面的shape触发激活样式

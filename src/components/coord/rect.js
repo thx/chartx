@@ -511,7 +511,7 @@ export default class Rect extends coordBase
         };
 
         if( e.eventInfo ){
-            obj = _.extend(obj, e.eventInfo);
+            _.extend(true, obj, e.eventInfo);
 
             //把xNode信息写到eventInfo上面
             if( obj.xAxis ){

@@ -11632,7 +11632,7 @@ var Chartx = (function () {
               }
             }
 
-            if (next_left_x - curr_right_x < -2) {
+            if (next_left_x - curr_right_x < 1) {
               if (ii == l - 2) {
                 //最后一个的话，反把前面的给hide
                 next.visible = true;
@@ -12898,7 +12898,8 @@ var Chartx = (function () {
         };
 
         if (e.eventInfo) {
-          obj = _.extend(obj, e.eventInfo); //把xNode信息写到eventInfo上面
+          _.extend(true, obj, e.eventInfo); //把xNode信息写到eventInfo上面
+
 
           if (obj.xAxis) {
             e.eventInfo.xAxis = xNode;
@@ -38877,6 +38878,7 @@ var Chartx = (function () {
 
       _this._line = null;
       _this._nodes = new Canvax.Display.Sprite();
+      _this.nodes = [];
       _this.sprite = new Canvax.Display.Sprite();
 
       _this.app.graphsSprite.addChild(_this.sprite);
@@ -38897,6 +38899,13 @@ var Chartx = (function () {
         this._widget();
 
         this.sprite.addChild(this._nodes);
+      }
+    }, {
+      key: "reset",
+      value: function reset(opt) {
+        opt && _.extend(true, this, opt);
+
+        this._widget();
       }
     }, {
       key: "_widget",
@@ -38935,15 +38944,34 @@ var Chartx = (function () {
             context: lineOpt
           });
           this.sprite.addChild(this._line);
+
+          this._line.on(types.get(), function (e) {
+            e.eventInfo = {
+              //iNode : this.iNode,
+              xAxis: {},
+              nodes: me.nodes
+            };
+
+            if (me.xVal != null) {
+              e.eventInfo.xAxis.value = me.xVal;
+              e.eventInfo.xAxis.text = me.xVal + '';
+              e.eventInfo.title = me.xVal + '';
+            }
+            me.app.fire(e.type, e);
+          });
         }
 
         var _graphs = this.app.getGraphs();
 
         me._nodes.removeAllChildren();
 
+        me.nodes = [];
+
         _.each(_graphs, function (_g) {
-          _g.on('complete', function () {
+          function _f() {
             var nodes = _g.getNodesOfPos(xNode.x);
+
+            me.nodes = me.nodes.concat(nodes);
 
             _.each(nodes, function (nodeData) {
               var nodeCtx = _.extend({
@@ -38960,9 +38988,32 @@ var Chartx = (function () {
                 context: nodeCtx
               });
 
+              _node.on(types.get(), function (e) {
+                e.eventInfo = {
+                  //iNode : this.iNode,
+                  xAxis: {},
+                  nodes: [nodeData]
+                };
+
+                if (me.xVal != null) {
+                  e.eventInfo.xAxis.value = me.xVal;
+                  e.eventInfo.xAxis.text = me.xVal + '';
+                  e.eventInfo.title = me.xVal + '';
+                }
+                me.app.fire(e.type, e);
+              });
+
               me._nodes.addChild(_node);
             });
-          });
+          }
+
+          if (_g.inited) {
+            _f();
+          } else {
+            _g.on('complete', function () {
+              _f();
+            });
+          }
         });
       }
     }]);

@@ -1,6 +1,6 @@
 import Component from "../component"
 import Canvax from "canvax"
-import { _, getDefaultProps } from "mmvis"
+import { _, getDefaultProps, event } from "mmvis"
 
 const Line = Canvax.Shapes.Line;
 const Circle = Canvax.Shapes.Circle;
@@ -69,12 +69,12 @@ export default class markCloumn extends Component
 
         _.extend(true, this , getDefaultProps( markCloumn.defaultProps() ), opt );
 
-        this._line     = null;
-        this._nodes    = new Canvax.Display.Sprite();
+        this._line  = null;
+        this._nodes = new Canvax.Display.Sprite();
+        this.nodes  = [];
 
         this.sprite = new Canvax.Display.Sprite();
         this.app.graphsSprite.addChild( this.sprite );
-        
     }
 
     draw( opt )
@@ -92,6 +92,10 @@ export default class markCloumn extends Component
         this.sprite.addChild( this._nodes );
     }
 
+    reset( opt ){
+        opt && _.extend(true, this, opt);
+        this._widget();
+    }
 
     _widget(){
         var me = this;
@@ -106,11 +110,8 @@ export default class markCloumn extends Component
             xNode = _xAxis.getNodeInfoOfPos( this.x )
         };
         var lineOpt = _.extend(true,{
-            x       : parseInt(xNode.x),
-            start   : {
-                x   : 0,
-                y   : -me.height
-            },
+            x           : parseInt(xNode.x),
+            start       : {x: 0, y: -me.height },
             lineWidth   : 1,
             strokeStyle : "#cccccc" 
         } , this.line);
@@ -121,38 +122,70 @@ export default class markCloumn extends Component
             this._line = new Line({
                 context : lineOpt
             });
-            this.sprite.addChild( this._line ); 
+            this.sprite.addChild( this._line );
+            this._line.on( event.types.get() , function (e) {
+                e.eventInfo = {
+                    //iNode : this.iNode,
+                    xAxis : {},
+                    nodes : me.nodes
+                };
+                if( me.xVal != null ){
+                    e.eventInfo.xAxis.value = me.xVal;
+                    e.eventInfo.xAxis.text = me.xVal+'';
+                    e.eventInfo.title = me.xVal+''
+                };
+                me.app.fire( e.type, e );
+            });
         };
         //线条渲染结束
 
-        
         var _graphs = this.app.getGraphs();
         me._nodes.removeAllChildren();
+        me.nodes = [];
         _.each( _graphs, function( _g ){
-            _g.on('complete', function(){
-                var nodes = _g.getNodesOfPos( xNode.x );
+            function _f(){
                 
+                var nodes = _g.getNodesOfPos( xNode.x );
+                me.nodes = me.nodes.concat( nodes );
+
                 _.each( nodes, function( nodeData ){
                     var nodeCtx = _.extend({
-                        x : nodeData.x,
-                        y : nodeData.y, 
-                        cursor: "pointer",
-                        r : me.node.radius,
-                        lineWidth : me.node.lineWidth || nodeData.lineWidth,
+                        x           : nodeData.x,
+                        y           : nodeData.y, 
+                        cursor      : "pointer",
+                        r           : me.node.radius,
+                        lineWidth   : me.node.lineWidth   || nodeData.lineWidth,
                         strokeStyle : me.node.strokeStyle || nodeData.color,
-                        fillStyle : me.node.fillStyle || nodeData.fillStyle
+                        fillStyle   : me.node.fillStyle   || nodeData.fillStyle
                     });
                     var _node = new Circle({
                         context : nodeCtx
                     });
+
+                    _node.on( event.types.get() , function (e) {
+                        e.eventInfo = {
+                            //iNode : this.iNode,
+                            xAxis : {},
+                            nodes : [ nodeData ]
+                        };
+                        if( me.xVal != null ){
+                            e.eventInfo.xAxis.value = me.xVal;
+                            e.eventInfo.xAxis.text = me.xVal+'';
+                            e.eventInfo.title = me.xVal+''
+                        };
+                        me.app.fire( e.type, e );
+                    });
+
                     me._nodes.addChild( _node );
-        
                 } );
-            });
+            };
+            if( _g.inited ){
+                _f();
+            } else {
+                _g.on('complete', function(){
+                    _f();
+                });
+            };
         } );
     }
-
-
-
-
 }

@@ -578,8 +578,8 @@ export default class xAxis extends Axis
                     }
                 };
 
-                //重叠，容许2px的误差
-                if( next_left_x - curr_right_x < -2 ){
+                //必须要有1px的间隔
+                if( next_left_x - curr_right_x < 1 ){
                     if( ii == l-2 ){
                         //最后一个的话，反把前面的给hide
                         next.visible = true;

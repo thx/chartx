@@ -86,6 +86,7 @@ var options = {
     ],
     markcloumn: [
         {
+            id : "cloumn1",
             xVal : 100,
             line : {
                 lineWidth: 2,
@@ -112,6 +113,14 @@ var options = {
 
 
 window.line = Chartx.create("canvasTest" , data , options)
+
+setTimeout(function(){
+    var comp = line.getComponent({ name:'markcloumn', id: 'cloumn1' });
+    comp.reset({
+        xVal: 200
+    });
+    
+},2000)
 
 
             </textarea></form>
