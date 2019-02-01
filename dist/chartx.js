@@ -28409,9 +28409,12 @@ var Chartx = (function () {
         me._nodes.removeAllChildren();
 
         me.nodes = [];
+        var i = 0;
 
         _.each(_graphs, function (_g) {
           function _f() {
+            i++;
+
             var nodes = _g.getNodesOfPos(xNode.x);
 
             me.nodes = me.nodes.concat(nodes);
@@ -28449,7 +28452,9 @@ var Chartx = (function () {
               me._nodes.addChild(_node);
             });
 
-            me.fire("complete");
+            if (i == _graphs.length) {
+              me.fire("complete");
+            }
           }
 
           if (_g.inited) {
