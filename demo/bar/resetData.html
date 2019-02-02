@@ -37,23 +37,25 @@
                     <textarea id="code" name="code">
 var data0 = []
 var data = [
-    ["percent","self","compete"],
-    ["2017-03-21",10,11],
-    ["2017-03-22",20,32],
-    ["2017-03-23",30,15]
+    ["percent"   ,"self","compete"],
+    ["2017-03-21",1011  ,11],
+    ["2017-03-22",2011  ,32],
+    ["2017-03-23",3011  ,15]
 ];
                 
 var options = {
     coord: {
         type: "rect",
-        horizontal: true,
+        //horizontal: true,
         xAxis: {
             field: "percent",
             enabled: false,
             title: "Title"
         },
         yAxis: {
-            title: "yAxis Title"
+            title: {
+                text: "yAxis Title"
+            }
         }
     },
     graphs: [
@@ -64,25 +66,31 @@ var options = {
     ]
 }
 
-                window.bar = Chartx.create("canvasTest" , data0 , options)
+window.bar = Chartx.create("canvasTest" , data0 , options)
             
 setTimeout(function(){
-bar.reset( {
-    coord: {
-        type: "rect",
-        horizontal: true,
-        xAxis: {
-            field: "percent",
-            enabled: false
-        }
-    },
-    graphs: [
-        {
-            type: "bar",
-            field: "compete"
-        }
-    ]
-}, data )
+    bar.reset({
+        coord: {
+            type: "rect",
+            //horizontal: true,
+            xAxis: {
+                field: "percent",
+                enabled: false,
+                title: "Title"
+            },
+            yAxis: {
+                title: {
+                    text: "yAxis Title"
+                }
+            }
+        },
+        graphs: [
+            {
+                type: "bar",
+                field: "self"
+            }
+        ]
+    }, data );
 } , 2000)
                        
             

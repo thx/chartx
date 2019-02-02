@@ -111,7 +111,7 @@ export default class markCloumn extends Component
         };
         var lineOpt = _.extend(true,{
             x           : parseInt(xNode.x),
-            start       : {x: 0, y: -me.height },
+            start       : { x: 0, y: -me.height },
             lineWidth   : 1,
             strokeStyle : "#cccccc" 
         } , this.line);
