@@ -53,6 +53,7 @@ var data = [
     { key: [1,3]   , label: '中国湖北' },
     { key: [1,4]   , label: '中国浙江' },
     { key: [2,5]   , label: '湖南长沙' },
+    { key: [5,2]   , label: '长沙湖南' },
     { key: [4,6]   , label: '浙江杭州' },
     { key: [6,7]   , label: '杭州闲林' },
     { key: [1,8]   , label: '中国北京' },
@@ -76,13 +77,21 @@ var options = {
     
         layout      : "dagre",
         layoutOpts  : {
-            rankdir: "TB",  
-            //align: "DR",
-            nodesep: 0,//同级node之间的距离
-            edgesep: 0,
-            ranksep: 0, //排与排之间的距离
-            acyclicer : "greedy",
-            //ranker: "longest-path",
+            graph : {
+                //rankdir: "TB",  
+                //align: "DR",
+                //nodesep: 0,//同级node之间的距离
+                //edgesep: 0,
+                //ranksep: 0, //排与排之间的距离
+                //acyclicer : "greedy",
+                //ranker: "longest-path",
+            },
+            node : {
+
+            },
+            edge : {
+
+            }
         }
         //如果完全可视化编辑器编辑出来的布局，就不需要layout算法，编辑器会保存一份layout数据
         //layoutData : null 

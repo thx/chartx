@@ -37,6 +37,21 @@ var Chartx = (function () {
     return Constructor;
   }
 
+  function _defineProperty(obj, key, value) {
+    if (key in obj) {
+      Object.defineProperty(obj, key, {
+        value: value,
+        enumerable: true,
+        configurable: true,
+        writable: true
+      });
+    } else {
+      obj[key] = value;
+    }
+
+    return obj;
+  }
+
   function _inherits(subClass, superClass) {
     if (typeof superClass !== "function" && superClass !== null) {
       throw new TypeError("Super expression must either be null or a function");
@@ -25387,6 +25402,7 @@ var Chartx = (function () {
   var Rect$7 = Canvax.Shapes.Rect;
   var Path$5 = Canvax.Shapes.Path;
   var Arrow = Canvax.Shapes.Arrow;
+  var Circle$9 = Canvax.Shapes.Circle;
   /**
    * 关系图中 包括了  配置，数据，和布局数据，
    * 默认用配置和数据可以完成绘图， 但是如果有布局数据，就绘图玩额外调用一次绘图，把布局数据传入修正布局效果
@@ -25467,7 +25483,7 @@ var Chartx = (function () {
           },
           line: {
             detail: '两个节点连线配置',
-            propertys: {
+            propertys: _defineProperty({
               strokeStyle: {
                 detail: '连线的颜色',
                 default: '#e5e5e5'
@@ -25477,7 +25493,7 @@ var Chartx = (function () {
                 default: 'solid'
               },
               arrow: {}
-            }
+            }, "strokeStyle", {})
           },
           layout: {
             detail: '采用的布局引擎,比如dagre',
@@ -25486,6 +25502,15 @@ var Chartx = (function () {
           layoutOpts: {
             detail: '布局引擎对应的配置,dagre详见dagre的官方wiki',
             default: {}
+          },
+          status: {
+            detail: '一些开关配置',
+            propertys: {
+              transform: {
+                detail: "是否启动拖拽缩放整个画布",
+                default: true
+              }
+            }
           }
         };
       }
@@ -25501,7 +25526,23 @@ var Chartx = (function () {
 
       _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(Relation.defaultProps()), opt);
 
+      var dagreOpts = {
+        graph: {
+          nodesep: 10,
+          ranksep: 10,
+          edgesep: 10,
+          acyclicer: "greedy"
+        },
+        node: {},
+        edge: {
+          labelpos: 'c'
+        }
+      };
+
+      _.extend(true, _this.layoutOpts, dagreOpts, _this.layoutOpts);
+
       _this.domContainer = app.canvax.domView;
+      _this.induce = null;
 
       _this.init();
 
@@ -25511,6 +25552,7 @@ var Chartx = (function () {
     _createClass(Relation, [{
       key: "init",
       value: function init() {
+        this.initInduce();
         this.nodesSp = new Canvax.Display.Sprite({
           id: "nodesSp"
         });
@@ -25525,6 +25567,52 @@ var Chartx = (function () {
         this.sprite.addChild(this.graphsSp);
       }
     }, {
+      key: "initInduce",
+      value: function initInduce() {
+        var me = this;
+        this.induce = new Rect$7({
+          context: {
+            width: 0,
+            height: 0,
+            fillStyle: "#000000",
+            globalAlpha: 0
+          }
+        });
+        this.sprite.addChild(this.induce);
+        var __mosedownIng = false;
+        var __lastDragPoint = null;
+        var __preCursor = me.app.canvax.domView.style.cursor;
+        this.induce.on(types.get(), function (e) {
+          if (me.status.transform) {
+            if (e.type == "mousedown") {
+              me.induce.toFront();
+              __mosedownIng = true;
+              __lastDragPoint = e.point;
+              me.app.canvax.domView.style.cursor = "move";
+            }
+
+            if (e.type == "mouseup" || e.type == "mouseout") {
+              me.induce.toBack();
+              __mosedownIng = false;
+              __lastDragPoint = null;
+              me.app.canvax.domView.style.cursor = __preCursor;
+            }
+
+            if (e.type == "mousemove") {
+              if (__mosedownIng) {
+                me.graphsSp.context.x += e.point.x - __lastDragPoint.x;
+                me.graphsSp.context.y += e.point.y - __lastDragPoint.y;
+                __lastDragPoint = e.point;
+              }
+            }
+
+            if (e.type == "wheel") {
+              e.preventDefault();
+            }
+          }
+        });
+      }
+    }, {
       key: "draw",
       value: function draw(opt) {
         !opt && (opt = {});
@@ -25532,7 +25620,6 @@ var Chartx = (function () {
         _.extend(true, this, opt);
 
         this.data = this._initData();
-        debugger;
 
         if (this.layout == "dagre") {
           this.dagreLayout(this.data);
@@ -25544,7 +25631,7 @@ var Chartx = (function () {
         this.sprite.context.x = this.origin.x;
         this.sprite.context.y = this.origin.y;
 
-        var _offsetLet = (this.app.width - this.data.size.width) / 2;
+        var _offsetLet = (this.width - this.data.size.width) / 2;
 
         if (_offsetLet < 0) {
           _offsetLet = 0;
@@ -25588,7 +25675,7 @@ var Chartx = (function () {
         var me = this;
         var layout = global$1.layout.dagre;
         var g = new layout.graphlib.Graph();
-        g.setGraph(this.layoutOpts);
+        g.setGraph(this.layoutOpts.graph);
         g.setDefaultEdgeLabel(function () {
           //其实我到现在都还没搞明白setDefaultEdgeLabel的作用
           return {};
@@ -25597,11 +25684,15 @@ var Chartx = (function () {
         _.each(data.nodes, function (metaData) {
           var fields = _.flatten([metaData[me.field]]);
 
+          _.extend(metaData, me.layoutOpts.edge);
+
           g.setNode(fields[0], metaData);
         });
 
         _.each(data.edges, function (metaData) {
           var fields = _.flatten([metaData[me.field]]);
+
+          _.extend(metaData, me.layoutOpts.edge);
 
           g.setEdge(fields[0], fields[1], metaData);
         });
@@ -25643,6 +25734,18 @@ var Chartx = (function () {
               strokeStyle: "#ccc"
             }
           });
+          /*
+          var _circle = new Circle({
+              context : {
+                  r : 4,
+                  x : edge.x,
+                  y : edge.y,
+                  fillStyle: "red"
+              }
+          })
+          me.edgesSp.addChild( _circle );
+          */
+
 
           me.edgesSp.addChild(_arrow);
           me.edgesSp.addChild(_bl);
@@ -25682,6 +25785,9 @@ var Chartx = (function () {
             });
           }
         });
+
+        this.induce.context.width = this.width;
+        this.induce.context.height = this.height;
       }
     }, {
       key: "_getPathStr",
@@ -36271,7 +36377,7 @@ var Chartx = (function () {
     this.params = params;
   };
 
-  var Circle$9 = Canvax.Shapes.Circle;
+  var Circle$a = Canvax.Shapes.Circle;
 
   var Legend =
   /*#__PURE__*/
@@ -36482,7 +36588,7 @@ var Chartx = (function () {
         _.each(this.data, function (obj, i) {
           if (isOver) return;
 
-          var _icon = new Circle$9({
+          var _icon = new Circle$a({
             id: "legend_field_icon_" + i,
             context: {
               x: 0,
@@ -39084,7 +39190,7 @@ var Chartx = (function () {
   }(Component);
 
   var Line$c = Canvax.Shapes.Line;
-  var Circle$a = Canvax.Shapes.Circle;
+  var Circle$b = Canvax.Shapes.Circle;
 
   var markCloumn =
   /*#__PURE__*/
@@ -39270,7 +39376,7 @@ var Chartx = (function () {
                 fillStyle: me.node.fillStyle || nodeData.fillStyle
               });
 
-              var _node = new Circle$a({
+              var _node = new Circle$b({
                 context: nodeCtx
               });
 
