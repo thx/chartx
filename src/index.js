@@ -26,11 +26,11 @@ import Sunburst from "./components/graphs/sunburst/index"
 import Sankey from "./components/graphs/sankey/index"
 import Progress from "./components/graphs/progress/index"
 
-/*
+
 import Relation from "./components/graphs/relation/index"
 import dagre from "dagre"
 global.layout.dagre = dagre;
-*/
+
 
 //-----------------------------------------------
 //components
@@ -66,7 +66,7 @@ global.registerComponent( Sunburst, 'graphs', 'sunburst' );
 global.registerComponent( Sankey, 'graphs', 'sankey' );
 global.registerComponent( Progress, 'graphs', 'progress' );
 
-//global.registerComponent( Relation, 'graphs', 'relation' );
+global.registerComponent( Relation, 'graphs', 'relation' );
 
 global.registerComponent( Theme, 'theme' );
 global.registerComponent( Legend, 'legend' );

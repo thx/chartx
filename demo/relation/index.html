@@ -36,32 +36,59 @@
 //第一行是表头。
 
 var data = [
-    { key: 100, label: '一线城市'  , parent: null },
-    { key: 1  , label: '中国'    , parent: null },
-    { key: 2  , label: '湖南'    , parent: 1 },
-    { key: 3  , label: '湖北'    , parent: 1 },
-    { key: 4  , label: '浙江'    , parent: 1 },
-    { key: 5  , label: '长沙'    , parent: 2 },
-    { key: 6  , label: '杭州'    , parent: [1,100] },
-    { key: 7  , label: '闲林'    , parent: 6 },
-    { key: 8  , label: '北京'    , parent: [1,100] },
-    { key: 9  , label: '娄底'    , parent: 2 },
-    { key: 10  , label: '冷水江' , parent: 9 },
-    { key: 11  , label: '武汉'   , parent: 3 }
+    { key: 100     , label: '<div style="width:50px;height:50px;background:red;">一线城市</div>'},
+    { key: 1       , label: '中国'    },
+    { key: 2       , label: '湖南'    },
+    { key: 3       , label: '湖北'    },
+    { key: 4       , label: '浙江'    },
+    { key: 5       , label: '长沙'    },
+    { key: 6       , label: '杭州'    },
+    { key: 7       , label: '闲林'    },
+    { key: 8       , label: '北京'    },
+    { key: 9       , label: '娄底'    },
+    { key: 10      , label: '<div style="width:50px;height:50px;background:red;">上海</div>' },
+    { key: 11      , label: '武汉'    },
 
+    { key: [1,2]   , label: '中国湖南' },
+    { key: [1,3]   , label: '中国湖北' },
+    { key: [1,4]   , label: '中国浙江' },
+    { key: [2,5]   , label: '湖南长沙' },
+    { key: [4,6]   , label: '浙江杭州' },
+    { key: [6,7]   , label: '杭州闲林' },
+    { key: [1,8]   , label: '中国北京' },
+    { key: [100,8] , label: '一线北京' },
+    { key: [2,9]   , label: '湖南娄底' },
+    { key: [1,10]  , label: '中国上海' },
+    { key: [100,10], label: '一线上海' },
+    { key: [3,11]  , label: '湖北武汉' },
 ];
 
 var options = {
     graphs : {
-        type        : "relation",
-        keyField    : "key",
-        parentField : "parent",
+        type     : "relation",
+        field    : "key",
+        node : {
+            content : {
+                field : "label",
+                type : "ctype"
+            }
+        },
+    
         layout      : "dagre",
+        layoutOpts  : {
+            rankdir: "TB",  
+            //align: "DR",
+            nodesep: 0,//同级node之间的距离
+            edgesep: 0,
+            ranksep: 0, //排与排之间的距离
+            acyclicer : "greedy",
+            //ranker: "longest-path",
+        }
         //如果完全可视化编辑器编辑出来的布局，就不需要layout算法，编辑器会保存一份layout数据
         //layoutData : null 
     },
-    miniMap   : {},
-    tips      : {}
+    miniMap : {},
+    tips    : {}
 };
 
 window.bar = Chartx.create("canvasTest" , data , options)
@@ -79,7 +106,7 @@ window.bar = Chartx.create("canvasTest" , data , options)
                 </p>
             </div>
             <div  class="test-c">
-                <div id="canvasTest" style='width:100%;height:300px;position:relative;'></div>
+                <div id="canvasTest" style='width:800px;height:800px;position:relative;'></div>
             </div>
 
             </div>

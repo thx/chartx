@@ -66,7 +66,6 @@ export default class markCloumn extends Component
     {
         super(opt, app);
         this.name = "markcloumn";
-
         _.extend(true, this , getDefaultProps( markCloumn.defaultProps() ), opt );
 
         this._line  = null;
