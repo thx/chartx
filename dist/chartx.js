@@ -1960,11 +1960,7 @@ var Chartx = (function () {
       }
     },
     //第二个参数是用户要用来覆盖chartpark中的配置的options
-    getOptions: function getOptions(chartPark_cid, userOptions) {
-      //chartPark_cid,chartpark中的图表id
-      if (!this.options[chartPark_cid]) {
-        return userOptions || {};
-      }
+    getOptionsOld: function getOptionsOld(chartPark_cid) {
       var JsonSerialize = {
         prefix: '[[JSON_FUN_PREFIX_',
         suffix: '_JSON_FUN_SUFFIX]]'
@@ -1979,27 +1975,38 @@ var Chartx = (function () {
         }) || {};
       };
 
-      var opt = parse$$1(decodeURIComponent(this.options[chartPark_cid] || {}));
-
-      if (userOptions) {
-        opt = _.extend(true, opt, userOptions);
-      }
-      return opt;
+      return parse$$1(decodeURIComponent(this.options[chartPark_cid] || '%7B%7D'));
     },
-    getOptionsNew: function getOptionsNew(chartPark_cid, userOptions, data, variables) {
+    getOptionsNew: function getOptionsNew(chartPark_cid, data, variables) {
+      var chartConfig = this.options[chartPark_cid];
+      var code = decodeURIComponent(chartConfig.code);
+      var range = chartConfig.range;
+      return parse.parse(code, range, data, variables);
+    },
+
+    /** 
+     * 获取图表配置并解析
+     * 
+     * @param {int} chartPark_cid  chartpark图表id
+     * @param {Object} userOptions 用户自定义图表options，若无chartPark_cid时默认使用该配置，否则使用该配置覆盖原chartpark中的图表配置
+     * @param {Array} data 绘制图表使用的数据
+     * @param {Object | Function} variables 用于覆盖chartpark图表配置的变量，为Function时，其返回值必须为Object
+     * @returns {Object} 正常情况返回图表配置，否则返回{}
+    */
+    getOptions: function getOptions(chartPark_cid, userOptions, data, variables) {
       if (!this.options[chartPark_cid]) {
         return userOptions || {};
       }
-      var chartConfig = this.options[chartPark_cid] || {};
-      var code = decodeURIComponent(chartConfig.code);
-      var range = chartConfig.range; // var code = decodeURIComponent(this.options[chartPark_cid]);
-
-      var opt = parse.parse(code, range, data, variables);
+      var chartConfig = this.options[chartPark_cid];
+      var optionsFromChartPark = typeof chartConfig === 'string' ? this.getOptionsOld(chartPark_cid) : this.getOptionsNew(chartPark_cid, data || [], variables || {});
 
       if (userOptions) {
-        opt = _.extend(true, opt, userOptions);
+        optionsFromChartPark = _.extend(true, optionsFromChartPark, userOptions);
       }
-      return opt;
+      return optionsFromChartPark;
+    },
+    calculateOptions: function calculateOptions(chartPark_cid, data, variables) {
+      return this.getOptions(chartPark_cid, undefined, data, variables);
     },
     components: {
       c_2d: {
@@ -2547,18 +2554,33 @@ var Chartx = (function () {
 
     if (_.isObject(evt) && evt.type) {
       eventType = evt.type;
+
+      _.extend(this, evt);
     }
     this.target = null;
     this.currentTarget = null;
     this.type = eventType;
     this.point = null;
+    var me = this;
     this._stopPropagation = false; //默认不阻止事件冒泡
-  };
 
-  Event.prototype = {
-    stopPropagation: function stopPropagation() {
-      this._stopPropagation = true;
-    }
+    this.stopPropagation = function () {
+      me._stopPropagation = true;
+
+      if (_.isObject(evt)) {
+        evt._stopPropagation = true;
+      }
+    };
+
+    this._preventDefault = false; //是否组织事件冒泡
+
+    this.preventDefault = function () {
+      me._preventDefault = true;
+
+      if (_.isObject(evt)) {
+        evt._preventDefault = true;
+      }
+    };
   };
 
   /**
@@ -2568,7 +2590,7 @@ var Chartx = (function () {
    *
    * canvas 上委托的事件管理
    */
-  var _mouseEvents = 'mousedown mouseup mouseover mousemove mouseout click dblclick';
+  var _mouseEvents = 'mousedown mouseup mouseover mousemove mouseout click dblclick wheel';
   var types = {
     _types: _mouseEvents.split(/,| /),
     register: function register(evts) {
@@ -3116,7 +3138,7 @@ var Chartx = (function () {
         me._cursorHander(child);
       }
 
-      if (root.preventDefault) {
+      if (root.preventDefault || e._preventDefault) {
         //阻止默认浏览器动作(W3C) 
         if (e && e.preventDefault) {
           e.preventDefault();
@@ -5166,16 +5188,6 @@ var Chartx = (function () {
           },
           visible: optCtx.visible || true,
           globalAlpha: optCtx.globalAlpha || 1 //样式部分迁移到shape中
-          //cursor        : optCtx.cursor || "default",
-          //fillAlpha     : optCtx.fillAlpha || 1,//context2d里没有，自定义
-          //fillStyle     : optCtx.fillStyle || null,//"#000000",
-          //lineCap       : optCtx.lineCap || null,//默认都是直角
-          //lineJoin      : optCtx.lineJoin || null,//这两个目前webgl里面没实现
-          //miterLimit    : optCtx.miterLimit || null,//miterLimit 属性设置或返回最大斜接长度,只有当 lineJoin 属性为 "miter" 时，miterLimit 才有效。
-          //lineAlpha     : optCtx.lineAlpha || 1,//context2d里没有，自定义
-          //strokeStyle   : optCtx.strokeStyle || null,
-          //lineType      : optCtx.lineType || "solid", //context2d里没有，自定义线条的type，默认为实线
-          //lineWidth     : optCtx.lineWidth || null
           //平凡的clone数据非常的耗时，还是走回原来的路
           //var _contextATTRS = _.extend( true , _.clone(CONTEXT_DEFAULT), opt.context );
 
@@ -5547,12 +5559,10 @@ var Chartx = (function () {
     }, {
       key: "setWorldTransform",
       value: function setWorldTransform() {
-        //if( !this.worldTransform ){
         var cm = new Matrix();
         cm.concat(this._transform);
         this.parent && cm.concat(this.parent.worldTransform);
-        this.worldTransform = cm; //};
-
+        this.worldTransform = cm;
         return this.worldTransform;
       } //显示对象的选取检测处理函数
 
@@ -6451,8 +6461,14 @@ var Chartx = (function () {
         }
         var $MC = displayObject.context.$model;
 
+        if (!displayObject.worldTransform) {
+          //第一次在舞台中渲染
+          displayObject.fire("render");
+        }
+
         if (!displayObject.worldTransform || displayObject._transformChange || displayObject.parent && displayObject.parent._transformChange) {
           displayObject.setWorldTransform();
+          displayObject.fire("transform");
           displayObject._transformChange = true;
         }
         globalAlpha *= $MC.globalAlpha;
@@ -6487,7 +6503,7 @@ var Chartx = (function () {
         }
 
         if (displayObject.graphics) {
-          //如果 graphicsData.length==0 的情况下才需要执行_draw来组织graphics数据
+          //如果 graphicsData.length==0 的情况下才需要执行_draw来组织 graphics 数据
           if (!displayObject.graphics.graphicsData.length) {
             //当渲染器开始渲染app的时候，app下面的所有displayObject都已经准备好了对应的世界矩阵
             displayObject._draw(displayObject.graphics); //_draw会完成绘制准备好 graphicsData
@@ -6496,6 +6512,12 @@ var Chartx = (function () {
           //事件检测的时候需要用到graphics.graphicsData
 
           if (!!globalAlpha) {
+            //默认要设置为实线
+            ctx.setLineDash([]); //然后如果发现这个描边非实线的话，就设置为虚线
+
+            if ($MC.lineType && $MC.lineType != 'solid') {
+              ctx.setLineDash($MC.lineDash);
+            }
             this.CGR.render(displayObject, stage, globalAlpha);
           }
         }
@@ -6571,13 +6593,7 @@ var Chartx = (function () {
 
       _this.webGL = opt.webGL;
       _this.renderer = autoRenderer(_assertThisInitialized(_assertThisInitialized(_this)), options);
-      _this.event = null; //是否阻止浏览器默认事件的执行
-
-      _this.preventDefault = true;
-
-      if (opt.preventDefault === false) {
-        _this.preventDefault = false;
-      }
+      _this.event = null; //该属性在systenRender里面操作，每帧由心跳上报的 需要重绘的stages 列表
 
       _this.convertStages = {};
       _this.context.$model.width = _this.width;
@@ -7877,6 +7893,7 @@ var Chartx = (function () {
         strokeStyle: opt.context.strokeStyle || null,
         lineType: opt.context.lineType || "solid",
         //context2d里没有，自定义线条的type，默认为实线
+        lineDash: opt.context.lineDash || [6, 3],
         lineWidth: opt.context.lineWidth || null
       };
 
@@ -7956,29 +7973,6 @@ var Chartx = (function () {
       key: "getBound",
       value: function getBound() {
         return this.graphics.updateLocalBounds().Bound;
-      }
-      /*
-       * 画虚线
-       */
-
-    }, {
-      key: "dashedLineTo",
-      value: function dashedLineTo(graphics, x1, y1, x2, y2, dashLength) {
-        dashLength = typeof dashLength == 'undefined' ? 3 : dashLength;
-        dashLength = Math.max(dashLength, this.context.$model.lineWidth);
-        var deltaX = x2 - x1;
-        var deltaY = y2 - y1;
-        var numDashes = Math.floor(Math.sqrt(deltaX * deltaX + deltaY * deltaY) / dashLength);
-
-        for (var i = 0; i < numDashes; ++i) {
-          var x = parseInt(x1 + deltaX / numDashes * i);
-          var y = parseInt(y1 + deltaY / numDashes * i);
-          graphics[i % 2 === 0 ? 'moveTo' : 'lineTo'](x, y);
-
-          if (i == numDashes - 1 && i % 2 === 0) {
-            graphics.lineTo(x2, y2);
-          }
-        }
       }
     }]);
 
@@ -8628,76 +8622,18 @@ var Chartx = (function () {
 
         for (var i = 0, l = pointList.length; i < l; i++) {
           var point = pointList[i];
-          var nextPoint = pointList[i + 1];
 
           if (myMath.isValibPoint(point)) {
-            if (!context.lineType || context.lineType == 'solid') {
-              //实线的绘制
-              if (!beginPath) {
-                graphics.moveTo(point[0], point[1]);
-              } else {
-                graphics.lineTo(point[0], point[1]);
-              }
-            } else if (context.lineType == 'dashed' || context.lineType == 'dotted') {
-              //如果是虚线
-              //如果是曲线
-              if (context.smooth) {
-                //就直接做间隔好了
-                //TODO: 这个情况会有点稀疏，要优化
-                if (!beginPath) {
-                  graphics.moveTo(point[0], point[1]);
-                } else {
-                  graphics.lineTo(point[0], point[1]);
-                  beginPath = false;
-                  i++; //跳过下一个点
-
-                  continue;
-                }
-              } else {
-                //point 有效，而且 next也有效的话
-                //直线的虚线
-                if (myMath.isValibPoint(nextPoint)) {
-                  this.dashedLineTo(graphics, point[0], point[1], nextPoint[0], nextPoint[1], 5);
-                }
-              }
+            if (!beginPath) {
+              graphics.moveTo(point[0], point[1]);
+            } else {
+              graphics.lineTo(point[0], point[1]);
             }
             beginPath = true;
           } else {
             beginPath = false;
           }
         }
-        /*
-        if (!context.lineType || context.lineType == 'solid') {
-            //默认为实线
-            //TODO:目前如果 有设置smooth 的情况下是不支持虚线的
-            graphics.moveTo(pointList[0][0], pointList[0][1]);
-            for (var i = 1, l = pointList.length; i < l; i++) {
-                graphics.lineTo(pointList[i][0], pointList[i][1]);
-            };
-          } else if (context.lineType == 'dashed' || context.lineType == 'dotted') {
-            if (context.smooth) {
-                for (var si = 0, sl = pointList.length; si < sl; si++) {
-                    if (si == sl-1) {
-                        break;
-                    };
-                    graphics.moveTo( pointList[si][0] , pointList[si][1] );
-                    graphics.lineTo( pointList[si+1][0] , pointList[si+1][1] );
-                    si+=1;
-                  };
-            } else {
-                //画虚线的方法  
-                for (var i = 1, l = pointList.length; i < l; i++) {
-                    var fromX = pointList[i - 1][0];
-                    var toX = pointList[i][0];
-                    var fromY = pointList[i - 1][1];
-                    var toY = pointList[i][1];
-                    this.dashedLineTo(graphics, fromX, fromY, toX, toY, 5);
-                };
-            }
-            
-        };
-        */
-
 
         return this;
       }
@@ -8714,18 +8650,6 @@ var Chartx = (function () {
     function Circle(opt) {
       _classCallCheck(this, Circle);
 
-      //opt = Utils.checkOpt( opt );
-      //默认情况下面，circle不需要把xy进行parentInt转换
-
-      /*
-      var opt = {
-          type : "circle",
-          xyToInt : false,
-          context : {
-              r : 0
-          }
-      };
-      */
       opt = _.extend(true, {
         type: "circle",
         xyToInt: false,
@@ -9262,36 +9186,6 @@ var Chartx = (function () {
         for (var i = 1, l = pointList.length; i < l; i++) {
           graphics.lineTo(pointList[i][0], pointList[i][1]);
         }
-        graphics.closePath(); //如果为虚线
-
-        if (context.lineType == 'dashed' || context.lineType == 'dotted') {
-          //首先把前面的draphicsData设置为fill only
-          //也就是把line强制设置为false，这点很重要，否则你虚线画不出来，会和这个实现重叠了
-          graphics.currentPath.line = false;
-
-          if (context.smooth) {
-            //如果是smooth，本身已经被用曲率打散过了，不需要采用间隔法
-            for (var si = 0, sl = pointList.length; si < sl; si++) {
-              if (si == sl - 1) {
-                break;
-              }
-              graphics.moveTo(pointList[si][0], pointList[si][1]);
-              graphics.lineTo(pointList[si + 1][0], pointList[si + 1][1]);
-              si += 1;
-            }
-          } else {
-            //画虚线的方法  
-            graphics.moveTo(pointList[0][0], pointList[0][1]);
-
-            for (var i = 1, l = pointList.length; i < l; i++) {
-              var fromX = pointList[i - 1][0];
-              var toX = pointList[i][0];
-              var fromY = pointList[i - 1][1];
-              var toY = pointList[i][1];
-              this.dashedLineTo(graphics, fromX, fromY, toX, toY, 5);
-            }
-          }
-        }
         graphics.closePath();
         return;
       }
@@ -9349,8 +9243,6 @@ var Chartx = (function () {
       _classCallCheck(this, Line);
 
       var _context = _.extend({
-        lineType: null,
-        //可选 虚线 实现 的 类型
         start: {
           x: 0,
           // 必须，起点横坐标
@@ -9362,9 +9254,7 @@ var Chartx = (function () {
           // 必须，终点横坐标
           y: 0 // 必须，终点纵坐标
 
-        },
-        dashLength: 3 // 虚线间隔
-
+        }
       }, opt.context);
 
       opt.context = _context;
@@ -9384,13 +9274,8 @@ var Chartx = (function () {
       key: "draw",
       value: function draw(graphics) {
         var model = this.context.$model;
-
-        if (!model.lineType || model.lineType == 'solid') {
-          graphics.moveTo(model.start.x, model.start.y);
-          graphics.lineTo(model.end.x, model.end.y);
-        } else if (model.lineType == 'dashed' || model.lineType == 'dotted') {
-          this.dashedLineTo(graphics, model.start.x, model.start.y, model.end.x, model.end.y, model.dashLength);
-        }
+        graphics.moveTo(model.start.x, model.start.y);
+        graphics.lineTo(model.end.x, model.end.y);
         return this;
       }
     }]);
@@ -9603,6 +9488,84 @@ var Chartx = (function () {
     return Sector;
   }(Shape);
 
+  var Line$1 =
+  /*#__PURE__*/
+  function (_Shape) {
+    _inherits(Line, _Shape);
+
+    function Line(opt) {
+      _classCallCheck(this, Line);
+
+      var _context = _.extend({
+        control: {
+          x: 0,
+          // 必须，起点横坐标
+          y: 0 // 必须，起点纵坐标
+
+        },
+        point: {
+          x: 0,
+          // 必须，终点横坐标
+          y: 0 // 必须，终点纵坐标
+
+        },
+        angle: null,
+        // control的存在，也就是为了计算出来这个angle
+        theta: 30,
+        // 箭头夹角
+        headlen: 6,
+        // 斜边长度
+        lineWidth: 1,
+        strokeStyle: '#666',
+        fillStyle: null
+      }, opt.context);
+
+      opt.context = _context;
+      opt.type = "arrow";
+      return _possibleConstructorReturn(this, _getPrototypeOf(Line).call(this, opt));
+    }
+
+    _createClass(Line, [{
+      key: "watch",
+      value: function watch(name, value, preValue) {
+        //并不清楚是start.x 还是end.x， 当然，这并不重要
+        if (name == "x" || name == "y" || name == "theta" || name == "headlen" || name == "angle") {
+          this.graphics.clear();
+        }
+      }
+    }, {
+      key: "draw",
+      value: function draw(graphics) {
+        var model = this.context.$model;
+        var fromX = model.control.x;
+        var fromY = model.control.y;
+        var toX = model.point.x;
+        var toY = model.point.y; // 计算各角度和对应的P2,P3坐标 
+
+        var angle = model.angle != null ? model.angle - 180 : Math.atan2(fromY - toY, fromX - toX) * 180 / Math.PI,
+            angle1 = (angle + model.theta) * Math.PI / 180,
+            angle2 = (angle - model.theta) * Math.PI / 180,
+            topX = model.headlen * Math.cos(angle1),
+            topY = model.headlen * Math.sin(angle1),
+            botX = model.headlen * Math.cos(angle2),
+            botY = model.headlen * Math.sin(angle2);
+        var arrowX = toX + topX;
+        var arrowY = toY + topY;
+        graphics.moveTo(arrowX, arrowY);
+        graphics.lineTo(toX, toY);
+        graphics.lineTo(toX + botX, toY + botY);
+
+        if (model.fillStyle) {
+          graphics.lineTo(arrowX, arrowY);
+          graphics.closePath();
+        }
+        return this;
+      }
+    }]);
+
+    return Line;
+  }(Shape);
+
   var Canvax = {
     App: Application
   };
@@ -9625,7 +9588,8 @@ var Chartx = (function () {
     Path: Path,
     Polygon: Polygon$1,
     Rect: Rect,
-    Sector: Sector
+    Sector: Sector,
+    Arrow: Line$1
   };
   Canvax.AnimationFrame = AnimationFrame;
   Canvax.utils = Utils;
@@ -11050,7 +11014,7 @@ var Chartx = (function () {
     return Axis;
   }(axis);
 
-  var Line$1 = Canvax.Shapes.Line;
+  var Line$2 = Canvax.Shapes.Line;
 
   var xAxis =
   /*#__PURE__*/
@@ -11457,7 +11421,7 @@ var Chartx = (function () {
                   xNode._line.context.x = lineContext.x;
                 }
               } else {
-                xNode._line = new Line$1({
+                xNode._line = new Line$2({
                   context: lineContext
                 });
                 xNode.addChild(xNode._line);
@@ -11493,7 +11457,7 @@ var Chartx = (function () {
         }
 
         if (this.axisLine.enabled) {
-          var _axisLine = new Line$1({
+          var _axisLine = new Line$2({
             context: {
               start: {
                 x: 0,
@@ -11650,7 +11614,7 @@ var Chartx = (function () {
     return xAxis;
   }(Axis);
 
-  var Line$2 = Canvax.Shapes.Line;
+  var Line$3 = Canvax.Shapes.Line;
 
   var yAxis =
   /*#__PURE__*/
@@ -11995,7 +11959,7 @@ var Chartx = (function () {
             if (me.tickLine.enabled) {
               //线条
               lineX = me.align == "left" ? -me.tickLine.lineLength - me.tickLine.distance : me.tickLine.distance;
-              var line = new Line$2({
+              var line = new Line$3({
                 context: {
                   x: lineX,
                   y: y,
@@ -12093,7 +12057,7 @@ var Chartx = (function () {
         }
 
         if (me.axisLine.enabled) {
-          var _axisLine = new Line$2({
+          var _axisLine = new Line$3({
             context: {
               start: {
                 x: _originX,
@@ -12141,7 +12105,7 @@ var Chartx = (function () {
     return yAxis;
   }(Axis);
 
-  var Line$3 = Canvax.Shapes.Line;
+  var Line$4 = Canvax.Shapes.Line;
   var Rect$1 = Canvax.Shapes.Rect;
 
   var rectGrid =
@@ -12324,7 +12288,7 @@ var Chartx = (function () {
 
         for (var a = 0, al = arr.length; a < al; a++) {
           var o = arr[a];
-          var line = new Line$3({
+          var line = new Line$4({
             id: "back_line_" + a,
             context: {
               y: o.y,
@@ -12345,7 +12309,7 @@ var Chartx = (function () {
 
         for (var a = 0, al = arr.length; a < al; a++) {
           var o = arr[a];
-          var line = new Line$3({
+          var line = new Line$4({
             context: {
               x: o.x,
               start: {
@@ -12983,7 +12947,7 @@ var Chartx = (function () {
     return Rect;
   }(coordBase);
 
-  var Line$4 = Canvax.Shapes.Line;
+  var Line$5 = Canvax.Shapes.Line;
   var Circle$2 = Canvax.Shapes.Circle;
   var Polygon$2 = Canvax.Shapes.Polygon;
 
@@ -13167,7 +13131,7 @@ var Chartx = (function () {
             }
 
             _.each(points, function (point) {
-              var _line = new Line$4({
+              var _line = new Line$5({
                 context: {
                   end: point,
                   lineWidth: me.ring.lineWidth,
@@ -16580,7 +16544,7 @@ var Chartx = (function () {
 
   var Circle$4 = Canvax.Shapes.Circle;
   var Rect$4 = Canvax.Shapes.Rect;
-  var Line$5 = Canvax.Shapes.Line;
+  var Line$6 = Canvax.Shapes.Line;
 
   var ScatGraphs =
   /*#__PURE__*/
@@ -17094,7 +17058,7 @@ var Chartx = (function () {
             };
 
             if (!_line) {
-              _line = new Line$5({
+              _line = new Line$6({
                 context: _lineContext
               });
 
@@ -20579,7 +20543,7 @@ var Chartx = (function () {
 
   var Text$2 = Canvax.Display.Text;
   var Circle$7 = Canvax.Shapes.Circle;
-  var Line$6 = Canvax.Shapes.Line;
+  var Line$7 = Canvax.Shapes.Line;
   var Rect$5 = Canvax.Shapes.Rect;
 
   var PlanetGraphs =
@@ -20878,7 +20842,7 @@ var Chartx = (function () {
 
             var ty = cy + _r * Math.sin(radian);
 
-            me.gridSp.addChild(new Line$6({
+            me.gridSp.addChild(new Line$7({
               context: {
                 start: {
                   x: cx,
@@ -25785,7 +25749,7 @@ var Chartx = (function () {
     return Legend;
   }(Component);
 
-  var Line$7 = Canvax.Shapes.Line;
+  var Line$8 = Canvax.Shapes.Line;
   var Rect$7 = Canvax.Shapes.Rect;
 
   var dataZoom =
@@ -26542,7 +26506,7 @@ var Chartx = (function () {
       key: "_addLine",
       value: function _addLine($o) {
         var o = $o || {};
-        var line = new Line$7({
+        var line = new Line$8({
           id: o.id || '',
           context: {
             x: o.x || 0,
@@ -26896,7 +26860,7 @@ var Chartx = (function () {
   }(Component);
 
   var Rect$8 = Canvax.Shapes.Rect;
-  var Line$8 = Canvax.Shapes.Line;
+  var Line$9 = Canvax.Shapes.Line;
 
   var Tips =
   /*#__PURE__*/
@@ -27258,7 +27222,7 @@ var Chartx = (function () {
 
         if (!el) {
           if (this.pointer == "line") {
-            el = new Line$8({
+            el = new Line$9({
               //xyToInt : false,
               context: {
                 x: x,
@@ -27381,7 +27345,7 @@ var Chartx = (function () {
     return Tips;
   }(Component);
 
-  var Line$9 = Canvax.Shapes.Line;
+  var Line$a = Canvax.Shapes.Line;
 
   var barTgi =
   /*#__PURE__*/
@@ -27519,7 +27483,7 @@ var Chartx = (function () {
           var y = -me._yAxis.getPosOfVal(tgi);
           var barData = me.barDatas[i];
 
-          var _tgiLine = new Line$9({
+          var _tgiLine = new Line$a({
             context: {
               start: {
                 x: barData.x,
@@ -27900,7 +27864,7 @@ var Chartx = (function () {
     return waterMark;
   }(Component);
 
-  var Line$a = Canvax.Shapes.Line;
+  var Line$b = Canvax.Shapes.Line;
 
   var Cross =
   /*#__PURE__*/
@@ -27993,7 +27957,7 @@ var Chartx = (function () {
           y: this.height / 2
         };
         this.setPosition();
-        me._hLine = new Line$a({
+        me._hLine = new Line$b({
           //横向线条
           context: {
             start: {
@@ -28010,7 +27974,7 @@ var Chartx = (function () {
           }
         });
         me.sprite.addChild(me._hLine);
-        me._vLine = new Line$a({
+        me._vLine = new Line$b({
           //线条
           context: {
             start: {
@@ -28243,7 +28207,7 @@ var Chartx = (function () {
     return lineSchedu;
   }(Component);
 
-  var Line$b = Canvax.Shapes.Line;
+  var Line$c = Canvax.Shapes.Line;
   var Circle$a = Canvax.Shapes.Circle;
 
   var markCloumn =
@@ -28383,7 +28347,7 @@ var Chartx = (function () {
         if (this._line) {
           _.extend(this._line.context, lineOpt);
         } else {
-          this._line = new Line$b({
+          this._line = new Line$c({
             context: lineOpt
           });
           this.sprite.addChild(this._line);
