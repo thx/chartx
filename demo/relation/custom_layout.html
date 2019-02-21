@@ -1,36 +1,39 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
-<title>xChart demo -- bar</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport"
+        content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
+    <title>xChart demo -- bar</title>
 
-<script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
-<script type="text/javascript" src="../../dist/chartx.js"></script>
-<!-- codemirror -->
-<script type="text/javascript" src="../../lib/codemirror/codemirror.js"></script>
-<script type="text/javascript" src="../../lib/codemirror/active-line.js"></script>
-<script type="text/javascript" src="../../lib/codemirror/javascript.js"></script>
-<script type="text/javascript" src="../../lib/codemirror/matchbrackets.js"></script>
-<link rel="stylesheet" href="../../lib/codemirror/codemirror.css">
-<link rel="stylesheet" href="../../lib/codemirror/zenburn.css">
-<link rel="stylesheet" href="../../lib/codemirror/docs.css">
-<!-- codemirror end -->
-<!--bootstrap-->
-<script type="text/javascript" src="../../lib/bootstrap/js/bootstrap.min.js"></script>
-<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap-theme.min.css">
-<link rel="stylesheet" href="../../lib/bootstrap/css/docs.min.css">
-<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap.min.css">
-<!--bootstrap end-->
-<script type="text/javascript" src="../../lib/demo.js"></script>
-<link rel="stylesheet" href="../../lib/demo.css">
+    <script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
+    <script type="text/javascript" src="../../dist/chartx.js"></script>
+    <!-- codemirror -->
+    <script type="text/javascript" src="../../lib/codemirror/codemirror.js"></script>
+    <script type="text/javascript" src="../../lib/codemirror/active-line.js"></script>
+    <script type="text/javascript" src="../../lib/codemirror/javascript.js"></script>
+    <script type="text/javascript" src="../../lib/codemirror/matchbrackets.js"></script>
+    <link rel="stylesheet" href="../../lib/codemirror/codemirror.css">
+    <link rel="stylesheet" href="../../lib/codemirror/zenburn.css">
+    <link rel="stylesheet" href="../../lib/codemirror/docs.css">
+    <!-- codemirror end -->
+    <!--bootstrap-->
+    <script type="text/javascript" src="../../lib/bootstrap/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="../../lib/bootstrap/css/docs.min.css">
+    <link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap.min.css">
+    <!--bootstrap end-->
+    <script type="text/javascript" src="../../lib/demo.js"></script>
+    <link rel="stylesheet" href="../../lib/demo.css">
 </head>
-<body >
 
-<table>
-    <tr>
-        <td id="td-vl">
-            <form><textarea id="code" name="code">
+<body>
+
+    <table>
+        <tr>
+            <td id="td-vl">
+                <form><textarea id="code" name="code">
 
 //chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
 //第一行是表头。
@@ -71,10 +74,93 @@ var options = {
             }
         },
     
-        layout      : "dagre",
+        layout      : function(data){
+           var layoutOpts= this.layoutOpts || {};
+           var  pageKey='page',actionKey='action',nodeTypeField='nodeType';
+           var pages=[],actions=[],nodeMap={}; 
+           var  pagesChains=[],pagesChainsMap={};
+           var  actionChains=[],actionChainsMap={};
+           
+           if(layoutOpts.customOps){
+               if(layoutOpts.customOps.nodeType){
+                pageKey =  layoutOpts.customOps.nodeType.pageKey ||'page';
+                actionKey = layoutOpts.customOps.nodeType.actionKey ||'action';
+               }
+             nodeTypeField = layoutOpts.customOps.nodeTypeField || 'nodeType'
+           }
+           
+           for(var i=0,len=data.nodes.length;i<len;i++){
+                var node = data.nodes[i];
+                if(node[nodeTypeField]===pageKey){
+                    pages.push(node);
+                }
+                if(node[nodeTypeField]===actionKey){
+                    actions.push(node);
+                }
+                nodeMap[node.key]=node;
+           }
+           for(var i=0,len=data.edges.length;i<len;i++){
+               var edge = data.edges[i];
+               var nodeStart = nodeMap[edge.key[0]];
+               var nodeEnd = nodeMap[edge.key[1]];
+               if(nodeStart && nodeEnd){
+                    if(nodeStart[nodeTypeField]===pageKey && nodeEnd[nodeTypeField]===pageKey ){
+                       var obj={
+                            from:nodeStart,
+                            to:nodeEnd,
+                            edge:edge,
+                            idx:i*2
+                        }
+                        
+                        
+                        if(pagesChains.length===0){
+                            pagesChains.push(nodeStart,nodeEnd);
+                        }else{
+                            //单条链
+                           if(pagesChainsMap[nodeStart.key].to===nodeStart){
+                            pagesChains[pagesChainsMap[nodeStart.key].idx+2]=nodeEnd;
+                           } 
+                           if(pagesChainsMap[nodeStart.key].from===nodeEnd){
+                            pagesChains= [nodeStart].concat(pagesChains);
+                                if(pagesChainsMap[nodeStart.key].idx-1>=0){
+                                    var tmp = 
+                                    pagesChains[pagesChainsMap[nodeStart.key].idx-1]=nodeStart;
+                                }else{
+                                    pagesChains= [nodeStart].concat(pagesChains);   
+                                }
+                           } 
+                        }
+
+                        pagesChainsMap[nodeStart.key]=obj;
+                        pagesChainsMap[nodeEnd.key]=obj
+                        
+                    }
+                    debugger
+                    if(nodeStart[nodeTypeField]===pageKey && nodeEnd[nodeTypeField]===actionKey){
+                        actionChains
+                    }
+                
+               }
+               
+
+           }
+
+           debugger
+           
+        },
         layoutOpts  : {
-            nodesep: 0,//同级node之间的距离
-            ranksep: 0, //排与排之间的距离
+            graph:{
+                nodesep: 0,//同级node之间的距离
+                ranksep: 0, //排与排之间的距离
+            },
+            customOps:{
+                nodeTypeField:'nodeType',
+                nodeType:{
+                    pageKey:'page',    //页面节点
+                    actionKey:'action'  //行为节点 
+                }  
+            }
+           
         }
         //如果完全可视化编辑器编辑出来的布局，就不需要layout算法，编辑器会保存一份layout数据
         //layoutData : null 
@@ -86,28 +172,28 @@ var options = {
 window.bar = Chartx.create("canvasTest" , data , options)
 
             </textarea></form>
-        </td>
-        <td style="padding:0 10px;" id="td-vr">
-            <div id="chartdemo-r">
-            <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
-                <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
+            </td>
+            <td style="padding:0 10px;" id="td-vr">
+                <div id="chartdemo-r">
+                    <div class="bs-callout bs-callout-warning" style="margin-top:10px;"
+                        id="callout-navs-anchor-disabled">
+                        <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
 
-                <h4>柱状图（bar chart）</h4>
-                <p>
-                    联系人：@释剑
-                </p>
-            </div>
-            <div  class="test-c">
-                <div id="canvasTest" style='width:800px;height:800px;position:relative;'></div>
-            </div>
+                        <h4>柱状图（bar chart）</h4>
+                        <p>
+                            联系人：@释剑
+                        </p>
+                    </div>
+                    <div class="test-c">
+                        <div id="canvasTest" style='width:800px;height:800px;position:relative;'></div>
+                    </div>
 
-            </div>
-        </td>
-    </tr>
-</table>
+                </div>
+            </td>
+        </tr>
+    </table>
 
-    
-</body> 
+
+</body>
+
 </html>
-
-
