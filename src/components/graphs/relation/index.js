@@ -1,10 +1,11 @@
 import Canvax from "canvax"
 import GraphsBase from "../index"
-import { _,global, getDefaultProps } from "mmvis"
+import { _,global, getDefaultProps,event } from "mmvis"
 
 const Rect  = Canvax.Shapes.Rect;
 const Path  = Canvax.Shapes.Path;
 const Arrow = Canvax.Shapes.Arrow;
+const Circle = Canvax.Shapes.Circle;
 
 /**
  * 关系图中 包括了  配置，数据，和布局数据，
@@ -92,6 +93,9 @@ export default class Relation extends GraphsBase
                     },
                     arrow : {
 
+                    },
+                    strokeStyle: {
+
                     }
                 }
             },
@@ -102,6 +106,16 @@ export default class Relation extends GraphsBase
             layoutOpts: {
                 detail: '布局引擎对应的配置,dagre详见dagre的官方wiki',
                 default: {}
+            },
+
+            status: {
+                detail: '一些开关配置',
+                propertys: {
+                    transform : {
+                        detail : "是否启动拖拽缩放整个画布",
+                        default: true
+                    }
+                }
             }
         }
     }
@@ -113,13 +127,32 @@ export default class Relation extends GraphsBase
 
         _.extend( true, this , getDefaultProps( Relation.defaultProps() ), opt );
 
+        var dagreOpts = {
+            graph : {
+                nodesep: 10,
+                ranksep: 10,
+                edgesep: 10,
+                acyclicer : "greedy"
+            },
+            node : {
+
+            },
+            edge : {
+                labelpos: 'c'
+            }
+        };
+        _.extend(true, this.layoutOpts, dagreOpts, this.layoutOpts);
+
         this.domContainer = app.canvax.domView;
+        this.induce = null;
 
         this.init();
     }
 
     init()
     {
+        this.initInduce();
+
         this.nodesSp = new Canvax.Display.Sprite({
             id: "nodesSp"
         });
@@ -134,11 +167,57 @@ export default class Relation extends GraphsBase
         this.sprite.addChild( this.graphsSp );
     }
 
+    initInduce(){
+        var me = this;
+        this.induce = new Rect({
+            context: {
+                width : 0,
+                height: 0,
+                fillStyle: "#000000",
+                globalAlpha: 0
+            }
+        });
+        this.sprite.addChild( this.induce );
+
+        var __mosedownIng = false;
+        var __lastDragPoint = null;
+        var __preCursor = me.app.canvax.domView.style.cursor;
+        this.induce.on( event.types.get() , function(e){
+            if( me.status.transform ){
+                if( e.type == "mousedown" ){
+                    me.induce.toFront();
+                    __mosedownIng = true;
+                    __lastDragPoint = e.point;
+                    me.app.canvax.domView.style.cursor = "move"
+                };
+                if( e.type == "mouseup" || e.type == "mouseout" ){
+                    me.induce.toBack();
+                    __mosedownIng = false;
+                    __lastDragPoint = null;
+                    me.app.canvax.domView.style.cursor = __preCursor;
+                };
+                if( e.type == "mousemove" ){
+                    if( __mosedownIng ){
+                        me.graphsSp.context.x += (e.point.x - __lastDragPoint.x);
+                        me.graphsSp.context.y += (e.point.y - __lastDragPoint.y);
+                        __lastDragPoint = e.point;
+                    }
+                };
+                if( e.type == "wheel" ){
+
+                    e.preventDefault();
+                };
+            };
+            
+        } );
+        
+    }
+
     draw( opt ){
         !opt && (opt ={});
         _.extend( true, this , opt );
         this.data = this._initData();
-debugger
+
         if( this.layout == "dagre" ){
             this.dagreLayout( this.data );
         } else if( _.isFunction( this.layout ) ) {
@@ -150,12 +229,11 @@ debugger
         this.sprite.context.x = this.origin.x;
         this.sprite.context.y = this.origin.y;
 
-        var _offsetLet = ( this.app.width - this.data.size.width )/2;
+        var _offsetLet = ( this.width - this.data.size.width )/2;
         if( _offsetLet < 0 ){
             _offsetLet = 0;
         };
         this.graphsSp.context.x = _offsetLet;
-        
     }
 
     _initData(){
@@ -195,7 +273,7 @@ debugger
         var layout = global.layout.dagre;
         
         var g = new layout.graphlib.Graph();
-        g.setGraph( this.layoutOpts );
+        g.setGraph( this.layoutOpts.graph );
         g.setDefaultEdgeLabel(function() {
             //其实我到现在都还没搞明白setDefaultEdgeLabel的作用
             return {
@@ -205,10 +283,12 @@ debugger
 
         _.each( data.nodes, function( metaData ){
             var fields = _.flatten([ metaData[me.field] ] );
+            _.extend( metaData, me.layoutOpts.edge );
             g.setNode( fields[0], metaData );
         } );
         _.each( data.edges, function( metaData ){
             var fields = _.flatten([ metaData[me.field] ] );
+            _.extend( metaData, me.layoutOpts.edge );
             g.setEdge( fields[0], fields[1], metaData );
         } );
 
@@ -228,13 +308,12 @@ debugger
         data.size.width  = g.graph().width;
         data.size.height = g.graph().height;
         
-
         return data
     }
 
     widget(){
         var me = this;
-        
+
         _.each( this.data.edges, function( edge ){
            
             var _bl = new Path({
@@ -252,6 +331,18 @@ debugger
                     strokeStyle : "#ccc"
                 }
             });
+
+            /*
+            var _circle = new Circle({
+                context : {
+                    r : 4,
+                    x : edge.x,
+                    y : edge.y,
+                    fillStyle: "red"
+                }
+            })
+            me.edgesSp.addChild( _circle );
+            */
 
             me.edgesSp.addChild( _arrow );
             me.edgesSp.addChild( _bl );
@@ -293,6 +384,8 @@ debugger
             };
         } );
 
+        this.induce.context.width = this.width;
+        this.induce.context.height = this.height;
 
     }
 
