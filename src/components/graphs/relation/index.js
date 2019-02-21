@@ -113,7 +113,22 @@ export default class Relation extends GraphsBase
                 propertys: {
                     transform : {
                         detail : "是否启动拖拽缩放整个画布",
-                        default: true
+                        propertys : {
+                            enabled : {
+                                detail: "是否开启",
+                                default: true
+                            },
+                            scale : {
+                                detail: "缩放值",
+                                default: 1
+                            },
+                            scaleOrigin : {
+                                detail : "缩放原点",
+                                default: {
+                                    x : 0,y:0
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -170,6 +185,7 @@ export default class Relation extends GraphsBase
     initInduce(){
         var me = this;
         this.induce = new Rect({
+            id : "induce",
             context: {
                 width : 0,
                 height: 0,
@@ -179,31 +195,56 @@ export default class Relation extends GraphsBase
         });
         this.sprite.addChild( this.induce );
 
-        var __mosedownIng = false;
-        var __lastDragPoint = null;
-        var __preCursor = me.app.canvax.domView.style.cursor;
+        var _mosedownIng = false;
+        var _lastDragPoint = null;
+        var _preCursor = me.app.canvax.domView.style.cursor;
+
+
+        //滚轮缩放相关
+        var _wheelHandleTimeLen = 32; //16*2
+        var _wheelHandleTimeer = null;
+        var _deltaY = 0;
+
         this.induce.on( event.types.get() , function(e){
-            if( me.status.transform ){
+            
+            if( me.status.transform.enabled ){
                 if( e.type == "mousedown" ){
                     me.induce.toFront();
-                    __mosedownIng = true;
-                    __lastDragPoint = e.point;
+                    _mosedownIng = true;
+                    _lastDragPoint = e.point;
                     me.app.canvax.domView.style.cursor = "move"
                 };
                 if( e.type == "mouseup" || e.type == "mouseout" ){
                     me.induce.toBack();
-                    __mosedownIng = false;
-                    __lastDragPoint = null;
-                    me.app.canvax.domView.style.cursor = __preCursor;
+                    _mosedownIng = false;
+                    _lastDragPoint = null;
+                    me.app.canvax.domView.style.cursor = _preCursor;
                 };
                 if( e.type == "mousemove" ){
-                    if( __mosedownIng ){
-                        me.graphsSp.context.x += (e.point.x - __lastDragPoint.x);
-                        me.graphsSp.context.y += (e.point.y - __lastDragPoint.y);
-                        __lastDragPoint = e.point;
+                    if( _mosedownIng ){
+                        me.graphsSp.context.x += (e.point.x - _lastDragPoint.x);
+                        me.graphsSp.context.y += (e.point.y - _lastDragPoint.y);
+                        _lastDragPoint = e.point;
                     }
                 };
                 if( e.type == "wheel" ){
+                    if( Math.abs( e.deltaY ) > Math.abs( _deltaY ) ){
+                        _deltaY = e.deltaY;
+                    };
+                    
+                    if( !_wheelHandleTimeer ){
+                        _wheelHandleTimeer = setTimeout( function(){
+                            var point = me.graphsSp.globalToLocal( e.target.localToGlobal( e.point ) );
+                            if( point.x > 1000 ){
+                                debugger
+                            }
+                            me.scale( {
+                                deltaY : _deltaY
+                            } , point );
+                            _wheelHandleTimeer = null;
+                            _deltaY = 0;
+                        } , _wheelHandleTimeLen );
+                    };
 
                     e.preventDefault();
                 };
@@ -211,6 +252,41 @@ export default class Relation extends GraphsBase
             
         } );
         
+    }
+
+    scale( opt, point ){
+        
+
+        var itemLen = 0.02;
+        
+        var _scale = (opt.deltaY/30)*itemLen;
+        if( Math.abs(_scale)< 0.04 ){
+            _scale = Math.sign( _scale ) * 0.04
+        }
+        if( Math.abs(_scale)> 0.08 ){
+            _scale = Math.sign( _scale ) * 0.08
+        }
+        var scale = this.status.transform.scale + _scale;
+        if( scale <= 0.1 ){
+            scale = 0.1;
+        }
+        if( scale >= 1 ){
+            //关系图里面放大看是没必要的
+            scale = 1;
+        }
+
+        var scaleOrigin = point || {x:0,y:0};
+
+        console.log( scale+"|"+JSON.stringify(scaleOrigin) )
+
+        this.status.transform.scale = scale;
+        this.status.transform.scaleOrigin.x = scaleOrigin.x;
+        this.status.transform.scaleOrigin.y = scaleOrigin.y;
+
+        this.graphsSp.context.scaleX = scale;
+        this.graphsSp.context.scaleY = scale;
+        this.graphsSp.context.scaleOrigin.x = scaleOrigin.x;
+        this.graphsSp.context.scaleOrigin.y = scaleOrigin.y;
     }
 
     draw( opt ){
@@ -294,17 +370,6 @@ export default class Relation extends GraphsBase
 
         layout.layout(g);
 
-        /*
-        g.nodes().forEach(function(v) {
-            data.nodes.push( g.node(v) );
-            //console.log("Node " + v + ": " + JSON.stringify(g.node(v)));
-        });
-        g.edges().forEach(function(e) {
-            data.edges.push( g.edge(e) );
-            //console.log("Edge " + e.v + " -> " + e.w + ": " + JSON.stringify(g.edge(e)));
-        });
-        */
-
         data.size.width  = g.graph().width;
         data.size.height = g.graph().height;
         
@@ -376,8 +441,9 @@ export default class Relation extends GraphsBase
                 _boxShape.on("transform" , function(){
                     var devicePixelRatio = typeof (window) !== 'undefined' ? window.devicePixelRatio : 1;
                     node.__element.style.transform  = "matrix("+_boxShape.worldTransform.clone().scale(1/devicePixelRatio , 1/devicePixelRatio).toArray().join()+")";
-                    node.__element.style.marginLeft = me.getProp( me.node.padding )+"px";
-                    node.__element.style.marginTop  = me.getProp( me.node.padding )+"px";
+                    node.__element.style.transformOrigin = "left top"; //修改为左上角为旋转中心点来和canvas同步
+                    node.__element.style.marginLeft = me.getProp( me.node.padding ) * me.status.transform.scale +"px";
+                    node.__element.style.marginTop  = me.getProp( me.node.padding ) * me.status.transform.scale +"px";
                     node.__element.style.visibility = "visible";
                 });
                 
@@ -435,15 +501,15 @@ export default class Relation extends GraphsBase
         
         !contentType && (contentType = 'canvas');
 
-        var __element;
+        var _element;
         if( contentType == 'canvas' ){
-            __element = me._getEleAndsetCanvasSize( metaData );
+            _element = me._getEleAndsetCanvasSize( metaData );
         };
         if( contentType == 'html' ){
-            __element = me._getEleAndsetHtmlSize( metaData );
+            _element = me._getEleAndsetHtmlSize( metaData );
         };
 
-        metaData.__element = __element;
+        metaData.__element = _element;
     }
 
 
@@ -463,10 +529,10 @@ export default class Relation extends GraphsBase
         });
 
         if ( !metaData.width ) {
-            metaData.width = label.getTextWidth() + me.getProp( me.node.padding )*2;
+            metaData.width = label.getTextWidth() + me.getProp( me.node.padding ) * me.status.transform.scale * 2;
         };
         if ( !metaData.height ) {
-            metaData.height = label.getTextHeight() + me.getProp( me.node.padding )*2;
+            metaData.height = label.getTextHeight() + me.getProp( me.node.padding ) * me.status.transform.scale * 2;
         };
 
         sprite.addChild( label );
@@ -496,10 +562,10 @@ export default class Relation extends GraphsBase
         this.domContainer.appendChild( _tipDom );
 
         if ( !metaData.width ) {
-            metaData.width = _tipDom.offsetWidth + me.getProp( me.node.padding ) * 2;
+            metaData.width = _tipDom.offsetWidth + me.getProp( me.node.padding ) * me.status.transform.scale * 2;
         };
         if ( !metaData.height ) {
-            metaData.height = _tipDom.offsetHeight + me.getProp( me.node.padding ) * 2;
+            metaData.height = _tipDom.offsetHeight + me.getProp( me.node.padding ) * me.status.transform.scale * 2;
         };
 
         return _tipDom;
