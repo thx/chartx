@@ -2778,6 +2778,7 @@ var Chartx = (function () {
 
       if (map) {
         if (!e.target) e.target = this;
+        if (!e.currentTarget) e.currentTarget = this;
         map = map.slice();
 
         for (var i = 0; i < map.length; i++) {
@@ -2874,15 +2875,13 @@ var Chartx = (function () {
           for (var p in params) {
             if (p != "type") {
               e[p] = params[p];
-            } //然后，currentTarget要修正为自己
-
-
-            e.currentTarget = this;
+            }
           }
         }
         var me = this;
 
         _.each(eventType.split(" "), function (eType) {
+          //然后，currentTarget要修正为自己
           e.currentTarget = me;
           me.dispatchEvent(e);
         });
@@ -3076,11 +3075,10 @@ var Chartx = (function () {
       //所以放在了下面的me.__getcurPointsTarget( e , curMousePoint );常规mousemove中执行
 
       var curMousePoint = me.curPoints[0];
-      var curMouseTarget = me.curPointsTarget[0]; //模拟drag,mouseover,mouseout 部分代码 begin-------------------------------------------------
-      //mousedown的时候 如果 curMouseTarget.dragEnabled 为true。就要开始准备drag了
+      var curMouseTarget = me.curPointsTarget[0];
 
-      if (e.type == "mousedown") {
-        //如果curTarget 的数组为空或者第一个为false ，，，
+      if ( //这几个事件触发过来，是一定需要检测 curMouseTarget 的
+      _.indexOf(['mousedown', 'mouseover', 'click'], e.type) > -1 && !curMouseTarget) {
         if (!curMouseTarget) {
           var obj = root.getObjectsUnderPoint(curMousePoint, 1)[0];
 
@@ -3089,7 +3087,11 @@ var Chartx = (function () {
           }
         }
         curMouseTarget = me.curPointsTarget[0];
+      }
+      //mousedown的时候 如果 curMouseTarget.dragEnabled 为true。就要开始准备drag了
 
+      if (e.type == "mousedown") {
+        //如果curTarget 的数组为空或者第一个为false ，，，
         if (curMouseTarget && curMouseTarget.dragEnabled) {
           //鼠标事件已经摸到了一个
           me._touching = true;
@@ -3345,20 +3347,16 @@ var Chartx = (function () {
       }
 
       var me = this;
-      var hasChild = false;
 
       _.each(childs, function (child, i) {
         if (child) {
-          hasChild = true;
-          var ce = new Event(e);
-          ce.target = ce.currentTarget = child || this;
+          var ce = new Event(e); //ce.target = ce.currentTarget = child || this;
+
           ce.stagePoint = me.curPoints[i];
-          ce.point = ce.target.globalToLocal(ce.stagePoint);
+          ce.point = child.globalToLocal(ce.stagePoint);
           child.dispatchEvent(ce);
         }
       });
-
-      return hasChild;
     },
     //克隆一个元素到hover stage中去
     _clone2hoverStage: function _clone2hoverStage(target, i) {
@@ -25581,6 +25579,7 @@ var Chartx = (function () {
         this.graphsSp.addChild(this.edgesSp);
         this.graphsSp.addChild(this.nodesSp);
         this.sprite.addChild(this.graphsSp);
+        window.gsp = this.graphsSp;
       }
     }, {
       key: "initInduce",
@@ -25635,12 +25634,11 @@ var Chartx = (function () {
 
               if (!_wheelHandleTimeer) {
                 _wheelHandleTimeer = setTimeout(function () {
-                  var point = me.graphsSp.globalToLocal(e.target.localToGlobal(e.point));
-
-                  if (point.x > 1000) {
+                  if (e.target.id != "induce") {
                     debugger;
                   }
-
+                  console.log("e.point" + JSON.stringify(e.point), JSON.stringify(e.target.localToGlobal(e.point)), JSON.stringify(me.graphsSp.globalToLocal(e.target.localToGlobal(e.point))));
+                  var point = me.graphsSp.globalToLocal(e.target.localToGlobal(e.point));
                   me.scale({
                     deltaY: _deltaY
                   }, point);
@@ -25679,18 +25677,25 @@ var Chartx = (function () {
           scale = 1;
         }
 
+        if (this.status.transform.scale == scale) {
+          return;
+        }
+
         var scaleOrigin = point || {
           x: 0,
           y: 0
-        };
+        }; //scaleOrigin.x = scaleOrigin.x * (1/scale);
+        //scaleOrigin.y = scaleOrigin.y * (1/scale);
+
         console.log(scale + "|" + JSON.stringify(scaleOrigin));
         this.status.transform.scale = scale;
         this.status.transform.scaleOrigin.x = scaleOrigin.x;
         this.status.transform.scaleOrigin.y = scaleOrigin.y;
-        this.graphsSp.context.scaleX = scale;
-        this.graphsSp.context.scaleY = scale;
         this.graphsSp.context.scaleOrigin.x = scaleOrigin.x;
         this.graphsSp.context.scaleOrigin.y = scaleOrigin.y;
+        this.graphsSp.context.scaleX = scale;
+        this.graphsSp.context.scaleY = scale;
+        console.log(this.graphsSp.worldTransform);
       }
     }, {
       key: "draw",
@@ -25717,6 +25722,8 @@ var Chartx = (function () {
           _offsetLet = 0;
         }
         this.graphsSp.context.x = _offsetLet;
+        this.graphsSp.context.width = 10000;
+        this.graphsSp.context.height = 10000;
       }
     }, {
       key: "_initData",

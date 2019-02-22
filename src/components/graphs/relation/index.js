@@ -180,6 +180,8 @@ export default class Relation extends GraphsBase
         this.graphsSp.addChild( this.edgesSp );
         this.graphsSp.addChild( this.nodesSp );
         this.sprite.addChild( this.graphsSp );
+
+        window.gsp = this.graphsSp
     }
 
     initInduce(){
@@ -198,7 +200,6 @@ export default class Relation extends GraphsBase
         var _mosedownIng = false;
         var _lastDragPoint = null;
         var _preCursor = me.app.canvax.domView.style.cursor;
-
 
         //滚轮缩放相关
         var _wheelHandleTimeLen = 32; //16*2
@@ -234,13 +235,19 @@ export default class Relation extends GraphsBase
                     
                     if( !_wheelHandleTimeer ){
                         _wheelHandleTimeer = setTimeout( function(){
-                            var point = me.graphsSp.globalToLocal( e.target.localToGlobal( e.point ) );
-                            if( point.x > 1000 ){
+                            
+                            if( e.target.id != "induce" ) {
                                 debugger
-                            }
+                            };
+                            
+                            console.log("e.point"+ JSON.stringify(e.point),JSON.stringify(e.target.localToGlobal( e.point )),JSON.stringify( me.graphsSp.globalToLocal( e.target.localToGlobal( e.point ) ) ) )
+                            var point = me.graphsSp.globalToLocal( e.target.localToGlobal( e.point ) ) ;
+                            
+
                             me.scale( {
                                 deltaY : _deltaY
                             } , point );
+
                             _wheelHandleTimeer = null;
                             _deltaY = 0;
                         } , _wheelHandleTimeLen );
@@ -256,7 +263,6 @@ export default class Relation extends GraphsBase
 
     scale( opt, point ){
         
-
         var itemLen = 0.02;
         
         var _scale = (opt.deltaY/30)*itemLen;
@@ -275,7 +281,14 @@ export default class Relation extends GraphsBase
             scale = 1;
         }
 
+        if( this.status.transform.scale == scale ){
+            return;
+        }
+
         var scaleOrigin = point || {x:0,y:0};
+ 
+        //scaleOrigin.x = scaleOrigin.x * (1/scale);
+        //scaleOrigin.y = scaleOrigin.y * (1/scale);
 
         console.log( scale+"|"+JSON.stringify(scaleOrigin) )
 
@@ -283,10 +296,13 @@ export default class Relation extends GraphsBase
         this.status.transform.scaleOrigin.x = scaleOrigin.x;
         this.status.transform.scaleOrigin.y = scaleOrigin.y;
 
-        this.graphsSp.context.scaleX = scale;
-        this.graphsSp.context.scaleY = scale;
+
         this.graphsSp.context.scaleOrigin.x = scaleOrigin.x;
         this.graphsSp.context.scaleOrigin.y = scaleOrigin.y;
+        this.graphsSp.context.scaleX = scale;
+        this.graphsSp.context.scaleY = scale;
+
+        console.log( this.graphsSp.worldTransform )
     }
 
     draw( opt ){
@@ -310,6 +326,8 @@ export default class Relation extends GraphsBase
             _offsetLet = 0;
         };
         this.graphsSp.context.x = _offsetLet;
+        this.graphsSp.context.width  = 10000;
+        this.graphsSp.context.height = 10000;
     }
 
     _initData(){
