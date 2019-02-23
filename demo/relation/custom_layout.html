@@ -85,7 +85,7 @@ var options = {
         },
     
         layout      : function(data) {
-            var layoutOpts = this.layoutOpts && this.layoutOpts.graph || {};
+            var layoutOpts = this.layoutOpts && this.layoutOpts || {};
     layoutOpts.nodesep = layoutOpts.nodesep || 50;
     layoutOpts.ranksep = layoutOpts.ranksep || 50;
 
@@ -350,10 +350,9 @@ var options = {
             return data;
         },
         layoutOpts  : {
-            graph:{
-                nodesep: 50,//同级node之间的距离
-                ranksep: 50, //排与排之间的距离
-            },
+           
+            nodesep: 50,//同级node之间的距离
+            ranksep: 50, //排与排之间的距离
             customOps:{
                 nodeTypeField:'nodeType',
                 nodeType:{
