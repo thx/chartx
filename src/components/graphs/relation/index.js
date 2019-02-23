@@ -236,17 +236,27 @@ export default class Relation extends GraphsBase
                     if( !_wheelHandleTimeer ){
                         _wheelHandleTimeer = setTimeout( function(){
                             
-                            if( e.target.id != "induce" ) {
-                                debugger
-                            };
+                            var itemLen = 0.02;
+        
+                            var _scale = ( e.deltaY/30 )*itemLen;
+                            if( Math.abs(_scale)< 0.04 ){
+                                _scale = Math.sign( _scale ) * 0.04
+                            }
+                            if( Math.abs(_scale)> 0.08 ){
+                                _scale = Math.sign( _scale ) * 0.08
+                            }
+                            var scale = me.status.transform.scale + _scale;
+                            if( scale <= 0.1 ){
+                                scale = 0.1;
+                            }
+                            if( scale >= 1 ){
+                                //关系图里面放大看是没必要的
+                                scale = 1;
+                            }
                             
-                            console.log("e.point"+ JSON.stringify(e.point),JSON.stringify(e.target.localToGlobal( e.point )),JSON.stringify( me.graphsSp.globalToLocal( e.target.localToGlobal( e.point ) ) ) )
-                            var point = me.graphsSp.globalToLocal( e.target.localToGlobal( e.point ) ) ;
+                            var point = e.target.localToGlobal( e.point );
                             
-
-                            me.scale( {
-                                deltaY : _deltaY
-                            } , point );
+                            me.scale( scale , point );
 
                             _wheelHandleTimeer = null;
                             _deltaY = 0;
@@ -261,36 +271,35 @@ export default class Relation extends GraphsBase
         
     }
 
-    scale( opt, point ){
+    //point is global point
+    scale( scale, point ){
         
-        var itemLen = 0.02;
-        
-        var _scale = (opt.deltaY/30)*itemLen;
-        if( Math.abs(_scale)< 0.04 ){
-            _scale = Math.sign( _scale ) * 0.04
-        }
-        if( Math.abs(_scale)> 0.08 ){
-            _scale = Math.sign( _scale ) * 0.08
-        }
-        var scale = this.status.transform.scale + _scale;
-        if( scale <= 0.1 ){
-            scale = 0.1;
-        }
-        if( scale >= 1 ){
-            //关系图里面放大看是没必要的
-            scale = 1;
-        }
-
         if( this.status.transform.scale == scale ){
             return;
-        }
+        };
 
-        var scaleOrigin = point || {x:0,y:0};
- 
+        debugger
+        var scaleOrigin = point ? this.graphsSp.globalToLocal( point ) : {x:0,y:0};
+        
+        /*
+        var inverseMatrix = this.graphsSp.worldTransform.clone().invert();
+        var originPos = [
+            point.x * 2,
+            point.y * 2
+        ];
+        originPos = inverseMatrix.mulVector( originPos );
+        var scaleOrigin = {
+            x: originPos[0],
+            y: originPos[1]
+        };
+        */
+
+        console.log( scale, JSON.stringify(point) , JSON.stringify(scaleOrigin), JSON.stringify( this.graphsSp._transform ) )
+
         //scaleOrigin.x = scaleOrigin.x * (1/scale);
         //scaleOrigin.y = scaleOrigin.y * (1/scale);
 
-        console.log( scale+"|"+JSON.stringify(scaleOrigin) )
+        
 
         this.status.transform.scale = scale;
         this.status.transform.scaleOrigin.x = scaleOrigin.x;
@@ -302,7 +311,6 @@ export default class Relation extends GraphsBase
         this.graphsSp.context.scaleX = scale;
         this.graphsSp.context.scaleY = scale;
 
-        console.log( this.graphsSp.worldTransform )
     }
 
     draw( opt ){
