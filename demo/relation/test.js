@@ -1,91 +1,5 @@
-<!DOCTYPE html>
-<html>
-
-<head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="viewport"
-        content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
-    <title>xChart demo -- bar</title>
-
-    <script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
-    <script type="text/javascript" src="../../dist/chartx.js"></script>
-    <!-- codemirror -->
-    <script type="text/javascript" src="../../lib/codemirror/codemirror.js"></script>
-    <script type="text/javascript" src="../../lib/codemirror/active-line.js"></script>
-    <script type="text/javascript" src="../../lib/codemirror/javascript.js"></script>
-    <script type="text/javascript" src="../../lib/codemirror/matchbrackets.js"></script>
-    <link rel="stylesheet" href="../../lib/codemirror/codemirror.css">
-    <link rel="stylesheet" href="../../lib/codemirror/zenburn.css">
-    <link rel="stylesheet" href="../../lib/codemirror/docs.css">
-    <!-- codemirror end -->
-    <!--bootstrap-->
-    <script type="text/javascript" src="../../lib/bootstrap/js/bootstrap.min.js"></script>
-    <link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap-theme.min.css">
-    <link rel="stylesheet" href="../../lib/bootstrap/css/docs.min.css">
-    <link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap.min.css">
-    <!--bootstrap end-->
-    <script type="text/javascript" src="../../lib/demo.js"></script>
-    <link rel="stylesheet" href="../../lib/demo.css">
-</head>
-
-<body>
-
-    <table>
-        <tr>
-            <td id="td-vl">
-                <form><textarea id="code" name="code">
-
-//chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
-//第一行是表头。
-
-var data = [
-    { key: 1       , label: '首页',  nodeType:'page'    },
-    { key: 2       , label: '计划管理页面', nodeType:'page'    },
-    { key: 3       , label: '新建计划' , nodeType:'page'    },
-    { key: 4       , label: '新建'  , nodeType:'action' },
-    { key: 5       , label: '编辑草稿'  , nodeType:'action'   },
-    { key: 6       , label: '点击菜单'   , nodeType:'action'  },
-    { key: 7       , label: '修改计划'    , nodeType:'action' },
-    { key: 8       , label: '下一步'    , nodeType:'action' },
-    { key: 9       , label: '查看计划列表'   , nodeType:'action'  },
-    { key: 10      , label: '<div style="width:50px;height:50px;background:red;">切换横向列表</div>'  , nodeType:'action'},
-    { key: 11      , label: '保存'   , nodeType:'action'  },
-
-    { key: 12       , label: '账户',  nodeType:'page'    },
-    { key: 13       , label: '报表', nodeType:'page'    },
-    { key: 14       , label: '创意' , nodeType:'page'    },
-    
-    { key: [13,14]  },
-    
-    { key: [1,2]  },
-    
-    { key: [1,6]  },
-    { key: [2,9]    },
-    { key: [9,10]    },
-    { key: [3,4]    },
-    { key: [4,5]    },
-    { key: [5,7]  },
-    { key: [7,8]    },
-    { key: [8,11]   },
-    { key: [3,12]  },
-    { key: [12,13]  },
-    { key: [2,3]  },
-   
-];
-
-var options = {
-    graphs : {
-        type     : "relation",
-        field    : "key",
-        node : {
-            content : {
-                field : "label",
-                type : "ctype"
-            }
-        },
-    
-        layout      : function(data) {
-            var layoutOpts = this.layoutOpts && this.layoutOpts.graph || {};
+function process(data) {
+    var layoutOpts = this.layoutOpts && this.layoutOpts.graph || {};
     layoutOpts.nodesep = layoutOpts.nodesep || 50;
     layoutOpts.ranksep = layoutOpts.ranksep || 50;
 
@@ -258,7 +172,6 @@ var options = {
         for (var b = 0; b < maxWidth.length - 1; b++) {
             distance += maxWidth[b];
         }
-        debugger
         for (var m = 0, ml = list.length; m < ml; m++) {
             var node = list[m];
             node.x = distance + (maxWidth[i] - (node.width || 0)) * 0.5 + i * layoutOpts.nodesep
@@ -346,55 +259,10 @@ var options = {
         )
 
     }
-            console.log(data);
-            return data;
-        },
-        layoutOpts  : {
-            graph:{
-                nodesep: 50,//同级node之间的距离
-                ranksep: 50, //排与排之间的距离
-            },
-            customOps:{
-                nodeTypeField:'nodeType',
-                nodeType:{
-                    pageKey:'page',    //页面节点
-                    actionKey:'action'  //行为节点 
-                }  
-            }
-           
-        }
-        //如果完全可视化编辑器编辑出来的布局，就不需要layout算法，编辑器会保存一份layout数据
-        //layoutData : null 
-    },
-    miniMap : {},
-    tips    : {}
-};
 
-window.bar = Chartx.create("canvasTest" , data , options)
+    console.log(data);
 
-            </textarea></form>
-            </td>
-            <td style="padding:0 10px;" id="td-vr">
-                <div id="chartdemo-r">
-                    <div class="bs-callout bs-callout-warning" style="margin-top:10px;"
-                        id="callout-navs-anchor-disabled">
-                        <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
+    return data
+}
 
-                        <h4>柱状图（bar chart）</h4>
-                        <p>
-                            联系人：@释剑
-                        </p>
-                    </div>
-                    <div class="test-c">
-                        <div id="canvasTest" style='width:800px;height:800px;position:relative;'></div>
-                    </div>
-
-                </div>
-            </td>
-        </tr>
-    </table>
-
-
-</body>
-
-</html>
+process(data);
