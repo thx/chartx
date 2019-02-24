@@ -22,6 +22,10 @@ export default class ScatGraphs extends GraphsBase
             node: {
                 detail: '单数据节点图形设置',
                 propertys: {
+                    dataKey : {
+                        detail: '元素的数据id，默认索引匹配',
+                        default: null
+                    },
                     shapeType: {
                         detail: '图形类型',
                         default: 'circle',
@@ -249,6 +253,7 @@ export default class ScatGraphs extends GraphsBase
         this.dataFrame = dataFrame;
         this.data = this._trimGraphs(); 
         this._widget();
+        this.grow();
     }
 
     getNodesAt()
@@ -415,31 +420,25 @@ export default class ScatGraphs extends GraphsBase
     _widget()
     {
         var me = this;
-
-        //那么有多余的元素要去除掉 begin
-        if( me._shapesp.children.length > me.data.length ){
-            for( var i=me.data.length; i<me._shapesp.children.length; i++ ){
-                me._shapesp.getChildAt( i-- ).destroy();
-            }
-        };
-        if( me._textsp.children.length > me.data.length ){
-            for( var i=me.data.length; i<me._textsp.children.length; i++ ){
-                me._textsp.getChildAt( i-- ).destroy();
-            }
-        };
-        if( me._linesp.children.length > me.data.length ){
-            for( var i=me.data.length; i<me._linesp.children.length; i++ ){
-                me._linesp.getChildAt( i-- ).destroy();
-            }
-        };
+        
+        _.each( _.flatten([me._shapesp.children,me._textsp.children,me._linesp.children]), function( el ){
+            el.__used = false
+        } );
+ 
         //那么有多余的元素要去除掉 end
 
         _.each( me.data , function( nodeData, iNode ){
 
+            var _nodeElement = me._getNodeElement( nodeData, iNode );
+            if( !_nodeElement ){
+                nodeData.__isNew = true;
+            };
+
             var _context = me._getNodeContext( nodeData );
             var Shape = nodeData.shapeType == "circle" ? Circle : Rect;
 
-            var _nodeElement = me._shapesp.getChildAt( iNode );
+            //var _nodeElement = me._shapesp.getChildAt( iNode );
+            
             if( !_nodeElement ){
                 _nodeElement = new Shape({
                     id: "shape_"+iNode,
@@ -468,6 +467,7 @@ export default class ScatGraphs extends GraphsBase
                 //_.extend( _nodeElement.context, _context );
                 _nodeElement.animate( _context );
             };
+            _nodeElement.__used = true;
         
             //数据和canvax原件相互引用
             _nodeElement.nodeData = nodeData;
@@ -480,11 +480,9 @@ export default class ScatGraphs extends GraphsBase
                 !this.nodeData.selected && me.unfocusAt( this.nodeData.iNode );
             });
 
-            
-
             if( me.line.enabled ){
 
-                var _line = me._linesp.getChildAt( iNode );
+                var _line = _nodeElement.lineElement;//me._linesp.getChildAt( iNode );
                 var _lineContext = {
                     start : {
                         x : _context.x,
@@ -505,17 +503,18 @@ export default class ScatGraphs extends GraphsBase
                     });
                     me._linesp.addChild( _line );
                 } else {
-                    _line.animate( _lineContext )
-                }
+                    _line.animate( _lineContext );
+                };
+                _line.__used = true;
 
-                _nodeElement._line = _line;
+                _nodeElement.lineElement = _line;
                 
             };
 
             //如果有label
             if( nodeData.label && me.label.enabled ){
         
-                var _label = me._textsp.getChildAt( iNode );
+                var _label = _nodeElement.labelElement;//me._textsp.getChildAt( iNode );
                 var _labelContext = {};
                 if( !_label ){
                     _label = new Canvax.Display.Text( nodeData.label , {
@@ -532,6 +531,7 @@ export default class ScatGraphs extends GraphsBase
                     _labelContext = me._getTextContext( _label, _context );
                     _label.animate( _labelContext );
                 };
+                _label.__used = true;
 
                 //图形节点和text文本相互引用
                 _nodeElement.labelElement = _label;
@@ -539,7 +539,52 @@ export default class ScatGraphs extends GraphsBase
             };
         
         } );
+
+        _.each( _.flatten([me._shapesp.children,me._textsp.children,me._linesp.children]), function( el ){
+            if(!el.__used ){
+                el.animate({
+                    globalAlpha: 0,
+                    r : 0
+                },{
+                    onComplete: function() {
+                        el.destroy();
+                    }
+                });
+            }
+        } );
      
+    }
+
+    _getNodeElement( nodeData, iNode ){
+        var me = this;
+        var nodeEle;
+        var dataKey = me.node.dataKey;
+        if( !dataKey ){
+            nodeEle = me._shapesp.getChildAt( iNode );
+        } else {
+            
+            if( _.isString( dataKey ) ){
+                dataKey = dataKey.split(",");
+            };
+
+            for( var i=0,l=this._shapesp.children.length; i<l; i++ ){
+                var _nodeEle = this._shapesp.children[i];
+                var isThisNodeEle=true;
+                for( var ii=0,ll=dataKey.length; ii<ll; ii++ ){
+                    var key = dataKey[ii];
+                    if( _nodeEle.nodeData.rowData[ key ] != nodeData.rowData[key] ){
+                        isThisNodeEle = false;
+                        break;
+                    };
+                };
+                if( isThisNodeEle && dataKey.length ){
+                    nodeEle = _nodeEle;
+                    break;
+                };
+            };
+        };
+        return nodeEle;
+        
     }
 
     _getTextPosition( _label, opt )
@@ -646,10 +691,8 @@ export default class ScatGraphs extends GraphsBase
             cursor : "pointer"
         };
 
-        if( this.animation && !this.inited ){
-            
+        if( this.animation && (!this.inited || nodeData.__isNew) ){
             this._setCtxAniOrigin(ctx);
-
             ctx.r = 1;
         };
         return ctx;
@@ -664,30 +707,41 @@ export default class ScatGraphs extends GraphsBase
         var l = this.data.length-1;
         var me = this;
         _.each( this.data , function( nodeData ){
-            nodeData.nodeElement.animate({
-                x : nodeData.x,
-                y : nodeData.y,
-                r : nodeData.radius
-            }, {
-                onUpdate: function( opt ){
-                    if( this.labelElement && this.labelElement.context ){
-                        var _textPoint = me._getTextPosition( this.labelElement, opt );
-                        this.labelElement.context.x = _textPoint.x;
-                        this.labelElement.context.y = _textPoint.y;
-                    };
-                    if( this._line && this._line.context ){
-                        this._line.context.start.y = opt.y+opt.r;
-                    };
-                },
-                delay : Math.round(Math.random()*300),
-                onComplete : function(){
+            
+            if( nodeData.__isNew ){
+                me._growNode( nodeData, function(){
                     i = i+1;
+                    delete nodeData.__isNew;
                     if( i == l ){
                         callback && callback();
                     }
-                }
-            })
+                } );
+            };
         } );
+    }
+
+    _growNode( nodeData, callback ){
+        var me = this;
+        nodeData.nodeElement.animate({
+            x : nodeData.x,
+            y : nodeData.y,
+            r : nodeData.radius
+        }, {
+            onUpdate: function( opt ){
+                if( this.labelElement && this.labelElement.context ){
+                    var _textPoint = me._getTextPosition( this.labelElement, opt );
+                    this.labelElement.context.x = _textPoint.x;
+                    this.labelElement.context.y = _textPoint.y;
+                };
+                if( this.lineElement && this.lineElement.context ){
+                    this.lineElement.context.start.y = opt.y+opt.r;
+                };
+            },
+            delay : Math.round(Math.random()*300),
+            onComplete : function(){
+                callback && callback()
+            }
+        })
     }
 
 
