@@ -24,6 +24,7 @@ export default class Relation extends GraphsBase
             node : {
                 detail : '单个节点的配置',
                 propertys: {
+                    
                     maxWidth: {
                         detail: '节点最大的width',
                         default: 200
@@ -179,7 +180,14 @@ export default class Relation extends GraphsBase
         });
         this.graphsSp.addChild( this.edgesSp );
         this.graphsSp.addChild( this.nodesSp );
+
+        //clone一份graphsSp
+        this._grahsSpClone = new Canvax.Display.Sprite({
+            id: "graphsSp_clone"
+        });
+
         this.sprite.addChild( this.graphsSp );
+        this.sprite.addChild( this._grahsSpClone );
 
         window.gsp = this.graphsSp
     }
@@ -236,17 +244,27 @@ export default class Relation extends GraphsBase
                     if( !_wheelHandleTimeer ){
                         _wheelHandleTimeer = setTimeout( function(){
                             
-                            if( e.target.id != "induce" ) {
-                                debugger
-                            };
+                            var itemLen = 0.02;
+        
+                            var _scale = ( e.deltaY/30 )*itemLen;
+                            if( Math.abs(_scale)< 0.04 ){
+                                _scale = Math.sign( _scale ) * 0.04
+                            }
+                            if( Math.abs(_scale)> 0.08 ){
+                                _scale = Math.sign( _scale ) * 0.08
+                            }
+                            var scale = me.status.transform.scale + _scale;
+                            if( scale <= 0.1 ){
+                                scale = 0.1;
+                            }
+                            if( scale >= 1 ){
+                                //关系图里面放大看是没必要的
+                                scale = 1;
+                            }
                             
-                            console.log("e.point"+ JSON.stringify(e.point),JSON.stringify(e.target.localToGlobal( e.point )),JSON.stringify( me.graphsSp.globalToLocal( e.target.localToGlobal( e.point ) ) ) )
-                            var point = me.graphsSp.globalToLocal( e.target.localToGlobal( e.point ) ) ;
+                            var point = e.target.localToGlobal( e.point );
                             
-
-                            me.scale( {
-                                deltaY : _deltaY
-                            } , point );
+                            me.scale( scale , point );
 
                             _wheelHandleTimeer = null;
                             _deltaY = 0;
@@ -261,48 +279,29 @@ export default class Relation extends GraphsBase
         
     }
 
-    scale( opt, point ){
-        
-        var itemLen = 0.02;
-        
-        var _scale = (opt.deltaY/30)*itemLen;
-        if( Math.abs(_scale)< 0.04 ){
-            _scale = Math.sign( _scale ) * 0.04
-        }
-        if( Math.abs(_scale)> 0.08 ){
-            _scale = Math.sign( _scale ) * 0.08
-        }
-        var scale = this.status.transform.scale + _scale;
-        if( scale <= 0.1 ){
-            scale = 0.1;
-        }
-        if( scale >= 1 ){
-            //关系图里面放大看是没必要的
-            scale = 1;
-        }
-
+    //point is global point
+    scale( scale, point ){
+        return;
         if( this.status.transform.scale == scale ){
             return;
-        }
+        };
+        var scaleOrigin = point ? this._grahsSpClone.globalToLocal( point ) : {x:0,y:0};
 
-        var scaleOrigin = point || {x:0,y:0};
- 
-        //scaleOrigin.x = scaleOrigin.x * (1/scale);
-        //scaleOrigin.y = scaleOrigin.y * (1/scale);
-
-        console.log( scale+"|"+JSON.stringify(scaleOrigin) )
+        console.log( scale, JSON.stringify(point) , JSON.stringify(scaleOrigin), JSON.stringify( this.graphsSp._transform ) );
 
         this.status.transform.scale = scale;
         this.status.transform.scaleOrigin.x = scaleOrigin.x;
         this.status.transform.scaleOrigin.y = scaleOrigin.y;
-
 
         this.graphsSp.context.scaleOrigin.x = scaleOrigin.x;
         this.graphsSp.context.scaleOrigin.y = scaleOrigin.y;
         this.graphsSp.context.scaleX = scale;
         this.graphsSp.context.scaleY = scale;
 
-        console.log( this.graphsSp.worldTransform )
+        var newLeftTopPoint = this.graphsSp.localToGlobal({x:0,y:0}, this.sprite);
+        console.log( JSON.stringify(newLeftTopPoint) )
+        //this._grahsSpClone.context.x = newLeftTopPoint.x;
+        //this._grahsSpClone.context.y = newLeftTopPoint.y;
     }
 
     draw( opt ){
@@ -326,8 +325,7 @@ export default class Relation extends GraphsBase
             _offsetLet = 0;
         };
         this.graphsSp.context.x = _offsetLet;
-        this.graphsSp.context.width  = 10000;
-        this.graphsSp.context.height = 10000;
+        this._grahsSpClone.context.x = _offsetLet;
     }
 
     _initData(){
