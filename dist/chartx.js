@@ -25830,8 +25830,8 @@ var Chartx = (function () {
         _.each(this.data.nodes, function (node) {
           var _boxShape = new Rect$7({
             context: {
-              x: node.x,
-              y: node.y,
+              x: node.x - node.width / 2,
+              y: node.y - node.height / 2,
               width: node.width,
               height: node.height,
               lineWidth: 1,
