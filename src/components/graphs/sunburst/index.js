@@ -35,7 +35,7 @@ export default class sunburstGraphs extends GraphsBase
                         detail: '描边线宽',
                         default:1
                     },
-                    lineAlpha: {
+                    strokeAlpha: {
                         detail: '描边边框透明度',
                         default: 1
                     },

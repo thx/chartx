@@ -43,7 +43,7 @@ export default class PlanetGroup
                         detail: '图形填充色',
                         default:'#f2fbfb'
                     },
-                    lineAlpha: {
+                    strokeAlpha: {
                         detail: '边框透明度',
                         default: 0.6
                     },
@@ -55,7 +55,7 @@ export default class PlanetGroup
                                 detail: '是否开启',
                                 default:true
                             },
-                            lineAlpha: {
+                            strokeAlpha: {
                                 detail: 'hover时候边框透明度',
                                 default: 0.7
                             },
@@ -77,7 +77,7 @@ export default class PlanetGroup
                                 detail: '是否开启',
                                 default:false
                             },
-                            lineAlpha: {
+                            strokeAlpha: {
                                 detail: '选中时候边框透明度',
                                 default:1
                             },
@@ -495,7 +495,7 @@ export default class PlanetGroup
 
                 var _fillStyle = me._getProp( me.node.fillStyle , p );
                 var _strokeStyle = me._getProp( node.strokeStyle , p );
-                var _lineAlpha = me._getProp( node.lineAlpha, p );
+                var _lineAlpha = me._getProp( node.strokeAlpha, p );
                 var _lineWidth = me._getProp( node.lineWidth, p );
 
                 var circleCtx = {
@@ -505,7 +505,7 @@ export default class PlanetGroup
                     fillStyle: _fillStyle,
                     lineWidth : _lineWidth,
                     strokeStyle : _strokeStyle,
-                    lineAlpha : _lineAlpha,
+                    strokeAlpha : _lineAlpha,
                     cursor: "pointer"
                 };
 
@@ -709,7 +709,7 @@ export default class PlanetGroup
         if( planet.nodeElement ){
             planet.nodeElement.context.lineWidth = this._getProp( this.node.select.lineWidth , planet );
             planet.nodeElement.context.strokeStyle = this._getProp( this.node.select.strokeStyle , planet );
-            planet.nodeElement.context.lineAlpha = this._getProp( this.node.select.lineAlpha , planet );
+            planet.nodeElement.context.strokeAlpha = this._getProp( this.node.select.strokeAlpha , planet );
         };
     
         for( var i = 0; i<this.selectInds.length; i++ ){
@@ -727,7 +727,7 @@ export default class PlanetGroup
 
         if( planet.nodeElement ){
             planet.nodeElement.context.lineWidth = this._getProp( this.node.lineWidth , planet );
-            planet.nodeElement.context.lineAlpha = this._getProp( this.node.lineAlpha , planet );
+            planet.nodeElement.context.strokeAlpha = this._getProp( this.node.strokeAlpha , planet );
         };
 
         this.selectInds.push( ind );
@@ -747,7 +747,7 @@ export default class PlanetGroup
         if( planet.nodeElement ){
             planet.nodeElement.context.lineWidth = this._getProp( this.node.focus.lineWidth , planet );
             planet.nodeElement.context.strokeStyle = this._getProp( this.node.focus.strokeStyle , planet );
-            planet.nodeElement.context.lineAlpha = this._getProp( this.node.focus.lineAlpha , planet ); 
+            planet.nodeElement.context.strokeAlpha = this._getProp( this.node.focus.strokeAlpha , planet ); 
         };
     }
     unfocusAt( ind ){
@@ -758,7 +758,7 @@ export default class PlanetGroup
 
         if( planet.nodeElement ){
             planet.nodeElement.context.lineWidth = this._getProp( this.node.lineWidth , planet );
-            planet.nodeElement.context.lineAlpha = this._getProp( this.node.lineAlpha , planet );
+            planet.nodeElement.context.strokeAlpha = this._getProp( this.node.strokeAlpha , planet );
         };
     }
 

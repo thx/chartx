@@ -319,7 +319,7 @@ export default class CloudGraphs extends GraphsBase
 
         var nctx = nodeData._node.context; 
         nctx.lineWidth = this.node.select.lineWidth;
-        nctx.lineAlpha = this.node.select.lineAlpha;
+        nctx.strokeAlpha = this.node.select.strokeAlpha;
         nctx.strokeStyle = this.node.select.strokeStyle;
 
         nodeData.selected = true;

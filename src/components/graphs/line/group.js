@@ -807,7 +807,7 @@ export default class LineGraphsGroup extends event.Dispatcher
 
         };
         
-        search( this._bline.context.pointList );
+        this._bline && search( this._bline.context.pointList );
         
         if( !point || point.y == undefined ){
             return null;
