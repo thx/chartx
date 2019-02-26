@@ -17,6 +17,12 @@ export default class markCloumn extends Component
                 detail: 'x的像素值',
                 default: null
             },
+            markTo : {
+                detail : '标准哪个目标字段',
+                documentation: '如果设置了这个字段，那么line的起点将是这个graphs上的node节点',
+                default : null
+            },
+
             line : {
                 detail: '线的配置',
                 propertys: {
@@ -31,6 +37,14 @@ export default class markCloumn extends Component
                     lineType: {
                         detail: '线的样式，虚线(dashed)实线(solid)',
                         default: 'solid'
+                    },
+                    startY: {
+                        detail: 'startY',
+                        default: 0
+                    },
+                    endY: {
+                        detail: 'startY',
+                        default: null  //'node'
                     }
                 }
             },
@@ -87,8 +101,6 @@ export default class markCloumn extends Component
         this.sprite.context.y = this.origin.y;
 
         this._widget();
-
-        this.sprite.addChild( this._nodes );
     }
 
     reset( opt ){
@@ -104,16 +116,77 @@ export default class markCloumn extends Component
         var xNode;
         if( this.xVal != null ){
             xNode = _xAxis.getNodeInfoOfVal( this.xVal )
-        }
+        };
         if( this.x != null ){
             xNode = _xAxis.getNodeInfoOfPos( this.x )
         };
-        var lineOpt = _.extend(true,{
+
+        
+        me._nodes.removeAllChildren();
+        me.nodes = [];
+
+        me.on("complete", function(){
+            me._drawLine( xNode );
+            me._drawNodes( xNode );
+        });
+
+        var i=0;
+
+        var _graphs = this.app.getGraphs();
+        _.each( _graphs, function( _g ){
+            function _f(){
+                i++;
+
+                if( me.markTo && _.flatten([ _g.field ]).indexOf( me.markTo ) == -1 ){
+                    //非markTo  的graph 跳过
+                } else {
+                    var nodes = _g.getNodesOfPos( xNode.x );
+                    if( me.markTo ){
+                        me.nodes = [ _.find( nodes, function( node ){
+                            return node.field == me.markTo
+                        } ) ];
+                    } else {
+                        me.nodes = me.nodes.concat( nodes );
+                    }
+                    
+                };
+
+                if( i == _graphs.length ){
+                    me.fire("complete");
+                };
+            };
+            if( _g.inited ){
+                _f();
+            } else {
+                _g.on('complete', function(){
+                    _f();
+                });
+            };
+        } );
+    }
+
+    _drawLine( xNode ){
+        var me = this;
+        var lineOpt     = _.extend(true,{
             x           : parseInt(xNode.x),
-            start       : { x: 0, y: -me.height },
+            start       : { x: 0, y: 0 },
+            end         : { x: 0, y: -me.height }, //默认贯穿整个画布
             lineWidth   : 1,
             strokeStyle : "#cccccc" 
         } , this.line);
+
+        if( me.line.endY != null ){
+            var y = 0;
+            if( _.isNumber( me.line.endY ) ){
+                y = me.line.endY;
+            };
+            if( me.line.endY == 'auto' ){
+                _.each( me.nodes, function( node ){
+                    y = Math.min( node.y );
+                } );
+            };
+            lineOpt.end.y = y;
+        };
 
         if( this._line ){
             _.extend( this._line.context , lineOpt );
@@ -131,66 +204,46 @@ export default class markCloumn extends Component
                 if( me.xVal != null ){
                     e.eventInfo.xAxis.value = me.xVal;
                     e.eventInfo.xAxis.text = me.xVal+'';
-                    e.eventInfo.title = me.xVal+''
+                    e.eventInfo.title = me.xVal+'';
                 };
                 me.app.fire( e.type, e );
             });
         };
         //线条渲染结束
+    }
 
-        var _graphs = this.app.getGraphs();
-        me._nodes.removeAllChildren();
-        me.nodes = [];
+    _drawNodes(){
+        var me = this;
+        _.each( me.nodes, function( nodeData ){
+            var nodeCtx = _.extend({
+                x           : nodeData.x,
+                y           : nodeData.y, 
+                cursor      : "pointer",
+                r           : me.node.radius,
+                lineWidth   : me.node.lineWidth   || nodeData.lineWidth,
+                strokeStyle : me.node.strokeStyle || nodeData.color,
+                fillStyle   : me.node.fillStyle   || nodeData.fillStyle
+            });
+            var _node = new Circle({
+                context : nodeCtx
+            });
 
-        var i=0;
-        _.each( _graphs, function( _g ){
-            function _f(){
-                i++
-                var nodes = _g.getNodesOfPos( xNode.x );
-                me.nodes = me.nodes.concat( nodes );
-
-                _.each( nodes, function( nodeData ){
-                    var nodeCtx = _.extend({
-                        x           : nodeData.x,
-                        y           : nodeData.y, 
-                        cursor      : "pointer",
-                        r           : me.node.radius,
-                        lineWidth   : me.node.lineWidth   || nodeData.lineWidth,
-                        strokeStyle : me.node.strokeStyle || nodeData.color,
-                        fillStyle   : me.node.fillStyle   || nodeData.fillStyle
-                    });
-                    var _node = new Circle({
-                        context : nodeCtx
-                    });
-
-                    _node.on( event.types.get() , function (e) {
-                        e.eventInfo = {
-                            //iNode : this.iNode,
-                            xAxis : {},
-                            nodes : [ nodeData ]
-                        };
-                        if( me.xVal != null ){
-                            e.eventInfo.xAxis.value = me.xVal;
-                            e.eventInfo.xAxis.text = me.xVal+'';
-                            e.eventInfo.title = me.xVal+''
-                        };
-                        me.app.fire( e.type, e );
-                    });
-
-                    me._nodes.addChild( _node );
-                } );
-
-                if( i == _graphs.length ){
-                    me.fire("complete");
+            _node.on( event.types.get() , function (e) {
+                e.eventInfo = {
+                    //iNode : this.iNode,
+                    xAxis : {},
+                    nodes : [ nodeData ]
                 };
-            };
-            if( _g.inited ){
-                _f();
-            } else {
-                _g.on('complete', function(){
-                    _f();
-                });
-            };
+                if( me.xVal != null ){
+                    e.eventInfo.xAxis.value = me.xVal;
+                    e.eventInfo.xAxis.text = me.xVal+'';
+                    e.eventInfo.title = me.xVal+''
+                };
+                me.app.fire( e.type, e );
+            });
+
+            me._nodes.addChild( _node );
         } );
+        this.sprite.addChild( this._nodes );
     }
 }

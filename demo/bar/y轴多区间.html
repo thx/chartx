@@ -49,15 +49,24 @@
                         },
                         yAxis: [
                             {
-                                middleweight: 6000
+                                middleWeight: 6000,
+                                middleWeightPos: 0.8
                             }
-                        ]
+                        ],
+                        grid : {
+                            fill: {
+                                enabled : true,
+                                //fillStyle : ['red','yellow'],
+                                //alpha: 0.5
+                            }
+                        }
                     },
                     graphs: [
                         {
                             type: "bar",
                             field: "click"
                         }
+
                     ]
                 }
                 
