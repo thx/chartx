@@ -39482,7 +39482,7 @@ var Chartx = (function () {
               },
               endY: {
                 detail: 'startY',
-                default: 'auto' //auto
+                default: null //'node'
 
               }
             }
@@ -39632,18 +39632,25 @@ var Chartx = (function () {
             x: 0,
             y: -me.height
           },
+          //默认贯穿整个画布
           lineWidth: 1,
           strokeStyle: "#cccccc"
-        }, this.line); //if( me.markTo ){
+        }, this.line);
 
+        if (me.line.endY != null) {
+          var y = 0;
 
-        var y = 0;
+          if (_.isNumber(me.line.endY)) {
+            y = me.line.endY;
+          }
 
-        _.each(me.nodes, function (node) {
-          y = Math.min(node.y);
-        });
-
-        lineOpt.end.y = y; //};
+          if (me.line.endY == 'auto') {
+            _.each(me.nodes, function (node) {
+              y = Math.min(node.y);
+            });
+          }
+          lineOpt.end.y = y;
+        }
 
         if (this._line) {
           _.extend(this._line.context, lineOpt);

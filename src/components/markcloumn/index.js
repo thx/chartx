@@ -1,7 +1,6 @@
 import Component from "../component"
 import Canvax from "canvax"
 import { _, getDefaultProps, event } from "mmvis"
-import { METHODS } from "http";
 
 const Line = Canvax.Shapes.Line;
 const Circle = Canvax.Shapes.Circle;
@@ -45,7 +44,7 @@ export default class markCloumn extends Component
                     },
                     endY: {
                         detail: 'startY',
-                        default: 'auto'  //auto
+                        default: null  //'node'
                     }
                 }
             },
@@ -171,18 +170,23 @@ export default class markCloumn extends Component
         var lineOpt     = _.extend(true,{
             x           : parseInt(xNode.x),
             start       : { x: 0, y: 0 },
-            end         : { x: 0, y: -me.height },
+            end         : { x: 0, y: -me.height }, //默认贯穿整个画布
             lineWidth   : 1,
             strokeStyle : "#cccccc" 
         } , this.line);
 
-        //if( me.markTo ){
+        if( me.line.endY != null ){
             var y = 0;
-            _.each( me.nodes, function( node ){
-                y = Math.min( node.y );
-            } );
+            if( _.isNumber( me.line.endY ) ){
+                y = me.line.endY;
+            };
+            if( me.line.endY == 'auto' ){
+                _.each( me.nodes, function( node ){
+                    y = Math.min( node.y );
+                } );
+            };
             lineOpt.end.y = y;
-        //};
+        };
 
         if( this._line ){
             _.extend( this._line.context , lineOpt );
