@@ -50,12 +50,12 @@ function jsonToArrayForRelation(data, options) {
     let key = options.field || defaultFieldKey;
     let label = options.node && options.node.content && options.node.content.field;
 
-    if (!checkData(data,key)) {
+    if (!checkData(data, key)) {
         console.error('该数据不能正确绘制，请提供数组对象形式的数据！');
         return result;
     }
-    
-    
+
+
 
     let childrens = [];
     let index = 0;
@@ -101,7 +101,7 @@ function jsonToArrayForRelation(data, options) {
         }
         index++;
     }
-
+    wm = null;
     return result;
 
 }
