@@ -730,10 +730,14 @@ var Chartx = (function () {
             default: null,
             documentation: '水位data，需要混入 计算 dataSection， 如果有设置waterLine， dataSection的最高水位不会低于这个值'
           },
-          middleweight: {
-            detail: '区间等分线',
+          middleWeight: {
+            detail: '区间分隔线',
             default: null,
             documentation: '如果middleweight有设置的话 dataSectionGroup 为被middleweight分割出来的n个数组>..[ [0,50 , 100],[100,500,1000] ]'
+          },
+          middleWeightPos: {
+            detail: '区间分隔线的物理位置，百分比,默认 0.5 ',
+            default: null
           },
           symmetric: {
             detail: '自动正负对称',
@@ -957,6 +961,8 @@ var Chartx = (function () {
           this.dataSection = _dataSection || this._opt.dataSection;
           this.dataSectionGroup = [this.dataSection];
         }
+
+        this._middleWeightPos();
       }
     }, {
       key: "_getDataSection",
@@ -1092,10 +1098,11 @@ var Chartx = (function () {
     }, {
       key: "_middleweight",
       value: function _middleweight() {
-        if (this.middleweight) {
+
+        if (this.middleWeight) {
           //支持多个量级的设置
-          if (!_.isArray(this.middleweight)) {
-            this.middleweight = [this.middleweight];
+          if (!_.isArray(this.middleWeight)) {
+            this.middleWeight = [this.middleWeight];
           }
 
           var dMin = _.min(this.dataSection);
@@ -1105,18 +1112,18 @@ var Chartx = (function () {
           var newDS = [dMin];
           var newDSG = [];
 
-          for (var i = 0, l = this.middleweight.length; i < l; i++) {
+          for (var i = 0, l = this.middleWeight.length; i < l; i++) {
             var preMiddleweight = dMin;
 
             if (i > 0) {
-              preMiddleweight = this.middleweight[i - 1];
+              preMiddleweight = this.middleWeight[i - 1];
             }
-            var middleVal = preMiddleweight + parseInt((this.middleweight[i] - preMiddleweight) / 2);
+            var middleVal = preMiddleweight + parseInt((this.middleWeight[i] - preMiddleweight) / 2);
             newDS.push(middleVal);
-            newDS.push(this.middleweight[i]);
-            newDSG.push([preMiddleweight, middleVal, this.middleweight[i]]);
+            newDS.push(this.middleWeight[i]);
+            newDSG.push([preMiddleweight, middleVal, this.middleWeight[i]]);
           }
-          var lastMW = this.middleweight.slice(-1)[0];
+          var lastMW = this.middleWeight.slice(-1)[0];
 
           if (dMax > lastMW) {
             newDS.push(lastMW + (dMax - lastMW) / 2);
@@ -1128,17 +1135,66 @@ var Chartx = (function () {
           this.dataSection = newDS;
           this.dataSectionGroup = newDSG;
         }
+      }
+    }, {
+      key: "_middleWeightPos",
+      value: function _middleWeightPos() {
+        if (this.middleWeightPos) {
+          if (!_.isArray(this.middleWeightPos)) {
+            this.middleWeightPos = [this.middleWeightPos];
+          }
+          //如果大于1了则默认按照均分设置
+
+          var _count = 0;
+
+          _.each(this.middleWeightPos, function (pos) {
+            _count += pos;
+          });
+
+          if (_count < 1) {
+            this.middleWeightPos.push(1 - _count);
+          }
+
+          if (_count > 1) {
+            this.middleWeightPos = null;
+          }
+        }
+
+        if (this.middleWeight) {
+          if (!this.middleWeightPos) {
+            this.middleWeightPos = [];
+            var _prePos = 0;
+
+            _.each(this.middleWeight, function () {
+              var _pos = 1 / (me.middleWeight.length + 1);
+
+              _prePos += _pos;
+              me.middleWeightPos.push(_pos);
+            });
+
+            this.middleWeightPos.push(1 - _prePos);
+          }
+        } else {
+          this.middleWeightPos = [1];
+        }
       } //origin 对应 this.origin 的值
 
     }, {
       key: "_getOriginTrans",
       value: function _getOriginTrans(origin) {
         var pos = 0;
-        var dsgLen = this.dataSectionGroup.length;
-        var groupLength = this.axisLength / dsgLen;
+        var dsgLen = this.dataSectionGroup.length; //var groupLength = this.axisLength / dsgLen;
 
         for (var i = 0, l = dsgLen; i < l; i++) {
           var ds = this.dataSectionGroup[i];
+          var groupLength = this.axisLength * this.middleWeightPos[i];
+          var preGroupLenth = 0;
+
+          _.each(this.middleWeightPos, function (mp, mi) {
+            if (mi < i) {
+              preGroupLenth += me.axisLength * mp;
+            }
+          });
 
           if (this.layoutType == "proportion") {
             var min = _.min(ds);
@@ -1148,7 +1204,7 @@ var Chartx = (function () {
             var amountABS = Math.abs(max - min);
 
             if (origin >= min && origin <= max) {
-              pos = (origin - min) / amountABS * groupLength + i * groupLength;
+              pos = (origin - min) / amountABS * groupLength + preGroupLenth;
               break;
             }
           }
@@ -1216,17 +1272,25 @@ var Chartx = (function () {
     }, {
       key: "getPosOf",
       value: function getPosOf(opt) {
+        var me = this;
         var pos;
 
         var cellCount = this._getCellCount(); //dataOrg上面的真实数据节点数，把轴分成了多少个节点
 
 
         if (this.layoutType == "proportion") {
-          var dsgLen = this.dataSectionGroup.length;
-          var groupLength = this.axisLength / dsgLen;
+          var dsgLen = this.dataSectionGroup.length; //var groupLength = this.axisLength / dsgLen;
 
           for (var i = 0, l = dsgLen; i < l; i++) {
             var ds = this.dataSectionGroup[i];
+            var groupLength = this.axisLength * this.middleWeightPos[i];
+            var preGroupLenth = 0;
+
+            _.each(this.middleWeightPos, function (mp, mi) {
+              if (mi < i) {
+                preGroupLenth += me.axisLength * mp;
+              }
+            });
 
             var min = _.min(ds);
 
@@ -1243,10 +1307,10 @@ var Chartx = (function () {
               var maxGroupDisABS = Math.max(Math.abs(max - _origin), Math.abs(_origin - min));
               var amountABS = Math.abs(max - min);
               var h = maxGroupDisABS / amountABS * groupLength;
-              pos = (val - _origin) / maxGroupDisABS * h + i * groupLength;
+              pos = (val - _origin) / maxGroupDisABS * h + preGroupLenth;
 
               if (isNaN(pos)) {
-                pos = parseInt(i * groupLength);
+                pos = parseInt(preGroupLenth);
               }
               break;
             }
@@ -1332,15 +1396,24 @@ var Chartx = (function () {
         var val;
 
         if (this.layoutType == "proportion") {
-          var groupLength = this.axisLength / this.dataSectionGroup.length;
+          var dsgLen = this.dataSectionGroup.length; //var groupLength = this.axisLength / dsgLen;
 
           _.each(this.dataSectionGroup, function (ds, i) {
+            var groupLength = me.axisLength * me.middleWeightPos[i];
+            var preGroupLenth = 0;
+
+            _.each(me.middleWeightPos, function (mp, mi) {
+              if (mi < i) {
+                preGroupLenth += me.axisLength * mp;
+              }
+            });
+
             if (parseInt(ind / groupLength) == i || i == me.dataSectionGroup.length - 1) {
               var min = _.min(ds);
 
               var max = _.max(ds);
 
-              val = min + (max - min) / groupLength * (ind - groupLength * i);
+              val = min + (max - min) / groupLength * (ind - preGroupLenth);
               return false;
             }
           });
@@ -12284,15 +12357,22 @@ var Chartx = (function () {
           self.yGroupSp = new Canvax.Display.Sprite(), self.sprite.addChild(self.yGroupSp);
 
           for (var g = 0, gl = _yAxis.dataSectionGroup.length; g < gl; g++) {
-            var yGroupHeight = _yAxis.height / gl;
+            var beginY = _yAxis.getPosOf({
+              val: _yAxis.dataSectionGroup[g][0]
+            });
+
+            var endY = _yAxis.getPosOf({
+              val: _yAxis.dataSectionGroup[g].slice(-1)[0]
+            });
+
             var groupRect = new Rect$1({
               context: {
                 x: 0,
-                y: -yGroupHeight * g,
+                y: -beginY,
                 width: self.width,
-                height: -yGroupHeight,
-                fillStyle: self.fill.fillStyle || "#000",
-                fillAlpha: self.fill.alpha || 0.025 * (g % 2)
+                height: -(endY - beginY),
+                fillStyle: self._getProp(self.fill.fillStyle, g, "#000"),
+                fillAlpha: self._getProp(self.fill.alpha, g, 0.025 * (g % 2))
               }
             });
             self.yGroupSp.addChild(groupRect);
@@ -12348,6 +12428,26 @@ var Chartx = (function () {
             self.yAxisSp.addChild(line);
           }
         }
+      }
+    }, {
+      key: "_getProp",
+      value: function _getProp(prop, i, def) {
+        var res = def;
+
+        if (prop != null && prop != undefined) {
+          if (_.isString(prop) || _.isNumber(prop)) {
+            res = prop;
+          }
+
+          if (_.isFunction(prop)) {
+            res = prop.apply(this, [prop, i, def]);
+          }
+
+          if (_.isArray(prop)) {
+            res = prop[i];
+          }
+        }
+        return res;
       }
     }]);
 
@@ -16232,7 +16332,7 @@ var Chartx = (function () {
           search(_pl);
         };
 
-        search(this._bline.context.pointList);
+        this._bline && search(this._bline.context.pointList);
 
         if (!point || point.y == undefined) {
           return null;
@@ -17391,6 +17491,14 @@ var Chartx = (function () {
         }
 
         nodeData.selected = false;
+      }
+    }, {
+      key: "getNodesOfPos",
+      value: function getNodesOfPos(x, y) {
+        //sat的 getNodesOfPos 一定要有两个点
+        var _nodesInfoList = []; //节点信息集合
+
+        return _nodesInfoList;
       }
     }]);
 
@@ -39348,6 +39456,11 @@ var Chartx = (function () {
             detail: 'x的像素值',
             default: null
           },
+          markTo: {
+            detail: '标准哪个目标字段',
+            documentation: '如果设置了这个字段，那么line的起点将是这个graphs上的node节点',
+            default: null
+          },
           line: {
             detail: '线的配置',
             propertys: {
@@ -39362,6 +39475,15 @@ var Chartx = (function () {
               lineType: {
                 detail: '线的样式，虚线(dashed)实线(solid)',
                 default: 'solid'
+              },
+              startY: {
+                detail: 'startY',
+                default: 0
+              },
+              endY: {
+                detail: 'startY',
+                default: 'auto' //auto
+
               }
             }
           },
@@ -39425,8 +39547,6 @@ var Chartx = (function () {
         this.sprite.context.y = this.origin.y;
 
         this._widget();
-
-        this.sprite.addChild(this._nodes);
       }
     }, {
       key: "reset",
@@ -39455,15 +39575,75 @@ var Chartx = (function () {
           xNode = _xAxis.getNodeInfoOfPos(this.x);
         }
 
+        me._nodes.removeAllChildren();
+
+        me.nodes = [];
+        me.on("complete", function () {
+          me._drawLine(xNode);
+
+          me._drawNodes(xNode);
+        });
+        var i = 0;
+
+        var _graphs = this.app.getGraphs();
+
+        _.each(_graphs, function (_g) {
+          function _f() {
+            i++;
+
+            if (me.markTo && _.flatten([_g.field]).indexOf(me.markTo) == -1) ; else {
+              var nodes = _g.getNodesOfPos(xNode.x);
+
+              if (me.markTo) {
+                me.nodes = [_.find(nodes, function (node) {
+                  return node.field == me.markTo;
+                })];
+              } else {
+                me.nodes = me.nodes.concat(nodes);
+              }
+            }
+
+            if (i == _graphs.length) {
+              me.fire("complete");
+            }
+          }
+
+          if (_g.inited) {
+            _f();
+          } else {
+            _g.on('complete', function () {
+              _f();
+            });
+          }
+        });
+      }
+    }, {
+      key: "_drawLine",
+      value: function _drawLine(xNode) {
+        var me = this;
+
         var lineOpt = _.extend(true, {
           x: parseInt(xNode.x),
           start: {
+            x: 0,
+            y: 0
+          },
+          end: {
             x: 0,
             y: -me.height
           },
           lineWidth: 1,
           strokeStyle: "#cccccc"
-        }, this.line);
+        }, this.line); //if( me.markTo ){
+
+
+        var y = 0;
+
+        _.each(me.nodes, function (node) {
+          y = Math.min(node.y);
+        });
+
+        lineOpt.end.y = y; //};
 
         if (this._line) {
           _.extend(this._line.context, lineOpt);
@@ -39488,68 +39668,46 @@ var Chartx = (function () {
             me.app.fire(e.type, e);
           });
         }
+      }
+    }, {
+      key: "_drawNodes",
+      value: function _drawNodes() {
+        var me = this;
 
-        var _graphs = this.app.getGraphs();
+        _.each(me.nodes, function (nodeData) {
+          var nodeCtx = _.extend({
+            x: nodeData.x,
+            y: nodeData.y,
+            cursor: "pointer",
+            r: me.node.radius,
+            lineWidth: me.node.lineWidth || nodeData.lineWidth,
+            strokeStyle: me.node.strokeStyle || nodeData.color,
+            fillStyle: me.node.fillStyle || nodeData.fillStyle
+          });
 
-        me._nodes.removeAllChildren();
+          var _node = new Circle$b({
+            context: nodeCtx
+          });
 
-        me.nodes = [];
-        var i = 0;
+          _node.on(types.get(), function (e) {
+            e.eventInfo = {
+              //iNode : this.iNode,
+              xAxis: {},
+              nodes: [nodeData]
+            };
 
-        _.each(_graphs, function (_g) {
-          function _f() {
-            i++;
-
-            var nodes = _g.getNodesOfPos(xNode.x);
-
-            me.nodes = me.nodes.concat(nodes);
-
-            _.each(nodes, function (nodeData) {
-              var nodeCtx = _.extend({
-                x: nodeData.x,
-                y: nodeData.y,
-                cursor: "pointer",
-                r: me.node.radius,
-                lineWidth: me.node.lineWidth || nodeData.lineWidth,
-                strokeStyle: me.node.strokeStyle || nodeData.color,
-                fillStyle: me.node.fillStyle || nodeData.fillStyle
-              });
-
-              var _node = new Circle$b({
-                context: nodeCtx
-              });
-
-              _node.on(types.get(), function (e) {
-                e.eventInfo = {
-                  //iNode : this.iNode,
-                  xAxis: {},
-                  nodes: [nodeData]
-                };
-
-                if (me.xVal != null) {
-                  e.eventInfo.xAxis.value = me.xVal;
-                  e.eventInfo.xAxis.text = me.xVal + '';
-                  e.eventInfo.title = me.xVal + '';
-                }
-                me.app.fire(e.type, e);
-              });
-
-              me._nodes.addChild(_node);
-            });
-
-            if (i == _graphs.length) {
-              me.fire("complete");
+            if (me.xVal != null) {
+              e.eventInfo.xAxis.value = me.xVal;
+              e.eventInfo.xAxis.text = me.xVal + '';
+              e.eventInfo.title = me.xVal + '';
             }
-          }
+            me.app.fire(e.type, e);
+          });
 
-          if (_g.inited) {
-            _f();
-          } else {
-            _g.on('complete', function () {
-              _f();
-            });
-          }
+          me._nodes.addChild(_node);
         });
+
+        this.sprite.addChild(this._nodes);
       }
     }]);
 

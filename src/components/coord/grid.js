@@ -145,16 +145,24 @@ export default class rectGrid extends event.Dispatcher
         
         if( self.fill.enabled && self.app && _yAxis && _yAxis.dataSectionGroup && _yAxis.dataSectionGroup.length>1 ){
             self.yGroupSp  = new Canvax.Display.Sprite(),  self.sprite.addChild(self.yGroupSp);
-            for( var g = 0 , gl=_yAxis.dataSectionGroup.length ; g < gl ; g++ ){
-                var yGroupHeight = _yAxis.height / gl ;
+            
+            for( var g = 0 , gl = _yAxis.dataSectionGroup.length ; g < gl ; g++ ){
+                
+                var beginY =_yAxis.getPosOf({
+                    val : _yAxis.dataSectionGroup[g][0]
+                });
+                var endY =_yAxis.getPosOf({
+                    val : _yAxis.dataSectionGroup[g].slice(-1)[0]
+                });
+                
                 var groupRect = new Rect({
                     context : {
                         x : 0,
-                        y : -yGroupHeight * g,
+                        y : -beginY,
                         width : self.width,
-                        height : -yGroupHeight,
-                        fillStyle : self.fill.fillStyle || "#000",
-                        fillAlpha : self.fill.alpha || 0.025 * (g%2)
+                        height : -( endY - beginY ),
+                        fillStyle : self._getProp( self.fill.fillStyle, g, "#000" ),
+                        fillAlpha : self._getProp( self.fill.alpha, g, 0.025 * (g%2) )
                     }
                 });
                 
@@ -214,5 +222,21 @@ export default class rectGrid extends event.Dispatcher
                 self.yAxisSp.addChild(line);
             };
         };
+    }
+
+    _getProp( prop, i, def ){
+        var res = def;
+        if( prop != null && prop != undefined ){
+            if( _.isString( prop ) || _.isNumber( prop ) ){
+                res = prop;
+            }
+            if( _.isFunction( prop ) ){
+                res = prop.apply( this, [ prop, i, def ] );
+            }
+            if( _.isArray( prop ) ){
+                res = prop[ i ]
+            }
+        };
+        return res;
     }
 }

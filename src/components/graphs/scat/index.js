@@ -251,7 +251,7 @@ export default class ScatGraphs extends GraphsBase
     resetData( dataFrame , dataTrigger )
     {
         this.dataFrame = dataFrame;
-        this.data = this._trimGraphs(); 
+        this.data = this._trimGraphs();
         this._widget();
         this.grow();
     }
@@ -798,6 +798,13 @@ export default class ScatGraphs extends GraphsBase
         }
 
         nodeData.selected = false;
+    }
+
+    getNodesOfPos( x, y )
+    {
+        //sat的 getNodesOfPos 一定要有两个点
+        var _nodesInfoList = []; //节点信息集合
+        return _nodesInfoList;
     }
 
 }
