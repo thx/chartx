@@ -308,7 +308,6 @@ export default class Relation extends GraphsBase {
         this.data = this._initData();
 
         if (this.layout == "dagre") {
-            debugger
             this.dagreLayout(this.data);
         } else if (_.isFunction(this.layout)) {
             //layout需要设置好data中nodes的xy， 以及edges的points，和 size的width，height
