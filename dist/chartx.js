@@ -99,10 +99,6 @@ var Chartx = (function () {
     return _assertThisInitialized(self);
   }
 
-  function _readOnlyError(name) {
-    throw new Error("\"" + name + "\" is read-only");
-  }
-
   var _ = {};
   var breaker = {};
   var ArrayProto = Array.prototype,
@@ -28287,6 +28283,9 @@ var Chartx = (function () {
     return Progress;
   }(GraphsBase);
 
+  /**
+   * 把json数据转化为关系图的数据格式
+   */
   //如：
   // [{
   // 	name: 'xxxx',
@@ -28384,9 +28383,9 @@ var Chartx = (function () {
 
     while (item = childrens.pop()) {
       _loop();
-    }
+    } // wm = null;
 
-    wm = (_readOnlyError("wm"), null);
+
     return result;
   }
 

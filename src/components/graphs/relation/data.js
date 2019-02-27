@@ -101,7 +101,7 @@ function jsonToArrayForRelation(data, options) {
         }
         index++;
     }
-    wm = null;
+   // wm = null;
     return result;
 
 }
