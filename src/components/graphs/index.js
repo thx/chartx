@@ -102,13 +102,15 @@ export default class GraphsBase extends Component
                     fn.apply( this , [ e , e.eventInfo.nodes ] );
                 };
             } else {
+                /*
                 var _arr = [];
                 _.each( arguments, function(item, i){
                     if( !!i ){
                         _arr.push( item );
                     }
                 } );
-                fn.apply( this, _arr );
+                */
+                fn.apply( this, arguments );
             }
             
         };

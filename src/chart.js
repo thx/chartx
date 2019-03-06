@@ -591,6 +591,14 @@ export default class Chart extends event.Dispatcher
     {
         var me = this;
         this.on(event.types.get() , function(e){
+            //触发每个graphs级别的事件，
+            //用户交互事件先执行，还可以修改e的内容修改tips内容
+            if( e.eventInfo ){
+                _.each( this.getGraphs(), function( graph ){
+                    graph.triggerEvent( e );
+                } );
+            };
+
             var _tips = me.getComponent({name:'tips'});
             var _coord = me.getComponent({name:'coord'});
             if( _tips ){
@@ -607,13 +615,6 @@ export default class Chart extends event.Dispatcher
                     _tips.hide(e);
                     me._tipsPointerHideAtAllGraphs( e );
                 };
-            };
-
-            //触发每个graphs级别的事件，
-            if( e.eventInfo ){
-                _.each( this.getGraphs(), function( graph ){
-                    graph.triggerEvent( e );
-                } );
             };
         });
 

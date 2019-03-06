@@ -3721,6 +3721,10 @@ var Chartx = (function () {
     toArray: function toArray(transpose, out) {
       if (arguments.length == 0) {
         //canvas2d 中不会有任何的参数传入
+        if (isNaN(this.a) || isNaN(this.b) || isNaN(this.c) || isNaN(this.d) || isNaN(this.tx) || isNaN(this.ty)) {
+          //不是一个合格的矩阵
+          return null;
+        }
         return [this.a, this.b, this.c, this.d, this.tx, this.ty];
       } //webgl的glsl需要用的时候，需要传入transpose 来转换为一个3*3完整矩阵
 
@@ -6560,7 +6564,14 @@ var Chartx = (function () {
         if (!$MC.visible || displayObject.isClip) {
           return;
         }
-        ctx.setTransform.apply(ctx, displayObject.worldTransform.toArray());
+        var worldMatrixArr = displayObject.worldTransform.toArray();
+
+        if (worldMatrixArr) {
+          ctx.setTransform.apply(ctx, worldMatrixArr);
+        } else {
+          //如果这个displayObject的世界矩阵有问题，那么就不绘制了
+          return;
+        }
         var isClipSave = false;
 
         if (displayObject.clip && displayObject.clip.graphics) {
@@ -10327,6 +10338,14 @@ var Chartx = (function () {
       value: function _bindEvent() {
         var me = this;
         this.on(types.get(), function (e) {
+          //触发每个graphs级别的事件，
+          //用户交互事件先执行，还可以修改e的内容修改tips内容
+          if (e.eventInfo) {
+            _.each(this.getGraphs(), function (graph) {
+              graph.triggerEvent(e);
+            });
+          }
+
           var _tips = me.getComponent({
             name: 'tips'
           });
@@ -10355,12 +10374,6 @@ var Chartx = (function () {
 
               me._tipsPointerHideAtAllGraphs(e);
             }
-          }
-
-          if (e.eventInfo) {
-            _.each(this.getGraphs(), function (graph) {
-              graph.triggerEvent(e);
-            });
           }
         });
       } //默认的基本tipsinfo处理，极坐标和笛卡尔坐标系统会覆盖
@@ -14267,15 +14280,15 @@ var Chartx = (function () {
               fn.apply(this, [e, e.eventInfo.nodes]);
             }
           } else {
+            /*
             var _arr = [];
-
-            _.each(arguments, function (item, i) {
-              if (!!i) {
-                _arr.push(item);
-              }
-            });
-
-            fn.apply(this, _arr);
+            _.each( arguments, function(item, i){
+                if( !!i ){
+                    _arr.push( item );
+                }
+            } );
+            */
+            fn.apply(this, arguments);
           }
         }
       } //所有graphs默认的grow
@@ -14777,7 +14790,9 @@ var Chartx = (function () {
                       iNode: this.iNode //TODO:这里设置了的话，会导致多graphs里获取不到别的graphs的nodes信息了
                       //nodes : me.getNodesAt( this.iNode ) 
 
-                    };
+                    }; //触发root统一设置e.eventInfo.nodes,所以上面不需要设置
+
+                    me.app.fire(e.type, e);
 
                     if (me.select.enabled && e.type == me.select.triggerEventType) {
                       //如果开启了图表的选中交互
@@ -14794,8 +14809,6 @@ var Chartx = (function () {
                         });
                       }
                     }
-
-                    me.app.fire(e.type, e);
                   });
                 }
               }
@@ -15619,12 +15632,13 @@ var Chartx = (function () {
       }
     }]);
 
-    function LineGraphsGroup(fieldMap, iGroup, opt, ctx, h, w) {
+    function LineGraphsGroup(fieldMap, iGroup, opt, ctx, h, w, _graphs) {
       var _this;
 
       _classCallCheck(this, LineGraphsGroup);
 
       _this = _possibleConstructorReturn(this, _getPrototypeOf(LineGraphsGroup).call(this));
+      _this._graphs = _graphs;
       _this._opt = opt;
       _this.fieldMap = fieldMap;
       _this.field = null; //在extend之后要重新设置
@@ -15936,6 +15950,14 @@ var Chartx = (function () {
           //线条
           context: blineCtx
         });
+        bline.on(types.get(), function (e) {
+          e.eventInfo = {
+            trigger: me.line,
+            nodes: []
+          };
+
+          me._graphs.app.fire(e.type, e);
+        });
 
         if (!this.line.enabled) {
           bline.context.visible = false;
@@ -15950,11 +15972,18 @@ var Chartx = (function () {
             globalAlpha: _.isArray(me.area.alpha) ? 1 : me.area.alpha
           }
         });
+        area.on(types.get(), function (e) {
+          e.eventInfo = {
+            trigger: me.area,
+            nodes: []
+          };
+
+          me._graphs.app.fire(e.type, e);
+        });
 
         if (!this.area.enabled) {
           area.context.visible = false;
         }
-
         me.sprite.addChild(area);
         me._area = area;
 
@@ -16603,7 +16632,7 @@ var Chartx = (function () {
           var iGroup = _.indexOf(_flattenField, field);
 
           var group = new LineGraphsGroup(fieldMap, iGroup, //不同于fieldMap.ind
-          me._opt, me.ctx, me.height, me.width);
+          me._opt, me.ctx, me.height, me.width, me);
           group.draw({
             animation: me.animation && !opt.resize
           }, g.data);
@@ -16952,6 +16981,9 @@ var Chartx = (function () {
             }
           });
 
+          if (point.pos.x == undefined || point.pos.y == undefined) {
+            continue;
+          }
           var nodeLayoutData = {
             rowData: rowData,
             x: point.pos.x,
@@ -17139,6 +17171,7 @@ var Chartx = (function () {
               if (this.nodeData.label) {
                 e.eventInfo.title = this.nodeData.label;
               }
+              //先触发用户事件，再处理后面的选中事件
 
               me.app.fire(e.type, e);
 

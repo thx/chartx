@@ -287,6 +287,10 @@ export default class ScatGraphs extends GraphsBase
                 }
             } );
 
+            if( point.pos.x == undefined || point.pos.y == undefined ){
+                continue;
+            };
+
             var nodeLayoutData = {
                 rowData    : rowData,
                 x          : point.pos.x,
@@ -467,6 +471,7 @@ export default class ScatGraphs extends GraphsBase
                      };
             
                      //fire到root上面去的是为了让root去处理tips
+                     //先触发用户事件，再处理后面的选中事件
                      me.app.fire( e.type, e );
 
                      if( e.type == 'mouseover' ){

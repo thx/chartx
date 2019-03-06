@@ -252,7 +252,8 @@ export default class LineGraphs extends GraphsBase
                 me._opt,
                 me.ctx,
                 me.height,
-                me.width
+                me.width,
+                me
             );
 
             group.draw( {

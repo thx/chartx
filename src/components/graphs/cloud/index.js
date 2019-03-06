@@ -288,6 +288,8 @@ export default class CloudGraphs extends GraphsBase
     
                     //fire到root上面去的是为了让root去处理tips
                     me.app.fire( e.type, e );
+
+                    
                 });
             });
 

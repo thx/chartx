@@ -111,9 +111,11 @@ export default class LineGraphsGroup extends event.Dispatcher
         }
     }
 
-    constructor( fieldMap, iGroup, opt, ctx, h, w )
+    constructor( fieldMap, iGroup, opt, ctx, h, w , _graphs)
     {
         super();
+
+        this._graphs = _graphs;
 
         this._opt = opt;
         this.fieldMap = fieldMap;
@@ -416,9 +418,13 @@ export default class LineGraphsGroup extends event.Dispatcher
             context: blineCtx
         });
 
-  
-
-
+        bline.on( event.types.get() , function (e) {
+            e.eventInfo = {
+                trigger : me.line,
+                nodes   : []
+            };
+            me._graphs.app.fire( e.type, e );
+        });
 
         if (!this.line.enabled) {
             bline.context.visible = false
@@ -433,10 +439,17 @@ export default class LineGraphsGroup extends event.Dispatcher
                 globalAlpha: _.isArray(me.area.alpha) ? 1 : me.area.alpha
             }
         });
+        area.on( event.types.get() , function (e) {
+            e.eventInfo = {
+                trigger : me.area,
+                nodes   : []
+            };
+            me._graphs.app.fire( e.type, e );
+        });
 
         if( !this.area.enabled ){
             area.context.visible = false
-        }
+        };
         me.sprite.addChild(area);
         me._area = area;
 
