@@ -1,0 +1,136 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
+<title>xChart demo -- scat</title>
+
+<script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
+<script type="text/javascript" src="../../dist/chartx.js"></script>
+<!-- codemirror -->
+<script type="text/javascript" src="../../lib/codemirror/codemirror.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/active-line.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/javascript.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/matchbrackets.js"></script>
+<link rel="stylesheet" href="../../lib/codemirror/codemirror.css">
+<link rel="stylesheet" href="../../lib/codemirror/zenburn.css">
+<link rel="stylesheet" href="../../lib/codemirror/docs.css">
+<!-- codemirror end -->
+<!--bootstrap-->
+<script type="text/javascript" src="../../lib/bootstrap/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap-theme.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/docs.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap.min.css">
+<!--bootstrap end-->
+<script type="text/javascript" src="../../lib/demo.js"></script>
+<link rel="stylesheet" href="../../lib/demo.css">
+</head>
+<body >
+
+<table>
+    <tr>
+        <td id="td-vl">
+            <form><textarea id="code" name="code">
+
+//chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
+var data = [
+    {"day":524,"click":279,"hasAd":0,"house":3,"click1":"","lucency":null},
+    {"day":234,"click":723,"hasAd":1,"house":342,"click1":null,"lucency":null},
+    {"day":0,"click":null,"hasAd":null,"house":null,"click1":0,"lucency":""},
+    {"day":100,"click":null,"hasAd":null,"house":null,"click1":143,"lucency":null},
+    {"day":200,"click":null,"hasAd":null,"house":null,"click1":234,"lucency":null},
+    {"day":300,"click":null,"hasAd":"","house":null,"click1":312,"lucency":""},
+    {"day":400,"click":null,"hasAd":null,"house":null,"click1":434,"lucency":null},
+    {"day":500,"click":null,"hasAd":null,"house":null,"click1":534,"lucency":null},
+    {"day":600,"click":null,"hasAd":null,"house":null,"click1":603,"lucency":""}
+];
+
+var variables = {
+    lineField: "click1",
+    scatField: "click",
+    xField: "day",
+    inflexionX: 400,
+    hotLower: 800
+}
+
+var options = {
+    coord: {
+        type: "rect",
+        xAxis: {
+            field: variables.xField,
+            layoutType: "proportion",
+            label:{
+                enabled: false
+            }
+        },
+        yAxis:{
+            align: "left",
+            middleWeight: variables.hotLower,
+            middleWeightPos: 0.8,
+        },
+        grid:{
+            fill:{
+                enabled:true,
+                fillStyle:['#ffffff', 'red']
+            }
+        }
+    },
+    graphs: [
+        {
+            type: "scat",
+            field: variables.scatField,
+            //animation: false,
+            node: {
+                fillAlpha: function( node ) {
+                    return 0.1
+                    if( node.rowData.lucency ){
+                        return 0.2
+                    } else {
+                        return 1
+                    }
+                },
+                fillStyle: function ( node ){
+                    if( node.rowData.hasAd ){
+                        return "#FFB071"
+                    } else {
+                        return "#49CE84"
+                    }
+                },
+                radius: 8
+            }
+        }
+    ],
+    tips: {
+        pointer: "line"
+    }
+};
+
+window.scat = Chartx.create("canvasTest" , data , options)
+
+            </textarea></form>
+        </td>
+        <td style="padding:0 10px;" id="td-vr">
+            <div id="chartdemo-r">
+            <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
+                <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
+
+                <p>
+                    联系人：@释剑
+                </p>
+                
+            </div>
+            <div  class="test-c">
+                <div id="canvasTest" style='width:100%;height:300px;position:relative;'></div>
+            </div>
+
+            </div>
+        </td>
+    </tr>
+</table>
+
+    
+</body> 
+</html>
+
+

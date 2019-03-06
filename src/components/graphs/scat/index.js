@@ -716,7 +716,6 @@ export default class ScatGraphs extends GraphsBase
         var l = this.data.length-1;
         var me = this;
         _.each( this.data , function( nodeData ){
-            
             if( nodeData.__isNew ){
                 me._growNode( nodeData, function(){
                     i = i+1;
