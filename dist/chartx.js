@@ -10402,7 +10402,7 @@ var Chartx = (function () {
           _.each(this.getComponents({
             name: 'graphs'
           }), function (_g) {
-            nodes = nodes.concat(_g.getNodesAt(iNode));
+            nodes = nodes.concat(_g.getNodesAt(iNode, e));
           });
 
           e.eventInfo.nodes = nodes;
@@ -11349,7 +11349,8 @@ var Chartx = (function () {
           //text是 format 后的数据
           x: pos,
           //这里不能直接用鼠标的x
-          field: this.field
+          field: this.field,
+          layoutType: this.layoutType
         };
         return o;
       }
@@ -12974,6 +12975,8 @@ var Chartx = (function () {
 
         var obj = {
           xAxis: xNode,
+          dimension_1: xNode,
+          //和xAxis一致，， 极坐标也会有dimension_1
           title: xNode.text,
           //下面两个属性是所有坐标系统一的
           iNode: xNode.ind,
@@ -15732,7 +15735,7 @@ var Chartx = (function () {
           var _nodesInfo = [];
 
           if (iNode != undefined) {
-            _nodesInfo.push(this.getNodeInfoAt(iNode));
+            _nodesInfo.push(this.data[iNode]);
           }
           return s.apply(this, _nodesInfo);
         }
@@ -15741,8 +15744,29 @@ var Chartx = (function () {
 
     }, {
       key: "getNodeInfoAt",
-      value: function getNodeInfoAt($index) {
+      value: function getNodeInfoAt($index, e) {
         var o = this.data[$index];
+
+        if (e && e.eventInfo && e.eventInfo.dimension_1) {
+          var lt = e.eventInfo.dimension_1.layoutType;
+
+          if (lt == 'proportion') {
+            //$index则代表的xpos，需要计算出来data中和$index最近的值作为 node
+            var xDis;
+
+            for (var i = 0, l = this.data.length; i < l; i++) {
+              var _node = this.data[i];
+
+              var _xDis = Math.abs(_node.x - $index);
+
+              if (xDis == undefined || _xDis < xDis) {
+                xDis = _xDis;
+                o = _node;
+                continue;
+              }
+            }
+          }
+        }
         return o;
       }
       /**
@@ -16306,7 +16330,7 @@ var Chartx = (function () {
         for (var i = 0, l = this.data.length; i < l; i++) {
           if (this.data[i].value !== null && Math.abs(this.data[i].x - x) <= 1) {
             //左右相差不到1px的，都算
-            nodeInfo = this.getNodeInfoAt(i);
+            nodeInfo = this.data[i];
             return nodeInfo;
           }
         }
@@ -16655,11 +16679,11 @@ var Chartx = (function () {
       }
     }, {
       key: "getNodesAt",
-      value: function getNodesAt(ind) {
+      value: function getNodesAt(ind, e) {
         var _nodesInfoList = []; //节点信息集合
 
         _.each(this.groups, function (group) {
-          var node = group.getNodeInfoAt(ind);
+          var node = group.getNodeInfoAt(ind, e);
           node && _nodesInfoList.push(node);
         });
 
@@ -39503,6 +39527,10 @@ var Chartx = (function () {
           line: {
             detail: '线的配置',
             propertys: {
+              enabled: {
+                detail: '是否开启',
+                default: true
+              },
               lineWidth: {
                 detail: '线宽',
                 default: 2
@@ -39660,6 +39688,7 @@ var Chartx = (function () {
       key: "_drawLine",
       value: function _drawLine(xNode) {
         var me = this;
+        if (!me.line.enabled) return;
 
         var lineOpt = _.extend(true, {
           x: parseInt(xNode.x),
@@ -39719,6 +39748,7 @@ var Chartx = (function () {
       key: "_drawNodes",
       value: function _drawNodes() {
         var me = this;
+        if (!me.node.enabled) return;
 
         _.each(me.nodes, function (nodeData) {
           var nodeCtx = _.extend({

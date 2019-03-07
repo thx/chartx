@@ -220,11 +220,12 @@ export default class xAxis extends Axis
 
     _getNodeInfo( ind,val,pos ){
         var o = {
-            ind   : ind,
-            value : val,
-            text  : this._getFormatText( val, ind), //text是 format 后的数据
-            x     : pos, //这里不能直接用鼠标的x
-            field : this.field
+            ind        : ind,
+            value      : val,
+            text       : this._getFormatText( val, ind), //text是 format 后的数据
+            x          : pos, //这里不能直接用鼠标的x
+            field      : this.field,
+            layoutType : this.layoutType
         };
         return o;
     }

@@ -500,12 +500,13 @@ export default class Rect extends coordBase
         var xNode = this._xAxis.getNodeInfoOfX( induceX );
         
         var obj = {
-            xAxis : xNode,
-            title : xNode.text,
+            xAxis       : xNode,
+            dimension_1 : xNode, //和xAxis一致，， 极坐标也会有dimension_1
+            title       : xNode.text,
 
             //下面两个属性是所有坐标系统一的
-            iNode : xNode.ind,
-            nodes : [
+            iNode       : xNode.ind,
+            nodes       : [
                 //遍历_graphs 去拿东西
             ]
         };

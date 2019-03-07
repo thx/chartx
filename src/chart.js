@@ -639,8 +639,9 @@ export default class Chart extends event.Dispatcher
         if( !e.eventInfo.nodes || !e.eventInfo.nodes.length ){
             var nodes = [];
             var iNode = e.eventInfo.iNode;
+            
             _.each( this.getComponents({name:'graphs'}), function( _g ){
-                nodes = nodes.concat( _g.getNodesAt( iNode ) );
+                nodes = nodes.concat( _g.getNodesAt( iNode, e ) );
             } );
             e.eventInfo.nodes = nodes;
         }

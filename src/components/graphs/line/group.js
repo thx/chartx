@@ -205,7 +205,7 @@ export default class LineGraphsGroup extends event.Dispatcher
         if (_.isFunction(s)) {
             var _nodesInfo = [];
             if( iNode != undefined ){
-                _nodesInfo.push( this.getNodeInfoAt( iNode ) );
+                _nodesInfo.push( this.data[ iNode ] );
             };
             return s.apply( this , _nodesInfo );
         };
@@ -214,9 +214,25 @@ export default class LineGraphsGroup extends event.Dispatcher
 
 
     //这个是tips需要用到的 
-    getNodeInfoAt( $index )
+    getNodeInfoAt( $index, e )
     {
         var o = this.data[ $index ];
+        if( e && e.eventInfo && e.eventInfo.dimension_1 ){
+            var lt = e.eventInfo.dimension_1.layoutType;
+            if( lt == 'proportion' ){
+               //$index则代表的xpos，需要计算出来data中和$index最近的值作为 node
+               var xDis;
+               for( var i=0,l=this.data.length; i<l; i++ ){
+                   var _node = this.data[i];
+                   var _xDis = Math.abs(_node.x - $index);
+                   if( xDis == undefined || _xDis < xDis ){
+                       xDis = _xDis;
+                       o = _node;
+                       continue;
+                   };
+               };
+            };
+        };
         return o;
     }
 
@@ -774,7 +790,7 @@ export default class LineGraphsGroup extends event.Dispatcher
         for( var i = 0,l = this.data.length; i<l; i++ ){
             if( this.data[i].value !== null && Math.abs( this.data[i].x - x) <= 1 ){
                 //左右相差不到1px的，都算
-                nodeInfo = this.getNodeInfoAt(i);
+                nodeInfo = this.data[ i ];
                 return nodeInfo;
             }
         };

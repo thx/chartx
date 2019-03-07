@@ -282,11 +282,11 @@ export default class LineGraphs extends GraphsBase
 
     }
 
-    getNodesAt( ind )
+    getNodesAt( ind, e )
     {
         var _nodesInfoList = []; //节点信息集合
         _.each( this.groups, function( group ){
-            var node = group.getNodeInfoAt( ind );
+            var node = group.getNodeInfoAt( ind, e );
             node && _nodesInfoList.push( node );
         } );
         return _nodesInfoList;
