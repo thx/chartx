@@ -11555,23 +11555,29 @@ var Chartx = (function () {
         }
 
         if (this.axisLine.enabled) {
-          var _axisLine = new Line$2({
-            context: {
-              start: {
-                x: 0,
-                y: 0
-              },
-              end: {
-                x: this.width,
-                y: 0
-              },
-              lineWidth: this.axisLine.lineWidth,
-              strokeStyle: this.axisLine.strokeStyle
-            }
-          });
+          var _axisLineCtx = {
+            start: {
+              x: 0,
+              y: 0
+            },
+            end: {
+              x: this.width,
+              y: 0
+            },
+            lineWidth: this.axisLine.lineWidth,
+            strokeStyle: this.axisLine.strokeStyle
+          };
 
-          this.sprite.addChild(_axisLine);
-          this._axisLine = _axisLine;
+          if (!this._axisLine) {
+            var _axisLine = new Line$2({
+              context: _axisLineCtx
+            });
+
+            this.sprite.addChild(_axisLine);
+            this._axisLine = _axisLine;
+          } else {
+            this._axisLine.animate(_axisLineCtx);
+          }
         }
       }
     }, {
@@ -12155,23 +12161,29 @@ var Chartx = (function () {
         }
 
         if (me.axisLine.enabled) {
-          var _axisLine = new Line$3({
-            context: {
-              start: {
-                x: _originX,
-                y: 0
-              },
-              end: {
-                x: _originX,
-                y: -me.height
-              },
-              lineWidth: me.axisLine.lineWidth,
-              strokeStyle: me._getStyle(me.axisLine.strokeStyle)
-            }
-          });
+          var _axisLineCtx = {
+            start: {
+              x: _originX,
+              y: 0
+            },
+            end: {
+              x: _originX,
+              y: -me.height
+            },
+            lineWidth: me.axisLine.lineWidth,
+            strokeStyle: me._getStyle(me.axisLine.strokeStyle)
+          };
 
-          this.sprite.addChild(_axisLine);
-          this._axisLine = _axisLine;
+          if (!this._axisLine) {
+            var _axisLine = new Line$3({
+              context: _axisLineCtx
+            });
+
+            this.sprite.addChild(_axisLine);
+            this._axisLine = _axisLine;
+          } else {
+            this._axisLine.animate(_axisLineCtx);
+          }
         }
 
         if (this._title) {

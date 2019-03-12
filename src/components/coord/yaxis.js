@@ -433,22 +433,29 @@ export default class yAxis extends Axis
 
         //轴线
         if( me.axisLine.enabled ){
-            var _axisLine = new Line({
-                context : {
-                    start : {
-                        x : _originX,
-                        y : 0
-                    },
-                    end   : {
-                        x : _originX,
-                        y : -me.height
-                    },
-                    lineWidth   : me.axisLine.lineWidth,
-                    strokeStyle : me._getStyle(me.axisLine.strokeStyle)
-                }
-            });
-            this.sprite.addChild( _axisLine );
-            this._axisLine = _axisLine;
+            var _axisLineCtx = {
+                start : {
+                    x : _originX,
+                    y : 0
+                },
+                end   : {
+                    x : _originX,
+                    y : -me.height
+                },
+                lineWidth   : me.axisLine.lineWidth,
+                strokeStyle : me._getStyle(me.axisLine.strokeStyle)
+            };
+
+            if( !this._axisLine ){
+                var _axisLine = new Line({
+                    context : _axisLineCtx
+                });
+                this.sprite.addChild( _axisLine );
+                this._axisLine = _axisLine;
+            } else {
+                this._axisLine.animate( _axisLineCtx );
+            }
+            
         }
 
         if (this._title) {

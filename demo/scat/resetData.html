@@ -35,7 +35,7 @@
 //chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
 var data = [
     ["age"    ,"money"    , "sex", 'house' , 'text'        , 'id'],
-    [ 276     , 101       , '女' , 123     , 'hello world' , 1],
+    [ -276     , 101       , '女' , 123     , 'hello world' , 1],
     [ 367     , 278       , '女' , 113     , '你好再见'      , 2],
     [ 824     , 438       , '男' , 103     , 'sdfdsfdsf'    , 3],
     [ 134     , 340       , '男' , 166     , '对方水电费'    ,  4],
@@ -57,6 +57,11 @@ var options = {
         xAxis : {
             field :  "age",
             layoutType : "proportion" //注意：scat的layoutType必须是proportion，位置计算才会对
+        },
+        yAxis: {
+            axisLine: {
+                position: 0
+            }
         }
     },
     legend : {},

@@ -439,22 +439,29 @@ export default class xAxis extends Axis
 
         //轴线
         if( this.axisLine.enabled ){
-            var _axisLine = new Line({
-                context : {
-                    start : {
-                        x : 0,
-                        y : 0
-                    },
-                    end   : {
-                        x : this.width,
-                        y : 0
-                    },
-                    lineWidth   : this.axisLine.lineWidth,
-                    strokeStyle : this.axisLine.strokeStyle
-                }
-            });
-            this.sprite.addChild( _axisLine );
-            this._axisLine = _axisLine;
+            var _axisLineCtx = {
+                start : {
+                    x : 0,
+                    y : 0
+                },
+                end   : {
+                    x : this.width,
+                    y : 0
+                },
+                lineWidth   : this.axisLine.lineWidth,
+                strokeStyle : this.axisLine.strokeStyle
+            };
+
+            if( !this._axisLine ){
+                var _axisLine = new Line({
+                    context : _axisLineCtx
+                });
+                this.sprite.addChild( _axisLine );
+                this._axisLine = _axisLine;
+            } else {
+                this._axisLine.animate( _axisLineCtx );
+            };
+            
         }
 
     }
