@@ -145,7 +145,7 @@ export default class Rect extends coordBase
                 yAxis.isH = true;
             });
         };
-
+debugger
         if( "enabled" in coord ){
             //如果有给直角坐标系做配置display，就直接通知到xAxis，yAxis，grid三个子组件
             _.extend( true, coord.xAxis, {

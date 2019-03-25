@@ -11142,7 +11142,6 @@ var Chartx = (function () {
       _this._coord = _coord || {};
       _this._title = null; //this.title对应的文本对象
 
-      _this._txts = [];
       _this._axisLine = null;
       _this._formatTextSection = []; //dataSection的值format后一一对应的值
 
@@ -11408,23 +11407,19 @@ var Chartx = (function () {
     }, {
       key: "_widget",
       value: function _widget(opt) {
-        if (!this.enabled) return;
-        !opt && (opt = {});
         var me = this;
-        var arr = this.layoutData;
+        !opt && (opt = {});
+
+        if (!me.enabled) {
+          me.height = 0; //width不能为0
+
+          return;
+        }
+        var arr = me.layoutData;
         var visibleInd = 0;
 
-        if (this._title) {
-          this._title.context.y = this.height - this._title.getTextHeight() / 2;
-          this._title.context.x = this.width / 2;
-          this.sprite.addChild(this._title);
-        }
-        var delay = Math.min(1000 / arr.length, 25);
-        var labelVisibleInd = 0; //var lineVisibleInd = 0;
-
         for (var a = 0, al = arr.length; a < al; a++) {
-          //这里可以由用户来自定义过滤 来 决定 该node的样式
-          _.isFunction(this.filter) && this.filter({
+          _.isFunction(me.filter) && me.filter({
             layoutData: arr,
             index: a
           });
@@ -11433,126 +11428,103 @@ var Chartx = (function () {
           if (!o.visible) {
             continue;
           }
-          var xNodeId = "xNode" + visibleInd;
-          var xNode = this.rulesSprite.getChildById(xNodeId);
-
-          if (!xNode) {
-            xNode = new Canvax.Display.Sprite({
-              id: xNodeId
-            });
-            this.rulesSprite.addChild(xNode);
-          }
           var x = o.x,
-              y = this.tickLine.lineLength + this.tickLine.distance + this.label.distance;
+              y = me.tickLine.lineLength + me.tickLine.distance + me.label.distance;
 
-          if (this.label.enabled) {
-            //文字
-            var textContext = {
-              x: o._text_x || o.x,
-              y: y + 20,
-              fillStyle: this.label.fontColor,
-              fontSize: this.label.fontSize,
-              rotation: -Math.abs(this.label.rotation),
-              textAlign: this.label.textAlign,
-              lineHeight: this.label.lineHeight,
-              textBaseline: !!this.label.rotation ? "middle" : "top",
-              globalAlpha: 0
-            };
+          var _node = me.rulesSprite.getChildAt(visibleInd); //文字 
 
-            if (!!this.label.rotation && this.label.rotation != 90) {
-              textContext.x += 5;
-              textContext.y += 3;
+
+          var textContext = {
+            x: o._text_x || o.x,
+            y: y,
+            fillStyle: this.label.fontColor,
+            fontSize: this.label.fontSize,
+            rotation: -Math.abs(this.label.rotation),
+            textAlign: this.label.textAlign,
+            lineHeight: this.label.lineHeight,
+            textBaseline: !!this.label.rotation ? "middle" : "top",
+            globalAlpha: 1
+          };
+
+          if (!!this.label.rotation && this.label.rotation != 90) {
+            textContext.x += 5;
+            textContext.y += 3;
+          }
+
+          var tickLineContext = {
+            x: x,
+            y: this.tickLine.distance,
+            end: {
+              x: 0,
+              y: this.tickLine.lineLength
+            },
+            lineWidth: this.tickLine.lineWidth,
+            strokeStyle: this.tickLine.strokeStyle
+          };
+          var duration = 300;
+          var delay = visibleInd * Math.min(1000 / arr.length, 25);
+
+          if (!me.animation || opt.resize) {
+            duration = 0;
+            delay = 0;
+          }
+
+          if (_node) {
+            if (_node._tickLine && me.tickLine.enabled) {
+              _node._tickLine.animate(tickLineContext, {
+                duration: duration,
+                id: _node._tickLine.id
+              });
             }
 
-            if (labelVisibleInd < me._txts.length) {
-              //_.extend( xNode._txt.context , textContext );
-              xNode._txt = me._txts[labelVisibleInd];
+            if (_node._txt && me.label.enabled) {
+              _node._txt.animate(textContext, {
+                duration: duration,
+                id: _node._txt.id
+              });
 
-              xNode._txt.resetText(o.text + "");
+              _node._txt.resetText(o.text);
+            }
+          } else {
+            _node = new Canvax.Display.Sprite({
+              id: "xNode" + visibleInd
+            }); //新建line
 
-              if (this.animation) {
-                xNode._txt.animate({
-                  x: textContext.x
-                }, {
-                  duration: 300
-                });
-              } else {
-                xNode._txt.context.x = textContext.x;
-              }
-            } else {
-              xNode._txt = new Canvax.Display.Text(o.text, {
+            if (me.tickLine.enabled) {
+              _node._tickLine = new Line$2({
+                id: "xAxis_tickline_" + visibleInd,
+                context: tickLineContext
+              });
+
+              _node.addChild(_node._tickLine);
+            }
+
+            if (me.label.enabled) {
+              _node._txt = new Canvax.Display.Text(o.text, {
                 id: "xAxis_txt_" + visibleInd,
                 context: textContext
               });
-              xNode.addChild(xNode._txt);
 
-              me._txts.push(xNode._txt); //新建的 txt的 动画方式
+              _node.addChild(_node._txt);
 
+              if (me.animation && !opt.resize) {
+                _node._txt.context.y += 20;
+                _node._txt.context.globalAlpha = 0;
 
-              if (this.animation && !opt.resize) {
-                xNode._txt.animate({
-                  globalAlpha: 1,
-                  y: xNode._txt.context.y - 20
+                _node._txt.animate({
+                  y: textContext.y,
+                  globalAlpha: 1
                 }, {
                   duration: 500,
-                  easing: 'Back.Out',
-                  //Tween.Easing.Elastic.InOut
-                  delay: visibleInd * delay,
-                  id: xNode._txt.id
+                  delay: delay,
+                  id: _node._txt.id
                 });
-              } else {
-                xNode._txt.context.y = xNode._txt.context.y - 20;
-                xNode._txt.context.globalAlpha = 1;
               }
             }
-            labelVisibleInd++;
-          }
 
-          if (this.tickLine.enabled) {
-            if (!!arr[a].visible) {
-              var lineContext = {
-                x: x,
-                y: this.tickLine.distance,
-                end: {
-                  x: 0,
-                  y: this.tickLine.lineLength
-                },
-                lineWidth: this.tickLine.lineWidth,
-                strokeStyle: this.tickLine.strokeStyle
-              };
-
-              if (xNode._line) {
-                //_.extend( xNode._txt.context , textContext );
-                if (this.animation) {
-                  xNode._line.animate({
-                    x: lineContext.x
-                  }, {
-                    duration: 300
-                  });
-                } else {
-                  xNode._line.context.x = lineContext.x;
-                }
-              } else {
-                xNode._line = new Line$2({
-                  context: lineContext
-                });
-                xNode.addChild(xNode._line);
-              }
-            } else {
-              if (xNode._line) {
-                xNode._line.destroy();
-
-                xNode._line = null;
-              }
-            }
+            me.rulesSprite.addChild(_node);
           }
           visibleInd++;
-        }
-
-        if (me._txts.length > labelVisibleInd) {
-          for (var i = labelVisibleInd; i < me._txts.length; i++) {
-            me._txts.splice(i--, 1)[0].destroy();
-          }
         }
 
         if (this.rulesSprite.children.length >= visibleInd) {
@@ -11586,6 +11558,12 @@ var Chartx = (function () {
           } else {
             this._axisLine.animate(_axisLineCtx);
           }
+        }
+
+        if (this._title) {
+          this._title.context.y = this.height - this._title.getTextHeight() / 2;
+          this._title.context.x = this.width / 2;
+          this.sprite.addChild(this._title);
         }
       }
     }, {
@@ -12031,119 +12009,119 @@ var Chartx = (function () {
               posy = y;
             }
           }
-          var yNode = this.rulesSprite.getChildAt(visibleInd);
+          var aniFrom = 16;
 
-          if (yNode) {
-            if (yNode._txt && this.label.enabled) {
-              if (me.animation && !opt.resize) {
-                yNode._txt.animate({
-                  y: posy,
-                  globalAlpha: 1
-                }, {
-                  duration: 500,
-                  delay: visibleInd * 80,
-                  id: yNode._txt.id
-                });
-              } else {
-                yNode._txt.context.y = posy;
-              }
+          if (o.value == me.origin) {
+            aniFrom = 0;
+          }
 
-              yNode._txt.resetText(o.text);
+          if (o.value < me.origin) {
+            aniFrom = -16;
+          }
+          var lineX = 0;
+          var tickLineContext;
+
+          if (me.tickLine.enabled) {
+            //线条
+            lineX = me.align == "left" ? -me.tickLine.lineLength - me.tickLine.distance : me.tickLine.distance;
+            tickLineContext = {
+              x: lineX,
+              y: y,
+              end: {
+                x: me.tickLine.lineLength,
+                y: 0
+              },
+              lineWidth: me.tickLine.lineWidth,
+              strokeStyle: me._getStyle(me.tickLine.strokeStyle)
+            };
+          }
+
+          var textContext;
+
+          if (me.label.enabled) {
+            var txtX = me.align == "left" ? lineX - me.label.distance : lineX + me.tickLine.lineLength + me.label.distance;
+
+            if (this.isH) {
+              txtX = txtX + (me.align == "left" ? -1 : 1) * 4;
+            }
+            textContext = {
+              x: txtX,
+              y: posy,
+              fillStyle: me._getStyle(me.label.fontColor),
+              fontSize: me.label.fontSize,
+              rotation: -Math.abs(me.label.rotation),
+              textAlign: textAlign,
+              textBaseline: "middle",
+              lineHeight: me.label.lineHeight,
+              globalAlpha: 1
+            };
+          }
+          var duration = 300;
+
+          if (!me.animation || opt.resize) {
+            duration = 0;
+          }
+
+          var _node = this.rulesSprite.getChildAt(visibleInd);
+
+          if (_node) {
+            if (_node._tickLine && me.tickLine.enabled) {
+              _node._tickLine.animate(tickLineContext, {
+                duration: duration,
+                id: _node._tickLine.id
+              });
             }
 
-            if (yNode._tickLine && this.tickLine.enabled) {
-              if (me.animation && !opt.resize) {
-                yNode._tickLine.animate({
-                  y: y
-                }, {
-                  duration: 500,
-                  delay: visibleInd * 80,
-                  id: yNode._tickLine.id
-                });
-              } else {
-                yNode._tickLine.context.y = y;
-              }
+            if (_node._txt && me.label.enabled) {
+              _node._txt.animate(textContext, {
+                duration: duration,
+                id: _node._txt.id
+              });
+
+              _node._txt.resetText(o.text);
             }
           } else {
-            yNode = new Canvax.Display.Sprite({
-              id: "yNode" + visibleInd
-            });
-            var aniFrom = 20;
-
-            if (o.value == me.origin) {
-              aniFrom = 0;
-            }
-
-            if (o.value < me.origin) {
-              aniFrom = -20;
-            }
-            var lineX = 0;
+            _node = new Canvax.Display.Sprite({
+              id: "_node" + visibleInd
+            }); //新建line
 
             if (me.tickLine.enabled) {
-              //线条
-              lineX = me.align == "left" ? -me.tickLine.lineLength - me.tickLine.distance : me.tickLine.distance;
-              var line = new Line$3({
-                context: {
-                  x: lineX,
-                  y: y,
-                  end: {
-                    x: me.tickLine.lineLength,
-                    y: 0
-                  },
-                  lineWidth: me.tickLine.lineWidth,
-                  strokeStyle: me._getStyle(me.tickLine.strokeStyle)
-                }
+              _node._tickLine = new Line$3({
+                id: "yAxis_tickline_" + visibleInd,
+                context: tickLineContext
               });
-              yNode.addChild(line);
-              yNode._tickLine = line;
+
+              _node.addChild(_node._tickLine);
             }
 
             if (me.label.enabled) {
-              var txtX = me.align == "left" ? lineX - me.label.distance : lineX + me.tickLine.lineLength + me.label.distance;
-
-              if (this.isH) {
-                txtX = txtX + (me.align == "left" ? -1 : 1) * 4;
-              }
-              var txt = new Canvax.Display.Text(o.text, {
-                id: "yAxis_txt_" + me.align + "_" + visibleInd,
-                context: {
-                  x: txtX,
-                  y: posy + aniFrom,
-                  fillStyle: me._getStyle(me.label.fontColor),
-                  fontSize: me.label.fontSize,
-                  rotation: -Math.abs(me.label.rotation),
-                  textAlign: textAlign,
-                  textBaseline: "middle",
-                  lineHeight: me.label.lineHeight,
-                  globalAlpha: 0
-                }
+              _node._txt = new Canvax.Display.Text(o.text, {
+                id: "yAxis_txt_" + visibleInd,
+                context: textContext
               });
-              yNode.addChild(txt);
-              yNode._txt = txt;
+
+              _node.addChild(_node._txt);
 
               if (me.label.rotation == 90 || me.label.rotation == -90) {
-                me.maxW = Math.max(me.maxW, txt.getTextHeight());
+                me.maxW = Math.max(me.maxW, _node._txt.getTextHeight());
               } else {
-                me.maxW = Math.max(me.maxW, txt.getTextWidth());
+                me.maxW = Math.max(me.maxW, _node._txt.getTextWidth());
               }
 
               if (me.animation && !opt.resize) {
-                txt.animate({
-                  globalAlpha: 1,
-                  y: txt.context.y - aniFrom
+                _node._txt.context.y = y + aniFrom;
+                _node._txt.context.globalAlpha = 0;
+
+                _node._txt.animate({
+                  y: textContext.y,
+                  globalAlpha: 1
                 }, {
-                  duration: 500,
-                  easing: 'Back.Out',
-                  //Tween.Easing.Elastic.InOut
-                  delay: (visibleInd + 1) * 80,
-                  id: txt.id
+                  duration: 300,
+                  id: _node._txt.id
                 });
-              } else {
-                txt.context.y = txt.context.y - aniFrom;
-                txt.context.globalAlpha = 1;
               }
             }
-            me.rulesSprite.addChild(yNode);
+            me.rulesSprite.addChild(_node);
           }
           visibleInd++;
         }
@@ -12641,6 +12619,7 @@ var Chartx = (function () {
             yAxis$$1.isH = true;
           });
         }
+        debugger;
 
         if ("enabled" in coord) {
           //如果有给直角坐标系做配置display，就直接通知到xAxis，yAxis，grid三个子组件
@@ -37371,6 +37350,7 @@ var Chartx = (function () {
         if (opt.coord.horizontal) {
           delete opt.coord.horizontal;
         }
+        opt.coord.enabled = false;
         var thumbChart = new chartConstructor(cloneEl, app._data, opt, app.componentModules);
         thumbChart.draw();
         return {

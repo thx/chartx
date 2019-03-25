@@ -293,121 +293,117 @@ export default class yAxis extends Axis
                 }
             };
 
-            var yNode = this.rulesSprite.getChildAt( visibleInd );
 
-            if( yNode ){
-                if( yNode._txt && this.label.enabled ){
+            var aniFrom = 16;
+            if( o.value == me.origin ){
+                aniFrom = 0;
+            };
+            if( o.value < me.origin ){
+                aniFrom = -16;
+            };
+            var lineX = 0;
+            var tickLineContext;
+            if (me.tickLine.enabled) {
+                //线条
+                lineX = me.align == "left" ? - me.tickLine.lineLength - me.tickLine.distance : me.tickLine.distance;
+                tickLineContext = {
+                    x: lineX ,
+                    y: y,
+                    end : {
+                        x : me.tickLine.lineLength,
+                        y : 0
+                    },
+                    lineWidth: me.tickLine.lineWidth,
+                    strokeStyle: me._getStyle(me.tickLine.strokeStyle)
+                }
+            };
 
-                    if (me.animation && !opt.resize) {
-                        yNode._txt.animate({
-                            y: posy,
-                            globalAlpha : 1
-                        }, {
-                            duration: 500,
-                            delay: visibleInd*80,
-                            id: yNode._txt.id
-                        });
-                    } else {
-                        yNode._txt.context.y = posy;
-                    };
-                    
-                    yNode._txt.resetText( o.text );
+            //文字
+            var textContext;
+            if( me.label.enabled ){
+                var txtX = me.align == "left" ? lineX - me.label.distance : lineX + me.tickLine.lineLength + me.label.distance;
+                if( this.isH ){
+                    txtX = txtX + (me.align == "left"?-1:1)* 4
+                };
+                textContext = {
+                    x: txtX,
+                    y: posy,
+                    fillStyle: me._getStyle(me.label.fontColor),
+                    fontSize: me.label.fontSize,
+                    rotation: -Math.abs(me.label.rotation),
+                    textAlign: textAlign,
+                    textBaseline: "middle",
+                    lineHeight: me.label.lineHeight,
+                    globalAlpha : 1
+                };
+            };
+
+            var duration = 300;
+            if (!me.animation || opt.resize) {
+                duration = 0;
+            };
+
+            var _node = this.rulesSprite.getChildAt( visibleInd );
+
+            if( _node ){
+                if( _node._tickLine && me.tickLine.enabled ){
+                    _node._tickLine.animate( tickLineContext, {
+                        duration: duration,
+                        id: _node._tickLine.id
+                    });
                 };
 
-                if( yNode._tickLine && this.tickLine.enabled ){
-                    if (me.animation && !opt.resize) {
-                        yNode._tickLine.animate({
-                            y: y
-                        }, {
-                            duration: 500,
-                            delay: visibleInd*80,
-                            id: yNode._tickLine.id
-                        });
-                    } else {
-                        yNode._tickLine.context.y = y;
-                    }
+                if( _node._txt && me.label.enabled ){
+                    _node._txt.animate( textContext, {
+                        duration: duration,
+                        id: _node._txt.id
+                    });
+                    _node._txt.resetText( o.text );
                 };
+            
             } else {
-                yNode = new Canvax.Display.Sprite({
-                    id: "yNode" + visibleInd
+                _node = new Canvax.Display.Sprite({
+                    id: "_node" + visibleInd
                 });
 
-                var aniFrom = 20;
-                if( o.value == me.origin ){
-                    aniFrom = 0;
-                };
-
-                if( o.value < me.origin ){
-                    aniFrom = -20;
-                };
-
-                var lineX = 0
-                if (me.tickLine.enabled) {
-                    //线条
-                    lineX = me.align == "left" ? - me.tickLine.lineLength - me.tickLine.distance : me.tickLine.distance;
-                    var line = new Line({
-                        context: {
-                            x: lineX ,
-                            y: y,
-                            end : {
-                                x : me.tickLine.lineLength,
-                                y : 0
-                            },
-                            lineWidth: me.tickLine.lineWidth,
-                            strokeStyle: me._getStyle(me.tickLine.strokeStyle)
-                        }
+                //新建line
+                if( me.tickLine.enabled ){
+                    _node._tickLine = new Line({
+                        id: "yAxis_tickline_" + visibleInd,
+                        context: tickLineContext
                     });
-                    yNode.addChild(line);
-                    yNode._tickLine = line;
+                    _node.addChild( _node._tickLine );
                 };
 
                 //文字
                 if( me.label.enabled ){
-                    var txtX = me.align == "left" ? lineX - me.label.distance : lineX + me.tickLine.lineLength + me.label.distance;
-                    if( this.isH ){
-                        txtX = txtX + (me.align == "left"?-1:1)* 4
-                    };
-                    var txt = new Canvax.Display.Text( o.text , {
-                        id: "yAxis_txt_" + me.align + "_" + visibleInd,
-                        context: {
-                            x: txtX,
-                            y: posy + aniFrom,
-                            fillStyle: me._getStyle(me.label.fontColor),
-                            fontSize: me.label.fontSize,
-                            rotation: -Math.abs(me.label.rotation),
-                            textAlign: textAlign,
-                            textBaseline: "middle",
-                            lineHeight  : me.label.lineHeight,
-                            globalAlpha: 0
-                        }
+      
+                    _node._txt = new Canvax.Display.Text(o.text, {
+                        id: "yAxis_txt_" + visibleInd,
+                        context: textContext
                     });
-                    yNode.addChild(txt);
-                    yNode._txt = txt;
+                    _node.addChild( _node._txt );
 
-                    
                     if (me.label.rotation == 90 || me.label.rotation == -90) {
-                        me.maxW = Math.max(me.maxW, txt.getTextHeight());
+                        me.maxW = Math.max(me.maxW, _node._txt.getTextHeight());
                     } else {
-                        me.maxW = Math.max(me.maxW, txt.getTextWidth());
+                        me.maxW = Math.max(me.maxW, _node._txt.getTextWidth());
                     };
 
                     if (me.animation && !opt.resize) {
-                        txt.animate({
-                            globalAlpha: 1,
-                            y: txt.context.y - aniFrom
+                        _node._txt.context.y = y + aniFrom;
+                        _node._txt.context.globalAlpha = 0;
+                        _node._txt.animate({
+                            y: textContext.y,
+                            globalAlpha: 1
                         }, {
-                            duration: 500,
-                            easing  : 'Back.Out', //Tween.Easing.Elastic.InOut
-                            delay   : (visibleInd+1) * 80,
-                            id      : txt.id
+                            duration: 300,
+                            id : _node._txt.id
                         });
-                    } else {
-                        txt.context.y = txt.context.y - aniFrom;
-                        txt.context.globalAlpha = 1;
-                    }
+                    } 
                 };
 
-                me.rulesSprite.addChild(yNode);
+                me.rulesSprite.addChild(_node);
             };
 
             visibleInd ++;

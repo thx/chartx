@@ -297,6 +297,8 @@ export default class dataZoom extends Component
             delete opt.coord.horizontal;
         };
 
+        opt.coord.enabled = false;
+
         var thumbChart = new chartConstructor(cloneEl, app._data, opt, app.componentModules);
         thumbChart.draw();
 

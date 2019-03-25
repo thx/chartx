@@ -19,7 +19,7 @@ export default class xAxis extends Axis
         this._coord = _coord || {};
         this._title = null; //this.title对应的文本对象
 
-        this._txts = [];
+      
         this._axisLine = null;
     
         this._formatTextSection = []; //dataSection的值format后一一对应的值
@@ -275,27 +275,19 @@ export default class xAxis extends Axis
 
     _widget( opt )
     {
-        if( !this.enabled ) return;
-        !opt && (opt ={});
-
         var me = this;
-        var arr = this.layoutData;
-        var visibleInd = 0;
-        
-        if ( this._title ) {
-            this._title.context.y = this.height - this._title.getTextHeight() / 2;
-            this._title.context.x = this.width / 2;
-            this.sprite.addChild( this._title );
+        !opt && (opt ={});
+        if (!me.enabled) {
+            me.height = 0;  //width不能为0
+            return;
         };
 
-        var delay = Math.min(1000 / arr.length, 25);
-
-        var labelVisibleInd = 0;
-        //var lineVisibleInd = 0;
+        var arr = me.layoutData;
+        var visibleInd = 0;
 
         for (var a = 0, al = arr.length; a < al; a++) {
-            //这里可以由用户来自定义过滤 来 决定 该node的样式
-            _.isFunction(this.filter) && this.filter({
+             
+            _.isFunction(me.filter) && me.filter({
                 layoutData : arr,
                 index      : a
             });
@@ -305,133 +297,104 @@ export default class xAxis extends Axis
                 continue;
             };
 
-            var xNodeId = "xNode" + visibleInd;
+            var x = o.x,
+                y = me.tickLine.lineLength + me.tickLine.distance + me.label.distance;
 
-            var xNode = this.rulesSprite.getChildById(xNodeId) 
-            if( !xNode ){
-                xNode = new Canvax.Display.Sprite({
-                    id: xNodeId
-                });
-                this.rulesSprite.addChild(xNode);
+            var _node = me.rulesSprite.getChildAt( visibleInd );
+
+            //文字 
+            var textContext = {
+                x            : o._text_x || o.x,
+                y            : y,
+                fillStyle    : this.label.fontColor,
+                fontSize     : this.label.fontSize,
+                rotation     : -Math.abs(this.label.rotation),
+                textAlign    : this.label.textAlign,
+                lineHeight   : this.label.lineHeight,
+                textBaseline : !!this.label.rotation ? "middle" : "top",
+                globalAlpha  : 1
+            };
+            if (!!this.label.rotation && this.label.rotation != 90) {
+                textContext.x += 5;
+                textContext.y += 3;
             };
 
-            var x = o.x,
-                y = this.tickLine.lineLength + this.tickLine.distance + this.label.distance;
+            //tick line
+            var tickLineContext = {
+                x     : x,
+                y     : this.tickLine.distance,
+                end   : {
+                    x : 0,
+                    y : this.tickLine.lineLength
+                },
+                lineWidth  : this.tickLine.lineWidth,
+                strokeStyle: this.tickLine.strokeStyle
+            };
 
-        
-            if ( this.label.enabled ){
-                    
-                //文字
-                var textContext = {
-                    x: o._text_x || o.x,
-                    y: y + 20,
-                    fillStyle    : this.label.fontColor,
-                    fontSize     : this.label.fontSize,
-                    rotation     : -Math.abs(this.label.rotation),
-                    textAlign    : this.label.textAlign,
-                    lineHeight   : this.label.lineHeight,
-                    textBaseline : !!this.label.rotation ? "middle" : "top",
-                    globalAlpha  : 0
+            var duration = 300;
+            var delay    = visibleInd * (Math.min(1000 / arr.length, 25));
+            if (!me.animation || opt.resize) {
+                duration = 0;
+                delay    = 0;
+            };
+
+            if( _node ){
+                if( _node._tickLine && me.tickLine.enabled ){
+                    _node._tickLine.animate( tickLineContext, {
+                        duration: duration,
+                        id: _node._tickLine.id
+                    });
+                };
+                if( _node._txt && me.label.enabled ){
+                    _node._txt.animate( textContext, {
+                        duration: duration,
+                        id: _node._txt.id
+                    });
+                    _node._txt.resetText( o.text );
+                };
+            } else {
+                _node = new Canvax.Display.Sprite({
+                    id: "xNode" + visibleInd
+                });
+
+
+                 //新建line
+                 if( me.tickLine.enabled ){
+                    _node._tickLine = new Line({
+                        id: "xAxis_tickline_" + visibleInd,
+                        context: tickLineContext
+                    });
+                    _node.addChild( _node._tickLine );
                 };
 
-                if (!!this.label.rotation && this.label.rotation != 90) {
-                    textContext.x += 5;
-                    textContext.y += 3;
-                };
-
-                if( labelVisibleInd < me._txts.length ){
-                    //_.extend( xNode._txt.context , textContext );
-                    xNode._txt = me._txts[ labelVisibleInd ]
-                    xNode._txt.resetText( o.text+"" );
-                    if( this.animation ){
-                        xNode._txt.animate( {
-                            x : textContext.x
-                        } , {
-                            duration : 300
-                        });
-                    } else {
-                        xNode._txt.context.x = textContext.x
-                    }
-
-                } else {
-
-                    xNode._txt = new Canvax.Display.Text(o.text, {
+                //新建txt
+                if( me.label.enabled ){
+                    _node._txt = new Canvax.Display.Text(o.text, {
                         id: "xAxis_txt_" + visibleInd,
                         context: textContext
                     });
-                    xNode.addChild( xNode._txt );
-                    me._txts.push( xNode._txt );
-
-                    //新建的 txt的 动画方式
-                    if (this.animation && !opt.resize) {
-                        xNode._txt.animate({
-                            globalAlpha: 1,
-                            y: xNode._txt.context.y - 20
+                    _node.addChild( _node._txt );
+                    if (me.animation && !opt.resize) {
+                        _node._txt.context.y += 20;
+                        _node._txt.context.globalAlpha = 0;
+                        _node._txt.animate( {
+                            y: textContext.y,
+                            globalAlpha: 1
                         }, {
                             duration: 500,
-                            easing: 'Back.Out', //Tween.Easing.Elastic.InOut
-                            delay: visibleInd * delay,
-                            id: xNode._txt.id
+                            delay: delay,
+                            id: _node._txt.id
                         });
-                    } else {
-                        xNode._txt.context.y = xNode._txt.context.y - 20;
-                        xNode._txt.context.globalAlpha = 1;
                     };
-                };
-
-                labelVisibleInd++;
-                
-            };
-            
-
-            if ( this.tickLine.enabled ) {
-                if( !!arr[a].visible ){
-                    var lineContext = {
-                        x: x,
-                        y: this.tickLine.distance,
-                        end : {
-                            x : 0,
-                            y : this.tickLine.lineLength
-                        },
-                        lineWidth: this.tickLine.lineWidth,
-                        strokeStyle: this.tickLine.strokeStyle
-                    };
-                    if( xNode._line ){
-                        //_.extend( xNode._txt.context , textContext );
-                        if( this.animation ){
-                            xNode._line.animate({
-                                x : lineContext.x
-                            } , {
-                                duration : 300
-                            })
-                        } else {
-                            xNode._line.context.x = lineContext.x;
-                        };
-                    } else {
-                        xNode._line = new Line({
-                            context: lineContext
-                        });
-                        xNode.addChild(xNode._line);
-                    }
-                } else {
-                    if( xNode._line ){
-                        xNode._line.destroy();
-                        xNode._line = null;
-                    }
                 }
+
+               
+
+                me.rulesSprite.addChild( _node );
             };
-
-            visibleInd ++;
-
+            visibleInd++;
         };
-
-        //_txts还有多的，就要干掉
-        if( me._txts.length > labelVisibleInd ){
-            for( var i= labelVisibleInd; i<me._txts.length; i++){
-                me._txts.splice( i-- , 1 )[0].destroy();
-            }
-        };
-
+        
         //把sprite.children中多余的给remove掉
         if( this.rulesSprite.children.length >= visibleInd ){
             for( var al = visibleInd,pl = this.rulesSprite.children.length;al<pl;al++  ){
@@ -465,6 +428,12 @@ export default class xAxis extends Axis
                 this._axisLine.animate( _axisLineCtx );
             };
             
+        };
+
+        if( this._title ) {
+            this._title.context.y = this.height - this._title.getTextHeight() / 2;
+            this._title.context.x = this.width / 2;
+            this.sprite.addChild( this._title );
         };
 
     }
