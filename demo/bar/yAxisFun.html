@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -55,6 +56,11 @@
                             {
                                 title: {
                                     text: "left"
+                                },
+                                filter:function( obj ){
+                                    if( !((obj.index+1) % 2) ){
+                                        obj.layoutData[ obj.index ].visible = false;
+                                    }
                                 }
                             },
                             {

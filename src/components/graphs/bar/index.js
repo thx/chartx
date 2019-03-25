@@ -621,12 +621,12 @@ export default class BarGraphs extends GraphsBase
                         };
                         
                         var textCtx = {
-                            fillStyle   : me.label.fontColor || finalPos.fillStyle,
-                            fontSize    : me.label.fontSize,
-                            lineWidth   : me.label.lineWidth,
-                            strokeStyle : me.label.strokeStyle || finalPos.fillStyle,
-                            //textAlign   : me.label.textAlign,
-                            textBaseline: me.label.verticalAlign,
+                            fillStyle     : me.label.fontColor || finalPos.fillStyle,
+                            fontSize      : me.label.fontSize,
+                            lineWidth     : me.label.lineWidth,
+                            strokeStyle   : me.label.strokeStyle || finalPos.fillStyle,
+                            //textAlign     : me.label.textAlign, 在后面的_getTextAlign中设置
+                            textBaseline  : me.label.verticalAlign,
                             rotation      : me.label.rotation
                         };
                         //然后根据position, offset确定x,y

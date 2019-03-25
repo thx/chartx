@@ -188,9 +188,10 @@ export default class Rect extends coordBase
         this._resetXY_axisLine_pos();
 
         var _yAxis = this._yAxisLeft || this._yAxisRight;
+        
         this._grid.reset({
             animation:false,
-            xDirection: {
+            oneDimension: {
                 data: _yAxis.layoutData
             }
         });
@@ -387,7 +388,7 @@ export default class Rect extends coordBase
     
         if( yAxisLeft ){
             yAxisLeftDataFrame = this.getAxisDataFrame( yAxisLeft.field );
-            this._yAxisLeft = new yAxisConstructor( yAxisLeft, yAxisLeftDataFrame );
+            this._yAxisLeft = new yAxisConstructor( yAxisLeft, yAxisLeftDataFrame, this );
             this._yAxisLeft.axis = yAxisLeft;
             this.sprite.addChild( this._yAxisLeft.sprite );
             this._yAxis.push( this._yAxisLeft );
@@ -399,7 +400,7 @@ export default class Rect extends coordBase
         } );
         if( yAxisRight ){
             yAxisRightDataFrame = this.getAxisDataFrame( yAxisRight.field )
-            this._yAxisRight = new yAxisConstructor( yAxisRight, yAxisRightDataFrame );
+            this._yAxisRight = new yAxisConstructor( yAxisRight, yAxisRightDataFrame, this );
             this._yAxisRight.axis = yAxisRight;
             this.sprite.addChild( this._yAxisRight.sprite );
             this._yAxis.push( this._yAxisRight );
@@ -453,7 +454,7 @@ export default class Rect extends coordBase
         //然后yAxis更新后，对应的背景也要更新
         this._grid.reset({
             animation:false,
-            xDirection: {
+            oneDimension: {
                 data: this._yAxisLeft ? this._yAxisLeft.layoutData : this._yAxisRight.layoutData
             }
         });

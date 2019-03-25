@@ -10059,18 +10059,19 @@ var Chartx = (function () {
       }
       /**
        * reset 其实就是重新绘制整个图表，不再做详细的拆分opts中有哪些变化，来做对应的细致的变化，简单粗暴的全部重新创立
+       * opt 必须全量options，不在支持局部opt传递，所以对opt的处理不再支持extend
        */
 
     }, {
       key: "reset",
       value: function reset(opt, data) {
-        !opt && (opt = {});
+        opt && (this._opt = opt);
+        /* 不能 extend opt 
+        !opt && (opt={});
+        _.extend(this._opt, opt);
+        */
 
-        _.extend(true, this._opt, opt);
-
-        if (data) {
-          this._data = data;
-        }
+        data && (this._data = data);
         this.dataFrame = this.initData(this._data, opt);
         this.clean();
         this.init();
@@ -11099,6 +11100,12 @@ var Chartx = (function () {
     _createClass(Axis, [{
       key: "drawWaterLine",
       value: function drawWaterLine(y) {
+        //如果y在现有的数据区间里面， 就不需要重新计算和绘制了
+        if (this.layoutType == "proportion") {
+          if (y >= this._min && y <= this._max) {
+            return;
+          }
+        }
         this.dataSection = [];
         this.setWaterLine(y);
 
@@ -11405,6 +11412,7 @@ var Chartx = (function () {
         !opt && (opt = {});
         var me = this;
         var arr = this.layoutData;
+        var visibleInd = 0;
 
         if (this._title) {
           this._title.context.y = this.height - this._title.getTextHeight() / 2;
@@ -11415,7 +11423,17 @@ var Chartx = (function () {
         var labelVisibleInd = 0; //var lineVisibleInd = 0;
 
         for (var a = 0, al = arr.length; a < al; a++) {
-          var xNodeId = "xNode" + a;
+          //这里可以由用户来自定义过滤 来 决定 该node的样式
+          _.isFunction(this.filter) && this.filter({
+            layoutData: arr,
+            index: a
+          });
+          var o = arr[a];
+
+          if (!o.visible) {
+            continue;
+          }
+          var xNodeId = "xNode" + visibleInd;
           var xNode = this.rulesSprite.getChildById(xNodeId);
 
           if (!xNode) {
@@ -11424,74 +11442,70 @@ var Chartx = (function () {
             });
             this.rulesSprite.addChild(xNode);
           }
-          var o = arr[a];
           var x = o.x,
               y = this.tickLine.lineLength + this.tickLine.distance + this.label.distance;
 
           if (this.label.enabled) {
-            if (!!arr[a].visible) {
-              //文字
-              var textContext = {
-                x: o._text_x || o.x,
-                y: y + 20,
-                fillStyle: this.label.fontColor,
-                fontSize: this.label.fontSize,
-                rotation: -Math.abs(this.label.rotation),
-                textAlign: this.label.textAlign,
-                lineHeight: this.label.lineHeight,
-                textBaseline: !!this.label.rotation ? "middle" : "top",
-                globalAlpha: 0
-              };
+            //文字
+            var textContext = {
+              x: o._text_x || o.x,
+              y: y + 20,
+              fillStyle: this.label.fontColor,
+              fontSize: this.label.fontSize,
+              rotation: -Math.abs(this.label.rotation),
+              textAlign: this.label.textAlign,
+              lineHeight: this.label.lineHeight,
+              textBaseline: !!this.label.rotation ? "middle" : "top",
+              globalAlpha: 0
+            };
 
-              if (!!this.label.rotation && this.label.rotation != 90) {
-                textContext.x += 5;
-                textContext.y += 3;
-              }
+            if (!!this.label.rotation && this.label.rotation != 90) {
+              textContext.x += 5;
+              textContext.y += 3;
+            }
 
-              if (labelVisibleInd < me._txts.length) {
-                //_.extend( xNode._txt.context , textContext );
-                xNode._txt = me._txts[labelVisibleInd];
+            if (labelVisibleInd < me._txts.length) {
+              //_.extend( xNode._txt.context , textContext );
+              xNode._txt = me._txts[labelVisibleInd];
 
-                xNode._txt.resetText(o.text + "");
+              xNode._txt.resetText(o.text + "");
 
-                if (this.animation) {
-                  xNode._txt.animate({
-                    x: textContext.x
-                  }, {
-                    duration: 300
-                  });
-                } else {
-                  xNode._txt.context.x = textContext.x;
-                }
-              } else {
-                xNode._txt = new Canvax.Display.Text(o.text, {
-                  id: "xAxis_txt_" + a,
-                  context: textContext
+              if (this.animation) {
+                xNode._txt.animate({
+                  x: textContext.x
+                }, {
+                  duration: 300
                 });
-                xNode.addChild(xNode._txt);
-
-                me._txts.push(xNode._txt); //新建的 txt的 动画方式
-
-
-                if (this.animation && !opt.resize) {
-                  xNode._txt.animate({
-                    globalAlpha: 1,
-                    y: xNode._txt.context.y - 20
-                  }, {
-                    duration: 500,
-                    easing: 'Back.Out',
-                    //Tween.Easing.Elastic.InOut
-                    delay: a * delay,
-                    id: xNode._txt.id
-                  });
-                } else {
-                  xNode._txt.context.y = xNode._txt.context.y - 20;
-                  xNode._txt.context.globalAlpha = 1;
-                }
+              } else {
+                xNode._txt.context.x = textContext.x;
               }
-              labelVisibleInd++;
-            } //xNode._txt.context.visible = !!arr[a].visible;
+            } else {
+              xNode._txt = new Canvax.Display.Text(o.text, {
+                id: "xAxis_txt_" + visibleInd,
+                context: textContext
+              });
+              xNode.addChild(xNode._txt);
 
+              me._txts.push(xNode._txt); //新建的 txt的 动画方式
+
+
+              if (this.animation && !opt.resize) {
+                xNode._txt.animate({
+                  globalAlpha: 1,
+                  y: xNode._txt.context.y - 20
+                }, {
+                  duration: 500,
+                  easing: 'Back.Out',
+                  //Tween.Easing.Elastic.InOut
+                  delay: visibleInd * delay,
+                  id: xNode._txt.id
+                });
+              } else {
+                xNode._txt.context.y = xNode._txt.context.y - 20;
+                xNode._txt.context.globalAlpha = 1;
+              }
+            }
+            labelVisibleInd++;
           }
 
           if (this.tickLine.enabled) {
@@ -11532,13 +11546,7 @@ var Chartx = (function () {
               }
             }
           }
-
-          _.isFunction(this.filter) && this.filter({
-            layoutData: arr,
-            index: a,
-            txt: xNode._txt,
-            line: xNode._line || null
-          });
+          visibleInd++;
         }
 
         if (me._txts.length > labelVisibleInd) {
@@ -11547,8 +11555,8 @@ var Chartx = (function () {
           }
         }
 
-        if (this.rulesSprite.children.length > arr.length) {
-          for (var al = arr.length, pl = this.rulesSprite.children.length; al < pl; al++) {
+        if (this.rulesSprite.children.length >= visibleInd) {
+          for (var al = visibleInd, pl = this.rulesSprite.children.length; al < pl; al++) {
             this.rulesSprite.getChildAt(al).remove();
             al--, pl--;
           }
@@ -11748,6 +11756,7 @@ var Chartx = (function () {
 
       _this = _possibleConstructorReturn(this, _getPrototypeOf(yAxis).call(this, opt, data.org));
       _this.type = "yAxis";
+      _this._coord = _coord || {};
       _this._title = null; //this.label对应的文本对象
 
       _this._axisLine = null;
@@ -11954,6 +11963,12 @@ var Chartx = (function () {
         }
 
         this.layoutData = tmpData;
+
+        if (this.trimLayout) {
+          //如果用户有手动的 trimLayout ，那么就全部visible为true，然后调用用户自己的过滤程序
+          //trimLayout就事把arr种的每个元素的visible设置为true和false的过程
+          this.trimLayout(tmpData);
+        }
       }
     }, {
       key: "_getYAxisDisLine",
@@ -11987,16 +12002,20 @@ var Chartx = (function () {
           return;
         }
         var arr = this.layoutData;
+        var visibleInd = 0;
         me.maxW = 0;
 
         for (var a = 0, al = arr.length; a < al; a++) {
+          _.isFunction(me.filter) && me.filter({
+            layoutData: arr,
+            index: a
+          });
           var o = arr[a];
 
           if (!o.visible) {
             continue;
           }
-          var y = o.y; //var value = o.value;
-
+          var y = o.y;
           var textAlign = me.label.textAlign;
           var posy = y + (a == 0 ? -3 : 0) + (a == arr.length - 1 ? 3 : 0); //为横向图表把y轴反转后的 逻辑
 
@@ -12012,7 +12031,7 @@ var Chartx = (function () {
               posy = y;
             }
           }
-          var yNode = this.rulesSprite.getChildAt(a);
+          var yNode = this.rulesSprite.getChildAt(visibleInd);
 
           if (yNode) {
             if (yNode._txt && this.label.enabled) {
@@ -12022,7 +12041,7 @@ var Chartx = (function () {
                   globalAlpha: 1
                 }, {
                   duration: 500,
-                  delay: a * 80,
+                  delay: visibleInd * 80,
                   id: yNode._txt.id
                 });
               } else {
@@ -12038,7 +12057,7 @@ var Chartx = (function () {
                   y: y
                 }, {
                   duration: 500,
-                  delay: a * 80,
+                  delay: visibleInd * 80,
                   id: yNode._tickLine.id
                 });
               } else {
@@ -12047,7 +12066,7 @@ var Chartx = (function () {
             }
           } else {
             yNode = new Canvax.Display.Sprite({
-              id: "yNode" + a
+              id: "yNode" + visibleInd
             });
             var aniFrom = 20;
 
@@ -12086,7 +12105,7 @@ var Chartx = (function () {
                 txtX = txtX + (me.align == "left" ? -1 : 1) * 4;
               }
               var txt = new Canvax.Display.Text(o.text, {
-                id: "yAxis_txt_" + me.align + "_" + a,
+                id: "yAxis_txt_" + me.align + "_" + visibleInd,
                 context: {
                   x: txtX,
                   y: posy + aniFrom,
@@ -12108,14 +12127,6 @@ var Chartx = (function () {
                 me.maxW = Math.max(me.maxW, txt.getTextWidth());
               }
 
-              _.isFunction(me.filter) && me.filter({
-                layoutData: me.layoutData,
-                index: a,
-                txt: txt,
-                line: line
-              });
-              me.rulesSprite.addChild(yNode);
-
               if (me.animation && !opt.resize) {
                 txt.animate({
                   globalAlpha: 1,
@@ -12124,7 +12135,7 @@ var Chartx = (function () {
                   duration: 500,
                   easing: 'Back.Out',
                   //Tween.Easing.Elastic.InOut
-                  delay: (a + 1) * 80,
+                  delay: (visibleInd + 1) * 80,
                   id: txt.id
                 });
               } else {
@@ -12132,11 +12143,13 @@ var Chartx = (function () {
                 txt.context.globalAlpha = 1;
               }
             }
+            me.rulesSprite.addChild(yNode);
           }
+          visibleInd++;
         }
 
-        if (me.rulesSprite.children.length > arr.length) {
-          for (var al = arr.length, pl = me.rulesSprite.children.length; al < pl; al++) {
+        if (me.rulesSprite.children.length >= visibleInd) {
+          for (var al = visibleInd, pl = me.rulesSprite.children.length; al < pl; al++) {
             me.rulesSprite.getChildAt(al).remove();
             al--, pl--;
           }
@@ -12409,9 +12422,10 @@ var Chartx = (function () {
             id: "back_line_" + a,
             context: {
               y: o.y,
-              lineType: self.oneDimension.lineType,
-              lineWidth: self.oneDimension.lineWidth,
-              strokeStyle: self.oneDimension.strokeStyle
+              lineType: self.getProp(self.oneDimension.lineType, a, 'solid'),
+              lineWidth: self.getProp(self.oneDimension.lineWidth, a, 1),
+              strokeStyle: self.getProp(self.oneDimension.strokeStyle, a, '#f0f0f0'),
+              visible: o.y ? true : false
             }
           });
 
@@ -12437,9 +12451,9 @@ var Chartx = (function () {
                 x: 0,
                 y: -self.height
               },
-              lineType: self.twoDimension.lineType,
-              lineWidth: self.twoDimension.lineWidth,
-              strokeStyle: self.twoDimension.strokeStyle,
+              lineType: self.getProp(self.twoDimension.lineType, a, 'solid'),
+              lineWidth: self.getProp(self.twoDimension.lineWidth, a, 1),
+              strokeStyle: self.getProp(self.twoDimension.strokeStyle, a, '#f0f0f0'),
               visible: o.x ? true : false
             }
           });
@@ -12452,7 +12466,7 @@ var Chartx = (function () {
     }, {
       key: "getProp",
       value: function getProp(prop, i, def) {
-        var res = def;
+        var res = def || prop;
 
         if (prop != null && prop != undefined) {
           if (_.isString(prop) || _.isNumber(prop)) {
@@ -12460,7 +12474,7 @@ var Chartx = (function () {
           }
 
           if (_.isFunction(prop)) {
-            res = prop.apply(this, [prop, i, def]);
+            res = prop.apply(this, [i, def]);
           }
 
           if (_.isArray(prop)) {
@@ -12678,7 +12692,7 @@ var Chartx = (function () {
 
         this._grid.reset({
           animation: false,
-          xDirection: {
+          oneDimension: {
             data: _yAxis.layoutData
           }
         });
@@ -12876,7 +12890,7 @@ var Chartx = (function () {
 
         if (yAxisLeft) {
           yAxisLeftDataFrame = this.getAxisDataFrame(yAxisLeft.field);
-          this._yAxisLeft = new yAxis(yAxisLeft, yAxisLeftDataFrame);
+          this._yAxisLeft = new yAxis(yAxisLeft, yAxisLeftDataFrame, this);
           this._yAxisLeft.axis = yAxisLeft;
           this.sprite.addChild(this._yAxisLeft.sprite);
 
@@ -12891,7 +12905,7 @@ var Chartx = (function () {
 
         if (yAxisRight) {
           yAxisRightDataFrame = this.getAxisDataFrame(yAxisRight.field);
-          this._yAxisRight = new yAxis(yAxisRight, yAxisRightDataFrame);
+          this._yAxisRight = new yAxis(yAxisRight, yAxisRightDataFrame, this);
           this._yAxisRight.axis = yAxisRight;
           this.sprite.addChild(this._yAxisRight.sprite);
 
@@ -12941,7 +12955,7 @@ var Chartx = (function () {
 
         this._grid.reset({
           animation: false,
-          xDirection: {
+          oneDimension: {
             data: this._yAxisLeft ? this._yAxisLeft.layoutData : this._yAxisRight.layoutData
           }
         });
@@ -14961,7 +14975,7 @@ var Chartx = (function () {
                   fontSize: me.label.fontSize,
                   lineWidth: me.label.lineWidth,
                   strokeStyle: me.label.strokeStyle || finalPos.fillStyle,
-                  //textAlign   : me.label.textAlign,
+                  //textAlign     : me.label.textAlign, 在后面的_getTextAlign中设置
                   textBaseline: me.label.verticalAlign,
                   rotation: me.label.rotation
                 }; //然后根据position, offset确定x,y

@@ -24,6 +24,7 @@ export default class yAxis extends Axis
 
         super(opt, data.org);
         this.type   = "yAxis";
+        this._coord = _coord || {};
 
         this._title = null;//this.label对应的文本对象
         this._axisLine  = null;
@@ -94,6 +95,7 @@ export default class yAxis extends Axis
      */
     draw(opt)
     {
+        
         _.extend(true, this, (opt || {} ));
 
         this.height = parseInt( this.yMaxHeight - this._getYAxisDisLine() );
@@ -222,6 +224,12 @@ export default class yAxis extends Axis
 
         //TODO: 最后的问题就是dataSection中得每个只如果format后都相同的话，就会出现最上面最下面两个一样得刻度
         this.layoutData = tmpData;
+
+        if( this.trimLayout ){
+            //如果用户有手动的 trimLayout ，那么就全部visible为true，然后调用用户自己的过滤程序
+            //trimLayout就事把arr种的每个元素的visible设置为true和false的过程
+            this.trimLayout( tmpData );
+        };
     }
 
     _getYAxisDisLine() 
@@ -253,16 +261,22 @@ export default class yAxis extends Axis
         };
         
         var arr = this.layoutData;
+        var visibleInd = 0;
         me.maxW = 0;
 
         for (var a = 0, al = arr.length; a < al; a++) {
+             
+            _.isFunction(me.filter) && me.filter({
+                layoutData : arr,
+                index      : a
+            });
+
             var o = arr[a];
             if( !o.visible ){
                 continue;
             };
+            
             var y = o.y;
-
-            //var value = o.value;
 
             var textAlign = me.label.textAlign;
  
@@ -279,7 +293,7 @@ export default class yAxis extends Axis
                 }
             };
 
-            var yNode = this.rulesSprite.getChildAt(a);
+            var yNode = this.rulesSprite.getChildAt( visibleInd );
 
             if( yNode ){
                 if( yNode._txt && this.label.enabled ){
@@ -290,7 +304,7 @@ export default class yAxis extends Axis
                             globalAlpha : 1
                         }, {
                             duration: 500,
-                            delay: a*80,
+                            delay: visibleInd*80,
                             id: yNode._txt.id
                         });
                     } else {
@@ -306,7 +320,7 @@ export default class yAxis extends Axis
                             y: y
                         }, {
                             duration: 500,
-                            delay: a*80,
+                            delay: visibleInd*80,
                             id: yNode._tickLine.id
                         });
                     } else {
@@ -315,7 +329,7 @@ export default class yAxis extends Axis
                 };
             } else {
                 yNode = new Canvax.Display.Sprite({
-                    id: "yNode" + a
+                    id: "yNode" + visibleInd
                 });
 
                 var aniFrom = 20;
@@ -354,7 +368,7 @@ export default class yAxis extends Axis
                         txtX = txtX + (me.align == "left"?-1:1)* 4
                     };
                     var txt = new Canvax.Display.Text( o.text , {
-                        id: "yAxis_txt_" + me.align + "_" + a,
+                        id: "yAxis_txt_" + me.align + "_" + visibleInd,
                         context: {
                             x: txtX,
                             y: posy + aniFrom,
@@ -377,38 +391,31 @@ export default class yAxis extends Axis
                         me.maxW = Math.max(me.maxW, txt.getTextWidth());
                     };
 
-                    //这里可以由用户来自定义过滤 来 决定 该node的样式
-                    _.isFunction(me.filter) && me.filter({
-                        layoutData: me.layoutData,
-                        index: a,
-                        txt: txt,
-                        line: line
-                    });
-
-                    me.rulesSprite.addChild(yNode);
-
-            
                     if (me.animation && !opt.resize) {
                         txt.animate({
                             globalAlpha: 1,
                             y: txt.context.y - aniFrom
                         }, {
                             duration: 500,
-                            easing: 'Back.Out', //Tween.Easing.Elastic.InOut
-                            delay: (a+1) * 80,
-                            id: txt.id
+                            easing  : 'Back.Out', //Tween.Easing.Elastic.InOut
+                            delay   : (visibleInd+1) * 80,
+                            id      : txt.id
                         });
                     } else {
                         txt.context.y = txt.context.y - aniFrom;
                         txt.context.globalAlpha = 1;
                     }
                 };
-            }
+
+                me.rulesSprite.addChild(yNode);
+            };
+
+            visibleInd ++;
         };
         
         //把 rulesSprite.children中多余的给remove掉
-        if( me.rulesSprite.children.length > arr.length ){
-            for( var al = arr.length,pl = me.rulesSprite.children.length;al<pl;al++  ){
+        if( me.rulesSprite.children.length >= visibleInd ){
+            for( var al = visibleInd,pl = me.rulesSprite.children.length;al<pl;al++  ){
                 me.rulesSprite.getChildAt( al ).remove();
                 al--,pl--;
             };
