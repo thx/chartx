@@ -65,7 +65,7 @@ export default class ScatGraphs extends GraphsBase
                     },
                     strokeAlpha: {
                         detail : '节点描边透明度',
-                        default: 0
+                        default: 1
                     },
     
                     focus: {
@@ -462,9 +462,9 @@ export default class ScatGraphs extends GraphsBase
                 _nodeElement.on(event.types.get(), function(e) {
                     
                      e.eventInfo = {
-                         title : null,
-                         trigger : me.node,
-                         nodes : [ this.nodeData ]
+                         title: null,
+                         trigger: me.node,
+                         nodes: [ this.nodeData ]
                      };
                      if( this.nodeData.label ){
                          e.eventInfo.title = this.nodeData.label;
@@ -776,6 +776,7 @@ export default class ScatGraphs extends GraphsBase
         nctx.lineWidth = nodeData.lineWidth;
         nctx.strokeAlpha = this.node.strokeAlpha;
         nctx.fillAlpha = nodeData.fillAlpha;
+        nctx.strokeStyle = nodeData.strokeStyle;
 
         nodeData.focused = false;
     }

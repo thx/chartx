@@ -12396,6 +12396,8 @@ var Chartx = (function () {
 
         for (var a = 0, al = arr.length; a < al; a++) {
           var o = arr[a];
+          debugger;
+          if (!o.visible) continue;
           var line = new Line$4({
             id: "back_line_" + a,
             context: {
@@ -12619,7 +12621,6 @@ var Chartx = (function () {
             yAxis$$1.isH = true;
           });
         }
-        debugger;
 
         if ("enabled" in coord) {
           //如果有给直角坐标系做配置display，就直接通知到xAxis，yAxis，grid三个子组件
@@ -16779,7 +16780,7 @@ var Chartx = (function () {
               },
               strokeAlpha: {
                 detail: '节点描边透明度',
-                default: 0
+                default: 1
               },
               focus: {
                 detail: "节点hover态设置",
@@ -17527,6 +17528,7 @@ var Chartx = (function () {
         nctx.lineWidth = nodeData.lineWidth;
         nctx.strokeAlpha = this.node.strokeAlpha;
         nctx.fillAlpha = nodeData.fillAlpha;
+        nctx.strokeStyle = nodeData.strokeStyle;
         nodeData.focused = false;
       }
     }, {

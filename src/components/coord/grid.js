@@ -178,6 +178,8 @@ export default class rectGrid extends event.Dispatcher
         
         for(var a = 0, al = arr.length; a < al; a++){
             var o = arr[a];
+debugger
+            if( !o.visible ) continue;
           
             var line = new Line({
                 id : "back_line_"+a,
