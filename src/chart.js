@@ -3,7 +3,7 @@ import { _ , dataFrame, $ , global , event } from "mmvis"
 
 const _padding = 20;
 
-export default class Chart extends event.Dispatcher
+class Chart extends event.Dispatcher
 {
     constructor( node, data, opt, componentModules )
     {
@@ -665,4 +665,8 @@ export default class Chart extends event.Dispatcher
          });
      }
      
-}
+};
+
+global.registerComponent( Chart, 'chart' );
+
+export default Chart;

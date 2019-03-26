@@ -3,10 +3,10 @@ import Canvax from "canvax"
 import xAxisConstructor from "./xaxis"
 import yAxisConstructor from "./yaxis"
 import Grid from "./grid"
-import { _,getDefaultProps,event } from "mmvis"
+import { global,_,getDefaultProps,event } from "mmvis"
 
 
-export default class Rect extends coordBase
+class Rect extends coordBase
 {
     static defaultProps(){
         return {
@@ -305,31 +305,35 @@ export default class Rect extends coordBase
         //设置下x y 轴的 _axisLine轴线的位置，默认 axisLine.position==default
 
         var xAxisPosY;
-        if( this._xAxis.axisLine.position == 'center' ){
-            xAxisPosY = -this._yAxis[0].height / 2;
-        } 
-        if( this._xAxis.axisLine.position == 'center' ){
-            xAxisPosY = -this._yAxis[0].height / 2;
-        } 
-        if( _.isNumber( this._xAxis.axisLine.position ) ){
-            xAxisPosY = -this._yAxis[0].getPosOfVal( this._xAxis.axisLine.position );
-        }
-        if( xAxisPosY !== undefined ){
-            this._xAxis._axisLine.context.y = xAxisPosY;
+        if( this._xAxis.enabled ){
+            if( this._xAxis.axisLine.position == 'center' ){
+                xAxisPosY = -this._yAxis[0].height / 2;
+            } 
+            if( this._xAxis.axisLine.position == 'center' ){
+                xAxisPosY = -this._yAxis[0].height / 2;
+            } 
+            if( _.isNumber( this._xAxis.axisLine.position ) ){
+                xAxisPosY = -this._yAxis[0].getPosOfVal( this._xAxis.axisLine.position );
+            }
+            if( xAxisPosY !== undefined ){
+                this._xAxis._axisLine.context.y = xAxisPosY;
+            }
         }
 
         _.each( this._yAxis , function( _yAxis ){
             //这个_yAxis是具体的y轴实例
             var yAxisPosX;
-            if( _yAxis.axisLine.position == 'center' ){
-                yAxisPosX = me._xAxis.width / 2;
-            }; 
-            if( _.isNumber( _yAxis.axisLine.position ) ){
-                yAxisPosX = me._xAxis.getPosOfVal( _yAxis.axisLine.position );
-            };
-            if( yAxisPosX !== undefined ){
-                _yAxis._axisLine.context.x = yAxisPosX;
-            };
+            if(_yAxis.enabled){
+                if( _yAxis.axisLine.position == 'center' ){
+                    yAxisPosX = me._xAxis.width / 2;
+                }; 
+                if( _.isNumber( _yAxis.axisLine.position ) ){
+                    yAxisPosX = me._xAxis.getPosOfVal( _yAxis.axisLine.position );
+                };
+                if( yAxisPosX !== undefined ){
+                    _yAxis._axisLine.context.x = yAxisPosX;
+                };
+            }
         } );
 
     }
@@ -594,3 +598,7 @@ export default class Rect extends coordBase
     }
 
 }
+
+global.registerComponent( Rect, 'coord', 'rect' );
+
+export default Rect;

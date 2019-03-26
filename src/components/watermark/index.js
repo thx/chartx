@@ -2,10 +2,10 @@
  * 水印组件
  */
 import Canvax from "canvax"
-import { _,getDefaultProps } from "mmvis"
+import { global,_,getDefaultProps } from "mmvis"
 import Component from "../component"
 
-export default class waterMark extends Component
+class waterMark extends Component
 {
     static defaultProps(){
         return {
@@ -85,3 +85,7 @@ export default class waterMark extends Component
 
     }
 }
+
+global.registerComponent( waterMark, 'waterMark' );
+
+export default waterMark;

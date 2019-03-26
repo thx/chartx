@@ -1,8 +1,8 @@
 import Pie from "./pie"
 import GraphsBase from "../index"
-import { _,getDefaultProps } from "mmvis"
+import { global, _,getDefaultProps } from "mmvis"
 
-export default class PieGraphs extends GraphsBase
+class PieGraphs extends GraphsBase
 {
     static defaultProps(){
         return {
@@ -476,3 +476,7 @@ export default class PieGraphs extends GraphsBase
     }
     
 }
+
+global.registerComponent( PieGraphs, 'graphs', 'pie' );
+
+export default PieGraphs;

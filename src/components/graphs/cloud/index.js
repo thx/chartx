@@ -1,11 +1,11 @@
 import Canvax from "canvax"
 import GraphsBase from "../index"
 import cloudLayout from "../../../layout/cloud"
-import { _,event,getDefaultProps } from "mmvis"
+import { global,_,event,getDefaultProps } from "mmvis"
 
 const Text = Canvax.Display.Text;
 
-export default class CloudGraphs extends GraphsBase
+class CloudGraphs extends GraphsBase
 {
     static defaultProps(){
         return {
@@ -337,3 +337,7 @@ export default class CloudGraphs extends GraphsBase
     }
 
 }
+
+global.registerComponent( CloudGraphs, 'graphs', 'cloud' );
+
+export default CloudGraphs;

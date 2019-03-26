@@ -1,8 +1,8 @@
 import Group from "./group"
 import GraphsBase from "../index"
-import { _, getDefaultProps } from "mmvis"
+import { global, _, getDefaultProps } from "mmvis"
 
-export default class LineGraphs extends GraphsBase
+class LineGraphs extends GraphsBase
 {
 
     static defaultProps(){
@@ -302,3 +302,7 @@ export default class LineGraphs extends GraphsBase
         return _nodesInfoList;
     }
 }
+
+global.registerComponent( LineGraphs, 'graphs', 'line' );
+
+export default LineGraphs;

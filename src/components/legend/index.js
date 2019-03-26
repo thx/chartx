@@ -1,11 +1,11 @@
 import Component from "../component"
 import Canvax from "canvax"
-import { _, getDefaultProps} from "mmvis"
+import { global,_, getDefaultProps} from "mmvis"
 import Trigger from "../trigger"
 
 const Circle = Canvax.Shapes.Circle
 
-export default class Legend extends Component
+class Legend extends Component
 {
     static defaultProps(){
         return {
@@ -346,3 +346,7 @@ export default class Legend extends Component
         };
     }
 }
+
+global.registerComponent( Legend, 'legend' );
+
+export default Legend;

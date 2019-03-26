@@ -1,11 +1,11 @@
 import Component from "../component"
 import Canvax from "canvax"
-import { _, getDefaultProps, event } from "mmvis"
+import { global,_, getDefaultProps, event } from "mmvis"
 
 const Line = Canvax.Shapes.Line;
 const Circle = Canvax.Shapes.Circle;
 
-export default class markCloumn extends Component
+class markCloumn extends Component
 {
     static defaultProps(){
         return {
@@ -254,3 +254,6 @@ export default class markCloumn extends Component
         this.sprite.addChild( this._nodes );
     }
 }
+global.registerComponent( markCloumn, 'markcloumn' );
+
+export default markCloumn;

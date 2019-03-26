@@ -1,12 +1,12 @@
 import Component from "../component"
 import Canvax from "canvax"
 import { numAddSymbol } from "../../utils/tools"
-import { _,getDefaultProps } from "mmvis"
+import { global,_,getDefaultProps } from "mmvis"
 
 const Rect = Canvax.Shapes.Rect;
 const Line = Canvax.Shapes.Line;
 
-export default class Tips extends Component {
+class Tips extends Component {
 
     static defaultProps(){
         return {
@@ -244,21 +244,32 @@ export default class Tips extends Component {
             str += "<div style='font-size:14px;border-bottom:1px solid #f0f0f0;padding:4px;margin-bottom:6px;'>" + info.title + "</div>";
         }; 
         _.each(info.nodes, function (node, i) {
+            /*
             if (!node.value && node.value !== 0) {
                 return;
-            }; 
+            };
+            */
+
             var style = node.color || node.fillStyle || node.strokeStyle;
-            var name = node.name || node.field;
+            var name = node.name || node.field || node.content;
             var value = typeof(node.value) == "object" ? JSON.stringify(node.value) : numAddSymbol(node.value);
+            var hasVal = node.value || node.value == 0
+
             str += "<div style='line-height:1.5;font-size:12px;padding:0 4px;'>"
             if( style ){
                 str += "<span style='background:" + style + ";margin-right:8px;margin-top:7px;float:left;width:8px;height:8px;border-radius:4px;overflow:hidden;font-size:0;'></span>";
             };
             if( name ){
-                str += "<span style='margin-right:5px;'>"+name+"：</span>";
+                str += "<span style='margin-right:5px;'>"+name;
+                
+                hasVal && (str += "：");
+                
+                str += "</span>";
             };
+         
+            hasVal && (str += value);
             
-            str += value + "</div>";
+            str += "</div>";
         });
         return str;
     }
@@ -436,3 +447,6 @@ export default class Tips extends Component {
     }
 
 }
+
+global.registerComponent( Tips, 'tips' );
+export default Tips;

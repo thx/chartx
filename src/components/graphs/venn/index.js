@@ -4,13 +4,13 @@ import GraphsBase from "../index"
 import {venn, lossFunction, normalizeSolution, scaleSolution} from "../../../layout/venn/layout";
 import {intersectionArea, distance, getCenter} from "../../../layout/venn/circleintersection";
 import {nelderMead} from "fmin";
-import { _, event, getDefaultProps } from "mmvis"
+import { global, _, event, getDefaultProps } from "mmvis"
 
 const Text = Canvax.Display.Text;
 const Path = Canvax.Shapes.Path;
 const Circle = Canvax.Shapes.Circle;
 
-export default class VennGraphs extends GraphsBase
+class VennGraphs extends GraphsBase
 {
     static defaultProps(){
         return {
@@ -677,3 +677,8 @@ function intersectionAreaPath(circles) {
 }
 
 //venn computeTextCentres 需要的相关代码 end
+
+
+global.registerComponent( VennGraphs, 'graphs', 'venn' );
+
+export default VennGraphs;

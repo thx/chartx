@@ -1,12 +1,12 @@
 import Canvax from "canvax"
 import GraphsBase from "../index"
 import {numAddSymbol} from "../../../utils/tools"
-import { _ , event , getDefaultProps} from "mmvis"
+import { global, _ , event , getDefaultProps} from "mmvis"
 
 const Text = Canvax.Display.Text;
 const Polygon = Canvax.Shapes.Polygon;
 
-export default class FunnelGraphs extends GraphsBase
+class FunnelGraphs extends GraphsBase
 {
     static defaultProps(){
         return {
@@ -286,3 +286,7 @@ export default class FunnelGraphs extends GraphsBase
 
 
 }
+
+global.registerComponent( FunnelGraphs, 'graphs', 'funnel' );
+
+export default FunnelGraphs;

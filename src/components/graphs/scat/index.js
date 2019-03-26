@@ -1,12 +1,12 @@
 import Canvax from "canvax"
 import GraphsBase from "../index"
-import { _,event,getDefaultProps } from "mmvis"
+import { global,_,event,getDefaultProps } from "mmvis"
 
 const Circle = Canvax.Shapes.Circle;
 const Rect = Canvax.Shapes.Rect;
 const Line = Canvax.Shapes.Line;
 
-export default class ScatGraphs extends GraphsBase
+class ScatGraphs extends GraphsBase
 {
     static defaultProps(){
         return {
@@ -822,3 +822,7 @@ export default class ScatGraphs extends GraphsBase
     }
 
 }
+
+global.registerComponent( ScatGraphs, 'graphs', 'scat' );
+
+export default ScatGraphs;

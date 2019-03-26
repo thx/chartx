@@ -1,10 +1,10 @@
 import Component from "../component"
 import Canvax from "canvax"
-import { _, getDefaultProps } from "mmvis"
+import { global,_, getDefaultProps } from "mmvis"
 
 const Line = Canvax.Shapes.Line;
 
-export default class Cross extends Component
+class Cross extends Component
 {
 
     static defaultProps(){
@@ -119,3 +119,7 @@ export default class Cross extends Component
     }
 
 }
+
+global.registerComponent( Cross, 'cross' );
+
+export default Cross;

@@ -178,7 +178,7 @@ export default class rectGrid extends event.Dispatcher
         
         for(var a = 0, al = arr.length; a < al; a++){
             var o = arr[a];
-debugger
+
             if( !o.visible ) continue;
           
             var line = new Line({
@@ -188,7 +188,7 @@ debugger
                     lineType    : self.getProp( self.oneDimension.lineType , a , 'solid'),
                     lineWidth   : self.getProp( self.oneDimension.lineWidth , a , 1),
                     strokeStyle : self.getProp( self.oneDimension.strokeStyle , a, '#f0f0f0'),
-                    visible     : o.y ? true : false
+                    visible     : true
                 }
             });
             if(self.oneDimension.enabled){
@@ -217,7 +217,7 @@ debugger
                     lineType    : self.getProp( self.twoDimension.lineType, a, 'solid'),
                     lineWidth   : self.getProp( self.twoDimension.lineWidth, a, 1),
                     strokeStyle : self.getProp( self.twoDimension.strokeStyle, a, '#f0f0f0'),
-                    visible     : o.x ? true : false
+                    visible     : true
                 }
             });
             if(self.twoDimension.enabled){

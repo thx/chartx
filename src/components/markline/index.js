@@ -1,12 +1,12 @@
 import Component from "../component"
 import Canvax from "canvax"
-import { _ ,getDefaultProps} from "mmvis"
+import { global,_ ,getDefaultProps} from "mmvis"
 
 const BrokenLine = Canvax.Shapes.BrokenLine;
 const Sprite = Canvax.Display.Sprite;
 const Text = Canvax.Display.Text;
 
-export default class MarkLine extends Component
+class MarkLine extends Component
 {
     static defaultProps(){
         return {
@@ -287,3 +287,6 @@ export default class MarkLine extends Component
         return str;
     }
 }
+
+global.registerComponent( MarkLine, 'markLine' );
+export default  MarkLine

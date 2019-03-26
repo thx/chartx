@@ -1,6 +1,6 @@
 import Canvax from "canvax"
 import GraphsBase from "../index"
-import { _,global, getDefaultProps,event } from "mmvis"
+import { global, _, getDefaultProps,event } from "mmvis"
 
 const Rect  = Canvax.Shapes.Rect;
 const Path  = Canvax.Shapes.Path;
@@ -11,8 +11,7 @@ const Circle = Canvax.Shapes.Circle;
  * 关系图中 包括了  配置，数据，和布局数据，
  * 默认用配置和数据可以完成绘图， 但是如果有布局数据，就绘图玩额外调用一次绘图，把布局数据传入修正布局效果
  */
-
-export default class Relation extends GraphsBase
+class Relation extends GraphsBase
 {
     static defaultProps(){
         return {
@@ -348,6 +347,9 @@ export default class Relation extends GraphsBase
             metaData.__ctype = this._checkHtml(metaData.content) ? 'html' : 'canvas';
             this._setNodeSize( metaData );
 
+            //关系图的数据中不能用type字段
+            metaData.type = 'relation';            
+ 
             var fields = _.flatten([ metaData[ this.field ] ] );
             
             if( fields.length == 1 ){
@@ -443,8 +445,16 @@ export default class Relation extends GraphsBase
                     radius: _.flatten([ me.getProp( me.node.radius ) ])
                 }
             });
-            
+            _boxShape.nodeData = node;
             me.nodesSp.addChild( _boxShape );
+
+            _boxShape.on(event.types.get(), function(e) {
+                e.eventInfo = {
+                    trigger : me.node,
+                    nodes : [ this.nodeData ]
+                };
+                me.app.fire( e.type, e );
+            });
 
             if( node.__ctype == "canvas" ){
                 node.__element.context.x = node.x - node.width/2;
@@ -527,8 +537,6 @@ export default class Relation extends GraphsBase
 
         metaData.__element = _element;
     }
-
-
     _getEleAndsetCanvasSize( metaData ) {
         var me = this;
         var content = metaData.content;
@@ -561,7 +569,6 @@ export default class Relation extends GraphsBase
         return sprite;
 
     }
-
     _getEleAndsetHtmlSize( metaData ){
         var me = this;
         var content = metaData.content;
@@ -590,24 +597,7 @@ export default class Relation extends GraphsBase
 
     getNodesAt(index)
     {
-        //该index指当前
-        var data = this.data;
         
-        var _nodesInfoList = []; //节点信息集合
-        _.each( this.enabledField, function( fs, i ){
-            if( _.isArray(fs) ){
-                _.each( fs, function( _fs, ii ){
-                    //fs的结构两层到顶了
-                    var nodeData = data[ _fs ] ? data[ _fs ][ index ] : null;
-                    nodeData && _nodesInfoList.push( nodeData );
-                } );
-            } else {
-                var nodeData = data[ fs ] ? data[ fs ][ index ] : null;
-                nodeData && _nodesInfoList.push( nodeData );
-            }
-        } );
-        
-        return _nodesInfoList;
     }
 
     getProp( prop, def ){
@@ -617,3 +607,7 @@ export default class Relation extends GraphsBase
     
 
 }
+
+global.registerComponent( Relation, 'graphs', 'relation' );
+
+export default Relation

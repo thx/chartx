@@ -1,8 +1,8 @@
 import Component from "../component"
 import Canvax from "canvax"
-import { _, getDefaultProps } from "mmvis"
+import { global,_, getDefaultProps } from "mmvis"
 
-export default class lineSchedu extends Component
+class lineSchedu extends Component
 {
     static defaultProps(){
         return {
@@ -186,3 +186,7 @@ export default class lineSchedu extends Component
     }
 
 }
+
+global.registerComponent( lineSchedu, 'lineSchedu' );
+
+export default lineSchedu

@@ -16,9 +16,9 @@
 import coorBase from "./index"
 import Canvax from "canvax"
 import Grid from "./polar/grid"
-import { dataSection,_,getDefaultProps,event } from "mmvis"
+import { global,dataSection,_,getDefaultProps,event } from "mmvis"
 
-export default class Polar extends coorBase
+class Polar extends coorBase
 {
     static defaultProps(){
         return {
@@ -847,3 +847,7 @@ export default class Polar extends coorBase
         
     }
 }
+
+global.registerComponent( Polar, 'coord', 'polar' );
+
+export default Polar;

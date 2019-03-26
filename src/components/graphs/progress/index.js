@@ -1,8 +1,8 @@
 import Canvax from "canvax"
 import GraphsBase from "../index"
-import { _, getDefaultProps } from "mmvis"
+import { global,_, getDefaultProps } from "mmvis"
 
-export default class Progress extends GraphsBase
+class Progress extends GraphsBase
 {
     static defaultProps(){
         return {
@@ -422,3 +422,7 @@ export default class Progress extends GraphsBase
 
 
 }
+
+global.registerComponent( Progress, 'graphs', 'progress' );
+
+export default Progress;

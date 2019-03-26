@@ -1,12 +1,12 @@
 import Canvax from "canvax"
 import {numAddSymbol} from "../../../utils/tools"
 import GraphsBase from "../index"
-import { _, event, getDefaultProps } from "mmvis"
+import { global, _, event, getDefaultProps } from "mmvis"
 
 const AnimationFrame = Canvax.AnimationFrame;
 const Rect = Canvax.Shapes.Rect;
 
-export default class BarGraphs extends GraphsBase
+class BarGraphs extends GraphsBase
 {
     static defaultProps(){
         return {
@@ -1160,3 +1160,7 @@ export default class BarGraphs extends GraphsBase
         return selectOpt
     }
 }
+
+global.registerComponent( BarGraphs, 'graphs', 'bar' );
+
+export default BarGraphs;
