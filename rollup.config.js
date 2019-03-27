@@ -25,8 +25,9 @@ export default [
             commonjs(),
             babel({
                 exclude: [
-                    /node_modules\/(?!.*@*(mmvis|canvax)\/).*/,
-                    /layout/
+                    ///node_modules\/(?!.*@*(mmvis|canvax)\/).*/,
+                    /node_modules/,
+                    /layout\/dagre/
                 ],
                 babelrc: false,
                 presets: [
