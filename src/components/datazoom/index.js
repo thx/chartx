@@ -192,6 +192,7 @@ class dataZoom extends Component
 
         //预设默认的opt.dataZoom
         _.extend( true, this, getDefaultProps( dataZoom.defaultProps() ) , opt);
+        
         this.layout();
 
 	}
@@ -200,7 +201,7 @@ class dataZoom extends Component
     //datazoom begin
     layout()
     {
-        let me = this;
+
         let app = this.app;
         if( this.position == "bottom" ){
             //目前dataZoom是固定在bottom位置的
@@ -212,7 +213,6 @@ class dataZoom extends Component
             this.pos.y = app.padding.top + this.margin.top;
             app.padding.top += (this.height + this.margin.top + this.margin.bottom);
         };
-
         
     }
  
@@ -225,8 +225,8 @@ class dataZoom extends Component
         cloneEl.innerHTML = "";
         cloneEl.id = app.el.id + "_currclone";
         cloneEl.style.position = "absolute";
-        cloneEl.style.width = app.el.offsetWidth + "px";
-        cloneEl.style.height = app.el.offsetHeight + "px";
+        cloneEl.style.width = this.width + "px";
+        cloneEl.style.height = this.height+"px"; //app.el.offsetHeight + "px";
         cloneEl.style.top = "10000px";
         document.body.appendChild(cloneEl);
 
@@ -288,6 +288,7 @@ class dataZoom extends Component
                 graphsOpt.push( _opt );
             }
         } );
+
         var opt = {
             coord : app._opt.coord,
             graphs : graphsOpt
@@ -298,6 +299,7 @@ class dataZoom extends Component
         };
 
         opt.coord.enabled = false;
+        opt.coord.padding = 0;
 
         var thumbChart = new chartConstructor(cloneEl, app._data, opt, app.componentModules);
         thumbChart.draw();
@@ -476,7 +478,6 @@ class dataZoom extends Component
                 me._underline = me._addLine( underlineCtx )
                 me.dataZoomBg.addChild(me._underline); 
             };
-            
         }
 
 
@@ -525,6 +526,7 @@ class dataZoom extends Component
             this.dataZoomBtns.addChild( this._btnLeft );
         };
 
+        debugger
         var btnRightCtx = {
             x: me._getRangeEnd() / me.count * me.width - me.btnWidth,
             y: - me.btnOut / 2 + 1,
@@ -766,13 +768,15 @@ class dataZoom extends Component
         };
 
         var graphssp = this._cloneChart.thumbChart.graphsSprite;
+        graphssp.setEventEnable(false);
+        
         var _coor = this._cloneChart.thumbChart.getComponent({name:'coord'});
 
         graphssp.id = graphssp.id + "_datazoomthumbChartbg"
         graphssp.context.x = -_coor.origin.x; //0;
 
-        //TODO:这里为什么要 -2 的原因还没查出来。
-        graphssp.context.y = - 2;
+
+        //缩放到横条范围内
         graphssp.context.scaleY = this.btnHeight / _coor.height;
         graphssp.context.scaleX = this.width / _coor.width;
 

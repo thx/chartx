@@ -2894,6 +2894,8 @@ var Chartx = (function () {
      * 判断events里面是否有用户交互事件
      */
     _setEventEnable: function _setEventEnable() {
+      if (this.children) return; //容器的_eventEnabled不受注册的用户交互事件影响
+
       var hasInteractionEvent = false;
 
       for (var t in this._eventMap) {
@@ -6274,7 +6276,12 @@ var Chartx = (function () {
           }
 
           if (child instanceof DisplayObjectContainer) {
-            //是集合
+            if (!child._eventEnabled) {
+              //容易一般默认 _eventEnabled == true; 但是如果被设置成了false
+              //如果容器设置了不接受事件检测，那么下面所有的元素都不接受事件检测
+              continue;
+            }
+
             if (child.mouseChildren && child.getNumChildren() > 0) {
               var objs = child.getObjectsUnderPoint(point);
 
@@ -17115,7 +17122,7 @@ var Chartx = (function () {
       key: "init",
       value: function init() {
         this._shapesp = new Canvax.Display.Sprite({
-          id: "shapesp"
+          id: "scat_shapesp"
         });
         this._textsp = new Canvax.Display.Sprite({
           id: "textsp"
@@ -26188,7 +26195,7 @@ var Chartx = (function () {
         for (var i = 0; i < this.dataFrame.length; i++) {
           var rowData = this.dataFrame.getRowDataAt(i);
 
-          var fields = _.flatten([rowData[this.field]]);
+          var fields = _.flatten([(rowData[this.field] + "").split(",")]);
 
           var content = this._getContent(rowData);
 
@@ -30882,8 +30889,9 @@ var Chartx = (function () {
         cloneEl.innerHTML = "";
         cloneEl.id = app.el.id + "_currclone";
         cloneEl.style.position = "absolute";
-        cloneEl.style.width = app.el.offsetWidth + "px";
-        cloneEl.style.height = app.el.offsetHeight + "px";
+        cloneEl.style.width = this.width + "px";
+        cloneEl.style.height = this.height + "px"; //app.el.offsetHeight + "px";
+
         cloneEl.style.top = "10000px";
         document.body.appendChild(cloneEl); //var opt = _.extend(true, {}, me._opt);
         //_.extend(true, opt, me.getCloneChart() );
@@ -30958,6 +30966,7 @@ var Chartx = (function () {
           delete opt.coord.horizontal;
         }
         opt.coord.enabled = false;
+        opt.coord.padding = 0;
         var thumbChart = new chartConstructor(cloneEl, app._data, opt, app.componentModules);
         thumbChart.draw();
         return {
@@ -31187,6 +31196,7 @@ var Chartx = (function () {
 
           this.dataZoomBtns.addChild(this._btnLeft);
         }
+        debugger;
         var btnRightCtx = {
           x: me._getRangeEnd() / me.count * me.width - me.btnWidth,
           y: -me.btnOut / 2 + 1,
@@ -31438,6 +31448,7 @@ var Chartx = (function () {
           this.__graphssp.destroy();
         }
         var graphssp = this._cloneChart.thumbChart.graphsSprite;
+        graphssp.setEventEnable(false);
 
         var _coor = this._cloneChart.thumbChart.getComponent({
           name: 'coord'
@@ -31445,9 +31456,8 @@ var Chartx = (function () {
 
         graphssp.id = graphssp.id + "_datazoomthumbChartbg";
         graphssp.context.x = -_coor.origin.x; //0;
-        //TODO:这里为什么要 -2 的原因还没查出来。
+        //缩放到横条范围内
 
-        graphssp.context.y = -2;
         graphssp.context.scaleY = this.btnHeight / _coor.height;
         graphssp.context.scaleX = this.width / _coor.width;
         this.dataZoomBg.addChild(graphssp, 0);
