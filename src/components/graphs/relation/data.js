@@ -21,6 +21,7 @@ import { _ } from "mmvis"
 // }];
 
 const childrenKey = 'children';
+const parentKey = 'parent';
 const defaultFieldKey = '__key__';
 
 function checkData(data, key) {
@@ -101,7 +102,7 @@ function jsonToArrayForRelation(data, options) {
         }
         index++;
     }
-   // wm = null;
+    // wm = null;
     return result;
 
 }

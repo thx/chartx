@@ -120,12 +120,12 @@ var options = {
         layout      : "dagre",
         layoutOpts  : {
             graph : {
-                //rankdir: "TB",  
+                rankdir: "LR",  
                 //align: "DR",
-                //nodesep: 0,//同级node之间的距离
-                //edgesep: 0,
-                //ranksep: 0, //排与排之间的距离
-                //acyclicer : "greedy",
+                nodesep: 0,//同级node之间的距离
+                edgesep: 0,
+                ranksep: 0, //排与排之间的距离
+                acyclicer : "greedy",
                 //ranker: "longest-path",
             },
             node : {
@@ -134,9 +134,14 @@ var options = {
             edge : {
 
             }
-        }
+        },
         //如果完全可视化编辑器编辑出来的布局，就不需要layout算法，编辑器会保存一份layout数据
-        //layoutData : null 
+		//layoutData : null,
+		status:{
+            transform:{
+                fitView:'autoZoom'  //是否自动缩放  默认值：''
+            }
+        }  
     },
     miniMap : {},
     tips    : {}

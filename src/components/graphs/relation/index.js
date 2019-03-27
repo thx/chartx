@@ -115,6 +115,10 @@ export default class Relation extends GraphsBase {
                     transform: {
                         detail: "是否启动拖拽缩放整个画布",
                         propertys: {
+                            fitView:{
+                                detail: "自动缩放",
+                                default: ''     //autoZoom
+                            }, 
                             enabled: {
                                 detail: "是否开启",
                                 default: true
@@ -141,22 +145,25 @@ export default class Relation extends GraphsBase {
         this.type = "relation";
 
         _.extend(true, this, getDefaultProps(Relation.defaultProps()), opt);
+        if (this.layout === 'dagre') {
+            var dagreOpts = {
+                graph: {
+                    nodesep: 10,
+                    ranksep: 10,
+                    edgesep: 10,
+                    acyclicer: "greedy"
+                },
+                node: {
 
-        var dagreOpts = {
-            graph: {
-                nodesep: 10,
-                ranksep: 10,
-                edgesep: 10,
-                acyclicer: "greedy"
-            },
-            node: {
+                },
+                edge: {
+                    //labelpos: 'c'
+                }
+            };
+            _.extend(true, dagreOpts, this.layoutOpts)
+            _.extend(true, this.layoutOpts, dagreOpts);
+        }
 
-            },
-            edge: {
-                labelpos: 'c'
-            }
-        };
-        _.extend(true, this.layoutOpts, dagreOpts, this.layoutOpts);
 
         this.domContainer = app.canvax.domView;
         this.induce = null;
@@ -309,6 +316,7 @@ export default class Relation extends GraphsBase {
 
         if (this.layout == "dagre") {
             this.dagreLayout(this.data);
+
         } else if (_.isFunction(this.layout)) {
             //layout需要设置好data中nodes的xy， 以及edges的points，和 size的width，height
             this.layout(this.data);
@@ -317,6 +325,11 @@ export default class Relation extends GraphsBase {
         this.widget();
         this.sprite.context.x = this.origin.x;
         this.sprite.context.y = this.origin.y;
+        if (this.status.transform.fitView == 'autoZoom') {
+            
+            this.sprite.context.scaleX = this.width / this.data.size.width;
+            this.sprite.context.scaleY = this.height / this.data.size.height;
+        }
 
         var _offsetLet = (this.width - this.data.size.width) / 2;
         if (_offsetLet < 0) {
@@ -373,18 +386,22 @@ export default class Relation extends GraphsBase {
         g.setDefaultEdgeLabel(function () {
             //其实我到现在都还没搞明白setDefaultEdgeLabel的作用
             return {
-
             };
+        });
+
+        g.setDefaultNodeLabel(function () {
+            return {};
         });
 
         _.each(data.nodes, function (metaData) {
             var fields = _.flatten([metaData[me.field]]);
-            _.extend(metaData, me.layoutOpts.edge);
+            //_.extend(metaData, me.layoutOpts.edge);
             g.setNode(fields[0], metaData);
         });
         _.each(data.edges, function (metaData) {
             var fields = _.flatten([metaData[me.field]]);
             _.extend(metaData, me.layoutOpts.edge);
+
             g.setEdge(fields[0], fields[1], metaData);
         });
 
@@ -398,7 +415,6 @@ export default class Relation extends GraphsBase {
 
     widget() {
         var me = this;
-
         _.each(this.data.edges, function (edge) {
 
             var _bl = new Path({

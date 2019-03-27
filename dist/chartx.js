@@ -28499,6 +28499,11 @@ var Chartx = (function () {
               transform: {
                 detail: "是否启动拖拽缩放整个画布",
                 propertys: {
+                  fitView: {
+                    detail: "自动缩放",
+                    default: '' //autoZoom
+
+                  },
                   enabled: {
                     detail: "是否开启",
                     default: true
@@ -28532,20 +28537,23 @@ var Chartx = (function () {
 
       _.extend(true, _assertThisInitialized(_this), getDefaultProps(Relation.defaultProps()), opt);
 
-      var dagreOpts = {
-        graph: {
-          nodesep: 10,
-          ranksep: 10,
-          edgesep: 10,
-          acyclicer: "greedy"
-        },
-        node: {},
-        edge: {
-          labelpos: 'c'
-        }
-      };
+      if (_this.layout === 'dagre') {
+        var dagreOpts = {
+          graph: {
+            nodesep: 10,
+            ranksep: 10,
+            edgesep: 10,
+            acyclicer: "greedy"
+          },
+          node: {},
+          edge: {//labelpos: 'c'
+          }
+        };
 
-      _.extend(true, _this.layoutOpts, dagreOpts, _this.layoutOpts);
+        _.extend(true, dagreOpts, _this.layoutOpts);
+
+        _.extend(true, _this.layoutOpts, dagreOpts);
+      }
 
       _this.domContainer = app.canvax.domView;
       _this.induce = null;
@@ -28712,6 +28720,11 @@ var Chartx = (function () {
         this.sprite.context.x = this.origin.x;
         this.sprite.context.y = this.origin.y;
 
+        if (this.status.transform.fitView == 'autoZoom') {
+          this.sprite.context.scaleX = this.width / this.data.size.width;
+          this.sprite.context.scaleY = this.height / this.data.size.height;
+        }
+
         var _offsetLet = (this.width - this.data.size.width) / 2;
 
         if (_offsetLet < 0) {
@@ -28768,11 +28781,13 @@ var Chartx = (function () {
           //其实我到现在都还没搞明白setDefaultEdgeLabel的作用
           return {};
         });
+        g.setDefaultNodeLabel(function () {
+          return {};
+        });
 
         _.each(data.nodes, function (metaData) {
-          var fields = _.flatten([metaData[me.field]]);
+          var fields = _.flatten([metaData[me.field]]); //_.extend(metaData, me.layoutOpts.edge);
 
-          _.extend(metaData, me.layoutOpts.edge);
 
           g.setNode(fields[0], metaData);
         });
