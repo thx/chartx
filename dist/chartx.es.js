@@ -5408,14 +5408,14 @@ function (_event$Dispatcher) {
     _this.id = opt.id || Utils.createId(_this.type);
     _this._trackList = []; //一个元素可以追踪另外元素的变动
 
-    _this.init.apply(_assertThisInitialized(_assertThisInitialized(_this)), arguments); //所有属性准备好了后，先要计算一次this._updateTransform()得到_tansform
+    _this.init.apply(_assertThisInitialized(_this), arguments); //所有属性准备好了后，先要计算一次this._updateTransform()得到_tansform
 
 
     _this._updateTransform();
 
     _this._tweens = [];
 
-    var me = _assertThisInitialized(_assertThisInitialized(_this));
+    var me = _assertThisInitialized(_this);
 
     _this.on("destroy", function () {
       me.cleanAnimates();
@@ -6684,7 +6684,7 @@ function (_SystemRenderer) {
     _classCallCheck(this, CanvasRenderer);
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(CanvasRenderer).call(this, RENDERER_TYPE.CANVAS, app, options));
-    _this.CGR = new CanvasGraphicsRenderer(_assertThisInitialized(_assertThisInitialized(_this)));
+    _this.CGR = new CanvasGraphicsRenderer(_assertThisInitialized(_this));
     return _this;
   }
 
@@ -6864,7 +6864,7 @@ function (_DisplayObjectContain) {
     _this.lastGetRO = 0; //最后一次获取 viewOffset 的时间
 
     _this.webGL = opt.webGL;
-    _this.renderer = autoRenderer(_assertThisInitialized(_assertThisInitialized(_this)), options);
+    _this.renderer = autoRenderer(_assertThisInitialized(_this), options);
     _this.event = null; //该属性在systenRender里面操作，每帧由心跳上报的 需要重绘的stages 列表
 
     _this.convertStages = {};
@@ -10640,7 +10640,7 @@ function (_event$Dispatcher) {
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(Component).call(this, opt, app));
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(Component.defaultProps()), opt);
+    _.extend(true, _assertThisInitialized(_this), getDefaultProps(Component.defaultProps()), opt);
 
     _this.name = "component"; //组件名称
 
@@ -10743,7 +10743,7 @@ function (_Component) {
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(coordBase).call(this, opt, app));
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(coordBase.defaultProps()));
+    _.extend(true, _assertThisInitialized(_this), getDefaultProps(coordBase.defaultProps()));
 
     _this.name = "coord";
     _this._opt = opt;
@@ -11270,7 +11270,7 @@ function (_baseAxis) {
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(Axis).call(this, opt, dataOrg));
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(Axis.defaultProps()));
+    _.extend(true, _assertThisInitialized(_this), getDefaultProps(Axis.defaultProps()));
 
     return _this;
   }
@@ -11334,7 +11334,7 @@ function (_Axis) {
     _this.sprite = null;
     _this.isH = false; //是否为横向转向的x轴
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(xAxis.defaultProps()), opt);
+    _.extend(true, _assertThisInitialized(_this), getDefaultProps(xAxis.defaultProps()), opt);
 
     _this.init(opt);
 
@@ -11929,7 +11929,7 @@ function (_Axis) {
     _this.sprite = null;
     _this.isH = false; //是否横向
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(yAxis.defaultProps()), opt);
+    _.extend(true, _assertThisInitialized(_this), getDefaultProps(yAxis.defaultProps()), opt);
 
     _this.init(opt);
 
@@ -12472,7 +12472,7 @@ function (_event$Dispatcher) {
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(rectGrid).call(this, opt, app));
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(rectGrid.defaultProps()));
+    _.extend(true, _assertThisInitialized(_this), getDefaultProps(rectGrid.defaultProps()));
 
     _this.width = 0;
     _this.height = 0;
@@ -12677,7 +12677,7 @@ function (_coordBase) {
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(Rect).call(this, opt, app));
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(Rect.defaultProps()), _this.setDefaultOpt(opt, app));
+    _.extend(true, _assertThisInitialized(_this), getDefaultProps(Rect.defaultProps()), _this.setDefaultOpt(opt, app));
 
     _this.type = "rect";
     _this._xAxis = null;
@@ -13349,7 +13349,7 @@ function (_event$Dispatcher) {
 
     _this.induce = null; //最外层的那个网，用来触发事件
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(polarGrid.defaultProps()), opt);
+    _.extend(true, _assertThisInitialized(_this), getDefaultProps(polarGrid.defaultProps()), opt);
 
     _this.init(opt);
 
@@ -13586,7 +13586,7 @@ function (_coorBase) {
     _this = _possibleConstructorReturn(this, _getPrototypeOf(Polar$$1).call(this, opt, app));
     _this.type = "polar";
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(Polar$$1.defaultProps()), _this.setDefaultOpt(opt, app));
+    _.extend(true, _assertThisInitialized(_this), getDefaultProps(Polar$$1.defaultProps()), _this.setDefaultOpt(opt, app));
 
     _this.init(opt);
 
@@ -14380,7 +14380,7 @@ function (_Component) {
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(GraphsBase).call(this, opt, app)); //这里不能把opt个extend进this
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(GraphsBase.defaultProps()));
+    _.extend(true, _assertThisInitialized(_this), getDefaultProps(GraphsBase.defaultProps()));
 
     _this.name = "graphs"; //这里所有的opts都要透传给 group
 
@@ -14406,7 +14406,7 @@ function (_Component) {
 
     _this._growTween = null;
 
-    var me = _assertThisInitialized(_assertThisInitialized(_this));
+    var me = _assertThisInitialized(_this);
 
     _this.sprite.on("destroy", function () {
       if (me._growTween) {
@@ -14713,7 +14713,7 @@ function (_GraphsBase) {
     _this._barsLen = 0;
     _this.txtsSp = null;
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(BarGraphs.defaultProps()), opt);
+    _.extend(true, _assertThisInitialized(_this), getDefaultProps(BarGraphs.defaultProps()), opt);
 
     _this.init();
 
@@ -15857,7 +15857,7 @@ function (_event$Dispatcher) {
 
     _this._bline = null;
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(LineGraphsGroup.defaultProps()), opt); //TODO group中得field不能直接用opt中得field， 必须重新设置， 
+    _.extend(true, _assertThisInitialized(_this), getDefaultProps(LineGraphsGroup.defaultProps()), opt); //TODO group中得field不能直接用opt中得field， 必须重新设置， 
     //group中得field只有一个值，代表一条折线, 后面要扩展extend方法，可以控制过滤哪些key值不做extend
 
 
@@ -16630,7 +16630,7 @@ function (_GraphsBase) {
     _this.enabledField = null;
     _this.groups = []; //群组集合
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(LineGraphs.defaultProps()), opt);
+    _.extend(true, _assertThisInitialized(_this), getDefaultProps(LineGraphs.defaultProps()), opt);
 
     _this.init();
 
@@ -17108,7 +17108,7 @@ function (_GraphsBase) {
     _this._rMaxValue = null;
     _this._rMinValue = null;
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(ScatGraphs.defaultProps()), opt);
+    _.extend(true, _assertThisInitialized(_this), getDefaultProps(ScatGraphs.defaultProps()), opt);
 
     _this.init();
 
@@ -18525,7 +18525,7 @@ function (_GraphsBase) {
     _this = _possibleConstructorReturn(this, _getPrototypeOf(PieGraphs).call(this, opt, app));
     _this.type = "pie";
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(PieGraphs.defaultProps()), opt);
+    _.extend(true, _assertThisInitialized(_this), getDefaultProps(PieGraphs.defaultProps()), opt);
 
     _this.init();
 
@@ -19006,7 +19006,7 @@ function (_GraphsBase) {
       //}
     };
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(RadarGraphs.defaultProps()), opt);
+    _.extend(true, _assertThisInitialized(_this), getDefaultProps(RadarGraphs.defaultProps()), opt);
 
     _this.init();
 
@@ -19976,7 +19976,7 @@ function (_GraphsBase) {
     _this = _possibleConstructorReturn(this, _getPrototypeOf(CloudGraphs).call(this, opt, app));
     _this.type = "cloud";
 
-    var me = _assertThisInitialized(_assertThisInitialized(_this)); //坚持一个数据节点的设置都在一个node下面
+    var me = _assertThisInitialized(_this); //坚持一个数据节点的设置都在一个node下面
 
 
     _this.node = {
@@ -19986,7 +19986,7 @@ function (_GraphsBase) {
 
     };
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(CloudGraphs.defaultProps()), opt);
+    _.extend(true, _assertThisInitialized(_this), getDefaultProps(CloudGraphs.defaultProps()), opt);
 
     _this.node.fontColor = function (nodeData) {
       return me.app.getTheme(nodeData.iNode);
@@ -21116,7 +21116,7 @@ function (_GraphsBase) {
       }
     };
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(PlanetGraphs.defaultProps()), opt);
+    _.extend(true, _assertThisInitialized(_this), getDefaultProps(PlanetGraphs.defaultProps()), opt);
 
     if (_this.center.radius == 0 || !_this.center.enabled) {
       _this.center.radius = 0;
@@ -21614,7 +21614,7 @@ function (_GraphsBase) {
     _this._maxVal = null;
     _this._minVal = null;
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(FunnelGraphs.defaultProps()), opt);
+    _.extend(true, _assertThisInitialized(_this), getDefaultProps(FunnelGraphs.defaultProps()), opt);
 
     _this.init();
 
@@ -23297,7 +23297,7 @@ function (_GraphsBase) {
     _this.type = "venn";
     _this.vennData = null;
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(VennGraphs.defaultProps()), opt); //_trimGraphs后，计算出来本次data的一些属性
+    _.extend(true, _assertThisInitialized(_this), getDefaultProps(VennGraphs.defaultProps()), opt); //_trimGraphs后，计算出来本次data的一些属性
 
 
     _this._dataCircleLen = 0;
@@ -24263,7 +24263,7 @@ function (_GraphsBase) {
     _this = _possibleConstructorReturn(this, _getPrototypeOf(sunburstGraphs).call(this, opt, app));
     _this.type = "sunburst";
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(sunburstGraphs.defaultProps()), opt);
+    _.extend(true, _assertThisInitialized(_this), getDefaultProps(sunburstGraphs.defaultProps()), opt);
 
     _this.data = []; //布局算法布局后的数据
 
@@ -25175,7 +25175,7 @@ function (_GraphsBase) {
     _this = _possibleConstructorReturn(this, _getPrototypeOf(sankeyGraphs).call(this, opt, app));
     _this.type = "sankey";
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(sankeyGraphs.defaultProps()), opt);
+    _.extend(true, _assertThisInitialized(_this), getDefaultProps(sankeyGraphs.defaultProps()), opt);
 
     _this.init();
 
@@ -25520,7 +25520,7 @@ function (_GraphsBase) {
     _this = _possibleConstructorReturn(this, _getPrototypeOf(Progress).call(this, opt, app));
     _this.type = "progress";
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(Progress.defaultProps()), opt);
+    _.extend(true, _assertThisInitialized(_this), getDefaultProps(Progress.defaultProps()), opt);
 
     _this.bgNodeData = null; //背景的nodeData数据，和data里面的结构保持一致
 
@@ -25954,6 +25954,11 @@ function (_GraphsBase) {
             transform: {
               detail: "是否启动拖拽缩放整个画布",
               propertys: {
+                fitView: {
+                  detail: "自动缩放",
+                  default: '' //autoZoom
+
+                },
                 enabled: {
                   detail: "是否开启",
                   default: true
@@ -25985,22 +25990,25 @@ function (_GraphsBase) {
     _this = _possibleConstructorReturn(this, _getPrototypeOf(Relation).call(this, opt, app));
     _this.type = "relation";
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(Relation.defaultProps()), opt);
+    _.extend(true, _assertThisInitialized(_this), getDefaultProps(Relation.defaultProps()), opt);
 
-    var dagreOpts = {
-      graph: {
-        nodesep: 10,
-        ranksep: 10,
-        edgesep: 10,
-        acyclicer: "greedy"
-      },
-      node: {},
-      edge: {
-        labelpos: 'c'
-      }
-    };
+    if (_this.layout === 'dagre') {
+      var dagreOpts = {
+        graph: {
+          nodesep: 10,
+          ranksep: 10,
+          edgesep: 10,
+          acyclicer: "greedy"
+        },
+        node: {},
+        edge: {//labelpos: 'c'
+        }
+      };
 
-    _.extend(true, _this.layoutOpts, dagreOpts, _this.layoutOpts);
+      _.extend(true, dagreOpts, _this.layoutOpts);
+
+      _.extend(true, _this.layoutOpts, dagreOpts);
+    }
 
     _this.domContainer = app.canvax.domView;
     _this.induce = null;
@@ -26166,6 +26174,11 @@ function (_GraphsBase) {
       this.widget();
       this.sprite.context.x = this.origin.x;
       this.sprite.context.y = this.origin.y;
+
+      if (this.status.transform.fitView == 'autoZoom') {
+        this.sprite.context.scaleX = this.width / this.data.size.width;
+        this.sprite.context.scaleY = this.height / this.data.size.height;
+      }
 
       var _offsetLet = (this.width - this.data.size.width) / 2;
 
@@ -26450,7 +26463,6 @@ function (_GraphsBase) {
       _tipDom.style.cssText += "; text-align:" + me.getProp(me.node.content.textAlign) + ";";
       _tipDom.style.cssText += "; vertical-align:" + me.getProp(me.node.content.textBaseline) + ";";
       _tipDom.innerHTML = content;
-      this.domContainer.appendChild(_tipDom);
 
       if (!width) {
         width = _tipDom.offsetWidth + me.getProp(me.node.padding) * me.status.transform.scale * 2;
@@ -30397,7 +30409,7 @@ function (_Component) {
     _this = _possibleConstructorReturn(this, _getPrototypeOf(Legend).call(this, opt, app));
     _this.name = "legend";
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(Legend.defaultProps()), opt);
+    _.extend(true, _assertThisInitialized(_this), getDefaultProps(Legend.defaultProps()), opt);
     /* data的数据结构为
     [
         //descartes中用到的时候还会带入yAxis
@@ -30853,7 +30865,7 @@ function (_Component) {
 
     app.stage.addChild(_this.sprite); //预设默认的opt.dataZoom
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(dataZoom.defaultProps()), opt);
+    _.extend(true, _assertThisInitialized(_this), getDefaultProps(dataZoom.defaultProps()), opt);
 
     _this.layout();
 
@@ -31586,7 +31598,7 @@ function (_Component) {
 
     _this.app.graphsSprite.addChild(_this.sprite);
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(MarkLine.defaultProps()), opt);
+    _.extend(true, _assertThisInitialized(_this), getDefaultProps(MarkLine.defaultProps()), opt);
 
     return _this;
   }
@@ -31897,13 +31909,13 @@ function (_Component) {
 
     _this.app.stage.addChild(_this.sprite);
 
-    var me = _assertThisInitialized(_assertThisInitialized(_this));
+    var me = _assertThisInitialized(_this);
 
     _this.sprite.on("destroy", function () {
       me._tipDom = null;
     });
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(Tips.defaultProps()), opt);
+    _.extend(true, _assertThisInitialized(_this), getDefaultProps(Tips.defaultProps()), opt);
 
     return _this;
   }
@@ -32380,7 +32392,7 @@ function (_Component) {
     };
     */
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(barTgi.defaultProps()), opt);
+    _.extend(true, _assertThisInitialized(_this), getDefaultProps(barTgi.defaultProps()), opt);
 
     _this._yAxis = _this.app.getComponent({
       name: 'coord'
@@ -32566,7 +32578,7 @@ function (_Component) {
     _this._yAxis = null;
     _this.sprite = null;
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(barGuide.defaultProps()), opt);
+    _.extend(true, _assertThisInitialized(_this), getDefaultProps(barGuide.defaultProps()), opt);
 
     _this._yAxis = _this.app.getComponent({
       name: 'coord'
@@ -32772,7 +32784,7 @@ function (_Component) {
     _this.width = _this.app.width;
     _this.height = _this.app.height;
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(waterMark.defaultProps()), opt);
+    _.extend(true, _assertThisInitialized(_this), getDefaultProps(waterMark.defaultProps()), opt);
 
     _this.spripte = new Canvax.Display.Sprite({
       id: "watermark"
@@ -32886,7 +32898,7 @@ function (_Component) {
 
     _this._vLine = null; //竖向的线
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(Cross.defaultProps()), opt);
+    _.extend(true, _assertThisInitialized(_this), getDefaultProps(Cross.defaultProps()), opt);
 
     _this._yAxis = _this.app.getComponent({
       name: 'coord'
@@ -33013,7 +33025,7 @@ function (_Component) {
     _this = _possibleConstructorReturn(this, _getPrototypeOf(lineSchedu).call(this, opt, app));
     _this.name = "lineSchedu";
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(lineSchedu.defaultProps()), opt);
+    _.extend(true, _assertThisInitialized(_this), getDefaultProps(lineSchedu.defaultProps()), opt);
 
     _this.lineDatas = null;
     _this.sprite = new Canvax.Display.Sprite();
@@ -33264,7 +33276,7 @@ function (_Component) {
     _this = _possibleConstructorReturn(this, _getPrototypeOf(markCloumn).call(this, opt, app));
     _this.name = "markcloumn";
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(markCloumn.defaultProps()), opt);
+    _.extend(true, _assertThisInitialized(_this), getDefaultProps(markCloumn.defaultProps()), opt);
 
     _this._line = null;
     _this._nodes = new Canvax.Display.Sprite();
