@@ -18,6 +18,11 @@ export default [
                 file : "dist/chartx.js",
                 name : "Chartx",
                 format : "iife"
+            },
+            {
+                file : "dist/chartx.es.js",
+                name : "Chartx",
+                format : "es"
             }
         ],
         plugins: [
