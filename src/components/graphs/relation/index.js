@@ -7,6 +7,7 @@ const Path = Canvax.Shapes.Path;
 const Arrow = Canvax.Shapes.Arrow;
 const Circle = Canvax.Shapes.Circle;
 
+
 /**
  * 关系图中 包括了  配置，数据，和布局数据，
  * 默认用配置和数据可以完成绘图， 但是如果有布局数据，就绘图玩额外调用一次绘图，把布局数据传入修正布局效果
