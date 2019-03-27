@@ -1,0 +1,150 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
+<title>xChart demo -- scat</title>
+
+<script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
+<script type="text/javascript" src="../../dist/chartx.js"></script>
+<!-- codemirror -->
+<script type="text/javascript" src="../../lib/codemirror/codemirror.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/active-line.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/javascript.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/matchbrackets.js"></script>
+<link rel="stylesheet" href="../../lib/codemirror/codemirror.css">
+<link rel="stylesheet" href="../../lib/codemirror/zenburn.css">
+<link rel="stylesheet" href="../../lib/codemirror/docs.css">
+<!-- codemirror end -->
+<!--bootstrap-->
+<script type="text/javascript" src="../../lib/bootstrap/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap-theme.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/docs.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap.min.css">
+<!--bootstrap end-->
+<script type="text/javascript" src="../../lib/demo.js"></script>
+<link rel="stylesheet" href="../../lib/demo.css">
+</head>
+<body >
+
+<table>
+    <tr>
+        <td id="td-vl">
+            <form><textarea id="code" name="code">
+
+//chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
+var data = [
+    {"industry_category_name":"综艺","item_name":"这！就是灌篮 第一季","uv":4603903,"tgi":101,"crowd_rec_point":666.3126164869021,"ratio":0.00974791669673255,"show_level":"S","is_possess":"S"},
+    {"industry_category_name":"其他","item_name":"这就是娱乐圈 2018","uv":4515998,"tgi":90,"crowd_rec_point":665.475374091698,"ratio":0.009561794048790952,"show_level":"A","is_possess":"S"},
+    {"industry_category_name":"综艺","item_name":"蒙面唱将猜猜猜 第三季","uv":3943402,"tgi":95,"crowd_rec_point":659.5871052366792,"ratio":0.008349427474412153,"show_level":"B","is_possess":"S"},
+    {"industry_category_name":"电视剧","item_name":"天坑鹰猎","uv":3770116,"tgi":80,"crowd_rec_point":657.6354712907349,"ratio":0.007982526283681159,"show_level":"A","is_possess":"S"},
+    {"industry_category_name":"电视剧","item_name":"知否知否应是绿肥红瘦 tv版","uv":3684855,"tgi":70,"crowd_rec_point":656.6420402930794,"ratio":0.007802001818791236,"show_level":"S","is_possess":"S"},
+    {"industry_category_name":"其他","item_name":"辣报","uv":3656972,"tgi":60,"crowd_rec_point":656.3121635128298,"ratio":0.007742964701533336,"show_level":"S","is_possess":"S"},
+    {"industry_category_name":"电视剧","item_name":"香蜜沉沉烬如霜 tv版","uv":3438615,"tgi":55,"crowd_rec_point":653.6383553334216,"ratio":0.007280633969076891,"show_level":"S","is_possess":"S"},
+    {"industry_category_name":"纪录片","item_name":"周六夜现场 第一季","uv":3366409,"tgi":50,"crowd_rec_point":652.716687921329,"ratio":0.007127751062333575,"show_level":"","is_possess":"S"},
+    {"industry_category_name":"纪录片","item_name":"大帅哥","uv":3330523,"tgi":40,"crowd_rec_point":652.251243716375,"ratio":0.007051769066496794,"show_level":"B","is_possess":"S"},
+    {"industry_category_name":"纪录片","item_name":"新舞林大会 2018","uv":3208959,"tgi":30,"crowd_rec_point":650.6364168267985,"ratio":0.006794379685069427,"show_level":"S","is_possess":"S"},
+    {"industry_category_name":"电视剧","item_name":"蚀日风暴","uv":3128161,"tgi":64,"crowd_rec_point":649.528909720501,"ratio":0.006623304800723993,"show_level":"A","is_possess":"S"},
+    {"industry_category_name":"动漫","item_name":"媚者无疆","uv":3066799,"tgi":87,"crowd_rec_point":648.6685312972564,"ratio":0.006493382066829534,"show_level":"S","is_possess":"S"},
+    {"industry_category_name":"动漫","item_name":"原来你还在这里","uv":3006987,"tgi":27,"crowd_rec_point":647.8131550534681,"ratio":0.006366741172469908,"show_level":"S","is_possess":"S"},
+    {"industry_category_name":"电视剧","item_name":"回到明朝当王爷之杨凌传","uv":2897722,"tgi":89,"crowd_rec_point":646.2056718037422,"ratio":0.006135392658422482,"show_level":"B","is_possess":"S"},
+    {"industry_category_name":"电影","item_name":"西虹市首富","uv":2669209,"tgi":38,"crowd_rec_point":642.6382580529006,"ratio":0.0056515584664074804,"show_level":"B","is_possess":"S"},
+    {"industry_category_name":"综艺","item_name":"这！就是歌唱·对唱季","uv":2614374,"tgi":85,"crowd_rec_point":641.7367715806777,"ratio":0.005535455452928411,"show_level":"S","is_possess":"S"},
+    {"industry_category_name":"电影","item_name":"大蛇","uv":2566950,"tgi":123,"crowd_rec_point":640.9417409405538,"ratio":0.005435043867057499,"show_level":"A","is_possess":"S"},
+    {"industry_category_name":"电影","item_name":"毒液：致命守护者","uv":2516215,"tgi":100,"crowd_rec_point":640.0747746997522,"ratio":0.00532762184847702,"show_level":"S","is_possess":"S"}
+];
+
+var options = {
+    coord: {
+        type: "rect",
+        xAxis: {
+            field: "tgi",
+            layoutType: "proportion",    
+            title:{
+                text:"品牌消费者TGI预估",
+                textBaseline:'top'
+            }       
+        },
+        yAxis: {
+            title:{
+                text:"热度指数",               
+                textBaseline:'bottom',
+            }   
+        }
+    },
+    graphs: [
+        {
+            type: "scat",
+            field: "crowd_rec_point",
+            label:{
+                field:"item_name",
+                fontColor:'#585858',
+               
+            },
+            node: {
+                radius: "20",
+                lineWidth : '3',   
+                strokeStyle:'#FF91CA',
+                fillStyle: function (node) {   
+                    return (node.rowData.show_level == "S" ? '#FEE083':'#A4D1FC')                     
+                }
+            }
+        }
+    ],
+    tips: {
+         content: function (va) {
+            if(va.nodes == 0) return;
+            var maps = {
+                industry_category_name: '类目',
+                uv: 'UV',
+                ratio: '占比',
+                tgi: 'TGI',
+            };
+            var formats = {
+                industry_category_name: function(a){ return a },
+                uv: function(a){ return isNaN(a) ? '-' : a.toLocaleString() },
+                ratio: function(a){ return isNaN(a) ? '-' : (a * 100).toFixed(1) + '%' },
+                tgi: function(a){ return isNaN(a) ? '-' : (a * 1).toFixed(0) },
+            };
+
+            return '<strong>' + va.title + '</strong>' + va.nodes.map(function(item) {
+                var rowData = item.rowData;
+                var str = '';
+                for(var key in maps) {
+                    str += '<p><em>' + maps[key] + '</em>' + formats[key](rowData[key]) + '</p>';
+                }
+                return str;
+            });
+        },
+        positionInRange: true
+    }
+};
+window.scat = Chartx.create("canvasTest" , data , options)
+
+            </textarea></form>
+        </td>
+        <td style="padding:0 10px;" id="td-vr">
+            <div id="chartdemo-r">
+            <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
+                <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
+
+                <p>
+                    联系人：@释剑
+                </p>
+                
+            </div>
+            <div  class="test-c">
+                <div id="canvasTest" style='width:100%;height:300px;position:relative;'></div>
+            </div>
+
+            </div>
+        </td>
+    </tr>
+</table>
+
+    
+</body> 
+</html>
+
+

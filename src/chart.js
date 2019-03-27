@@ -3,7 +3,7 @@ import { _ , dataFrame, $ , global , event } from "mmvis"
 
 const _padding = 20;
 
-export default class Chart extends event.Dispatcher
+class Chart extends event.Dispatcher
 {
     constructor( node, data, opt, componentModules )
     {
@@ -347,17 +347,20 @@ export default class Chart extends event.Dispatcher
 
     /**
      * reset 其实就是重新绘制整个图表，不再做详细的拆分opts中有哪些变化，来做对应的细致的变化，简单粗暴的全部重新创立
+     * opt 必须全量options，不在支持局部opt传递，所以对opt的处理不再支持extend
      */
     reset(opt, data)
     {
+        
+        opt && (this._opt = opt);
+        
+        /* 不能 extend opt 
         !opt && (opt={});
+        _.extend(this._opt, opt);
+        */
 
-        _.extend(true, this._opt, opt);
-
-        if( data ) {
-            this._data = data;
-        };
-
+        data && (this._data = data);
+    
         this.dataFrame = this.initData( this._data, opt );
 
         this.clean();
@@ -591,6 +594,14 @@ export default class Chart extends event.Dispatcher
     {
         var me = this;
         this.on(event.types.get() , function(e){
+            //触发每个graphs级别的事件，
+            //用户交互事件先执行，还可以修改e的内容修改tips内容
+            if( e.eventInfo ){
+                _.each( this.getGraphs(), function( graph ){
+                    graph.triggerEvent( e );
+                } );
+            };
+
             var _tips = me.getComponent({name:'tips'});
             var _coord = me.getComponent({name:'coord'});
             if( _tips ){
@@ -607,13 +618,6 @@ export default class Chart extends event.Dispatcher
                     _tips.hide(e);
                     me._tipsPointerHideAtAllGraphs( e );
                 };
-            };
-
-            //触发每个graphs级别的事件，
-            if( e.eventInfo ){
-                _.each( this.getGraphs(), function( graph ){
-                    graph.triggerEvent( e );
-                } );
             };
         });
 
@@ -638,8 +642,9 @@ export default class Chart extends event.Dispatcher
         if( !e.eventInfo.nodes || !e.eventInfo.nodes.length ){
             var nodes = [];
             var iNode = e.eventInfo.iNode;
+            
             _.each( this.getComponents({name:'graphs'}), function( _g ){
-                nodes = nodes.concat( _g.getNodesAt( iNode ) );
+                nodes = nodes.concat( _g.getNodesAt( iNode, e ) );
             } );
             e.eventInfo.nodes = nodes;
         }
@@ -660,4 +665,8 @@ export default class Chart extends event.Dispatcher
          });
      }
      
-}
+};
+
+global.registerComponent( Chart, 'chart' );
+
+export default Chart;

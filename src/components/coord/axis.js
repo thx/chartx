@@ -171,6 +171,12 @@ export default class Axis extends baseAxis
 
     drawWaterLine(y)
     {
+        //如果y在现有的数据区间里面， 就不需要重新计算和绘制了
+        if( this.layoutType == "proportion" ){
+            if( y >= this._min && y<= this._max ){
+                return;
+            }
+        };
         this.dataSection = [];
         this.setWaterLine( y );
         this._initHandle();

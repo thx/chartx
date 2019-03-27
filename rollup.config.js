@@ -24,7 +24,11 @@ export default [
             resolve({ jsnext: true, main: true, browser: true }), 
             commonjs(),
             babel({
-                exclude: /node_modules\/(?!.*@*(mmvis|canvax)\/).*/,
+                exclude: [
+                    ///node_modules\/(?!.*@*(mmvis|canvax)\/).*/,
+                    /node_modules/,
+                    /layout\/dagre/
+                ],
                 babelrc: false,
                 presets: [
                     [

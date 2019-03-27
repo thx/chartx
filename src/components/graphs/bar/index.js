@@ -1,12 +1,12 @@
 import Canvax from "canvax"
 import {numAddSymbol} from "../../../utils/tools"
 import GraphsBase from "../index"
-import { _, event, getDefaultProps } from "mmvis"
+import { global, _, event, getDefaultProps } from "mmvis"
 
 const AnimationFrame = Canvax.AnimationFrame;
 const Rect = Canvax.Shapes.Rect;
 
-export default class BarGraphs extends GraphsBase
+class BarGraphs extends GraphsBase
 {
     static defaultProps(){
         return {
@@ -457,6 +457,9 @@ export default class BarGraphs extends GraphsBase
                                     //nodes : me.getNodesAt( this.iNode ) 
                                 };
 
+                                //触发root统一设置e.eventInfo.nodes,所以上面不需要设置
+                                me.app.fire( e.type, e );
+
                                 if( me.select.enabled && e.type == me.select.triggerEventType ){
                                     //如果开启了图表的选中交互
                                     var ind = me.dataFrame.range.start + this.iNode;
@@ -472,11 +475,7 @@ export default class BarGraphs extends GraphsBase
                                             barGraph.selectAt( ind );
                                         })
                                     };
-                                    
                                 };
-
-                                //触发root统一设置e.eventInfo.nodes,所以上面不需要设置
-                                me.app.fire( e.type, e );
 
                             });
                         }
@@ -588,7 +587,6 @@ export default class BarGraphs extends GraphsBase
                                 trigger : me.node,
                                 nodes : [ this.nodeData ]
                             };
-                            
                             me.app.fire( e.type, e );
                         });
                         
@@ -623,12 +621,12 @@ export default class BarGraphs extends GraphsBase
                         };
                         
                         var textCtx = {
-                            fillStyle   : me.label.fontColor || finalPos.fillStyle,
-                            fontSize    : me.label.fontSize,
-                            lineWidth   : me.label.lineWidth,
-                            strokeStyle : me.label.strokeStyle || finalPos.fillStyle,
-                            //textAlign   : me.label.textAlign,
-                            textBaseline: me.label.verticalAlign,
+                            fillStyle     : me.label.fontColor || finalPos.fillStyle,
+                            fontSize      : me.label.fontSize,
+                            lineWidth     : me.label.lineWidth,
+                            strokeStyle   : me.label.strokeStyle || finalPos.fillStyle,
+                            //textAlign     : me.label.textAlign, 在后面的_getTextAlign中设置
+                            textBaseline  : me.label.verticalAlign,
                             rotation      : me.label.rotation
                         };
                         //然后根据position, offset确定x,y
@@ -1162,3 +1160,7 @@ export default class BarGraphs extends GraphsBase
         return selectOpt
     }
 }
+
+global.registerComponent( BarGraphs, 'graphs', 'bar' );
+
+export default BarGraphs;

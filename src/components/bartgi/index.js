@@ -1,10 +1,10 @@
 import Component from "../component"
 import Canvax from "canvax"
-import { _ , getDefaultProps} from "mmvis"
+import { global,_ , getDefaultProps} from "mmvis"
 
 const Line = Canvax.Shapes.Line
 
-export default class barTgi extends Component
+class barTgi extends Component
 {
     static defaultProps(){
         return {
@@ -152,3 +152,5 @@ export default class barTgi extends Component
         return res;
     }
 }
+global.registerComponent( barTgi, 'barTgi' );
+export default barTgi;

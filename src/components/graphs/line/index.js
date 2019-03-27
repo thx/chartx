@@ -1,8 +1,8 @@
 import Group from "./group"
 import GraphsBase from "../index"
-import { _, getDefaultProps } from "mmvis"
+import { global, _, getDefaultProps } from "mmvis"
 
-export default class LineGraphs extends GraphsBase
+class LineGraphs extends GraphsBase
 {
 
     static defaultProps(){
@@ -252,7 +252,8 @@ export default class LineGraphs extends GraphsBase
                 me._opt,
                 me.ctx,
                 me.height,
-                me.width
+                me.width,
+                me
             );
 
             group.draw( {
@@ -281,11 +282,11 @@ export default class LineGraphs extends GraphsBase
 
     }
 
-    getNodesAt( ind )
+    getNodesAt( ind, e )
     {
         var _nodesInfoList = []; //节点信息集合
         _.each( this.groups, function( group ){
-            var node = group.getNodeInfoAt( ind );
+            var node = group.getNodeInfoAt( ind, e );
             node && _nodesInfoList.push( node );
         } );
         return _nodesInfoList;
@@ -301,3 +302,7 @@ export default class LineGraphs extends GraphsBase
         return _nodesInfoList;
     }
 }
+
+global.registerComponent( LineGraphs, 'graphs', 'line' );
+
+export default LineGraphs;

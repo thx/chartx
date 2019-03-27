@@ -4,13 +4,13 @@ import GraphsBase from "../index"
 import {venn, lossFunction, normalizeSolution, scaleSolution} from "../../../layout/venn/layout";
 import {intersectionArea, distance, getCenter} from "../../../layout/venn/circleintersection";
 import {nelderMead} from "fmin";
-import { _, event, getDefaultProps } from "mmvis"
+import { global, _, event, getDefaultProps } from "mmvis"
 
 const Text = Canvax.Display.Text;
 const Path = Canvax.Shapes.Path;
 const Circle = Canvax.Shapes.Circle;
 
-export default class VennGraphs extends GraphsBase
+class VennGraphs extends GraphsBase
 {
     static defaultProps(){
         return {
@@ -33,7 +33,7 @@ export default class VennGraphs extends GraphsBase
                         detail: '边框大小',
                         default: 2
                     },
-                    lineAlpha: {
+                    strokeAlpha: {
                         detail: '边框透明度',
                         default: 0
                     },
@@ -52,7 +52,7 @@ export default class VennGraphs extends GraphsBase
                                 detail: '是否开启',
                                 default:true
                             },
-                            lineAlpha: {
+                            strokeAlpha: {
                                 detail: '边框透明度',
                                 default: 0.3
                             }
@@ -336,7 +336,7 @@ export default class VennGraphs extends GraphsBase
                         fillAlpha : me.node.fillAlpha,
                         lineWidth : me.node.lineWidth,
                         strokeStyle : strokeStyle,
-                        lineAlpha : me.node.lineAlpha
+                        strokeAlpha : me.node.strokeAlpha
                     };
                     _shape = me.venn_circles.getChildAt( circleInd++ );
                     if( !_shape ){
@@ -359,7 +359,7 @@ export default class VennGraphs extends GraphsBase
                         fillAlpha : 0,//me.node.fillAlpha,
                         lineWidth : me.node.lineWidth,
                         strokeStyle : "#ffffff",
-                        lineAlpha : 0//me.node.lineAlpha
+                        strokeAlpha : 0//me.node.strokeAlpha
                     };
                     
                     _shape = me.venn_paths.getChildAt( pathInd++ );
@@ -452,13 +452,13 @@ export default class VennGraphs extends GraphsBase
         if( !this.node.focus.enabled || nodeData.focused ) return;
 
         let nctx = nodeData._node.context; 
-        //nctx.lineAlpha += 0.5;
+        //nctx.strokeAlpha += 0.5;
         if( nodeData.sets.length>1 ){
             //path
-            nctx.lineAlpha = 1;
+            nctx.strokeAlpha = 1;
         } else {
             //circle
-            nctx.lineAlpha = this.node.focus.lineAlpha;
+            nctx.strokeAlpha = this.node.focus.strokeAlpha;
         }
         
         nodeData.focused = true;
@@ -468,8 +468,8 @@ export default class VennGraphs extends GraphsBase
         let nodeData = this.data[ ind ];
         if( !this.node.focus.enabled || !nodeData.focused ) return;
         let nctx = nodeData._node.context; 
-        //nctx.lineAlpha = 0.5;
-        nctx.lineAlpha = this.node.lineAlpha;
+        //nctx.strokeAlpha = 0.5;
+        nctx.strokeAlpha = this.node.strokeAlpha;
         nodeData.focused = false;
     }
     
@@ -480,7 +480,7 @@ export default class VennGraphs extends GraphsBase
 
         let nctx = nodeData._node.context; 
         nctx.lineWidth = this.node.select.lineWidth;
-        nctx.lineAlpha = this.node.select.lineAlpha;
+        nctx.strokeAlpha = this.node.select.strokeAlpha;
         nctx.strokeStyle = this.node.select.strokeStyle;
 
         nodeData.selected = true;
@@ -677,3 +677,8 @@ function intersectionAreaPath(circles) {
 }
 
 //venn computeTextCentres 需要的相关代码 end
+
+
+global.registerComponent( VennGraphs, 'graphs', 'venn' );
+
+export default VennGraphs;

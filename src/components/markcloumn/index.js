@@ -1,11 +1,11 @@
 import Component from "../component"
 import Canvax from "canvax"
-import { _, getDefaultProps, event } from "mmvis"
+import { global,_, getDefaultProps, event } from "mmvis"
 
 const Line = Canvax.Shapes.Line;
 const Circle = Canvax.Shapes.Circle;
 
-export default class markCloumn extends Component
+class markCloumn extends Component
 {
     static defaultProps(){
         return {
@@ -26,6 +26,10 @@ export default class markCloumn extends Component
             line : {
                 detail: '线的配置',
                 propertys: {
+                    enabled: {
+                        detail: '是否开启',
+                        default:true
+                    },
                     lineWidth: {
                         detail: '线宽',
                         default: 2
@@ -167,6 +171,7 @@ export default class markCloumn extends Component
 
     _drawLine( xNode ){
         var me = this;
+        if( !me.line.enabled ) return;
         var lineOpt     = _.extend(true,{
             x           : parseInt(xNode.x),
             start       : { x: 0, y: 0 },
@@ -213,7 +218,9 @@ export default class markCloumn extends Component
     }
 
     _drawNodes(){
+        
         var me = this;
+        if( !me.node.enabled ) return;
         _.each( me.nodes, function( nodeData ){
             var nodeCtx = _.extend({
                 x           : nodeData.x,
@@ -247,3 +254,6 @@ export default class markCloumn extends Component
         this.sprite.addChild( this._nodes );
     }
 }
+global.registerComponent( markCloumn, 'markcloumn' );
+
+export default markCloumn;

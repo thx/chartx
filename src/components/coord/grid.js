@@ -81,18 +81,18 @@ export default class rectGrid extends event.Dispatcher
         super( opt, app);
         _.extend( true, this, getDefaultProps( rectGrid.defaultProps() ) );
 
-        this.width  = 0;   
-        this.height = 0;
-        this.app = app; //该组件被添加到的目标图表项目，
+        this.width   = 0;
+        this.height  = 0;
+        this.app     = app; //该组件被添加到的目标图表项目，
 
-        this.pos = {
+        this.pos     = {
             x : 0,
             y : 0
         };
 
-        this.sprite       = null;                       //总的sprite
-        this.xAxisSp      = null;                       //x轴上的线集合
-        this.yAxisSp      = null;                       //y轴上的线集合
+        this.sprite  = null;                       //总的sprite
+        this.xAxisSp = null;                       //x轴上的线集合
+        this.yAxisSp = null;                       //y轴上的线集合
 
         this.init(opt);
     }
@@ -161,8 +161,8 @@ export default class rectGrid extends event.Dispatcher
                         y : -beginY,
                         width : self.width,
                         height : -( endY - beginY ),
-                        fillStyle : self._getProp( self.fill.fillStyle, g, "#000" ),
-                        fillAlpha : self._getProp( self.fill.alpha, g, 0.025 * (g%2) )
+                        fillStyle : self.getProp( self.fill.fillStyle, g, "#000" ),
+                        fillAlpha : self.getProp( self.fill.alpha, g, 0.025 * (g%2) )
                     }
                 });
                 
@@ -175,22 +175,24 @@ export default class rectGrid extends event.Dispatcher
         
         //x轴方向的线集合
         var arr = self.oneDimension.data;
+        
         for(var a = 0, al = arr.length; a < al; a++){
             var o = arr[a];
+
+            if( !o.visible ) continue;
           
             var line = new Line({
                 id : "back_line_"+a,
                 context : {
                     y : o.y,
-                    lineType    : self.oneDimension.lineType,
-                    lineWidth   : self.oneDimension.lineWidth,
-                    strokeStyle : self.oneDimension.strokeStyle  
+                    lineType    : self.getProp( self.oneDimension.lineType , a , 'solid'),
+                    lineWidth   : self.getProp( self.oneDimension.lineWidth , a , 1),
+                    strokeStyle : self.getProp( self.oneDimension.strokeStyle , a, '#f0f0f0'),
+                    visible     : true
                 }
             });
             if(self.oneDimension.enabled){
-
                 self.xAxisSp.addChild(line);
-    
                 line.context.start.x = 0;
                 line.context.end.x = self.width;
                 
@@ -212,10 +214,10 @@ export default class rectGrid extends event.Dispatcher
                         x : 0,
                         y : -self.height
                     },
-                    lineType    : self.twoDimension.lineType,
-                    lineWidth   : self.twoDimension.lineWidth,
-                    strokeStyle : self.twoDimension.strokeStyle,
-                    visible     : o.x ? true : false
+                    lineType    : self.getProp( self.twoDimension.lineType, a, 'solid'),
+                    lineWidth   : self.getProp( self.twoDimension.lineWidth, a, 1),
+                    strokeStyle : self.getProp( self.twoDimension.strokeStyle, a, '#f0f0f0'),
+                    visible     : true
                 }
             });
             if(self.twoDimension.enabled){
@@ -224,14 +226,14 @@ export default class rectGrid extends event.Dispatcher
         };
     }
 
-    _getProp( prop, i, def ){
-        var res = def;
+    getProp( prop, i, def ){
+        var res = def || prop;
         if( prop != null && prop != undefined ){
             if( _.isString( prop ) || _.isNumber( prop ) ){
                 res = prop;
             }
             if( _.isFunction( prop ) ){
-                res = prop.apply( this, [ prop, i, def ] );
+                res = prop.apply( this, [ i, def ] );
             }
             if( _.isArray( prop ) ){
                 res = prop[ i ]

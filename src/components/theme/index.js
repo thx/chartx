@@ -2,9 +2,9 @@
  * 皮肤组件，不是一个具体的ui组件
  */
 import Component from "../component"
-import { _ } from "mmvis"
+import { global,_ } from "mmvis"
 
-export default class theme extends Component
+class Theme extends Component
 {
     constructor( theme , app )
     {
@@ -45,3 +45,7 @@ export default class theme extends Component
     }
 
 }
+
+global.registerComponent( Theme, 'theme' );
+
+export default Theme;

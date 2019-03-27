@@ -4,11 +4,11 @@
 import Canvax from "canvax"
 import GraphsBase from "../index"
 import Partition from "../../../layout/partition"
-import { _,event,getDefaultProps } from "mmvis"
+import {global, _,event,getDefaultProps } from "mmvis"
 
 const Sector = Canvax.Shapes.Sector;
 
-export default class sunburstGraphs extends GraphsBase
+class sunburstGraphs extends GraphsBase
 {
     static defaultProps(){
         return {
@@ -35,7 +35,7 @@ export default class sunburstGraphs extends GraphsBase
                         detail: '描边线宽',
                         default:1
                     },
-                    lineAlpha: {
+                    strokeAlpha: {
                         detail: '描边边框透明度',
                         default: 1
                     },
@@ -303,3 +303,6 @@ export default class sunburstGraphs extends GraphsBase
         }
     }
 }
+
+global.registerComponent( sunburstGraphs, 'graphs', 'sunburst' );
+export default sunburstGraphs;

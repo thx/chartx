@@ -1,12 +1,12 @@
 import Canvax from "canvax"
 import GraphsBase from "../index"
-import { _,event,getDefaultProps } from "mmvis"
+import { global,_,event,getDefaultProps } from "mmvis"
 
 const Circle = Canvax.Shapes.Circle;
 const Rect = Canvax.Shapes.Rect;
 const Line = Canvax.Shapes.Line;
 
-export default class ScatGraphs extends GraphsBase
+class ScatGraphs extends GraphsBase
 {
     static defaultProps(){
         return {
@@ -63,9 +63,9 @@ export default class ScatGraphs extends GraphsBase
                         detail: '节点描边线宽',
                         default: 0
                     },
-                    lineAlpha: {
+                    strokeAlpha: {
                         detail : '节点描边透明度',
-                        default: 0
+                        default: 1
                     },
     
                     focus: {
@@ -79,7 +79,7 @@ export default class ScatGraphs extends GraphsBase
                                 detail: 'hover后的边框大小',
                                 default: 6
                             },
-                            lineAlpha: {
+                            strokeAlpha: {
                                 detail: 'hover后的边框透明度',
                                 default: 0.2
                             },
@@ -101,7 +101,7 @@ export default class ScatGraphs extends GraphsBase
                                 detail: '选中后的边框大小',
                                 default: 8
                             },
-                            lineAlpha: {
+                            strokeAlpha: {
                                 detail: '选中后的边框透明度',
                                 default: 0.4
                             },
@@ -287,6 +287,10 @@ export default class ScatGraphs extends GraphsBase
                 }
             } );
 
+            if( point.pos.x == undefined || point.pos.y == undefined ){
+                continue;
+            };
+
             var nodeLayoutData = {
                 rowData    : rowData,
                 x          : point.pos.x,
@@ -307,12 +311,14 @@ export default class ScatGraphs extends GraphsBase
                 lineWidth  : 0,
                 shapeType  : null,
                 label      : null,
+                fillAlpha  : 0,
 
                 nodeElement: null //对应的canvax 节点， 在widget之后赋值
             };
 
             this._setR( nodeLayoutData );
             this._setFillStyle( nodeLayoutData );
+            this._setFillAlpha( nodeLayoutData );
             this._setStrokeStyle( nodeLayoutData );
             this._setLineWidth( nodeLayoutData );
             this._setNodeType( nodeLayoutData );
@@ -372,6 +378,12 @@ export default class ScatGraphs extends GraphsBase
         nodeLayoutData.color = nodeLayoutData.fillStyle = this._getStyle( this.node.fillStyle, nodeLayoutData );
         return this;
     }
+    _setFillAlpha( nodeLayoutData )
+    {
+        nodeLayoutData.fillAlpha = this._getStyle( this.node.fillAlpha, nodeLayoutData );
+        return this;
+    }
+    
 
     _setStrokeStyle( nodeLayoutData )
     {
@@ -450,17 +462,25 @@ export default class ScatGraphs extends GraphsBase
                 _nodeElement.on(event.types.get(), function(e) {
                     
                      e.eventInfo = {
-                         title : null,
-                         trigger : me.node,
-                         nodes : [ this.nodeData ]
+                         title: null,
+                         trigger: me.node,
+                         nodes: [ this.nodeData ]
                      };
                      if( this.nodeData.label ){
                          e.eventInfo.title = this.nodeData.label;
                      };
             
                      //fire到root上面去的是为了让root去处理tips
+                     //先触发用户事件，再处理后面的选中事件
                      me.app.fire( e.type, e );
-                 });
+
+                     if( e.type == 'mouseover' ){
+                        me.focusAt( this.nodeData.iNode );
+                     };
+                     if( e.type == 'mouseout' ) {
+                        !this.nodeData.selected && me.unfocusAt( this.nodeData.iNode );
+                     };
+                });
 
             } else {
                 //_nodeElement.context = _context;
@@ -473,12 +493,6 @@ export default class ScatGraphs extends GraphsBase
             _nodeElement.nodeData = nodeData;
             _nodeElement.iNode = iNode;
             nodeData.nodeElement = _nodeElement;
-
-            me.node.focus.enabled && _nodeElement.hover(function(e){
-                me.focusAt( this.nodeData.iNode );
-            } , function(e){
-                !this.nodeData.selected && me.unfocusAt( this.nodeData.iNode );
-            });
 
             if( me.line.enabled ){
 
@@ -687,7 +701,7 @@ export default class ScatGraphs extends GraphsBase
             fillStyle : nodeData.fillStyle,
             strokeStyle : nodeData.strokeStyle,
             lineWidth : nodeData.lineWidth,
-            fillAlpha : this.node.fillAlpha,
+            fillAlpha : nodeData.fillAlpha,
             cursor : "pointer"
         };
 
@@ -707,7 +721,6 @@ export default class ScatGraphs extends GraphsBase
         var l = this.data.length-1;
         var me = this;
         _.each( this.data , function( nodeData ){
-            
             if( nodeData.__isNew ){
                 me._growNode( nodeData, function(){
                     i = i+1;
@@ -751,7 +764,7 @@ export default class ScatGraphs extends GraphsBase
 
         var nctx = nodeData.nodeElement.context; 
         nctx.lineWidth = this.node.focus.lineWidth;
-        nctx.lineAlpha = this.node.focus.lineAlpha;
+        nctx.strokeAlpha = this.node.focus.strokeAlpha;
         nctx.fillAlpha = this.node.focus.fillAlpha;
         nodeData.focused = true;
     }
@@ -760,9 +773,10 @@ export default class ScatGraphs extends GraphsBase
         var nodeData = this.data[ ind ];
         if( !this.node.focus.enabled || !nodeData.focused ) return;
         var nctx = nodeData.nodeElement.context; 
-        nctx.lineWidth = this.node.lineWidth;
-        nctx.lineAlpha = this.node.lineAlpha;
-        nctx.fillAlpha = this.node.fillAlpha;
+        nctx.lineWidth = nodeData.lineWidth;
+        nctx.strokeAlpha = this.node.strokeAlpha;
+        nctx.fillAlpha = nodeData.fillAlpha;
+        nctx.strokeStyle = nodeData.strokeStyle;
 
         nodeData.focused = false;
     }
@@ -774,7 +788,7 @@ export default class ScatGraphs extends GraphsBase
         
         var nctx = nodeData.nodeElement.context; 
         nctx.lineWidth = this.node.select.lineWidth;
-        nctx.lineAlpha = this.node.select.lineAlpha;
+        nctx.strokeAlpha = this.node.select.strokeAlpha;
         nctx.fillAlpha = this.node.select.fillAlpha;
 
         nodeData.selected = true;
@@ -789,11 +803,11 @@ export default class ScatGraphs extends GraphsBase
         if( nodeData.focused ) {
             //有e 说明这个函数是事件触发的，鼠标肯定还在node上面
             nctx.lineWidth = this.node.focus.lineWidth;
-            nctx.lineAlpha = this.node.focus.lineAlpha;
+            nctx.strokeAlpha = this.node.focus.strokeAlpha;
             nctx.fillAlpha = this.node.focus.fillAlpha;
         } else {
             nctx.lineWidth = this.node.lineWidth;
-            nctx.lineAlpha = this.node.lineAlpha;
+            nctx.strokeAlpha = this.node.strokeAlpha;
             nctx.fillAlpha = this.node.fillAlpha;
         }
 
@@ -808,3 +822,7 @@ export default class ScatGraphs extends GraphsBase
     }
 
 }
+
+global.registerComponent( ScatGraphs, 'graphs', 'scat' );
+
+export default ScatGraphs;

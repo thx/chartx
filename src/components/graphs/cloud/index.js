@@ -1,11 +1,11 @@
 import Canvax from "canvax"
 import GraphsBase from "../index"
 import cloudLayout from "../../../layout/cloud"
-import { _,event,getDefaultProps } from "mmvis"
+import { global,_,event,getDefaultProps } from "mmvis"
 
 const Text = Canvax.Display.Text;
 
-export default class CloudGraphs extends GraphsBase
+class CloudGraphs extends GraphsBase
 {
     static defaultProps(){
         return {
@@ -288,6 +288,8 @@ export default class CloudGraphs extends GraphsBase
     
                     //fire到root上面去的是为了让root去处理tips
                     me.app.fire( e.type, e );
+
+                    
                 });
             });
 
@@ -319,7 +321,7 @@ export default class CloudGraphs extends GraphsBase
 
         var nctx = nodeData._node.context; 
         nctx.lineWidth = this.node.select.lineWidth;
-        nctx.lineAlpha = this.node.select.lineAlpha;
+        nctx.strokeAlpha = this.node.select.strokeAlpha;
         nctx.strokeStyle = this.node.select.strokeStyle;
 
         nodeData.selected = true;
@@ -335,3 +337,7 @@ export default class CloudGraphs extends GraphsBase
     }
 
 }
+
+global.registerComponent( CloudGraphs, 'graphs', 'cloud' );
+
+export default CloudGraphs;

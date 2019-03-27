@@ -1,12 +1,12 @@
 import Component from "../component"
 import Canvax from "canvax"
-import { _ ,getDefaultProps} from "mmvis"
+import { global,_ ,getDefaultProps} from "mmvis"
 import Trigger from "../trigger"
 
 const Line = Canvax.Shapes.Line;
 const Rect = Canvax.Shapes.Rect;
 
-export default class dataZoom extends Component
+class dataZoom extends Component
 {
     static defaultProps(){
         return {
@@ -296,6 +296,8 @@ export default class dataZoom extends Component
         if( opt.coord.horizontal ){
             delete opt.coord.horizontal;
         };
+
+        opt.coord.enabled = false;
 
         var thumbChart = new chartConstructor(cloneEl, app._data, opt, app.componentModules);
         thumbChart.draw();
@@ -783,3 +785,7 @@ export default class dataZoom extends Component
     }
 
 }
+
+global.registerComponent( dataZoom, 'dataZoom' );
+
+export default dataZoom;

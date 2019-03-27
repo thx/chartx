@@ -1,0 +1,177 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
+<title>xChart demo -- scat</title>
+
+<script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
+<script type="text/javascript" src="../../dist/chartx.js"></script>
+<!-- codemirror -->
+<script type="text/javascript" src="../../lib/codemirror/codemirror.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/active-line.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/javascript.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/matchbrackets.js"></script>
+<link rel="stylesheet" href="../../lib/codemirror/codemirror.css">
+<link rel="stylesheet" href="../../lib/codemirror/zenburn.css">
+<link rel="stylesheet" href="../../lib/codemirror/docs.css">
+<!-- codemirror end -->
+<!--bootstrap-->
+<script type="text/javascript" src="../../lib/bootstrap/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap-theme.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/docs.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap.min.css">
+<!--bootstrap end-->
+<script type="text/javascript" src="../../lib/demo.js"></script>
+<link rel="stylesheet" href="../../lib/demo.css">
+</head>
+<body >
+
+<table>
+    <tr>
+        <td id="td-vl">
+            <form><textarea id="code" name="code">
+
+//chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
+var data = [
+    {"day":524,"click":279,"hasAd":0,"house":3,"click1":"","lucency":null},
+    {"day":234,"click":723,"hasAd":1,"house":342,"click1":null,"lucency":null},
+    {"day":0,"click":null,"hasAd":null,"house":null,"click1":0,"lucency":""},
+    {"day":100,"click":null,"hasAd":null,"house":null,"click1":143,"lucency":null},
+    {"day":200,"click":null,"hasAd":null,"house":null,"click1":234,"lucency":null},
+    {"day":300,"click":null,"hasAd":"","house":null,"click1":312,"lucency":""},
+    {"day":400,"click":null,"hasAd":null,"house":null,"click1":434,"lucency":null},
+    {"day":500,"click":null,"hasAd":null,"house":null,"click1":534,"lucency":null},
+    {"day":600,"click":null,"hasAd":null,"house":null,"click1":603,"lucency":""}
+];
+
+var data = [{"campaignId":"33659682","coordinate":{"y":"0","x":"0"},"hasAd":"0","adgroupId":"0","itemId":"587348157446","overDevelopTime":"0","itemPrice":"149.0","itemTitle":"蓝若水大码女装2019夏装新款胖MM宽松显瘦印花洋气遮肚子短袖T恤","overSaleNum":"0","itemIcon":"//img.alicdn.com/imgextra/i3/279740328/O1CN01IcuTd01EIGPaSVsv8_!!0-item_pic.jpg","day":0,"click":0,"click1":null},{"campaignId":"59012592","coordinate":{"y":"344","x":"40"},"hasAd":"1","adgroupId":"1109096530","itemId":"586236521125","overDevelopTime":"1","itemPrice":"479.0","itemTitle":"大码女装2019春装新款胖MM赫本风套装裙洋气显瘦两件套御姐连衣裙","overSaleNum":"0","itemIcon":"//img.alicdn.com/imgextra/i4/279740328/O1CN01Gqial81EIGPZohRI8_!!0-item_pic.jpg","day":40,"click":344,"click1":null},{"campaignId":"49972556","coordinate":{"y":"6203","x":"40"},"hasAd":"1","adgroupId":"1110258282","itemId":"586364186953","overDevelopTime":"1","itemPrice":"279.0","itemTitle":"大码女2019春装新款胖MM收腰V领洋气遮肚减龄法式复古雪纺连衣裙","overSaleNum":"1","itemIcon":"//img.alicdn.com/imgextra/i2/279740328/O1CN011y7cji1EIGPY1DC5X_!!0-item_pic.jpg","day":40,"click":6203,"click1":null},{"campaignId":"33659682","coordinate":{"y":"0","x":"0"},"hasAd":"0","adgroupId":"0","itemId":"587135096852","overDevelopTime":"0","itemPrice":"199.0","itemTitle":"大码女装2019春装新款胖MM宽松仙气雪纺衫波点娃娃领遮肚衬衫上衣","overSaleNum":"0","itemIcon":"//img.alicdn.com/imgextra/i4/279740328/O1CN01IQpE2K1EIGPZ81uDj_!!0-item_pic.jpg","day":0,"click":0,"click1":null},{"campaignId":"58762049","coordinate":{"y":"1535","x":"40"},"hasAd":"1","adgroupId":"1114045348","itemId":"586233865504","overDevelopTime":"1","itemPrice":"189.0","itemTitle":"大码女装2019春装新款胖MM洋气减龄遮肚V领藏肉七分袖上衣针织衫","overSaleNum":"1","itemIcon":"//img.alicdn.com/imgextra/i1/279740328/O1CN01cHyuit1EIGPa45pEr_!!0-item_pic.jpg","day":40,"click":1535,"click1":null},{"campaignId":"59012592","coordinate":{"y":"874","x":"39"},"hasAd":"1","adgroupId":"1111275117","itemId":"586059552196","overDevelopTime":"1","itemPrice":"349.0","itemTitle":"大码女宽松洋气减龄套装春胖MM2019新款马甲显瘦心机时髦两件套潮","overSaleNum":"1","itemIcon":"//img.alicdn.com/imgextra/i2/279740328/O1CN01EqdgEl1EIGPXPg6Y0_!!0-item_pic.jpg","day":39,"click":874,"click1":null},{"campaignId":"59475139","coordinate":{"y":"163","x":"34"},"hasAd":"1","adgroupId":"1196583516","itemId":"586486361076","overDevelopTime":"1","itemPrice":"259.0","itemTitle":"大码女装2019春装新款胖MM宽松遮肚子蕾丝拼接碎花减龄雪纺连衣裙","overSaleNum":"0","itemIcon":"//img.alicdn.com/imgextra/i4/279740328/O1CN01QbxtSG1EIGPWdmwZ6_!!0-item_pic.jpg","day":34,"click":163,"click1":null},{"campaignId":"58855082","coordinate":{"y":"2009","x":"34"},"hasAd":"1","adgroupId":"1193124757","itemId":"586774699172","overDevelopTime":"1","itemPrice":"199.0","itemTitle":"胖女人大码女装2019春新款胖MM宽松遮肚雪纺上衣洋气衬衫显瘦小衫","overSaleNum":"1","itemIcon":"//img.alicdn.com/imgextra/i3/279740328/O1CN01uktd2B1EIGPYjASci_!!0-item_pic.jpg","day":34,"click":2009,"click1":null},{"campaignId":"50803788","coordinate":{"y":"1352","x":"34"},"hasAd":"1","adgroupId":"1196289400","itemId":"586271244448","overDevelopTime":"1","itemPrice":"379.0","itemTitle":"大码女装2019春装新款胖MM洋气减龄套装宽松显瘦马甲裤子两件套潮","overSaleNum":"1","itemIcon":"//img.alicdn.com/imgextra/i4/279740328/O1CN015pTiPa1EIGPR6llkc_!!0-item_pic.jpg","day":34,"click":1352,"click1":null},{"campaignId":"59760752","coordinate":{"y":"1536","x":"34"},"hasAd":"1","adgroupId":"1195154769","itemId":"586276808591","overDevelopTime":"1","itemPrice":"199.0","itemTitle":"大码女装2019春装新款胖MM宽松OL条纹遮肚洋气藏肉上衣雪纺衬衫","overSaleNum":"1","itemIcon":"//img.alicdn.com/imgextra/i4/279740328/O1CN01szyXWg1EIGPXbdft8_!!0-item_pic.jpg","day":34,"click":1536,"click1":null},{"campaignId":"59475139","coordinate":{"y":"91","x":"34"},"hasAd":"1","adgroupId":"1196515809","itemId":"586486789193","overDevelopTime":"1","itemPrice":"279.0","itemTitle":"蓝若水大码女装2019春装新款胖MM收腰遮肚洋气减龄娃娃领连衣裙","overSaleNum":"0","itemIcon":"//img.alicdn.com/imgextra/i2/279740328/O1CN01xYkM6T1EIGPWGT8Fn_!!0-item_pic.jpg","day":34,"click":91,"click1":null},{"campaignId":"59475139","coordinate":{"y":"138","x":"40"},"hasAd":"1","adgroupId":"1111708925","itemId":"586022604026","overDevelopTime":"1","itemPrice":"289.0","itemTitle":"大码女装2019春装新款胖MM很仙的洋气遮肚减龄波点收腰雪纺连衣裙","overSaleNum":"0","itemIcon":"//img.alicdn.com/imgextra/i4/279740328/O1CN017XL0pz1EIGPWdnPeJ_!!0-item_pic.jpg","day":40,"click":138,"click1":null},{"campaignId":"59475139","coordinate":{"y":"35","x":"40"},"hasAd":"1","adgroupId":"1111986797","itemId":"586018248796","overDevelopTime":"1","itemPrice":"279.0","itemTitle":"蓝若水大码女装2019春装新款胖MM修身简约V领遮肚子喇叭袖连衣裙","overSaleNum":"0","itemIcon":"//img.alicdn.com/imgextra/i2/279740328/O1CN01PCXo681EIGPaOYX69_!!0-item_pic.jpg","day":40,"click":35,"click1":null},{"campaignId":"59475139","coordinate":{"y":"115","x":"40"},"hasAd":"1","adgroupId":"1114075306","itemId":"586367650793","overDevelopTime":"1","itemPrice":"359.0","itemTitle":"胖公主大码女装2019春装新款胖MM收腰洋气遮肚子减龄娃娃领连衣裙","overSaleNum":"0","itemIcon":"//img.alicdn.com/imgextra/i2/279740328/O1CN01Xi194s1EIGPYjBjcq_!!0-item_pic.jpg","day":40,"click":115,"click1":null},{"campaignId":"59356283","coordinate":{"y":"278","x":"34"},"hasAd":"1","adgroupId":"1197449682","itemId":"586274856962","overDevelopTime":"1","itemPrice":"359.0","itemTitle":"蓝若水大码女装2019春装新款胖MM修身收腰钉珠OL小西装外套200斤","overSaleNum":"0","itemIcon":"//img.alicdn.com/imgextra/i2/279740328/O1CN01HUgl0o1EIGPWdpI5Z_!!0-item_pic.jpg","day":34,"click":278,"click1":null},{"campaignId":"33659682","coordinate":{"y":"0","x":"0"},"hasAd":"0","adgroupId":"0","itemId":"585375966807","overDevelopTime":"0","itemPrice":"229.0","itemTitle":"胖妹妹2019春装新款大码女装套头圆领宽松雪纺衫卫衣200斤上衣仙","overSaleNum":"0","itemIcon":"//img.alicdn.com/imgextra/i2/279740328/O1CN01cQoQuY1EIGPY1Cel0_!!0-item_pic.jpg","day":0,"click":0,"click1":null},{"day":0,"click":null,"click1":221},{"day":1,"click":null,"click1":380},{"day":2,"click":null,"click1":407},{"day":3,"click":null,"click1":333},{"day":4,"click":null,"click1":333},{"day":5,"click":null,"click1":353},{"day":6,"click":null,"click1":376},{"day":7,"click":null,"click1":399},{"day":8,"click":null,"click1":418},{"day":9,"click":null,"click1":375},{"day":10,"click":null,"click1":400},{"day":11,"click":null,"click1":445},{"day":12,"click":null,"click1":458},{"day":13,"click":null,"click1":470},{"day":14,"click":null,"click1":477},{"day":15,"click":null,"click1":481},{"day":16,"click":null,"click1":489},{"day":17,"click":null,"click1":511},{"day":18,"click":null,"click1":540},{"day":19,"click":null,"click1":544},{"day":20,"click":null,"click1":559},{"day":21,"click":null,"click1":622},{"day":22,"click":null,"click1":577},{"day":23,"click":null,"click1":578},{"day":24,"click":null,"click1":587},{"day":25,"click":null,"click1":598},{"day":26,"click":null,"click1":621},{"day":27,"click":null,"click1":629},{"day":28,"click":null,"click1":659},{"day":29,"click":null,"click1":585},{"day":30,"click":null,"click1":571},{"day":31,"click":null,"click1":548},{"day":32,"click":null,"click1":530},{"day":33,"click":null,"click1":577},{"day":34,"click":null,"click1":504},{"day":35,"click":null,"click1":475},{"day":36,"click":null,"click1":445},{"day":37,"click":null,"click1":424},{"day":38,"click":null,"click1":397},{"day":39,"click":null,"click1":375},{"day":40,"click":null,"click1":357},{"day":41,"click":null,"click1":351},{"day":42,"click":null,"click1":350},{"day":43,"click":null,"click1":358},{"day":44,"click":null,"click1":350},{"day":45,"click":null,"click1":334},{"day":46,"click":null,"click1":345},{"day":47,"click":null,"click1":369},{"day":48,"click":null,"click1":400},{"day":49,"click":null,"click1":381},{"day":50,"click":null,"click1":384},{"day":51,"click":null,"click1":397},{"day":52,"click":null,"click1":414},{"day":53,"click":null,"click1":420},{"day":54,"click":null,"click1":432},{"day":55,"click":null,"click1":455},{"day":56,"click":null,"click1":462},{"day":57,"click":null,"click1":478},{"day":58,"click":null,"click1":504},{"day":59,"click":null,"click1":555},{"day":60,"click":null,"click1":593}]
+
+var variables = {
+    lineField: "click1",
+    scatField: "click",
+    xField: "day",
+    inflexionX: 400,
+    hotLower: 800
+}
+
+var options = {
+    coord: {
+        type: "rect",
+        xAxis: {
+            field: variables.xField,
+            layoutType: "proportion",
+            label:{
+                enabled: false
+            }
+        },
+        yAxis:{
+            align: "left",
+            middleWeight: variables.hotLower,
+            middleWeightPos: 0.8,
+        },
+        grid:{
+            fill:{
+                enabled:true,
+                fillStyle:['#ffffff', '#458AEC '],
+                alpha: 0.08
+            }
+        }
+    },
+    graphs: [
+        {
+            type: "scat",
+            field: variables.scatField,
+            node: {
+                fillAlpha: function( node ) {
+                    if( node.rowData.lucency ){
+                        return 0.2
+                    } else {
+                        return 1
+                    }
+                },
+                fillStyle: function ( node ){
+                    if( node.rowData.hasAd ){
+                        return "#FFB071"
+                    } else {
+                        return "#49CE84"
+                    }
+                },
+                radius: 8
+            }
+        }, {
+            type: "line",
+            field: variables.lineField,
+            node: {
+                enabled: false
+            },
+            line:{
+                strokeStyle: {
+                    lineargradient: [
+                        {
+                            position: 0,
+                            color: "#A7F586"
+                        },
+                        {
+                            position: 1,
+                            color: "#FFE14C"
+                        }
+                    ] 
+                },
+                onmouseover: function(e){
+                    debugger
+                    e.eventInfo.title = '我是折线'
+                }
+            }
+        }
+    ],
+    tips: {
+        pointer: "line",
+        content: function(e){
+            debugger
+        }
+    },
+    markcloumn: [
+        {
+            id: "cloumn1",
+            xVal: variables.inflexionX,
+            markTo: variables.lineField,
+            line: {
+                lineWidth: 1,
+                strokeStyle: "#999",
+                endY:'auto',
+                lineType:'dashed'
+            }
+        }
+    ]
+};
+
+window.scat = Chartx.create("canvasTest" , data , options)
+
+            </textarea></form>
+        </td>
+        <td style="padding:0 10px;" id="td-vr">
+            <div id="chartdemo-r">
+            <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
+                <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
+
+                <p>
+                    联系人：@释剑
+                </p>
+                
+            </div>
+            <div  class="test-c">
+                <div id="canvasTest" style='width:100%;height:300px;position:relative;'></div>
+            </div>
+
+            </div>
+        </td>
+    </tr>
+</table>
+
+    
+</body> 
+</html>
+
+

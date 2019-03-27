@@ -1,7 +1,6 @@
 import Canvax from "canvax"
 import GraphsBase from "../index"
-import { _, global, getDefaultProps, event, dataFrame } from "mmvis"
-import { checkData, jsonToArrayForRelation } from './data';
+import { global, _, getDefaultProps,event } from "mmvis"
 
 const Rect = Canvax.Shapes.Rect;
 const Path = Canvax.Shapes.Path;
@@ -12,9 +11,9 @@ const Circle = Canvax.Shapes.Circle;
  * 关系图中 包括了  配置，数据，和布局数据，
  * 默认用配置和数据可以完成绘图， 但是如果有布局数据，就绘图玩额外调用一次绘图，把布局数据传入修正布局效果
  */
-
-export default class Relation extends GraphsBase {
-    static defaultProps() {
+class Relation extends GraphsBase
+{
+    static defaultProps(){
         return {
             field: {
                 detail: 'key字段设置',
@@ -309,10 +308,10 @@ export default class Relation extends GraphsBase {
         //this._grahsSpClone.context.y = newLeftTopPoint.y;
     }
 
-    draw(opt) {
-        !opt && (opt = {});
-        _.extend(true, this, opt);
-        this.data = this._initData();
+    draw( opt ){
+        !opt && (opt ={});
+        _.extend( true, this , opt );
+        this.data = opt.data || this._initData();
 
         if (this.layout == "dagre") {
             this.dagreLayout(this.data);
@@ -341,38 +340,47 @@ export default class Relation extends GraphsBase {
 
     _initData() {
         var data = {
-            nodes: [
-
+            nodes : [
+              //{ type,key,content,ctype,width,height,x,y }
             ],
-            edges: [
-
+            edges : [
+              //{ type,key[],content,ctype,width,height,x,y }
             ],
             size: {
                 width: 0,
                 height: 0
             }
         };
-        let originData = this.app._data;
-        if (checkData(originData, this.field)) {
-            let result = jsonToArrayForRelation(originData, this);
-            this.dataFrame = dataFrame(result);
-        }
+        for( var i=0; i < this.dataFrame.length; i++ ){
+            var rowData = this.dataFrame.getRowDataAt(i);
+            var fields = _.flatten([ rowData[ this.field ] ] );
+            var content = this._getContent( rowData );
 
-        for (var i = 0; i < this.dataFrame.length; i++) {
-            var metaData = this.dataFrame.getRowDataAt(i);
+            var node = {
+                type : "relation",
+                rowData : rowData,
+                key : fields.length == 1 ? fields[0] : fields,
+                content : content,
+                ctype : this._checkHtml( content ) ? 'html' : 'canvas',
 
-            this._setContent(metaData);
-            metaData.__ctype = this._checkHtml(metaData.content) ? 'html' : 'canvas';
-            this._setNodeSize(metaData);
-
-            var fields = _.flatten([metaData[this.field]]);
-
-            if (fields.length == 1) {
-                data.nodes.push(metaData);
+                //下面三个属性在_setElementAndSize中设置
+                element : null, //外面传的layout数据可能没有element，widget的时候要检测下
+                width : null,
+                height : null,
+                
+                //这个在layout的时候设置
+                x: null,
+                y: null
+            };
+            _.extend(node, this._getElementAndSize( node ) );
+            
+            if( fields.length == 1 ){
+                data.nodes.push( node );
             } else {
-                data.edges.push(metaData);
+                data.edges.push( node );
             };
         };
+        
         return data;
     }
 
@@ -389,21 +397,12 @@ export default class Relation extends GraphsBase {
             };
         });
 
-        g.setDefaultNodeLabel(function () {
-            return {};
-        });
-
-        _.each(data.nodes, function (metaData) {
-            var fields = _.flatten([metaData[me.field]]);
-            //_.extend(metaData, me.layoutOpts.edge);
-            g.setNode(fields[0], metaData);
-        });
-        _.each(data.edges, function (metaData) {
-            var fields = _.flatten([metaData[me.field]]);
-            _.extend(metaData, me.layoutOpts.edge);
-
-            g.setEdge(fields[0], fields[1], metaData);
-        });
+        _.each( data.nodes, function( node ){
+            g.setNode( node.key, node );
+        } );
+        _.each( data.edges, function( edge ){
+            g.setEdge( ...edge.key, edge );
+        } );
 
         layout.layout(g);
 
@@ -463,24 +462,32 @@ export default class Relation extends GraphsBase {
                     radius: _.flatten([me.getProp(me.node.radius)])
                 }
             });
+            _boxShape.nodeData = node;
+            me.nodesSp.addChild( _boxShape );
 
-            me.nodesSp.addChild(_boxShape);
+            _boxShape.on(event.types.get(), function(e) {
+                e.eventInfo = {
+                    trigger : me.node,
+                    nodes : [ this.nodeData ]
+                };
+                me.app.fire( e.type, e );
+            });
 
-            if (node.__ctype == "canvas") {
-                node.__element.context.x = node.x - node.width / 2;
-                node.__element.context.y = node.y - node.height / 2;
-                me.nodesSp.addChild(node.__element);
+            if( node.ctype == "canvas" ){
+                node.element.context.x = node.x - node.width/2;
+                node.element.context.y = node.y - node.height/2;
+                me.nodesSp.addChild( node.element );
             };
-            if (node.__ctype == "html") {
+            if( node.ctype == "html" ){
                 //html的话，要等 _boxShape 被添加进舞台，拥有了世界矩阵后才能被显示出来和移动位置
                 //而且要监听 _boxShape 的任何形变跟随
                 _boxShape.on("transform", function () {
                     var devicePixelRatio = typeof (window) !== 'undefined' ? window.devicePixelRatio : 1;
-                    node.__element.style.transform = "matrix(" + _boxShape.worldTransform.clone().scale(1 / devicePixelRatio, 1 / devicePixelRatio).toArray().join() + ")";
-                    node.__element.style.transformOrigin = "left top"; //修改为左上角为旋转中心点来和canvas同步
-                    node.__element.style.marginLeft = me.getProp(me.node.padding) * me.status.transform.scale + "px";
-                    node.__element.style.marginTop = me.getProp(me.node.padding) * me.status.transform.scale + "px";
-                    node.__element.style.visibility = "visible";
+                    node.element.style.transform  = "matrix("+_boxShape.worldTransform.clone().scale(1/devicePixelRatio , 1/devicePixelRatio).toArray().join()+")";
+                    node.element.style.transformOrigin = "left top"; //修改为左上角为旋转中心点来和canvas同步
+                    node.element.style.marginLeft = me.getProp( me.node.padding ) * me.status.transform.scale +"px";
+                    node.element.style.marginTop  = me.getProp( me.node.padding ) * me.status.transform.scale +"px";
+                    node.element.style.visibility = "visible";
                 });
 
             };
@@ -507,12 +514,12 @@ export default class Relation extends GraphsBase {
         return reg.test(str);
     }
 
-    _setContent(metaData) {
+    _getContent( rowData ){
         var me = this;
 
         var _c; //this.node.content;
-        if (this._isField(this.node.content.field)) {
-            _c = metaData[this.node.content.field];
+        if( this._isField( this.node.content.field ) ){
+            _c = rowData[ this.node.content.field ];
         }
         if (_.isFunction(_c)) {
             _c = this.content.apply(this, arguments);
@@ -520,38 +527,35 @@ export default class Relation extends GraphsBase {
         if (me.node.content.format && _.isFunction(me.node.content.format)) {
             _c = me.node.content.format(_c);
         }
-        metaData.content = _c;
+        return _c;
     }
 
     _isField(str) {
         return ~this.dataFrame.fields.indexOf(str)
     }
 
-    _setNodeSize(metaData) {
+    _getElementAndSize( node ){
         var me = this;
-        var contentType = metaData.__ctype;
+        var contentType = node.ctype;
 
-        if (me._isField(contentType)) {
-            contentType = metaData[contentType];
+        if( me._isField( contentType ) ){
+            contentType = node.rowData[ contentType ];
         };
 
         !contentType && (contentType = 'canvas');
-
-        var _element;
-        if (contentType == 'canvas') {
-            _element = me._getEleAndsetCanvasSize(metaData);
+        
+        if( contentType == 'canvas' ){
+            return me._getEleAndsetCanvasSize( node );
         };
-        if (contentType == 'html') {
-            _element = me._getEleAndsetHtmlSize(metaData);
+        if( contentType == 'html' ){
+            return me._getEleAndsetHtmlSize( node );
         };
 
-        metaData.__element = _element;
     }
-
-
-    _getEleAndsetCanvasSize(metaData) {
+    _getEleAndsetCanvasSize( node ) {
         var me = this;
-        var content = metaData.content;
+        var content = node.content;
+        var width=node.rowData.width,height=node.rowData.height;
 
         var sprite = new Canvax.Display.Sprite({});
 
@@ -564,27 +568,31 @@ export default class Relation extends GraphsBase {
             }
         });
 
-        if (!metaData.width) {
-            metaData.width = label.getTextWidth() + me.getProp(me.node.padding) * me.status.transform.scale * 2;
+        if ( !width ) {
+            width = label.getTextWidth() + me.getProp( me.node.padding ) * me.status.transform.scale * 2;
         };
-        if (!metaData.height) {
-            metaData.height = label.getTextHeight() + me.getProp(me.node.padding) * me.status.transform.scale * 2;
+        if ( !height ) {
+            height = label.getTextHeight() + me.getProp( me.node.padding ) * me.status.transform.scale * 2;
         };
 
         sprite.addChild(label);
 
-        sprite.context.width = parseInt(metaData.width);
-        sprite.context.height = parseInt(metaData.height);
-        label.context.x = parseInt(metaData.width / 2);
-        label.context.y = parseInt(metaData.height / 2);
+        sprite.context.width = parseInt( width );
+        sprite.context.height = parseInt( height );
+        label.context.x = parseInt( width / 2 );
+        label.context.y = parseInt( height / 2 );
 
-        return sprite;
+        return {
+            element: sprite,
+            width: width,
+            height: height
+        };
 
     }
-
-    _getEleAndsetHtmlSize(metaData) {
+    _getEleAndsetHtmlSize( node ){
         var me = this;
-        var content = metaData.content;
+        var content = node.content;
+        var width=node.rowData.width,height=node.rowData.height;
 
         var _tipDom = document.createElement("div");
         _tipDom.className = "chartx_relation_node";
@@ -595,42 +603,34 @@ export default class Relation extends GraphsBase {
 
         _tipDom.innerHTML = content;
 
-        this.domContainer.appendChild(_tipDom);
-
-        if (!metaData.width) {
-            metaData.width = _tipDom.offsetWidth + me.getProp(me.node.padding) * me.status.transform.scale * 2;
+        if ( !width ) {
+            width = _tipDom.offsetWidth + me.getProp( me.node.padding ) * me.status.transform.scale * 2;
         };
-        if (!metaData.height) {
-            metaData.height = _tipDom.offsetHeight + me.getProp(me.node.padding) * me.status.transform.scale * 2;
+        if ( !height ) {
+            height = _tipDom.offsetHeight + me.getProp( me.node.padding ) * me.status.transform.scale * 2;
         };
 
-        return _tipDom;
+        return {
+            element: _tipDom,
+            width: width,
+            height: height
+        };
 
     }
 
-    getNodesAt(index) {
-        //该index指当前
-        var data = this.data;
-
-        var _nodesInfoList = []; //节点信息集合
-        _.each(this.enabledField, function (fs, i) {
-            if (_.isArray(fs)) {
-                _.each(fs, function (_fs, ii) {
-                    //fs的结构两层到顶了
-                    var nodeData = data[_fs] ? data[_fs][index] : null;
-                    nodeData && _nodesInfoList.push(nodeData);
-                });
-            } else {
-                var nodeData = data[fs] ? data[fs][index] : null;
-                nodeData && _nodesInfoList.push(nodeData);
-            }
-        });
-
-        return _nodesInfoList;
+    getNodesAt(index)
+    {
+        
     }
 
     getProp(prop, def) {
         return prop
     }
 
+    
+
 }
+
+global.registerComponent( Relation, 'graphs', 'relation' );
+
+export default Relation

@@ -1,14 +1,14 @@
 import Canvax from "canvax"
 import GraphsBase from "../index"
 import Group from "./group"
-import { dataFrame,_,getDefaultProps } from "mmvis"
+import { global,dataFrame,_,getDefaultProps } from "mmvis"
 
 const Text = Canvax.Display.Text;
 const Circle = Canvax.Shapes.Circle;
 const Line = Canvax.Shapes.Line;
 const Rect = Canvax.Shapes.Rect;
 
-export default class PlanetGraphs extends GraphsBase
+class PlanetGraphs extends GraphsBase
 {
     static defaultProps(){
         return {
@@ -499,3 +499,7 @@ export default class PlanetGraphs extends GraphsBase
     }
 
 }
+
+global.registerComponent( PlanetGraphs, 'graphs', 'planet' );
+
+export default PlanetGraphs;

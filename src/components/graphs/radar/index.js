@@ -1,11 +1,11 @@
 import Canvax from "canvax"
 import GraphsBase from "../index"
-import { _,event,getDefaultProps } from "mmvis"
+import { global,_,event,getDefaultProps } from "mmvis"
 
 const Polygon = Canvax.Shapes.Polygon;
 const Circle = Canvax.Shapes.Circle;
 
-export default class RadarGraphs extends GraphsBase
+class RadarGraphs extends GraphsBase
 {
     static defaultProps(){
         return {
@@ -359,3 +359,7 @@ export default class RadarGraphs extends GraphsBase
         return _nodesInfoList;
     }
 }
+
+global.registerComponent( RadarGraphs, 'graphs', 'radar' );
+
+export default RadarGraphs;

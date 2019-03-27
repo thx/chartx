@@ -3,10 +3,10 @@ import Canvax from "canvax"
 import xAxisConstructor from "./xaxis"
 import yAxisConstructor from "./yaxis"
 import Grid from "./grid"
-import { _,getDefaultProps,event } from "mmvis"
+import { global,_,getDefaultProps,event } from "mmvis"
 
 
-export default class Rect extends coordBase
+class Rect extends coordBase
 {
     static defaultProps(){
         return {
@@ -188,9 +188,10 @@ export default class Rect extends coordBase
         this._resetXY_axisLine_pos();
 
         var _yAxis = this._yAxisLeft || this._yAxisRight;
+        
         this._grid.reset({
             animation:false,
-            xDirection: {
+            oneDimension: {
                 data: _yAxis.layoutData
             }
         });
@@ -304,31 +305,35 @@ export default class Rect extends coordBase
         //设置下x y 轴的 _axisLine轴线的位置，默认 axisLine.position==default
 
         var xAxisPosY;
-        if( this._xAxis.axisLine.position == 'center' ){
-            xAxisPosY = -this._yAxis[0].height / 2;
-        } 
-        if( this._xAxis.axisLine.position == 'center' ){
-            xAxisPosY = -this._yAxis[0].height / 2;
-        } 
-        if( _.isNumber( this._xAxis.axisLine.position ) ){
-            xAxisPosY = -this._yAxis[0].getPosOfVal( this._xAxis.axisLine.position );
-        }
-        if( xAxisPosY !== undefined ){
-            this._xAxis._axisLine.context.y = xAxisPosY;
+        if( this._xAxis.enabled ){
+            if( this._xAxis.axisLine.position == 'center' ){
+                xAxisPosY = -this._yAxis[0].height / 2;
+            } 
+            if( this._xAxis.axisLine.position == 'center' ){
+                xAxisPosY = -this._yAxis[0].height / 2;
+            } 
+            if( _.isNumber( this._xAxis.axisLine.position ) ){
+                xAxisPosY = -this._yAxis[0].getPosOfVal( this._xAxis.axisLine.position );
+            }
+            if( xAxisPosY !== undefined ){
+                this._xAxis._axisLine.context.y = xAxisPosY;
+            }
         }
 
         _.each( this._yAxis , function( _yAxis ){
             //这个_yAxis是具体的y轴实例
             var yAxisPosX;
-            if( _yAxis.axisLine.position == 'center' ){
-                yAxisPosX = me._xAxis.width / 2;
-            }; 
-            if( _.isNumber( _yAxis.axisLine.position ) ){
-                yAxisPosX = me._xAxis.getPosOfVal( _yAxis.axisLine.position );
-            };
-            if( yAxisPosX !== undefined ){
-                _yAxis._axisLine.context.x = yAxisPosX;
-            };
+            if(_yAxis.enabled){
+                if( _yAxis.axisLine.position == 'center' ){
+                    yAxisPosX = me._xAxis.width / 2;
+                }; 
+                if( _.isNumber( _yAxis.axisLine.position ) ){
+                    yAxisPosX = me._xAxis.getPosOfVal( _yAxis.axisLine.position );
+                };
+                if( yAxisPosX !== undefined ){
+                    _yAxis._axisLine.context.x = yAxisPosX;
+                };
+            }
         } );
 
     }
@@ -387,7 +392,7 @@ export default class Rect extends coordBase
     
         if( yAxisLeft ){
             yAxisLeftDataFrame = this.getAxisDataFrame( yAxisLeft.field );
-            this._yAxisLeft = new yAxisConstructor( yAxisLeft, yAxisLeftDataFrame );
+            this._yAxisLeft = new yAxisConstructor( yAxisLeft, yAxisLeftDataFrame, this );
             this._yAxisLeft.axis = yAxisLeft;
             this.sprite.addChild( this._yAxisLeft.sprite );
             this._yAxis.push( this._yAxisLeft );
@@ -399,7 +404,7 @@ export default class Rect extends coordBase
         } );
         if( yAxisRight ){
             yAxisRightDataFrame = this.getAxisDataFrame( yAxisRight.field )
-            this._yAxisRight = new yAxisConstructor( yAxisRight, yAxisRightDataFrame );
+            this._yAxisRight = new yAxisConstructor( yAxisRight, yAxisRightDataFrame, this );
             this._yAxisRight.axis = yAxisRight;
             this.sprite.addChild( this._yAxisRight.sprite );
             this._yAxis.push( this._yAxisRight );
@@ -453,7 +458,7 @@ export default class Rect extends coordBase
         //然后yAxis更新后，对应的背景也要更新
         this._grid.reset({
             animation:false,
-            xDirection: {
+            oneDimension: {
                 data: this._yAxisLeft ? this._yAxisLeft.layoutData : this._yAxisRight.layoutData
             }
         });
@@ -500,12 +505,13 @@ export default class Rect extends coordBase
         var xNode = this._xAxis.getNodeInfoOfX( induceX );
         
         var obj = {
-            xAxis : xNode,
-            title : xNode.text,
+            xAxis       : xNode,
+            dimension_1 : xNode, //和xAxis一致，， 极坐标也会有dimension_1
+            title       : xNode.text,
 
             //下面两个属性是所有坐标系统一的
-            iNode : xNode.ind,
-            nodes : [
+            iNode       : xNode.ind,
+            nodes       : [
                 //遍历_graphs 去拿东西
             ]
         };
@@ -592,3 +598,7 @@ export default class Rect extends coordBase
     }
 
 }
+
+global.registerComponent( Rect, 'coord', 'rect' );
+
+export default Rect;
