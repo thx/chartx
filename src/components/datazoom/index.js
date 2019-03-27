@@ -30,7 +30,7 @@ class dataZoom extends Component
                 detail : '颜色',
                 default: '#008ae6' 
             },
-            range : {
+            range : { //propotion中，start 和 end代表的是数值的大小
                 detail : '范围设置',
                 propertys : {
                     start : {
@@ -159,8 +159,8 @@ class dataZoom extends Component
         this._cloneChart = null;
         
         this.count = 1; //把w 均为为多少个区间， 同样多节点的line 和  bar， 这个count相差一
-        this.dataLen = 1;
-        this.axisLayoutType = null; //和line bar等得xAxis.layoutType 一一对应
+        this.dataLen = 1; //总共有多少条数据 
+        this.axisLayoutType = null; //和xAxis.layoutType 一一对应  peak rule proportion
 
         this.dragIng = function(){};
         this.dragEnd = function(){};
@@ -226,7 +226,7 @@ class dataZoom extends Component
         cloneEl.id = app.el.id + "_currclone";
         cloneEl.style.position = "absolute";
         cloneEl.style.width = this.width + "px";
-        cloneEl.style.height = this.height+"px"; //app.el.offsetHeight + "px";
+        cloneEl.style.height = this.btnHeight+"px"; //app.el.offsetHeight + "px";
         cloneEl.style.top = "10000px";
         document.body.appendChild(cloneEl);
 
@@ -393,13 +393,26 @@ class dataZoom extends Component
         var _cloneChart = this._cloneChart.thumbChart
 
         this.dataLen = _cloneChart.dataFrame.length;
-        this.count = this.axisLayoutType == "rule" ? this.dataLen-1 : this.dataLen;
+        switch( this.axisLayoutType ){
+            case "rule":
+                this.count = this.dataLen-1;
+                break;
+            case "peak":
+                this.count = this.dataLen;
+                break;
+            case "proportion":
+                this.count = this.width;
+                break;
+        };
         
         if(!this.range.max || this.range.max > this.count){
-            this.range.max = this.count;
+            this.range.max = this.count - 1;
         };
         if( !this.range.end || this.range.end > this.dataLen - 1 ){
             this.range.end = this.dataLen - 1;
+            if( this.axisLayoutType == "proportion" ){
+                this.range.end = this.count - 1;
+            };
         };
 
         //如果用户没有配置layoutType但是配置了position
@@ -414,6 +427,24 @@ class dataZoom extends Component
         this.disPart = this._getDisPart();
         this.btnHeight = this.height - this.btnOut;
     }
+    _getDisPart()
+    {
+        var me = this;
+        var min = Math.max( parseInt(me.range.min / 2 / me.count * me.width), 23 );
+        //柱状图用得这种x轴布局，不需要 /2
+        if( this.axisLayoutType == "peak" ){
+            min = Math.max( parseInt(me.range.min / me.count * me.width), 23 );
+        };
+
+        if( this.axisLayoutType == "proportion" ){
+            //min = min;
+        };
+
+        return {
+            min : min,
+            max : parseInt((me.range.max+1) / me.count * me.width)
+        };
+    }
 
     _getRangeEnd( end )
     {
@@ -422,7 +453,10 @@ class dataZoom extends Component
         }
         if( this.axisLayoutType == "peak" ){
             end += 1;
-        };
+        }
+        if( this.axisLayoutType == "proportion" ){
+            end += 1;
+        }
         return end
     }
 
@@ -526,7 +560,6 @@ class dataZoom extends Component
             this.dataZoomBtns.addChild( this._btnLeft );
         };
 
-        debugger
         var btnRightCtx = {
             x: me._getRangeEnd() / me.count * me.width - me.btnWidth,
             y: - me.btnOut / 2 + 1,
@@ -641,21 +674,6 @@ class dataZoom extends Component
         
     }
 
-    _getDisPart()
-    {
-        var me = this;
-        var min = Math.max( parseInt(me.range.min / 2 / me.count * me.width), 23 );
-        //柱状图用得这种x轴布局，不需要 /2
-        if( this.axisLayoutType == "peak" ){
-            min = Math.max( parseInt(me.range.min / me.count * me.width), 23 );
-        };
-
-        return {
-            min : min,
-            max : parseInt(me.range.max / me.count * me.width)
-        }
-    }
-
     _setRange( trigger )
     {
         var me = this;
@@ -669,9 +687,12 @@ class dataZoom extends Component
         if( this.axisLayoutType == "peak" ){
             start = Math.round( start );
             end = Math.round( end );
-        } else {
+        } else if( this.axisLayoutType == "rule" ) {
             start = parseInt( start );
             end = parseInt( end );
+        } else {
+            start = start;
+            end = end-1;
         };
 
         if( trigger == "btnCenter" ){
@@ -687,7 +708,7 @@ class dataZoom extends Component
                 end -= 1;
             };
             me.range.end = end;
-
+            console.log( JSON.stringify( me.range ) );
             me.dragIng( me.range );
         };
 

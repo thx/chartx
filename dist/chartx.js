@@ -25957,6 +25957,11 @@ var Chartx = (function () {
               transform: {
                 detail: "是否启动拖拽缩放整个画布",
                 propertys: {
+                  fitView: {
+                    detail: "自动缩放",
+                    default: '' //autoZoom
+
+                  },
                   enabled: {
                     detail: "是否开启",
                     default: true
@@ -25990,20 +25995,23 @@ var Chartx = (function () {
 
       _.extend(true, _assertThisInitialized(_this), getDefaultProps(Relation.defaultProps()), opt);
 
-      var dagreOpts = {
-        graph: {
-          nodesep: 10,
-          ranksep: 10,
-          edgesep: 10,
-          acyclicer: "greedy"
-        },
-        node: {},
-        edge: {
-          labelpos: 'c'
-        }
-      };
+      if (_this.layout === 'dagre') {
+        var dagreOpts = {
+          graph: {
+            nodesep: 10,
+            ranksep: 10,
+            edgesep: 10,
+            acyclicer: "greedy"
+          },
+          node: {},
+          edge: {//labelpos: 'c'
+          }
+        };
 
-      _.extend(true, _this.layoutOpts, dagreOpts, _this.layoutOpts);
+        _.extend(true, dagreOpts, _this.layoutOpts);
+
+        _.extend(true, _this.layoutOpts, dagreOpts);
+      }
 
       _this.domContainer = app.canvax.domView;
       _this.induce = null;
@@ -26169,6 +26177,11 @@ var Chartx = (function () {
         this.widget();
         this.sprite.context.x = this.origin.x;
         this.sprite.context.y = this.origin.y;
+
+        if (this.status.transform.fitView == 'autoZoom') {
+          this.sprite.context.scaleX = this.width / this.data.size.width;
+          this.sprite.context.scaleY = this.height / this.data.size.height;
+        }
 
         var _offsetLet = (this.width - this.data.size.width) / 2;
 
@@ -26453,7 +26466,6 @@ var Chartx = (function () {
         _tipDom.style.cssText += "; text-align:" + me.getProp(me.node.content.textAlign) + ";";
         _tipDom.style.cssText += "; vertical-align:" + me.getProp(me.node.content.textBaseline) + ";";
         _tipDom.innerHTML = content;
-        this.domContainer.appendChild(_tipDom);
 
         if (!width) {
           width = _tipDom.offsetWidth + me.getProp(me.node.padding) * me.status.transform.scale * 2;
@@ -30693,6 +30705,7 @@ var Chartx = (function () {
             default: '#008ae6'
           },
           range: {
+            //propotion中，start 和 end代表的是数值的大小
             detail: '范围设置',
             propertys: {
               start: {
@@ -30822,8 +30835,9 @@ var Chartx = (function () {
       _this._cloneChart = null;
       _this.count = 1; //把w 均为为多少个区间， 同样多节点的line 和  bar， 这个count相差一
 
-      _this.dataLen = 1;
-      _this.axisLayoutType = null; //和line bar等得xAxis.layoutType 一一对应
+      _this.dataLen = 1; //总共有多少条数据 
+
+      _this.axisLayoutType = null; //和xAxis.layoutType 一一对应  peak rule proportion
 
       _this.dragIng = function () {};
 
@@ -30890,7 +30904,7 @@ var Chartx = (function () {
         cloneEl.id = app.el.id + "_currclone";
         cloneEl.style.position = "absolute";
         cloneEl.style.width = this.width + "px";
-        cloneEl.style.height = this.height + "px"; //app.el.offsetHeight + "px";
+        cloneEl.style.height = this.btnHeight + "px"; //app.el.offsetHeight + "px";
 
         cloneEl.style.top = "10000px";
         document.body.appendChild(cloneEl); //var opt = _.extend(true, {}, me._opt);
@@ -31057,14 +31071,31 @@ var Chartx = (function () {
       value: function _computeAttrs() {
         var _cloneChart = this._cloneChart.thumbChart;
         this.dataLen = _cloneChart.dataFrame.length;
-        this.count = this.axisLayoutType == "rule" ? this.dataLen - 1 : this.dataLen;
+
+        switch (this.axisLayoutType) {
+          case "rule":
+            this.count = this.dataLen - 1;
+            break;
+
+          case "peak":
+            this.count = this.dataLen;
+            break;
+
+          case "proportion":
+            this.count = this.width;
+            break;
+        }
 
         if (!this.range.max || this.range.max > this.count) {
-          this.range.max = this.count;
+          this.range.max = this.count - 1;
         }
 
         if (!this.range.end || this.range.end > this.dataLen - 1) {
           this.range.end = this.dataLen - 1;
+
+          if (this.axisLayoutType == "proportion") {
+            this.range.end = this.count - 1;
+          }
         }
 
         if (!this.direction && this.position) {
@@ -31078,6 +31109,22 @@ var Chartx = (function () {
         this.btnHeight = this.height - this.btnOut;
       }
     }, {
+      key: "_getDisPart",
+      value: function _getDisPart() {
+        var me = this;
+        var min = Math.max(parseInt(me.range.min / 2 / me.count * me.width), 23); //柱状图用得这种x轴布局，不需要 /2
+
+        if (this.axisLayoutType == "peak") {
+          min = Math.max(parseInt(me.range.min / me.count * me.width), 23);
+        }
+
+        if (this.axisLayoutType == "proportion") ;
+        return {
+          min: min,
+          max: parseInt((me.range.max + 1) / me.count * me.width)
+        };
+      }
+    }, {
       key: "_getRangeEnd",
       value: function _getRangeEnd(end) {
         if (end === undefined) {
@@ -31087,6 +31134,11 @@ var Chartx = (function () {
         if (this.axisLayoutType == "peak") {
           end += 1;
         }
+
+        if (this.axisLayoutType == "proportion") {
+          end += 1;
+        }
+
         return end;
       }
     }, {
@@ -31196,7 +31248,6 @@ var Chartx = (function () {
 
           this.dataZoomBtns.addChild(this._btnLeft);
         }
-        debugger;
         var btnRightCtx = {
           x: me._getRangeEnd() / me.count * me.width - me.btnWidth,
           y: -me.btnOut / 2 + 1,
@@ -31326,20 +31377,6 @@ var Chartx = (function () {
         }
       }
     }, {
-      key: "_getDisPart",
-      value: function _getDisPart() {
-        var me = this;
-        var min = Math.max(parseInt(me.range.min / 2 / me.count * me.width), 23); //柱状图用得这种x轴布局，不需要 /2
-
-        if (this.axisLayoutType == "peak") {
-          min = Math.max(parseInt(me.range.min / me.count * me.width), 23);
-        }
-        return {
-          min: min,
-          max: parseInt(me.range.max / me.count * me.width)
-        };
-      }
-    }, {
       key: "_setRange",
       value: function _setRange(trigger) {
         var me = this;
@@ -31354,9 +31391,12 @@ var Chartx = (function () {
         if (this.axisLayoutType == "peak") {
           start = Math.round(start);
           end = Math.round(end);
-        } else {
+        } else if (this.axisLayoutType == "rule") {
           start = parseInt(start);
           end = parseInt(end);
+        } else {
+          start = start;
+          end = end - 1;
         }
 
         if (trigger == "btnCenter") {
@@ -31373,6 +31413,7 @@ var Chartx = (function () {
             end -= 1;
           }
           me.range.end = end;
+          console.log(JSON.stringify(me.range));
           me.dragIng(me.range);
         }
 
