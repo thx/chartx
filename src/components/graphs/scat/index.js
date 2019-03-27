@@ -212,7 +212,7 @@ class ScatGraphs extends GraphsBase
     init()
     {
         this._shapesp = new Canvax.Display.Sprite({ 
-            id : "shapesp"
+            id : "scat_shapesp"
         });
         this._textsp = new Canvax.Display.Sprite({ 
             id : "textsp"
@@ -224,6 +224,7 @@ class ScatGraphs extends GraphsBase
         this.sprite.addChild( this._linesp );
         this.sprite.addChild( this._shapesp );
         this.sprite.addChild( this._textsp );
+        
     }
 
     draw(opt)

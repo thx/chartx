@@ -232,11 +232,13 @@ class Chart extends event.Dispatcher
     _getPadding(){
         
         var paddingVal = _padding;
+
         if( this._opt.coord && "padding" in this._opt.coord ){
             if( !_.isObject(this._opt.coord.padding) ){
                 paddingVal = this._opt.coord.padding;
             }
         };
+
         var paddingObj = {
             top: paddingVal,
             right: paddingVal,
@@ -280,6 +282,7 @@ class Chart extends event.Dispatcher
             id: 'graphsSprite'
         });
         this.stage.addChild( this.graphsSprite );
+        
     }
 
     /*

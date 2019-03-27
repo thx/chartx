@@ -353,7 +353,7 @@ class Relation extends GraphsBase
         };
         for( var i=0; i < this.dataFrame.length; i++ ){
             var rowData = this.dataFrame.getRowDataAt(i);
-            var fields = _.flatten([ rowData[ this.field ] ] );
+            var fields = _.flatten([ (rowData[ this.field ]+"").split(",") ] );
             var content = this._getContent( rowData );
 
             var node = {
