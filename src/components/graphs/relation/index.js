@@ -605,6 +605,8 @@ class Relation extends GraphsBase
 
         _dom.innerHTML = content;
 
+        this.domContainer.appendChild( _dom );
+
         if ( !width ) {
             width = _dom.offsetWidth + me.getProp( me.node.padding ) * me.status.transform.scale * 2;
         };

@@ -26473,6 +26473,7 @@ var Chartx = (function () {
         _dom.style.cssText += "; text-align:" + me.getProp(me.node.content.textAlign) + ";";
         _dom.style.cssText += "; vertical-align:" + me.getProp(me.node.content.textBaseline) + ";";
         _dom.innerHTML = content;
+        this.domContainer.appendChild(_dom);
 
         if (!width) {
           width = _dom.offsetWidth + me.getProp(me.node.padding) * me.status.transform.scale * 2;
