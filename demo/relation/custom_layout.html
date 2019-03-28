@@ -141,8 +141,8 @@ var custom_layout = function(data){
         }
     }
     var getNodeTypeRelation = function (start, end) {
-        var nodeTypeStart = start[nodeTypeField];
-        var nodeTypeEnd = end[nodeTypeField];
+        var nodeTypeStart = start.rowData[nodeTypeField];
+        var nodeTypeEnd = end.rowData[nodeTypeField];
         if (nodeTypeStart === pageKey && nodeTypeEnd === pageKey) {
             return pageKey
         } else if (nodeTypeStart === pageKey && nodeTypeEnd === actionKey) {
@@ -154,7 +154,7 @@ var custom_layout = function(data){
     //将数组转换为对象
     for (var i = 0, len = data.nodes.length; i < len; i++) {
         var node = data.nodes[i];
-        if (node[nodeTypeField] === pageKey) {
+        if (node.rowData[nodeTypeField] === pageKey) {
             pageCount++;
         }
         nodeMap[node.key] = node;
@@ -174,7 +174,7 @@ var custom_layout = function(data){
                         var weight = pagesChainsMap.get(nodeStart.key).weight + 1;
                         pagesChainsMap.addChain(nodeEnd.key, nodeStart, nodeEnd, edge, weight);
                     } else if (pagesChainsMap.isExsit(nodeEnd.key)) {
-                        var weight = pagesChainsMap.get(nodeStart.key).weight - 1;
+                        var weight = pagesChainsMap.get(nodeEnd.key).weight - 1;
                         pagesChainsMap.addChain(nodeStart.key, nodeStart, nodeEnd, edge, weight);
                     }
                 }
@@ -356,21 +356,21 @@ var data = [
     { key: 13       , label: '报表',               nodeType:'page'    },
     { key: 14       , label: '创意' ,              nodeType:'page'    },
     
-    { key: [13,14]  },
+    { key: "13,14"  },
     
-    { key: [1,2]  },
+    { key: "1,2"  },
     
-    { key: [1,6]  },
-    { key: [2,9]    },
-    { key: [9,10]    },
-    { key: [3,4]    },
-    { key: [4,5]    },
-    { key: [5,7]  },
-    { key: [7,8]    },
-    { key: [8,11]   },
-    { key: [3,12]  },
-    { key: [12,13]  },
-    { key: [2,3]  },
+    { key: "1,6"  },
+    { key: "2,9"    },
+    { key: "9,10"    },
+    { key: "3,4"    },
+    { key: "4,5"    },
+    { key: "5,7"  },
+    { key: "7,8"    },
+    { key: "8,11"   },
+    { key: "3,12"  },
+    { key: "12,13"  },
+    { key: "2,3"  },
    
 ];
 
