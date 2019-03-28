@@ -482,6 +482,7 @@ class Relation extends GraphsBase
             if( node.ctype == "html" ){
                 //html的话，要等 _boxShape 被添加进舞台，拥有了世界矩阵后才能被显示出来和移动位置
                 //而且要监听 _boxShape 的任何形变跟随
+                
                 _boxShape.on("transform", function () {
                     var devicePixelRatio = typeof (window) !== 'undefined' ? window.devicePixelRatio : 1;
                     node.element.style.transform  = "matrix("+_boxShape.worldTransform.clone().scale(1/devicePixelRatio , 1/devicePixelRatio).toArray().join()+")";
@@ -595,24 +596,24 @@ class Relation extends GraphsBase
         var content = node.content;
         var width=node.rowData.width,height=node.rowData.height;
 
-        var _tipDom = document.createElement("div");
-        _tipDom.className = "chartx_relation_node";
-        _tipDom.style.cssText += "; position:absolute;visibility:hidden;"
-        _tipDom.style.cssText += "; color:" + me.getProp(me.node.content.fontColor) + ";";
-        _tipDom.style.cssText += "; text-align:" + me.getProp(me.node.content.textAlign) + ";";
-        _tipDom.style.cssText += "; vertical-align:" + me.getProp(me.node.content.textBaseline) + ";";
+        var _dom = document.createElement("div");
+        _dom.className = "chartx_relation_node";
+        _dom.style.cssText += "; position:absolute;visibility:hidden;"
+        _dom.style.cssText += "; color:" + me.getProp(me.node.content.fontColor) + ";";
+        _dom.style.cssText += "; text-align:" + me.getProp(me.node.content.textAlign) + ";";
+        _dom.style.cssText += "; vertical-align:" + me.getProp(me.node.content.textBaseline) + ";";
 
-        _tipDom.innerHTML = content;
+        _dom.innerHTML = content;
 
         if ( !width ) {
-            width = _tipDom.offsetWidth + me.getProp( me.node.padding ) * me.status.transform.scale * 2;
+            width = _dom.offsetWidth + me.getProp( me.node.padding ) * me.status.transform.scale * 2;
         };
         if ( !height ) {
-            height = _tipDom.offsetHeight + me.getProp( me.node.padding ) * me.status.transform.scale * 2;
+            height = _dom.offsetHeight + me.getProp( me.node.padding ) * me.status.transform.scale * 2;
         };
 
         return {
-            element: _tipDom,
+            element: _dom,
             width: width,
             height: height
         };
