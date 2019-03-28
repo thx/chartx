@@ -1628,82 +1628,147 @@ var Chartx = (function () {
     }
   }
 
-  function dataFrame (data, opt) {
+  function parse2JsonData(list) {
+    var newArr = list; //检测第一个数据是否为一个array, 否就是传入了一个json格式的数据
+
+    if (list.length > 0 && _.isArray(list[0])) {
+      newArr = [];
+      var fields = list[0];
+      var fl = fields.length;
+
+      for (var i = 1, l = list.length; i < l; i++) {
+        var obj = {};
+
+        for (var fi = 0; fi < fl; fi++) {
+          obj[fields[fi]] = list[i][fi];
+        }
+        newArr.push(obj);
+      }
+      return newArr;
+    }
+  }
+
+  function dataFrame (dataOrg, opt) {
     //数据做一份拷贝，避免污染源数据
-    data = JSON.parse(JSON.stringify(data));
+    dataOrg = JSON.parse(JSON.stringify(dataOrg));
     var dataFrame = {
       //数据框架集合
       length: 0,
       org: [],
       //最原始的数据，一定是个行列式，因为如果发现是json格式数据，会自动转换为行列式
+      jsonOrg: [],
+      //原始数据的json格式
       data: [],
       //最原始的数据转化后的数据格式：[o,o,o] o={field:'val1',index:0,data:[1,2,3]}
       getRowDataAt: _getRowDataAt,
       getRowDataOf: _getRowDataOf,
       getFieldData: _getFieldData,
       getDataOrg: getDataOrg,
+      refresh: _refresh,
       fields: [],
       range: {
         start: 0,
         end: 0
-      }
+      },
+      filters: {} //数据过滤器，在range的基础上
+
     };
 
-    if (!data || data.length == 0) {
+    if (!dataOrg || dataOrg.length == 0) {
       return dataFrame;
     }
 
-    if (data.length > 0 && !_.isArray(data[0])) {
-      data = parse2MatrixData(data);
+    if (dataOrg.length > 0 && !_.isArray(dataOrg[0])) {
+      dataFrame.jsonOrg = dataOrg;
+      dataOrg = parse2MatrixData(dataOrg);
+      dataFrame.org = dataOrg;
+    } else {
+      dataFrame.org = dataOrg;
+      dataFrame.jsonOrg = parse2JsonData(dataOrg);
     }
-    dataFrame.length = data.length - 1; //设置好数据区间end值
 
-    dataFrame.range.end = dataFrame.length - 1; //然后检查opts中是否有dataZoom.range
+    dataFrame.range.end = dataOrg.length - 1; //然后检查opts中是否有dataZoom.range
 
     if (opt && opt.dataZoom && opt.dataZoom.range) {
       _.extend(dataFrame.range, opt.dataZoom.range);
     }
 
-    if (data.length && data[0].length && !~data[0].indexOf("__index__")) {
+    if (dataOrg.length && dataOrg[0].length && !~dataOrg[0].indexOf("__index__")) {
       //如果数据中没有用户自己设置的__index__，那么就主动添加一个__index__，来记录元数据中的index
-      for (var i = 0, l = data.length; i < l; i++) {
+      for (var i = 0, l = dataOrg.length; i < l; i++) {
         if (!i) {
-          data[0].push("__index__");
+          dataOrg[0].push("__index__");
         } else {
-          data[i].push(i - 1);
+          dataOrg[i].push(i - 1);
         }
       }
     }
+    dataFrame.fields = dataOrg[0] ? dataOrg[0] : []; //所有的字段集合;
 
-    dataFrame.org = data;
-    dataFrame.fields = data[0] ? data[0] : []; //所有的字段集合;
+    dataFrame.data = _getData();
 
-    var total = []; //已经处理成[o,o,o]   o={field:'val1',index:0,data:[1,2,3]}
-
-    for (var a = 0, al = dataFrame.fields.length; a < al; a++) {
-      var o = {};
-      o.field = dataFrame.fields[a];
-      o.index = a;
-      o.data = [];
-      total.push(o);
+    function _refresh() {
+      dataFrame.data = _getData();
     }
-    dataFrame.data = total; //填充好total的data并且把属于yAxis的设置为number
 
-    for (var a = 1, al = data.length; a < al; a++) {
-      for (var b = 0, bl = data[a].length; b < bl; b++) {
-        var _val = data[a][b]; //如果用户传入的数据是个number，那么就转换为真正的Number吧
-        //‘223’ --》 223
+    function _getData() {
+      var total = []; //已经处理成[o,o,o]   o={field:'val1',index:0,data:[1,2,3]}
 
-        if (!isNaN(_val) && _val !== "" && _val !== null) {
-          _val = Number(_val);
-        }
-        total[b].data.push(_val); //total[b].data.push( data[a][b] );
+      for (var a = 0, al = dataFrame.fields.length; a < al; a++) {
+        var o = {};
+        o.field = dataFrame.fields[a];
+        o.index = a;
+        o.data = [];
+        total.push(o);
       }
+
+      var rows = _getValidRows(function (rowData) {
+        _.each(rowData, function (_val, _field) {
+          if (!isNaN(_val) && _val !== "" && _val !== null) {
+            _val = Number(_val);
+          }
+
+          var gData = _.find(total, function (g) {
+            return g.field == _field;
+          });
+
+          gData && gData.data.push(_val);
+        });
+      }); //到这里保证了data一定是行列式
+
+
+      dataFrame.length = rows.length;
+      return total;
+    }
+
+    function _getValidRows(callback) {
+      var validRowDatas = [];
+
+      _.each(dataFrame.jsonOrg.slice(dataFrame.range.start, dataFrame.range.end + 1), function (rowData) {
+        var validRowData = true;
+
+        if (_.keys(dataFrame.filters).length) {
+          _.each(dataFrame.filters, function (filter) {
+            if (_.isFunction(filter) && !filter(rowData)) {
+              validRowData = false;
+              return false;
+            }
+          });
+        }
+
+        if (validRowData) {
+          callback && callback(rowData);
+          validRowDatas.push(rowData);
+        }
+      });
+
+      return validRowDatas;
     }
 
     function getDataOrg($field, format, totalList, lev) {
       if (!lev) lev = 0;
-      var arr = totalList || total;
+
+      var arr = totalList || _getData();
 
       if (!arr) {
         return;
@@ -1715,11 +1780,11 @@ var Chartx = (function () {
         };
       }
 
-      function _format(data) {
-        for (var i = 0, l = data.length; i < l; i++) {
-          data[i] = format(data[i]);
+      function _format(d) {
+        for (var i = 0, l = d.length; i < l; i++) {
+          d[i] = format(d[i]);
         }
-        return data;
+        return d;
       }
 
       if (!_.isArray($field)) {
@@ -1742,7 +1807,7 @@ var Chartx = (function () {
           for (var ii = 0, iil = arr.length; ii < iil; ii++) {
             if ($field[i] == arr[ii].field) {
 
-              _fieldData.push(_format(arr[ii].data.slice(dataFrame.range.start, dataFrame.range.end + 1)));
+              _fieldData.push(_format(arr[ii].data));
 
               break;
             }
@@ -1757,7 +1822,7 @@ var Chartx = (function () {
       return newData;
     }
     /*
-     * 获取某一行数据
+     * 获取某一行数据,当前dataFrame.data中
     */
 
     function _getRowDataAt(index) {
@@ -1765,7 +1830,7 @@ var Chartx = (function () {
       var data = dataFrame.data;
 
       for (var a = 0; a < data.length; a++) {
-        o[data[a].field] = data[a].data[dataFrame.range.start + index];
+        o[data[a].field] = data[a].data[index];
       }
       return o;
     }
@@ -1803,19 +1868,14 @@ var Chartx = (function () {
     }
 
     function _getFieldData(field) {
-      var data;
+      var list = [];
 
-      _.each(dataFrame.data, function (d) {
-        if (d.field == field) {
-          data = d;
-        }
+      var _f = _.find(dataFrame.data, function (obj) {
+        return obj.field == field;
       });
 
-      if (data) {
-        return data.data.slice(dataFrame.range.start, dataFrame.range.end + 1);
-      } else {
-        return [];
-      }
+      _f && (list = _f.data);
+      return list;
     }
 
     return dataFrame;
@@ -10276,11 +10336,13 @@ var Chartx = (function () {
       key: "resetData",
       value: function resetData(data, trigger) {
         var me = this;
-        var preDataLenth = this.dataFrame.length;
+        var preDataLenth = this.dataFrame.org.length;
 
         if (data) {
           this._data = data;
           this.dataFrame = this.initData(this._data);
+        } else {
+          this.dataFrame.refresh();
         }
 
         if (!preDataLenth) {
@@ -16958,6 +17020,11 @@ var Chartx = (function () {
                 detail: '半径',
                 default: null
               },
+              radiusScale: {
+                detail: '半径缩放比例',
+                documentation: '在计算好真实半径后缩放，主要用在,缩略图中，比如datazoom的缩略图',
+                default: 1
+              },
               normalRadius: {
                 detail: '默认半径',
                 default: 15
@@ -17286,6 +17353,7 @@ var Chartx = (function () {
             r = parseInt(this.node.radius);
           }
         }
+        r = Math.max(r * this.node.radiusScale, 2);
         nodeLayoutData.radius = r;
         return this;
       }
@@ -30878,6 +30946,8 @@ var Chartx = (function () {
 
       _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(dataZoom.defaultProps()), opt);
 
+      _this.axis = null; //对应哪个轴
+
       _this.layout();
 
       return _this;
@@ -30904,7 +30974,11 @@ var Chartx = (function () {
     }, {
       key: "_getCloneChart",
       value: function _getCloneChart() {
+        var me = this;
         var app = this.app;
+
+        var _coord = app.getCoord();
+
         var chartConstructor = app.constructor; //(barConstructor || Bar);
 
         var cloneEl = app.el.cloneNode();
@@ -30965,11 +31039,17 @@ var Chartx = (function () {
               });
             }
 
+            var _h = _coord.height || app.el.offsetHeight;
+
+            var radiusScale = me.btnHeight / _h || 1;
+
             if (_g.type == "scat") {
               _.extend(true, _opt, {
                 animation: false,
                 node: {
-                  fillStyle: "#ececec"
+                  //fillStyle : "#ececec",
+                  radiusScale: radiusScale,
+                  fillAlpha: 0.4
                 },
                 label: {
                   enabled: false
@@ -31013,13 +31093,29 @@ var Chartx = (function () {
             x: coordInfo.origin.x
           },
           dragIng: function dragIng(range) {
-            var trigger = new Trigger(me, {
-              left: app.dataFrame.range.start - range.start,
-              right: range.end - app.dataFrame.range.end
-            });
+            var trigger;
 
-            _.extend(app.dataFrame.range, range); //不想要重新构造dataFrame，所以第一个参数为null
+            if (me.axisLayoutType == 'proportion') {
+              trigger = new Trigger(me, {
+                min: range.start,
+                max: range.end
+              });
 
+              app.dataFrame.filters['datazoom'] = function (rowData) {
+                var val = rowData[me.axis.field]; //把range.start  range.end换算成axis上面对应的数值区间
+
+                var min = me.axis.getValOfPos(range.start);
+                var max = me.axis.getValOfPos(range.end);
+                return val >= min && val <= max;
+              };
+            } else {
+              trigger = new Trigger(me, {
+                left: app.dataFrame.range.start - range.start,
+                right: range.end - app.dataFrame.range.end
+              });
+
+              _.extend(app.dataFrame.range, range);
+            }
 
             app.resetData(null, trigger);
             app.fire("dataZoomDragIng");
@@ -31037,9 +31133,10 @@ var Chartx = (function () {
         this._setDataZoomOpt();
 
         this._cloneChart = this._getCloneChart();
-        this.axisLayoutType = this._cloneChart.thumbChart.getComponent({
+        this.axis = this._cloneChart.thumbChart.getComponent({
           name: 'coord'
-        })._xAxis.layoutType; //和line bar等得xAxis.layoutType 一一对应
+        })._xAxis;
+        this.axisLayoutType = this.axis.layoutType; //和line bar等得xAxis.layoutType 一一对应
 
         this._computeAttrs(); //这个组件可以在init的时候就绘制好
 

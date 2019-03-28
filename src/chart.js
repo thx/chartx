@@ -382,10 +382,12 @@ class Chart extends event.Dispatcher
     {
         var me = this;
 
-        var preDataLenth = this.dataFrame.length;
+        var preDataLenth = this.dataFrame.org.length;
         if( data ){
             this._data = data;
             this.dataFrame = this.initData( this._data );
+        } else {
+            this.dataFrame.refresh();
         };
 
         if( !preDataLenth ){

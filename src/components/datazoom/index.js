@@ -192,6 +192,8 @@ class dataZoom extends Component
 
         //预设默认的opt.dataZoom
         _.extend( true, this, getDefaultProps( dataZoom.defaultProps() ) , opt);
+
+        this.axis = null; //对应哪个轴
         
         this.layout();
 
@@ -219,7 +221,9 @@ class dataZoom extends Component
 
     _getCloneChart() 
     {
+        var me = this;
         var app = this.app;
+        var _coord = app.getCoord();
         var chartConstructor = app.constructor;//(barConstructor || Bar);
         var cloneEl = app.el.cloneNode();
         cloneEl.innerHTML = "";
@@ -274,12 +278,18 @@ class dataZoom extends Component
                             enabled: false
                         }
                     } )
-                }
+                };
+
+                
+                var _h = _coord.height || app.el.offsetHeight;
+                var radiusScale = (me.btnHeight / _h) || 1 ;
                 if( _g.type == "scat" ){
                     _.extend( true, _opt, {
                         animation: false,
                         node : {
-                            fillStyle : "#ececec"
+                            //fillStyle : "#ececec",
+                            radiusScale : radiusScale,
+                            fillAlpha : 0.4
                         },
                         label: {
                             enabled: false
@@ -326,11 +336,30 @@ class dataZoom extends Component
                 x: coordInfo.origin.x
             },
             dragIng: function(range) {
-                var trigger = new Trigger( me, {
-                    left :  app.dataFrame.range.start - range.start,
-                    right : range.end - app.dataFrame.range.end
-                } );
-                _.extend( app.dataFrame.range , range );
+                var trigger;
+
+                if( me.axisLayoutType == 'proportion' ){
+                    trigger = new Trigger( me, {
+                        min :  range.start,
+                        max : range.end
+                    } );
+                    app.dataFrame.filters[ 'datazoom' ] = function( rowData ){
+                        var val = rowData[ me.axis.field ];
+
+                        //把range.start  range.end换算成axis上面对应的数值区间
+                        var min = me.axis.getValOfPos( range.start );
+                        var max = me.axis.getValOfPos( range.end );
+                      
+                        return val >= min && val <= max;
+                    };
+                } else {
+                    trigger = new Trigger( me, {
+                        left :  app.dataFrame.range.start - range.start,
+                        right : range.end - app.dataFrame.range.end
+                    } );
+                    _.extend( app.dataFrame.range , range );
+                };
+                
                 //不想要重新构造dataFrame，所以第一个参数为null
                 app.resetData( null , trigger );
                 app.fire("dataZoomDragIng");
@@ -349,7 +378,8 @@ class dataZoom extends Component
         this._setDataZoomOpt();
         
         this._cloneChart = this._getCloneChart();
-        this.axisLayoutType = this._cloneChart.thumbChart.getComponent({name:'coord'})._xAxis.layoutType; //和line bar等得xAxis.layoutType 一一对应
+        this.axis = this._cloneChart.thumbChart.getComponent({name:'coord'})._xAxis;
+        this.axisLayoutType = this.axis.layoutType; //和line bar等得xAxis.layoutType 一一对应
 
         this._computeAttrs();
 
