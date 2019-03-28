@@ -2853,7 +2853,7 @@ var Chartx = (function () {
    *
    * canvas 上委托的事件管理
    */
-  var _mouseEvents = 'mousedown mouseup mouseover mousemove mouseout click dblclick wheel';
+  var _mouseEvents = 'mousedown mouseup mouseover mousemove mouseout click dblclick wheel keydown keypress keyup';
   var types = {
     _types: _mouseEvents.split(/,| /),
     register: function register(evts) {
@@ -3293,6 +3293,14 @@ var Chartx = (function () {
         //即为第三方库，那么就要对接第三方库的事件系统。默认实现hammer的大部分事件系统
         types.register(_hammerEventTypes);
       }
+
+      $.addEvent(me.target, "contextmenu", function (e) {
+        if (e && e.preventDefault) {
+          e.preventDefault();
+        } else {
+          window.event.returnValue = false;
+        }
+      });
 
       _.each(types.get(), function (type) {
         //不再关心浏览器环境是否 'ontouchstart' in window 
