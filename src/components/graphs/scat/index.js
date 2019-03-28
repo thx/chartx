@@ -43,6 +43,11 @@ class ScatGraphs extends GraphsBase
                         detail: '半径',
                         default: null
                     },
+                    radiusScale: {
+                        detail: '半径缩放比例',
+                        documentation: '在计算好真实半径后缩放，主要用在,缩略图中，比如datazoom的缩略图',
+                        default: 1
+                    },
                     normalRadius: {
                         detail: '默认半径',
                         default: 15
@@ -238,13 +243,14 @@ class ScatGraphs extends GraphsBase
         this.sprite.context.y = this.origin.y;
 
         var me = this;
+        
         if( this.animation && !opt.resize && !me.inited ){
             this.grow( function(){
                 me.fire("complete");
             } );
         } else {
             this.fire("complete");
-        }
+        };
 
         return this;
     }
@@ -267,6 +273,7 @@ class ScatGraphs extends GraphsBase
         var tmplData = [];
 
         var _coord = this.app.getComponent({name:'coord'});
+        
         var dataLen  = this.dataFrame.length;
 
         ////计算半径的时候需要用到， 每次执行_trimGraphs都必须要初始化一次
@@ -360,6 +367,9 @@ class ScatGraphs extends GraphsBase
                 r = parseInt( this.node.radius )
             };
         };
+
+        r = Math.max( r * this.node.radiusScale , 2 );
+
         nodeLayoutData.radius = r;
         return this;
 

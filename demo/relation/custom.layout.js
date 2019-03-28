@@ -101,8 +101,8 @@ function process(data) {
         }
     }
     var getNodeTypeRelation = function (start, end) {
-        var nodeTypeStart = start[nodeTypeField];
-        var nodeTypeEnd = end[nodeTypeField];
+        var nodeTypeStart = start.rowData[nodeTypeField];
+        var nodeTypeEnd = end.rowData[nodeTypeField];
         if (nodeTypeStart === pageKey && nodeTypeEnd === pageKey) {
             return pageKey
         } else if (nodeTypeStart === pageKey && nodeTypeEnd === actionKey) {
@@ -114,12 +114,11 @@ function process(data) {
     //将数组转换为对象
     for (var i = 0, len = data.nodes.length; i < len; i++) {
         var node = data.nodes[i];
-        if (node[nodeTypeField] === pageKey) {
+        if (node.rowData[nodeTypeField] === pageKey) {
             pageCount++;
         }
         nodeMap[node.key] = node;
     }
-
 
     pagesChainsMap = new ChainManage();
     //按照页面的连线顺序整理页面NODE
@@ -134,7 +133,7 @@ function process(data) {
                         var weight = pagesChainsMap.get(nodeStart.key).weight + 1;
                         pagesChainsMap.addChain(nodeEnd.key, nodeStart, nodeEnd, edge, weight);
                     } else if (pagesChainsMap.isExsit(nodeEnd.key)) {
-                        var weight = pagesChainsMap.get(nodeStart.key).weight - 1;
+                        var weight = pagesChainsMap.get(nodeEnd.key).weight - 1;
                         pagesChainsMap.addChain(nodeStart.key, nodeStart, nodeEnd, edge, weight);
                     }
                 }
@@ -291,11 +290,12 @@ function process(data) {
             end
         )
     });
-
-    //console.log(data);
     nodeMap = null; pagesChains = null; pagesChainsMap = null;
     actionChainsMap = null;
+    //console.log(data);
+
     return data
+
 }
 console.time('start');
 process(data);

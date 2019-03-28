@@ -10336,11 +10336,13 @@ var Chartx = (function () {
       key: "resetData",
       value: function resetData(data, trigger) {
         var me = this;
-        var preDataLenth = this.dataFrame.length;
+        var preDataLenth = this.dataFrame.org.length;
 
         if (data) {
           this._data = data;
           this.dataFrame = this.initData(this._data);
+        } else {
+          this.dataFrame.refresh();
         }
 
         if (!preDataLenth) {
@@ -17018,6 +17020,11 @@ var Chartx = (function () {
                 detail: '半径',
                 default: null
               },
+              radiusScale: {
+                detail: '半径缩放比例',
+                documentation: '在计算好真实半径后缩放，主要用在,缩略图中，比如datazoom的缩略图',
+                default: 1
+              },
               normalRadius: {
                 detail: '默认半径',
                 default: 15
@@ -17224,7 +17231,6 @@ var Chartx = (function () {
         } else {
           this.fire("complete");
         }
-
         return this;
       }
     }, {
@@ -17347,6 +17353,7 @@ var Chartx = (function () {
             r = parseInt(this.node.radius);
           }
         }
+        r = Math.max(r * this.node.radiusScale, 2);
         nodeLayoutData.radius = r;
         return this;
       }
@@ -25915,6 +25922,116 @@ var Chartx = (function () {
 
   global$1.registerComponent(Progress, 'graphs', 'progress');
 
+  /**
+   * 把json数据转化为关系图的数据格式
+   */
+  //如：
+  // [{
+  // 	name: 'xxxx',
+  // 	children: [{
+  // 		name: 'aaaaa'
+  // 	}, {
+  // 		name: 'bbbb',
+  // 		children: [{
+  // 			name: 'ccccc'
+  // 		}]
+  // 	}],
+  // }];
+
+  var childrenKey = 'children';
+  var defaultFieldKey = '__key__';
+
+  function checkData(data, key) {
+    var result = false; //1、要求数据必须是一个数组
+
+    if (!_.isArray(data)) return false; //2、数组中的每个元素是一个对象
+
+    result = _.every(data, function (item) {
+      return _.isObject(item);
+    }); //3、field 自动不能是数组，如果是表示已经处理过的数据
+
+    if (result) {
+      result = _.every(data, function (item) {
+        return !_.isArray(item[key]);
+      });
+    } //4、至少有一个元素中存在关键字
+
+
+    result = _.some(data, function (item) {
+      return childrenKey in item;
+    });
+    return result;
+  }
+
+  function jsonToArrayForRelation(data, options) {
+    var result = [];
+    var wm = new WeakMap();
+    var key = options.field || defaultFieldKey;
+    var label = options.node && options.node.content && options.node.content.field;
+
+    if (!checkData(data, key)) {
+      console.error('该数据不能正确绘制，请提供数组对象形式的数据！');
+      return result;
+    }
+
+    var childrens = [];
+    var index$$1 = 0;
+    var item = undefined;
+
+    _.each(data, function (item) {
+      childrens.push(item);
+    });
+
+    var _loop = function _loop() {
+      if (!item[key]) item[key] = index$$1;
+      var _child = item[childrenKey];
+
+      if (_child) {
+        _.each(_child, function (ch) {
+          wm.set(ch, {
+            parentIndex: index$$1,
+            parentNode: item
+          });
+        });
+
+        childrens = childrens.concat(_child.reverse());
+      }
+
+      var obj = {};
+
+      _.each(item, function (value, key) {
+        if (key !== childrenKey) {
+          obj[key] = value;
+        }
+      });
+
+      result.push(obj);
+      var myWm = wm.get(item);
+
+      if (myWm) {
+        var start = myWm.parentIndex;
+        var startNode = myWm.parentNode;
+        var line = {};
+        line.key = [start, index$$1].join(',');
+
+        if (label) {
+          line[label] = [startNode[label], item[label]].join('_');
+        }
+
+        result.push(line);
+      }
+
+      index$$1++;
+    };
+
+    while (item = childrens.pop()) {
+      _loop();
+    } // wm = null;
+
+
+    return result;
+  }
+
   var Rect$7 = Canvax.Shapes.Rect;
   var Path$5 = Canvax.Shapes.Path;
   var Arrow = Canvax.Shapes.Arrow;
@@ -26025,6 +26142,11 @@ var Chartx = (function () {
               transform: {
                 detail: "是否启动拖拽缩放整个画布",
                 propertys: {
+                  fitView: {
+                    detail: "自动缩放",
+                    default: '' //autoZoom
+
+                  },
                   enabled: {
                     detail: "是否开启",
                     default: true
@@ -26058,20 +26180,23 @@ var Chartx = (function () {
 
       _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(Relation.defaultProps()), opt);
 
-      var dagreOpts = {
-        graph: {
-          nodesep: 10,
-          ranksep: 10,
-          edgesep: 10,
-          acyclicer: "greedy"
-        },
-        node: {},
-        edge: {
-          labelpos: 'c'
-        }
-      };
+      if (_this.layout === 'dagre') {
+        var dagreOpts = {
+          graph: {
+            nodesep: 10,
+            ranksep: 10,
+            edgesep: 10,
+            acyclicer: "greedy"
+          },
+          node: {},
+          edge: {//labelpos: 'c'
+          }
+        };
 
-      _.extend(true, _this.layoutOpts, dagreOpts, _this.layoutOpts);
+        _.extend(true, dagreOpts, _this.layoutOpts);
+
+        _.extend(true, _this.layoutOpts, dagreOpts);
+      }
 
       _this.domContainer = app.canvax.domView;
       _this.induce = null;
@@ -26238,6 +26363,11 @@ var Chartx = (function () {
         this.sprite.context.x = this.origin.x;
         this.sprite.context.y = this.origin.y;
 
+        if (this.status.transform.fitView == 'autoZoom') {
+          this.sprite.context.scaleX = this.width / this.data.size.width;
+          this.sprite.context.scaleY = this.height / this.data.size.height;
+        }
+
         var _offsetLet = (this.width - this.data.size.width) / 2;
 
         if (_offsetLet < 0) {
@@ -26259,6 +26389,12 @@ var Chartx = (function () {
             height: 0
           }
         };
+        var originData = this.app._data;
+
+        if (checkData(originData, this.field)) {
+          var result = jsonToArrayForRelation(originData, this);
+          this.dataFrame = dataFrame(result);
+        }
 
         for (var i = 0; i < this.dataFrame.length; i++) {
           var rowData = this.dataFrame.getRowDataAt(i);
@@ -26513,25 +26649,25 @@ var Chartx = (function () {
         var width = node.rowData.width,
             height = node.rowData.height;
 
-        var _tipDom = document.createElement("div");
+        var _dom = document.createElement("div");
 
-        _tipDom.className = "chartx_relation_node";
-        _tipDom.style.cssText += "; position:absolute;visibility:hidden;";
-        _tipDom.style.cssText += "; color:" + me.getProp(me.node.content.fontColor) + ";";
-        _tipDom.style.cssText += "; text-align:" + me.getProp(me.node.content.textAlign) + ";";
-        _tipDom.style.cssText += "; vertical-align:" + me.getProp(me.node.content.textBaseline) + ";";
-        _tipDom.innerHTML = content;
-        this.domContainer.appendChild(_tipDom);
+        _dom.className = "chartx_relation_node";
+        _dom.style.cssText += "; position:absolute;visibility:hidden;";
+        _dom.style.cssText += "; color:" + me.getProp(me.node.content.fontColor) + ";";
+        _dom.style.cssText += "; text-align:" + me.getProp(me.node.content.textAlign) + ";";
+        _dom.style.cssText += "; vertical-align:" + me.getProp(me.node.content.textBaseline) + ";";
+        _dom.innerHTML = content;
+        this.domContainer.appendChild(_dom);
 
         if (!width) {
-          width = _tipDom.offsetWidth + me.getProp(me.node.padding) * me.status.transform.scale * 2;
+          width = _dom.offsetWidth + me.getProp(me.node.padding) * me.status.transform.scale * 2;
         }
 
         if (!height) {
-          height = _tipDom.offsetHeight + me.getProp(me.node.padding) * me.status.transform.scale * 2;
+          height = _dom.offsetHeight + me.getProp(me.node.padding) * me.status.transform.scale * 2;
         }
         return {
-          element: _tipDom,
+          element: _dom,
           width: width,
           height: height
         };
@@ -30926,6 +31062,8 @@ var Chartx = (function () {
 
       _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(dataZoom.defaultProps()), opt);
 
+      _this.axis = null; //对应哪个轴
+
       _this.layout();
 
       return _this;
@@ -30952,7 +31090,11 @@ var Chartx = (function () {
     }, {
       key: "_getCloneChart",
       value: function _getCloneChart() {
+        var me = this;
         var app = this.app;
+
+        var _coord = app.getCoord();
+
         var chartConstructor = app.constructor; //(barConstructor || Bar);
 
         var cloneEl = app.el.cloneNode();
@@ -30987,7 +31129,6 @@ var Chartx = (function () {
                   radius: 0
                 },
                 animation: false,
-                eventEnabled: false,
                 label: {
                   enabled: false
                 }
@@ -31008,17 +31149,26 @@ var Chartx = (function () {
                   fillStyle: "#ececec"
                 },
                 animation: false,
-                eventEnabled: false,
                 label: {
                   enabled: false
                 }
               });
             }
 
+            var _h = _coord.height || app.el.offsetHeight;
+
+            var radiusScale = me.btnHeight / _h || 1;
+
             if (_g.type == "scat") {
               _.extend(true, _opt, {
+                animation: false,
                 node: {
-                  fillStyle: "#ececec"
+                  //fillStyle : "#ececec",
+                  radiusScale: radiusScale,
+                  fillAlpha: 0.4
+                },
+                label: {
+                  enabled: false
                 }
               });
             }
@@ -31059,13 +31209,29 @@ var Chartx = (function () {
             x: coordInfo.origin.x
           },
           dragIng: function dragIng(range) {
-            var trigger = new Trigger(me, {
-              left: app.dataFrame.range.start - range.start,
-              right: range.end - app.dataFrame.range.end
-            });
+            var trigger;
 
-            _.extend(app.dataFrame.range, range); //不想要重新构造dataFrame，所以第一个参数为null
+            if (me.axisLayoutType == 'proportion') {
+              trigger = new Trigger(me, {
+                min: range.start,
+                max: range.end
+              });
 
+              app.dataFrame.filters['datazoom'] = function (rowData) {
+                var val = rowData[me.axis.field]; //把range.start  range.end换算成axis上面对应的数值区间
+
+                var min = me.axis.getValOfPos(range.start);
+                var max = me.axis.getValOfPos(range.end);
+                return val >= min && val <= max;
+              };
+            } else {
+              trigger = new Trigger(me, {
+                left: app.dataFrame.range.start - range.start,
+                right: range.end - app.dataFrame.range.end
+              });
+
+              _.extend(app.dataFrame.range, range);
+            }
 
             app.resetData(null, trigger);
             app.fire("dataZoomDragIng");
@@ -31083,9 +31249,10 @@ var Chartx = (function () {
         this._setDataZoomOpt();
 
         this._cloneChart = this._getCloneChart();
-        this.axisLayoutType = this._cloneChart.thumbChart.getComponent({
+        this.axis = this._cloneChart.thumbChart.getComponent({
           name: 'coord'
-        })._xAxis.layoutType; //和line bar等得xAxis.layoutType 一一对应
+        })._xAxis;
+        this.axisLayoutType = this.axis.layoutType; //和line bar等得xAxis.layoutType 一一对应
 
         this._computeAttrs(); //这个组件可以在init的时候就绘制好
 
