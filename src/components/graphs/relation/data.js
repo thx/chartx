@@ -63,11 +63,8 @@ function jsonToArrayForRelation(data, options) {
     }
 
 
-
     let childrens = [];
     let index = 0;
-    let nodeIndex = 0;
-    let indexKey = '__index__';
     let item = undefined;
 
     _.each(data, item => {
@@ -76,7 +73,6 @@ function jsonToArrayForRelation(data, options) {
 
     while (item = childrens.pop()) {
         if (!item[key]) item[key] = index;
-        item[indexKey] = nodeIndex++;
         let _child = item[childrenKey]
         if (_child) {
             _.each(_child, ch => {
