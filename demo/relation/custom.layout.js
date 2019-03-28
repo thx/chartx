@@ -120,7 +120,6 @@ function process(data) {
         nodeMap[node.key] = node;
     }
 
-
     pagesChainsMap = new ChainManage();
     //按照页面的连线顺序整理页面NODE
     while (pageCount--) {
@@ -291,11 +290,12 @@ function process(data) {
             end
         )
     });
-
-    //console.log(data);
     nodeMap = null; pagesChains = null; pagesChainsMap = null;
     actionChainsMap = null;
+    //console.log(data);
+
     return data
+
 }
 console.time('start');
 process(data);

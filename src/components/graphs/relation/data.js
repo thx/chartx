@@ -34,12 +34,18 @@ function checkData(data, key) {
         return _.isObject(item);
     });
 
+
+
     //3、field 自动不能是数组，如果是表示已经处理过的数据
     if (result) {
         result = _.every(data, (item) => {
             return !_.isArray(item[key])
         });
     }
+    //4、至少有一个元素中存在关键字
+    result = _.some(data, item => {
+        return childrenKey in item;
+    });
 
     return result;
 
@@ -55,7 +61,6 @@ function jsonToArrayForRelation(data, options) {
         console.error('该数据不能正确绘制，请提供数组对象形式的数据！');
         return result;
     }
-
 
 
     let childrens = [];
@@ -76,7 +81,7 @@ function jsonToArrayForRelation(data, options) {
                     parentNode: item
                 })
             });
-            childrens = childrens.concat(_child);
+            childrens = childrens.concat(_child.reverse());
         }
         let obj = {};
         _.each(item, (value, key) => {
@@ -93,7 +98,7 @@ function jsonToArrayForRelation(data, options) {
             let start = myWm.parentIndex;
             let startNode = myWm.parentNode
             let line = {};
-            line.key = [start, index];
+            line.key = [start, index].join(',');
             if (label) {
                 line[label] = [startNode[label], item[label]].join('_');
             }

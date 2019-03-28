@@ -1,6 +1,7 @@
 import Canvax from "canvax"
 import GraphsBase from "../index"
-import { global, _, getDefaultProps,event } from "mmvis"
+import { global, _, getDefaultProps, event, dataFrame } from "mmvis"
+import { checkData, jsonToArrayForRelation } from './data';
 
 const Rect = Canvax.Shapes.Rect;
 const Path = Canvax.Shapes.Path;
@@ -12,9 +13,8 @@ const Circle = Canvax.Shapes.Circle;
  * 关系图中 包括了  配置，数据，和布局数据，
  * 默认用配置和数据可以完成绘图， 但是如果有布局数据，就绘图玩额外调用一次绘图，把布局数据传入修正布局效果
  */
-class Relation extends GraphsBase
-{
-    static defaultProps(){
+class Relation extends GraphsBase {
+    static defaultProps() {
         return {
             field: {
                 detail: 'key字段设置',
@@ -115,10 +115,10 @@ class Relation extends GraphsBase
                     transform: {
                         detail: "是否启动拖拽缩放整个画布",
                         propertys: {
-                            fitView:{
+                            fitView: {
                                 detail: "自动缩放",
                                 default: ''     //autoZoom
-                            }, 
+                            },
                             enabled: {
                                 detail: "是否开启",
                                 default: true
@@ -309,9 +309,9 @@ class Relation extends GraphsBase
         //this._grahsSpClone.context.y = newLeftTopPoint.y;
     }
 
-    draw( opt ){
-        !opt && (opt ={});
-        _.extend( true, this , opt );
+    draw(opt) {
+        !opt && (opt = {});
+        _.extend(true, this, opt);
         this.data = opt.data || this._initData();
 
         if (this.layout == "dagre") {
@@ -326,7 +326,7 @@ class Relation extends GraphsBase
         this.sprite.context.x = this.origin.x;
         this.sprite.context.y = this.origin.y;
         if (this.status.transform.fitView == 'autoZoom') {
-            
+
             this.sprite.context.scaleX = this.width / this.data.size.width;
             this.sprite.context.scaleY = this.height / this.data.size.height;
         }
@@ -341,47 +341,54 @@ class Relation extends GraphsBase
 
     _initData() {
         var data = {
-            nodes : [
-              //{ type,key,content,ctype,width,height,x,y }
+            nodes: [
+                //{ type,key,content,ctype,width,height,x,y }
             ],
-            edges : [
-              //{ type,key[],content,ctype,width,height,x,y }
+            edges: [
+                //{ type,key[],content,ctype,width,height,x,y }
             ],
             size: {
                 width: 0,
                 height: 0
             }
         };
-        for( var i=0; i < this.dataFrame.length; i++ ){
+
+        let originData = this.app._data;
+        if (checkData(originData, this.field)) {
+            let result = jsonToArrayForRelation(originData, this);
+            this.dataFrame = dataFrame(result);
+        }
+
+        for (var i = 0; i < this.dataFrame.length; i++) {
             var rowData = this.dataFrame.getRowDataAt(i);
-            var fields = _.flatten([ (rowData[ this.field ]+"").split(",") ] );
-            var content = this._getContent( rowData );
+            var fields = _.flatten([(rowData[this.field] + "").split(",")]);
+            var content = this._getContent(rowData);
 
             var node = {
-                type : "relation",
-                rowData : rowData,
-                key : fields.length == 1 ? fields[0] : fields,
-                content : content,
-                ctype : this._checkHtml( content ) ? 'html' : 'canvas',
+                type: "relation",
+                rowData: rowData,
+                key: fields.length == 1 ? fields[0] : fields,
+                content: content,
+                ctype: this._checkHtml(content) ? 'html' : 'canvas',
 
                 //下面三个属性在_setElementAndSize中设置
-                element : null, //外面传的layout数据可能没有element，widget的时候要检测下
-                width : null,
-                height : null,
-                
+                element: null, //外面传的layout数据可能没有element，widget的时候要检测下
+                width: null,
+                height: null,
+
                 //这个在layout的时候设置
                 x: null,
                 y: null
             };
-            _.extend(node, this._getElementAndSize( node ) );
-            
-            if( fields.length == 1 ){
-                data.nodes.push( node );
+            _.extend(node, this._getElementAndSize(node));
+
+            if (fields.length == 1) {
+                data.nodes.push(node);
             } else {
-                data.edges.push( node );
+                data.edges.push(node);
             };
         };
-        
+
         return data;
     }
 
@@ -398,12 +405,12 @@ class Relation extends GraphsBase
             };
         });
 
-        _.each( data.nodes, function( node ){
-            g.setNode( node.key, node );
-        } );
-        _.each( data.edges, function( edge ){
-            g.setEdge( ...edge.key, edge );
-        } );
+        _.each(data.nodes, function (node) {
+            g.setNode(node.key, node);
+        });
+        _.each(data.edges, function (edge) {
+            g.setEdge(...edge.key, edge);
+        });
 
         layout.layout(g);
 
@@ -464,31 +471,31 @@ class Relation extends GraphsBase
                 }
             });
             _boxShape.nodeData = node;
-            me.nodesSp.addChild( _boxShape );
+            me.nodesSp.addChild(_boxShape);
 
-            _boxShape.on(event.types.get(), function(e) {
+            _boxShape.on(event.types.get(), function (e) {
                 e.eventInfo = {
-                    trigger : me.node,
-                    nodes : [ this.nodeData ]
+                    trigger: me.node,
+                    nodes: [this.nodeData]
                 };
-                me.app.fire( e.type, e );
+                me.app.fire(e.type, e);
             });
 
-            if( node.ctype == "canvas" ){
-                node.element.context.x = node.x - node.width/2;
-                node.element.context.y = node.y - node.height/2;
-                me.nodesSp.addChild( node.element );
+            if (node.ctype == "canvas") {
+                node.element.context.x = node.x - node.width / 2;
+                node.element.context.y = node.y - node.height / 2;
+                me.nodesSp.addChild(node.element);
             };
-            if( node.ctype == "html" ){
+            if (node.ctype == "html") {
                 //html的话，要等 _boxShape 被添加进舞台，拥有了世界矩阵后才能被显示出来和移动位置
                 //而且要监听 _boxShape 的任何形变跟随
-                
+
                 _boxShape.on("transform", function () {
                     var devicePixelRatio = typeof (window) !== 'undefined' ? window.devicePixelRatio : 1;
-                    node.element.style.transform  = "matrix("+_boxShape.worldTransform.clone().scale(1/devicePixelRatio , 1/devicePixelRatio).toArray().join()+")";
+                    node.element.style.transform = "matrix(" + _boxShape.worldTransform.clone().scale(1 / devicePixelRatio, 1 / devicePixelRatio).toArray().join() + ")";
                     node.element.style.transformOrigin = "left top"; //修改为左上角为旋转中心点来和canvas同步
-                    node.element.style.marginLeft = me.getProp( me.node.padding ) * me.status.transform.scale +"px";
-                    node.element.style.marginTop  = me.getProp( me.node.padding ) * me.status.transform.scale +"px";
+                    node.element.style.marginLeft = me.getProp(me.node.padding) * me.status.transform.scale + "px";
+                    node.element.style.marginTop = me.getProp(me.node.padding) * me.status.transform.scale + "px";
                     node.element.style.visibility = "visible";
                 });
 
@@ -516,12 +523,12 @@ class Relation extends GraphsBase
         return reg.test(str);
     }
 
-    _getContent( rowData ){
+    _getContent(rowData) {
         var me = this;
 
         var _c; //this.node.content;
-        if( this._isField( this.node.content.field ) ){
-            _c = rowData[ this.node.content.field ];
+        if (this._isField(this.node.content.field)) {
+            _c = rowData[this.node.content.field];
         }
         if (_.isFunction(_c)) {
             _c = this.content.apply(this, arguments);
@@ -536,28 +543,28 @@ class Relation extends GraphsBase
         return ~this.dataFrame.fields.indexOf(str)
     }
 
-    _getElementAndSize( node ){
+    _getElementAndSize(node) {
         var me = this;
         var contentType = node.ctype;
 
-        if( me._isField( contentType ) ){
-            contentType = node.rowData[ contentType ];
+        if (me._isField(contentType)) {
+            contentType = node.rowData[contentType];
         };
 
         !contentType && (contentType = 'canvas');
-        
-        if( contentType == 'canvas' ){
-            return me._getEleAndsetCanvasSize( node );
+
+        if (contentType == 'canvas') {
+            return me._getEleAndsetCanvasSize(node);
         };
-        if( contentType == 'html' ){
-            return me._getEleAndsetHtmlSize( node );
+        if (contentType == 'html') {
+            return me._getEleAndsetHtmlSize(node);
         };
 
     }
-    _getEleAndsetCanvasSize( node ) {
+    _getEleAndsetCanvasSize(node) {
         var me = this;
         var content = node.content;
-        var width=node.rowData.width,height=node.rowData.height;
+        var width = node.rowData.width, height = node.rowData.height;
 
         var sprite = new Canvax.Display.Sprite({});
 
@@ -570,19 +577,19 @@ class Relation extends GraphsBase
             }
         });
 
-        if ( !width ) {
-            width = label.getTextWidth() + me.getProp( me.node.padding ) * me.status.transform.scale * 2;
+        if (!width) {
+            width = label.getTextWidth() + me.getProp(me.node.padding) * me.status.transform.scale * 2;
         };
-        if ( !height ) {
-            height = label.getTextHeight() + me.getProp( me.node.padding ) * me.status.transform.scale * 2;
+        if (!height) {
+            height = label.getTextHeight() + me.getProp(me.node.padding) * me.status.transform.scale * 2;
         };
 
         sprite.addChild(label);
 
-        sprite.context.width = parseInt( width );
-        sprite.context.height = parseInt( height );
-        label.context.x = parseInt( width / 2 );
-        label.context.y = parseInt( height / 2 );
+        sprite.context.width = parseInt(width);
+        sprite.context.height = parseInt(height);
+        label.context.x = parseInt(width / 2);
+        label.context.y = parseInt(height / 2);
 
         return {
             element: sprite,
@@ -591,10 +598,10 @@ class Relation extends GraphsBase
         };
 
     }
-    _getEleAndsetHtmlSize( node ){
+    _getEleAndsetHtmlSize(node) {
         var me = this;
         var content = node.content;
-        var width=node.rowData.width,height=node.rowData.height;
+        var width = node.rowData.width, height = node.rowData.height;
 
         var _dom = document.createElement("div");
         _dom.className = "chartx_relation_node";
@@ -605,13 +612,13 @@ class Relation extends GraphsBase
 
         _dom.innerHTML = content;
 
-        this.domContainer.appendChild( _dom );
+        this.domContainer.appendChild(_dom);
 
-        if ( !width ) {
-            width = _dom.offsetWidth + me.getProp( me.node.padding ) * me.status.transform.scale * 2;
+        if (!width) {
+            width = _dom.offsetWidth + me.getProp(me.node.padding) * me.status.transform.scale * 2;
         };
-        if ( !height ) {
-            height = _dom.offsetHeight + me.getProp( me.node.padding ) * me.status.transform.scale * 2;
+        if (!height) {
+            height = _dom.offsetHeight + me.getProp(me.node.padding) * me.status.transform.scale * 2;
         };
 
         return {
@@ -622,19 +629,18 @@ class Relation extends GraphsBase
 
     }
 
-    getNodesAt(index)
-    {
-        
+    getNodesAt(index) {
+
     }
 
     getProp(prop, def) {
         return prop
     }
 
-    
+
 
 }
 
-global.registerComponent( Relation, 'graphs', 'relation' );
+global.registerComponent(Relation, 'graphs', 'relation');
 
 export default Relation
