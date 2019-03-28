@@ -99,7 +99,7 @@ function jsonToArrayForRelation(data, options) {
             let start = myWm.parentIndex;
             let startNode = myWm.parentNode
             let line = {};
-            line.key = [start, index];
+            line.key = [start, index].join(',');
             if (label) {
                 line[label] = [startNode[label], item[label]].join('_');
             }
@@ -109,6 +109,7 @@ function jsonToArrayForRelation(data, options) {
         index++;
     }
     // wm = null;
+    debugger
     return result;
 
 }

@@ -25936,7 +25936,7 @@ var Chartx = (function () {
         var start = myWm.parentIndex;
         var startNode = myWm.parentNode;
         var line = {};
-        line.key = [start, index$$1];
+        line.key = [start, index$$1].join(',');
 
         if (label) {
           line[label] = [startNode[label], item[label]].join('_');
@@ -25953,6 +25953,7 @@ var Chartx = (function () {
     } // wm = null;
 
 
+    debugger;
     return result;
   }
 
