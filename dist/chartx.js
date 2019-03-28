@@ -25900,6 +25900,8 @@ var Chartx = (function () {
 
     var childrens = [];
     var index$$1 = 0;
+    var nodeIndex = 0;
+    var indexKey = '__index__';
     var item = undefined;
 
     _.each(data, function (item) {
@@ -25908,6 +25910,7 @@ var Chartx = (function () {
 
     var _loop = function _loop() {
       if (!item[key]) item[key] = index$$1;
+      item[indexKey] = nodeIndex++;
       var _child = item[childrenKey];
 
       if (_child) {
@@ -25918,7 +25921,7 @@ var Chartx = (function () {
           });
         });
 
-        childrens = childrens.concat(_child);
+        childrens = childrens.concat(_child.reverse());
       }
 
       var obj = {};
@@ -25953,7 +25956,6 @@ var Chartx = (function () {
     } // wm = null;
 
 
-    debugger;
     return result;
   }
 

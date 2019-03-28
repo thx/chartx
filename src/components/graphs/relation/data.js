@@ -66,6 +66,8 @@ function jsonToArrayForRelation(data, options) {
 
     let childrens = [];
     let index = 0;
+    let nodeIndex = 0;
+    let indexKey = '__index__';
     let item = undefined;
 
     _.each(data, item => {
@@ -74,6 +76,7 @@ function jsonToArrayForRelation(data, options) {
 
     while (item = childrens.pop()) {
         if (!item[key]) item[key] = index;
+        item[indexKey] = nodeIndex++;
         let _child = item[childrenKey]
         if (_child) {
             _.each(_child, ch => {
@@ -82,7 +85,7 @@ function jsonToArrayForRelation(data, options) {
                     parentNode: item
                 })
             });
-            childrens = childrens.concat(_child);
+            childrens = childrens.concat(_child.reverse());
         }
         let obj = {};
         _.each(item, (value, key) => {
@@ -109,7 +112,6 @@ function jsonToArrayForRelation(data, options) {
         index++;
     }
     // wm = null;
-    debugger
     return result;
 
 }

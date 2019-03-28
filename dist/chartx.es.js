@@ -25897,6 +25897,8 @@ function jsonToArrayForRelation(data, options) {
 
   var childrens = [];
   var index$$1 = 0;
+  var nodeIndex = 0;
+  var indexKey = '__index__';
   var item = undefined;
 
   _.each(data, function (item) {
@@ -25905,6 +25907,7 @@ function jsonToArrayForRelation(data, options) {
 
   var _loop = function _loop() {
     if (!item[key]) item[key] = index$$1;
+    item[indexKey] = nodeIndex++;
     var _child = item[childrenKey];
 
     if (_child) {
@@ -25915,7 +25918,7 @@ function jsonToArrayForRelation(data, options) {
         });
       });
 
-      childrens = childrens.concat(_child);
+      childrens = childrens.concat(_child.reverse());
     }
 
     var obj = {};
@@ -25950,7 +25953,6 @@ function jsonToArrayForRelation(data, options) {
   } // wm = null;
 
 
-  debugger;
   return result;
 }
 
