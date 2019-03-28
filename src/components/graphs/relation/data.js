@@ -34,12 +34,18 @@ function checkData(data, key) {
         return _.isObject(item);
     });
 
+
+
     //3、field 自动不能是数组，如果是表示已经处理过的数据
     if (result) {
         result = _.every(data, (item) => {
             return !_.isArray(item[key])
         });
     }
+    //4、至少有一个元素中存在关键字
+    result = _.some(data, item => {
+        return childrenKey in item;
+    });
 
     return result;
 

@@ -25875,8 +25875,12 @@ function checkData(data, key) {
     result = _.every(data, function (item) {
       return !_.isArray(item[key]);
     });
-  }
+  } //4、至少有一个元素中存在关键字
 
+
+  result = _.some(data, function (item) {
+    return childrenKey in item;
+  });
   return result;
 }
 
