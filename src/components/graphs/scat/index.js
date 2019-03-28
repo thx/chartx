@@ -238,13 +238,14 @@ class ScatGraphs extends GraphsBase
         this.sprite.context.y = this.origin.y;
 
         var me = this;
+        
         if( this.animation && !opt.resize && !me.inited ){
             this.grow( function(){
                 me.fire("complete");
             } );
         } else {
             this.fire("complete");
-        }
+        };
 
         return this;
     }

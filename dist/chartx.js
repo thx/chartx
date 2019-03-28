@@ -17164,7 +17164,6 @@ var Chartx = (function () {
         } else {
           this.fire("complete");
         }
-
         return this;
       }
     }, {
@@ -30927,7 +30926,6 @@ var Chartx = (function () {
                   radius: 0
                 },
                 animation: false,
-                eventEnabled: false,
                 label: {
                   enabled: false
                 }
@@ -30948,7 +30946,6 @@ var Chartx = (function () {
                   fillStyle: "#ececec"
                 },
                 animation: false,
-                eventEnabled: false,
                 label: {
                   enabled: false
                 }
@@ -30957,8 +30954,12 @@ var Chartx = (function () {
 
             if (_g.type == "scat") {
               _.extend(true, _opt, {
+                animation: false,
                 node: {
                   fillStyle: "#ececec"
+                },
+                label: {
+                  enabled: false
                 }
               });
             }
