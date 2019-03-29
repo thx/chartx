@@ -144,14 +144,16 @@ class markCloumn extends Component
                 if( me.markTo && _.flatten([ _g.field ]).indexOf( me.markTo ) == -1 ){
                     //非markTo  的graph 跳过
                 } else {
+                    
                     var nodes = _g.getNodesOfPos( xNode.x );
                     if( me.markTo ){
-                        me.nodes = [ _.find( nodes, function( node ){
+                        var _node = _.find( nodes, function( node ){
                             return node.field == me.markTo
-                        } ) ];
+                        } );
+                        _node && (me.nodes = [ _node ]);
                     } else {
                         me.nodes = me.nodes.concat( nodes );
-                    }
+                    };
                     
                 };
 

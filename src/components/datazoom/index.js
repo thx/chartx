@@ -349,7 +349,7 @@ class dataZoom extends Component
                         //把range.start  range.end换算成axis上面对应的数值区间
                         var min = me.axis.getValOfPos( range.start );
                         var max = me.axis.getValOfPos( range.end );
-                      
+                        
                         return val >= min && val <= max;
                     };
                 } else {
@@ -463,6 +463,7 @@ class dataZoom extends Component
     {
         var me = this;
         var min = Math.max( parseInt(me.range.min / 2 / me.count * me.width), 23 );
+        var max = parseInt((me.range.max+1) / me.count * me.width);
         //柱状图用得这种x轴布局，不需要 /2
         if( this.axisLayoutType == "peak" ){
             min = Math.max( parseInt(me.range.min / me.count * me.width), 23 );
@@ -470,11 +471,12 @@ class dataZoom extends Component
 
         if( this.axisLayoutType == "proportion" ){
             //min = min;
+            max = me.width;
         };
 
         return {
             min : min,
-            max : parseInt((me.range.max+1) / me.count * me.width)
+            max : max
         };
     }
 
@@ -489,6 +491,7 @@ class dataZoom extends Component
         if( this.axisLayoutType == "proportion" ){
             end += 1;
         }
+     
         return end
     }
 
@@ -574,7 +577,7 @@ class dataZoom extends Component
                 if(this.context.x > (me._btnRight.context.x - me.btnWidth - 2)){
                     this.context.x = me._btnRight.context.x - me.btnWidth - 2
                 };
-                if(me._btnRight.context.x + me.btnWidth - this.context.x > me.disPart.max){
+                if(me._btnRight.context.x + me.btnWidth - this.context.x >= me.disPart.max){
                     this.context.x = me._btnRight.context.x + me.btnWidth - me.disPart.max
                 }
                 if(me._btnRight.context.x + me.btnWidth - this.context.x < me.disPart.min){
@@ -592,6 +595,7 @@ class dataZoom extends Component
             this.dataZoomBtns.addChild( this._btnLeft );
         };
 
+        
         var btnRightCtx = {
             x: me._getRangeEnd() / me.count * me.width - me.btnWidth,
             y: - me.btnOut / 2 + 1,
@@ -618,7 +622,7 @@ class dataZoom extends Component
                 if( this.context.x > me.width - me.btnWidth ){
                     this.context.x = me.width - me.btnWidth;
                 };
-                if( this.context.x + me.btnWidth - me._btnLeft.context.x > me.disPart.max){
+                if( this.context.x + me.btnWidth - me._btnLeft.context.x >= me.disPart.max){
                     this.context.x = me.disPart.max - (me.btnWidth - me._btnLeft.context.x)
                 };
                 if( this.context.x + me.btnWidth - me._btnLeft.context.x < me.disPart.min){
@@ -723,8 +727,8 @@ class dataZoom extends Component
             start = parseInt( start );
             end = parseInt( end );
         } else {
-            start = start;
-            end = end-1;
+            start = parseInt( start );
+            end = parseInt( end );;
         };
 
         if( trigger == "btnCenter" ){
@@ -740,7 +744,6 @@ class dataZoom extends Component
                 end -= 1;
             };
             me.range.end = end;
-            console.log( JSON.stringify( me.range ) );
             me.dragIng( me.range );
         };
 

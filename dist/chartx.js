@@ -16054,6 +16054,7 @@ var Chartx = (function () {
           this.data = data;
         }
         me._pointList = this._getPointList(this.data);
+        console.log(me._pointList);
         var plen = me._pointList.length;
         var cplen = me._currPointList.length;
         var params = {
@@ -16783,6 +16784,7 @@ var Chartx = (function () {
           var _lineData = me.dataFrame.getFieldData(field);
 
           if (!_lineData) return;
+          console.log(JSON.stringify(_lineData));
           var _data = [];
 
           for (var b = 0, bl = _lineData.length; b < bl; b++) {
@@ -17405,7 +17407,7 @@ var Chartx = (function () {
     }, {
       key: "_setLineWidth",
       value: function _setLineWidth(nodeLayoutData) {
-        nodeLayoutData.lineWidth = this.node.lineWidth;
+        nodeLayoutData.lineWidth = this._getStyle(this.node.lineWidth, nodeLayoutData);
         return this;
       }
     }, {
@@ -31335,16 +31337,20 @@ var Chartx = (function () {
       key: "_getDisPart",
       value: function _getDisPart() {
         var me = this;
-        var min = Math.max(parseInt(me.range.min / 2 / me.count * me.width), 23); //柱状图用得这种x轴布局，不需要 /2
+        var min = Math.max(parseInt(me.range.min / 2 / me.count * me.width), 23);
+        var max = parseInt((me.range.max + 1) / me.count * me.width); //柱状图用得这种x轴布局，不需要 /2
 
         if (this.axisLayoutType == "peak") {
           min = Math.max(parseInt(me.range.min / me.count * me.width), 23);
         }
 
-        if (this.axisLayoutType == "proportion") ;
+        if (this.axisLayoutType == "proportion") {
+          //min = min;
+          max = me.width;
+        }
         return {
           min: min,
-          max: parseInt((me.range.max + 1) / me.count * me.width)
+          max: max
         };
       }
     }, {
@@ -31451,7 +31457,7 @@ var Chartx = (function () {
               this.context.x = me._btnRight.context.x - me.btnWidth - 2;
             }
 
-            if (me._btnRight.context.x + me.btnWidth - this.context.x > me.disPart.max) {
+            if (me._btnRight.context.x + me.btnWidth - this.context.x >= me.disPart.max) {
               this.context.x = me._btnRight.context.x + me.btnWidth - me.disPart.max;
             }
 
@@ -31498,7 +31504,7 @@ var Chartx = (function () {
               this.context.x = me.width - me.btnWidth;
             }
 
-            if (this.context.x + me.btnWidth - me._btnLeft.context.x > me.disPart.max) {
+            if (this.context.x + me.btnWidth - me._btnLeft.context.x >= me.disPart.max) {
               this.context.x = me.disPart.max - (me.btnWidth - me._btnLeft.context.x);
             }
 
@@ -31618,8 +31624,8 @@ var Chartx = (function () {
           start = parseInt(start);
           end = parseInt(end);
         } else {
-          start = start;
-          end = end - 1;
+          start = parseInt(start);
+          end = parseInt(end);
         }
 
         if (trigger == "btnCenter") {
@@ -31636,7 +31642,6 @@ var Chartx = (function () {
             end -= 1;
           }
           me.range.end = end;
-          console.log(JSON.stringify(me.range));
           me.dragIng(me.range);
         }
 
@@ -33573,9 +33578,11 @@ var Chartx = (function () {
               var nodes = _g.getNodesOfPos(xNode.x);
 
               if (me.markTo) {
-                me.nodes = [_.find(nodes, function (node) {
+                var _node = _.find(nodes, function (node) {
                   return node.field == me.markTo;
-                })];
+                });
+
+                _node && (me.nodes = [_node]);
               } else {
                 me.nodes = me.nodes.concat(nodes);
               }

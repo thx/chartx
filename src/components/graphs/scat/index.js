@@ -419,7 +419,7 @@ class ScatGraphs extends GraphsBase
 
     _setLineWidth( nodeLayoutData )
     {
-        nodeLayoutData.lineWidth = this.node.lineWidth;
+        nodeLayoutData.lineWidth = this._getStyle( this.node.lineWidth, nodeLayoutData );
         return this;
     }
 

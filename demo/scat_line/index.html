@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
+<title>xChart demo -- bar</title>
+
+<script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
+<script type="text/javascript" src="../../dist/chartx.js"></script>
+<!-- codemirror -->
+<script type="text/javascript" src="../../lib/codemirror/codemirror.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/active-line.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/javascript.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/matchbrackets.js"></script>
+<link rel="stylesheet" href="../../lib/codemirror/codemirror.css">
+<link rel="stylesheet" href="../../lib/codemirror/zenburn.css">
+<link rel="stylesheet" href="../../lib/codemirror/docs.css">
+<!-- codemirror end -->
+<!--bootstrap-->
+<script type="text/javascript" src="../../lib/bootstrap/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap-theme.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/docs.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap.min.css">
+<!--bootstrap end-->
+<script type="text/javascript" src="../../lib/demo.js"></script>
+<link rel="stylesheet" href="../../lib/demo.css">
+</head>
+<body >
+
+<table>
+    <tr>
+        <td id="td-vl">
+            <form><textarea id="code" name="code">
+
+//------------------------------
+// 在线录入符合chartx数据格式的数据
+// var data = [ 
+//    {"xfield":1,"uv":2,"pv":3}
+// ]
+//------------------------------
+var data = [
+    {"day":276,"click":101,"hasAd":1,"house":123,"click1":null,"lucency":1},
+    {"day":367,"click":278,"hasAd":0,"house":113,"click1":null,"lucency":null},
+    {"day":824,"click":438,"hasAd":1,"house":103,"click1":null,"lucency":null},
+    {"day":134,"click":340,"hasAd":1,"house":166,"click1":null,"lucency":null},
+    {"day":425,"click":290,"hasAd":0,"house":123,"click1":null,"lucency":null},
+    {"day":161,"click":134,"hasAd":1,"house":12,"click1":null,"lucency":null},
+    {"day":117,"click":201,"hasAd":0,"house":2,"click1":null,"lucency":1},
+    {"day":268,"click":145,"hasAd":1,"house":3,"click1":null,"lucency":null},
+    {"day":523,"click":364,"hasAd":1,"house":34,"click1":null,"lucency":null},
+    {"day":332,"click":423,"hasAd":0,"house":234,"click1":null,"lucency":null},
+    {"day":126,"click":101,"hasAd":0,"house":346,"click1":null,"lucency":null},
+    {"day":727,"click":247,"hasAd":0,"house":234,"click1":null,"lucency":null},
+    {"day":84,"click":634,"hasAd":1,"house":25,"click1":null,"lucency":null},
+    {"day":24,"click":205,"hasAd":1,"house":35,"click1":null,"lucency":1},
+    {"day":325,"click":32,"hasAd":0,"house":645,"click1":null,"lucency":null},
+    {"day":61,"click":570,"hasAd":1,"house":3,"click1":null,"lucency":1},
+    {"day":17,"click":201,"hasAd":0,"house":34,"click1":null,"lucency":null},
+    {"day":123,"click":524,"hasAd":1,"house":62,"click1":null,"lucency":null},
+    {"day":219,"click":235,"hasAd":1,"house":463,"click1":null,"lucency":1},
+    {"day":52,"click":273,"hasAd":0,"house":111,"click1":null,"lucency":null},
+    {"day":732,"click":101,"hasAd":0,"house":332,"click1":null,"lucency":null},
+    {"day":762,"click":725,"hasAd":0,"house":112,"click1":null,"lucency":1},
+    {"day":625,"click":828,"hasAd":1,"house":115,"click1":null,"lucency":null},
+    {"day":134,"click":824,"hasAd":1,"house":235,"click1":null,"lucency":1},
+    {"day":325,"click":439,"hasAd":0,"house":214,"click1":null,"lucency":null},
+    {"day":861,"click":130,"hasAd":1,"house":2,"click1":null,"lucency":null},
+    {"day":342,"click":201,"hasAd":0,"house":236,"click1":null,"lucency":null},
+    {"day":285,"click":134,"hasAd":1,"house":253,"click1":null,"lucency":1},
+    {"day":199,"click":468,"hasAd":1,"house":234,"click1":null,"lucency":1},
+    {"day":220,"click":303,"hasAd":0,"house":234,"click1":null,"lucency":null},
+    {"day":176,"click":201,"hasAd":0,"house":43,"click1":null,"lucency":null},
+    {"day":28,"click":145,"hasAd":1,"house":423,"click1":null,"lucency":null},
+    {"day":219,"click":624,"hasAd":1,"house":654,"click1":null,"lucency":null},
+    {"day":322,"click":330,"hasAd":0,"house":5,"click1":null,"lucency":1},
+    {"day":453,"click":561,"hasAd":0,"house":24,"click1":null,"lucency":null},
+    {"day":274,"click":247,"hasAd":0,"house":62,"click1":null,"lucency":1},
+    {"day":284,"click":234,"hasAd":1,"house":897,"click1":null,"lucency":null},
+    {"day":536,"click":253,"hasAd":1,"house":6,"click1":null,"lucency":null},
+    {"day":335,"click":942,"hasAd":0,"house":234,"click1":null,"lucency":1},
+    {"day":263,"click":632,"hasAd":1,"house":524,"click1":null,"lucency":null},
+    {"day":510,"click":211,"hasAd":0,"house":623,"click1":null,"lucency":1},
+    {"day":283,"click":224,"hasAd":1,"house":34,"click1":null,"lucency":null},
+    {"day":219,"click":326,"hasAd":1,"house":452,"click1":null,"lucency":null},
+    {"day":273,"click":303,"hasAd":0,"house":333,"click1":null,"lucency":1},
+    {"day":347,"click":131,"hasAd":0,"house":552,"click1":null,"lucency":null},
+    {"day":632,"click":375,"hasAd":0,"house":153,"click1":null,"lucency":null},
+    {"day":332,"click":183,"hasAd":1,"house":234,"click1":null,"lucency":null},
+    {"day":344,"click":684,"hasAd":1,"house":5,"click1":null,"lucency":null},
+    {"day":135,"click":429,"hasAd":0,"house":777,"click1":null,"lucency":1},
+    {"day":581,"click":432,"hasAd":1,"house":234,"click1":null,"lucency":null},
+    {"day":162,"click":80,"hasAd":1,"house":22,"click1":null,"lucency":null},
+    {"day":732,"click":821,"hasAd":1,"house":25,"click1":null,"lucency":null},
+    {"day":234,"click":723,"hasAd":1,"house":342,"click1":null,"lucency":null},
+    {"day":524,"click":279,"hasAd":0,"house":3,"click1":"","lucency":null},
+    {"day":0,"click":null,"hasAd":null,"house":null,"click1":0,"lucency":null},
+    {"day":100,"click":null,"hasAd":null,"house":null,"click1":143,"lucency":null},
+    {"day":200,"click":null,"hasAd":null,"house":null,"click1":234,"lucency":null},
+    {"day":300,"click":null,"hasAd":null,"house":null,"click1":312,"lucency":null},
+    {"day":400,"click":null,"hasAd":null,"house":null,"click1":434,"lucency":null},
+    {"day":500,"click":null,"hasAd":null,"house":null,"click1":534,"lucency":null},
+    {"day":600,"click":null,"hasAd":null,"house":null,"click1":603,"lucency":null},
+    {"day":700,"click":null,"hasAd":null,"house":null,"click1":745,"lucency":null},
+    {"day":800,"click":null,"hasAd":null,"house":null,"click1":853,"lucency":null},
+    {"day":900,"click":null,"hasAd":null,"house":null,"click1":954,"lucency":null},
+    {"day":1000,"click":null,"hasAd":null,"house":null,"click1":985,"lucency":null}
+];
+                
+
+var variables = {
+    lineField: "click1",
+    scatField: "click",
+    xField: "day",
+    inflexionX: 400,
+    hotLower: 800,
+    count: 1 
+}
+
+var options = {
+    coord: {
+        type: "rect",
+        xAxis: {
+            field: variables.xField,
+            layoutType: "proportion"
+        },
+        yAxis:{
+            align: "left",
+            middleWeight: variables.hotLower,
+            middleWeightPos: 0.8,
+            filter:function( obj ){
+                if( !((obj.index+1) % 2) ){
+                    obj.layoutData[ obj.index ].visible = false;
+                }
+            }
+        },
+        grid:{
+            fill:{
+                enabled:true,
+                fillStyle:['#ffffff', '#458AEC '],
+                alpha: 0.08
+            }
+        }
+    },
+    graphs: [
+        {
+            type: "scat",
+            field: variables.scatField,
+            node: {
+                fillAlpha: function( node ) {
+                    if( node.rowData.lucency ){
+                        return 0.2
+                    } else {
+                        return 0.8
+                    }
+                },
+                fillStyle: function ( node ){
+                    if( node.rowData.hasAd ){
+                        return "#FFB071"
+                    } else {
+                        return "#49CE84"
+                    }
+                },
+                radius: function() {
+                    if( variables.count < 100){
+                        return 7.5
+                    } else if (variables.count >= 100 && variables.count < 200) {
+                        return 6
+                    } else {
+                        return 4.5
+                    }
+                }
+            }
+        }, {
+            type: "line",
+            field: variables.lineField,
+            node: {
+                enabled: false
+            },
+            line:{
+                strokeStyle: {
+                    lineargradient: [
+                        {
+                            position: 0,
+                            color: "#FFE14C"
+                        },
+                        {
+                            position: 1,
+                            color: "#F77E7E"
+                        }
+                    ] 
+                }
+            },
+            area:{
+                enabled:false
+            }
+        }
+    ],
+    tips: {
+        pointer: "line"
+    },
+    markcloumn: [
+        {
+            id: "cloumn1",
+            xVal: variables.inflexionX,
+            markTo: variables.lineField,
+            line: {
+                lineWidth: 1,
+                strokeStyle: "#999",
+                endY:'auto',
+                lineType:'dashed'
+            }            
+        }
+    ],
+    dataZoom:{}
+};
+
+
+window.bar = Chartx.create("canvasTest" , data , options)
+
+            </textarea></form>
+        </td>
+        <td style="padding:0 10px;" id="td-vr">
+            <div id="chartdemo-r">
+            <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
+                <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
+
+                <h4>柱状图（bar chart）</h4>
+                <p>
+                    联系人：@释剑
+                </p>
+            </div>
+            <div  class="test-c">
+                <div id="canvasTest" style='width:100%;height:300px;position:relative;'></div>
+            </div>
+
+            </div>
+        </td>
+    </tr>
+</table>
+
+    
+</body> 
+</html>
+
+
