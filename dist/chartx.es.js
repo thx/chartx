@@ -1697,6 +1697,7 @@ function dataFrame (dataOrg, opt) {
         dataOrg[0].push("__index__");
       } else {
         dataOrg[i].push(i - 1);
+        dataFrame.jsonOrg[i - 1]["__index__"] = i - 1;
       }
     }
   }
@@ -17000,7 +17001,7 @@ function (_GraphsBase) {
           propertys: {
             dataKey: {
               detail: '元素的数据id，默认索引匹配',
-              default: null
+              default: '__index__'
             },
             shapeType: {
               detail: '图形类型',
@@ -17295,10 +17296,11 @@ function (_GraphsBase) {
           fillStyle: null,
           color: null,
           strokeStyle: null,
+          strokeAlpha: 1,
           lineWidth: 0,
           shapeType: null,
           label: null,
-          fillAlpha: 0,
+          fillAlpha: 1,
           nodeElement: null //对应的canvax 节点， 在widget之后赋值
 
         };
@@ -17312,6 +17314,8 @@ function (_GraphsBase) {
         this._setStrokeStyle(nodeLayoutData);
 
         this._setLineWidth(nodeLayoutData);
+
+        this._setStrokeAlpha(nodeLayoutData);
 
         this._setNodeType(nodeLayoutData);
 
@@ -17374,7 +17378,13 @@ function (_GraphsBase) {
   }, {
     key: "_setFillAlpha",
     value: function _setFillAlpha(nodeLayoutData) {
-      nodeLayoutData.fillAlpha = this._getStyle(this.node.fillAlpha, nodeLayoutData);
+      nodeLayoutData.fillAlpha = this._getProp(this.node.fillAlpha, nodeLayoutData);
+      return this;
+    }
+  }, {
+    key: "_setStrokeAlpha",
+    value: function _setStrokeAlpha(nodeLayoutData) {
+      nodeLayoutData.strokeAlpha = this._getProp(this.node.strokeAlpha, nodeLayoutData);
       return this;
     }
   }, {
@@ -17382,6 +17392,20 @@ function (_GraphsBase) {
     value: function _setStrokeStyle(nodeLayoutData) {
       nodeLayoutData.strokeStyle = this._getStyle(this.node.strokeStyle || this.node.fillStyle, nodeLayoutData);
       return this;
+    }
+  }, {
+    key: "_getProp",
+    value: function _getProp(prop, nodeLayoutData) {
+      var _prop = prop;
+
+      if (_.isArray(prop)) {
+        _prop = prop[nodeLayoutData.iGroup];
+      }
+
+      if (_.isFunction(prop)) {
+        _prop = prop.apply(this, [nodeLayoutData]);
+      }
+      return _prop;
     }
   }, {
     key: "_getStyle",
@@ -17393,7 +17417,7 @@ function (_GraphsBase) {
       }
 
       if (_.isFunction(style)) {
-        _style = style(nodeLayoutData);
+        _style = style.apply(this, [nodeLayoutData]);
       }
 
       if (!_style) {
@@ -17404,7 +17428,7 @@ function (_GraphsBase) {
   }, {
     key: "_setLineWidth",
     value: function _setLineWidth(nodeLayoutData) {
-      nodeLayoutData.lineWidth = this._getStyle(this.node.lineWidth, nodeLayoutData);
+      nodeLayoutData.lineWidth = this._getProp(this.node.lineWidth, nodeLayoutData);
       return this;
     }
   }, {
@@ -17711,6 +17735,7 @@ function (_GraphsBase) {
         r: nodeData.radius,
         fillStyle: nodeData.fillStyle,
         strokeStyle: nodeData.strokeStyle,
+        strokeAlpha: nodeData.strokeAlpha,
         lineWidth: nodeData.lineWidth,
         fillAlpha: nodeData.fillAlpha,
         cursor: "pointer"
@@ -17792,7 +17817,7 @@ function (_GraphsBase) {
       if (!this.node.focus.enabled || !nodeData.focused) return;
       var nctx = nodeData.nodeElement.context;
       nctx.lineWidth = nodeData.lineWidth;
-      nctx.strokeAlpha = this.node.strokeAlpha;
+      nctx.strokeAlpha = nodeData.strokeAlpha;
       nctx.fillAlpha = nodeData.fillAlpha;
       nctx.strokeStyle = nodeData.strokeStyle;
       nodeData.focused = false;
@@ -17821,9 +17846,9 @@ function (_GraphsBase) {
         nctx.strokeAlpha = this.node.focus.strokeAlpha;
         nctx.fillAlpha = this.node.focus.fillAlpha;
       } else {
-        nctx.lineWidth = this.node.lineWidth;
-        nctx.strokeAlpha = this.node.strokeAlpha;
-        nctx.fillAlpha = this.node.fillAlpha;
+        nctx.lineWidth = nodeData.lineWidth;
+        nctx.strokeAlpha = nodeData.strokeAlpha;
+        nctx.fillAlpha = nodeData.fillAlpha;
       }
 
       nodeData.selected = false;
