@@ -1628,82 +1628,148 @@ var Chartx = (function () {
     }
   }
 
-  function dataFrame (data, opt) {
+  function parse2JsonData(list) {
+    var newArr = list; //检测第一个数据是否为一个array, 否就是传入了一个json格式的数据
+
+    if (list.length > 0 && _.isArray(list[0])) {
+      newArr = [];
+      var fields = list[0];
+      var fl = fields.length;
+
+      for (var i = 1, l = list.length; i < l; i++) {
+        var obj = {};
+
+        for (var fi = 0; fi < fl; fi++) {
+          obj[fields[fi]] = list[i][fi];
+        }
+        newArr.push(obj);
+      }
+      return newArr;
+    }
+  }
+
+  function dataFrame (dataOrg, opt) {
     //数据做一份拷贝，避免污染源数据
-    data = JSON.parse(JSON.stringify(data));
+    dataOrg = JSON.parse(JSON.stringify(dataOrg));
     var dataFrame = {
       //数据框架集合
       length: 0,
       org: [],
       //最原始的数据，一定是个行列式，因为如果发现是json格式数据，会自动转换为行列式
+      jsonOrg: [],
+      //原始数据的json格式
       data: [],
       //最原始的数据转化后的数据格式：[o,o,o] o={field:'val1',index:0,data:[1,2,3]}
       getRowDataAt: _getRowDataAt,
       getRowDataOf: _getRowDataOf,
       getFieldData: _getFieldData,
       getDataOrg: getDataOrg,
+      refresh: _refresh,
       fields: [],
       range: {
         start: 0,
         end: 0
-      }
+      },
+      filters: {} //数据过滤器，在range的基础上
+
     };
 
-    if (!data || data.length == 0) {
+    if (!dataOrg || dataOrg.length == 0) {
       return dataFrame;
     }
 
-    if (data.length > 0 && !_.isArray(data[0])) {
-      data = parse2MatrixData(data);
+    if (dataOrg.length > 0 && !_.isArray(dataOrg[0])) {
+      dataFrame.jsonOrg = dataOrg;
+      dataOrg = parse2MatrixData(dataOrg);
+      dataFrame.org = dataOrg;
+    } else {
+      dataFrame.org = dataOrg;
+      dataFrame.jsonOrg = parse2JsonData(dataOrg);
     }
-    dataFrame.length = data.length - 1; //设置好数据区间end值
 
-    dataFrame.range.end = dataFrame.length - 1; //然后检查opts中是否有dataZoom.range
+    dataFrame.range.end = dataOrg.length - 1; //然后检查opts中是否有dataZoom.range
 
     if (opt && opt.dataZoom && opt.dataZoom.range) {
       _.extend(dataFrame.range, opt.dataZoom.range);
     }
 
-    if (data.length && data[0].length && !~data[0].indexOf("__index__")) {
+    if (dataOrg.length && dataOrg[0].length && !~dataOrg[0].indexOf("__index__")) {
       //如果数据中没有用户自己设置的__index__，那么就主动添加一个__index__，来记录元数据中的index
-      for (var i = 0, l = data.length; i < l; i++) {
+      for (var i = 0, l = dataOrg.length; i < l; i++) {
         if (!i) {
-          data[0].push("__index__");
+          dataOrg[0].push("__index__");
         } else {
-          data[i].push(i - 1);
+          dataOrg[i].push(i - 1);
+          dataFrame.jsonOrg[i - 1]["__index__"] = i - 1;
         }
       }
     }
+    dataFrame.fields = dataOrg[0] ? dataOrg[0] : []; //所有的字段集合;
 
-    dataFrame.org = data;
-    dataFrame.fields = data[0] ? data[0] : []; //所有的字段集合;
+    dataFrame.data = _getData();
 
-    var total = []; //已经处理成[o,o,o]   o={field:'val1',index:0,data:[1,2,3]}
-
-    for (var a = 0, al = dataFrame.fields.length; a < al; a++) {
-      var o = {};
-      o.field = dataFrame.fields[a];
-      o.index = a;
-      o.data = [];
-      total.push(o);
+    function _refresh() {
+      dataFrame.data = _getData();
     }
-    dataFrame.data = total; //填充好total的data并且把属于yAxis的设置为number
 
-    for (var a = 1, al = data.length; a < al; a++) {
-      for (var b = 0, bl = data[a].length; b < bl; b++) {
-        var _val = data[a][b]; //如果用户传入的数据是个number，那么就转换为真正的Number吧
-        //‘223’ --》 223
+    function _getData() {
+      var total = []; //已经处理成[o,o,o]   o={field:'val1',index:0,data:[1,2,3]}
 
-        if (!isNaN(_val) && _val !== "" && _val !== null) {
-          _val = Number(_val);
-        }
-        total[b].data.push(_val); //total[b].data.push( data[a][b] );
+      for (var a = 0, al = dataFrame.fields.length; a < al; a++) {
+        var o = {};
+        o.field = dataFrame.fields[a];
+        o.index = a;
+        o.data = [];
+        total.push(o);
       }
+
+      var rows = _getValidRows(function (rowData) {
+        _.each(rowData, function (_val, _field) {
+          if (!isNaN(_val) && _val !== "" && _val !== null) {
+            _val = Number(_val);
+          }
+
+          var gData = _.find(total, function (g) {
+            return g.field == _field;
+          });
+
+          gData && gData.data.push(_val);
+        });
+      }); //到这里保证了data一定是行列式
+
+
+      dataFrame.length = rows.length;
+      return total;
+    }
+
+    function _getValidRows(callback) {
+      var validRowDatas = [];
+
+      _.each(dataFrame.jsonOrg.slice(dataFrame.range.start, dataFrame.range.end + 1), function (rowData) {
+        var validRowData = true;
+
+        if (_.keys(dataFrame.filters).length) {
+          _.each(dataFrame.filters, function (filter) {
+            if (_.isFunction(filter) && !filter(rowData)) {
+              validRowData = false;
+              return false;
+            }
+          });
+        }
+
+        if (validRowData) {
+          callback && callback(rowData);
+          validRowDatas.push(rowData);
+        }
+      });
+
+      return validRowDatas;
     }
 
     function getDataOrg($field, format, totalList, lev) {
       if (!lev) lev = 0;
-      var arr = totalList || total;
+
+      var arr = totalList || _getData();
 
       if (!arr) {
         return;
@@ -1715,11 +1781,11 @@ var Chartx = (function () {
         };
       }
 
-      function _format(data) {
-        for (var i = 0, l = data.length; i < l; i++) {
-          data[i] = format(data[i]);
+      function _format(d) {
+        for (var i = 0, l = d.length; i < l; i++) {
+          d[i] = format(d[i]);
         }
-        return data;
+        return d;
       }
 
       if (!_.isArray($field)) {
@@ -1742,7 +1808,7 @@ var Chartx = (function () {
           for (var ii = 0, iil = arr.length; ii < iil; ii++) {
             if ($field[i] == arr[ii].field) {
 
-              _fieldData.push(_format(arr[ii].data.slice(dataFrame.range.start, dataFrame.range.end + 1)));
+              _fieldData.push(_format(arr[ii].data));
 
               break;
             }
@@ -1757,7 +1823,7 @@ var Chartx = (function () {
       return newData;
     }
     /*
-     * 获取某一行数据
+     * 获取某一行数据,当前dataFrame.data中
     */
 
     function _getRowDataAt(index) {
@@ -1765,7 +1831,7 @@ var Chartx = (function () {
       var data = dataFrame.data;
 
       for (var a = 0; a < data.length; a++) {
-        o[data[a].field] = data[a].data[dataFrame.range.start + index];
+        o[data[a].field] = data[a].data[index];
       }
       return o;
     }
@@ -1803,19 +1869,14 @@ var Chartx = (function () {
     }
 
     function _getFieldData(field) {
-      var data;
+      var list = [];
 
-      _.each(dataFrame.data, function (d) {
-        if (d.field == field) {
-          data = d;
-        }
+      var _f = _.find(dataFrame.data, function (obj) {
+        return obj.field == field;
       });
 
-      if (data) {
-        return data.data.slice(dataFrame.range.start, dataFrame.range.end + 1);
-      } else {
-        return [];
-      }
+      _f && (list = _f.data);
+      return list;
     }
 
     return dataFrame;
@@ -2853,7 +2914,7 @@ var Chartx = (function () {
    *
    * canvas 上委托的事件管理
    */
-  var _mouseEvents = 'mousedown mouseup mouseover mousemove mouseout click dblclick wheel';
+  var _mouseEvents = 'mousedown mouseup mouseover mousemove mouseout click dblclick wheel keydown keypress keyup';
   var types = {
     _types: _mouseEvents.split(/,| /),
     register: function register(evts) {
@@ -3293,6 +3354,14 @@ var Chartx = (function () {
         //即为第三方库，那么就要对接第三方库的事件系统。默认实现hammer的大部分事件系统
         types.register(_hammerEventTypes);
       }
+
+      $.addEvent(me.target, "contextmenu", function (e) {
+        if (e && e.preventDefault) {
+          e.preventDefault();
+        } else {
+          window.event.returnValue = false;
+        }
+      });
 
       _.each(types.get(), function (type) {
         //不再关心浏览器环境是否 'ontouchstart' in window 
@@ -5411,14 +5480,14 @@ var Chartx = (function () {
       _this.id = opt.id || Utils.createId(_this.type);
       _this._trackList = []; //一个元素可以追踪另外元素的变动
 
-      _this.init.apply(_assertThisInitialized(_this), arguments); //所有属性准备好了后，先要计算一次this._updateTransform()得到_tansform
+      _this.init.apply(_assertThisInitialized(_assertThisInitialized(_this)), arguments); //所有属性准备好了后，先要计算一次this._updateTransform()得到_tansform
 
 
       _this._updateTransform();
 
       _this._tweens = [];
 
-      var me = _assertThisInitialized(_this);
+      var me = _assertThisInitialized(_assertThisInitialized(_this));
 
       _this.on("destroy", function () {
         me.cleanAnimates();
@@ -6687,7 +6756,7 @@ var Chartx = (function () {
       _classCallCheck(this, CanvasRenderer);
 
       _this = _possibleConstructorReturn(this, _getPrototypeOf(CanvasRenderer).call(this, RENDERER_TYPE.CANVAS, app, options));
-      _this.CGR = new CanvasGraphicsRenderer(_assertThisInitialized(_this));
+      _this.CGR = new CanvasGraphicsRenderer(_assertThisInitialized(_assertThisInitialized(_this)));
       return _this;
     }
 
@@ -6867,7 +6936,7 @@ var Chartx = (function () {
       _this.lastGetRO = 0; //最后一次获取 viewOffset 的时间
 
       _this.webGL = opt.webGL;
-      _this.renderer = autoRenderer(_assertThisInitialized(_this), options);
+      _this.renderer = autoRenderer(_assertThisInitialized(_assertThisInitialized(_this)), options);
       _this.event = null; //该属性在systenRender里面操作，每帧由心跳上报的 需要重绘的stages 列表
 
       _this.convertStages = {};
@@ -10268,11 +10337,13 @@ var Chartx = (function () {
       key: "resetData",
       value: function resetData(data, trigger) {
         var me = this;
-        var preDataLenth = this.dataFrame.length;
+        var preDataLenth = this.dataFrame.org.length;
 
         if (data) {
           this._data = data;
           this.dataFrame = this.initData(this._data);
+        } else {
+          this.dataFrame.refresh();
         }
 
         if (!preDataLenth) {
@@ -10643,7 +10714,7 @@ var Chartx = (function () {
 
       _this = _possibleConstructorReturn(this, _getPrototypeOf(Component).call(this, opt, app));
 
-      _.extend(true, _assertThisInitialized(_this), getDefaultProps(Component.defaultProps()), opt);
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(Component.defaultProps()), opt);
 
       _this.name = "component"; //组件名称
 
@@ -10746,7 +10817,7 @@ var Chartx = (function () {
 
       _this = _possibleConstructorReturn(this, _getPrototypeOf(coordBase).call(this, opt, app));
 
-      _.extend(true, _assertThisInitialized(_this), getDefaultProps(coordBase.defaultProps()));
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(coordBase.defaultProps()));
 
       _this.name = "coord";
       _this._opt = opt;
@@ -11273,7 +11344,7 @@ var Chartx = (function () {
 
       _this = _possibleConstructorReturn(this, _getPrototypeOf(Axis).call(this, opt, dataOrg));
 
-      _.extend(true, _assertThisInitialized(_this), getDefaultProps(Axis.defaultProps()));
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(Axis.defaultProps()));
 
       return _this;
     }
@@ -11337,7 +11408,7 @@ var Chartx = (function () {
       _this.sprite = null;
       _this.isH = false; //是否为横向转向的x轴
 
-      _.extend(true, _assertThisInitialized(_this), getDefaultProps(xAxis.defaultProps()), opt);
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(xAxis.defaultProps()), opt);
 
       _this.init(opt);
 
@@ -11932,7 +12003,7 @@ var Chartx = (function () {
       _this.sprite = null;
       _this.isH = false; //是否横向
 
-      _.extend(true, _assertThisInitialized(_this), getDefaultProps(yAxis.defaultProps()), opt);
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(yAxis.defaultProps()), opt);
 
       _this.init(opt);
 
@@ -12475,7 +12546,7 @@ var Chartx = (function () {
 
       _this = _possibleConstructorReturn(this, _getPrototypeOf(rectGrid).call(this, opt, app));
 
-      _.extend(true, _assertThisInitialized(_this), getDefaultProps(rectGrid.defaultProps()));
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(rectGrid.defaultProps()));
 
       _this.width = 0;
       _this.height = 0;
@@ -12680,7 +12751,7 @@ var Chartx = (function () {
 
       _this = _possibleConstructorReturn(this, _getPrototypeOf(Rect).call(this, opt, app));
 
-      _.extend(true, _assertThisInitialized(_this), getDefaultProps(Rect.defaultProps()), _this.setDefaultOpt(opt, app));
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(Rect.defaultProps()), _this.setDefaultOpt(opt, app));
 
       _this.type = "rect";
       _this._xAxis = null;
@@ -13352,7 +13423,7 @@ var Chartx = (function () {
 
       _this.induce = null; //最外层的那个网，用来触发事件
 
-      _.extend(true, _assertThisInitialized(_this), getDefaultProps(polarGrid.defaultProps()), opt);
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(polarGrid.defaultProps()), opt);
 
       _this.init(opt);
 
@@ -13589,7 +13660,7 @@ var Chartx = (function () {
       _this = _possibleConstructorReturn(this, _getPrototypeOf(Polar$$1).call(this, opt, app));
       _this.type = "polar";
 
-      _.extend(true, _assertThisInitialized(_this), getDefaultProps(Polar$$1.defaultProps()), _this.setDefaultOpt(opt, app));
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(Polar$$1.defaultProps()), _this.setDefaultOpt(opt, app));
 
       _this.init(opt);
 
@@ -14383,7 +14454,7 @@ var Chartx = (function () {
 
       _this = _possibleConstructorReturn(this, _getPrototypeOf(GraphsBase).call(this, opt, app)); //这里不能把opt个extend进this
 
-      _.extend(true, _assertThisInitialized(_this), getDefaultProps(GraphsBase.defaultProps()));
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(GraphsBase.defaultProps()));
 
       _this.name = "graphs"; //这里所有的opts都要透传给 group
 
@@ -14409,7 +14480,7 @@ var Chartx = (function () {
 
       _this._growTween = null;
 
-      var me = _assertThisInitialized(_this);
+      var me = _assertThisInitialized(_assertThisInitialized(_this));
 
       _this.sprite.on("destroy", function () {
         if (me._growTween) {
@@ -14716,7 +14787,7 @@ var Chartx = (function () {
       _this._barsLen = 0;
       _this.txtsSp = null;
 
-      _.extend(true, _assertThisInitialized(_this), getDefaultProps(BarGraphs.defaultProps()), opt);
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(BarGraphs.defaultProps()), opt);
 
       _this.init();
 
@@ -15860,7 +15931,7 @@ var Chartx = (function () {
 
       _this._bline = null;
 
-      _.extend(true, _assertThisInitialized(_this), getDefaultProps(LineGraphsGroup.defaultProps()), opt); //TODO group中得field不能直接用opt中得field， 必须重新设置， 
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(LineGraphsGroup.defaultProps()), opt); //TODO group中得field不能直接用opt中得field， 必须重新设置， 
       //group中得field只有一个值，代表一条折线, 后面要扩展extend方法，可以控制过滤哪些key值不做extend
 
 
@@ -15984,6 +16055,7 @@ var Chartx = (function () {
           this.data = data;
         }
         me._pointList = this._getPointList(this.data);
+        console.log(me._pointList);
         var plen = me._pointList.length;
         var cplen = me._currPointList.length;
         var params = {
@@ -16633,7 +16705,7 @@ var Chartx = (function () {
       _this.enabledField = null;
       _this.groups = []; //群组集合
 
-      _.extend(true, _assertThisInitialized(_this), getDefaultProps(LineGraphs.defaultProps()), opt);
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(LineGraphs.defaultProps()), opt);
 
       _this.init();
 
@@ -16713,6 +16785,7 @@ var Chartx = (function () {
           var _lineData = me.dataFrame.getFieldData(field);
 
           if (!_lineData) return;
+          console.log(JSON.stringify(_lineData));
           var _data = [];
 
           for (var b = 0, bl = _lineData.length; b < bl; b++) {
@@ -16931,7 +17004,7 @@ var Chartx = (function () {
             propertys: {
               dataKey: {
                 detail: '元素的数据id，默认索引匹配',
-                default: null
+                default: '__index__'
               },
               shapeType: {
                 detail: '图形类型',
@@ -16949,6 +17022,11 @@ var Chartx = (function () {
               radius: {
                 detail: '半径',
                 default: null
+              },
+              radiusScale: {
+                detail: '半径缩放比例',
+                documentation: '在计算好真实半径后缩放，主要用在,缩略图中，比如datazoom的缩略图',
+                default: 1
               },
               normalRadius: {
                 detail: '默认半径',
@@ -17111,7 +17189,7 @@ var Chartx = (function () {
       _this._rMaxValue = null;
       _this._rMinValue = null;
 
-      _.extend(true, _assertThisInitialized(_this), getDefaultProps(ScatGraphs.defaultProps()), opt);
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(ScatGraphs.defaultProps()), opt);
 
       _this.init();
 
@@ -17122,7 +17200,7 @@ var Chartx = (function () {
       key: "init",
       value: function init() {
         this._shapesp = new Canvax.Display.Sprite({
-          id: "shapesp"
+          id: "scat_shapesp"
         });
         this._textsp = new Canvax.Display.Sprite({
           id: "textsp"
@@ -17156,7 +17234,6 @@ var Chartx = (function () {
         } else {
           this.fire("complete");
         }
-
         return this;
       }
     }, {
@@ -17222,10 +17299,11 @@ var Chartx = (function () {
             fillStyle: null,
             color: null,
             strokeStyle: null,
+            strokeAlpha: 1,
             lineWidth: 0,
             shapeType: null,
             label: null,
-            fillAlpha: 0,
+            fillAlpha: 1,
             nodeElement: null //对应的canvax 节点， 在widget之后赋值
 
           };
@@ -17239,6 +17317,8 @@ var Chartx = (function () {
           this._setStrokeStyle(nodeLayoutData);
 
           this._setLineWidth(nodeLayoutData);
+
+          this._setStrokeAlpha(nodeLayoutData);
 
           this._setNodeType(nodeLayoutData);
 
@@ -17279,6 +17359,7 @@ var Chartx = (function () {
             r = parseInt(this.node.radius);
           }
         }
+        r = Math.max(r * this.node.radiusScale, 2);
         nodeLayoutData.radius = r;
         return this;
       }
@@ -17300,7 +17381,13 @@ var Chartx = (function () {
     }, {
       key: "_setFillAlpha",
       value: function _setFillAlpha(nodeLayoutData) {
-        nodeLayoutData.fillAlpha = this._getStyle(this.node.fillAlpha, nodeLayoutData);
+        nodeLayoutData.fillAlpha = this._getProp(this.node.fillAlpha, nodeLayoutData);
+        return this;
+      }
+    }, {
+      key: "_setStrokeAlpha",
+      value: function _setStrokeAlpha(nodeLayoutData) {
+        nodeLayoutData.strokeAlpha = this._getProp(this.node.strokeAlpha, nodeLayoutData);
         return this;
       }
     }, {
@@ -17308,6 +17395,20 @@ var Chartx = (function () {
       value: function _setStrokeStyle(nodeLayoutData) {
         nodeLayoutData.strokeStyle = this._getStyle(this.node.strokeStyle || this.node.fillStyle, nodeLayoutData);
         return this;
+      }
+    }, {
+      key: "_getProp",
+      value: function _getProp(prop, nodeLayoutData) {
+        var _prop = prop;
+
+        if (_.isArray(prop)) {
+          _prop = prop[nodeLayoutData.iGroup];
+        }
+
+        if (_.isFunction(prop)) {
+          _prop = prop.apply(this, [nodeLayoutData]);
+        }
+        return _prop;
       }
     }, {
       key: "_getStyle",
@@ -17319,7 +17420,7 @@ var Chartx = (function () {
         }
 
         if (_.isFunction(style)) {
-          _style = style(nodeLayoutData);
+          _style = style.apply(this, [nodeLayoutData]);
         }
 
         if (!_style) {
@@ -17330,7 +17431,7 @@ var Chartx = (function () {
     }, {
       key: "_setLineWidth",
       value: function _setLineWidth(nodeLayoutData) {
-        nodeLayoutData.lineWidth = this.node.lineWidth;
+        nodeLayoutData.lineWidth = this._getProp(this.node.lineWidth, nodeLayoutData);
         return this;
       }
     }, {
@@ -17637,6 +17738,7 @@ var Chartx = (function () {
           r: nodeData.radius,
           fillStyle: nodeData.fillStyle,
           strokeStyle: nodeData.strokeStyle,
+          strokeAlpha: nodeData.strokeAlpha,
           lineWidth: nodeData.lineWidth,
           fillAlpha: nodeData.fillAlpha,
           cursor: "pointer"
@@ -17718,7 +17820,7 @@ var Chartx = (function () {
         if (!this.node.focus.enabled || !nodeData.focused) return;
         var nctx = nodeData.nodeElement.context;
         nctx.lineWidth = nodeData.lineWidth;
-        nctx.strokeAlpha = this.node.strokeAlpha;
+        nctx.strokeAlpha = nodeData.strokeAlpha;
         nctx.fillAlpha = nodeData.fillAlpha;
         nctx.strokeStyle = nodeData.strokeStyle;
         nodeData.focused = false;
@@ -17747,9 +17849,9 @@ var Chartx = (function () {
           nctx.strokeAlpha = this.node.focus.strokeAlpha;
           nctx.fillAlpha = this.node.focus.fillAlpha;
         } else {
-          nctx.lineWidth = this.node.lineWidth;
-          nctx.strokeAlpha = this.node.strokeAlpha;
-          nctx.fillAlpha = this.node.fillAlpha;
+          nctx.lineWidth = nodeData.lineWidth;
+          nctx.strokeAlpha = nodeData.strokeAlpha;
+          nctx.fillAlpha = nodeData.fillAlpha;
         }
 
         nodeData.selected = false;
@@ -18528,7 +18630,7 @@ var Chartx = (function () {
       _this = _possibleConstructorReturn(this, _getPrototypeOf(PieGraphs).call(this, opt, app));
       _this.type = "pie";
 
-      _.extend(true, _assertThisInitialized(_this), getDefaultProps(PieGraphs.defaultProps()), opt);
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(PieGraphs.defaultProps()), opt);
 
       _this.init();
 
@@ -19009,7 +19111,7 @@ var Chartx = (function () {
         //}
       };
 
-      _.extend(true, _assertThisInitialized(_this), getDefaultProps(RadarGraphs.defaultProps()), opt);
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(RadarGraphs.defaultProps()), opt);
 
       _this.init();
 
@@ -19979,7 +20081,7 @@ var Chartx = (function () {
       _this = _possibleConstructorReturn(this, _getPrototypeOf(CloudGraphs).call(this, opt, app));
       _this.type = "cloud";
 
-      var me = _assertThisInitialized(_this); //坚持一个数据节点的设置都在一个node下面
+      var me = _assertThisInitialized(_assertThisInitialized(_this)); //坚持一个数据节点的设置都在一个node下面
 
 
       _this.node = {
@@ -19989,7 +20091,7 @@ var Chartx = (function () {
 
       };
 
-      _.extend(true, _assertThisInitialized(_this), getDefaultProps(CloudGraphs.defaultProps()), opt);
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(CloudGraphs.defaultProps()), opt);
 
       _this.node.fontColor = function (nodeData) {
         return me.app.getTheme(nodeData.iNode);
@@ -21119,7 +21221,7 @@ var Chartx = (function () {
         }
       };
 
-      _.extend(true, _assertThisInitialized(_this), getDefaultProps(PlanetGraphs.defaultProps()), opt);
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(PlanetGraphs.defaultProps()), opt);
 
       if (_this.center.radius == 0 || !_this.center.enabled) {
         _this.center.radius = 0;
@@ -21617,7 +21719,7 @@ var Chartx = (function () {
       _this._maxVal = null;
       _this._minVal = null;
 
-      _.extend(true, _assertThisInitialized(_this), getDefaultProps(FunnelGraphs.defaultProps()), opt);
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(FunnelGraphs.defaultProps()), opt);
 
       _this.init();
 
@@ -23300,7 +23402,7 @@ var Chartx = (function () {
       _this.type = "venn";
       _this.vennData = null;
 
-      _.extend(true, _assertThisInitialized(_this), getDefaultProps(VennGraphs.defaultProps()), opt); //_trimGraphs后，计算出来本次data的一些属性
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(VennGraphs.defaultProps()), opt); //_trimGraphs后，计算出来本次data的一些属性
 
 
       _this._dataCircleLen = 0;
@@ -24266,7 +24368,7 @@ var Chartx = (function () {
       _this = _possibleConstructorReturn(this, _getPrototypeOf(sunburstGraphs).call(this, opt, app));
       _this.type = "sunburst";
 
-      _.extend(true, _assertThisInitialized(_this), getDefaultProps(sunburstGraphs.defaultProps()), opt);
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(sunburstGraphs.defaultProps()), opt);
 
       _this.data = []; //布局算法布局后的数据
 
@@ -25178,7 +25280,7 @@ var Chartx = (function () {
       _this = _possibleConstructorReturn(this, _getPrototypeOf(sankeyGraphs).call(this, opt, app));
       _this.type = "sankey";
 
-      _.extend(true, _assertThisInitialized(_this), getDefaultProps(sankeyGraphs.defaultProps()), opt);
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(sankeyGraphs.defaultProps()), opt);
 
       _this.init();
 
@@ -25523,7 +25625,7 @@ var Chartx = (function () {
       _this = _possibleConstructorReturn(this, _getPrototypeOf(Progress).call(this, opt, app));
       _this.type = "progress";
 
-      _.extend(true, _assertThisInitialized(_this), getDefaultProps(Progress.defaultProps()), opt);
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(Progress.defaultProps()), opt);
 
       _this.bgNodeData = null; //背景的nodeData数据，和data里面的结构保持一致
 
@@ -25847,6 +25949,116 @@ var Chartx = (function () {
 
   global$1.registerComponent(Progress, 'graphs', 'progress');
 
+  /**
+   * 把json数据转化为关系图的数据格式
+   */
+  //如：
+  // [{
+  // 	name: 'xxxx',
+  // 	children: [{
+  // 		name: 'aaaaa'
+  // 	}, {
+  // 		name: 'bbbb',
+  // 		children: [{
+  // 			name: 'ccccc'
+  // 		}]
+  // 	}],
+  // }];
+
+  var childrenKey = 'children';
+  var defaultFieldKey = '__key__';
+
+  function checkData(data, key) {
+    var result = false; //1、要求数据必须是一个数组
+
+    if (!_.isArray(data)) return false; //2、数组中的每个元素是一个对象
+
+    result = _.every(data, function (item) {
+      return _.isObject(item);
+    }); //3、field 自动不能是数组，如果是表示已经处理过的数据
+
+    if (result) {
+      result = _.every(data, function (item) {
+        return !_.isArray(item[key]);
+      });
+    } //4、至少有一个元素中存在关键字
+
+
+    result = _.some(data, function (item) {
+      return childrenKey in item;
+    });
+    return result;
+  }
+
+  function jsonToArrayForRelation(data, options) {
+    var result = [];
+    var wm = new WeakMap();
+    var key = options.field || defaultFieldKey;
+    var label = options.node && options.node.content && options.node.content.field;
+
+    if (!checkData(data, key)) {
+      console.error('该数据不能正确绘制，请提供数组对象形式的数据！');
+      return result;
+    }
+
+    var childrens = [];
+    var index$$1 = 0;
+    var item = undefined;
+
+    _.each(data, function (item) {
+      childrens.push(item);
+    });
+
+    var _loop = function _loop() {
+      if (!item[key]) item[key] = index$$1;
+      var _child = item[childrenKey];
+
+      if (_child) {
+        _.each(_child, function (ch) {
+          wm.set(ch, {
+            parentIndex: index$$1,
+            parentNode: item
+          });
+        });
+
+        childrens = childrens.concat(_child.reverse());
+      }
+
+      var obj = {};
+
+      _.each(item, function (value, key) {
+        if (key !== childrenKey) {
+          obj[key] = value;
+        }
+      });
+
+      result.push(obj);
+      var myWm = wm.get(item);
+
+      if (myWm) {
+        var start = myWm.parentIndex;
+        var startNode = myWm.parentNode;
+        var line = {};
+        line.key = [start, index$$1].join(',');
+
+        if (label) {
+          line[label] = [startNode[label], item[label]].join('_');
+        }
+
+        result.push(line);
+      }
+
+      index$$1++;
+    };
+
+    while (item = childrens.pop()) {
+      _loop();
+    } // wm = null;
+
+
+    return result;
+  }
+
   var Rect$7 = Canvax.Shapes.Rect;
   var Path$5 = Canvax.Shapes.Path;
   var Arrow = Canvax.Shapes.Arrow;
@@ -25957,6 +26169,11 @@ var Chartx = (function () {
               transform: {
                 detail: "是否启动拖拽缩放整个画布",
                 propertys: {
+                  fitView: {
+                    detail: "自动缩放",
+                    default: '' //autoZoom
+
+                  },
                   enabled: {
                     detail: "是否开启",
                     default: true
@@ -25988,22 +26205,25 @@ var Chartx = (function () {
       _this = _possibleConstructorReturn(this, _getPrototypeOf(Relation).call(this, opt, app));
       _this.type = "relation";
 
-      _.extend(true, _assertThisInitialized(_this), getDefaultProps(Relation.defaultProps()), opt);
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(Relation.defaultProps()), opt);
 
-      var dagreOpts = {
-        graph: {
-          nodesep: 10,
-          ranksep: 10,
-          edgesep: 10,
-          acyclicer: "greedy"
-        },
-        node: {},
-        edge: {
-          labelpos: 'c'
-        }
-      };
+      if (_this.layout === 'dagre') {
+        var dagreOpts = {
+          graph: {
+            nodesep: 10,
+            ranksep: 10,
+            edgesep: 10,
+            acyclicer: "greedy"
+          },
+          node: {},
+          edge: {//labelpos: 'c'
+          }
+        };
 
-      _.extend(true, _this.layoutOpts, dagreOpts, _this.layoutOpts);
+        _.extend(true, dagreOpts, _this.layoutOpts);
+
+        _.extend(true, _this.layoutOpts, dagreOpts);
+      }
 
       _this.domContainer = app.canvax.domView;
       _this.induce = null;
@@ -26170,6 +26390,11 @@ var Chartx = (function () {
         this.sprite.context.x = this.origin.x;
         this.sprite.context.y = this.origin.y;
 
+        if (this.status.transform.fitView == 'autoZoom') {
+          this.sprite.context.scaleX = this.width / this.data.size.width;
+          this.sprite.context.scaleY = this.height / this.data.size.height;
+        }
+
         var _offsetLet = (this.width - this.data.size.width) / 2;
 
         if (_offsetLet < 0) {
@@ -26191,11 +26416,17 @@ var Chartx = (function () {
             height: 0
           }
         };
+        var originData = this.app._data;
+
+        if (checkData(originData, this.field)) {
+          var result = jsonToArrayForRelation(originData, this);
+          this.dataFrame = dataFrame(result);
+        }
 
         for (var i = 0; i < this.dataFrame.length; i++) {
           var rowData = this.dataFrame.getRowDataAt(i);
 
-          var fields = _.flatten([rowData[this.field]]);
+          var fields = _.flatten([(rowData[this.field] + "").split(",")]);
 
           var content = this._getContent(rowData);
 
@@ -26445,25 +26676,25 @@ var Chartx = (function () {
         var width = node.rowData.width,
             height = node.rowData.height;
 
-        var _tipDom = document.createElement("div");
+        var _dom = document.createElement("div");
 
-        _tipDom.className = "chartx_relation_node";
-        _tipDom.style.cssText += "; position:absolute;visibility:hidden;";
-        _tipDom.style.cssText += "; color:" + me.getProp(me.node.content.fontColor) + ";";
-        _tipDom.style.cssText += "; text-align:" + me.getProp(me.node.content.textAlign) + ";";
-        _tipDom.style.cssText += "; vertical-align:" + me.getProp(me.node.content.textBaseline) + ";";
-        _tipDom.innerHTML = content;
-        this.domContainer.appendChild(_tipDom);
+        _dom.className = "chartx_relation_node";
+        _dom.style.cssText += "; position:absolute;visibility:hidden;";
+        _dom.style.cssText += "; color:" + me.getProp(me.node.content.fontColor) + ";";
+        _dom.style.cssText += "; text-align:" + me.getProp(me.node.content.textAlign) + ";";
+        _dom.style.cssText += "; vertical-align:" + me.getProp(me.node.content.textBaseline) + ";";
+        _dom.innerHTML = content;
+        this.domContainer.appendChild(_dom);
 
         if (!width) {
-          width = _tipDom.offsetWidth + me.getProp(me.node.padding) * me.status.transform.scale * 2;
+          width = _dom.offsetWidth + me.getProp(me.node.padding) * me.status.transform.scale * 2;
         }
 
         if (!height) {
-          height = _tipDom.offsetHeight + me.getProp(me.node.padding) * me.status.transform.scale * 2;
+          height = _dom.offsetHeight + me.getProp(me.node.padding) * me.status.transform.scale * 2;
         }
         return {
-          element: _tipDom,
+          element: _dom,
           width: width,
           height: height
         };
@@ -30400,7 +30631,7 @@ var Chartx = (function () {
       _this = _possibleConstructorReturn(this, _getPrototypeOf(Legend).call(this, opt, app));
       _this.name = "legend";
 
-      _.extend(true, _assertThisInitialized(_this), getDefaultProps(Legend.defaultProps()), opt);
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(Legend.defaultProps()), opt);
       /* data的数据结构为
       [
           //descartes中用到的时候还会带入yAxis
@@ -30693,6 +30924,7 @@ var Chartx = (function () {
             default: '#008ae6'
           },
           range: {
+            //propotion中，start 和 end代表的是数值的大小
             detail: '范围设置',
             propertys: {
               start: {
@@ -30822,8 +31054,9 @@ var Chartx = (function () {
       _this._cloneChart = null;
       _this.count = 1; //把w 均为为多少个区间， 同样多节点的line 和  bar， 这个count相差一
 
-      _this.dataLen = 1;
-      _this.axisLayoutType = null; //和line bar等得xAxis.layoutType 一一对应
+      _this.dataLen = 1; //总共有多少条数据 
+
+      _this.axisLayoutType = null; //和xAxis.layoutType 一一对应  peak rule proportion
 
       _this.dragIng = function () {};
 
@@ -30854,7 +31087,9 @@ var Chartx = (function () {
 
       app.stage.addChild(_this.sprite); //预设默认的opt.dataZoom
 
-      _.extend(true, _assertThisInitialized(_this), getDefaultProps(dataZoom.defaultProps()), opt);
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(dataZoom.defaultProps()), opt);
+
+      _this.axis = null; //对应哪个轴
 
       _this.layout();
 
@@ -30882,15 +31117,20 @@ var Chartx = (function () {
     }, {
       key: "_getCloneChart",
       value: function _getCloneChart() {
+        var me = this;
         var app = this.app;
+
+        var _coord = app.getCoord();
+
         var chartConstructor = app.constructor; //(barConstructor || Bar);
 
         var cloneEl = app.el.cloneNode();
         cloneEl.innerHTML = "";
         cloneEl.id = app.el.id + "_currclone";
         cloneEl.style.position = "absolute";
-        cloneEl.style.width = app.el.offsetWidth + "px";
-        cloneEl.style.height = app.el.offsetHeight + "px";
+        cloneEl.style.width = this.width + "px";
+        cloneEl.style.height = this.btnHeight + "px"; //app.el.offsetHeight + "px";
+
         cloneEl.style.top = "10000px";
         document.body.appendChild(cloneEl); //var opt = _.extend(true, {}, me._opt);
         //_.extend(true, opt, me.getCloneChart() );
@@ -30916,7 +31156,6 @@ var Chartx = (function () {
                   radius: 0
                 },
                 animation: false,
-                eventEnabled: false,
                 label: {
                   enabled: false
                 }
@@ -30937,17 +31176,26 @@ var Chartx = (function () {
                   fillStyle: "#ececec"
                 },
                 animation: false,
-                eventEnabled: false,
                 label: {
                   enabled: false
                 }
               });
             }
 
+            var _h = _coord.height || app.el.offsetHeight;
+
+            var radiusScale = me.btnHeight / _h || 1;
+
             if (_g.type == "scat") {
               _.extend(true, _opt, {
+                animation: false,
                 node: {
-                  fillStyle: "#ececec"
+                  //fillStyle : "#ececec",
+                  radiusScale: radiusScale,
+                  fillAlpha: 0.4
+                },
+                label: {
+                  enabled: false
                 }
               });
             }
@@ -30965,6 +31213,7 @@ var Chartx = (function () {
           delete opt.coord.horizontal;
         }
         opt.coord.enabled = false;
+        opt.coord.padding = 0;
         var thumbChart = new chartConstructor(cloneEl, app._data, opt, app.componentModules);
         thumbChart.draw();
         return {
@@ -30987,13 +31236,29 @@ var Chartx = (function () {
             x: coordInfo.origin.x
           },
           dragIng: function dragIng(range) {
-            var trigger = new Trigger(me, {
-              left: app.dataFrame.range.start - range.start,
-              right: range.end - app.dataFrame.range.end
-            });
+            var trigger;
 
-            _.extend(app.dataFrame.range, range); //不想要重新构造dataFrame，所以第一个参数为null
+            if (me.axisLayoutType == 'proportion') {
+              trigger = new Trigger(me, {
+                min: range.start,
+                max: range.end
+              });
 
+              app.dataFrame.filters['datazoom'] = function (rowData) {
+                var val = rowData[me.axis.field]; //把range.start  range.end换算成axis上面对应的数值区间
+
+                var min = me.axis.getValOfPos(range.start);
+                var max = me.axis.getValOfPos(range.end);
+                return val >= min && val <= max;
+              };
+            } else {
+              trigger = new Trigger(me, {
+                left: app.dataFrame.range.start - range.start,
+                right: range.end - app.dataFrame.range.end
+              });
+
+              _.extend(app.dataFrame.range, range);
+            }
 
             app.resetData(null, trigger);
             app.fire("dataZoomDragIng");
@@ -31011,9 +31276,10 @@ var Chartx = (function () {
         this._setDataZoomOpt();
 
         this._cloneChart = this._getCloneChart();
-        this.axisLayoutType = this._cloneChart.thumbChart.getComponent({
+        this.axis = this._cloneChart.thumbChart.getComponent({
           name: 'coord'
-        })._xAxis.layoutType; //和line bar等得xAxis.layoutType 一一对应
+        })._xAxis;
+        this.axisLayoutType = this.axis.layoutType; //和line bar等得xAxis.layoutType 一一对应
 
         this._computeAttrs(); //这个组件可以在init的时候就绘制好
 
@@ -31055,14 +31321,31 @@ var Chartx = (function () {
       value: function _computeAttrs() {
         var _cloneChart = this._cloneChart.thumbChart;
         this.dataLen = _cloneChart.dataFrame.length;
-        this.count = this.axisLayoutType == "rule" ? this.dataLen - 1 : this.dataLen;
+
+        switch (this.axisLayoutType) {
+          case "rule":
+            this.count = this.dataLen - 1;
+            break;
+
+          case "peak":
+            this.count = this.dataLen;
+            break;
+
+          case "proportion":
+            this.count = this.width;
+            break;
+        }
 
         if (!this.range.max || this.range.max > this.count) {
-          this.range.max = this.count;
+          this.range.max = this.count - 1;
         }
 
         if (!this.range.end || this.range.end > this.dataLen - 1) {
           this.range.end = this.dataLen - 1;
+
+          if (this.axisLayoutType == "proportion") {
+            this.range.end = this.count - 1;
+          }
         }
 
         if (!this.direction && this.position) {
@@ -31076,6 +31359,26 @@ var Chartx = (function () {
         this.btnHeight = this.height - this.btnOut;
       }
     }, {
+      key: "_getDisPart",
+      value: function _getDisPart() {
+        var me = this;
+        var min = Math.max(parseInt(me.range.min / 2 / me.count * me.width), 23);
+        var max = parseInt((me.range.max + 1) / me.count * me.width); //柱状图用得这种x轴布局，不需要 /2
+
+        if (this.axisLayoutType == "peak") {
+          min = Math.max(parseInt(me.range.min / me.count * me.width), 23);
+        }
+
+        if (this.axisLayoutType == "proportion") {
+          //min = min;
+          max = me.width;
+        }
+        return {
+          min: min,
+          max: max
+        };
+      }
+    }, {
       key: "_getRangeEnd",
       value: function _getRangeEnd(end) {
         if (end === undefined) {
@@ -31085,6 +31388,11 @@ var Chartx = (function () {
         if (this.axisLayoutType == "peak") {
           end += 1;
         }
+
+        if (this.axisLayoutType == "proportion") {
+          end += 1;
+        }
+
         return end;
       }
     }, {
@@ -31174,7 +31482,7 @@ var Chartx = (function () {
               this.context.x = me._btnRight.context.x - me.btnWidth - 2;
             }
 
-            if (me._btnRight.context.x + me.btnWidth - this.context.x > me.disPart.max) {
+            if (me._btnRight.context.x + me.btnWidth - this.context.x >= me.disPart.max) {
               this.context.x = me._btnRight.context.x + me.btnWidth - me.disPart.max;
             }
 
@@ -31221,7 +31529,7 @@ var Chartx = (function () {
               this.context.x = me.width - me.btnWidth;
             }
 
-            if (this.context.x + me.btnWidth - me._btnLeft.context.x > me.disPart.max) {
+            if (this.context.x + me.btnWidth - me._btnLeft.context.x >= me.disPart.max) {
               this.context.x = me.disPart.max - (me.btnWidth - me._btnLeft.context.x);
             }
 
@@ -31323,20 +31631,6 @@ var Chartx = (function () {
         }
       }
     }, {
-      key: "_getDisPart",
-      value: function _getDisPart() {
-        var me = this;
-        var min = Math.max(parseInt(me.range.min / 2 / me.count * me.width), 23); //柱状图用得这种x轴布局，不需要 /2
-
-        if (this.axisLayoutType == "peak") {
-          min = Math.max(parseInt(me.range.min / me.count * me.width), 23);
-        }
-        return {
-          min: min,
-          max: parseInt(me.range.max / me.count * me.width)
-        };
-      }
-    }, {
       key: "_setRange",
       value: function _setRange(trigger) {
         var me = this;
@@ -31351,6 +31645,9 @@ var Chartx = (function () {
         if (this.axisLayoutType == "peak") {
           start = Math.round(start);
           end = Math.round(end);
+        } else if (this.axisLayoutType == "rule") {
+          start = parseInt(start);
+          end = parseInt(end);
         } else {
           start = parseInt(start);
           end = parseInt(end);
@@ -31445,6 +31742,7 @@ var Chartx = (function () {
           this.__graphssp.destroy();
         }
         var graphssp = this._cloneChart.thumbChart.graphsSprite;
+        graphssp.setEventEnable(false);
 
         var _coor = this._cloneChart.thumbChart.getComponent({
           name: 'coord'
@@ -31452,9 +31750,8 @@ var Chartx = (function () {
 
         graphssp.id = graphssp.id + "_datazoomthumbChartbg";
         graphssp.context.x = -_coor.origin.x; //0;
-        //TODO:这里为什么要 -2 的原因还没查出来。
+        //缩放到横条范围内
 
-        graphssp.context.y = -2;
         graphssp.context.scaleY = this.btnHeight / _coor.height;
         graphssp.context.scaleX = this.width / _coor.width;
         this.dataZoomBg.addChild(graphssp, 0);
@@ -31557,7 +31854,7 @@ var Chartx = (function () {
 
       _this.app.graphsSprite.addChild(_this.sprite);
 
-      _.extend(true, _assertThisInitialized(_this), getDefaultProps(MarkLine.defaultProps()), opt);
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(MarkLine.defaultProps()), opt);
 
       return _this;
     }
@@ -31868,13 +32165,13 @@ var Chartx = (function () {
 
       _this.app.stage.addChild(_this.sprite);
 
-      var me = _assertThisInitialized(_this);
+      var me = _assertThisInitialized(_assertThisInitialized(_this));
 
       _this.sprite.on("destroy", function () {
         me._tipDom = null;
       });
 
-      _.extend(true, _assertThisInitialized(_this), getDefaultProps(Tips.defaultProps()), opt);
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(Tips.defaultProps()), opt);
 
       return _this;
     }
@@ -32351,7 +32648,7 @@ var Chartx = (function () {
       };
       */
 
-      _.extend(true, _assertThisInitialized(_this), getDefaultProps(barTgi.defaultProps()), opt);
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(barTgi.defaultProps()), opt);
 
       _this._yAxis = _this.app.getComponent({
         name: 'coord'
@@ -32537,7 +32834,7 @@ var Chartx = (function () {
       _this._yAxis = null;
       _this.sprite = null;
 
-      _.extend(true, _assertThisInitialized(_this), getDefaultProps(barGuide.defaultProps()), opt);
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(barGuide.defaultProps()), opt);
 
       _this._yAxis = _this.app.getComponent({
         name: 'coord'
@@ -32743,7 +33040,7 @@ var Chartx = (function () {
       _this.width = _this.app.width;
       _this.height = _this.app.height;
 
-      _.extend(true, _assertThisInitialized(_this), getDefaultProps(waterMark.defaultProps()), opt);
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(waterMark.defaultProps()), opt);
 
       _this.spripte = new Canvax.Display.Sprite({
         id: "watermark"
@@ -32857,7 +33154,7 @@ var Chartx = (function () {
 
       _this._vLine = null; //竖向的线
 
-      _.extend(true, _assertThisInitialized(_this), getDefaultProps(Cross.defaultProps()), opt);
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(Cross.defaultProps()), opt);
 
       _this._yAxis = _this.app.getComponent({
         name: 'coord'
@@ -32984,7 +33281,7 @@ var Chartx = (function () {
       _this = _possibleConstructorReturn(this, _getPrototypeOf(lineSchedu).call(this, opt, app));
       _this.name = "lineSchedu";
 
-      _.extend(true, _assertThisInitialized(_this), getDefaultProps(lineSchedu.defaultProps()), opt);
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(lineSchedu.defaultProps()), opt);
 
       _this.lineDatas = null;
       _this.sprite = new Canvax.Display.Sprite();
@@ -33235,7 +33532,7 @@ var Chartx = (function () {
       _this = _possibleConstructorReturn(this, _getPrototypeOf(markCloumn).call(this, opt, app));
       _this.name = "markcloumn";
 
-      _.extend(true, _assertThisInitialized(_this), getDefaultProps(markCloumn.defaultProps()), opt);
+      _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(markCloumn.defaultProps()), opt);
 
       _this._line = null;
       _this._nodes = new Canvax.Display.Sprite();
@@ -33306,9 +33603,11 @@ var Chartx = (function () {
               var nodes = _g.getNodesOfPos(xNode.x);
 
               if (me.markTo) {
-                me.nodes = [_.find(nodes, function (node) {
+                var _node = _.find(nodes, function (node) {
                   return node.field == me.markTo;
-                })];
+                });
+
+                _node && (me.nodes = [_node]);
               } else {
                 me.nodes = me.nodes.concat(nodes);
               }

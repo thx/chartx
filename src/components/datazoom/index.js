@@ -30,7 +30,7 @@ class dataZoom extends Component
                 detail : '颜色',
                 default: '#008ae6' 
             },
-            range : {
+            range : { //propotion中，start 和 end代表的是数值的大小
                 detail : '范围设置',
                 propertys : {
                     start : {
@@ -159,8 +159,8 @@ class dataZoom extends Component
         this._cloneChart = null;
         
         this.count = 1; //把w 均为为多少个区间， 同样多节点的line 和  bar， 这个count相差一
-        this.dataLen = 1;
-        this.axisLayoutType = null; //和line bar等得xAxis.layoutType 一一对应
+        this.dataLen = 1; //总共有多少条数据 
+        this.axisLayoutType = null; //和xAxis.layoutType 一一对应  peak rule proportion
 
         this.dragIng = function(){};
         this.dragEnd = function(){};
@@ -192,6 +192,9 @@ class dataZoom extends Component
 
         //预设默认的opt.dataZoom
         _.extend( true, this, getDefaultProps( dataZoom.defaultProps() ) , opt);
+
+        this.axis = null; //对应哪个轴
+        
         this.layout();
 
 	}
@@ -200,7 +203,7 @@ class dataZoom extends Component
     //datazoom begin
     layout()
     {
-        let me = this;
+
         let app = this.app;
         if( this.position == "bottom" ){
             //目前dataZoom是固定在bottom位置的
@@ -212,21 +215,22 @@ class dataZoom extends Component
             this.pos.y = app.padding.top + this.margin.top;
             app.padding.top += (this.height + this.margin.top + this.margin.bottom);
         };
-
         
     }
  
 
     _getCloneChart() 
     {
+        var me = this;
         var app = this.app;
+        var _coord = app.getCoord();
         var chartConstructor = app.constructor;//(barConstructor || Bar);
         var cloneEl = app.el.cloneNode();
         cloneEl.innerHTML = "";
         cloneEl.id = app.el.id + "_currclone";
         cloneEl.style.position = "absolute";
-        cloneEl.style.width = app.el.offsetWidth + "px";
-        cloneEl.style.height = app.el.offsetHeight + "px";
+        cloneEl.style.width = this.width + "px";
+        cloneEl.style.height = this.btnHeight+"px"; //app.el.offsetHeight + "px";
         cloneEl.style.top = "10000px";
         document.body.appendChild(cloneEl);
 
@@ -251,7 +255,6 @@ class dataZoom extends Component
                             radius: 0
                         },
                         animation: false,
-                        eventEnabled: false,
                         label: {
                             enabled: false
                         }
@@ -271,16 +274,25 @@ class dataZoom extends Component
                             fillStyle: "#ececec"
                         },
                         animation: false,
-                        eventEnabled: false,
                         label: {
                             enabled: false
                         }
                     } )
-                }
+                };
+
+                
+                var _h = _coord.height || app.el.offsetHeight;
+                var radiusScale = (me.btnHeight / _h) || 1 ;
                 if( _g.type == "scat" ){
                     _.extend( true, _opt, {
+                        animation: false,
                         node : {
-                            fillStyle : "#ececec"
+                            //fillStyle : "#ececec",
+                            radiusScale : radiusScale,
+                            fillAlpha : 0.4
+                        },
+                        label: {
+                            enabled: false
                         }
                     } )
                 }
@@ -288,6 +300,7 @@ class dataZoom extends Component
                 graphsOpt.push( _opt );
             }
         } );
+
         var opt = {
             coord : app._opt.coord,
             graphs : graphsOpt
@@ -298,6 +311,7 @@ class dataZoom extends Component
         };
 
         opt.coord.enabled = false;
+        opt.coord.padding = 0;
 
         var thumbChart = new chartConstructor(cloneEl, app._data, opt, app.componentModules);
         thumbChart.draw();
@@ -322,11 +336,30 @@ class dataZoom extends Component
                 x: coordInfo.origin.x
             },
             dragIng: function(range) {
-                var trigger = new Trigger( me, {
-                    left :  app.dataFrame.range.start - range.start,
-                    right : range.end - app.dataFrame.range.end
-                } );
-                _.extend( app.dataFrame.range , range );
+                var trigger;
+
+                if( me.axisLayoutType == 'proportion' ){
+                    trigger = new Trigger( me, {
+                        min :  range.start,
+                        max : range.end
+                    } );
+                    app.dataFrame.filters[ 'datazoom' ] = function( rowData ){
+                        var val = rowData[ me.axis.field ];
+
+                        //把range.start  range.end换算成axis上面对应的数值区间
+                        var min = me.axis.getValOfPos( range.start );
+                        var max = me.axis.getValOfPos( range.end );
+                        
+                        return val >= min && val <= max;
+                    };
+                } else {
+                    trigger = new Trigger( me, {
+                        left :  app.dataFrame.range.start - range.start,
+                        right : range.end - app.dataFrame.range.end
+                    } );
+                    _.extend( app.dataFrame.range , range );
+                };
+                
                 //不想要重新构造dataFrame，所以第一个参数为null
                 app.resetData( null , trigger );
                 app.fire("dataZoomDragIng");
@@ -345,7 +378,8 @@ class dataZoom extends Component
         this._setDataZoomOpt();
         
         this._cloneChart = this._getCloneChart();
-        this.axisLayoutType = this._cloneChart.thumbChart.getComponent({name:'coord'})._xAxis.layoutType; //和line bar等得xAxis.layoutType 一一对应
+        this.axis = this._cloneChart.thumbChart.getComponent({name:'coord'})._xAxis;
+        this.axisLayoutType = this.axis.layoutType; //和line bar等得xAxis.layoutType 一一对应
 
         this._computeAttrs();
 
@@ -391,13 +425,26 @@ class dataZoom extends Component
         var _cloneChart = this._cloneChart.thumbChart
 
         this.dataLen = _cloneChart.dataFrame.length;
-        this.count = this.axisLayoutType == "rule" ? this.dataLen-1 : this.dataLen;
+        switch( this.axisLayoutType ){
+            case "rule":
+                this.count = this.dataLen-1;
+                break;
+            case "peak":
+                this.count = this.dataLen;
+                break;
+            case "proportion":
+                this.count = this.width;
+                break;
+        };
         
         if(!this.range.max || this.range.max > this.count){
-            this.range.max = this.count;
+            this.range.max = this.count - 1;
         };
         if( !this.range.end || this.range.end > this.dataLen - 1 ){
             this.range.end = this.dataLen - 1;
+            if( this.axisLayoutType == "proportion" ){
+                this.range.end = this.count - 1;
+            };
         };
 
         //如果用户没有配置layoutType但是配置了position
@@ -412,6 +459,26 @@ class dataZoom extends Component
         this.disPart = this._getDisPart();
         this.btnHeight = this.height - this.btnOut;
     }
+    _getDisPart()
+    {
+        var me = this;
+        var min = Math.max( parseInt(me.range.min / 2 / me.count * me.width), 23 );
+        var max = parseInt((me.range.max+1) / me.count * me.width);
+        //柱状图用得这种x轴布局，不需要 /2
+        if( this.axisLayoutType == "peak" ){
+            min = Math.max( parseInt(me.range.min / me.count * me.width), 23 );
+        };
+
+        if( this.axisLayoutType == "proportion" ){
+            //min = min;
+            max = me.width;
+        };
+
+        return {
+            min : min,
+            max : max
+        };
+    }
 
     _getRangeEnd( end )
     {
@@ -420,7 +487,11 @@ class dataZoom extends Component
         }
         if( this.axisLayoutType == "peak" ){
             end += 1;
-        };
+        }
+        if( this.axisLayoutType == "proportion" ){
+            end += 1;
+        }
+     
         return end
     }
 
@@ -476,7 +547,6 @@ class dataZoom extends Component
                 me._underline = me._addLine( underlineCtx )
                 me.dataZoomBg.addChild(me._underline); 
             };
-            
         }
 
 
@@ -507,7 +577,7 @@ class dataZoom extends Component
                 if(this.context.x > (me._btnRight.context.x - me.btnWidth - 2)){
                     this.context.x = me._btnRight.context.x - me.btnWidth - 2
                 };
-                if(me._btnRight.context.x + me.btnWidth - this.context.x > me.disPart.max){
+                if(me._btnRight.context.x + me.btnWidth - this.context.x >= me.disPart.max){
                     this.context.x = me._btnRight.context.x + me.btnWidth - me.disPart.max
                 }
                 if(me._btnRight.context.x + me.btnWidth - this.context.x < me.disPart.min){
@@ -525,6 +595,7 @@ class dataZoom extends Component
             this.dataZoomBtns.addChild( this._btnLeft );
         };
 
+        
         var btnRightCtx = {
             x: me._getRangeEnd() / me.count * me.width - me.btnWidth,
             y: - me.btnOut / 2 + 1,
@@ -551,7 +622,7 @@ class dataZoom extends Component
                 if( this.context.x > me.width - me.btnWidth ){
                     this.context.x = me.width - me.btnWidth;
                 };
-                if( this.context.x + me.btnWidth - me._btnLeft.context.x > me.disPart.max){
+                if( this.context.x + me.btnWidth - me._btnLeft.context.x >= me.disPart.max){
                     this.context.x = me.disPart.max - (me.btnWidth - me._btnLeft.context.x)
                 };
                 if( this.context.x + me.btnWidth - me._btnLeft.context.x < me.disPart.min){
@@ -639,21 +710,6 @@ class dataZoom extends Component
         
     }
 
-    _getDisPart()
-    {
-        var me = this;
-        var min = Math.max( parseInt(me.range.min / 2 / me.count * me.width), 23 );
-        //柱状图用得这种x轴布局，不需要 /2
-        if( this.axisLayoutType == "peak" ){
-            min = Math.max( parseInt(me.range.min / me.count * me.width), 23 );
-        };
-
-        return {
-            min : min,
-            max : parseInt(me.range.max / me.count * me.width)
-        }
-    }
-
     _setRange( trigger )
     {
         var me = this;
@@ -667,9 +723,12 @@ class dataZoom extends Component
         if( this.axisLayoutType == "peak" ){
             start = Math.round( start );
             end = Math.round( end );
-        } else {
+        } else if( this.axisLayoutType == "rule" ) {
             start = parseInt( start );
             end = parseInt( end );
+        } else {
+            start = parseInt( start );
+            end = parseInt( end );;
         };
 
         if( trigger == "btnCenter" ){
@@ -685,7 +744,6 @@ class dataZoom extends Component
                 end -= 1;
             };
             me.range.end = end;
-
             me.dragIng( me.range );
         };
 
@@ -766,13 +824,15 @@ class dataZoom extends Component
         };
 
         var graphssp = this._cloneChart.thumbChart.graphsSprite;
+        graphssp.setEventEnable(false);
+        
         var _coor = this._cloneChart.thumbChart.getComponent({name:'coord'});
 
         graphssp.id = graphssp.id + "_datazoomthumbChartbg"
         graphssp.context.x = -_coor.origin.x; //0;
 
-        //TODO:这里为什么要 -2 的原因还没查出来。
-        graphssp.context.y = - 2;
+
+        //缩放到横条范围内
         graphssp.context.scaleY = this.btnHeight / _coor.height;
         graphssp.context.scaleX = this.width / _coor.width;
 

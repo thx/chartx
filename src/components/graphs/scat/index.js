@@ -24,7 +24,7 @@ class ScatGraphs extends GraphsBase
                 propertys: {
                     dataKey : {
                         detail: '元素的数据id，默认索引匹配',
-                        default: null
+                        default: '__index__'
                     },
                     shapeType: {
                         detail: '图形类型',
@@ -42,6 +42,11 @@ class ScatGraphs extends GraphsBase
                     radius: {
                         detail: '半径',
                         default: null
+                    },
+                    radiusScale: {
+                        detail: '半径缩放比例',
+                        documentation: '在计算好真实半径后缩放，主要用在,缩略图中，比如datazoom的缩略图',
+                        default: 1
                     },
                     normalRadius: {
                         detail: '默认半径',
@@ -212,7 +217,7 @@ class ScatGraphs extends GraphsBase
     init()
     {
         this._shapesp = new Canvax.Display.Sprite({ 
-            id : "shapesp"
+            id : "scat_shapesp"
         });
         this._textsp = new Canvax.Display.Sprite({ 
             id : "textsp"
@@ -224,6 +229,7 @@ class ScatGraphs extends GraphsBase
         this.sprite.addChild( this._linesp );
         this.sprite.addChild( this._shapesp );
         this.sprite.addChild( this._textsp );
+        
     }
 
     draw(opt)
@@ -237,13 +243,14 @@ class ScatGraphs extends GraphsBase
         this.sprite.context.y = this.origin.y;
 
         var me = this;
+        
         if( this.animation && !opt.resize && !me.inited ){
             this.grow( function(){
                 me.fire("complete");
             } );
         } else {
             this.fire("complete");
-        }
+        };
 
         return this;
     }
@@ -266,6 +273,7 @@ class ScatGraphs extends GraphsBase
         var tmplData = [];
 
         var _coord = this.app.getComponent({name:'coord'});
+        
         var dataLen  = this.dataFrame.length;
 
         ////计算半径的时候需要用到， 每次执行_trimGraphs都必须要初始化一次
@@ -308,10 +316,11 @@ class ScatGraphs extends GraphsBase
                 fillStyle  : null,
                 color      : null,
                 strokeStyle: null,
+                strokeAlpha: 1,
                 lineWidth  : 0,
                 shapeType  : null,
                 label      : null,
-                fillAlpha  : 0,
+                fillAlpha  : 1,
 
                 nodeElement: null //对应的canvax 节点， 在widget之后赋值
             };
@@ -321,6 +330,7 @@ class ScatGraphs extends GraphsBase
             this._setFillAlpha( nodeLayoutData );
             this._setStrokeStyle( nodeLayoutData );
             this._setLineWidth( nodeLayoutData );
+            this._setStrokeAlpha( nodeLayoutData );
             this._setNodeType( nodeLayoutData );
             this._setText( nodeLayoutData );
 
@@ -359,6 +369,9 @@ class ScatGraphs extends GraphsBase
                 r = parseInt( this.node.radius )
             };
         };
+
+        r = Math.max( r * this.node.radiusScale , 2 );
+
         nodeLayoutData.radius = r;
         return this;
 
@@ -380,10 +393,14 @@ class ScatGraphs extends GraphsBase
     }
     _setFillAlpha( nodeLayoutData )
     {
-        nodeLayoutData.fillAlpha = this._getStyle( this.node.fillAlpha, nodeLayoutData );
+        nodeLayoutData.fillAlpha = this._getProp( this.node.fillAlpha, nodeLayoutData );
         return this;
     }
-    
+
+    _setStrokeAlpha( nodeLayoutData ){
+        nodeLayoutData.strokeAlpha = this._getProp( this.node.strokeAlpha, nodeLayoutData );
+        return this;
+    }
 
     _setStrokeStyle( nodeLayoutData )
     {
@@ -391,6 +408,17 @@ class ScatGraphs extends GraphsBase
         return this;
     }
 
+    _getProp( prop, nodeLayoutData )
+    {
+        var _prop = prop;
+        if( _.isArray( prop ) ){
+            _prop = prop[ nodeLayoutData.iGroup ]
+        };
+        if( _.isFunction( prop ) ){
+            _prop = prop.apply( this, [nodeLayoutData] );
+        };
+        return _prop;
+    }
     _getStyle( style, nodeLayoutData )
     {
         var _style = style;
@@ -398,7 +426,7 @@ class ScatGraphs extends GraphsBase
             _style = style[ nodeLayoutData.iGroup ]
         };
         if( _.isFunction( style ) ){
-            _style = style( nodeLayoutData );
+            _style = style.apply( this, [nodeLayoutData] );
         };
         if( !_style ){
             _style = nodeLayoutData.fieldColor;
@@ -408,7 +436,7 @@ class ScatGraphs extends GraphsBase
 
     _setLineWidth( nodeLayoutData )
     {
-        nodeLayoutData.lineWidth = this.node.lineWidth;
+        nodeLayoutData.lineWidth = this._getProp( this.node.lineWidth, nodeLayoutData );
         return this;
     }
 
@@ -700,6 +728,7 @@ class ScatGraphs extends GraphsBase
             r : nodeData.radius,
             fillStyle : nodeData.fillStyle,
             strokeStyle : nodeData.strokeStyle,
+            strokeAlpha : nodeData.strokeAlpha,
             lineWidth : nodeData.lineWidth,
             fillAlpha : nodeData.fillAlpha,
             cursor : "pointer"
@@ -774,7 +803,7 @@ class ScatGraphs extends GraphsBase
         if( !this.node.focus.enabled || !nodeData.focused ) return;
         var nctx = nodeData.nodeElement.context; 
         nctx.lineWidth = nodeData.lineWidth;
-        nctx.strokeAlpha = this.node.strokeAlpha;
+        nctx.strokeAlpha = nodeData.strokeAlpha;
         nctx.fillAlpha = nodeData.fillAlpha;
         nctx.strokeStyle = nodeData.strokeStyle;
 
@@ -806,9 +835,9 @@ class ScatGraphs extends GraphsBase
             nctx.strokeAlpha = this.node.focus.strokeAlpha;
             nctx.fillAlpha = this.node.focus.fillAlpha;
         } else {
-            nctx.lineWidth = this.node.lineWidth;
-            nctx.strokeAlpha = this.node.strokeAlpha;
-            nctx.fillAlpha = this.node.fillAlpha;
+            nctx.lineWidth = nodeData.lineWidth;
+            nctx.strokeAlpha = nodeData.strokeAlpha;
+            nctx.fillAlpha = nodeData.fillAlpha;
         }
 
         nodeData.selected = false;

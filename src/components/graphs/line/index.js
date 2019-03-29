@@ -68,14 +68,11 @@ class LineGraphs extends GraphsBase
 
     resetData(dataFrame, dataTrigger)
     {
-        
         var me = this;
-
         if( dataFrame ){
             me.dataFrame = dataFrame;
             me.data = me._trimGraphs();
         };
-
         _.each( me.groups, function(g){
             g.resetData( me.data[ g.field ].data , dataTrigger );
         } );
@@ -106,8 +103,9 @@ class LineGraphs extends GraphsBase
 
             //单条line的全部data数据
             var _lineData = me.dataFrame.getFieldData(field);
+            
             if( !_lineData ) return;
-
+console.log( JSON.stringify( _lineData ) )
             var _data = [];
 
             for (var b = 0, bl = _lineData.length; b < bl; b++) {

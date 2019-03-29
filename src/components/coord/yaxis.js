@@ -458,7 +458,6 @@ export default class yAxis extends Axis
             } else {
                 this._axisLine.animate( _axisLineCtx );
             }
-            
         }
 
         if (this._title) {
