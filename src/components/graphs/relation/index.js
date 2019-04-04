@@ -527,7 +527,7 @@ class Relation extends GraphsBase {
                 }
             });
 
-            /*
+            /*  edge的xy 就是 可以用来显示label的位置
             var _circle = new Circle({
                 context : {
                     r : 4,
@@ -599,19 +599,19 @@ class Relation extends GraphsBase {
     _setTreePoints( edge ){
         var points = edge.points;
       
-        if( this.rankdir == "TB" ){
+        if( this.rankdir == "TB" || this.rankdir == "BT" ){
             points[0] = {
                 x : edge.source.x,
-                y : edge.source.y + edge.source.height/2
+                y : edge.source.y + (this.rankdir == "BT"?-1:1)*edge.source.height/2
             };
             points.splice(1,0,{
                 x : edge.source.x,
                 y : points.slice(-2,-1)[0].y
             });
         }
-        if( this.rankdir == "LR" ){
+        if( this.rankdir == "LR" || this.rankdir == "RL" ){
             points[0] = {
-                x : edge.source.x + edge.source.width/2,
+                x : edge.source.x + (this.rankdir == "RL"?-1:1)*edge.source.width/2,
                 y : edge.source.y
             };
             points.splice(1,0,{
