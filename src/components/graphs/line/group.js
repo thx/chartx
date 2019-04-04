@@ -254,7 +254,7 @@ export default class LineGraphsGroup extends event.Dispatcher
         };
 
         me._pointList = this._getPointList( this.data );
-        console.log( me._pointList )
+        
         var plen = me._pointList.length;
         var cplen = me._currPointList.length;
 

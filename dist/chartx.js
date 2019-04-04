@@ -37,21 +37,6 @@ var Chartx = (function () {
     return Constructor;
   }
 
-  function _defineProperty(obj, key, value) {
-    if (key in obj) {
-      Object.defineProperty(obj, key, {
-        value: value,
-        enumerable: true,
-        configurable: true,
-        writable: true
-      });
-    } else {
-      obj[key] = value;
-    }
-
-    return obj;
-  }
-
   function _inherits(subClass, superClass) {
     if (typeof superClass !== "function" && superClass !== null) {
       throw new TypeError("Super expression must either be null or a function");
@@ -1650,7 +1635,13 @@ var Chartx = (function () {
 
   function dataFrame (dataOrg, opt) {
     //数据做一份拷贝，避免污染源数据
-    dataOrg = JSON.parse(JSON.stringify(dataOrg));
+    dataOrg = JSON.parse(JSON.stringify(dataOrg, function (k, v) {
+      if (v === undefined) {
+        return null;
+      }
+
+      return v;
+    }));
     var dataFrame = {
       //数据框架集合
       length: 0,
@@ -1724,7 +1715,9 @@ var Chartx = (function () {
       }
 
       var rows = _getValidRows(function (rowData) {
-        _.each(rowData, function (_val, _field) {
+        _.each(dataFrame.fields, function (_field) {
+          var _val = rowData[_field];
+
           if (!isNaN(_val) && _val !== "" && _val !== null) {
             _val = Number(_val);
           }
@@ -16055,7 +16048,6 @@ var Chartx = (function () {
           this.data = data;
         }
         me._pointList = this._getPointList(this.data);
-        console.log(me._pointList);
         var plen = me._pointList.length;
         var cplen = me._currPointList.length;
         var params = {
@@ -24110,10 +24102,12 @@ var Chartx = (function () {
             child.depth = node.depth + 1;
           }
 
-          var _value = +value.call(hierarchy, node, node.depth);
+          if (value) {
+            var _value = +value.call(hierarchy, node, node.depth);
 
-          if (_value && !isNaN(_value)) {
-            node._value = _value;
+            if (_value && !isNaN(_value)) {
+              node._value = _value;
+            }
           }
           if (value) node.value = 0;
           node.children = childs;
@@ -24123,7 +24117,7 @@ var Chartx = (function () {
         }
       }
 
-      layout_hierarchyVisitAfter(app, function (node) {
+      Hierarchy.layout_hierarchyVisitAfter(app, function (node) {
         var childs, parent;
         if (sort && (childs = node.children)) childs.sort(sort);
         if (value && (parent = node.parent)) parent.value += node.value;
@@ -24157,10 +24151,10 @@ var Chartx = (function () {
 
     hierarchy.revalue = function (app) {
       if (value) {
-        layout_hierarchyVisitBefore(app, function (node) {
+        Hierarchy.layout_hierarchyVisitBefore(app, function (node) {
           if (node.children) node.value = 0;
         });
-        layout_hierarchyVisitAfter(app, function (node) {
+        Hierarchy.layout_hierarchyVisitAfter(app, function (node) {
           var parent;
           if (!node.children) node.value = +value.call(hierarchy, node, node.depth) || 0;
           if (parent = node.parent) parent.value += node.value;
@@ -24185,7 +24179,7 @@ var Chartx = (function () {
     return object;
   };
 
-  function layout_hierarchyVisitBefore(node, callback) {
+  Hierarchy.layout_hierarchyVisitBefore = function (node, callback) {
     var nodes = [node];
 
     while ((node = nodes.pop()) != null) {
@@ -24199,9 +24193,9 @@ var Chartx = (function () {
         }
       }
     }
-  }
+  };
 
-  function layout_hierarchyVisitAfter(node, callback) {
+  Hierarchy.layout_hierarchyVisitAfter = function (node, callback) {
     var nodes = [node],
         nodes2 = [];
 
@@ -24222,7 +24216,7 @@ var Chartx = (function () {
     while ((node = nodes2.pop()) != null) {
       callback(node);
     }
-  }
+  };
 
   function layout_hierarchyChildren(d) {
     return d.children;
@@ -25968,7 +25962,7 @@ var Chartx = (function () {
   var childrenKey = 'children';
   var defaultFieldKey = '__key__';
 
-  function checkData(data, key) {
+  function checkDataIsJson(data, key) {
     var result = false; //1、要求数据必须是一个数组
 
     if (!_.isArray(data)) return false; //2、数组中的每个元素是一个对象
@@ -25981,8 +25975,7 @@ var Chartx = (function () {
       result = _.every(data, function (item) {
         return !_.isArray(item[key]);
       });
-    } //4、至少有一个元素中存在关键字
-
+    }
 
     result = _.some(data, function (item) {
       return childrenKey in item;
@@ -25996,11 +25989,10 @@ var Chartx = (function () {
     var key = options.field || defaultFieldKey;
     var label = options.node && options.node.content && options.node.content.field;
 
-    if (!checkData(data, key)) {
+    if (!checkDataIsJson(data, key)) {
       console.error('该数据不能正确绘制，请提供数组对象形式的数据！');
       return result;
     }
-
     var childrens = [];
     var index$$1 = 0;
     var item = undefined;
@@ -26059,6 +26051,72 @@ var Chartx = (function () {
     return result;
   }
 
+  function arrayToTreeJsonForRelation(data, options) {
+    // [ { key: 1, name: },{key:'1,2'} ] to [ { name: children: [ {}... ] } ] 
+    var _nodes = {};
+    var _edges = {};
+
+    _.each(data, function (item) {
+      var key = item[options.field];
+
+      if (key.split(',').length == 1) {
+        _nodes[key] = item;
+      } else {
+        _edges[key] = item;
+      }
+    }); //先找到所有的一层
+
+
+    var arr = [];
+
+    _.each(_nodes, function (node, nkey) {
+      var isFirstLev = true;
+
+      _.each(_edges, function (edge, ekey) {
+        if (ekey.split(',')[1] == nkey) {
+          isFirstLev = false;
+          return false;
+        }
+      });
+
+      if (isFirstLev) {
+        arr.push(node);
+        node.__inRelation = true;
+      }
+    }); //有了第一层就好办了
+
+
+    function getChildren(list) {
+      _.each(list, function (node, i) {
+        if (node.__cycle) return;
+        var key = node[options.field];
+
+        _.each(_edges, function (edge, ekey) {
+          if (ekey.split(',')[0] == key) {
+            //那么说明[1] 就是自己的children
+            var childNode = _nodes[ekey.split(',')[1]];
+
+            if (childNode) {
+              if (!node.children) node.children = [];
+              node.children.push(childNode); //如果这个目标节点__inRelation已经在关系结构中
+              //那么说明形成闭环了，不需要再分析这个节点的children
+
+              if (childNode.__inRelation) {
+                childNode.__cycle = true;
+              }
+            }
+          }
+        });
+
+        if (node.children && node.children.length) {
+          getChildren(node.children);
+        }
+      });
+    }
+    getChildren(arr);
+    return arr;
+  }
+
   var Rect$7 = Canvax.Shapes.Rect;
   var Path$5 = Canvax.Shapes.Path;
   var Arrow = Canvax.Shapes.Arrow;
@@ -26082,9 +26140,22 @@ var Chartx = (function () {
             documentation: '',
             default: null
           },
+          //rankdir: "TB",
+          //align: "DR",
+          //nodesep: 0,//同级node之间的距离
+          //edgesep: 0,
+          //ranksep: 0, //排与排之间的距离
+          rankdir: {
+            detail: '布局方向',
+            default: null
+          },
           node: {
             detail: '单个节点的配置',
             propertys: {
+              shapeType: {
+                detail: '节点图形，目前只支持rect',
+                default: 'rect'
+              },
               maxWidth: {
                 detail: '节点最大的width',
                 default: 200
@@ -26143,7 +26214,20 @@ var Chartx = (function () {
           },
           line: {
             detail: '两个节点连线配置',
-            propertys: _defineProperty({
+            propertys: {
+              isTree: {
+                detail: '是否树结构的连线',
+                documentation: '非树结构启用该配置可能会有意想不到的惊喜，慎用',
+                default: false
+              },
+              shapeType: {
+                detail: '连线的图形样式 brokenLine or bezier',
+                default: 'bezier'
+              },
+              lineWidth: {
+                detail: '线宽',
+                default: 1
+              },
               strokeStyle: {
                 detail: '连线的颜色',
                 default: '#e5e5e5'
@@ -26152,8 +26236,11 @@ var Chartx = (function () {
                 detail: '连线样式（虚线等）',
                 default: 'solid'
               },
-              arrow: {}
-            }, "strokeStyle", {})
+              arrow: {
+                detail: '是否有箭头',
+                default: true
+              }
+            }
           },
           layout: {
             detail: '采用的布局引擎,比如dagre',
@@ -26161,7 +26248,7 @@ var Chartx = (function () {
           },
           layoutOpts: {
             detail: '布局引擎对应的配置,dagre详见dagre的官方wiki',
-            default: {}
+            propertys: {}
           },
           status: {
             detail: '一些开关配置',
@@ -26210,6 +26297,7 @@ var Chartx = (function () {
       if (_this.layout === 'dagre') {
         var dagreOpts = {
           graph: {
+            rankdir: 'TB',
             nodesep: 10,
             ranksep: 10,
             edgesep: 10,
@@ -26223,8 +26311,14 @@ var Chartx = (function () {
         _.extend(true, dagreOpts, _this.layoutOpts);
 
         _.extend(true, _this.layoutOpts, dagreOpts);
-      }
 
+        if (!_this.rankdir) {
+          _this.rankdir = _this.layoutOpts.graph.rankdir;
+        } else {
+          //如果有设置this.randdir 则已经 ta 为准
+          _this.layoutOpts.graph.rankdir = _this.rankdir;
+        }
+      }
       _this.domContainer = app.canvax.domView;
       _this.induce = null;
 
@@ -26382,6 +26476,8 @@ var Chartx = (function () {
 
         if (this.layout == "dagre") {
           this.dagreLayout(this.data);
+        } else if (this.layout == "tree") {
+          this.treeLayout(this.data);
         } else if (_.isFunction(this.layout)) {
           //layout需要设置好data中nodes的xy， 以及edges的points，和 size的width，height
           this.layout(this.data);
@@ -26418,10 +26514,18 @@ var Chartx = (function () {
         };
         var originData = this.app._data;
 
-        if (checkData(originData, this.field)) {
-          var result = jsonToArrayForRelation(originData, this);
-          this.dataFrame = dataFrame(result);
+        if (checkDataIsJson(originData, this.field)) {
+          this.jsonData = jsonToArrayForRelation(originData, this);
+          this.app.dataFrame = dataFrame(this.jsonData);
+        } else {
+          if (this.layout == "tree") {
+            //源数据就是图表标准数据，只需要转换成json的Children格式
+            //app.dataFrame.jsonOrg ==> [{name: key:} ...] 不是children的树结构
+            //tree layout算法需要children格式的数据，蛋疼
+            this.jsonData = arrayToTreeJsonForRelation(this.app.dataFrame.jsonOrg, this);
+          }
         }
+        var _nodeMap = {};
 
         for (var i = 0; i < this.dataFrame.length; i++) {
           var rowData = this.dataFrame.getRowDataAt(i);
@@ -26432,6 +26536,7 @@ var Chartx = (function () {
 
           var node = {
             type: "relation",
+            iNode: i,
             rowData: rowData,
             key: fields.length == 1 ? fields[0] : fields,
             content: content,
@@ -26443,17 +26548,31 @@ var Chartx = (function () {
             height: null,
             //这个在layout的时候设置
             x: null,
-            y: null
+            y: null,
+            shapeType: null,
+            //如果是edge，要填写这两节点
+            source: null,
+            target: null
           };
 
           _.extend(node, this._getElementAndSize(node));
 
           if (fields.length == 1) {
+            node.shapeType = this.getProp(this.node.shapeType, node);
             data.nodes.push(node);
+            _nodeMap[node.key] = node;
           } else {
+            node.shapeType = this.getProp(this.line.shapeType, node);
             data.edges.push(node);
           }
         }
+
+        _.each(data.edges, function (edge) {
+          var keys = edge.key;
+          edge.source = _nodeMap[keys[0]];
+          edge.target = _nodeMap[keys[1]];
+        });
+
         return data;
       }
     }, {
@@ -26481,24 +26600,53 @@ var Chartx = (function () {
         return data;
       }
     }, {
+      key: "treeLayout",
+      value: function treeLayout(data) {
+        var tree = global$1.layout.tree().separation(function (a, b) {
+          //设置横向节点之间的间距
+          var totalWidth = a.width + b.width;
+          return totalWidth / 2 + 10;
+        });
+        var nodes = tree.nodes(this.jsonData[0]).reverse();
+        var links = tree.links(nodes);
+      }
+    }, {
       key: "widget",
       value: function widget() {
         var me = this;
 
         _.each(this.data.edges, function (edge) {
+          if (me.line.isTree) {
+            me._setTreePoints(edge);
+          }
+          var lineWidth = me.getProp(me.line.lineWidth, edge);
+          var strokeStyle = me.getProp(me.line.strokeStyle, edge);
+
           var _bl = new Path$5({
             context: {
               path: me._getPathStr(edge),
-              lineWidth: 1,
-              strokeStyle: "#ccc"
+              lineWidth: lineWidth,
+              strokeStyle: strokeStyle
             }
           });
 
+          var arrowControl = edge.points.slice(-2, -1)[0];
+
+          if (me.line.shapeType == "bezier") {
+            if (me.rankdir == "TB" || me.rankdir == "BT") {
+              arrowControl.x += (edge.source.x - edge.target.x) / 20;
+            }
+
+            if (me.rankdir == "LR" || me.rankdir == "RL") {
+              arrowControl.y += (edge.source.y - edge.target.y) / 20;
+            }
+          }
+
           var _arrow = new Arrow({
             context: {
-              control: edge.points.slice(-2, -1)[0],
+              control: arrowControl,
               point: edge.points.slice(-1)[0],
-              strokeStyle: "#ccc"
+              strokeStyle: strokeStyle
             }
           });
           /*
@@ -26514,8 +26662,8 @@ var Chartx = (function () {
           */
 
 
-          me.edgesSp.addChild(_arrow);
           me.edgesSp.addChild(_bl);
+          me.edgesSp.addChild(_arrow);
         });
 
         _.each(this.data.nodes, function (node) {
@@ -26526,9 +26674,9 @@ var Chartx = (function () {
               width: node.width,
               height: node.height,
               lineWidth: 1,
-              fillStyle: me.getProp(me.node.fillStyle),
-              strokeStyle: me.getProp(me.node.strokeStyle),
-              radius: _.flatten([me.getProp(me.node.radius)])
+              fillStyle: me.getProp(me.node.fillStyle, node),
+              strokeStyle: me.getProp(me.node.strokeStyle, node),
+              radius: _.flatten([me.getProp(me.node.radius, node)])
             }
           });
 
@@ -26557,8 +26705,8 @@ var Chartx = (function () {
               node.element.style.transform = "matrix(" + _boxShape.worldTransform.clone().scale(1 / devicePixelRatio, 1 / devicePixelRatio).toArray().join() + ")";
               node.element.style.transformOrigin = "left top"; //修改为左上角为旋转中心点来和canvas同步
 
-              node.element.style.marginLeft = me.getProp(me.node.padding) * me.status.transform.scale + "px";
-              node.element.style.marginTop = me.getProp(me.node.padding) * me.status.transform.scale + "px";
+              node.element.style.marginLeft = me.getProp(me.node.padding, node) * me.status.transform.scale + "px";
+              node.element.style.marginTop = me.getProp(me.node.padding, node) * me.status.transform.scale + "px";
               node.element.style.visibility = "visible";
             });
           }
@@ -26568,12 +26716,60 @@ var Chartx = (function () {
         this.induce.context.height = this.height;
       }
     }, {
+      key: "_setTreePoints",
+      value: function _setTreePoints(edge) {
+        var points = edge.points;
+
+        if (this.rankdir == "TB") {
+          points[0] = {
+            x: edge.source.x,
+            y: edge.source.y + edge.source.height / 2
+          };
+          points.splice(1, 0, {
+            x: edge.source.x,
+            y: points.slice(-2, -1)[0].y
+          });
+        }
+
+        if (this.rankdir == "LR") {
+          points[0] = {
+            x: edge.source.x + edge.source.width / 2,
+            y: edge.source.y
+          };
+          points.splice(1, 0, {
+            x: points.slice(-2, -1)[0].x,
+            y: edge.source.y
+          });
+        }
+
+        edge.points = points;
+      }
+    }, {
       key: "_getPathStr",
       value: function _getPathStr(edge) {
-        var head = edge.points[0];
-        var tail = edge.points.slice(-1)[0];
+        var points = edge.points;
+        var head = points[0];
+        var tail = points.slice(-1)[0];
         var str = "M" + head.x + " " + head.y;
-        str += ",Q" + edge.points[1].x + " " + edge.points[1].y + " " + tail.x + " " + tail.y; //str += "z"
+
+        if (edge.shapeType == "bezier") {
+          if (points.length == 3) {
+            str += ",Q" + points[1].x + " " + points[1].y + " " + tail.x + " " + tail.y;
+          }
+
+          if (points.length == 4) {
+            str += ",C" + points[1].x + " " + points[1].y + " " + points[2].x + " " + points[2].y + " " + tail.x + " " + tail.y;
+          }
+        }
+
+        if (edge.shapeType == "brokenLine") {
+          _.each(points, function (point, i) {
+            if (i) {
+              str += ",L" + point.x + " " + point.y;
+            }
+          });
+        } //str += "z"
+
 
         return str;
       }
@@ -26644,18 +26840,18 @@ var Chartx = (function () {
 
         var label = new Canvax.Display.Text(content, {
           context: {
-            fillStyle: me.getProp(me.node.content.fontColor),
-            textAlign: me.getProp(me.node.content.textAlign),
-            textBaseline: me.getProp(me.node.content.textBaseline)
+            fillStyle: me.getProp(me.node.content.fontColor, node),
+            textAlign: me.getProp(me.node.content.textAlign, node),
+            textBaseline: me.getProp(me.node.content.textBaseline, node)
           }
         });
 
         if (!width) {
-          width = label.getTextWidth() + me.getProp(me.node.padding) * me.status.transform.scale * 2;
+          width = label.getTextWidth() + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
         }
 
         if (!height) {
-          height = label.getTextHeight() + me.getProp(me.node.padding) * me.status.transform.scale * 2;
+          height = label.getTextHeight() + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
         }
         sprite.addChild(label);
         sprite.context.width = parseInt(width);
@@ -26680,18 +26876,18 @@ var Chartx = (function () {
 
         _dom.className = "chartx_relation_node";
         _dom.style.cssText += "; position:absolute;visibility:hidden;";
-        _dom.style.cssText += "; color:" + me.getProp(me.node.content.fontColor) + ";";
-        _dom.style.cssText += "; text-align:" + me.getProp(me.node.content.textAlign) + ";";
-        _dom.style.cssText += "; vertical-align:" + me.getProp(me.node.content.textBaseline) + ";";
+        _dom.style.cssText += "; color:" + me.getProp(me.node.content.fontColor, node) + ";";
+        _dom.style.cssText += "; text-align:" + me.getProp(me.node.content.textAlign, node) + ";";
+        _dom.style.cssText += "; vertical-align:" + me.getProp(me.node.content.textBaseline, node) + ";";
         _dom.innerHTML = content;
         this.domContainer.appendChild(_dom);
 
         if (!width) {
-          width = _dom.offsetWidth + me.getProp(me.node.padding) * me.status.transform.scale * 2;
+          width = _dom.offsetWidth + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
         }
 
         if (!height) {
-          height = _dom.offsetHeight + me.getProp(me.node.padding) * me.status.transform.scale * 2;
+          height = _dom.offsetHeight + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
         }
         return {
           element: _dom,
@@ -26704,8 +26900,21 @@ var Chartx = (function () {
       value: function getNodesAt(index$$1) {}
     }, {
       key: "getProp",
-      value: function getProp(prop, def) {
-        return prop;
+      value: function getProp(prop, nodeData) {
+        var _prop = prop;
+
+        if (this._isField(prop)) {
+          _prop = nodeData.rowData[prop];
+        } else {
+          if (_.isArray(prop)) {
+            _prop = prop[nodeData.iNode];
+          }
+
+          if (_.isFunction(prop)) {
+            _prop = prop.apply(this, [nodeData]);
+          }
+        }
+        return _prop;
       }
     }]);
 
@@ -30520,6 +30729,263 @@ var Chartx = (function () {
 
   global$1.registerLayout('dagre', dagre);
 
+  var TREE = function TREE() {
+    var hierarchy = Hierarchy().sort(null).value(null),
+        separation = layout_treeSeparation,
+        size = [1, 1],
+        // width, height
+    nodeSize = null;
+
+    function tree(d, i) {
+      var nodes = hierarchy.call(this, d, i),
+          root0 = nodes[0],
+          root1 = wrapTree(root0); // Compute the layout using Buchheim et al.'s algorithm.
+
+      Hierarchy.layout_hierarchyVisitAfter(root1, firstWalk), root1.parent.m = -root1.z;
+      Hierarchy.layout_hierarchyVisitBefore(root1, secondWalk); // If a fixed node size is specified, scale x and y.
+
+      if (nodeSize) Hierarchy.layout_hierarchyVisitBefore(root0, sizeNode); // If a fixed tree size is specified, scale x and y based on the extent.
+      // Compute the left-most, right-most, and depth-most nodes for extents.
+      else {
+          var left = root0,
+              right = root0,
+              bottom = root0;
+          Hierarchy.layout_hierarchyVisitBefore(root0, function (node) {
+            if (node.x < left.x) left = node;
+            if (node.x > right.x) right = node;
+            if (node.depth > bottom.depth) bottom = node;
+          });
+          var tx = separation(left, right) / 2 - left.x,
+              kx = size[0] / (right.x + separation(right, left) / 2 + tx),
+              ky = size[1] / (bottom.depth || 1);
+          Hierarchy.layout_hierarchyVisitBefore(root0, function (node) {
+            node.x = (node.x + tx) * kx;
+            node.y = node.depth * ky;
+          });
+        }
+      return nodes;
+    }
+
+    function wrapTree(root0) {
+      var root1 = {
+        A: null,
+        children: [root0]
+      },
+          queue = [root1],
+          node1;
+
+      while ((node1 = queue.pop()) != null) {
+        for (var children = node1.children, child, i = 0, n = children.length; i < n; ++i) {
+          queue.push((children[i] = child = {
+            _: children[i],
+            // source node
+            parent: node1,
+            children: (child = children[i].children) && child.slice() || [],
+            A: null,
+            // default ancestor
+            a: null,
+            // ancestor
+            z: 0,
+            // prelim
+            m: 0,
+            // mod
+            c: 0,
+            // change
+            s: 0,
+            // shift
+            t: null,
+            // thread
+            i: i // number
+
+          }).a = child);
+        }
+      }
+
+      return root1.children[0];
+    } // FIRST WALK
+    // Computes a preliminary x-coordinate for v. Before that, FIRST WALK is
+    // applied recursively to the children of v, as well as the function
+    // APPORTION. After spacing out the children by calling EXECUTE SHIFTS, the
+    // node v is placed to the midpoint of its outermost children.
+
+
+    function firstWalk(v) {
+      var children = v.children,
+          siblings = v.parent.children,
+          w = v.i ? siblings[v.i - 1] : null;
+
+      if (children.length) {
+        layout_treeShift(v);
+        var midpoint = (children[0].z + children[children.length - 1].z) / 2;
+
+        if (w) {
+          v.z = w.z + separation(v._, w._);
+          v.m = v.z - midpoint;
+        } else {
+          v.z = midpoint;
+        }
+      } else if (w) {
+        v.z = w.z + separation(v._, w._);
+      }
+
+      v.parent.A = apportion(v, w, v.parent.A || siblings[0]);
+    } // SECOND WALK
+    // Computes all real x-coordinates by summing up the modifiers recursively.
+
+
+    function secondWalk(v) {
+      v._.x = v.z + v.parent.m;
+      v.m += v.parent.m;
+    } // APPORTION
+    // The core of the algorithm. Here, a new subtree is combined with the
+    // previous subtrees. Threads are used to traverse the inside and outside
+    // contours of the left and right subtree up to the highest common level. The
+    // vertices used for the traversals are vi+, vi-, vo-, and vo+, where the
+    // superscript o means outside and i means inside, the subscript - means left
+    // subtree and + means right subtree. For summing up the modifiers along the
+    // contour, we use respective variables si+, si-, so-, and so+. Whenever two
+    // nodes of the inside contours conflict, we compute the left one of the
+    // greatest uncommon ancestors using the function ANCESTOR and call MOVE
+    // SUBTREE to shift the subtree and prepare the shifts of smaller subtrees.
+    // Finally, we add a new thread (if necessary).
+
+
+    function apportion(v, w, ancestor) {
+      if (w) {
+        var vip = v,
+            vop = v,
+            vim = w,
+            vom = vip.parent.children[0],
+            sip = vip.m,
+            sop = vop.m,
+            sim = vim.m,
+            som = vom.m,
+            shift;
+
+        while (vim = layout_treeRight(vim), vip = layout_treeLeft(vip), vim && vip) {
+          vom = layout_treeLeft(vom);
+          vop = layout_treeRight(vop);
+          vop.a = v;
+          shift = vim.z + sim - vip.z - sip + separation(vim._, vip._);
+
+          if (shift > 0) {
+            layout_treeMove(layout_treeAncestor(vim, v, ancestor), v, shift);
+            sip += shift;
+            sop += shift;
+          }
+
+          sim += vim.m;
+          sip += vip.m;
+          som += vom.m;
+          sop += vop.m;
+        }
+
+        if (vim && !layout_treeRight(vop)) {
+          vop.t = vim;
+          vop.m += sim - sop;
+        }
+
+        if (vip && !layout_treeLeft(vom)) {
+          vom.t = vip;
+          vom.m += sip - som;
+          ancestor = v;
+        }
+      }
+
+      return ancestor;
+    }
+
+    function sizeNode(node) {
+      node.x *= size[0];
+      node.y = node.depth * size[1];
+    }
+
+    tree.separation = function (x) {
+      if (!arguments.length) return separation;
+      separation = x;
+      return tree;
+    };
+
+    tree.size = function (x) {
+      if (!arguments.length) return nodeSize ? null : size;
+      nodeSize = (size = x) == null ? sizeNode : null;
+      return tree;
+    };
+
+    tree.nodeSize = function (x) {
+      if (!arguments.length) return nodeSize ? size : null;
+      nodeSize = (size = x) == null ? null : sizeNode;
+      return tree;
+    };
+
+    return Hierarchy.layout_hierarchyRebind(tree, hierarchy);
+  };
+
+  function layout_treeSeparation(a, b) {
+    return a.parent == b.parent ? 1 : 2;
+  } // function d3_layout_treeSeparationRadial(a, b) {
+  //   return (a.parent == b.parent ? 1 : 2) / a.depth;
+  // }
+  // NEXT LEFT
+  // This function is used to traverse the left contour of a subtree (or
+  // subforest). It returns the successor of v on this contour. This successor is
+  // either given by the leftmost child of v or by the thread of v. The function
+  // returns null if and only if v is on the highest level of its subtree.
+
+
+  function layout_treeLeft(v) {
+    var children = v.children;
+    return children.length ? children[0] : v.t;
+  } // NEXT RIGHT
+  // This function works analogously to NEXT LEFT.
+
+
+  function layout_treeRight(v) {
+    var children = v.children,
+        n;
+    return (n = children.length) ? children[n - 1] : v.t;
+  } // MOVE SUBTREE
+  // Shifts the current subtree rooted at w+. This is done by increasing
+  // prelim(w+) and mod(w+) by shift.
+
+
+  function layout_treeMove(wm, wp, shift) {
+    var change = shift / (wp.i - wm.i);
+    wp.c -= change;
+    wp.s += shift;
+    wm.c += change;
+    wp.z += shift;
+    wp.m += shift;
+  } // EXECUTE SHIFTS
+  // All other shifts, applied to the smaller subtrees between w- and w+, are
+  // performed by this function. To prepare the shifts, we have to adjust
+  // change(w+), shift(w+), and change(w-).
+
+
+  function layout_treeShift(v) {
+    var shift = 0,
+        change = 0,
+        children = v.children,
+        i = children.length,
+        w;
+
+    while (--i >= 0) {
+      w = children[i];
+      w.z += shift;
+      w.m += shift;
+      shift += w.s + (change += w.c);
+    }
+  } // ANCESTOR
+  // If vi-’s ancestor is a sibling of v, returns vi-’s ancestor. Otherwise,
+  // returns the specified (default) ancestor.
+
+
+  function layout_treeAncestor(vim, v, ancestor) {
+    return vim.a.parent === v.parent ? vim.a : ancestor;
+  }
+
+  global$1.registerLayout('tree', TREE);
+
   /**
    * 每个组件中对外影响的时候，要抛出一个trigger对象
    * 上面的comp属性就是触发这个trigger的组件本身
@@ -31009,6 +31475,14 @@ var Chartx = (function () {
               }
             }
           },
+          graphAlpha: {
+            detail: '图形的透明度',
+            default: 0.6
+          },
+          graphStyle: {
+            detail: '图形的颜色',
+            default: '#ececec'
+          },
           underline: {
             detail: 'underline',
             propertys: {
@@ -31148,38 +31622,36 @@ var Chartx = (function () {
             var _opt = _.extend(true, {}, _g._opt);
 
             _opt.field = _field;
+            var miniOpt = {};
 
             if (_g.type == "bar") {
-              _.extend(true, _opt, {
-                node: {
-                  fillStyle: "#ececec",
-                  radius: 0
-                },
-                animation: false,
-                label: {
-                  enabled: false
+              miniOpt = {
+                node: {//fillStyle: "#ececec"
                 }
-              });
+              };
+
+              if (me.graphStyle) {
+                miniOpt.node.fillStyle = me.graphStyle;
+              }
             }
 
             if (_g.type == "line") {
-              _.extend(true, _opt, {
+              miniOpt = {
                 line: {
-                  //lineWidth: 1,
-                  strokeStyle: "#ececec"
+                  lineWidth: 1 //strokeStyle: "#ececec"
+
                 },
                 node: {
                   enabled: false
                 },
-                area: {
-                  alpha: 1,
-                  fillStyle: "#ececec"
-                },
-                animation: false,
-                label: {
-                  enabled: false
+                area: {//fillStyle: "#ececec"
                 }
-              });
+              };
+
+              if (me.graphStyle) {
+                miniOpt.line.strokeStyle = me.graphStyle;
+                miniOpt.area.fillStyle = me.graphStyle;
+              }
             }
 
             var _h = _coord.height || app.el.offsetHeight;
@@ -31187,20 +31659,21 @@ var Chartx = (function () {
             var radiusScale = me.btnHeight / _h || 1;
 
             if (_g.type == "scat") {
-              _.extend(true, _opt, {
-                animation: false,
+              miniOpt = {
                 node: {
                   //fillStyle : "#ececec",
-                  radiusScale: radiusScale,
-                  fillAlpha: 0.4
-                },
-                label: {
-                  enabled: false
+                  radiusScale: radiusScale
                 }
-              });
-            }
+              };
 
-            graphsOpt.push(_opt);
+              if (me.graphStyle) ;
+            }
+            graphsOpt.push(_.extend(true, _opt, miniOpt, {
+              label: {
+                enabled: false
+              },
+              animation: false
+            }));
           }
         });
 
@@ -31754,6 +32227,7 @@ var Chartx = (function () {
 
         graphssp.context.scaleY = this.btnHeight / _coor.height;
         graphssp.context.scaleX = this.width / _coor.width;
+        graphssp.context.globalAlpha = this.graphAlpha;
         this.dataZoomBg.addChild(graphssp, 0);
         this.__graphssp = graphssp;
 

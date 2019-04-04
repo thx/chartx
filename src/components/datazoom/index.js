@@ -115,6 +115,15 @@ class dataZoom extends Component
                     }
                 }
             },
+            graphAlpha : {
+                detail : '图形的透明度',
+                default: 0.6
+            },
+            graphStyle : {
+                detail : '图形的颜色',
+                default: '#ececec'
+            },
+            
             underline : {
                 detail : 'underline',
                 propertys : {
@@ -248,56 +257,59 @@ class dataZoom extends Component
                 var _opt = _.extend( true, {} , _g._opt );
                 
                 _opt.field = _field;
+
+                var miniOpt = {};
                 if( _g.type == "bar" ){
-                    _.extend(true, _opt , {
+                    miniOpt = {
                         node: {
-                            fillStyle: "#ececec",
-                            radius: 0
-                        },
-                        animation: false,
-                        label: {
-                            enabled: false
+                            //fillStyle: "#ececec"
                         }
-                    } )
-                }
+                    };
+                    if( me.graphStyle ){
+                        miniOpt.node.fillStyle = me.graphStyle;
+                    };
+                };
                 if( _g.type == "line" ){
-                    _.extend( true,  _opt , {
+                    miniOpt = {
                         line: {
-                            //lineWidth: 1,
-                            strokeStyle: "#ececec"
+                            lineWidth: 1,
+                            //strokeStyle: "#ececec"
                         },
                         node: {
                             enabled: false
                         },
                         area: {
-                            alpha: 1,
-                            fillStyle: "#ececec"
-                        },
-                        animation: false,
-                        label: {
-                            enabled: false
+                            //fillStyle: "#ececec"
                         }
-                    } )
+                    };
+                    if( me.graphStyle ){
+                        miniOpt.line.strokeStyle = me.graphStyle;
+                        miniOpt.area.fillStyle = me.graphStyle;
+                    };
                 };
 
                 
                 var _h = _coord.height || app.el.offsetHeight;
                 var radiusScale = (me.btnHeight / _h) || 1 ;
                 if( _g.type == "scat" ){
-                    _.extend( true, _opt, {
-                        animation: false,
+                    miniOpt = {
                         node : {
                             //fillStyle : "#ececec",
-                            radiusScale : radiusScale,
-                            fillAlpha : 0.4
-                        },
-                        label: {
-                            enabled: false
+                            radiusScale : radiusScale
                         }
-                    } )
-                }
+                    };
+                    if( me.graphStyle ){
+                        //散点图用图形自己的颜色
+                        //miniOpt.node.fillStyle = me.graphStyle;
+                    };
+                };
 
-                graphsOpt.push( _opt );
+                graphsOpt.push( _.extend( true, _opt, miniOpt, {
+                    label: {
+                        enabled: false
+                    },
+                    animation: false
+                } ) );
             }
         } );
 
@@ -835,6 +847,8 @@ class dataZoom extends Component
         //缩放到横条范围内
         graphssp.context.scaleY = this.btnHeight / _coor.height;
         graphssp.context.scaleX = this.width / _coor.width;
+
+        graphssp.context.globalAlpha = this.graphAlpha;
 
         this.dataZoomBg.addChild( graphssp , 0);
 

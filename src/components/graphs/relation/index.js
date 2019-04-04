@@ -1,7 +1,7 @@
 import Canvax from "canvax"
 import GraphsBase from "../index"
 import { global, _, getDefaultProps, event, dataFrame } from "mmvis"
-import { checkData, jsonToArrayForRelation } from './data';
+import { checkDataIsJson, jsonToArrayForRelation, arrayToTreeJsonForRelation } from './data';
 
 const Rect = Canvax.Shapes.Rect;
 const Path = Canvax.Shapes.Path;
@@ -21,10 +21,24 @@ class Relation extends GraphsBase {
                 documentation: '',
                 default: null
             },
+
+            //rankdir: "TB",
+            //align: "DR",
+            //nodesep: 0,//同级node之间的距离
+            //edgesep: 0,
+            //ranksep: 0, //排与排之间的距离
+            rankdir:{
+                detail : '布局方向',
+                default: null
+            },
+
             node: {
                 detail: '单个节点的配置',
                 propertys: {
-
+                    shapeType: {
+                        detail: '节点图形，目前只支持rect',
+                        default: 'rect'
+                    },
                     maxWidth: {
                         detail: '节点最大的width',
                         default: 200
@@ -84,6 +98,19 @@ class Relation extends GraphsBase {
             line: {
                 detail: '两个节点连线配置',
                 propertys: {
+                    isTree: {
+                        detail: '是否树结构的连线',
+                        documentation: '非树结构启用该配置可能会有意想不到的惊喜，慎用',
+                        default: false
+                    },
+                    shapeType: {
+                        detail: '连线的图形样式 brokenLine or bezier',
+                        default: 'bezier'
+                    },
+                    lineWidth: {
+                        detail: '线宽',
+                        default: 1
+                    },
                     strokeStyle: {
                         detail: '连线的颜色',
                         default: '#e5e5e5'
@@ -93,10 +120,8 @@ class Relation extends GraphsBase {
                         default: 'solid'
                     },
                     arrow: {
-
-                    },
-                    strokeStyle: {
-
+                        detail: '是否有箭头',
+                        default:true
                     }
                 }
             },
@@ -106,7 +131,9 @@ class Relation extends GraphsBase {
             },
             layoutOpts: {
                 detail: '布局引擎对应的配置,dagre详见dagre的官方wiki',
-                default: {}
+                propertys: {
+                    
+                }
             },
 
             status: {
@@ -148,6 +175,7 @@ class Relation extends GraphsBase {
         if (this.layout === 'dagre') {
             var dagreOpts = {
                 graph: {
+                    rankdir: 'TB',
                     nodesep: 10,
                     ranksep: 10,
                     edgesep: 10,
@@ -160,9 +188,17 @@ class Relation extends GraphsBase {
                     //labelpos: 'c'
                 }
             };
-            _.extend(true, dagreOpts, this.layoutOpts)
+            _.extend(true, dagreOpts, this.layoutOpts);
             _.extend(true, this.layoutOpts, dagreOpts);
-        }
+
+            if( !this.rankdir ){
+                this.rankdir = this.layoutOpts.graph.rankdir
+            } else {
+                //如果有设置this.randdir 则已经 ta 为准
+                this.layoutOpts.graph.rankdir = this.rankdir;
+            };
+            
+        };
 
 
         this.domContainer = app.canvax.domView;
@@ -208,7 +244,7 @@ class Relation extends GraphsBase {
                 globalAlpha: 0
             }
         });
-        this.sprite.addChild(this.induce);
+        this.sprite.addChild( this.induce );
 
         var _mosedownIng = false;
         var _lastDragPoint = null;
@@ -219,7 +255,7 @@ class Relation extends GraphsBase {
         var _wheelHandleTimeer = null;
         var _deltaY = 0;
 
-        this.induce.on(event.types.get(), function (e) {
+        this.induce.on( event.types.get(), function (e) {
 
             if (me.status.transform.enabled) {
                 if (e.type == "mousedown") {
@@ -309,14 +345,15 @@ class Relation extends GraphsBase {
         //this._grahsSpClone.context.y = newLeftTopPoint.y;
     }
 
-    draw(opt) {
+    draw( opt ) {
         !opt && (opt = {});
         _.extend(true, this, opt);
         this.data = opt.data || this._initData();
 
         if (this.layout == "dagre") {
-            this.dagreLayout(this.data);
-
+            this.dagreLayout( this.data );
+        } else if(this.layout == "tree"){
+            this.treeLayout( this.data );
         } else if (_.isFunction(this.layout)) {
             //layout需要设置好data中nodes的xy， 以及edges的points，和 size的width，height
             this.layout(this.data);
@@ -354,11 +391,19 @@ class Relation extends GraphsBase {
         };
 
         let originData = this.app._data;
-        if (checkData(originData, this.field)) {
-            let result = jsonToArrayForRelation(originData, this);
-            this.dataFrame = dataFrame(result);
-        }
+        if ( checkDataIsJson(originData, this.field) ) {
+            this.jsonData = jsonToArrayForRelation(originData, this);
+            this.app.dataFrame = dataFrame( this.jsonData );
+        } else {
+            if( this.layout == "tree" ){
+                //源数据就是图表标准数据，只需要转换成json的Children格式
+                //app.dataFrame.jsonOrg ==> [{name: key:} ...] 不是children的树结构
+                //tree layout算法需要children格式的数据，蛋疼
+                this.jsonData = arrayToTreeJsonForRelation(this.app.dataFrame.jsonOrg, this);
+            };
+        };
 
+        var _nodeMap = {};
         for (var i = 0; i < this.dataFrame.length; i++) {
             var rowData = this.dataFrame.getRowDataAt(i);
             var fields = _.flatten([(rowData[this.field] + "").split(",")]);
@@ -366,6 +411,7 @@ class Relation extends GraphsBase {
 
             var node = {
                 type: "relation",
+                iNode: i,
                 rowData: rowData,
                 key: fields.length == 1 ? fields[0] : fields,
                 content: content,
@@ -378,23 +424,36 @@ class Relation extends GraphsBase {
 
                 //这个在layout的时候设置
                 x: null,
-                y: null
+                y: null,
+                shapeType: null,
+
+                //如果是edge，要填写这两节点
+                source : null,
+                target : null
             };
             _.extend(node, this._getElementAndSize(node));
 
             if (fields.length == 1) {
+                node.shapeType = this.getProp( this.node.shapeType, node );
                 data.nodes.push(node);
+                _nodeMap[ node.key ] = node;
             } else {
+                node.shapeType = this.getProp( this.line.shapeType, node );
                 data.edges.push(node);
             };
         };
+
+        //然后给edge填写source 和 target
+        _.each( data.edges, function( edge ){
+            var keys = edge.key;
+            edge.source = _nodeMap[ keys[0] ];
+            edge.target = _nodeMap[ keys[1] ];
+        } );
 
         return data;
     }
 
     dagreLayout(data) {
-        var me = this;
-
         var layout = global.layout.dagre;
 
         var g = new layout.graphlib.Graph();
@@ -420,23 +479,51 @@ class Relation extends GraphsBase {
         return data
     }
 
+    treeLayout( data ){
+        var tree = global.layout.tree().separation(function(a, b) {
+            //设置横向节点之间的间距
+            var totalWidth = a.width + b.width;
+            return (totalWidth/2) + 10;
+        });
+        
+        var nodes = tree.nodes( this.jsonData[0] ).reverse();
+	    var links = tree.links(nodes);
+        
+    }
+
     widget() {
         var me = this;
         _.each(this.data.edges, function (edge) {
 
+            if( me.line.isTree ){
+                me._setTreePoints( edge );
+            };
+
+            var lineWidth = me.getProp( me.line.lineWidth, edge );
+            var strokeStyle = me.getProp( me.line.strokeStyle, edge );
+
             var _bl = new Path({
                 context: {
                     path: me._getPathStr(edge),
-                    lineWidth: 1,
-                    strokeStyle: "#ccc"
+                    lineWidth: lineWidth,
+                    strokeStyle: strokeStyle
                 }
             });
 
+            var arrowControl = edge.points.slice(-2, -1)[0];
+            if( me.line.shapeType == "bezier" ){
+                if( me.rankdir == "TB" || me.rankdir == "BT" ){
+                    arrowControl.x += (edge.source.x-edge.target.x)/20
+                }
+                if( me.rankdir == "LR" || me.rankdir == "RL" ){
+                    arrowControl.y += (edge.source.y-edge.target.y)/20
+                }
+            };
             var _arrow = new Arrow({
                 context: {
-                    control: edge.points.slice(-2, -1)[0],
+                    control: arrowControl,
                     point: edge.points.slice(-1)[0],
-                    strokeStyle: "#ccc"
+                    strokeStyle: strokeStyle
                 }
             });
 
@@ -452,10 +539,12 @@ class Relation extends GraphsBase {
             me.edgesSp.addChild( _circle );
             */
 
-            me.edgesSp.addChild(_arrow);
             me.edgesSp.addChild(_bl);
+            me.edgesSp.addChild(_arrow);
+            
 
         });
+
         _.each(this.data.nodes, function (node) {
 
             var _boxShape = new Rect({
@@ -465,9 +554,9 @@ class Relation extends GraphsBase {
                     width: node.width,
                     height: node.height,
                     lineWidth: 1,
-                    fillStyle: me.getProp(me.node.fillStyle),
-                    strokeStyle: me.getProp(me.node.strokeStyle),
-                    radius: _.flatten([me.getProp(me.node.radius)])
+                    fillStyle: me.getProp(me.node.fillStyle, node),
+                    strokeStyle: me.getProp(me.node.strokeStyle, node),
+                    radius: _.flatten([me.getProp(me.node.radius, node)])
                 }
             });
             _boxShape.nodeData = node;
@@ -494,8 +583,8 @@ class Relation extends GraphsBase {
                     var devicePixelRatio = typeof (window) !== 'undefined' ? window.devicePixelRatio : 1;
                     node.element.style.transform = "matrix(" + _boxShape.worldTransform.clone().scale(1 / devicePixelRatio, 1 / devicePixelRatio).toArray().join() + ")";
                     node.element.style.transformOrigin = "left top"; //修改为左上角为旋转中心点来和canvas同步
-                    node.element.style.marginLeft = me.getProp(me.node.padding) * me.status.transform.scale + "px";
-                    node.element.style.marginTop = me.getProp(me.node.padding) * me.status.transform.scale + "px";
+                    node.element.style.marginLeft = me.getProp(me.node.padding, node) * me.status.transform.scale + "px";
+                    node.element.style.marginTop = me.getProp(me.node.padding, node) * me.status.transform.scale + "px";
                     node.element.style.visibility = "visible";
                 });
 
@@ -507,11 +596,62 @@ class Relation extends GraphsBase {
 
     }
 
+    _setTreePoints( edge ){
+        var points = edge.points;
+      
+        if( this.rankdir == "TB" ){
+            points[0] = {
+                x : edge.source.x,
+                y : edge.source.y + edge.source.height/2
+            };
+            points.splice(1,0,{
+                x : edge.source.x,
+                y : points.slice(-2,-1)[0].y
+            });
+        }
+        if( this.rankdir == "LR" ){
+            points[0] = {
+                x : edge.source.x + edge.source.width/2,
+                y : edge.source.y
+            };
+            points.splice(1,0,{
+                x : points.slice(-2,-1)[0].x,
+                y : edge.source.y
+            });
+        }
+
+        edge.points = points;
+            
+        
+    }
+
     _getPathStr(edge) {
-        var head = edge.points[0];
-        var tail = edge.points.slice(-1)[0];
+        
+        var points = edge.points;
+
+
+        var head = points[0];
+        var tail = points.slice(-1)[0];
         var str = "M" + head.x + " " + head.y;
-        str += ",Q" + edge.points[1].x + " " + edge.points[1].y + " " + tail.x + " " + tail.y;
+        
+        if( edge.shapeType == "bezier" ){
+            if( points.length == 3 ){
+                str += ",Q" + points[1].x + " " + points[1].y + " " + tail.x + " " + tail.y;
+            }
+            if( points.length == 4 ){
+                str += ",C" + points[1].x + " " + points[1].y + " "+ points[2].x + " " + points[2].y + " " + tail.x + " " + tail.y;
+            }
+        }
+
+        if( edge.shapeType == "brokenLine" ){
+            _.each( points, function( point, i ){
+                if( i ){
+                    str += ",L" + point.x + " " + point.y;
+                }
+            } );
+        }
+        
+
         //str += "z"
         return str;
     }
@@ -571,17 +711,17 @@ class Relation extends GraphsBase {
         //先创建text，根据 text 来计算node需要的width和height
         var label = new Canvax.Display.Text(content, {
             context: {
-                fillStyle: me.getProp(me.node.content.fontColor),
-                textAlign: me.getProp(me.node.content.textAlign),
-                textBaseline: me.getProp(me.node.content.textBaseline)
+                fillStyle: me.getProp(me.node.content.fontColor, node),
+                textAlign: me.getProp(me.node.content.textAlign, node),
+                textBaseline: me.getProp(me.node.content.textBaseline, node)
             }
         });
 
         if (!width) {
-            width = label.getTextWidth() + me.getProp(me.node.padding) * me.status.transform.scale * 2;
+            width = label.getTextWidth() + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
         };
         if (!height) {
-            height = label.getTextHeight() + me.getProp(me.node.padding) * me.status.transform.scale * 2;
+            height = label.getTextHeight() + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
         };
 
         sprite.addChild(label);
@@ -606,19 +746,19 @@ class Relation extends GraphsBase {
         var _dom = document.createElement("div");
         _dom.className = "chartx_relation_node";
         _dom.style.cssText += "; position:absolute;visibility:hidden;"
-        _dom.style.cssText += "; color:" + me.getProp(me.node.content.fontColor) + ";";
-        _dom.style.cssText += "; text-align:" + me.getProp(me.node.content.textAlign) + ";";
-        _dom.style.cssText += "; vertical-align:" + me.getProp(me.node.content.textBaseline) + ";";
+        _dom.style.cssText += "; color:" + me.getProp(me.node.content.fontColor, node) + ";";
+        _dom.style.cssText += "; text-align:" + me.getProp(me.node.content.textAlign, node) + ";";
+        _dom.style.cssText += "; vertical-align:" + me.getProp(me.node.content.textBaseline, node) + ";";
 
         _dom.innerHTML = content;
 
         this.domContainer.appendChild(_dom);
 
         if (!width) {
-            width = _dom.offsetWidth + me.getProp(me.node.padding) * me.status.transform.scale * 2;
+            width = _dom.offsetWidth + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
         };
         if (!height) {
-            height = _dom.offsetHeight + me.getProp(me.node.padding) * me.status.transform.scale * 2;
+            height = _dom.offsetHeight + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
         };
 
         return {
@@ -633,8 +773,19 @@ class Relation extends GraphsBase {
 
     }
 
-    getProp(prop, def) {
-        return prop
+    getProp( prop, nodeData ) {
+        var _prop = prop;
+        if( this._isField( prop ) ){
+            _prop = nodeData.rowData[ prop ];
+        } else {
+            if( _.isArray( prop ) ){
+                _prop = prop[ nodeData.iNode ]
+            };
+            if( _.isFunction( prop ) ){
+                _prop = prop.apply( this, [ nodeData ] );
+            };
+        };
+        return _prop;
     }
 
 

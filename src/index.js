@@ -26,8 +26,9 @@ import "./components/graphs/progress/index"
 import "./components/graphs/relation/index"
 
 //-----------------------------------------------
-//算法
+//布局算法
 import "./layout/dagre/index"
+import "./layout/tree/index"
 
 //-----------------------------------------------
 //components

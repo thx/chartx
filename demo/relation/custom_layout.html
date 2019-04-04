@@ -373,6 +373,10 @@ var data = [
    
 ];
 
+var data = [{"label":"首页","nodeType":"page","children":[{"label":"横向管理普通计划计划列表","nodeType":"page","children":[{"label":"横向管理普通计划计划列表","nodeType":"page","children":[{"label":"账户整体报表","nodeType":"page","children":[{"label":"单品推广报表","nodeType":"page","children":[{"label":"单品推广报表","nodeType":"page","children":[{"label":"横向管理普通计划计划列表","nodeType":"page","children":[{"label":"横向管理普通计划计划列表","nodeType":"page","children":[{"label":"横向管理普通计划计划列表","nodeType":"page"}]}]}]}]}]}]}]}]}]
+
+var data = [{"label":"首页","nodeType":"page","key":0},{"label":"横向管理普通计划计划列表","nodeType":"page","key":1},{"key":"0,1","label":"首页_横向管理普通计划计划列表"},{"label":"横向管理普通计划计划列表","nodeType":"page","key":2},{"key":"1,2","label":"横向管理普通计划计划列表_横向管理普通计划计划列表"},{"label":"账户整体报表","nodeType":"page","key":3},{"key":"2,3","label":"横向管理普通计划计划列表_账户整体报表"},{"label":"单品推广报表","nodeType":"page","key":4},{"key":"3,4","label":"账户整体报表_单品推广报表"},{"label":"单品推广报表","nodeType":"page","key":5},{"key":"4,5","label":"单品推广报表_单品推广报表"},{"label":"横向管理普通计划计划列表","nodeType":"page","key":6},{"key":"5,6","label":"单品推广报表_横向管理普通计划计划列表"},{"label":"横向管理普通计划计划列表","nodeType":"page","key":7},{"key":"6,7","label":"横向管理普通计划计划列表_横向管理普通计划计划列表"},{"label":"横向管理普通计划计划列表","nodeType":"page","key":8},{"key":"7,8","label":"横向管理普通计划计划列表_横向管理普通计划计划列表"}]
+
 var options = {
     graphs : {
         type     : "relation",
@@ -404,6 +408,7 @@ var options = {
     miniMap : {},
     tips    : {}
 };
+
 
 window.bar = Chartx.create("canvasTest" , data , options)
 
