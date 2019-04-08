@@ -300,6 +300,7 @@ class ScatGraphs extends GraphsBase
             };
 
             var nodeLayoutData = {
+                type       : "scat",
                 rowData    : rowData,
                 x          : point.pos.x,
                 y          : point.pos.y,

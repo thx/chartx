@@ -524,6 +524,7 @@ class Relation extends GraphsBase {
                     control: arrowControl,
                     point: edge.points.slice(-1)[0],
                     strokeStyle: strokeStyle
+                    //fillStyle: strokeStyle
                 }
             });
 

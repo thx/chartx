@@ -74,29 +74,9 @@ var options = {
         },
         line : {
             isTree: true,
-            shapeType: 'brokenLine'
+            shapeType: 'bezier'
         },
-        //layout      : "tree",
-        layoutOpts  : {
-            graph : {
-                //rankdir: "TB",
-                //align: "DR",
-                //nodesep: 0,//同级node之间的距离
-                //edgesep: 0,
-                //ranksep: 0, //排与排之间的距离
-                //acyclicer : "greedy",
-                //ranker: "longest-path",
-            },
-            node : {
-
-            },
-            edge : {
-
-            }
-           
-        },
-        //如果完全可视化编辑器编辑出来的布局，就不需要layout算法，编辑器会保存一份layout数据
-        //layoutData : null,
+        rankdir: "RL"
       
     },
     miniMap : {},

@@ -17276,6 +17276,7 @@ var Chartx = (function () {
             continue;
           }
           var nodeLayoutData = {
+            type: "scat",
             rowData: rowData,
             x: point.pos.x,
             y: point.pos.y,
@@ -18732,6 +18733,7 @@ var Chartx = (function () {
           var rowData = dataFrame$$1.getRowDataAt(i);
           var color$$1 = me.app.getTheme(i);
           var layoutData = {
+            type: "pie",
             rowData: rowData,
             //把这一行数据给到layoutData引用起来
             focused: false,
@@ -19346,6 +19348,7 @@ var Chartx = (function () {
             var point = _coord.getPointInRadianOfR(_r, _coord.getROfNum(dataOrg[i]));
 
             arr.push({
+              type: "radar",
               field: field,
               iNode: i,
               rowData: me.dataFrame.getRowDataAt(i),
@@ -20193,6 +20196,7 @@ var Chartx = (function () {
           var rowData = me.app.dataFrame.getRowDataAt(me.getDaraFrameIndOfVal(d)); //这里不能直接用i去从dataFrame里查询,因为cloud layout后，可能会扔掉渲染不下的部分
 
           var tag = {
+            type: "cloud",
             rowData: rowData,
             field: me.field,
             value: d,
@@ -20543,6 +20547,7 @@ var Chartx = (function () {
         for (var i = 0; i < dataLen; i++) {
           var rowData = this.dataFrame.getRowDataAt(i);
           var planetLayoutData = {
+            type: "planet",
             groupLen: this.groupLen,
             iGroup: me.iGroup,
             iNode: i,
@@ -23517,6 +23522,7 @@ var Chartx = (function () {
         for (var i = 0, l = this.dataFrame.length; i < l; i++) {
           var rowData = me.dataFrame.getRowDataAt(i);
           var obj = {
+            type: "venn",
             iNode: i,
             nodeId: null,
             rowData: rowData,
@@ -24551,8 +24557,10 @@ var Chartx = (function () {
         if (iNode !== undefined) {
           var node = _.find(this.data, function (item) {
             return item.iNode == iNode;
-          });
+          }); //type给到tips用主要
 
+
+          node.type = 'sunburst';
           node && nodes.push(node);
         }
         return nodes;
@@ -25440,7 +25448,9 @@ var Chartx = (function () {
             if (e.type == 'mouseout') {
               this.context.globalAlpha -= 0.2;
             }
-            var linkData = this.link;
+            var linkData = this.link; //type给tips用
+
+            linkData.type = "sankey";
             e.eventInfo = {
               trigger: me.node,
               title: linkData.source.name + " --<span style='position:relative;top:-0.5px;font-size:16px;left:-3px;'>></span> " + linkData.target.name,
@@ -26646,7 +26656,8 @@ var Chartx = (function () {
             context: {
               control: arrowControl,
               point: edge.points.slice(-1)[0],
-              strokeStyle: strokeStyle
+              strokeStyle: strokeStyle //fillStyle: strokeStyle
+
             }
           });
           /*  edge的xy 就是 可以用来显示label的位置

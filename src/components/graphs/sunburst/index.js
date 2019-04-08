@@ -254,9 +254,13 @@ class sunburstGraphs extends GraphsBase
             var node = _.find( this.data, function( item ){
                 return item.iNode == iNode
             } );
+
+            //type给到tips用主要
+            node.type = 'sunburst';
+
             node && nodes.push( node );
         };
-        return  nodes
+        return  nodes;
     }
 
     _focus(layoutData, group){

@@ -207,6 +207,7 @@ class CloudGraphs extends GraphsBase
             .words(me.dataFrame.getFieldData( me.field ).map(function(d, ind) {
                 var rowData  = me.app.dataFrame.getRowDataAt( me.getDaraFrameIndOfVal( d ) );//这里不能直接用i去从dataFrame里查询,因为cloud layout后，可能会扔掉渲染不下的部分
                 var tag = {
+                    type    : "cloud",
                     rowData : rowData,
                     field   : me.field,
                     value   : d,

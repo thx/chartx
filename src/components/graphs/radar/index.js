@@ -303,6 +303,7 @@ class RadarGraphs extends GraphsBase
                 var _r = Math.PI * _a / 180;
                 var point = _coord.getPointInRadianOfR( _r, _coord.getROfNum(dataOrg[i]) );
                 arr.push( {
+                    type    : "radar",
                     field   : field,
                     iNode   : i,
                     rowData : me.dataFrame.getRowDataAt(i),

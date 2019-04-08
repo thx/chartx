@@ -247,6 +247,9 @@ class sankeyGraphs extends GraphsBase
 
                 var linkData = this.link;
 
+                //type给tips用
+                linkData.type = "sankey";
+
                 e.eventInfo = {
                     trigger : me.node,
                     title : linkData.source.name+" --<span style='position:relative;top:-0.5px;font-size:16px;left:-3px;'>></span> "+linkData.target.name,

@@ -215,6 +215,7 @@ class PieGraphs extends GraphsBase
             var rowData = dataFrame.getRowDataAt(i);
             var color = me.app.getTheme( i );
             var layoutData = {
+                type          : "pie",
                 rowData       : rowData,//把这一行数据给到layoutData引用起来
                 focused       : false,  //是否获取焦点，外扩
                 focusEnabled  : me.node.focus.enabled,

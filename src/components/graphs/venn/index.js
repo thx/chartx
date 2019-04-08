@@ -231,6 +231,7 @@ class VennGraphs extends GraphsBase
             var rowData = me.dataFrame.getRowDataAt( i );
 
             let obj = {
+                type : "venn",
                 iNode: i,
                 nodeId : null,
                 rowData : rowData,

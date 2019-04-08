@@ -234,6 +234,7 @@ export default class PlanetGroup
             
             var rowData = this.dataFrame.getRowDataAt(i);
             var planetLayoutData = {
+                type        : "planet",
                 groupLen    : this.groupLen,
                 iGroup      : me.iGroup,
                 iNode       : i,
