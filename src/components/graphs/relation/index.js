@@ -21,7 +21,12 @@ class Relation extends GraphsBase {
                 documentation: '',
                 default: null
             },
-
+            childrenField: {
+                detail: '树结构数据的关联字段',
+                documentation: '如果是树结构的关联数据，不是行列式，那么就通过这个字段来建立父子关系',
+                default: 'children'
+            },
+            
             //rankdir: "TB",
             //align: "DR",
             //nodesep: 0,//同级node之间的距离
@@ -71,7 +76,7 @@ class Relation extends GraphsBase {
                         detail: '节点内容配置',
                         propertys: {
                             field: {
-                                detail: '内容，可以是字段，也可以是函数',
+                                detail: '内容字段',
                                 documentation: '默认content字段',
                                 default: 'content'
                             },
@@ -172,6 +177,7 @@ class Relation extends GraphsBase {
         this.type = "relation";
 
         _.extend(true, this, getDefaultProps(Relation.defaultProps()), opt);
+        
         if (this.layout === 'dagre') {
             var dagreOpts = {
                 graph: {
@@ -190,7 +196,7 @@ class Relation extends GraphsBase {
             };
             _.extend(true, dagreOpts, this.layoutOpts);
             _.extend(true, this.layoutOpts, dagreOpts);
-
+debugger
             if( !this.rankdir ){
                 this.rankdir = this.layoutOpts.graph.rankdir
             } else {
@@ -391,9 +397,9 @@ class Relation extends GraphsBase {
         };
 
         let originData = this.app._data;
-        if ( checkDataIsJson(originData, this.field) ) {
-            this.jsonData = jsonToArrayForRelation(originData, this);
-            this.app.dataFrame = dataFrame( this.jsonData );
+        if ( checkDataIsJson(originData, this.field, this.childrenField) ) {
+            this.jsonData = jsonToArrayForRelation(originData, this, this.childrenField);
+            this.dataFrame = this.app.dataFrame = dataFrame( this.jsonData );
         } else {
             if( this.layout == "tree" ){
                 //源数据就是图表标准数据，只需要转换成json的Children格式
@@ -669,14 +675,11 @@ class Relation extends GraphsBase {
 
         var _c; //this.node.content;
         if (this._isField(this.node.content.field)) {
-            _c = rowData[this.node.content.field];
-        }
-        if (_.isFunction(_c)) {
-            _c = this.content.apply(this, arguments);
-        }
+            _c = rowData[ this.node.content.field ];
+        };
         if (me.node.content.format && _.isFunction(me.node.content.format)) {
-            _c = me.node.content.format(_c);
-        }
+            _c = me.node.content.format.apply(this, [ _c, rowData ]);
+        };
         return _c;
     }
 

@@ -18,12 +18,18 @@ import { _ } from "mmvis"
 // 	}],
 // }];
 
-const childrenKey = 'children';
+
 const parentKey = 'parent';
 const defaultFieldKey = '__key__';
 
-function checkDataIsJson(data, key) {
+let childrenKey = 'children';
+
+function checkDataIsJson(data, key, _childrenField) {
+
+    childrenKey = _childrenField;
+
     let result = false;
+
     //1、要求数据必须是一个数组
     if (!_.isArray(data)) return false;
 
@@ -47,13 +53,14 @@ function checkDataIsJson(data, key) {
     return result;
 }
 
-function jsonToArrayForRelation(data, options) {
+function jsonToArrayForRelation(data, options ,_childrenField ) {
+    childrenKey = _childrenField;
     let result = [];
     const wm = new WeakMap();
     let key = options.field || defaultFieldKey;
     let label = options.node && options.node.content && options.node.content.field;
 
-    if (!checkDataIsJson(data, key)) {
+    if (!checkDataIsJson(data, key, childrenKey)) {
         console.error('该数据不能正确绘制，请提供数组对象形式的数据！');
         return result;
     };

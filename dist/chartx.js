@@ -25956,23 +25956,11 @@ var Chartx = (function () {
   /**
    * 把json数据转化为关系图的数据格式
    */
-  //如：
-  // [{
-  // 	name: 'xxxx',
-  // 	children: [{
-  // 		name: 'aaaaa'
-  // 	}, {
-  // 		name: 'bbbb',
-  // 		children: [{
-  // 			name: 'ccccc'
-  // 		}]
-  // 	}],
-  // }];
-
-  var childrenKey = 'children';
   var defaultFieldKey = '__key__';
+  var childrenKey = 'children';
 
-  function checkDataIsJson(data, key) {
+  function checkDataIsJson(data, key, _childrenField) {
+    childrenKey = _childrenField;
     var result = false; //1、要求数据必须是一个数组
 
     if (!_.isArray(data)) return false; //2、数组中的每个元素是一个对象
@@ -25993,13 +25981,14 @@ var Chartx = (function () {
     return result;
   }
 
-  function jsonToArrayForRelation(data, options) {
+  function jsonToArrayForRelation(data, options, _childrenField) {
+    childrenKey = _childrenField;
     var result = [];
     var wm = new WeakMap();
     var key = options.field || defaultFieldKey;
     var label = options.node && options.node.content && options.node.content.field;
 
-    if (!checkDataIsJson(data, key)) {
+    if (!checkDataIsJson(data, key, childrenKey)) {
       console.error('该数据不能正确绘制，请提供数组对象形式的数据！');
       return result;
     }
@@ -26150,6 +26139,11 @@ var Chartx = (function () {
             documentation: '',
             default: null
           },
+          childrenField: {
+            detail: '树结构数据的关联字段',
+            documentation: '如果是树结构的关联数据，不是行列式，那么就通过这个字段来建立父子关系',
+            default: 'children'
+          },
           //rankdir: "TB",
           //align: "DR",
           //nodesep: 0,//同级node之间的距离
@@ -26198,7 +26192,7 @@ var Chartx = (function () {
                 detail: '节点内容配置',
                 propertys: {
                   field: {
-                    detail: '内容，可以是字段，也可以是函数',
+                    detail: '内容字段',
                     documentation: '默认content字段',
                     default: 'content'
                   },
@@ -26321,6 +26315,8 @@ var Chartx = (function () {
         _.extend(true, dagreOpts, _this.layoutOpts);
 
         _.extend(true, _this.layoutOpts, dagreOpts);
+
+        debugger;
 
         if (!_this.rankdir) {
           _this.rankdir = _this.layoutOpts.graph.rankdir;
@@ -26524,9 +26520,9 @@ var Chartx = (function () {
         };
         var originData = this.app._data;
 
-        if (checkDataIsJson(originData, this.field)) {
-          this.jsonData = jsonToArrayForRelation(originData, this);
-          this.app.dataFrame = dataFrame(this.jsonData);
+        if (checkDataIsJson(originData, this.field, this.childrenField)) {
+          this.jsonData = jsonToArrayForRelation(originData, this, this.childrenField);
+          this.dataFrame = this.app.dataFrame = dataFrame(this.jsonData);
         } else {
           if (this.layout == "tree") {
             //源数据就是图表标准数据，只需要转换成json的Children格式
@@ -26806,14 +26802,9 @@ var Chartx = (function () {
           _c = rowData[this.node.content.field];
         }
 
-        if (_.isFunction(_c)) {
-          _c = this.content.apply(this, arguments);
-        }
-
         if (me.node.content.format && _.isFunction(me.node.content.format)) {
-          _c = me.node.content.format(_c);
+          _c = me.node.content.format.apply(this, [_c, rowData]);
         }
-
         return _c;
       }
     }, {
