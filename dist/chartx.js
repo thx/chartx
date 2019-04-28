@@ -26224,6 +26224,10 @@ var Chartx = (function () {
                 documentation: '非树结构启用该配置可能会有意想不到的惊喜，慎用',
                 default: false
               },
+              inflectionRadius: {
+                detail: '树状连线的拐点圆角半径',
+                default: 0
+              },
               shapeType: {
                 detail: '连线的图形样式 brokenLine or bezier',
                 default: 'bezier'
@@ -26315,8 +26319,6 @@ var Chartx = (function () {
         _.extend(true, dagreOpts, _this.layoutOpts);
 
         _.extend(true, _this.layoutOpts, dagreOpts);
-
-        debugger;
 
         if (!_this.rankdir) {
           _this.rankdir = _this.layoutOpts.graph.rankdir;
@@ -26754,6 +26756,7 @@ var Chartx = (function () {
     }, {
       key: "_getPathStr",
       value: function _getPathStr(edge) {
+        var me = this;
         var points = edge.points;
         var head = points[0];
         var tail = points.slice(-1)[0];
@@ -26772,11 +26775,36 @@ var Chartx = (function () {
         if (edge.shapeType == "brokenLine") {
           _.each(points, function (point, i) {
             if (i) {
-              str += ",L" + point.x + " " + point.y;
+              if (me.line.inflectionRadius && i < points.length - 1) {
+                //圆角连线
+                var prePoint = points[i - 1];
+                var nextPoint = points[i + 1]; //要从这个点到上个点的半径距离，已point为控制点，绘制nextPoint的半径距离
+
+                console.log(Math.atan2(point.y - prePoint.y, point.x - prePoint.x), Math.atan2(nextPoint.y - point.y, nextPoint.x - point.x));
+
+                if (point.x == prePoint.x && point.y == prePoint.y || point.x == nextPoint.x && point.y == nextPoint.y || Math.atan2(point.y - prePoint.y, point.x - prePoint.x) == Math.atan2(nextPoint.y - point.y, nextPoint.x - point.x)) {
+                  //如果中间的这个点 ， 和前后的点在一个直线上面，就略过
+                  return;
+                } else {
+                  var getPointOf = function getPointOf(p) {
+                    var _atan2 = Math.atan2(p.y - point.y, p.x - point.x);
+
+                    return {
+                      x: point.x + me.line.inflectionRadius * Math.cos(_atan2),
+                      y: point.y + me.line.inflectionRadius * Math.sin(_atan2)
+                    };
+                  };
+                  var bezierBegin = getPointOf(prePoint);
+                  var bezierEnd = getPointOf(nextPoint);
+                  str += ",L" + bezierBegin.x + " " + bezierBegin.y + ",Q" + point.x + " " + point.y + " " + bezierEnd.x + " " + bezierEnd.y;
+                }
+              } else {
+                //直角连线
+                str += ",L" + point.x + " " + point.y;
+              }
             }
           });
-        } //str += "z"
-
+        }
 
         return str;
       }
