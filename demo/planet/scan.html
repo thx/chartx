@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
-<title>xChart demo -- bar</title>
+<title>雷达效果</title>
 
 <script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
 <script type="text/javascript" src="../../dist/chartx.js"></script>
@@ -101,7 +101,7 @@ var options = {
         "sortField": "tgi",
         "center": {
           "text": "娱乐圈",
-          "fillStyle": "#1ad09f"
+          "fillStyle": "#FB8400"
         },
         "node": {
           "radius": "pv",
@@ -111,8 +111,8 @@ var options = {
         },
         scan: {
            enabled : true,
-           fillStyle: '#f99335',
-           angle: 100
+           fillStyle: '#FB8400',
+           angle: 110
         },
         "getLegendData": function ()
         {
@@ -141,34 +141,13 @@ var options = {
         },
         "grid": {
           "rings": {
-            "count": 10,
-            "fillStyle": [
-              "#A1C7FF",
-              "#B6D8FF",
-              "#C1DFFF",
-              "#CBE4FF",
-              "#D5E9FF",
-              "#DDEDFF",
-              "#E4F1FF",
-              "#EBF5FF",
-              "#F3F9FF",
-              "#F8FCFF"
-            ],
+            "count": 4,
             "strokeStyle": [
-              "#85AAFF",
-              "#607AFF",
-              "#9AC9FF",
-              "#A1CCFF",
-              "#8FB8FF",
-              "#BBDAFF",
-              "#C2DEFF",
-              "#8FB8FF",
-              "#DBECFF",
-              "#E8F3FF"
+              "rgba(251,132,0,0.3)",
+              "rgba(251,132,0,0.2)",
+              "rgba(251,132,0,0.1)",
+              "rgba(251,132,0,0.05)",
             ]
-          },
-          "rays": {
-            "count": 12
           }
         }
       }

@@ -9719,7 +9719,7 @@ var Chartx = (function () {
         //{number},  // 必须，起始角度[0, 360)
         endAngle: 0,
         //{number},  // 必须，结束角度(0, 360]
-        clockwise: false //是否顺时针，默认为false(顺时针)
+        clockwise: false //是否逆时针，默认为false(顺时针)
 
       }, opt.context);
 
@@ -20315,6 +20315,8 @@ var Chartx = (function () {
   global$1.registerComponent(CloudGraphs, 'graphs', 'cloud');
 
   var Circle$6 = Canvax.Shapes.Circle;
+  var Sector$2 = Canvax.Shapes.Sector;
+  var Line$7 = Canvax.Shapes.Line;
 
   var PlanetGroup =
   /*#__PURE__*/
@@ -20445,6 +20447,36 @@ var Chartx = (function () {
               offsetY: {
                 detail: 'y方向偏移量',
                 default: 0
+              }
+            }
+          },
+          scan: {
+            detail: '扫描效果',
+            propertys: {
+              enabled: {
+                detail: '是否开启扫描效果',
+                default: false
+              },
+              fillStyle: {
+                detail: '扫描效果颜色',
+                default: null //默认取 me._graphs.center.fillStyle
+
+              },
+              alpha: {
+                detail: '起始透明度',
+                default: 0.6
+              },
+              angle: {
+                detail: '扫描效果的覆盖角度',
+                default: 90
+              },
+              r: {
+                detail: '扫描效果覆盖的半径',
+                default: null
+              },
+              repeat: {
+                detail: '扫描次数',
+                default: 3
               }
             }
           }
@@ -20881,10 +20913,41 @@ var Chartx = (function () {
             _circle.ringInd = i;
             _circle.planetIndInRing = ii;
 
-            _ringSp.addChild(_circle); //然后添加label
+            _ringSp.addChild(_circle); //如果有开启入场动画
+
+
+            if (me._graphs.animation) {
+              var _r = _circle.context.r;
+              var _globalAlpha = _circle.context.globalAlpha;
+              _circle.context.r = 1;
+              _circle.context.globalAlpha = 0.1;
+
+              _circle.animate({
+                r: _r,
+                globalAlpha: _globalAlpha
+              }, {
+                delay: (me.scan.enabled ? 500 : 0) + Math.round(Math.random() * 1500),
+                onComplete: function onComplete() {
+                  //这个时候再把label现实出来
+                  _circle.labelElement && (_circle.labelElement.context.visible = true);
+
+                  var _cloneNode = _circle.clone();
+
+                  _ringSp.addChildAt(_cloneNode, 0);
+
+                  _cloneNode.animate({
+                    r: _r + 10,
+                    globalAlpha: 0
+                  }, {
+                    onComplete: function onComplete() {
+                      _cloneNode.destroy();
+                    }
+                  });
+                }
+              });
+            }
             //绘制实心圆上面的文案
             //x,y 默认安装圆心定位，也就是position == 'center'
-
 
             var _labelCtx = {
               x: point.x,
@@ -20968,11 +21031,85 @@ var Chartx = (function () {
             _label.nodeData = p;
             p.labelElement = _label;
 
+            if (me._graphs.animation) {
+              _label.context.visible = false;
+            }
+
             _ringSp.addChild(_label);
           });
 
           me.sprite.addChild(_ringSp);
         });
+
+        if (me.scan.enabled) {
+          var _scanSp = new Canvax.Display.Sprite();
+
+          me.sprite.addChild(_scanSp);
+          var r = me.scan.r || me._graphs.height / 2 - 10;
+          var fillStyle = me.scan.fillStyle || me._graphs.center.fillStyle; //如果开启了扫描效果
+
+          var count = me.scan.angle;
+
+          for (var i = 0, l = count; i < l; i++) {
+            var node = new Sector$2({
+              context: {
+                r: r,
+                fillStyle: fillStyle,
+                clockwise: true,
+                startAngle: 360 - i,
+                endAngle: 359 - i,
+                globalAlpha: me.scan.alpha - me.scan.alpha / count * i
+              }
+            });
+
+            _scanSp.addChild(node);
+          }
+
+          var _line = new Line$7({
+            context: {
+              end: {
+                x: r,
+                y: 0
+              },
+              lineWidth: 1,
+              strokeStyle: fillStyle
+            }
+          });
+
+          _scanSp.addChild(_line);
+
+          _scanSp.context.rotation = 0;
+
+          _scanSp.animate({
+            rotation: 360,
+            globalAlpha: 1
+          }, {
+            duration: 1000,
+            onComplete: function onComplete() {
+              _scanSp.context.rotation = 0;
+
+              _scanSp.animate({
+                rotation: 360
+              }, {
+                duration: 1000,
+                repeat: me.scan.repeat - 2,
+                onComplete: function onComplete() {
+                  _scanSp.context.rotation = 0;
+
+                  _scanSp.animate({
+                    rotation: 360,
+                    globalAlpha: 0
+                  }, {
+                    duration: 1000,
+                    onComplete: function onComplete() {
+                      _scanSp.destroy();
+                    }
+                  });
+                }
+              });
+            }
+          });
+        }
       }
     }, {
       key: "_getRProp",
@@ -21095,7 +21232,7 @@ var Chartx = (function () {
 
   var Text$2 = Canvax.Display.Text;
   var Circle$7 = Canvax.Shapes.Circle;
-  var Line$7 = Canvax.Shapes.Line;
+  var Line$8 = Canvax.Shapes.Line;
   var Rect$5 = Canvax.Shapes.Rect;
 
   var PlanetGraphs =
@@ -21394,7 +21531,7 @@ var Chartx = (function () {
 
             var ty = cy + _r * Math.sin(radian);
 
-            me.gridSp.addChild(new Line$7({
+            me.gridSp.addChild(new Line$8({
               context: {
                 start: {
                   x: cx,
@@ -24303,7 +24440,7 @@ var Chartx = (function () {
     return Hierarchy.layout_hierarchyRebind(partition, hierarchy);
   }
 
-  var Sector$2 = Canvax.Shapes.Sector;
+  var Sector$3 = Canvax.Shapes.Sector;
 
   var sunburstGraphs =
   /*#__PURE__*/
@@ -24504,7 +24641,7 @@ var Chartx = (function () {
               lineWidth: me.node.lineWidth,
               globalAlpha: 0
             };
-            var sector = new Sector$2({
+            var sector = new Sector$3({
               id: "sector_" + g + "_" + i,
               context: sectorContext
             });
@@ -26649,15 +26786,7 @@ var Chartx = (function () {
               arrowControl.y += (edge.source.y - edge.target.y) / 20;
             }
           }
-
-          var _arrow = new Arrow({
-            context: {
-              control: arrowControl,
-              point: edge.points.slice(-1)[0],
-              strokeStyle: strokeStyle //fillStyle: strokeStyle
-
-            }
-          });
+          me.edgesSp.addChild(_bl);
           /*  edge的xy 就是 可以用来显示label的位置
           var _circle = new Circle({
               context : {
@@ -26670,9 +26799,18 @@ var Chartx = (function () {
           me.edgesSp.addChild( _circle );
           */
 
+          if (me.line.arrow) {
+            var _arrow = new Arrow({
+              context: {
+                control: arrowControl,
+                point: edge.points.slice(-1)[0],
+                strokeStyle: strokeStyle //fillStyle: strokeStyle
 
-          me.edgesSp.addChild(_bl);
-          me.edgesSp.addChild(_arrow);
+              }
+            });
+
+            me.edgesSp.addChild(_arrow);
+          }
         });
 
         _.each(this.data.nodes, function (node) {
@@ -31387,7 +31525,7 @@ var Chartx = (function () {
 
   global$1.registerComponent(Legend, 'legend');
 
-  var Line$8 = Canvax.Shapes.Line;
+  var Line$9 = Canvax.Shapes.Line;
   var Rect$8 = Canvax.Shapes.Rect;
 
   var dataZoom =
@@ -32218,7 +32356,7 @@ var Chartx = (function () {
       key: "_addLine",
       value: function _addLine($o) {
         var o = $o || {};
-        var line = new Line$8({
+        var line = new Line$9({
           id: o.id || '',
           context: {
             x: o.x || 0,
@@ -32577,7 +32715,7 @@ var Chartx = (function () {
   global$1.registerComponent(MarkLine, 'markLine');
 
   var Rect$9 = Canvax.Shapes.Rect;
-  var Line$9 = Canvax.Shapes.Line;
+  var Line$a = Canvax.Shapes.Line;
 
   var Tips =
   /*#__PURE__*/
@@ -32945,7 +33083,7 @@ var Chartx = (function () {
 
         if (!el) {
           if (this.pointer == "line") {
-            el = new Line$9({
+            el = new Line$a({
               //xyToInt : false,
               context: {
                 x: x,
@@ -33070,7 +33208,7 @@ var Chartx = (function () {
 
   global$1.registerComponent(Tips, 'tips');
 
-  var Line$a = Canvax.Shapes.Line;
+  var Line$b = Canvax.Shapes.Line;
 
   var barTgi =
   /*#__PURE__*/
@@ -33208,7 +33346,7 @@ var Chartx = (function () {
           var y = -me._yAxis.getPosOfVal(tgi);
           var barData = me.barDatas[i];
 
-          var _tgiLine = new Line$a({
+          var _tgiLine = new Line$b({
             context: {
               start: {
                 x: barData.x,
@@ -33597,7 +33735,7 @@ var Chartx = (function () {
 
   global$1.registerComponent(waterMark, 'waterMark');
 
-  var Line$b = Canvax.Shapes.Line;
+  var Line$c = Canvax.Shapes.Line;
 
   var Cross =
   /*#__PURE__*/
@@ -33690,7 +33828,7 @@ var Chartx = (function () {
           y: this.height / 2
         };
         this.setPosition();
-        me._hLine = new Line$b({
+        me._hLine = new Line$c({
           //横向线条
           context: {
             start: {
@@ -33707,7 +33845,7 @@ var Chartx = (function () {
           }
         });
         me.sprite.addChild(me._hLine);
-        me._vLine = new Line$b({
+        me._vLine = new Line$c({
           //线条
           context: {
             start: {
@@ -33944,7 +34082,7 @@ var Chartx = (function () {
 
   global$1.registerComponent(lineSchedu, 'lineSchedu');
 
-  var Line$c = Canvax.Shapes.Line;
+  var Line$d = Canvax.Shapes.Line;
   var Circle$b = Canvax.Shapes.Circle;
 
   var markCloumn =
@@ -34170,7 +34308,7 @@ var Chartx = (function () {
         if (this._line) {
           _.extend(this._line.context, lineOpt);
         } else {
-          this._line = new Line$c({
+          this._line = new Line$d({
             context: lineOpt
           });
           this.sprite.addChild(this._line);

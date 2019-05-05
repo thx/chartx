@@ -1,7 +1,10 @@
 import Canvax from "canvax"
 import { _,event,getDefaultProps } from "mmvis"
 
+
 const Circle = Canvax.Shapes.Circle;
+const Sector = Canvax.Shapes.Sector;
+const Line = Canvax.Shapes.Line;
 
 export default class PlanetGroup
 {
@@ -131,6 +134,35 @@ export default class PlanetGroup
                     offsetY: {
                         detail: 'y方向偏移量',
                         default:0
+                    }
+                }
+            },
+            scan : {
+                detail : '扫描效果',
+                propertys: {
+                    enabled: {
+                        detail: '是否开启扫描效果',
+                        default: false
+                    },
+                    fillStyle: {
+                        detail: '扫描效果颜色',
+                        default: null //默认取 me._graphs.center.fillStyle
+                    },
+                    alpha: {
+                        detail: '起始透明度',
+                        default: 0.6
+                    },
+                    angle: {
+                        detail: '扫描效果的覆盖角度',
+                        default: 90
+                    },
+                    r : {
+                        detail: '扫描效果覆盖的半径',
+                        default: null
+                    },
+                    repeat : {
+                        detail: '扫描次数',
+                        default: 3
                     }
                 }
             }
@@ -555,7 +587,7 @@ export default class PlanetGroup
                     //fire到root上面去的是为了让root去处理tips
                     me.app.fire( e.type, e );
 
-                 });
+                });
 
                 //互相用属性引用起来
                 _circle.nodeData = p;
@@ -565,6 +597,39 @@ export default class PlanetGroup
                 _circle.planetIndInRing = ii;
 
                 _ringSp.addChild( _circle );
+
+                //如果有开启入场动画
+                if( me._graphs.animation ){
+                    var _r = _circle.context.r;
+                    var _globalAlpha = _circle.context.globalAlpha;
+
+                    _circle.context.r = 1;
+                    _circle.context.globalAlpha = 0.1;
+
+                    _circle.animate({
+                        r : _r,
+                        globalAlpha : _globalAlpha
+                    }, {
+                        delay : (me.scan.enabled?500:0) + Math.round(Math.random() * 1500),
+                        onComplete: function(){
+
+                            //这个时候再把label现实出来
+                            _circle.labelElement && (_circle.labelElement.context.visible = true);
+
+                            var _cloneNode = _circle.clone();
+                            _ringSp.addChildAt( _cloneNode , 0);
+                            _cloneNode.animate({
+                                r : _r+10,
+                                globalAlpha: 0
+                            }, {
+                                onComplete: function(){
+                                    _cloneNode.destroy();
+                                }
+                            });
+                        }
+                    });
+
+                };
 
                 //然后添加label
                 //绘制实心圆上面的文案
@@ -649,11 +714,81 @@ export default class PlanetGroup
                 _label.nodeData = p;
                 p.labelElement = _label;
 
+                if( me._graphs.animation ){
+                    _label.context.visible = false;
+                };
+
                 _ringSp.addChild( _label );
             } );
 
             me.sprite.addChild( _ringSp );
         } );
+
+        if( me.scan.enabled ){
+            var _scanSp = new Canvax.Display.Sprite();
+            me.sprite.addChild(_scanSp);
+
+            var r = me.scan.r || me._graphs.height/2 - 10;
+            var fillStyle = me.scan.fillStyle || me._graphs.center.fillStyle;
+
+            //如果开启了扫描效果
+            var count = me.scan.angle;
+            for( var i=0,l=count; i<l; i++ ){
+                var node = new Sector({
+                    context: {
+                        r: r,
+                        fillStyle: fillStyle,
+                        clockwise: true,
+                        startAngle: 360-i,
+                        endAngle: 359-i,
+                        globalAlpha: me.scan.alpha - ( me.scan.alpha / count)*i
+                    }
+                })
+                _scanSp.addChild( node );
+            };
+
+            var _line = new Line({
+                context: {
+                    end : {
+                        x : r,
+                        y : 0
+                    },
+                    lineWidth: 1,
+                    strokeStyle : fillStyle
+                }
+            });
+
+            _scanSp.addChild( _line );
+
+            _scanSp.context.rotation = 0;
+            _scanSp.animate({
+                rotation : 360,
+                globalAlpha: 1
+            },{
+                duration: 1000,
+                onComplete: function(){
+                    _scanSp.context.rotation = 0;
+                    _scanSp.animate({
+                        rotation : 360
+                    }, {
+                        duration: 1000,
+                        repeat: me.scan.repeat - 2,
+                        onComplete: function(){
+                            _scanSp.context.rotation = 0;
+                            _scanSp.animate({
+                                rotation : 360,
+                                globalAlpha: 0
+                            }, {
+                                duration: 1000,
+                                onComplete: function(){
+                                    _scanSp.destroy();
+                                }
+                            })
+                        }
+                    });
+                }
+            });
+        };
     }
 
     _getRProp( r, ringInd, iNode, nodeData )

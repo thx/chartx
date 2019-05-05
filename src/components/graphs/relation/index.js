@@ -529,14 +529,7 @@ class Relation extends GraphsBase {
                     arrowControl.y += (edge.source.y-edge.target.y)/20
                 }
             };
-            var _arrow = new Arrow({
-                context: {
-                    control: arrowControl,
-                    point: edge.points.slice(-1)[0],
-                    strokeStyle: strokeStyle
-                    //fillStyle: strokeStyle
-                }
-            });
+            me.edgesSp.addChild(_bl);
 
             /*  edge的xy 就是 可以用来显示label的位置
             var _circle = new Circle({
@@ -550,10 +543,18 @@ class Relation extends GraphsBase {
             me.edgesSp.addChild( _circle );
             */
 
-            me.edgesSp.addChild(_bl);
-            me.edgesSp.addChild(_arrow);
-            
-
+            if( me.line.arrow ){
+                var _arrow = new Arrow({
+                    context: {
+                        control: arrowControl,
+                        point: edge.points.slice(-1)[0],
+                        strokeStyle: strokeStyle
+                        //fillStyle: strokeStyle
+                    }
+                });
+                me.edgesSp.addChild(_arrow);
+            };
+    
         });
 
         _.each(this.data.nodes, function (node) {
