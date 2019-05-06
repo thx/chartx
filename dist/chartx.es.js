@@ -20476,6 +20476,27 @@ function () {
               default: 3
             }
           }
+        },
+        bewrite: {
+          detail: 'planet的趋势描述',
+          propertys: {
+            enabled: {
+              detail: '是否开启趋势描述',
+              default: false
+            },
+            text: {
+              detail: '描述文本',
+              default: null
+            },
+            fontColor: {
+              detail: 'fontColor',
+              default: '#999'
+            },
+            fontSize: {
+              detail: 'fontSize',
+              default: 14
+            }
+          }
         }
       };
     }
@@ -21036,7 +21057,98 @@ function () {
         });
 
         me.sprite.addChild(_ringSp);
-      });
+      }); //如果开启了描述中线
+
+
+      if (me.bewrite.enabled) {
+        var _draw = function _draw(direction, _txt, _powerTxt, _weakTxt) {
+          //先绘制右边的
+          _powerTxt.context.x = direction * me._graphs.center.radius + direction * 20;
+
+          _bewriteSp.addChild(_powerTxt);
+
+          _bewriteSp.addChild(new Line$7({
+            context: {
+              lineType: 'dashed',
+              start: {
+                x: _powerTxt.context.x,
+                y: 0
+              },
+              end: {
+                x: direction * (_txt ? _graphR / 2 - _txtWidth / 2 : _graphR),
+                y: 0
+              },
+              lineWidth: 1,
+              strokeStyle: "#ccc"
+            }
+          }));
+
+          if (_txt) {
+            _txt.context.x = direction * (_graphR / 2);
+
+            _bewriteSp.addChild(_txt);
+
+            _bewriteSp.addChild(new Line$7({
+              context: {
+                lineType: 'dashed',
+                start: {
+                  x: direction * (_graphR / 2 + _txtWidth / 2),
+                  y: 0
+                },
+                end: {
+                  x: direction * _graphR,
+                  y: 0
+                },
+                lineWidth: 1,
+                strokeStyle: "#ccc"
+              }
+            }));
+          }
+          _weakTxt.context.x = direction * _graphR;
+
+          _bewriteSp.addChild(_weakTxt);
+        };
+
+        var _txt, _txtWidth, _powerTxt, _weakTxt;
+
+        if (me.bewrite.text) {
+          _txt = new Canvax.Display.Text(me.bewrite.text, {
+            context: {
+              fillStyle: me.bewrite.fontColor,
+              fontSize: me.bewrite.fontSize,
+              textBaseline: "middle",
+              textAlign: "center"
+            }
+          });
+          _txtWidth = _txt.getTextWidth();
+        }
+        _powerTxt = new Canvax.Display.Text("强", {
+          context: {
+            fillStyle: me.bewrite.fontColor,
+            fontSize: me.bewrite.fontSize,
+            textBaseline: "middle",
+            textAlign: "center"
+          }
+        });
+        _weakTxt = new Canvax.Display.Text("弱", {
+          context: {
+            fillStyle: me.bewrite.fontColor,
+            fontSize: me.bewrite.fontSize,
+            textBaseline: "middle",
+            textAlign: "center"
+          }
+        });
+
+        var _bewriteSp = new Canvax.Display.Sprite();
+
+        me.sprite.addChild(_bewriteSp);
+
+        var _graphR = me._graphs.width / 2;
+
+        _draw(1, _txt.clone(), _powerTxt.clone(), _weakTxt.clone());
+
+        _draw(-1, _txt.clone(), _powerTxt.clone(), _weakTxt.clone());
+      }
 
       if (me.scan.enabled) {
         var _scanSp = new Canvax.Display.Sprite();
