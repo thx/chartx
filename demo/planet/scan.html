@@ -101,7 +101,18 @@ var options = {
         "sortField": "tgi",
         "center": {
           "text": "娱乐圈",
-          "fillStyle": "#FB8400"
+          "fillStyle": "#FB8400",
+          cursor: "pointer",
+          onclick: function(e){
+            var me = this;
+            this.clean();
+            this.scan();
+            setTimeout(function(){
+                //只能在app上面触发resetData
+                me.app.resetData( data );
+            }, 3000)
+            //this.app.resetData( data );
+          }
         },
         "node": {
           "radius": "pv",

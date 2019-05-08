@@ -1,6 +1,6 @@
 import Component from "../component"
 import Canvax from "canvax"
-import { global,_, getDefaultProps} from "mmvis"
+import { global,_, getDefaultProps,event} from "mmvis"
 import Trigger from "../trigger"
 
 const Circle = Canvax.Shapes.Circle
@@ -81,6 +81,23 @@ class Legend extends Component
                         default: null
                     }
                 }
+            },
+            event: {
+                detail: '事件配置',
+                propertys: {
+                    enabled: {
+                        detail: '是否开启',
+                        default: false
+                    },
+                    type : {
+                        detail: '触发事件的类型',
+                        default: 'click'
+                    }
+                }
+            },
+            tipsEnabled: {
+                detail: '是否开启图例的tips',
+                default: true
             }
         }
     }
@@ -210,17 +227,14 @@ class Legend extends Component
                 }
             });
             
-            _icon.hover(function( e ){
-                e.eventInfo = me._getInfoHandler(e,obj);
-            } , function(e){
-                delete e.eventInfo;
+            _icon.on( event.types.get() , function(e){
+                if( e.type == 'mouseover' || e.type == 'mousemove' ){
+                    e.eventInfo = me._getInfoHandler(e,obj);
+                };
+                if( e.type == 'mouseout' ){
+                    delete e.eventInfo;
+                };
             });
-            _icon.on("mousemove" , function( e ){
-                e.eventInfo = me._getInfoHandler(e,obj);
-            });
-            //阻止事件冒泡
-            
-            _icon.on("click" , function(){});
 
             var _text = obj.name;
             if( me.label.format ){
@@ -239,15 +253,14 @@ class Legend extends Component
                 }
             } );
         
-            txt.hover(function( e ){
-                e.eventInfo = me._getInfoHandler(e,obj);
-            } , function(e){
-                delete e.eventInfo;
+            txt.on(event.types.get() , function(e){
+                if( e.type == 'mouseover' || e.type == 'mousemove' ){
+                    e.eventInfo = me._getInfoHandler(e,obj);
+                };
+                if( e.type == 'mouseout' ){
+                    delete e.eventInfo;
+                };
             });
-            txt.on("mousemove" , function( e ){
-                e.eventInfo = me._getInfoHandler(e,obj);
-            });
-            txt.on("click" , function(){});
 
             var txtW = txt.getTextWidth();
             var itemW = txtW + me.icon.radius*2 + 20;
@@ -299,24 +312,26 @@ class Legend extends Component
             sprite.context.width = itemW;
             me.sprite.addChild(sprite);
 
-            sprite.on("click" , function( e ){
+            sprite.on( event.types.get() , function( e ){
 
-                //只有一个field的时候，不支持取消
-                if( _.filter( me.data , function(obj){return obj.enabled} ).length == 1 ){
+                if( e.type == me.event.type && me.event.enabled ){
+                    //只有一个field的时候，不支持取消
+                    if( _.filter( me.data , function(obj){return obj.enabled} ).length == 1 ){
+                        if( obj.enabled ){
+                            return;
+                        }
+                    };
+                    obj.enabled = !obj.enabled;
+                    _icon.context.fillStyle = !obj.enabled ? "#ccc" : (obj.color || "#999");
                     if( obj.enabled ){
-                        return;
-                    }
+                        me.app.show( obj.name , new Trigger( this, obj ) );
+                    } else {
+                        me.app.hide( obj.name , new Trigger( this, obj ));
+                    };
                 };
-                
-                obj.enabled = !obj.enabled;
 
-                _icon.context.fillStyle = !obj.enabled ? "#ccc" : (obj.color || "#999");
+                me.app.fire( e.type, e );
 
-                if( obj.enabled ){
-                    me.app.show( obj.name , new Trigger( this, obj ) );
-                } else {
-                    me.app.hide( obj.name , new Trigger( this, obj ));
-                }
             });
 
         } );
@@ -336,6 +351,9 @@ class Legend extends Component
     {
         return {
             type : "legend",
+            triggerType : 'legend',
+            trigger : this,
+            tipsEnabled : this.tipsEnabled,
             //title : data.name,
             nodes : [
                 {

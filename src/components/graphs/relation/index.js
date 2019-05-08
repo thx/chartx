@@ -514,7 +514,7 @@ class Relation extends GraphsBase {
 
             var _bl = new Path({
                 context: {
-                    path: me._getPathStr(edge),
+                    path: me._getPathStr(edge, me.line.inflectionRadius),
                     lineWidth: lineWidth,
                     strokeStyle: strokeStyle
                 }
@@ -633,13 +633,15 @@ class Relation extends GraphsBase {
         }
 
         edge.points = points;
-            
-        
     }
 
-    _getPathStr(edge) {
+    /**
+     * 
+     * @param {shapeType,points} edge 
+     * @param {number} inflectionRadius 拐点的圆角半径
+     */
+    _getPathStr(edge, inflectionRadius) {
         
-        var me = this;
         var points = edge.points;
 
 
@@ -660,14 +662,23 @@ class Relation extends GraphsBase {
             _.each( points, function( point, i ){
                 
                 if( i ){
-                    if( me.line.inflectionRadius && i<points.length-1 ){
+                    if( inflectionRadius && i<points.length-1 ){
                         
                         //圆角连线
                         var prePoint = points[i-1];
                         var nextPoint= points[i+1];
                         //要从这个点到上个点的半径距离，已point为控制点，绘制nextPoint的半径距离
 
-                        console.log(Math.atan2( point.y - prePoint.y , point.x - prePoint.x ),Math.atan2( nextPoint.y - point.y , nextPoint.x - point.x ))
+                        var radius = inflectionRadius;
+                        //radius要做次二次校验，取radius 以及 point 和prePoint距离以及和 nextPoint 的最小值
+                        //var _disPre = Math.abs(Math.sqrt( (prePoint.x - point.x)*(prePoint.x - point.x) + (prePoint.y - point.y)*(prePoint.y - point.y) ));
+                        //var _disNext = Math.abs(Math.sqrt( (nextPoint.x - point.x)*(nextPoint.x - point.x) + (nextPoint.y - point.y)*(nextPoint.y - point.y) ));
+                        var _disPre = Math.max( Math.abs( prePoint.x - point.x )/2, Math.abs( prePoint.y - point.y )/2 );
+                        var _disNext = Math.max( Math.abs( nextPoint.x - point.x )/2, Math.abs( nextPoint.y - point.y )/2 );
+                        radius = _.min( [radius, _disPre, _disNext] );
+
+                        //console.log(Math.atan2( point.y - prePoint.y , point.x - prePoint.x ),Math.atan2( nextPoint.y - point.y , nextPoint.x - point.x ))
+                        
                         if( 
                             (point.x == prePoint.x && point.y == prePoint.y ) ||
                             (point.x == nextPoint.x && point.y == nextPoint.y ) ||
@@ -679,15 +690,13 @@ class Relation extends GraphsBase {
                             function getPointOf( p ){
                                 var _atan2 = Math.atan2( p.y - point.y , p.x - point.x );
                                 return {
-                                    x : point.x+me.line.inflectionRadius * Math.cos( _atan2 ),
-                                    y : point.y+me.line.inflectionRadius * Math.sin( _atan2 )
+                                    x : point.x+radius * Math.cos( _atan2 ),
+                                    y : point.y+radius * Math.sin( _atan2 )
                                 }
                             };
-    
                             var bezierBegin = getPointOf( prePoint );
                             var bezierEnd = getPointOf( nextPoint );
                             str +=",L"+bezierBegin.x+" "+bezierBegin.y+",Q"+ point.x + " " + point.y+" "+ bezierEnd.x + " " + bezierEnd.y
-    
                         }
                     } else {
                         //直角连线
@@ -696,8 +705,6 @@ class Relation extends GraphsBase {
                 }
             } );
         };
-        
-
         //str += "z"
         return str;
     }

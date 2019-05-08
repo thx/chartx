@@ -1680,8 +1680,11 @@ var Chartx = (function () {
 
     dataFrame.range.end = dataOrg.length - 1; //然后检查opts中是否有dataZoom.range
 
-    if (opt && opt.dataZoom && opt.dataZoom.range) {
-      _.extend(dataFrame.range, opt.dataZoom.range);
+    if (opt) {
+      //兼容下dataZoom 和 datazoom 的大小写配置
+      var _datazoom = opt.dataZoom || opt.datazoom;
+
+      _datazoom && _datazoom.range && _.extend(dataFrame.range, _datazoom.range);
     }
 
     if (dataOrg.length && dataOrg[0].length && !~dataOrg[0].indexOf("__index__")) {
@@ -8910,7 +8913,7 @@ var Chartx = (function () {
 
       opt = Utils.checkOpt(opt);
 
-      var _context = _.extend({
+      var _context = _.extend(true, {
         lineType: null,
         smooth: false,
         pointList: [],
@@ -9027,7 +9030,7 @@ var Chartx = (function () {
     function Path(opt) {
       _classCallCheck(this, Path);
 
-      var _context = _.extend({
+      var _context = _.extend(true, {
         pointList: [],
         //从下面的path中计算得到的边界点的集合
         path: "" //字符串 必须，路径。例如:M 0 0 L 0 10 L 10 10 Z (一个三角形)
@@ -9394,7 +9397,7 @@ var Chartx = (function () {
 
       _classCallCheck(this, Droplet);
 
-      opt = _.extend({
+      opt = _.extend(true, {
         type: "droplet",
         context: {
           hr: 0,
@@ -9438,7 +9441,7 @@ var Chartx = (function () {
     function Ellipse(opt) {
       _classCallCheck(this, Ellipse);
 
-      opt = _.extend({
+      opt = _.extend(true, {
         type: "ellipse",
         context: {
           hr: 0,
@@ -9475,7 +9478,7 @@ var Chartx = (function () {
     function Polygon(opt) {
       _classCallCheck(this, Polygon);
 
-      var _context = _.extend({
+      var _context = _.extend(true, {
         lineType: null,
         smooth: false,
         pointList: [],
@@ -9539,7 +9542,7 @@ var Chartx = (function () {
     function Isogon(opt) {
       _classCallCheck(this, Isogon);
 
-      var _context = _.extend({
+      var _context = _.extend(true, {
         pointList: [],
         //从下面的r和n计算得到的边界值的集合
         r: 0,
@@ -9579,7 +9582,7 @@ var Chartx = (function () {
     function Line(opt) {
       _classCallCheck(this, Line);
 
-      var _context = _.extend({
+      var _context = _.extend(true, {
         start: {
           x: 0,
           // 必须，起点横坐标
@@ -9628,7 +9631,7 @@ var Chartx = (function () {
     function Rect(opt) {
       _classCallCheck(this, Rect);
 
-      var _context = _.extend({
+      var _context = _.extend(true, {
         width: 0,
         height: 0,
         radius: []
@@ -9708,7 +9711,7 @@ var Chartx = (function () {
     function Sector(opt) {
       _classCallCheck(this, Sector);
 
-      var _context = _.extend({
+      var _context = _.extend(true, {
         pointList: [],
         //边界点的集合,私有，从下面的属性计算的来
         r0: 0,
@@ -9719,7 +9722,7 @@ var Chartx = (function () {
         //{number},  // 必须，起始角度[0, 360)
         endAngle: 0,
         //{number},  // 必须，结束角度(0, 360]
-        clockwise: false //是否逆时针，默认为false(顺时针)
+        clockwise: false //是否顺时针，默认为false(顺时针)
 
       }, opt.context);
 
@@ -9833,7 +9836,7 @@ var Chartx = (function () {
     function Line(opt) {
       _classCallCheck(this, Line);
 
-      var _context = _.extend({
+      var _context = _.extend(true, {
         control: {
           x: 0,
           // 必须，起点横坐标
@@ -10600,32 +10603,35 @@ var Chartx = (function () {
           });
 
           if (_tips) {
-            me._setTipsInfo.apply(me, [e]);
+            //比如图例中的event 会带过来 triggerType == 'legend' 就不需要调用 _setGraphsTipsInfo 
+            //来自坐标系区域的事件
+            var isCoordTrigger = e.eventInfo && (!e.eventInfo.triggerType || e.eventInfo.triggerType == 'coord');
+            isCoordTrigger && me._setGraphsTipsInfo.apply(me, [e]);
 
             if (e.type == "mouseover" || e.type == "mousedown") {
               _tips.show(e);
 
-              me._tipsPointerAtAllGraphs(e);
+              isCoordTrigger && me._tipsPointerAtAllGraphs(e);
             }
 
             if (e.type == "mousemove") {
               _tips.move(e);
 
-              me._tipsPointerAtAllGraphs(e);
+              isCoordTrigger && me._tipsPointerAtAllGraphs(e);
             }
 
             if (e.type == "mouseout" && !(e.toTarget && _coord && _coord.induce && _coord.induce.containsPoint(_coord.induce.globalToLocal(e.target.localToGlobal(e.point))))) {
               _tips.hide(e);
 
-              me._tipsPointerHideAtAllGraphs(e);
+              isCoordTrigger && me._tipsPointerHideAtAllGraphs(e);
             }
           }
         });
       } //默认的基本tipsinfo处理，极坐标和笛卡尔坐标系统会覆盖
 
     }, {
-      key: "_setTipsInfo",
-      value: function _setTipsInfo(e) {
+      key: "_setGraphsTipsInfo",
+      value: function _setGraphsTipsInfo(e) {
         if (!e.eventInfo) {
           e.eventInfo = {};
         }
@@ -14931,6 +14937,7 @@ var Chartx = (function () {
       key: "resetData",
       value: function resetData(dataFrame$$1, dataTrigger) {
         this.dataFrame = dataFrame$$1;
+        debugger;
         this.draw();
       }
     }, {
@@ -15028,6 +15035,7 @@ var Chartx = (function () {
                   groupRegion = groupH.getChildById("group_region_" + h);
                   groupRegion.context.width = groupRegionWidth;
                   groupRegion.context.x = itemW * h + (itemW - groupRegionWidth) / 2;
+                  groupRegion.context.globalAlpha = _.indexOf(me.select.inds, me.dataFrame.range.start + h) > -1 ? me.select.alpha : 0;
                 } else {
                   groupRegion = new Rect$3({
                     id: "group_region_" + h,
@@ -20315,8 +20323,6 @@ var Chartx = (function () {
   global$1.registerComponent(CloudGraphs, 'graphs', 'cloud');
 
   var Circle$6 = Canvax.Shapes.Circle;
-  var Sector$2 = Canvax.Shapes.Sector;
-  var Line$7 = Canvax.Shapes.Line;
 
   var PlanetGroup =
   /*#__PURE__*/
@@ -20447,57 +20453,6 @@ var Chartx = (function () {
               offsetY: {
                 detail: 'y方向偏移量',
                 default: 0
-              }
-            }
-          },
-          scan: {
-            detail: '扫描效果',
-            propertys: {
-              enabled: {
-                detail: '是否开启扫描效果',
-                default: false
-              },
-              fillStyle: {
-                detail: '扫描效果颜色',
-                default: null //默认取 me._graphs.center.fillStyle
-
-              },
-              alpha: {
-                detail: '起始透明度',
-                default: 0.6
-              },
-              angle: {
-                detail: '扫描效果的覆盖角度',
-                default: 90
-              },
-              r: {
-                detail: '扫描效果覆盖的半径',
-                default: null
-              },
-              repeat: {
-                detail: '扫描次数',
-                default: 3
-              }
-            }
-          },
-          bewrite: {
-            detail: 'planet的趋势描述',
-            propertys: {
-              enabled: {
-                detail: '是否开启趋势描述',
-                default: false
-              },
-              text: {
-                detail: '描述文本',
-                default: null
-              },
-              fontColor: {
-                detail: 'fontColor',
-                default: '#999'
-              },
-              fontSize: {
-                detail: 'fontSize',
-                default: 14
               }
             }
           }
@@ -20947,7 +20902,7 @@ var Chartx = (function () {
                 r: _r,
                 globalAlpha: _globalAlpha
               }, {
-                delay: (me.scan.enabled ? 500 : 0) + Math.round(Math.random() * 1500),
+                delay: Math.round(Math.random() * 1500),
                 onComplete: function onComplete() {
                   //这个时候再把label现实出来
                   _circle.labelElement && (_circle.labelElement.context.visible = true);
@@ -21060,168 +21015,7 @@ var Chartx = (function () {
           });
 
           me.sprite.addChild(_ringSp);
-        }); //如果开启了描述中线
-
-
-        if (me.bewrite.enabled) {
-          var _draw = function _draw(direction, _txt, _powerTxt, _weakTxt) {
-            //先绘制右边的
-            _powerTxt.context.x = direction * me._graphs.center.radius + direction * 20;
-
-            _bewriteSp.addChild(_powerTxt);
-
-            _bewriteSp.addChild(new Line$7({
-              context: {
-                lineType: 'dashed',
-                start: {
-                  x: _powerTxt.context.x,
-                  y: 0
-                },
-                end: {
-                  x: direction * (_txt ? _graphR / 2 - _txtWidth / 2 : _graphR),
-                  y: 0
-                },
-                lineWidth: 1,
-                strokeStyle: "#ccc"
-              }
-            }));
-
-            if (_txt) {
-              _txt.context.x = direction * (_graphR / 2);
-
-              _bewriteSp.addChild(_txt);
-
-              _bewriteSp.addChild(new Line$7({
-                context: {
-                  lineType: 'dashed',
-                  start: {
-                    x: direction * (_graphR / 2 + _txtWidth / 2),
-                    y: 0
-                  },
-                  end: {
-                    x: direction * _graphR,
-                    y: 0
-                  },
-                  lineWidth: 1,
-                  strokeStyle: "#ccc"
-                }
-              }));
-            }
-            _weakTxt.context.x = direction * _graphR;
-
-            _bewriteSp.addChild(_weakTxt);
-          };
-
-          var _txt, _txtWidth, _powerTxt, _weakTxt;
-
-          if (me.bewrite.text) {
-            _txt = new Canvax.Display.Text(me.bewrite.text, {
-              context: {
-                fillStyle: me.bewrite.fontColor,
-                fontSize: me.bewrite.fontSize,
-                textBaseline: "middle",
-                textAlign: "center"
-              }
-            });
-            _txtWidth = _txt.getTextWidth();
-          }
-          _powerTxt = new Canvax.Display.Text("强", {
-            context: {
-              fillStyle: me.bewrite.fontColor,
-              fontSize: me.bewrite.fontSize,
-              textBaseline: "middle",
-              textAlign: "center"
-            }
-          });
-          _weakTxt = new Canvax.Display.Text("弱", {
-            context: {
-              fillStyle: me.bewrite.fontColor,
-              fontSize: me.bewrite.fontSize,
-              textBaseline: "middle",
-              textAlign: "center"
-            }
-          });
-
-          var _bewriteSp = new Canvax.Display.Sprite();
-
-          me.sprite.addChild(_bewriteSp);
-
-          var _graphR = me._graphs.width / 2;
-
-          _draw(1, _txt.clone(), _powerTxt.clone(), _weakTxt.clone());
-
-          _draw(-1, _txt.clone(), _powerTxt.clone(), _weakTxt.clone());
-        }
-
-        if (me.scan.enabled) {
-          var _scanSp = new Canvax.Display.Sprite();
-
-          me.sprite.addChild(_scanSp);
-          var r = me.scan.r || me._graphs.height / 2 - 10;
-          var fillStyle = me.scan.fillStyle || me._graphs.center.fillStyle; //如果开启了扫描效果
-
-          var count = me.scan.angle;
-
-          for (var i = 0, l = count; i < l; i++) {
-            var node = new Sector$2({
-              context: {
-                r: r,
-                fillStyle: fillStyle,
-                clockwise: true,
-                startAngle: 360 - i,
-                endAngle: 359 - i,
-                globalAlpha: me.scan.alpha - me.scan.alpha / count * i
-              }
-            });
-
-            _scanSp.addChild(node);
-          }
-
-          var _line = new Line$7({
-            context: {
-              end: {
-                x: r,
-                y: 0
-              },
-              lineWidth: 1,
-              strokeStyle: fillStyle
-            }
-          });
-
-          _scanSp.addChild(_line);
-
-          _scanSp.context.rotation = 0;
-
-          _scanSp.animate({
-            rotation: 360,
-            globalAlpha: 1
-          }, {
-            duration: 1000,
-            onComplete: function onComplete() {
-              _scanSp.context.rotation = 0;
-
-              _scanSp.animate({
-                rotation: 360
-              }, {
-                duration: 1000,
-                repeat: me.scan.repeat - 2,
-                onComplete: function onComplete() {
-                  _scanSp.context.rotation = 0;
-
-                  _scanSp.animate({
-                    rotation: 360,
-                    globalAlpha: 0
-                  }, {
-                    duration: 1000,
-                    onComplete: function onComplete() {
-                      _scanSp.destroy();
-                    }
-                  });
-                }
-              });
-            }
-          });
-        }
+        });
       }
     }, {
       key: "_getRProp",
@@ -21344,8 +21138,9 @@ var Chartx = (function () {
 
   var Text$2 = Canvax.Display.Text;
   var Circle$7 = Canvax.Shapes.Circle;
-  var Line$8 = Canvax.Shapes.Line;
+  var Line$7 = Canvax.Shapes.Line;
   var Rect$5 = Canvax.Shapes.Rect;
+  var Sector$2 = Canvax.Shapes.Sector;
 
   var PlanetGraphs =
   /*#__PURE__*/
@@ -21390,6 +21185,10 @@ var Chartx = (function () {
               margin: {
                 detail: '中区区域和外围可绘图区域距离',
                 default: 20
+              },
+              cursor: {
+                detail: '中心节点的鼠标手势',
+                default: 'default'
               }
             }
           },
@@ -21444,6 +21243,57 @@ var Chartx = (function () {
               }
             }
           },
+          bewrite: {
+            detail: 'planet的趋势描述',
+            propertys: {
+              enabled: {
+                detail: '是否开启趋势描述',
+                default: false
+              },
+              text: {
+                detail: '描述文本',
+                default: null
+              },
+              fontColor: {
+                detail: 'fontColor',
+                default: '#999'
+              },
+              fontSize: {
+                detail: 'fontSize',
+                default: 12
+              }
+            }
+          },
+          scan: {
+            detail: '扫描效果',
+            propertys: {
+              enabled: {
+                detail: '是否开启扫描效果',
+                default: false
+              },
+              fillStyle: {
+                detail: '扫描效果颜色',
+                default: null //默认取 me._graphs.center.fillStyle
+
+              },
+              alpha: {
+                detail: '起始透明度',
+                default: 0.6
+              },
+              angle: {
+                detail: '扫描效果的覆盖角度',
+                default: 90
+              },
+              r: {
+                detail: '扫描效果覆盖的半径',
+                default: null
+              },
+              repeat: {
+                detail: '扫描次数',
+                default: 3
+              }
+            }
+          },
           _props: [PlanetGroup]
         };
       }
@@ -21474,6 +21324,7 @@ var Chartx = (function () {
         _this.center.margin = 0;
         _this.center.enabled = false;
       }
+      _this.__scanIngCurOration = 0;
 
       _this.init();
 
@@ -21486,9 +21337,19 @@ var Chartx = (function () {
         this.gridSp = new Canvax.Display.Sprite({
           id: "gridSp"
         });
+        this.groupSp = new Canvax.Display.Sprite({
+          id: "groupSp"
+        });
+        this.scanSp = new Canvax.Display.Sprite({
+          id: "scanSp"
+        });
+        this.centerSp = new Canvax.Display.Sprite({
+          id: "centerSp"
+        });
         this.sprite.addChild(this.gridSp);
-
-        this._dataGroupHandle();
+        this.sprite.addChild(this.groupSp);
+        this.sprite.addChild(this.scanSp);
+        this.sprite.addChild(this.centerSp);
       }
     }, {
       key: "draw",
@@ -21497,9 +21358,17 @@ var Chartx = (function () {
 
         _.extend(true, this, opt);
 
+        this._dataGroupHandle();
+
         this._drawGroups();
 
+        this._drawBack();
+
+        this._drawBewrite();
+
         this._drawCenter();
+
+        this._drawScan();
 
         this.fire("complete");
       }
@@ -21552,8 +21421,6 @@ var Chartx = (function () {
           });
         });
 
-        me._drawBack();
-
         _.each(me._ringGroups, function (_g) {
           me.sprite.addChild(_g.sprite);
         });
@@ -21561,14 +21428,18 @@ var Chartx = (function () {
     }, {
       key: "_drawCenter",
       value: function _drawCenter() {
+        var me = this;
+
         if (this.center.enabled) {
           //绘制中心实心圆
           this._center = new Circle$7({
+            hoverClone: false,
             context: {
               x: this.origin.x,
               y: this.origin.y,
               fillStyle: this.center.fillStyle,
-              r: this.center.radius
+              r: this.center.radius,
+              cursor: this.center.cursor
             }
           }); //绘制实心圆上面的文案
 
@@ -21581,9 +21452,29 @@ var Chartx = (function () {
               textBaseline: "middle",
               fillStyle: this.center.fontColor
             }
+          }); //给圆点添加事件
+
+          this._center.on(types.get(), function (e) {
+            e.eventInfo = {
+              title: me.center.text,
+              trigger: me.center,
+              nodes: [me.center]
+            };
+
+            if (me.center['onclick']) {
+              if (e.type == 'mousedown') {
+                me._center.context.r += 2;
+              }
+
+              if (e.type == 'mouseup') {
+                me._center.context.r -= 2;
+              }
+            }
+            me.app.fire(e.type, e);
           });
-          this.sprite.addChild(this._center);
-          this.sprite.addChild(this._centerTxt);
+
+          this.centerSp.addChild(this._center);
+          this.centerSp.addChild(this._centerTxt);
         }
       }
     }, {
@@ -21643,7 +21534,7 @@ var Chartx = (function () {
 
             var ty = cy + _r * Math.sin(radian);
 
-            me.gridSp.addChild(new Line$8({
+            me.gridSp.addChild(new Line$7({
               context: {
                 start: {
                   x: cx,
@@ -21671,7 +21562,8 @@ var Chartx = (function () {
           }
         });
 
-        me.gridSp.clipTo(_clipRect);
+        me.gridSp.clipTo(_clipRect); //TODO：理论上下面这句应该可以神略了才行
+
         me.sprite.addChild(_clipRect);
       }
     }, {
@@ -21697,6 +21589,251 @@ var Chartx = (function () {
           res = p[i];
         }
         return res;
+      }
+    }, {
+      key: "_drawBewrite",
+      value: function _drawBewrite() {
+        var me = this; //如果开启了描述中线
+
+        if (me.bewrite.enabled) {
+          var _draw = function _draw(direction, _txt, _powerTxt, _weakTxt) {
+            //先绘制右边的
+            _powerTxt.context.x = direction * me.center.radius + direction * 20;
+
+            _bewriteSp.addChild(_powerTxt);
+
+            _bewriteSp.addChild(new Line$7({
+              context: {
+                lineType: 'dashed',
+                start: {
+                  x: _powerTxt.context.x,
+                  y: 0
+                },
+                end: {
+                  x: direction * (_txt ? _graphR / 2 - _txtWidth / 2 : _graphR),
+                  y: 0
+                },
+                lineWidth: 1,
+                strokeStyle: "#ccc"
+              }
+            }));
+
+            if (_txt) {
+              _txt.context.x = direction * (_graphR / 2);
+
+              _bewriteSp.addChild(_txt);
+
+              _bewriteSp.addChild(new Line$7({
+                context: {
+                  lineType: 'dashed',
+                  start: {
+                    x: direction * (_graphR / 2 + _txtWidth / 2),
+                    y: 0
+                  },
+                  end: {
+                    x: direction * _graphR,
+                    y: 0
+                  },
+                  lineWidth: 1,
+                  strokeStyle: "#ccc"
+                }
+              }));
+            }
+            _weakTxt.context.x = direction * _graphR;
+
+            _bewriteSp.addChild(_weakTxt);
+          };
+
+          var _txt, _txtWidth, _powerTxt, _weakTxt;
+
+          if (me.bewrite.text) {
+            _txt = new Canvax.Display.Text(me.bewrite.text, {
+              context: {
+                fillStyle: me.bewrite.fontColor,
+                fontSize: me.bewrite.fontSize,
+                textBaseline: "middle",
+                textAlign: "center"
+              }
+            });
+            _txtWidth = _txt.getTextWidth();
+          }
+          _powerTxt = new Canvax.Display.Text("强", {
+            context: {
+              fillStyle: me.bewrite.fontColor,
+              fontSize: me.bewrite.fontSize,
+              textBaseline: "middle",
+              textAlign: "center"
+            }
+          });
+          _weakTxt = new Canvax.Display.Text("弱", {
+            context: {
+              fillStyle: me.bewrite.fontColor,
+              fontSize: me.bewrite.fontSize,
+              textBaseline: "middle",
+              textAlign: "center"
+            }
+          });
+
+          var _bewriteSp = new Canvax.Display.Sprite({
+            context: {
+              x: this.origin.x,
+              y: this.origin.y
+            }
+          });
+
+          me.sprite.addChild(_bewriteSp);
+
+          var _graphR = me.width / 2;
+
+          _draw(1, _txt.clone(), _powerTxt.clone(), _weakTxt.clone());
+
+          _draw(-1, _txt.clone(), _powerTxt.clone(), _weakTxt.clone());
+        }
+      }
+    }, {
+      key: "scan",
+      value: function scan() {
+        var me = this;
+        this._scanAnim && this._scanAnim.stop();
+
+        var _scanSp = me._getScanSp(); //开始动画
+
+
+        if (me.__scanIngCurOration == 360) {
+          _scanSp.context.rotation = 0;
+        }
+        me._scanAnim = _scanSp.animate({
+          rotation: 360,
+          globalAlpha: 1
+        }, {
+          duration: 1000 * ((360 - me.__scanIngCurOration) / 360),
+          onUpdate: function onUpdate(e) {
+            me.__scanIngCurOration = e.rotation;
+          },
+          onComplete: function onComplete() {
+            _scanSp.context.rotation = 0;
+            me._scanAnim = _scanSp.animate({
+              rotation: 360
+            }, {
+              duration: 1000,
+              repeat: 1000,
+              //一般repeat不到1000
+              onUpdate: function onUpdate(e) {
+                me.__scanIngCurOration = e.rotation;
+              }
+            });
+          }
+        });
+      }
+    }, {
+      key: "_drawScan",
+      value: function _drawScan(callback) {
+        var me = this;
+
+        if (me.scan.enabled) {
+          var _scanSp = me._getScanSp(); //开始动画
+
+
+          if (me.__scanIngCurOration == 360) {
+            _scanSp.context.rotation = 0;
+          }
+          me._scanAnim && me._scanAnim.stop();
+          me._scanAnim = _scanSp.animate({
+            rotation: 360,
+            globalAlpha: 1
+          }, {
+            duration: 1000 * ((360 - me.__scanIngCurOration) / 360),
+            onUpdate: function onUpdate(e) {
+              me.__scanIngCurOration = e.rotation;
+            },
+            onComplete: function onComplete() {
+              _scanSp.context.rotation = 0;
+              me._scanAnim = _scanSp.animate({
+                rotation: 360
+              }, {
+                duration: 1000,
+                repeat: me.scan.repeat - 2,
+                onUpdate: function onUpdate(e) {
+                  me.__scanIngCurOration = e.rotation;
+                },
+                onComplete: function onComplete() {
+                  _scanSp.context.rotation = 0;
+                  me._scanAnim = _scanSp.animate({
+                    rotation: 360,
+                    globalAlpha: 0
+                  }, {
+                    duration: 1000,
+                    onUpdate: function onUpdate(e) {
+                      me.__scanIngCurOration = e.rotation;
+                    },
+                    onComplete: function onComplete() {
+                      _scanSp.destroy();
+
+                      me.__scanSp = null;
+                      delete me.__scanSp;
+                      me.__scanIngCurOration = 0;
+                      callback && callback();
+                    }
+                  });
+                }
+              });
+            }
+          });
+        }
+      }
+    }, {
+      key: "_getScanSp",
+      value: function _getScanSp() {
+        var me = this; //先准备scan元素
+
+        var _scanSp = me.__scanSp;
+
+        if (!_scanSp) {
+          _scanSp = new Canvax.Display.Sprite({
+            context: {
+              x: this.origin.x,
+              y: this.origin.y,
+              globalAlpha: 0,
+              rotation: me.__scanIngCurOration
+            }
+          });
+          me.scanSp.addChild(_scanSp);
+          me.__scanSp = _scanSp;
+          var r = me.scan.r || me.height / 2 - 10;
+          var fillStyle = me.scan.fillStyle || me.center.fillStyle; //如果开启了扫描效果
+
+          var count = me.scan.angle;
+
+          for (var i = 0, l = count; i < l; i++) {
+            var node = new Sector$2({
+              context: {
+                r: r,
+                fillStyle: fillStyle,
+                clockwise: true,
+                startAngle: 360 - i,
+                endAngle: 359 - i,
+                globalAlpha: me.scan.alpha - me.scan.alpha / count * i
+              }
+            });
+
+            _scanSp.addChild(node);
+          }
+
+          var _line = new Line$7({
+            context: {
+              end: {
+                x: r,
+                y: 0
+              },
+              lineWidth: 1,
+              strokeStyle: fillStyle
+            }
+          });
+
+          _scanSp.addChild(_line);
+        }
+
+        return _scanSp;
       }
     }, {
       key: "_dataGroupHandle",
@@ -21865,6 +22002,33 @@ var Chartx = (function () {
         });
 
         return arr;
+      }
+    }, {
+      key: "getNodesAt",
+      value: function getNodesAt() {}
+    }, {
+      key: "resetData",
+      value: function resetData(dataFrame$$1, dataTrigger) {
+        this.clean();
+        this.dataFrame = dataFrame$$1;
+
+        this._dataGroupHandle();
+
+        this._drawGroups();
+
+        this._drawScan();
+      }
+    }, {
+      key: "clean",
+      value: function clean() {
+        var me = this;
+        me.groupDataFrames = [];
+
+        _.each(me._ringGroups, function (_g) {
+          _g.sprite.destroy();
+        });
+
+        me._ringGroups = [];
       }
     }]);
 
@@ -24882,11 +25046,23 @@ var Chartx = (function () {
         nodePadding = 8,
         size = [1, 1],
         nodes = [],
-        links = [];
+        sort = function sort(a, b) {
+      return a.y - b.y;
+    },
+        // sort = function(a, b) {
+    //     return a < b ? -1 : a > b ? 1 : a >= b ? 0 : NaN;
+    // },
+    links = [];
 
     sankey.nodeWidth = function (_$$1) {
       if (!arguments.length) return nodeWidth;
       nodeWidth = +_$$1;
+      return sankey;
+    };
+
+    sankey.nodeSort = function (_$$1) {
+      if (!arguments.length) return sort;
+      sort = _$$1;
       return sankey;
     };
 
@@ -25302,14 +25478,14 @@ var Chartx = (function () {
       return true;
     }
 
-    function d3_ascending(a, b) {
+    function d3_sortKey(a, b) {
       return a < b ? -1 : a > b ? 1 : a >= b ? 0 : NaN;
     }
 
     function computeNodeDepths(iterations) {
       var nodesByBreadth = d3_nest().key(function (d) {
         return d.x;
-      }).sortKeys(d3_ascending).entries(nodes).map(function (d) {
+      }).sortKeys(d3_sortKey).entries(nodes).map(function (d) {
         return d.values;
       }); //
 
@@ -25376,7 +25552,7 @@ var Chartx = (function () {
               n = nodes.length,
               i; // Push any overlapping nodes down.
 
-          nodes.sort(ascendingDepth);
+          sort && nodes.sort(sort);
 
           for (i = 0; i < n; ++i) {
             node = nodes[i];
@@ -25399,10 +25575,6 @@ var Chartx = (function () {
             }
           }
         });
-      }
-
-      function ascendingDepth(a, b) {
-        return a.y - b.y;
       }
     }
 
@@ -25479,6 +25651,12 @@ var Chartx = (function () {
                 detail: '节点间距',
                 default: 10
               },
+              sort: {
+                detail: '节点排序字段',
+                default: function _default(a, b) {
+                  return a.y - b.y;
+                }
+              },
               fillStyle: {
                 detail: '节点背景色',
                 default: null
@@ -25495,6 +25673,15 @@ var Chartx = (function () {
               alpha: {
                 detail: '线透明度',
                 default: 0.3
+              },
+              focus: {
+                detail: '图形的hover设置',
+                propertys: {
+                  enabled: {
+                    detail: '是否开启',
+                    default: true
+                  }
+                }
               }
             }
           },
@@ -25516,6 +25703,10 @@ var Chartx = (function () {
               verticalAlign: {
                 detail: '垂直对齐方式',
                 default: 'middle'
+              },
+              format: {
+                detail: '文本格式函数',
+                default: null
               }
             }
           }
@@ -25599,7 +25790,7 @@ var Chartx = (function () {
           if (me.parentField) {
             nodeNames.push(parentFields[i]);
           }
-          nodeNames = nodeNames.concat(key.split(/[,|]/));
+          nodeNames = nodeNames.concat(key.split(/[|]/));
 
           if (nodeNames.length == 2) {
             links.push({
@@ -25610,7 +25801,8 @@ var Chartx = (function () {
           }
         });
 
-        return sankeyLayout().nodeWidth(this.node.width).nodePadding(this.node.padding).size([this.width, this.height]).nodes(nodes).links(links).layout(16);
+        debugger;
+        return sankeyLayout().nodeWidth(this.node.width).nodePadding(this.node.padding).nodeSort(this.node.sort).size([this.width, this.height]).nodes(nodes).links(links).layout(16);
       }
     }, {
       key: "_widget",
@@ -25687,15 +25879,18 @@ var Chartx = (function () {
             }
           });
 
+          _path.__glpha = me.line.alpha;
           _path.link = link;
 
           _path.on(types.get(), function (e) {
-            if (e.type == 'mouseover') {
-              this.context.globalAlpha += 0.2;
-            }
+            if (me.line.focus.enabled) {
+              if (e.type == 'mouseover') {
+                this.__glpha += 0.1;
+              }
 
-            if (e.type == 'mouseout') {
-              this.context.globalAlpha -= 0.2;
+              if (e.type == 'mouseout') {
+                this.__glpha -= 0.1;
+              }
             }
             var linkData = this.link; //type给tips用
 
@@ -25731,7 +25926,8 @@ var Chartx = (function () {
           */
 
           var y = node.y + Math.max(node.dy / 2, 1);
-          var label = new Canvax.Display.Text(node.name, {
+          var txt = me.label.format ? me.label.format(node.name, node) : node.name;
+          var label = new Canvax.Display.Text(txt, {
             context: {
               x: x,
               y: y,
@@ -26881,7 +27077,7 @@ var Chartx = (function () {
 
           var _bl = new Path$5({
             context: {
-              path: me._getPathStr(edge),
+              path: me._getPathStr(edge, me.line.inflectionRadius),
               lineWidth: lineWidth,
               strokeStyle: strokeStyle
             }
@@ -27003,10 +27199,15 @@ var Chartx = (function () {
 
         edge.points = points;
       }
+      /**
+       * 
+       * @param {shapeType,points} edge 
+       * @param {number} inflectionRadius 拐点的圆角半径
+       */
+
     }, {
       key: "_getPathStr",
-      value: function _getPathStr(edge) {
-        var me = this;
+      value: function _getPathStr(edge, inflectionRadius) {
         var points = edge.points;
         var head = points[0];
         var tail = points.slice(-1)[0];
@@ -27025,12 +27226,20 @@ var Chartx = (function () {
         if (edge.shapeType == "brokenLine") {
           _.each(points, function (point, i) {
             if (i) {
-              if (me.line.inflectionRadius && i < points.length - 1) {
+              if (inflectionRadius && i < points.length - 1) {
                 //圆角连线
                 var prePoint = points[i - 1];
                 var nextPoint = points[i + 1]; //要从这个点到上个点的半径距离，已point为控制点，绘制nextPoint的半径距离
 
-                console.log(Math.atan2(point.y - prePoint.y, point.x - prePoint.x), Math.atan2(nextPoint.y - point.y, nextPoint.x - point.x));
+                var radius = inflectionRadius; //radius要做次二次校验，取radius 以及 point 和prePoint距离以及和 nextPoint 的最小值
+                //var _disPre = Math.abs(Math.sqrt( (prePoint.x - point.x)*(prePoint.x - point.x) + (prePoint.y - point.y)*(prePoint.y - point.y) ));
+                //var _disNext = Math.abs(Math.sqrt( (nextPoint.x - point.x)*(nextPoint.x - point.x) + (nextPoint.y - point.y)*(nextPoint.y - point.y) ));
+
+                var _disPre = Math.max(Math.abs(prePoint.x - point.x) / 2, Math.abs(prePoint.y - point.y) / 2);
+
+                var _disNext = Math.max(Math.abs(nextPoint.x - point.x) / 2, Math.abs(nextPoint.y - point.y) / 2);
+
+                radius = _.min([radius, _disPre, _disNext]); //console.log(Math.atan2( point.y - prePoint.y , point.x - prePoint.x ),Math.atan2( nextPoint.y - point.y , nextPoint.x - point.x ))
 
                 if (point.x == prePoint.x && point.y == prePoint.y || point.x == nextPoint.x && point.y == nextPoint.y || Math.atan2(point.y - prePoint.y, point.x - prePoint.x) == Math.atan2(nextPoint.y - point.y, nextPoint.x - point.x)) {
                   //如果中间的这个点 ， 和前后的点在一个直线上面，就略过
@@ -27040,8 +27249,8 @@ var Chartx = (function () {
                     var _atan2 = Math.atan2(p.y - point.y, p.x - point.x);
 
                     return {
-                      x: point.x + me.line.inflectionRadius * Math.cos(_atan2),
-                      y: point.y + me.line.inflectionRadius * Math.sin(_atan2)
+                      x: point.x + radius * Math.cos(_atan2),
+                      y: point.y + radius * Math.sin(_atan2)
                     };
                   };
                   var bezierBegin = getPointOf(prePoint);
@@ -31364,6 +31573,23 @@ var Chartx = (function () {
                 default: null
               }
             }
+          },
+          event: {
+            detail: '事件配置',
+            propertys: {
+              enabled: {
+                detail: '是否开启',
+                default: false
+              },
+              type: {
+                detail: '触发事件的类型',
+                default: 'click'
+              }
+            }
+          },
+          tipsEnabled: {
+            detail: '是否开启图例的tips',
+            default: true
           }
         };
       }
@@ -31503,18 +31729,15 @@ var Chartx = (function () {
             }
           });
 
-          _icon.hover(function (e) {
-            e.eventInfo = me._getInfoHandler(e, obj);
-          }, function (e) {
-            delete e.eventInfo;
+          _icon.on(types.get(), function (e) {
+            if (e.type == 'mouseover' || e.type == 'mousemove') {
+              e.eventInfo = me._getInfoHandler(e, obj);
+            }
+
+            if (e.type == 'mouseout') {
+              delete e.eventInfo;
+            }
           });
-
-          _icon.on("mousemove", function (e) {
-            e.eventInfo = me._getInfoHandler(e, obj);
-          }); //阻止事件冒泡
-
-
-          _icon.on("click", function () {});
 
           var _text = obj.name;
 
@@ -31536,15 +31759,15 @@ var Chartx = (function () {
 
             }
           });
-          txt.hover(function (e) {
-            e.eventInfo = me._getInfoHandler(e, obj);
-          }, function (e) {
-            delete e.eventInfo;
+          txt.on(types.get(), function (e) {
+            if (e.type == 'mouseover' || e.type == 'mousemove') {
+              e.eventInfo = me._getInfoHandler(e, obj);
+            }
+
+            if (e.type == 'mouseout') {
+              delete e.eventInfo;
+            }
           });
-          txt.on("mousemove", function (e) {
-            e.eventInfo = me._getInfoHandler(e, obj);
-          });
-          txt.on("click", function () {});
           var txtW = txt.getTextWidth();
           var itemW = txtW + me.icon.radius * 2 + 20;
           maxItemWidth = Math.max(maxItemWidth, itemW);
@@ -31588,23 +31811,26 @@ var Chartx = (function () {
           sprite.addChild(txt);
           sprite.context.width = itemW;
           me.sprite.addChild(sprite);
-          sprite.on("click", function (e) {
-            //只有一个field的时候，不支持取消
-            if (_.filter(me.data, function (obj) {
-              return obj.enabled;
-            }).length == 1) {
+          sprite.on(types.get(), function (e) {
+            if (e.type == me.event.type && me.event.enabled) {
+              //只有一个field的时候，不支持取消
+              if (_.filter(me.data, function (obj) {
+                return obj.enabled;
+              }).length == 1) {
+                if (obj.enabled) {
+                  return;
+                }
+              }
+              obj.enabled = !obj.enabled;
+              _icon.context.fillStyle = !obj.enabled ? "#ccc" : obj.color || "#999";
+
               if (obj.enabled) {
-                return;
+                me.app.show(obj.name, new Trigger(this, obj));
+              } else {
+                me.app.hide(obj.name, new Trigger(this, obj));
               }
             }
-            obj.enabled = !obj.enabled;
-            _icon.context.fillStyle = !obj.enabled ? "#ccc" : obj.color || "#999";
-
-            if (obj.enabled) {
-              me.app.show(obj.name, new Trigger(this, obj));
-            } else {
-              me.app.hide(obj.name, new Trigger(this, obj));
-            }
+            me.app.fire(e.type, e);
           });
         });
 
@@ -31623,6 +31849,9 @@ var Chartx = (function () {
       value: function _getInfoHandler(e, data) {
         return {
           type: "legend",
+          triggerType: 'legend',
+          trigger: this,
+          tipsEnabled: this.tipsEnabled,
           //title : data.name,
           nodes: [{
             name: data.name,
@@ -31637,7 +31866,7 @@ var Chartx = (function () {
 
   global$1.registerComponent(Legend, 'legend');
 
-  var Line$9 = Canvax.Shapes.Line;
+  var Line$8 = Canvax.Shapes.Line;
   var Rect$8 = Canvax.Shapes.Rect;
 
   var dataZoom =
@@ -32468,7 +32697,7 @@ var Chartx = (function () {
       key: "_addLine",
       value: function _addLine($o) {
         var o = $o || {};
-        var line = new Line$9({
+        var line = new Line$8({
           id: o.id || '',
           context: {
             x: o.x || 0,
@@ -32827,7 +33056,7 @@ var Chartx = (function () {
   global$1.registerComponent(MarkLine, 'markLine');
 
   var Rect$9 = Canvax.Shapes.Rect;
-  var Line$a = Canvax.Shapes.Line;
+  var Line$9 = Canvax.Shapes.Line;
 
   var Tips =
   /*#__PURE__*/
@@ -32991,12 +33220,12 @@ var Chartx = (function () {
       }
     }, {
       key: "hide",
-      value: function hide() {
+      value: function hide(e) {
         if (!this.enabled) return;
 
-        this._hideDialogTips();
+        this._hideDialogTips(e);
 
-        this._tipsPointerHide();
+        this._tipsPointerHide(e);
       }
     }, {
       key: "_hideDialogTips",
@@ -33167,6 +33396,11 @@ var Chartx = (function () {
     }, {
       key: "_tipsPointerShow",
       value: function _tipsPointerShow(e) {
+        //legend等组件上面的tips是没有xAxis等轴信息的
+        if (!e.eventInfo || !e.eventInfo.xAxis) {
+          return;
+        }
+
         var _coord = this.app.getComponent({
           name: 'coord'
         }); //目前只实现了直角坐标系的tipsPointer
@@ -33195,7 +33429,7 @@ var Chartx = (function () {
 
         if (!el) {
           if (this.pointer == "line") {
-            el = new Line$a({
+            el = new Line$9({
               //xyToInt : false,
               context: {
                 x: x,
@@ -33250,7 +33484,12 @@ var Chartx = (function () {
       }
     }, {
       key: "_tipsPointerHide",
-      value: function _tipsPointerHide() {
+      value: function _tipsPointerHide(e) {
+        //legend等组件上面的tips是没有xAxis等轴信息的
+        if (!e.eventInfo || !e.eventInfo.xAxis) {
+          return;
+        }
+
         var _coord = this.app.getComponent({
           name: 'coord'
         }); //目前只实现了直角坐标系的tipsPointer
@@ -33266,6 +33505,11 @@ var Chartx = (function () {
     }, {
       key: "_tipsPointerMove",
       value: function _tipsPointerMove(e) {
+        //legend等组件上面的tips是没有xAxis等轴信息的
+        if (!e.eventInfo || !e.eventInfo.xAxis) {
+          return;
+        }
+
         var _coord = this.app.getComponent({
           name: 'coord'
         }); //目前只实现了直角坐标系的tipsPointer
@@ -33320,7 +33564,7 @@ var Chartx = (function () {
 
   global$1.registerComponent(Tips, 'tips');
 
-  var Line$b = Canvax.Shapes.Line;
+  var Line$a = Canvax.Shapes.Line;
 
   var barTgi =
   /*#__PURE__*/
@@ -33458,7 +33702,7 @@ var Chartx = (function () {
           var y = -me._yAxis.getPosOfVal(tgi);
           var barData = me.barDatas[i];
 
-          var _tgiLine = new Line$b({
+          var _tgiLine = new Line$a({
             context: {
               start: {
                 x: barData.x,
@@ -33847,7 +34091,7 @@ var Chartx = (function () {
 
   global$1.registerComponent(waterMark, 'waterMark');
 
-  var Line$c = Canvax.Shapes.Line;
+  var Line$b = Canvax.Shapes.Line;
 
   var Cross =
   /*#__PURE__*/
@@ -33940,7 +34184,7 @@ var Chartx = (function () {
           y: this.height / 2
         };
         this.setPosition();
-        me._hLine = new Line$c({
+        me._hLine = new Line$b({
           //横向线条
           context: {
             start: {
@@ -33957,7 +34201,7 @@ var Chartx = (function () {
           }
         });
         me.sprite.addChild(me._hLine);
-        me._vLine = new Line$c({
+        me._vLine = new Line$b({
           //线条
           context: {
             start: {
@@ -34194,7 +34438,7 @@ var Chartx = (function () {
 
   global$1.registerComponent(lineSchedu, 'lineSchedu');
 
-  var Line$d = Canvax.Shapes.Line;
+  var Line$c = Canvax.Shapes.Line;
   var Circle$b = Canvax.Shapes.Circle;
 
   var markCloumn =
@@ -34420,7 +34664,7 @@ var Chartx = (function () {
         if (this._line) {
           _.extend(this._line.context, lineOpt);
         } else {
-          this._line = new Line$d({
+          this._line = new Line$c({
             context: lineOpt
           });
           this.sprite.addChild(this._line);

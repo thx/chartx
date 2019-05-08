@@ -155,10 +155,10 @@ class Tips extends Component {
         this._tipsPointerMove(e)
     }
 
-    hide() {
+    hide(e) {
         if (!this.enabled) return;
-        this._hideDialogTips();
-        this._tipsPointerHide()
+        this._hideDialogTips(e);
+        this._tipsPointerHide(e);
     }
 
     _hideDialogTips() {
@@ -310,6 +310,10 @@ class Tips extends Component {
 
 
     _tipsPointerShow(e) {
+        //legend等组件上面的tips是没有xAxis等轴信息的
+        if( !e.eventInfo || !e.eventInfo.xAxis ) {
+            return;
+        };
         var _coord = this.app.getComponent({name:'coord'});
 
         //目前只实现了直角坐标系的tipsPointer
@@ -387,7 +391,12 @@ class Tips extends Component {
         }
     }
 
-    _tipsPointerHide() {
+    _tipsPointerHide(e) {
+        //legend等组件上面的tips是没有xAxis等轴信息的
+        if( !e.eventInfo || !e.eventInfo.xAxis ) {
+            return;
+        };
+
         var _coord = this.app.getComponent({name:'coord'});
         //目前只实现了直角坐标系的tipsPointer
         if (!_coord || _coord.type != 'rect') return;
@@ -399,7 +408,10 @@ class Tips extends Component {
     }
 
     _tipsPointerMove(e) {
-
+        //legend等组件上面的tips是没有xAxis等轴信息的
+        if( !e.eventInfo || !e.eventInfo.xAxis ) {
+            return;
+        };
         var _coord = this.app.getComponent({name:'coord'});
 
         //目前只实现了直角坐标系的tipsPointer

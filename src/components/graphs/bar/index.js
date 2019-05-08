@@ -327,6 +327,7 @@ class BarGraphs extends GraphsBase
     resetData( dataFrame , dataTrigger )
     {
         this.dataFrame = dataFrame;
+        debugger
         this.draw();
     }
 
@@ -430,6 +431,7 @@ class BarGraphs extends GraphsBase
                             groupRegion = groupH.getChildById("group_region_" + h);
                             groupRegion.context.width = groupRegionWidth;
                             groupRegion.context.x = itemW * h + ( itemW - groupRegionWidth ) / 2;
+                            groupRegion.context.globalAlpha = _.indexOf(me.select.inds, me.dataFrame.range.start + h) > -1 ? me.select.alpha : 0
                         } else {
                             groupRegion = new Rect({
                                 id: "group_region_" + h,

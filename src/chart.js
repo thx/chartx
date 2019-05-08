@@ -610,18 +610,23 @@ class Chart extends event.Dispatcher
             var _tips = me.getComponent({name:'tips'});
             var _coord = me.getComponent({name:'coord'});
             if( _tips ){
-                me._setTipsInfo.apply(me, [e]);
+
+                //比如图例中的event 会带过来 triggerType == 'legend' 就不需要调用 _setGraphsTipsInfo 
+                //来自坐标系区域的事件
+                var isCoordTrigger = e.eventInfo && (!e.eventInfo.triggerType || e.eventInfo.triggerType == 'coord')
+                isCoordTrigger && me._setGraphsTipsInfo.apply(me, [e]);
+
                 if( e.type == "mouseover" || e.type == "mousedown" ){
                     _tips.show(e);
-                    me._tipsPointerAtAllGraphs( e );
+                    isCoordTrigger && me._tipsPointerAtAllGraphs( e );
                 };
                 if( e.type == "mousemove" ){
                     _tips.move(e);
-                    me._tipsPointerAtAllGraphs( e );
+                    isCoordTrigger && me._tipsPointerAtAllGraphs( e );
                 };
                 if( e.type == "mouseout" && !( e.toTarget && _coord && _coord.induce && _coord.induce.containsPoint( _coord.induce.globalToLocal(e.target.localToGlobal(e.point) )) ) ){
                     _tips.hide(e);
-                    me._tipsPointerHideAtAllGraphs( e );
+                    isCoordTrigger && me._tipsPointerHideAtAllGraphs( e );
                 };
             };
         });
@@ -630,7 +635,7 @@ class Chart extends event.Dispatcher
 
 
     //默认的基本tipsinfo处理，极坐标和笛卡尔坐标系统会覆盖
-    _setTipsInfo(e)
+    _setGraphsTipsInfo(e)
     {
         if( !e.eventInfo ){
             e.eventInfo = {};

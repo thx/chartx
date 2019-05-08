@@ -5,11 +5,23 @@ export default function() {
         nodePadding = 8,
         size = [1, 1],
         nodes = [],
+        sort = function(a, b) {
+            return a.y - b.y;
+        },
+        // sort = function(a, b) {
+        //     return a < b ? -1 : a > b ? 1 : a >= b ? 0 : NaN;
+        // },
         links = [];
 
     sankey.nodeWidth = function (_) {
         if (!arguments.length) return nodeWidth;
         nodeWidth = +_;
+        return sankey;
+    };
+
+    sankey.nodeSort = function (_) {
+        if (!arguments.length) return sort;
+        sort = _;
         return sankey;
     };
 
@@ -251,6 +263,7 @@ export default function() {
             rollup;
 
         function map(mapType, array, depth) {
+            
             if (depth >= keys.length) return rollup ? rollup.call(nest, array) : (sortValues ? array.sort(sortValues) : array);
 
             var i = -1,
@@ -428,16 +441,17 @@ export default function() {
         return true;
     }
 
-    function d3_ascending(a, b) {
+    function d3_sortKey(a, b) {
         return a < b ? -1 : a > b ? 1 : a >= b ? 0 : NaN;
     }
 
     function computeNodeDepths(iterations) {
+        
         var nodesByBreadth = d3_nest()
             .key(function (d) {
                 return d.x;
             })
-            .sortKeys(d3_ascending)
+            .sortKeys( d3_sortKey )
             .entries(nodes)
             .map(function (d) {
                 return d.values;
@@ -509,7 +523,7 @@ export default function() {
                     i;
 
                 // Push any overlapping nodes down.
-                nodes.sort(ascendingDepth);
+                sort && nodes.sort( sort );
                 for (i = 0; i < n; ++i) {
                     node = nodes[i];
                     dy = y0 - node.y;

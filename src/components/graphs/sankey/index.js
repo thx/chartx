@@ -36,6 +36,12 @@ class sankeyGraphs extends GraphsBase
                         detail: '节点间距',
                         default: 10
                     },
+                    sort : {
+                        detail: '节点排序字段',
+                        default: function(a, b) {
+                            return a.y - b.y;
+                        }
+                    },
                     fillStyle: {
                         detail: '节点背景色',
                         default: null
@@ -52,6 +58,15 @@ class sankeyGraphs extends GraphsBase
                     alpha: {
                         detail: '线透明度',
                         default: 0.3
+                    },
+                    focus: {
+                        detail: '图形的hover设置',
+                        propertys: {
+                            enabled: {
+                                detail: '是否开启',
+                                default: true
+                            }
+                        }
                     }
                 }
             },
@@ -73,6 +88,10 @@ class sankeyGraphs extends GraphsBase
                     verticalAlign: {
                         detail: '垂直对齐方式',
                         default: 'middle'
+                    },
+                    format: {
+                        detail: '文本格式函数',
+                        default:null
                     }
                 }
             }
@@ -150,7 +169,7 @@ class sankeyGraphs extends GraphsBase
             if( me.parentField ){
                 nodeNames.push( parentFields[i] );
             };
-            nodeNames = nodeNames.concat( key.split(/[,|]/) );
+            nodeNames = nodeNames.concat( key.split(/[|]/) );
 
             if( nodeNames.length == 2 ){
                 links.push({
@@ -160,10 +179,11 @@ class sankeyGraphs extends GraphsBase
                 })
             }
         } );
-
+debugger
         return sankeyLayout()
             .nodeWidth( this.node.width )
             .nodePadding( this.node.padding )
+            .nodeSort( this.node.sort )
             .size([this.width, this.height])
             .nodes(nodes)
             .links(links)
@@ -233,18 +253,21 @@ class sankeyGraphs extends GraphsBase
                 }
             });
 
+            _path.__glpha = me.line.alpha;
 
             _path.link = link;
 
             _path.on( event.types.get(), function(e) {
                 
-                if( e.type == 'mouseover' ){
-                    this.context.globalAlpha += 0.2;
+                if( me.line.focus.enabled ){
+                    if( e.type == 'mouseover' ){
+                        this.__glpha += 0.1;
+                    };
+                    if( e.type == 'mouseout' ){
+                        this.__glpha -= 0.1;
+                    };
                 };
-                if( e.type == 'mouseout' ){
-                    this.context.globalAlpha -= 0.2;
-                };
-
+                
                 var linkData = this.link;
 
                 //type给tips用
@@ -273,6 +296,7 @@ class sankeyGraphs extends GraphsBase
             var textAlign = me.label.textAlign;
 
             var x = node.x+me.data.nodeWidth()+4;
+
             /*
             if( x > me.width/2 ){
                 x  = node.x - 4;
@@ -281,9 +305,12 @@ class sankeyGraphs extends GraphsBase
                 x += 4;
             };
             */
-            var y = node.y+Math.max(node.dy / 2 , 1);
 
-            var label = new Canvax.Display.Text(node.name , {
+            var y = node.y + Math.max(node.dy / 2 , 1);
+
+            var txt = me.label.format ? me.label.format( node.name, node ) : node.name;
+
+            var label = new Canvax.Display.Text( txt , {
                 context: {
                     x : x,
                     y : y,
@@ -302,8 +329,6 @@ class sankeyGraphs extends GraphsBase
 
         });
     }
-
-
 
 }
 

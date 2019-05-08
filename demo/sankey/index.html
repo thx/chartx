@@ -58,12 +58,22 @@ var data = [
     [ "剑圣"       , 67      , "狼人" ]
 ]
 
+var data = [
+    {"node":"非店铺消费者 2000 45%","value":100,"parent":"非店铺消费者 40000"},
+    {"node":"新客","value":80,"parent":"非店铺消费者 40000"},
+    {"node":"老客","value":288,"parent":"非店铺消费者 40000"},
+    {"node":"潜客","value":66,"parent":"非店铺消费者 40000"}
+];
+
 var options = {
     graphs : {
         type  : "sankey",
         keyField : "node",
         valueField : "value",
-        parentField: "parent"
+        parentField: "parent",
+        node : {
+            sort : null
+        }
     },
     tips : {}
 };
