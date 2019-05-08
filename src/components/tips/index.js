@@ -101,7 +101,8 @@ class Tips extends Component {
 
         if (!this.enabled) return;
 
-        if (e.eventInfo) {
+        if (e.eventInfo && e.eventInfo.tipsEnabled ) {
+            
             this.eventInfo = e.eventInfo;
 
             //TODO:这里要优化，canvax后续要提供直接获取canvax实例的方法
@@ -137,7 +138,7 @@ class Tips extends Component {
     move(e) {
         if (!this.enabled) return;
 
-        if (e.eventInfo) {
+        if (e.eventInfo && e.eventInfo.tipsEnabled) {
             this.eventInfo = e.eventInfo;
             var content = this._setContent(e);
             if (content) {

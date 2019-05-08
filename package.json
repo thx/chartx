@@ -2,7 +2,7 @@
   "name": "chartx",
   "title": "chartx.js",
   "description": "Data Visualization Chart Library",
-  "version": "1.0.135",
+  "version": "1.0.137",
   "homepage": "https://thx.github.io/chartx/",
   "license": "MIT",
   "magixCliConfig": {

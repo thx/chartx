@@ -97,7 +97,7 @@ class Legend extends Component
             },
             tipsEnabled: {
                 detail: '是否开启图例的tips',
-                default: true
+                default: false
             }
         }
     }

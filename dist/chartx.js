@@ -10643,6 +10643,10 @@ var Chartx = (function () {
         if (_coord) {
           e.eventInfo = _coord.getTipsInfoHandler(e);
         }
+
+        if (!("tipsEnabled" in e.eventInfo)) {
+          e.eventInfo.tipsEnabled = true; //默认都开始tips
+        }
         //比如鼠标移动到多柱子组合的具体某根bar上面，e.eventInfo.nodes = [ {bardata} ] 就有了这个bar的数据
         //那么tips就只显示这个bardata的数据
 
@@ -31589,7 +31593,7 @@ var Chartx = (function () {
           },
           tipsEnabled: {
             detail: '是否开启图例的tips',
-            default: true
+            default: false
           }
         };
       }
@@ -33164,7 +33168,7 @@ var Chartx = (function () {
       value: function show(e) {
         if (!this.enabled) return;
 
-        if (e.eventInfo) {
+        if (e.eventInfo && e.eventInfo.tipsEnabled) {
           this.eventInfo = e.eventInfo; //TODO:这里要优化，canvax后续要提供直接获取canvax实例的方法
 
           var stage = e.target.getStage();
@@ -33199,7 +33203,7 @@ var Chartx = (function () {
       value: function move(e) {
         if (!this.enabled) return;
 
-        if (e.eventInfo) {
+        if (e.eventInfo && e.eventInfo.tipsEnabled) {
           this.eventInfo = e.eventInfo;
 
           var content = this._setContent(e);

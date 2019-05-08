@@ -646,6 +646,10 @@ class Chart extends event.Dispatcher
             e.eventInfo = _coord.getTipsInfoHandler(e);
         };
 
+        if( !("tipsEnabled" in e.eventInfo) ){
+            e.eventInfo.tipsEnabled = true; //默认都开始tips
+        };
+
         //如果具体的e事件对象中有设置好了得 e.eventInfo.nodes，那么就不再遍历_graphs去取值
         //比如鼠标移动到多柱子组合的具体某根bar上面，e.eventInfo.nodes = [ {bardata} ] 就有了这个bar的数据
         //那么tips就只显示这个bardata的数据
@@ -657,7 +661,7 @@ class Chart extends event.Dispatcher
                 nodes = nodes.concat( _g.getNodesAt( iNode, e ) );
             } );
             e.eventInfo.nodes = nodes;
-        }
+        };
      }
  
      //把这个point拿来给每一个graphs执行一次测试，给graphs上面的shape触发激活样式
