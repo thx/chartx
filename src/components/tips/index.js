@@ -127,7 +127,7 @@ class Tips extends Component {
                 //反之，如果只有hover到点的时候才显示point，那么就放这里
                 //this._tipsPointerShow(e);
             } else {
-                this.hide();
+                this.hide(e);
             }
 
         };

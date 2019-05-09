@@ -10602,7 +10602,8 @@ function (_event$Dispatcher) {
         if (_tips) {
           //比如图例中的event 会带过来 triggerType == 'legend' 就不需要调用 _setGraphsTipsInfo 
           //来自坐标系区域的事件
-          var isCoordTrigger = e.eventInfo && (!e.eventInfo.triggerType || e.eventInfo.triggerType == 'coord');
+          var isCoordTrigger = !e.eventInfo || e.eventInfo && (!e.eventInfo.triggerType || e.eventInfo.triggerType == 'coord');
+          isCoordTrigger = true;
           isCoordTrigger && me._setGraphsTipsInfo.apply(me, [e]);
 
           if (e.type == "mouseover" || e.type == "mousedown") {
@@ -14938,7 +14939,6 @@ function (_GraphsBase) {
     key: "resetData",
     value: function resetData(dataFrame$$1, dataTrigger) {
       this.dataFrame = dataFrame$$1;
-      debugger;
       this.draw();
     }
   }, {
@@ -25772,7 +25772,7 @@ function (_GraphsBase) {
         if (me.parentField) {
           nodeNames.push(parentFields[i]);
         }
-        nodeNames = nodeNames.concat(key.split(/[,|]/));
+        nodeNames = nodeNames.concat(key.split(/[|]/));
 
         _.each(nodeNames, function (name) {
           if (nodeMap[name] === undefined) {
@@ -25802,7 +25802,6 @@ function (_GraphsBase) {
         }
       });
 
-      debugger;
       return sankeyLayout().nodeWidth(this.node.width).nodePadding(this.node.padding).nodeSort(this.node.sort).size([this.width, this.height]).nodes(nodes).links(links).layout(16);
     }
   }, {
@@ -33189,7 +33188,7 @@ function (_Component) {
           //反之，如果只有hover到点的时候才显示point，那么就放这里
           //this._tipsPointerShow(e);
         } else {
-          this.hide();
+          this.hide(e);
         }
       }
 

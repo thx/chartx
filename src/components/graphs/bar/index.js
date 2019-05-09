@@ -327,7 +327,6 @@ class BarGraphs extends GraphsBase
     resetData( dataFrame , dataTrigger )
     {
         this.dataFrame = dataFrame;
-        debugger
         this.draw();
     }
 

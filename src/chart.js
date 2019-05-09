@@ -613,7 +613,8 @@ class Chart extends event.Dispatcher
 
                 //比如图例中的event 会带过来 triggerType == 'legend' 就不需要调用 _setGraphsTipsInfo 
                 //来自坐标系区域的事件
-                var isCoordTrigger = e.eventInfo && (!e.eventInfo.triggerType || e.eventInfo.triggerType == 'coord')
+                var isCoordTrigger = !e.eventInfo || (e.eventInfo && (!e.eventInfo.triggerType || e.eventInfo.triggerType == 'coord') );
+                isCoordTrigger = true;
                 isCoordTrigger && me._setGraphsTipsInfo.apply(me, [e]);
 
                 if( e.type == "mouseover" || e.type == "mousedown" ){

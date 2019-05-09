@@ -150,7 +150,7 @@ class sankeyGraphs extends GraphsBase
             if( me.parentField ){
                 nodeNames.push( parentFields[i] );
             };
-            nodeNames = nodeNames.concat( key.split(/[,|]/) );
+            nodeNames = nodeNames.concat( key.split(/[|]/) );
 
             _.each( nodeNames, function( name ){
                 if( nodeMap[ name ] === undefined ){
@@ -179,7 +179,7 @@ class sankeyGraphs extends GraphsBase
                 })
             }
         } );
-debugger
+
         return sankeyLayout()
             .nodeWidth( this.node.width )
             .nodePadding( this.node.padding )
