@@ -101,7 +101,7 @@ class Tips extends Component {
 
         if (!this.enabled) return;
 
-        if (e.eventInfo && e.eventInfo.tipsEnabled ) {
+        if (e.eventInfo ) {
             
             this.eventInfo = e.eventInfo;
 
@@ -138,7 +138,7 @@ class Tips extends Component {
     move(e) {
         if (!this.enabled) return;
 
-        if (e.eventInfo && e.eventInfo.tipsEnabled) {
+        if (e.eventInfo) {
             this.eventInfo = e.eventInfo;
             var content = this._setContent(e);
             if (content) {

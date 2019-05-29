@@ -10600,28 +10600,24 @@ function (_event$Dispatcher) {
         });
 
         if (_tips) {
-          //比如图例中的event 会带过来 triggerType == 'legend' 就不需要调用 _setGraphsTipsInfo 
-          //来自坐标系区域的事件
-          var isCoordTrigger = !e.eventInfo || e.eventInfo && (!e.eventInfo.triggerType || e.eventInfo.triggerType == 'coord');
-          isCoordTrigger = true;
-          isCoordTrigger && me._setGraphsTipsInfo.apply(me, [e]);
+          me._setGraphsTipsInfo.apply(me, [e]);
 
           if (e.type == "mouseover" || e.type == "mousedown") {
             _tips.show(e);
 
-            isCoordTrigger && me._tipsPointerAtAllGraphs(e);
+            me._tipsPointerAtAllGraphs(e);
           }
 
           if (e.type == "mousemove") {
             _tips.move(e);
 
-            isCoordTrigger && me._tipsPointerAtAllGraphs(e);
+            me._tipsPointerAtAllGraphs(e);
           }
 
           if (e.type == "mouseout" && !(e.toTarget && _coord && _coord.induce && _coord.induce.containsPoint(_coord.induce.globalToLocal(e.target.localToGlobal(e.point))))) {
             _tips.hide(e);
 
-            isCoordTrigger && me._tipsPointerHideAtAllGraphs(e);
+            me._tipsPointerHideAtAllGraphs(e);
           }
         }
       });
@@ -14540,7 +14536,7 @@ function (_Component) {
       var fn = trigger["on" + e.type];
 
       if (fn && _.isFunction(fn)) {
-
+        //如果有在pie的配置上面注册对应的事件，则触发
         if (e.eventInfo && e.eventInfo.nodes && e.eventInfo.nodes.length) {
           //完整的nodes数据在e.eventInfo中有，但是添加第二个参数，如果nodes只有一个数据就返回单个，多个则数组
           if (e.eventInfo.nodes.length == 1) {
@@ -31574,18 +31570,9 @@ function (_Component) {
             }
           }
         },
-        event: {
-          detail: '事件配置',
-          propertys: {
-            enabled: {
-              detail: '是否开启',
-              default: false
-            },
-            type: {
-              detail: '触发事件的类型',
-              default: 'click'
-            }
-          }
+        activeEnabled: {
+          detail: '是否启动图例的',
+          default: true
         },
         tipsEnabled: {
           detail: '是否开启图例的tips',
@@ -31729,14 +31716,7 @@ function (_Component) {
           }
         });
 
-        _icon.on(types.get(), function (e) {
-          if (e.type == 'mouseover' || e.type == 'mousemove') {
-            e.eventInfo = me._getInfoHandler(e, obj);
-          }
-
-          if (e.type == 'mouseout') {
-            delete e.eventInfo;
-          }
+        _icon.on(types.get(), function (e) {//... 代理到sprit上面处理
         });
 
         var _text = obj.name;
@@ -31759,14 +31739,7 @@ function (_Component) {
 
           }
         });
-        txt.on(types.get(), function (e) {
-          if (e.type == 'mouseover' || e.type == 'mousemove') {
-            e.eventInfo = me._getInfoHandler(e, obj);
-          }
-
-          if (e.type == 'mouseout') {
-            delete e.eventInfo;
-          }
+        txt.on(types.get(), function (e) {//... 代理到sprit上面处理
         });
         var txtW = txt.getTextWidth();
         var itemW = txtW + me.icon.radius * 2 + 20;
@@ -31812,7 +31785,7 @@ function (_Component) {
         sprite.context.width = itemW;
         me.sprite.addChild(sprite);
         sprite.on(types.get(), function (e) {
-          if (e.type == me.event.type && me.event.enabled) {
+          if (e.type == "click" && me.activeEnabled) {
             //只有一个field的时候，不支持取消
             if (_.filter(me.data, function (obj) {
               return obj.enabled;
@@ -31830,7 +31803,17 @@ function (_Component) {
               me.app.hide(obj.name, new Trigger(this, obj));
             }
           }
-          me.app.fire(e.type, e);
+
+          if (me.tipsEnabled) {
+            if (e.type == 'mouseover' || e.type == 'mousemove') {
+              e.eventInfo = me._getInfoHandler(e, obj);
+            }
+
+            if (e.type == 'mouseout') {
+              delete e.eventInfo;
+            }
+            me.app.fire(e.type, e);
+          }
         });
       });
 
@@ -33164,7 +33147,7 @@ function (_Component) {
     value: function show(e) {
       if (!this.enabled) return;
 
-      if (e.eventInfo && e.eventInfo.tipsEnabled) {
+      if (e.eventInfo) {
         this.eventInfo = e.eventInfo; //TODO:这里要优化，canvax后续要提供直接获取canvax实例的方法
 
         var stage = e.target.getStage();
@@ -33199,7 +33182,7 @@ function (_Component) {
     value: function move(e) {
       if (!this.enabled) return;
 
-      if (e.eventInfo && e.eventInfo.tipsEnabled) {
+      if (e.eventInfo) {
         this.eventInfo = e.eventInfo;
 
         var content = this._setContent(e);

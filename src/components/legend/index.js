@@ -82,18 +82,10 @@ class Legend extends Component
                     }
                 }
             },
-            event: {
-                detail: '事件配置',
-                propertys: {
-                    enabled: {
-                        detail: '是否开启',
-                        default: false
-                    },
-                    type : {
-                        detail: '触发事件的类型',
-                        default: 'click'
-                    }
-                }
+            
+            activeEnabled: {
+                detail: '是否启动图例的',
+                default: true
             },
             tipsEnabled: {
                 detail: '是否开启图例的tips',
@@ -228,12 +220,7 @@ class Legend extends Component
             });
             
             _icon.on( event.types.get() , function(e){
-                if( e.type == 'mouseover' || e.type == 'mousemove' ){
-                    e.eventInfo = me._getInfoHandler(e,obj);
-                };
-                if( e.type == 'mouseout' ){
-                    delete e.eventInfo;
-                };
+                //... 代理到sprit上面处理
             });
 
             var _text = obj.name;
@@ -254,12 +241,7 @@ class Legend extends Component
             } );
         
             txt.on(event.types.get() , function(e){
-                if( e.type == 'mouseover' || e.type == 'mousemove' ){
-                    e.eventInfo = me._getInfoHandler(e,obj);
-                };
-                if( e.type == 'mouseout' ){
-                    delete e.eventInfo;
-                };
+                //... 代理到sprit上面处理
             });
 
             var txtW = txt.getTextWidth();
@@ -314,7 +296,7 @@ class Legend extends Component
 
             sprite.on( event.types.get() , function( e ){
 
-                if( e.type == me.event.type && me.event.enabled ){
+                if( e.type == "click" && me.activeEnabled ){
                     //只有一个field的时候，不支持取消
                     if( _.filter( me.data , function(obj){return obj.enabled} ).length == 1 ){
                         if( obj.enabled ){
@@ -330,7 +312,15 @@ class Legend extends Component
                     };
                 };
 
-                me.app.fire( e.type, e );
+                if( me.tipsEnabled ){
+                    if( e.type == 'mouseover' || e.type == 'mousemove' ){
+                        e.eventInfo = me._getInfoHandler(e,obj);
+                    };
+                    if( e.type == 'mouseout' ){
+                        delete e.eventInfo;
+                    };
+                    me.app.fire( e.type, e );
+                };
 
             });
 

@@ -609,27 +609,25 @@ class Chart extends event.Dispatcher
 
             var _tips = me.getComponent({name:'tips'});
             var _coord = me.getComponent({name:'coord'});
-            if( _tips ){
 
-                //比如图例中的event 会带过来 triggerType == 'legend' 就不需要调用 _setGraphsTipsInfo 
-                //来自坐标系区域的事件
-                var isCoordTrigger = !e.eventInfo || (e.eventInfo && (!e.eventInfo.triggerType || e.eventInfo.triggerType == 'coord') );
-                isCoordTrigger = true;
-                isCoordTrigger && me._setGraphsTipsInfo.apply(me, [e]);
+            if( _tips ){
+                
+                me._setGraphsTipsInfo.apply(me, [e]);
 
                 if( e.type == "mouseover" || e.type == "mousedown" ){
                     _tips.show(e);
-                    isCoordTrigger && me._tipsPointerAtAllGraphs( e );
+                    me._tipsPointerAtAllGraphs( e );
                 };
                 if( e.type == "mousemove" ){
                     _tips.move(e);
-                    isCoordTrigger && me._tipsPointerAtAllGraphs( e );
+                    me._tipsPointerAtAllGraphs( e );
                 };
                 if( e.type == "mouseout" && !( e.toTarget && _coord && _coord.induce && _coord.induce.containsPoint( _coord.induce.globalToLocal(e.target.localToGlobal(e.point) )) ) ){
                     _tips.hide(e);
-                    isCoordTrigger && me._tipsPointerHideAtAllGraphs( e );
+                    me._tipsPointerHideAtAllGraphs( e );
                 };
             };
+
         });
 
     }

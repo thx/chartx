@@ -93,7 +93,7 @@ export default class GraphsBase extends Component
         var fn = trigger[ "on"+e.type ];
         if( fn && _.isFunction( fn ) ){
             //如果有在pie的配置上面注册对应的事件，则触发
-            var nodeData = null;
+            
             if( e.eventInfo && e.eventInfo.nodes && e.eventInfo.nodes.length ){
                 //完整的nodes数据在e.eventInfo中有，但是添加第二个参数，如果nodes只有一个数据就返回单个，多个则数组
                 if( e.eventInfo.nodes.length == 1 ){
