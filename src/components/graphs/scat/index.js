@@ -499,9 +499,7 @@ class ScatGraphs extends GraphsBase
                          e.eventInfo.title = this.nodeData.label;
                      };
             
-                     //fire到root上面去的是为了让root去处理tips
-                     //先触发用户事件，再处理后面的选中事件
-                     me.app.fire( e.type, e );
+                     
 
                      if( e.type == 'mouseover' ){
                         me.focusAt( this.nodeData.iNode );
@@ -509,6 +507,11 @@ class ScatGraphs extends GraphsBase
                      if( e.type == 'mouseout' ) {
                         !this.nodeData.selected && me.unfocusAt( this.nodeData.iNode );
                      };
+
+                     //fire到root上面去的是为了让root去处理tips
+                     //先触发用户事件，再处理后面的选中事件
+                     me.app.fire( e.type, e );
+                     
                 });
 
             } else {

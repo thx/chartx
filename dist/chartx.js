@@ -15059,9 +15059,7 @@ var Chartx = (function () {
                       iNode: this.iNode //TODO:这里设置了的话，会导致多graphs里获取不到别的graphs的nodes信息了
                       //nodes : me.getNodesAt( this.iNode ) 
 
-                    }; //触发root统一设置e.eventInfo.nodes,所以上面不需要设置
-
-                    me.app.fire(e.type, e);
+                    };
 
                     if (me.select.enabled && e.type == me.select.triggerEventType) {
                       //如果开启了图表的选中交互
@@ -15078,6 +15076,9 @@ var Chartx = (function () {
                         });
                       }
                     }
+                    //TODO: fire需要最后触发，因为在比如click时间中要拿到所有的 上面select触发的选中态list值
+
+                    me.app.fire(e.type, e);
                   });
                 }
               }
@@ -15791,6 +15792,7 @@ var Chartx = (function () {
   var AnimationFrame$3 = Canvax.AnimationFrame;
   var BrokenLine$1 = Canvax.Shapes.BrokenLine;
   var Circle$3 = Canvax.Shapes.Circle;
+  var Isogon$1 = Canvax.Shapes.Isogon;
   var Path$1 = Canvax.Shapes.Path;
 
   var LineGraphsGroup =
@@ -15834,6 +15836,15 @@ var Chartx = (function () {
               enabled: {
                 detail: '是否开启',
                 default: true
+              },
+              shapeType: {
+                detail: '节点icon的图形类型，默认circle',
+                documentation: '可选有"isogon"(正多边形)，"path"（自定义path路径，待实现）',
+                default: 'circle'
+              },
+              isogonPointNum: {
+                detail: 'shapeType为"isogon"时有效，描述正多边形的边数',
+                default: 3
               },
               corner: {
                 detail: '拐角才有节点',
@@ -16114,8 +16125,8 @@ var Chartx = (function () {
 
           _.each(list, function (point, i) {
             if (_.isNumber(point[1])) {
-              if (me._circles) {
-                var _circle = me._circles.getChildAt(iNode);
+              if (me._nodes) {
+                var _circle = me._nodes.getChildAt(iNode);
 
                 if (_circle) {
                   _circle.context.x = point[0];
@@ -16402,9 +16413,9 @@ var Chartx = (function () {
         var me = this;
         var list = me._currPointList; //if ((me.node.enabled || list.length == 1) && !!me.line.lineWidth) { //拐角的圆点
 
-        if (!this._circles) {
-          this._circles = new Canvax.Display.Sprite({});
-          this.sprite.addChild(this._circles);
+        if (!this._nodes) {
+          this._nodes = new Canvax.Display.Sprite({});
+          this.sprite.addChild(this._nodes);
         }
         var iNode = 0; //这里不能和下面的a对等，以为list中有很多无效的节点
 
@@ -16431,16 +16442,22 @@ var Chartx = (function () {
             strokeStyle: _nodeColor,
             fillStyle: me.node.fillStyle
           };
-          var circle = me._circles.children[iNode];
+          var nodeConstructor = Circle$3;
 
-          if (circle) {
-            _.extend(circle.context, context);
+          if (me.node.shapeType == "isogon") {
+            nodeConstructor = Isogon$1;
+            context.n = me.node.isogonPointNum;
+          }
+          var nodeEl = me._nodes.children[iNode];
+
+          if (nodeEl) {
+            _.extend(nodeEl.context, context);
           } else {
-            circle = new Circle$3({
+            nodeEl = new nodeConstructor({
               context: context
             });
 
-            me._circles.addChild(circle);
+            me._nodes.addChild(nodeEl);
           }
 
           if (me.node.corner) {
@@ -16451,16 +16468,16 @@ var Chartx = (function () {
 
             if (pre && next) {
               if (y == pre[1] && y == next[1]) {
-                circle.context.visible = false;
+                nodeEl.context.visible = false;
               }
             }
           }
           iNode++;
         }
 
-        if (me._circles.children.length > iNode) {
-          for (var i = iNode, l = me._circles.children.length; i < l; i++) {
-            me._circles.children[i].destroy();
+        if (me._nodes.children.length > iNode) {
+          for (var i = iNode, l = me._nodes.children.length; i < l; i++) {
+            me._nodes.children[i].destroy();
 
             i--;
             l--;
@@ -17495,9 +17512,6 @@ var Chartx = (function () {
               if (this.nodeData.label) {
                 e.eventInfo.title = this.nodeData.label;
               }
-              //先触发用户事件，再处理后面的选中事件
-
-              me.app.fire(e.type, e);
 
               if (e.type == 'mouseover') {
                 me.focusAt(this.nodeData.iNode);
@@ -17506,6 +17520,9 @@ var Chartx = (function () {
               if (e.type == 'mouseout') {
                 !this.nodeData.selected && me.unfocusAt(this.nodeData.iNode);
               }
+              //先触发用户事件，再处理后面的选中事件
+
+              me.app.fire(e.type, e);
             });
           } else {
             //_nodeElement.context = _context;

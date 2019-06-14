@@ -402,7 +402,6 @@ class VennGraphs extends GraphsBase
                         me.app.fire( e.type, e );
                     });
                 };
-
             }
 
             if( nodeData.label && me.label.enabled ){

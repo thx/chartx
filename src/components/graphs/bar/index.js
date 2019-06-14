@@ -458,9 +458,6 @@ class BarGraphs extends GraphsBase
                                     //nodes : me.getNodesAt( this.iNode ) 
                                 };
 
-                                //触发root统一设置e.eventInfo.nodes,所以上面不需要设置
-                                me.app.fire( e.type, e );
-
                                 if( me.select.enabled && e.type == me.select.triggerEventType ){
                                     //如果开启了图表的选中交互
                                     var ind = me.dataFrame.range.start + this.iNode;
@@ -477,6 +474,10 @@ class BarGraphs extends GraphsBase
                                         })
                                     };
                                 };
+
+                                //触发root统一设置e.eventInfo.nodes,所以上面不需要设置
+                                //TODO: fire需要最后触发，因为在比如click时间中要拿到所有的 上面select触发的选中态list值
+                                me.app.fire( e.type, e );
 
                             });
                         }
