@@ -105,7 +105,7 @@ class LineGraphs extends GraphsBase
             var _lineData = me.dataFrame.getFieldData(field);
             
             if( !_lineData ) return;
-console.log( JSON.stringify( _lineData ) )
+            //console.log( JSON.stringify( _lineData ) )
             var _data = [];
 
             for (var b = 0, bl = _lineData.length; b < bl; b++) {
@@ -116,7 +116,7 @@ console.log( JSON.stringify( _lineData ) )
                     field : field,
                     value : {
                         //x:
-                        y : _lineData[b]
+                        y : _lineData[ b ]
                     }
                 } );
 

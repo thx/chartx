@@ -1081,19 +1081,21 @@ class BarGraphs extends GraphsBase
     }
 
     //这里的ind是包含了start的全局index
+    //为什么需要传全局的index呢， 因为这个接口需要对外抛出，外部用户并不需要知道当前dataFrame.range.start
     selectAt( ind ){
         var me = this;
         if( _.indexOf( this.select.inds, ind ) > -1 ) return;
 
         this.select.inds.push( ind );
 
+        //因为这里是带上了start的全局的index，
+        var index = ind - this.dataFrame.range.start;
+
         _.each( this.data, function( list, f ){
-            var nodeData = list[ ind ];
+            var nodeData = list[ index ];
             nodeData.selected = true;
             me.setNodeElementStyle( nodeData );
         } );
-
-        var index = ind - this.dataFrame.range.start;
         var group = this.barsSp.getChildById("barGroup_" + index);
         if( group ){
             var groupRegion = group.getChildById("group_region_"+index);

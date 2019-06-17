@@ -54,6 +54,10 @@ export default class LineGraphsGroup extends event.Dispatcher
                         detail: 'shapeType为"isogon"时有效，描述正多边形的边数',
                         default: 3
                     },
+                    path: {
+                        detail: 'shapeType为path的时候，描述图形的path路径',
+                        default: null
+                    },
                     corner: {
                         detail: '拐角才有节点',
                         default: false
@@ -73,6 +77,10 @@ export default class LineGraphsGroup extends event.Dispatcher
                     lineWidth: {
                         detail: '节点图形边宽大小',
                         default: 2
+                    },
+                    visible: {
+                        detail: '节点是否显示,支持函数',
+                        default: true
                     }
                 }
             },
@@ -219,6 +227,7 @@ export default class LineGraphsGroup extends event.Dispatcher
             };
             return s.apply( this , _nodesInfo );
         };
+        
         return s
     }
 
@@ -320,10 +329,10 @@ export default class LineGraphsGroup extends event.Dispatcher
             _.each( list, function( point, i ){
                 if( _.isNumber( point[1] ) ){
                     if( me._nodes ){
-                        var _circle = me._nodes.getChildAt(iNode);
-                        if( _circle ){
-                            _circle.context.x = point[0];
-                            _circle.context.y = point[1];
+                        var _node = me._nodes.getChildAt(iNode);
+                        if( _node ){
+                            _node.context.x = point[0];
+                            _node.context.y = point[1];
                         }
                     }
                     if( me._labels ){
@@ -632,18 +641,38 @@ export default class LineGraphsGroup extends event.Dispatcher
                     r: me._getProp(me.node.radius, a),
                     lineWidth: me._getProp(me.node.lineWidth, a) || 2,
                     strokeStyle: _nodeColor,
-                    fillStyle: me.node.fillStyle
+                    fillStyle: me._getProp(me.node.fillStyle,a),
+                    visible : !!me._getProp(me.node.visible, a)
                 };
+
                 var nodeConstructor = Circle;
 
-                if( me.node.shapeType == "isogon" ){
+                var _shapeType = me._getProp(me.node.shapeType, a)
+
+                if( _shapeType == "isogon" ){
                     nodeConstructor = Isogon;
-                    context.n = me.node.isogonPointNum;
+                    context.n = me._getProp(me.node.isogonPointNum, a);
+                };
+                if( _shapeType == "path" ){
+                    nodeConstructor = Path;
+                    context.path = me._getProp( me.node.path, a );
                 };
 
                 var nodeEl = me._nodes.children[ iNode ];
+
+                //同一个元素，才能直接extend context
                 if( nodeEl ){
-                    _.extend( nodeEl.context , context );
+                    if( nodeEl.type == _shapeType ){
+                        _.extend( nodeEl.context , context );
+                    } else {
+                        nodeEl.destroy();
+
+                        //重新创建一个新的元素放到相同位置
+                        nodeEl = new nodeConstructor({
+                            context: context
+                        });
+                        me._nodes.addChildAt(nodeEl, iNode);
+                    };
                 } else {
                     nodeEl = new nodeConstructor({
                         context: context
@@ -651,7 +680,7 @@ export default class LineGraphsGroup extends event.Dispatcher
                     me._nodes.addChild(nodeEl);
                 };
                  
-                if (me.node.corner) { //拐角才有节点
+                if ( me.node.corner ) { //拐角才有节点
                     var y = me._pointList[a][1];
                     var pre = me._pointList[a - 1];
                     var next = me._pointList[a + 1];

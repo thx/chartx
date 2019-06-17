@@ -99,7 +99,33 @@ var options = {
             },
             label: {
                 enabled: true
-            }
+            },
+            node: {
+                visible : function( nodeData ){
+                    if( nodeData.iNode == 3 ){
+                        return false
+                    }
+                    return true
+                },
+                shapeType: function( nodeData ){
+                    if( nodeData.iNode == 6 ){
+                        return 'isogon'
+                    }
+                    if( nodeData.iNode == 5 ){
+                        return 'path'
+                    }
+                },
+                path: function( nodeData ){
+                    if( nodeData.iNode == 5 ){
+                        var model = {
+                            hr : 6,vr: 10
+                        }
+                        var ps = "M 0 "+model.hr+" C "+model.hr+" "+model.hr+" "+( model.hr*3/2 ) +" "+(-model.hr/3)+" 0 "+(-model.vr);
+                        ps += " C "+(-model.hr * 3/ 2)+" "+(-model.hr / 3)+" "+(-model.hr)+" "+model.hr+" 0 "+ model.hr+ "z";
+                        return ps;
+                    }
+                }
+            },
         }
     ],
     legend: {

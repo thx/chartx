@@ -28,6 +28,16 @@ class Legend extends Component
                 default: 'h',
                 documentation: '横向 top,bottom --> h left,right -- >v'
             },
+            textAlign: {
+                detail : '水平方向的对其，默认居左对其',
+                default: 'left',
+                documentation: '可选left，center，right'
+            },
+            verticalAlign: {
+                detail : '垂直方向的对其方式，默认居中（待实现）',
+                default: 'middle',
+                documentation: '可选top，middle，bottom'
+            },
             icon : {
                 detail : '图标设置',
                 propertys : {
@@ -152,46 +162,71 @@ class Legend extends Component
     layout(){
         let app = this.app;
 
-        if( this.direction == "h" ){
-            app.padding[ this.position ] += (this.height+this.margin.top+this.margin.bottom);
-        } else {
-            app.padding[ this.position ] += (this.width+this.margin.left+this.margin.right);
-        };
+        let width = this.width+this.margin.left+this.margin.right;
+        let height = this.height+this.margin.top+this.margin.bottom;
 
-        //default right
-        var pos = {
-            x : app.width - app.padding.right + this.margin.left,
-            y : app.padding.top + this.margin.top
-        };
-        if( this.position == "left" ){
-            pos.x = app.padding.left - this.width + this.margin.left;
-        };
-        if( this.position == "top" ){
-            pos.x = app.padding.left + this.margin.left;
-            pos.y = app.padding.top - this.height - this.margin.top;
+        let x = app.padding.left;
+        let y = app.padding.top;
+
+        if( this.position == "right" ){
+            x = app.width - app.padding.right - width;
         };
         if( this.position == "bottom" ){
-            pos.x = app.padding.left + this.margin.left;
-            pos.y = app.height - app.padding.bottom + this.margin.bottom;
+            y = app.height - app.padding.bottom - height;
         };
 
-        this.pos = pos;
+
+        let layoutWidth,layoutHeight;
+
+        //然后把app的padding扩展开来
+        if( this.position == "left" || this.position == "right" ){
+            // v
+            app.padding[ this.position ] += width;
+
+            layoutWidth = width;
+            layoutHeight = app.height - app.padding.top - app.padding.bottom;
+
+        } else if( this.position == "top" || this.position == "bottom") {
+            // h
+            app.padding[ this.position ] += height;
+
+            layoutWidth = app.width - app.padding.right - app.padding.left;
+            layoutHeight = height;
+        };
+
+        //然后计算textAlign,上面的pos.x 已经是按照默认的left计算过了的
+        if( this.textAlign == 'center' ){
+            x += layoutWidth/2 - this.width/2;
+        };
+        if( this.textAlign == 'right' ){
+            x += layoutWidth - this.width;
+        };
+
+        this.pos = {
+            x,y
+        };
+
+        return this.pos;
     }
 
 
     draw()
     {
+        //为了在直角坐标系中，让 textAlign left的时候，图例和坐标系左侧对齐， 好看点, 用心良苦啊
         var _coord = this.app.getComponent({name:'coord'});
         if( _coord && _coord.type == 'rect' ){
-            if( this.position == "top" || this.position == "bottom" ){
+            if( this.textAlign == "left" && (this.position == "top" || this.position == "bottom") ){
                 this.pos.x = _coord.getSizeAndOrigin().origin.x + this.icon.radius;
             };
         };
+        
+        
         this.setPosition();
     }
 
     widget()
     {
+    
         var me = this;
 
         var viewWidth = this.app.width - this.app.padding.left - this.app.padding.right;
@@ -274,8 +309,6 @@ class Legend extends Component
                         isOver = true;
                         return;
                     };
-                    
-                    width = Math.max( width, x );
                     x = 0;
                     rows++;    
                 };
@@ -283,6 +316,8 @@ class Legend extends Component
                 spItemC.x = x;
                 spItemC.y = me.icon.height * (rows-1);
                 x += itemW;
+
+                width = Math.max( width, x );
             };
             var sprite = new Canvax.Display.Sprite({
                 id : "legend_field_"+i,

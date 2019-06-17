@@ -15681,21 +15681,23 @@ function (_GraphsBase) {
         }
       });
     } //这里的ind是包含了start的全局index
+    //为什么需要传全局的index呢， 因为这个接口需要对外抛出，外部用户并不需要知道当前dataFrame.range.start
 
   }, {
     key: "selectAt",
     value: function selectAt(ind) {
       var me = this;
       if (_.indexOf(this.select.inds, ind) > -1) return;
-      this.select.inds.push(ind);
+      this.select.inds.push(ind); //因为这里是带上了start的全局的index，
+
+      var index$$1 = ind - this.dataFrame.range.start;
 
       _.each(this.data, function (list, f) {
-        var nodeData = list[ind];
+        var nodeData = list[index$$1];
         nodeData.selected = true;
         me.setNodeElementStyle(nodeData);
       });
 
-      var index$$1 = ind - this.dataFrame.range.start;
       var group = this.barsSp.getChildById("barGroup_" + index$$1);
 
       if (group) {
@@ -15843,6 +15845,10 @@ function (_event$Dispatcher) {
               detail: 'shapeType为"isogon"时有效，描述正多边形的边数',
               default: 3
             },
+            path: {
+              detail: 'shapeType为path的时候，描述图形的path路径',
+              default: null
+            },
             corner: {
               detail: '拐角才有节点',
               default: false
@@ -15862,6 +15868,10 @@ function (_event$Dispatcher) {
             lineWidth: {
               detail: '节点图形边宽大小',
               default: 2
+            },
+            visible: {
+              detail: '节点是否显示,支持函数',
+              default: true
             }
           }
         },
@@ -16123,11 +16133,11 @@ function (_event$Dispatcher) {
         _.each(list, function (point, i) {
           if (_.isNumber(point[1])) {
             if (me._nodes) {
-              var _circle = me._nodes.getChildAt(iNode);
+              var _node = me._nodes.getChildAt(iNode);
 
-              if (_circle) {
-                _circle.context.x = point[0];
-                _circle.context.y = point[1];
+              if (_node) {
+                _node.context.x = point[0];
+                _node.context.y = point[1];
               }
             }
 
@@ -16437,18 +16447,36 @@ function (_event$Dispatcher) {
           r: me._getProp(me.node.radius, a),
           lineWidth: me._getProp(me.node.lineWidth, a) || 2,
           strokeStyle: _nodeColor,
-          fillStyle: me.node.fillStyle
+          fillStyle: me._getProp(me.node.fillStyle, a),
+          visible: !!me._getProp(me.node.visible, a)
         };
         var nodeConstructor = Circle$3;
 
-        if (me.node.shapeType == "isogon") {
+        var _shapeType = me._getProp(me.node.shapeType, a);
+
+        if (_shapeType == "isogon") {
           nodeConstructor = Isogon$1;
-          context.n = me.node.isogonPointNum;
+          context.n = me._getProp(me.node.isogonPointNum, a);
         }
-        var nodeEl = me._nodes.children[iNode];
+
+        if (_shapeType == "path") {
+          nodeConstructor = Path$1;
+          context.path = me._getProp(me.node.path, a);
+        }
+        var nodeEl = me._nodes.children[iNode]; //同一个元素，才能直接extend context
 
         if (nodeEl) {
-          _.extend(nodeEl.context, context);
+          if (nodeEl.type == _shapeType) {
+            _.extend(nodeEl.context, context);
+          } else {
+            nodeEl.destroy(); //重新创建一个新的元素放到相同位置
+
+            nodeEl = new nodeConstructor({
+              context: context
+            });
+
+            me._nodes.addChildAt(nodeEl, iNode);
+          }
         } else {
           nodeEl = new nodeConstructor({
             context: context
@@ -16798,8 +16826,8 @@ function (_GraphsBase) {
 
         var _lineData = me.dataFrame.getFieldData(field);
 
-        if (!_lineData) return;
-        console.log(JSON.stringify(_lineData));
+        if (!_lineData) return; //console.log( JSON.stringify( _lineData ) )
+
         var _data = [];
 
         for (var b = 0, bl = _lineData.length; b < bl; b++) {
@@ -31533,6 +31561,16 @@ function (_Component) {
           default: 'h',
           documentation: '横向 top,bottom --> h left,right -- >v'
         },
+        textAlign: {
+          detail: '水平方向的对其，默认居左对其',
+          default: 'left',
+          documentation: '可选left，center，right'
+        },
+        verticalAlign: {
+          detail: '垂直方向的对其方式，默认居中（待实现）',
+          default: 'middle',
+          documentation: '可选top，middle，bottom'
+        },
         icon: {
           detail: '图标设置',
           propertys: {
@@ -31664,42 +31702,55 @@ function (_Component) {
     key: "layout",
     value: function layout() {
       var app = this.app;
+      var width = this.width + this.margin.left + this.margin.right;
+      var height = this.height + this.margin.top + this.margin.bottom;
+      var x = app.padding.left;
+      var y = app.padding.top;
 
-      if (this.direction == "h") {
-        app.padding[this.position] += this.height + this.margin.top + this.margin.bottom;
-      } else {
-        app.padding[this.position] += this.width + this.margin.left + this.margin.right;
-      }
-
-      var pos = {
-        x: app.width - app.padding.right + this.margin.left,
-        y: app.padding.top + this.margin.top
-      };
-
-      if (this.position == "left") {
-        pos.x = app.padding.left - this.width + this.margin.left;
-      }
-
-      if (this.position == "top") {
-        pos.x = app.padding.left + this.margin.left;
-        pos.y = app.padding.top - this.height - this.margin.top;
+      if (this.position == "right") {
+        x = app.width - app.padding.right - width;
       }
 
       if (this.position == "bottom") {
-        pos.x = app.padding.left + this.margin.left;
-        pos.y = app.height - app.padding.bottom + this.margin.bottom;
+        y = app.height - app.padding.bottom - height;
       }
-      this.pos = pos;
+      var layoutWidth, layoutHeight; //然后把app的padding扩展开来
+
+      if (this.position == "left" || this.position == "right") {
+        // v
+        app.padding[this.position] += width;
+        layoutWidth = width;
+        layoutHeight = app.height - app.padding.top - app.padding.bottom;
+      } else if (this.position == "top" || this.position == "bottom") {
+        // h
+        app.padding[this.position] += height;
+        layoutWidth = app.width - app.padding.right - app.padding.left;
+        layoutHeight = height;
+      }
+
+      if (this.textAlign == 'center') {
+        x += layoutWidth / 2 - this.width / 2;
+      }
+
+      if (this.textAlign == 'right') {
+        x += layoutWidth - this.width;
+      }
+      this.pos = {
+        x: x,
+        y: y
+      };
+      return this.pos;
     }
   }, {
     key: "draw",
     value: function draw() {
+      //为了在直角坐标系中，让 textAlign left的时候，图例和坐标系左侧对齐， 好看点, 用心良苦啊
       var _coord = this.app.getComponent({
         name: 'coord'
       });
 
       if (_coord && _coord.type == 'rect') {
-        if (this.position == "top" || this.position == "bottom") {
+        if (this.textAlign == "left" && (this.position == "top" || this.position == "bottom")) {
           this.pos.x = _coord.getSizeAndOrigin().origin.x + this.icon.radius;
         }
       }
@@ -31785,13 +31836,13 @@ function (_Component) {
               isOver = true;
               return;
             }
-            width = Math.max(width, x);
             x = 0;
             rows++;
           }
           spItemC.x = x;
           spItemC.y = me.icon.height * (rows - 1);
           x += itemW;
+          width = Math.max(width, x);
         }
         var sprite = new Canvax.Display.Sprite({
           id: "legend_field_" + i,
