@@ -213,7 +213,7 @@ class PieGraphs extends GraphsBase
         
         for( var i=0,l=dataFrame.length; i<l; i++ ){
             var rowData = dataFrame.getRowDataAt(i);
-            var color = me.app.getTheme( i );
+
             var layoutData = {
                 type          : "pie",
                 rowData       : rowData,//把这一行数据给到layoutData引用起来
@@ -226,8 +226,8 @@ class PieGraphs extends GraphsBase
                 selectedAlpha : me.node.select.alpha,
                 enabled       : true,   //是否启用，显示在列表中
                 
-                fillStyle     : color,
-                color         : color, //加个color属性是为了给tips用
+                fillStyle     : null,
+                color         : null, //加个color属性是为了给tips用
 
                 value         : rowData[ me.field ],
                 label         : rowData[  me.groupField || me.label.field || me.field ],
@@ -235,12 +235,9 @@ class PieGraphs extends GraphsBase
                 iNode         : i
             };
 
-            if( _.isFunction( this.node.fillStyle ) ){
-                var _color = this.node.fontColor( layoutData );
-                if( !_color ){
-                    layoutData.fillStyle = layoutData.color = _color;
-                };
-            };
+            //设置颜色
+            var color = me._getColor( me.node.fillStyle, layoutData );
+            layoutData.fillStyle = layoutData.color = color;
             
             data.push( layoutData );
         };
@@ -402,6 +399,25 @@ class PieGraphs extends GraphsBase
             list  : data,
             total : total
         };
+    }
+
+    _getColor( prop , layoutData)
+    {
+        var me = this;
+        var iNode = layoutData.iNode;
+        var color = prop;
+        if (_.isArray( prop )) {
+            color = prop[ iNode ];
+        };
+        if (_.isFunction( prop )) {
+            color = s.apply( this , [ layoutData ] );
+        };
+
+        if( !color ){
+            color = me.app.getTheme( iNode );
+        };
+        
+        return color;
     }
 
     _getLabelText( itemData )

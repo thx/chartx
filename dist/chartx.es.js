@@ -18784,7 +18784,6 @@ function (_GraphsBase) {
 
       for (var i = 0, l = dataFrame$$1.length; i < l; i++) {
         var rowData = dataFrame$$1.getRowDataAt(i);
-        var color$$1 = me.app.getTheme(i);
         var layoutData = {
           type: "pie",
           rowData: rowData,
@@ -18799,23 +18798,19 @@ function (_GraphsBase) {
           selectedAlpha: me.node.select.alpha,
           enabled: true,
           //是否启用，显示在列表中
-          fillStyle: color$$1,
-          color: color$$1,
+          fillStyle: null,
+          color: null,
           //加个color属性是为了给tips用
           value: rowData[me.field],
           label: rowData[me.groupField || me.label.field || me.field],
           labelText: null,
           //绘制的时候再设置,label format后的数据
           iNode: i
-        };
+        }; //设置颜色
 
-        if (_.isFunction(this.node.fillStyle)) {
-          var _color = this.node.fontColor(layoutData);
+        var color$$1 = me._getColor(me.node.fillStyle, layoutData);
 
-          if (!_color) {
-            layoutData.fillStyle = layoutData.color = _color;
-          }
-        }
+        layoutData.fillStyle = layoutData.color = color$$1;
         data.push(layoutData);
       }
 
@@ -18979,6 +18974,26 @@ function (_GraphsBase) {
         list: data,
         total: total
       };
+    }
+  }, {
+    key: "_getColor",
+    value: function _getColor(prop, layoutData) {
+      var me = this;
+      var iNode = layoutData.iNode;
+      var color$$1 = prop;
+
+      if (_.isArray(prop)) {
+        color$$1 = prop[iNode];
+      }
+
+      if (_.isFunction(prop)) {
+        color$$1 = s.apply(this, [layoutData]);
+      }
+
+      if (!color$$1) {
+        color$$1 = me.app.getTheme(iNode);
+      }
+      return color$$1;
     }
   }, {
     key: "_getLabelText",
