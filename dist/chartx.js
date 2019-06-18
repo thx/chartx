@@ -15721,14 +15721,14 @@ var Chartx = (function () {
         var _index = _.indexOf(this.select.inds, ind);
 
         this.select.inds.splice(_index, 1);
+        var index$$1 = ind - this.dataFrame.range.start;
 
         _.each(this.data, function (list, f) {
-          var nodeData = list[ind];
+          var nodeData = list[index$$1];
           nodeData.selected = false;
           me.setNodeElementStyle(nodeData);
         });
 
-        var index$$1 = ind - this.dataFrame.range.start;
         var group = this.barsSp.getChildById("barGroup_" + index$$1);
 
         if (group) {
@@ -15746,8 +15746,11 @@ var Chartx = (function () {
         var me = this;
 
         _.each(me.select.inds, function (ind) {
-          var index$$1 = ind - me.dataFrame.range.start;
-          rowDatas.push(me.dataFrame.getRowDataAt(index$$1));
+          //TODO: 这里的inds 是全局的，而getRowDataAt只能获取到当前视图内的数据
+          //所以用这个接口会有问题
+          //var index = ind - me.dataFrame.range.start;
+          //rowDatas.push( me.dataFrame.getRowDataAt( index ) )
+          rowDatas.push(me.dataFrame.jsonOrg[ind]);
         });
 
         return rowDatas;

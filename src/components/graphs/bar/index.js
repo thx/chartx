@@ -1113,13 +1113,14 @@ class BarGraphs extends GraphsBase
 
         var _index = _.indexOf( this.select.inds, ind );
         this.select.inds.splice( _index, 1 );
+
+        var index = ind - this.dataFrame.range.start;
         _.each( this.data, function( list, f ){
-            var nodeData = list[ ind ];
+            var nodeData = list[ index ];
             nodeData.selected = false;
             me.setNodeElementStyle( nodeData );
         } );
 
-        var index = ind - this.dataFrame.range.start;
         var group = this.barsSp.getChildById("barGroup_" + index);
         if( group ){
             var groupRegion = group.getChildById("group_region_"+index);
@@ -1135,8 +1136,13 @@ class BarGraphs extends GraphsBase
         var me = this;
 
         _.each( me.select.inds, function( ind ){
-            var index = ind - me.dataFrame.range.start;
-            rowDatas.push( me.dataFrame.getRowDataAt( index ) )
+            
+            //TODO: 这里的inds 是全局的，而getRowDataAt只能获取到当前视图内的数据
+            //所以用这个接口会有问题
+            //var index = ind - me.dataFrame.range.start;
+            //rowDatas.push( me.dataFrame.getRowDataAt( index ) )
+
+            rowDatas.push( me.dataFrame.jsonOrg[ind] );
         } );
 
         return rowDatas;

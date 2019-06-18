@@ -645,6 +645,8 @@ export default class LineGraphsGroup extends event.Dispatcher
                     visible : !!me._getProp(me.node.visible, a)
                 };
 
+                
+
                 var nodeConstructor = Circle;
 
                 var _shapeType = me._getProp(me.node.shapeType, a)
