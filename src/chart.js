@@ -14,7 +14,7 @@ class Chart extends event.Dispatcher
         this._node = node;
         this._data = data;
         this._opt = opt;
-
+ 
         this.dataFrame = this.initData( data , opt );
 
         this.el = $.query(node) //chart 在页面里面的容器节点，也就是要把这个chart放在哪个节点里

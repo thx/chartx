@@ -121,7 +121,7 @@ class dataZoom extends Component
             },
             graphStyle : {
                 detail : '图形的颜色',
-                default: '#ececec'
+                default: '#dddddd'
             },
             
             underline : {
@@ -452,6 +452,7 @@ class dataZoom extends Component
         if(!this.range.max || this.range.max > this.count){
             this.range.max = this.count - 1;
         };
+        
         if( !this.range.end || this.range.end > this.dataLen - 1 ){
             this.range.end = this.dataLen - 1;
             if( this.axisLayoutType == "proportion" ){
@@ -755,6 +756,7 @@ class dataZoom extends Component
             if( me.axisLayoutType == "peak" ){
                 end -= 1;
             };
+            
             me.range.end = end;
             me.dragIng( me.range );
         };

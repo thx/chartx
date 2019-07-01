@@ -366,6 +366,15 @@ class BarGraphs extends GraphsBase
 
         me.node._count = 0;
 
+        var preGraphs = 0;
+        var barGraphs = me.app.getComponents({name:'graphs',type:'bar'});
+        _.each( barGraphs, function( graph, i ){
+            if( graph == me ){
+                preGraphs = i
+            };
+        } );
+        
+
         _.each( this.enabledField , function(h_group, i) {
             
             h_group = _.flatten([ h_group ]);
@@ -391,10 +400,34 @@ class BarGraphs extends GraphsBase
 
             me._barsLen = me._dataLen * groupsLen;
 
+            // this bind到了 对应的元素上面
+            function barGroupSectedHandle(e){
+                
+                if( me.select.enabled && e.type == me.select.triggerEventType ){
+                    
+                    //如果开启了图表的选中交互
+                    var ind = me.dataFrame.range.start + this.iNode;
+
+                    //region触发的selected，需要把所有的graphs都执行一遍
+                    if( _.indexOf( me.select.inds, ind ) > -1 ){
+                        //说明已经选中了
+                        _.each( barGraphs, function( barGraph ){
+                            barGraph.unselectAt( ind );
+                        })
+                    } else {
+                        _.each( barGraphs, function( barGraph ){
+                            barGraph.selectAt( ind );
+                        })
+                    };
+                };
+            }
+
             for (var h = 0; h < me._dataLen; h++) {
 
                 //bar的group
                 var groupH = null;
+                
+
                 if (i == 0) {
                     //横向的分组
                     if (h <= preDataLen - 1) {
@@ -407,14 +440,7 @@ class BarGraphs extends GraphsBase
                         groupH.iNode = h;
                     };
 
-
-                    var preGraphs = 0;
-                    var barGraphs = me.app.getComponents({name:'graphs',type:'bar'});
-                    _.each( barGraphs, function( graph, i ){
-                        if( graph == me ){
-                            preGraphs = i
-                        };
-                    } );
+                    
                     if( !preGraphs ){
                         //只有preGraphs == 0，第一组graphs的时候才需要加载这个region
 
@@ -458,22 +484,7 @@ class BarGraphs extends GraphsBase
                                     //nodes : me.getNodesAt( this.iNode ) 
                                 };
 
-                                if( me.select.enabled && e.type == me.select.triggerEventType ){
-                                    //如果开启了图表的选中交互
-                                    var ind = me.dataFrame.range.start + this.iNode;
-
-                                    //region触发的selected，需要把所有的graphs都执行一遍
-                                    if( _.indexOf( me.select.inds, ind ) > -1 ){
-                                        //说明已经选中了
-                                        _.each( barGraphs, function( barGraph ){
-                                            barGraph.unselectAt( ind );
-                                        })
-                                    } else {
-                                        _.each( barGraphs, function( barGraph ){
-                                            barGraph.selectAt( ind );
-                                        })
-                                    };
-                                };
+                                barGroupSectedHandle.bind( this )(e);
 
                                 //触发root统一设置e.eventInfo.nodes,所以上面不需要设置
                                 //TODO: fire需要最后触发，因为在比如click时间中要拿到所有的 上面select触发的选中态list值
@@ -589,6 +600,26 @@ class BarGraphs extends GraphsBase
                                 trigger : me.node,
                                 nodes : [ this.nodeData ]
                             };
+
+                            barGroupSectedHandle.bind( this )(e);
+                            //如果开启了分组的选中，如果后续实现了单个bar的选中，那么就要和分组的选中区分开来，单个选中优先
+                            // if( me.select.enabled && e.type == me.select.triggerEventType ){
+                            //     //如果开启了图表的选中交互
+                            //     var ind = me.dataFrame.range.start + this.iNode;
+
+                            //     //region触发的selected，需要把所有的graphs都执行一遍
+                            //     if( _.indexOf( me.select.inds, ind ) > -1 ){
+                            //         //说明已经选中了
+                            //         _.each( barGraphs, function( barGraph ){
+                            //             barGraph.unselectAt( ind );
+                            //         })
+                            //     } else {
+                            //         _.each( barGraphs, function( barGraph ){
+                            //             barGraph.selectAt( ind );
+                            //         })
+                            //     };
+                            // };
+
                             me.app.fire( e.type, e );
                         });
                         
@@ -771,6 +802,13 @@ class BarGraphs extends GraphsBase
         //然后计算出对于结构的dataOrg
         var dataOrg = this.dataFrame.getDataOrg( this.enabledField );
 
+
+        var selectOpt = me.getGraphSelectOpt();
+        //自己的select.inds为空的情况下，才需要寻找是不是别的graphs设置了inds
+        if( !me.select.inds.length && selectOpt && selectOpt.inds && selectOpt.inds.length ){
+            me.select.inds = _.clone( selectOpt.inds );
+        };
+
         //dataOrg和field是一一对应的
         _.each( dataOrg, function( hData, b ){
             //hData，可以理解为一根竹子 横向的分组数据，这个hData上面还可能有纵向的堆叠
@@ -885,16 +923,9 @@ class BarGraphs extends GraphsBase
                     };
 
                     //如果某个graph 配置了select ----start
-                    var selectOpt = me.getGraphSelectOpt();
-                    if( selectOpt && selectOpt.inds && selectOpt.inds.length ){
-                        if( _.indexOf( selectOpt.inds, i ) > -1 ){
-                            nodeData.selected = true;
-                        };
-                        //同步到自己的select.inds
-                        
-                        me.select.inds = _.clone(selectOpt.inds);
+                    if( _.indexOf( me.select.inds, i ) > -1 ){
+                        nodeData.selected = true;
                     };
-                    //----end
 
                     tempBarData[v].push(nodeData);
 

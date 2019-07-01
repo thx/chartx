@@ -68,6 +68,7 @@ class LineGraphs extends GraphsBase
 
     resetData(dataFrame, dataTrigger)
     {
+        
         var me = this;
         if( dataFrame ){
             me.dataFrame = dataFrame;
