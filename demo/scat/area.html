@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
+<title>xChart demo -- scat</title>
+
+<script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
+<script type="text/javascript" src="../../dist/chartx.js"></script>
+<!-- codemirror -->
+<script type="text/javascript" src="../../lib/codemirror/codemirror.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/active-line.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/javascript.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/matchbrackets.js"></script>
+<link rel="stylesheet" href="../../lib/codemirror/codemirror.css">
+<link rel="stylesheet" href="../../lib/codemirror/zenburn.css">
+<link rel="stylesheet" href="../../lib/codemirror/docs.css">
+<!-- codemirror end -->
+<!--bootstrap-->
+<script type="text/javascript" src="../../lib/bootstrap/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap-theme.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/docs.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap.min.css">
+<!--bootstrap end-->
+<script type="text/javascript" src="../../lib/demo.js"></script>
+<link rel="stylesheet" href="../../lib/demo.css">
+</head>
+<body >
+
+<table>
+    <tr>
+        <td id="td-vl">
+            <form><textarea id="code" name="code">
+
+//chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
+var data = [
+    ["uv"    ,"money"    , "sex", 'house' , 'text'],
+    [ -276    , -101      , '女' , 123     , 'hello world'],
+    [ 367     , -278      , '女' , 113     , '你好再见'],
+    [ 824     , 438       , '男' , 103     , 'sdfdsfdsf'],
+    [ -134    , 340       , '男' , 166     , '对方水电费'],
+    [ 425     , 290       , '女' , 123     , '个人赛飞'],
+    [ 161     , 134       , '男' , 12      , '多福多寿'],
+    [ 117     , 201       , '女' , 2       , '歌热舞'],
+    [ 268     , -145      , '男' , 3       , '个人法尔'],
+    [ -23     , 364       , '男' , 34      , 'fsdfsd'],
+    [ 332     , 423       , '女' , 234     , 'sdfdsfsdwer'],
+    [ 0       , -101      , '女' , 346     , 'sdfsdfrthsdfawe'],
+    [ 727     , 247       , '女' , 234     , 'gherwfsdf'],
+    [ 84      , 634       , '男' , 25      , 'dfsdfwerwegscs'],
+    [ 24      , 205       , '男' , 35      , 'gwer'],
+    [ 325     , -32       , '女' , 645     , 'werb'],
+    [ 61      , 0         , '男' , 3       , 'hwers'],
+    [ 17      , 201       , '女' , 34      , 'werwg'],
+    [ 123     , 524       , '男' , 62      , 'drgd'],
+    [ 219     , 235       , '男' , 463     , 'wer2fs'],
+    [ 52      , 273       , '女' , 111     , 'wersv'],
+    [ 732     , 101       , '女' , 332     , 'hert'],
+    [ 762     , 725       , '女' , 112     , 'gewfz'],
+    [ 625     , 828       , '男' , 115     , 'herww'],
+    [ 134     , 824       , '男' , 235     , 'vrvcz'],
+    [ 325     , 439       , '女' , 214     , 'we'],
+    [ 861     , 130       , '男' , 2       , 'werwerwer23'],
+    [ 342     , 201       , '女' , 236     , '23423wf'],
+    [ 285     , 134       , '男' , 253     , 'se'],
+    [ 199     , 468       , '男' , 234     , 'werw2'],
+    [ 220     , 303       , '女' , 234     , '2sd'],
+    [ 176     , 201       , '女' , 43      , 'nickli'],
+    [ 28      , 145       , '男' , 423     , 'lidf'],
+    [ 219     , 624       , '男' , 654     , 'fwe'],
+    [ 322     , 330       , '女' , 5       , 'de'],
+    [ 453     , 561       , '女' , 24      , '22'],
+    [ 274     , 247       , '女' , 62      , 'vsdf'],
+    [ 284     , 234       , '男' , 897     , 'wer'],
+    [ 536     , 253       , '男' , 6       , 'sefrw'],
+    [ 335     , 942       , '女' , 234     , 'v'],
+    [ 263     , 632       , '男' , 524     , 'serw'],
+    [ 510     , 211       , '女' , 623     , 'wer23'],
+    [ 283     , 224       , '男' , 34      , '3234'],
+    [ 219     , 326       , '男' , 452     , 'dsdf'],
+    [ 273     , 303       , '女' , 333     , '2342'],
+    [ 347     , 131       , '女' , 552     , 'vvvs'],
+    [ 632     , 375       , '女' , 153     , 'xxoo'],
+    [ 332     , 183       , '男' , 234     , 'ww'],
+    [ 344     , 684       , '男' , 5       , '23'],
+    [ 135     , 429       , '女' , 777     , '23'],
+    [ 581     , 432       , '男' , 234     , 'dfw'],
+    [ 162     , 80        , '男' , 22      , 'wwf'],
+    [ 732     , 821       , '男' , 25      , 'g345'],
+    [ 234     , 723       , '男' , 342     , 'f23423'],
+    [ 524     , 279       , '女' , 3       , '2222']
+];
+
+var options = {
+    coord: {
+        type : "rect",
+        xAxis : {
+            field :  "uv",
+            symmetric: true,
+            layoutType : "proportion", //注意：scat的layoutType必须是proportion，位置计算才会对
+            axisLine: {
+                position: 0//"center"
+            }
+        },
+        yAxis : {
+            symmetric: true,
+            axisLine: {
+                position: 0//"center"
+            }
+        }
+    },
+    graphs : [
+        {
+            type : "scat",
+            field : "money",
+            groupField: "sex",
+            aniOrigin : "origin",
+  
+            area : {
+                enabled : true,
+                concavity: 80,
+                quantile : 8  //8分位
+            },
+
+            node : {
+                radius : "house", //r可以配置为某个字段名字，就会自动计算比例
+                fillStyle : function( d ){
+                    if( d.rowData.sex == "男" ){
+                        return "#ff8533"
+                    } else {
+                        return "#73ace6"
+                    }
+                },
+                select : {
+                    enabled : true
+                }
+            },
+            label : {
+                enabled : false,
+                field : "text"
+            }
+        }
+    ],
+    tips : {}
+};
+
+window.scat = Chartx.create("canvasTest" , data , options)
+
+            </textarea></form>
+        </td>
+        <td style="padding:0 10px;" id="td-vr">
+            <div id="chartdemo-r">
+            <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
+                <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
+
+                <p>
+                    联系人：@释剑
+                </p>
+                
+            </div>
+            <div  class="test-c">
+                <div id="canvasTest" style='width:100%;height:300px;position:relative;'></div>
+            </div>
+
+            </div>
+        </td>
+    </tr>
+</table>
+
+    
+</body> 
+</html>
+
+

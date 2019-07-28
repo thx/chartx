@@ -1,10 +1,14 @@
 import Canvax from "canvax"
 import GraphsBase from "../index"
 import { global,_,event,getDefaultProps } from "mmvis"
+import hull from "../../../utils/hull/index"
 
 const Circle = Canvax.Shapes.Circle;
 const Rect = Canvax.Shapes.Rect;
 const Line = Canvax.Shapes.Line;
+const Polygon = Canvax.Shapes.Polygon;
+
+//TODO iGroup 的实现有问题
 
 class ScatGraphs extends GraphsBase
 {
@@ -13,6 +17,11 @@ class ScatGraphs extends GraphsBase
             field: {
                 detail: '字段配置',
                 default: null
+            },
+            groupField: {
+                detail: '分组字段',
+                default: null,
+                documentation: '分组字段，如果area配置enabled为true，那么需要groupField来构建几个area'
             },
             aniOrigin: {
                 detail: '节点动画的原点',
@@ -139,6 +148,43 @@ class ScatGraphs extends GraphsBase
                     }
                 }
             },
+            area: {
+                detail: '散点集合组成的面',
+                propertys: {
+                    enabled: {
+                        detail: '是否开启',
+                        default: false
+                    },
+                    concavity: {
+                        detail: '凹凸系数，默认80，越大越凸',
+                        default: 88
+                    },
+                    quantile : {
+                        detail : '散点用来计入面积的分位数',
+                        default: 8,
+                    },
+                    fillStyle: {
+                        detail: '散点集合面的背景色',
+                        default: null
+                    },
+                    fillAlpha: {
+                        detail: '散点集合面的透明度',
+                        default: 0.2
+                    },
+                    strokeStyle: {
+                        detail: '散点集合面的描边颜色',
+                        default: null
+                    },
+                    lineWidth: {
+                        detail: '散点集合面的描边线宽',
+                        default: 0
+                    },
+                    strokeAlpha: {
+                        detail : '散点集合面的描边透明度',
+                        default: 0.5
+                    }
+                }
+            },
             label: {
                 detail: '文本设置',
                 propertys: {
@@ -209,6 +255,8 @@ class ScatGraphs extends GraphsBase
         this._rMaxValue = null;
         this._rMinValue = null;
 
+        this._groupData = {}; //groupField配置有的情况下会被赋值，在_trimGraphs会被先置空，然后赋值
+
         _.extend( true, this , getDefaultProps( ScatGraphs.defaultProps() ), opt );
 
         this.init();
@@ -271,6 +319,7 @@ class ScatGraphs extends GraphsBase
     _trimGraphs()
     {
         var tmplData = [];
+        this._groupData = {};
 
         var _coord = this.app.getComponent({name:'coord'});
         
@@ -334,6 +383,22 @@ class ScatGraphs extends GraphsBase
             this._setStrokeAlpha( nodeLayoutData );
             this._setNodeType( nodeLayoutData );
             this._setText( nodeLayoutData );
+
+            //如果有分组字段，则记录在_groupData，供后面的一些分组需求用，比如area
+            if( this.groupField ){
+                var groupVal = rowData[ this.groupField ];
+                if( groupVal ){
+                    if( !this._groupData[ groupVal ] ){
+                        this._groupData[ groupVal ] = [];
+                    };
+                    !this._groupData[ groupVal ].push( nodeLayoutData );
+                }
+            } else {
+                if( !this._groupData.all ){
+                    this._groupData.all = [];
+                };
+                this._groupData.all.push( nodeLayoutData );
+            }
 
             tmplData.push( nodeLayoutData );
         };
@@ -466,8 +531,7 @@ class ScatGraphs extends GraphsBase
             el.__used = false
         } );
  
-        //那么有多余的元素要去除掉 end
-
+        
         _.each( me.data , function( nodeData, iNode ){
 
             var _nodeElement = me._getNodeElement( nodeData, iNode );
@@ -499,8 +563,6 @@ class ScatGraphs extends GraphsBase
                          e.eventInfo.title = this.nodeData.label;
                      };
             
-                     
-
                      if( e.type == 'mouseover' ){
                         me.focusAt( this.nodeData.iNode );
                      };
@@ -511,7 +573,7 @@ class ScatGraphs extends GraphsBase
                      //fire到root上面去的是为了让root去处理tips
                      //先触发用户事件，再处理后面的选中事件
                      me.app.fire( e.type, e );
-                     
+
                 });
 
             } else {
@@ -586,6 +648,66 @@ class ScatGraphs extends GraphsBase
         
         } );
 
+        if( me.area.enabled ){
+            var gi = 0;
+            for( var _groupKey in this._groupData ){
+                var _group = this._groupData[ _groupKey ];
+                var _groupData = {
+                    name : _groupKey,
+                    iGroup : gi,
+                    data : _group
+                };
+                var _groupPoints = [];
+
+                function getCirclePoints( nodeData, n ){
+
+                    if( !n || n == 1 ){
+                        return [ [ nodeData.x, nodeData.y ] ]
+                    };
+
+                    var _points = [];
+                    for( var i=0; i<n; i++ ){
+                        var degree = 360/(n-1) * i;
+                        var r = nodeData.radius + 3;
+                        var x = nodeData.x +  Math.cos(Math.PI * 2 / 360 * degree) * r;
+                        var y = nodeData.y+ Math.sin(Math.PI * 2 / 360 * degree) * r;
+                        _points.push( [x,y] );
+                    };
+                    return _points;
+                }
+
+                _.each( _group, function( nodeData ){
+                    _groupPoints = _groupPoints.concat( getCirclePoints( nodeData , me.area.quantile) );
+                } );
+                var areaPoints = hull( _groupPoints, me.area.concavity );
+
+                var defStyle = me.app.getTheme( gi );
+
+                var areaFillStyle = me._getStyle( me.area.fillStyle, _groupData ) || defStyle;
+                var areaFillAlpha = me._getProp( me.area.fillAlpha , _groupData );
+                var areaStrokeStyle = me._getStyle( me.area.strokeStyle, _groupData ) || defStyle;
+                var areaLineWidth = me._getProp( me.area.lineWidth , _groupData );
+                var areaStrokeAlpha = me._getProp( me.area.strokeAlpha, _groupData );
+
+                var _areaElement = new Polygon({
+                    context : {
+                        pointList   : areaPoints,
+                        fillStyle   : areaFillStyle,
+                        fillAlpha   : areaFillAlpha,
+                        strokeStyle : areaStrokeStyle,
+                        lineWidth   : areaLineWidth,
+                        strokeAlpha : areaStrokeAlpha,
+                        smooth      : false
+                    }
+                });
+                me.sprite.addChild( _areaElement );
+
+                gi++;
+                debugger
+            }
+        };
+
+        //多余的元素渐隐后销毁
         _.each( _.flatten([me._shapesp.children,me._textsp.children,me._linesp.children]), function( el ){
             if(!el.__used ){
                 el.animate({
