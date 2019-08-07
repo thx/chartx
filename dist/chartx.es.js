@@ -17425,6 +17425,11 @@ function (_GraphsBase) {
           default: null,
           documentation: '分组字段，如果area配置enabled为true，那么需要groupField来构建几个area'
         },
+        dataFilter: {
+          detail: '散点过滤数据',
+          default: null,
+          documentation: "数据过滤器，可以和groupField实现交叉过滤"
+        },
         aniOrigin: {
           detail: '节点动画的原点',
           default: 'default',
@@ -17569,7 +17574,7 @@ function (_GraphsBase) {
             },
             fillAlpha: {
               detail: '散点集合面的透明度',
-              default: 0.2
+              default: 0.15
             },
             strokeStyle: {
               detail: '散点集合面的描边颜色',
@@ -17677,6 +17682,10 @@ function (_GraphsBase) {
       this._linesp = new Canvax.Display.Sprite({
         id: "textsp"
       });
+      this._areasp = new Canvax.Display.Sprite({
+        id: "areasp"
+      });
+      this.sprite.addChild(this._areasp);
       this.sprite.addChild(this._linesp);
       this.sprite.addChild(this._shapesp);
       this.sprite.addChild(this._textsp);
@@ -17793,7 +17802,15 @@ function (_GraphsBase) {
 
         this._setNodeType(nodeLayoutData);
 
-        this._setText(nodeLayoutData); //如果有分组字段，则记录在_groupData，供后面的一些分组需求用，比如area
+        this._setText(nodeLayoutData);
+
+        if (this.dataFilter) {
+          if (_.isFunction(this.dataFilter)) {
+            if (!this.dataFilter.apply(this, [nodeLayoutData])) {
+              continue;
+            }
+          }
+        } //如果有分组字段，则记录在_groupData，供后面的一些分组需求用，比如area
 
 
         if (this.groupField) {
@@ -18067,6 +18084,8 @@ function (_GraphsBase) {
       });
 
       if (me.area.enabled) {
+        me._areasp.removeAllChildren();
+
         var gi = 0;
 
         var _loop = function _loop() {
@@ -18117,9 +18136,10 @@ function (_GraphsBase) {
               smooth: false
             }
           });
-          me.sprite.addChild(_areaElement);
+
+          me._areasp.addChild(_areaElement);
+
           gi++;
-          debugger;
         };
 
         for (var _groupKey in this._groupData) {
@@ -18420,7 +18440,6 @@ function (_GraphsBase) {
         nctx.strokeAlpha = nodeData.strokeAlpha;
         nctx.fillAlpha = nodeData.fillAlpha;
       }
-
       nodeData.selected = false;
     }
   }, {
@@ -26568,6 +26587,18 @@ function (_GraphsBase) {
               detail: '是否启用label',
               default: 'true'
             },
+            unit: {
+              detail: '单位值，默认%',
+              default: '%'
+            },
+            unitColor: {
+              detail: '单位值的颜色',
+              default: null
+            },
+            unitFontSize: {
+              detail: '单位值的大小',
+              default: null
+            },
             fontColor: {
               detail: 'label颜色',
               default: '#666'
@@ -26885,8 +26916,8 @@ function (_GraphsBase) {
             var lebelSymbolCxt = {
               x: labelElement.getTextWidth() / 2,
               y: 3,
-              fillStyle: me.label.fontColor,
-              fontSize: me.label.fontSize - 8,
+              fillStyle: me.label.unitColor || me.label.fontColor,
+              fontSize: me.label.unitFontSize || me.label.fontSize - 8,
               textAlign: "left",
               textBaseline: me.label.verticalAlign
             };
@@ -26894,7 +26925,8 @@ function (_GraphsBase) {
             if (labelSymbolElement) {
               _.extend(labelSymbolElement.context, lebelSymbolCxt);
             } else {
-              var labelSymbolElement = new Canvax.Display.Text("%", {
+              var unitText = me.label.unit;
+              var labelSymbolElement = new Canvax.Display.Text(unitText, {
                 id: labelSymbolId,
                 context: lebelSymbolCxt
               });
@@ -26902,17 +26934,7 @@ function (_GraphsBase) {
             }
           }
         });
-      }); //绘制圆心
-
-
-      return;
-      var center = new Canvax.Shapes.Circle({
-        context: {
-          r: 2,
-          fillStyle: "red"
-        }
       });
-      me.sprite.addChild(center);
     }
   }, {
     key: "_getPathStr",

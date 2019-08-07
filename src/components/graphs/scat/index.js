@@ -23,6 +23,11 @@ class ScatGraphs extends GraphsBase
                 default: null,
                 documentation: '分组字段，如果area配置enabled为true，那么需要groupField来构建几个area'
             },
+            dataFilter: {
+                detail: '散点过滤数据',
+                default: null,
+                documentation: "数据过滤器，可以和groupField实现交叉过滤"
+            },
             aniOrigin: {
                 detail: '节点动画的原点',
                 default:'default',
@@ -169,7 +174,7 @@ class ScatGraphs extends GraphsBase
                     },
                     fillAlpha: {
                         detail: '散点集合面的透明度',
-                        default: 0.2
+                        default: 0.15
                     },
                     strokeStyle: {
                         detail: '散点集合面的描边颜色',
@@ -273,7 +278,11 @@ class ScatGraphs extends GraphsBase
         this._linesp = new Canvax.Display.Sprite({ 
             id : "textsp"
         });
+        this._areasp = new Canvax.Display.Sprite({
+            id : "areasp"
+        });
         
+        this.sprite.addChild( this._areasp );
         this.sprite.addChild( this._linesp );
         this.sprite.addChild( this._shapesp );
         this.sprite.addChild( this._textsp );
@@ -383,6 +392,15 @@ class ScatGraphs extends GraphsBase
             this._setStrokeAlpha( nodeLayoutData );
             this._setNodeType( nodeLayoutData );
             this._setText( nodeLayoutData );
+
+            
+            if( this.dataFilter ){
+                if( _.isFunction( this.dataFilter ) ){
+                    if( !this.dataFilter.apply( this, [ nodeLayoutData ] ) ){
+                        continue;
+                    }
+                }
+            }
 
             //如果有分组字段，则记录在_groupData，供后面的一些分组需求用，比如area
             if( this.groupField ){
@@ -649,6 +667,9 @@ class ScatGraphs extends GraphsBase
         } );
 
         if( me.area.enabled ){
+
+            me._areasp.removeAllChildren();
+
             var gi = 0;
             for( var _groupKey in this._groupData ){
                 var _group = this._groupData[ _groupKey ];
@@ -700,10 +721,10 @@ class ScatGraphs extends GraphsBase
                         smooth      : false
                     }
                 });
-                me.sprite.addChild( _areaElement );
+                me._areasp.addChild( _areaElement );
 
                 gi++;
-                debugger
+                
             }
         };
 
@@ -964,7 +985,7 @@ class ScatGraphs extends GraphsBase
             nctx.lineWidth = nodeData.lineWidth;
             nctx.strokeAlpha = nodeData.strokeAlpha;
             nctx.fillAlpha = nodeData.fillAlpha;
-        }
+        };
 
         nodeData.selected = false;
     }

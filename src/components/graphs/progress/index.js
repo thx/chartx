@@ -31,6 +31,18 @@ class Progress extends GraphsBase
                         detail : '是否启用label',
                         default: 'true'
                     },
+                    unit : {
+                        detail : '单位值，默认%',
+                        default : '%'
+                    },
+                    unitColor : {
+                        detail : '单位值的颜色',
+                        default : null
+                    },
+                    unitFontSize : {
+                        detail : '单位值的大小',
+                        default : null
+                    },
                     fontColor : {
                         detail : 'label颜色',
                         default : '#666'
@@ -306,7 +318,7 @@ class Progress extends GraphsBase
                     };
                     labelSpElement.context.x = me.label.offsetX - 6; //%好会占一部分位置 所以往左边偏移6
                     labelSpElement.context.y = me.label.offsetY;
-
+                    
                     var lebelCxt = {
                         fillStyle   : me.label.fontColor,
                         fontSize    : me.label.fontSize,
@@ -316,6 +328,7 @@ class Progress extends GraphsBase
                         textBaseline: me.label.verticalAlign,
                         rotation    : me.label.rotation
                     };
+                    
                     var labelId = "progress_label_"+nodeData.field+"_"+i;
                     var labelElement = labelSpElement.getChildById( labelId );
                     if( labelElement ){
@@ -329,22 +342,22 @@ class Progress extends GraphsBase
                         labelSpElement.addChild( labelElement );
                     };
 
-
                     var labelSymbolId = "progress_label_"+nodeData.field+"_symbol_"+i;
                     var labelSymbolElement = labelSpElement.getChildById( labelSymbolId );
                     var lebelSymbolCxt = {
-                        x : labelElement.getTextWidth()/2,
-                        y : 3,
-                        fillStyle   : me.label.fontColor,
-                        fontSize    : me.label.fontSize-8,
-                        textAlign   : "left",
-                        textBaseline: me.label.verticalAlign,
+                        x            : labelElement.getTextWidth()/2,
+                        y            : 3,
+                        fillStyle    : me.label.unitColor || me.label.fontColor,
+                        fontSize     : me.label.unitFontSize || me.label.fontSize-8,
+                        textAlign    : "left",
+                        textBaseline : me.label.verticalAlign
                     };
-                    
+                   
                     if( labelSymbolElement ){
                         _.extend( labelSymbolElement.context, lebelSymbolCxt );
                     } else {
-                        var labelSymbolElement = new Canvax.Display.Text( "%", {
+                        var unitText = me.label.unit;
+                        var labelSymbolElement = new Canvax.Display.Text( unitText, {
                             id : labelSymbolId,
                             context : lebelSymbolCxt
                         } );
@@ -355,17 +368,6 @@ class Progress extends GraphsBase
             } );
         } );
 
-        
-
-        //绘制圆心
-        return;
-        var center = new Canvax.Shapes.Circle({
-            context : {
-                r : 2,
-                fillStyle : "red"
-            }
-        });
-        me.sprite.addChild( center );
     }
 
     _getPathStr( nodeData ){
