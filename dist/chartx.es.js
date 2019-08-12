@@ -26597,20 +26597,25 @@ function (_GraphsBase) {
             },
             unitFontSize: {
               detail: '单位值的大小',
-              default: null
+              default: 14
             },
             fontColor: {
               detail: 'label颜色',
-              default: '#666'
+              default: null //默认同node.fillStyle
+
             },
             fontSize: {
               detail: 'label文本大小',
               default: 26
             },
+            fixNum: {
+              detail: 'toFixed的位数',
+              default: 2
+            },
             format: {
               detail: 'label格式化处理函数',
               default: function _default(val, nodeData) {
-                return val.toFixed(0);
+                return val.toFixed(this.label.fixNum);
               }
             },
             lineWidth: {
@@ -26816,7 +26821,7 @@ function (_GraphsBase) {
 
       if (field) {
         if (me.label.format && _.isFunction(me.label.format)) {
-          nodeData.text = me.label.format(val, nodeData);
+          nodeData.text = me.label.format.apply(this, [val, nodeData]);
         }
       }
       /*  样式的设置全部在外面处理
@@ -26888,8 +26893,8 @@ function (_GraphsBase) {
             labelSpElement.context.x = me.label.offsetX - 6; //%好会占一部分位置 所以往左边偏移6
 
             labelSpElement.context.y = me.label.offsetY;
-            var lebelCxt = {
-              fillStyle: me.label.fontColor,
+            var labelCtx = {
+              fillStyle: me.label.fontColor || nodeData.fillStyle,
               fontSize: me.label.fontSize,
               lineWidth: me.label.lineWidth,
               strokeStyle: me.label.strokeStyle,
@@ -26903,21 +26908,21 @@ function (_GraphsBase) {
             if (labelElement) {
               labelElement.resetText(nodeData.text);
 
-              _.extend(labelElement.context, lebelCxt);
+              _.extend(labelElement.context, labelCtx);
             } else {
               var labelElement = new Canvax.Display.Text(nodeData.text, {
                 id: labelId,
-                context: lebelCxt
+                context: labelCtx
               });
               labelSpElement.addChild(labelElement);
             }
             var labelSymbolId = "progress_label_" + nodeData.field + "_symbol_" + i;
             var labelSymbolElement = labelSpElement.getChildById(labelSymbolId);
             var lebelSymbolCxt = {
-              x: labelElement.getTextWidth() / 2,
+              x: labelElement.getTextWidth() / 2 + 2,
               y: 3,
-              fillStyle: me.label.unitColor || me.label.fontColor,
-              fontSize: me.label.unitFontSize || me.label.fontSize - 8,
+              fillStyle: me.label.unitColor || me.label.fontColor || nodeData.fillStyle,
+              fontSize: me.label.unitFontSize,
               textAlign: "left",
               textBaseline: me.label.verticalAlign
             };
