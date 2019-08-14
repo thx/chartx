@@ -1303,18 +1303,25 @@ function () {
           var val = "val" in opt ? opt.val : this.getValOfInd(opt.ind);
 
           if (val >= min && val <= max) {
-            var _origin = this.origin; //如果 origin 并不在这个区间
+            var _origin = this.origin;
+            var origiInRange = !(_origin < min || _origin > max); //如果 origin 并不在这个区间
 
-            if (_origin < min || _origin > max) {
+            if (!origiInRange) {
               _origin = min;
             }
+
             var maxGroupDisABS = Math.max(Math.abs(max - _origin), Math.abs(_origin - min));
             var amountABS = Math.abs(max - min);
-            var h = maxGroupDisABS / amountABS * groupLength;
-            pos = (val - _origin) / maxGroupDisABS * h + preGroupLenth;
+            var originPos = maxGroupDisABS / amountABS * groupLength;
+            pos = (val - _origin) / maxGroupDisABS * originPos + preGroupLenth;
 
             if (isNaN(pos)) {
               pos = parseInt(preGroupLenth);
+            }
+
+            if (origiInRange) {
+              //origin在区间内的时候，才需要便宜_originTrans
+              pos += this._originTrans;
             }
             break;
           }
@@ -1350,7 +1357,7 @@ function () {
         }
       }
       !pos && (pos = 0);
-      pos = Number(pos.toFixed(1)) + this._originTrans;
+      pos = Number(pos.toFixed(1));
       return Math.abs(pos);
     }
   }, {
@@ -5474,14 +5481,14 @@ function (_event$Dispatcher) {
     _this.id = opt.id || Utils.createId(_this.type);
     _this._trackList = []; //一个元素可以追踪另外元素的变动
 
-    _this.init.apply(_assertThisInitialized(_assertThisInitialized(_this)), arguments); //所有属性准备好了后，先要计算一次this._updateTransform()得到_tansform
+    _this.init.apply(_assertThisInitialized(_this), arguments); //所有属性准备好了后，先要计算一次this._updateTransform()得到_tansform
 
 
     _this._updateTransform();
 
     _this._tweens = [];
 
-    var me = _assertThisInitialized(_assertThisInitialized(_this));
+    var me = _assertThisInitialized(_this);
 
     _this.on("destroy", function () {
       me.cleanAnimates();
@@ -6750,7 +6757,7 @@ function (_SystemRenderer) {
     _classCallCheck(this, CanvasRenderer);
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(CanvasRenderer).call(this, RENDERER_TYPE.CANVAS, app, options));
-    _this.CGR = new CanvasGraphicsRenderer(_assertThisInitialized(_assertThisInitialized(_this)));
+    _this.CGR = new CanvasGraphicsRenderer(_assertThisInitialized(_this));
     return _this;
   }
 
@@ -6930,7 +6937,7 @@ function (_DisplayObjectContain) {
     _this.lastGetRO = 0; //最后一次获取 viewOffset 的时间
 
     _this.webGL = opt.webGL;
-    _this.renderer = autoRenderer(_assertThisInitialized(_assertThisInitialized(_this)), options);
+    _this.renderer = autoRenderer(_assertThisInitialized(_this), options);
     _this.event = null; //该属性在systenRender里面操作，每帧由心跳上报的 需要重绘的stages 列表
 
     _this.convertStages = {};
@@ -10712,7 +10719,7 @@ function (_event$Dispatcher) {
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(Component).call(this, opt, app));
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(Component.defaultProps()), opt);
+    _.extend(true, _assertThisInitialized(_this), getDefaultProps(Component.defaultProps()), opt);
 
     _this.name = "component"; //组件名称
 
@@ -10815,7 +10822,7 @@ function (_Component) {
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(coordBase).call(this, opt, app));
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(coordBase.defaultProps()));
+    _.extend(true, _assertThisInitialized(_this), getDefaultProps(coordBase.defaultProps()));
 
     _this.name = "coord";
     _this._opt = opt;
@@ -11342,7 +11349,7 @@ function (_baseAxis) {
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(Axis).call(this, opt, dataOrg));
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(Axis.defaultProps()));
+    _.extend(true, _assertThisInitialized(_this), getDefaultProps(Axis.defaultProps()));
 
     return _this;
   }
@@ -11406,7 +11413,7 @@ function (_Axis) {
     _this.sprite = null;
     _this.isH = false; //是否为横向转向的x轴
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(xAxis.defaultProps()), opt);
+    _.extend(true, _assertThisInitialized(_this), getDefaultProps(xAxis.defaultProps()), opt);
 
     _this.init(opt);
 
@@ -12001,7 +12008,7 @@ function (_Axis) {
     _this.sprite = null;
     _this.isH = false; //是否横向
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(yAxis.defaultProps()), opt);
+    _.extend(true, _assertThisInitialized(_this), getDefaultProps(yAxis.defaultProps()), opt);
 
     _this.init(opt);
 
@@ -12472,64 +12479,100 @@ function (_event$Dispatcher) {
           detail: '是否开启grid绘制',
           default: true
         },
-        oneDimension: {
-          detail: '一维方向的网格线',
+        line: {
+          detail: '网格线条配置',
           propertys: {
-            enabled: {
-              detail: '是否开启',
-              default: true
+            xDimension: {
+              detail: '一维方向的网格线',
+              propertys: {
+                enabled: {
+                  detail: '是否开启',
+                  default: true
+                },
+                data: [],
+                lineType: {
+                  detail: '线的样式，虚线或者实现',
+                  default: 'solid'
+                },
+                lineWidth: {
+                  detail: '线宽',
+                  default: 1
+                },
+                strokeStyle: {
+                  detail: '线颜色',
+                  default: '#f0f0f0'
+                }
+              }
             },
-            data: [],
-            lineType: {
-              detail: '线的样式，虚线或者实现',
-              default: 'solid'
-            },
-            lineWidth: {
-              detail: '线宽',
-              default: 1
-            },
-            strokeStyle: {
-              detail: '线颜色',
-              default: '#f0f0f0'
-            }
-          }
-        },
-        twoDimension: {
-          detail: '二维方向的网格线',
-          propertys: {
-            enabled: {
-              detail: '是否开启',
-              default: false
-            },
-            data: [],
-            lineType: {
-              detail: '线的样式，虚线或者实现',
-              default: 'solid'
-            },
-            lineWidth: {
-              detail: '线宽',
-              default: 1
-            },
-            strokeStyle: {
-              detail: '线颜色',
-              default: '#f0f0f0'
+            yDimension: {
+              detail: '二维方向的网格线',
+              propertys: {
+                enabled: {
+                  detail: '是否开启',
+                  default: false
+                },
+                data: [],
+                lineType: {
+                  detail: '线的样式，虚线或者实现',
+                  default: 'solid'
+                },
+                lineWidth: {
+                  detail: '线宽',
+                  default: 1
+                },
+                strokeStyle: {
+                  detail: '线颜色',
+                  default: '#f0f0f0'
+                }
+              }
             }
           }
         },
         fill: {
-          detail: '背景',
+          detail: '背景色配置',
           propertys: {
-            enabled: {
-              detail: '是否开启',
-              default: false
+            xDimension: {
+              detail: '以为方向的背景色块，x方向',
+              propertys: {
+                enabled: {
+                  detail: '是否开启',
+                  default: false
+                },
+                splitVals: {
+                  detail: "从x轴上面用来分割区块的vals",
+                  default: null //默认等于xaxis的dataSection
+
+                },
+                fillStyle: {
+                  detail: '背景颜色',
+                  default: null
+                },
+                alpha: {
+                  detail: '背景透明度',
+                  default: null
+                }
+              }
             },
-            fillStyle: {
-              detail: '背景颜色',
-              default: null
-            },
-            alpha: {
-              detail: '背景透明度',
-              default: null
+            yDimension: {
+              detail: '以为方向的背景色块，y方向',
+              propertys: {
+                enabled: {
+                  detail: '是否开启',
+                  default: false
+                },
+                splitVals: {
+                  detail: "从x轴上面用来分割区块的vals",
+                  default: null
+                },
+                fillStyle: {
+                  detail: '背景颜色',
+                  default: null
+                },
+                alpha: {
+                  detail: '背景透明度',
+                  default: null
+                }
+              }
             }
           }
         }
@@ -12537,18 +12580,18 @@ function (_event$Dispatcher) {
     }
   }]);
 
-  function rectGrid(opt, app) {
+  function rectGrid(opt, _coord) {
     var _this;
 
     _classCallCheck(this, rectGrid);
 
-    _this = _possibleConstructorReturn(this, _getPrototypeOf(rectGrid).call(this, opt, app));
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(rectGrid).call(this, opt, _coord));
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(rectGrid.defaultProps()));
+    _.extend(true, _assertThisInitialized(_this), getDefaultProps(rectGrid.defaultProps()));
 
     _this.width = 0;
     _this.height = 0;
-    _this.app = app; //该组件被添加到的目标图表项目，
+    _this._coord = _coord; //该组件被添加到的目标图表项目，
 
     _this.pos = {
       x: 0,
@@ -12612,37 +12655,83 @@ function (_event$Dispatcher) {
       if (!this.enabled) {
         return;
       }
-      var _yAxis = self.app._yAxis[0];
+      var _yAxis = self._coord._yAxis[0];
+      var _xAxis = self._coord._xAxis;
+      this.fillSp = new Canvax.Display.Sprite();
+      this.sprite.addChild(this.fillSp);
 
-      if (self.fill.enabled && self.app && _yAxis && _yAxis.dataSectionGroup && _yAxis.dataSectionGroup.length > 1) {
-        self.yGroupSp = new Canvax.Display.Sprite(), self.sprite.addChild(self.yGroupSp);
+      _.each([self.fill.xDimension, self.fill.yDimension], function (fill, ind) {
+        var _axis = ind ? _yAxis : _xAxis;
 
-        for (var g = 0, gl = _yAxis.dataSectionGroup.length; g < gl; g++) {
-          var beginY = _yAxis.getPosOf({
-            val: _yAxis.dataSectionGroup[g][0]
-          });
+        var splitVals = [];
 
-          var endY = _yAxis.getPosOf({
-            val: _yAxis.dataSectionGroup[g].slice(-1)[0]
-          });
+        if (fill.enabled) {
+          if (!fill.splitVals) {
+            splitVals = _axis.dataSection;
+          } else {
+            splitVals = [_axis.dataSection[0]].concat(_.flatten([fill.splitVals]));
+            splitVals.push(_axis.dataSection.slice(-1)[0]);
+          }
 
-          var groupRect = new Rect$1({
-            context: {
-              x: 0,
-              y: -beginY,
-              width: self.width,
-              height: -(endY - beginY),
-              fillStyle: self.getProp(self.fill.fillStyle, g, "#000"),
-              fillAlpha: self.getProp(self.fill.alpha, g, 0.025 * (g % 2))
+          var fillRanges = [];
+
+          if (splitVals.length >= 2) {
+            var range = [];
+
+            for (var i = 0, l = splitVals.length; i < l; i++) {
+              var pos = _axis.getPosOf({
+                val: splitVals[i]
+              });
+
+              if (!range.length) {
+                range.push(pos);
+                continue;
+              }
+
+              if (range.length == 1) {
+                if (pos - range[0] < 1) {
+                  continue;
+                } else {
+                  range.push(pos);
+                  fillRanges.push(range);
+                  var nextBegin = range[1];
+                  range = [nextBegin];
+                }
+              }
             }
-          });
-          self.yGroupSp.addChild(groupRect);
-        }
-      }
-      self.xAxisSp = new Canvax.Display.Sprite(), self.sprite.addChild(self.xAxisSp);
-      self.yAxisSp = new Canvax.Display.Sprite(), self.sprite.addChild(self.yAxisSp); //x轴方向的线集合
 
-      var arr = self.oneDimension.data;
+            _.each(fillRanges, function (range, rInd) {
+              var rectCtx = {
+                fillStyle: self.getProp(fill.fillStyle, rInd, "#000"),
+                fillAlpha: self.getProp(fill.alpha, rInd, 0.02 * (rInd % 2))
+              };
+
+              if (!ind) {
+                //x轴上面排列的fill
+                rectCtx.x = range[0];
+                rectCtx.y = 0;
+                rectCtx.width = range[1] - range[0];
+                rectCtx.height = -self.height;
+              } else {
+                //y轴上面排列的fill
+                rectCtx.x = 0;
+                rectCtx.y = -range[0];
+                rectCtx.width = self.width;
+                rectCtx.height = -(range[1] - range[0]);
+              }
+
+              var fillRect = new Rect$1({
+                context: rectCtx
+              });
+              self.fillSp.addChild(fillRect);
+            });
+          }
+        }
+      });
+
+      self.xAxisSp = new Canvax.Display.Sprite(), self.sprite.addChild(self.xAxisSp);
+      self.yAxisSp = new Canvax.Display.Sprite(), self.sprite.addChild(self.yAxisSp);
+      var arr = _yAxis.layoutData;
 
       for (var a = 0, al = arr.length; a < al; a++) {
         var o = arr[a];
@@ -12651,21 +12740,21 @@ function (_event$Dispatcher) {
           id: "back_line_" + a,
           context: {
             y: o.y,
-            lineType: self.getProp(self.oneDimension.lineType, a, 'solid'),
-            lineWidth: self.getProp(self.oneDimension.lineWidth, a, 1),
-            strokeStyle: self.getProp(self.oneDimension.strokeStyle, a, '#f0f0f0'),
+            lineType: self.getProp(self.line.xDimension.lineType, a, 'solid'),
+            lineWidth: self.getProp(self.line.xDimension.lineWidth, a, 1),
+            strokeStyle: self.getProp(self.line.xDimension.strokeStyle, a, '#f0f0f0'),
             visible: true
           }
         });
 
-        if (self.oneDimension.enabled) {
+        if (self.line.xDimension.enabled) {
           self.xAxisSp.addChild(line);
           line.context.start.x = 0;
           line.context.end.x = self.width;
         }
       }
 
-      var arr = self.twoDimension.data;
+      var arr = _xAxis.layoutData;
 
       for (var a = 0, al = arr.length; a < al; a++) {
         var o = arr[a];
@@ -12680,14 +12769,14 @@ function (_event$Dispatcher) {
               x: 0,
               y: -self.height
             },
-            lineType: self.getProp(self.twoDimension.lineType, a, 'solid'),
-            lineWidth: self.getProp(self.twoDimension.lineWidth, a, 1),
-            strokeStyle: self.getProp(self.twoDimension.strokeStyle, a, '#f0f0f0'),
+            lineType: self.getProp(self.line.yDimension.lineType, a, 'solid'),
+            lineWidth: self.getProp(self.line.yDimension.lineWidth, a, 1),
+            strokeStyle: self.getProp(self.line.yDimension.strokeStyle, a, '#f0f0f0'),
             visible: true
           }
         });
 
-        if (self.twoDimension.enabled) {
+        if (self.line.yDimension.enabled) {
           self.yAxisSp.addChild(line);
         }
       }
@@ -12695,7 +12784,7 @@ function (_event$Dispatcher) {
   }, {
     key: "getProp",
     value: function getProp(prop, i, def) {
-      var res = def || prop;
+      var res = def;
 
       if (prop != null && prop != undefined) {
         if (_.isString(prop) || _.isNumber(prop)) {
@@ -12749,7 +12838,7 @@ function (_coordBase) {
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(Rect).call(this, opt, app));
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(Rect.defaultProps()), _this.setDefaultOpt(opt, app));
+    _.extend(true, _assertThisInitialized(_this), getDefaultProps(Rect.defaultProps()), _this.setDefaultOpt(opt, app));
 
     _this.type = "rect";
     _this._xAxis = null;
@@ -12920,10 +13009,7 @@ function (_coordBase) {
       var _yAxis = this._yAxisLeft || this._yAxisRight;
 
       this._grid.reset({
-        animation: false,
-        oneDimension: {
-          data: _yAxis.layoutData
-        }
+        animation: false
       });
     }
   }, {
@@ -12986,12 +13072,6 @@ function (_coordBase) {
       this._grid.draw({
         width: this._xAxis.width,
         height: this._yAxis[0].height,
-        oneDimension: {
-          data: this._yAxis[0].layoutData
-        },
-        towDimension: {
-          data: this._xAxis.layoutData
-        },
         pos: {
           x: _yAxisW + _padding.left,
           y: y
@@ -13187,10 +13267,7 @@ function (_coordBase) {
 
 
       this._grid.reset({
-        animation: false,
-        oneDimension: {
-          data: this._yAxisLeft ? this._yAxisLeft.layoutData : this._yAxisRight.layoutData
-        }
+        animation: false
       });
     }
   }, {
@@ -13421,7 +13498,7 @@ function (_event$Dispatcher) {
 
     _this.induce = null; //最外层的那个网，用来触发事件
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(polarGrid.defaultProps()), opt);
+    _.extend(true, _assertThisInitialized(_this), getDefaultProps(polarGrid.defaultProps()), opt);
 
     _this.init(opt);
 
@@ -13658,7 +13735,7 @@ function (_coorBase) {
     _this = _possibleConstructorReturn(this, _getPrototypeOf(Polar$$1).call(this, opt, app));
     _this.type = "polar";
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(Polar$$1.defaultProps()), _this.setDefaultOpt(opt, app));
+    _.extend(true, _assertThisInitialized(_this), getDefaultProps(Polar$$1.defaultProps()), _this.setDefaultOpt(opt, app));
 
     _this.init(opt);
 
@@ -14452,7 +14529,7 @@ function (_Component) {
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(GraphsBase).call(this, opt, app)); //这里不能把opt个extend进this
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(GraphsBase.defaultProps()));
+    _.extend(true, _assertThisInitialized(_this), getDefaultProps(GraphsBase.defaultProps()));
 
     _this.name = "graphs"; //这里所有的opts都要透传给 group
 
@@ -14478,7 +14555,7 @@ function (_Component) {
 
     _this._growTween = null;
 
-    var me = _assertThisInitialized(_assertThisInitialized(_this));
+    var me = _assertThisInitialized(_this);
 
     _this.sprite.on("destroy", function () {
       if (me._growTween) {
@@ -14785,7 +14862,7 @@ function (_GraphsBase) {
     _this._barsLen = 0;
     _this.txtsSp = null;
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(BarGraphs.defaultProps()), opt);
+    _.extend(true, _assertThisInitialized(_this), getDefaultProps(BarGraphs.defaultProps()), opt);
 
     _this.init();
 
@@ -15972,7 +16049,7 @@ function (_event$Dispatcher) {
 
     _this._bline = null;
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(LineGraphsGroup.defaultProps()), opt); //TODO group中得field不能直接用opt中得field， 必须重新设置， 
+    _.extend(true, _assertThisInitialized(_this), getDefaultProps(LineGraphsGroup.defaultProps()), opt); //TODO group中得field不能直接用opt中得field， 必须重新设置， 
     //group中得field只有一个值，代表一条折线, 后面要扩展extend方法，可以控制过滤哪些key值不做extend
 
 
@@ -16769,7 +16846,7 @@ function (_GraphsBase) {
     _this.enabledField = null;
     _this.groups = []; //群组集合
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(LineGraphs.defaultProps()), opt);
+    _.extend(true, _assertThisInitialized(_this), getDefaultProps(LineGraphs.defaultProps()), opt);
 
     _this.init();
 
@@ -17663,7 +17740,7 @@ function (_GraphsBase) {
     _this._rMinValue = null;
     _this._groupData = {}; //groupField配置有的情况下会被赋值，在_trimGraphs会被先置空，然后赋值
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(ScatGraphs.defaultProps()), opt);
+    _.extend(true, _assertThisInitialized(_this), getDefaultProps(ScatGraphs.defaultProps()), opt);
 
     _this.init();
 
@@ -19216,7 +19293,7 @@ function (_GraphsBase) {
     _this = _possibleConstructorReturn(this, _getPrototypeOf(PieGraphs).call(this, opt, app));
     _this.type = "pie";
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(PieGraphs.defaultProps()), opt);
+    _.extend(true, _assertThisInitialized(_this), getDefaultProps(PieGraphs.defaultProps()), opt);
 
     _this.init();
 
@@ -19713,7 +19790,7 @@ function (_GraphsBase) {
       //}
     };
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(RadarGraphs.defaultProps()), opt);
+    _.extend(true, _assertThisInitialized(_this), getDefaultProps(RadarGraphs.defaultProps()), opt);
 
     _this.init();
 
@@ -20684,7 +20761,7 @@ function (_GraphsBase) {
     _this = _possibleConstructorReturn(this, _getPrototypeOf(CloudGraphs).call(this, opt, app));
     _this.type = "cloud";
 
-    var me = _assertThisInitialized(_assertThisInitialized(_this)); //坚持一个数据节点的设置都在一个node下面
+    var me = _assertThisInitialized(_this); //坚持一个数据节点的设置都在一个node下面
 
 
     _this.node = {
@@ -20694,7 +20771,7 @@ function (_GraphsBase) {
 
     };
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(CloudGraphs.defaultProps()), opt);
+    _.extend(true, _assertThisInitialized(_this), getDefaultProps(CloudGraphs.defaultProps()), opt);
 
     _this.node.fontColor = function (nodeData) {
       return me.app.getTheme(nodeData.iNode);
@@ -21917,7 +21994,7 @@ function (_GraphsBase) {
       }
     };
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(PlanetGraphs.defaultProps()), opt);
+    _.extend(true, _assertThisInitialized(_this), getDefaultProps(PlanetGraphs.defaultProps()), opt);
 
     if (_this.center.radius == 0 || !_this.center.enabled) {
       _this.center.radius = 0;
@@ -22729,7 +22806,7 @@ function (_GraphsBase) {
     _this._maxVal = null;
     _this._minVal = null;
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(FunnelGraphs.defaultProps()), opt);
+    _.extend(true, _assertThisInitialized(_this), getDefaultProps(FunnelGraphs.defaultProps()), opt);
 
     _this.init();
 
@@ -24412,7 +24489,7 @@ function (_GraphsBase) {
     _this.type = "venn";
     _this.vennData = null;
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(VennGraphs.defaultProps()), opt); //_trimGraphs后，计算出来本次data的一些属性
+    _.extend(true, _assertThisInitialized(_this), getDefaultProps(VennGraphs.defaultProps()), opt); //_trimGraphs后，计算出来本次data的一些属性
 
 
     _this._dataCircleLen = 0;
@@ -25381,7 +25458,7 @@ function (_GraphsBase) {
     _this = _possibleConstructorReturn(this, _getPrototypeOf(sunburstGraphs).call(this, opt, app));
     _this.type = "sunburst";
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(sunburstGraphs.defaultProps()), opt);
+    _.extend(true, _assertThisInitialized(_this), getDefaultProps(sunburstGraphs.defaultProps()), opt);
 
     _this.data = []; //布局算法布局后的数据
 
@@ -26322,7 +26399,7 @@ function (_GraphsBase) {
     _this = _possibleConstructorReturn(this, _getPrototypeOf(sankeyGraphs).call(this, opt, app));
     _this.type = "sankey";
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(sankeyGraphs.defaultProps()), opt);
+    _.extend(true, _assertThisInitialized(_this), getDefaultProps(sankeyGraphs.defaultProps()), opt);
 
     _this.init();
 
@@ -26690,7 +26767,7 @@ function (_GraphsBase) {
     _this = _possibleConstructorReturn(this, _getPrototypeOf(Progress).call(this, opt, app));
     _this.type = "progress";
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(Progress.defaultProps()), opt);
+    _.extend(true, _assertThisInitialized(_this), getDefaultProps(Progress.defaultProps()), opt);
 
     _this.bgNodeData = null; //背景的nodeData数据，和data里面的结构保持一致
 
@@ -27352,7 +27429,7 @@ function (_GraphsBase) {
     _this = _possibleConstructorReturn(this, _getPrototypeOf(Relation).call(this, opt, app));
     _this.type = "relation";
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(Relation.defaultProps()), opt);
+    _.extend(true, _assertThisInitialized(_this), getDefaultProps(Relation.defaultProps()), opt);
 
     if (_this.layout === 'dagre') {
       var dagreOpts = {
@@ -32211,7 +32288,7 @@ function (_Component) {
     _this = _possibleConstructorReturn(this, _getPrototypeOf(Legend).call(this, opt, app));
     _this.name = "legend";
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(Legend.defaultProps()), opt);
+    _.extend(true, _assertThisInitialized(_this), getDefaultProps(Legend.defaultProps()), opt);
     /* data的数据结构为
     [
         //descartes中用到的时候还会带入yAxis
@@ -32687,7 +32764,7 @@ function (_Component) {
 
     app.stage.addChild(_this.sprite); //预设默认的opt.dataZoom
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(dataZoom.defaultProps()), opt);
+    _.extend(true, _assertThisInitialized(_this), getDefaultProps(dataZoom.defaultProps()), opt);
 
     _this.axis = null; //对应哪个轴
 
@@ -33454,7 +33531,7 @@ function (_Component) {
 
     _this.app.graphsSprite.addChild(_this.sprite);
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(MarkLine.defaultProps()), opt);
+    _.extend(true, _assertThisInitialized(_this), getDefaultProps(MarkLine.defaultProps()), opt);
 
     return _this;
   }
@@ -33765,13 +33842,13 @@ function (_Component) {
 
     _this.app.stage.addChild(_this.sprite);
 
-    var me = _assertThisInitialized(_assertThisInitialized(_this));
+    var me = _assertThisInitialized(_this);
 
     _this.sprite.on("destroy", function () {
       me._tipDom = null;
     });
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(Tips.defaultProps()), opt);
+    _.extend(true, _assertThisInitialized(_this), getDefaultProps(Tips.defaultProps()), opt);
 
     return _this;
   }
@@ -34263,7 +34340,7 @@ function (_Component) {
     };
     */
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(barTgi.defaultProps()), opt);
+    _.extend(true, _assertThisInitialized(_this), getDefaultProps(barTgi.defaultProps()), opt);
 
     _this._yAxis = _this.app.getComponent({
       name: 'coord'
@@ -34449,7 +34526,7 @@ function (_Component) {
     _this._yAxis = null;
     _this.sprite = null;
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(barGuide.defaultProps()), opt);
+    _.extend(true, _assertThisInitialized(_this), getDefaultProps(barGuide.defaultProps()), opt);
 
     _this._yAxis = _this.app.getComponent({
       name: 'coord'
@@ -34655,7 +34732,7 @@ function (_Component) {
     _this.width = _this.app.width;
     _this.height = _this.app.height;
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(waterMark.defaultProps()), opt);
+    _.extend(true, _assertThisInitialized(_this), getDefaultProps(waterMark.defaultProps()), opt);
 
     _this.spripte = new Canvax.Display.Sprite({
       id: "watermark"
@@ -34769,7 +34846,7 @@ function (_Component) {
 
     _this._vLine = null; //竖向的线
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(Cross.defaultProps()), opt);
+    _.extend(true, _assertThisInitialized(_this), getDefaultProps(Cross.defaultProps()), opt);
 
     _this._yAxis = _this.app.getComponent({
       name: 'coord'
@@ -34896,7 +34973,7 @@ function (_Component) {
     _this = _possibleConstructorReturn(this, _getPrototypeOf(lineSchedu).call(this, opt, app));
     _this.name = "lineSchedu";
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(lineSchedu.defaultProps()), opt);
+    _.extend(true, _assertThisInitialized(_this), getDefaultProps(lineSchedu.defaultProps()), opt);
 
     _this.lineDatas = null;
     _this.sprite = new Canvax.Display.Sprite();
@@ -35147,7 +35224,7 @@ function (_Component) {
     _this = _possibleConstructorReturn(this, _getPrototypeOf(markCloumn).call(this, opt, app));
     _this.name = "markcloumn";
 
-    _.extend(true, _assertThisInitialized(_assertThisInitialized(_this)), getDefaultProps(markCloumn.defaultProps()), opt);
+    _.extend(true, _assertThisInitialized(_this), getDefaultProps(markCloumn.defaultProps()), opt);
 
     _this._line = null;
     _this._nodes = new Canvax.Display.Sprite();

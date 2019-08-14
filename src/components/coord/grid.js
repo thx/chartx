@@ -12,78 +12,114 @@ export default class rectGrid extends event.Dispatcher
                 detail : '是否开启grid绘制',
                 default: true
             },
-            oneDimension : {
-                detail : '一维方向的网格线',
+            line : {
+                detail : '网格线条配置',
                 propertys : {
-                    enabled : {
-                        detail : '是否开启',
-                        default: true
+                    xDimension : {
+                        detail : '一维方向的网格线',
+                        propertys : {
+                            enabled : {
+                                detail : '是否开启',
+                                default: true
+                            },
+                            data : [],
+                            lineType : {
+                                detail : '线的样式，虚线或者实现',
+                                default: 'solid'
+                            },
+                            lineWidth : {
+                                detail : '线宽',
+                                default: 1
+                            },
+                            strokeStyle : {
+                                detail : '线颜色',
+                                default: '#f0f0f0'
+                            }
+                        }
                     },
-                    data : [],
-                    lineType : {
-                        detail : '线的样式，虚线或者实现',
-                        default: 'solid'
-                    },
-                    lineWidth : {
-                        detail : '线宽',
-                        default: 1
-                    },
-                    strokeStyle : {
-                        detail : '线颜色',
-                        default: '#f0f0f0'
+                    yDimension : {
+                        detail : '二维方向的网格线',
+                        propertys : {
+                            enabled : {
+                                detail : '是否开启',
+                                default: false
+                            },
+                            data : [],
+                            lineType : {
+                                detail : '线的样式，虚线或者实现',
+                                default: 'solid'
+                            },
+                            lineWidth : {
+                                detail : '线宽',
+                                default: 1
+                            },
+                            strokeStyle : {
+                                detail : '线颜色',
+                                default: '#f0f0f0'
+                            }
+                        }
                     }
                 }
             },
-            twoDimension : {
-                detail : '二维方向的网格线',
-                propertys : {
-                    enabled : {
-                        detail : '是否开启',
-                        default: false
-                    },
-                    data : [],
-                    lineType : {
-                        detail : '线的样式，虚线或者实现',
-                        default: 'solid'
-                    },
-                    lineWidth : {
-                        detail : '线宽',
-                        default: 1
-                    },
-                    strokeStyle : {
-                        detail : '线颜色',
-                        default: '#f0f0f0'
-                    }
-                }
-            },
+            
             fill : {
-                detail : '背景',
+                detail : '背景色配置',
                 propertys : {
-                    enabled : {
-                        detail : '是否开启',
-                        default: false
+                    xDimension : {
+                        detail : '以为方向的背景色块，x方向',
+                        propertys : {
+                            enabled : {
+                                detail : '是否开启',
+                                default: false
+                            },
+                            splitVals : {
+                                detail : "从x轴上面用来分割区块的vals",
+                                default: null//默认等于xaxis的dataSection
+                            },
+                            fillStyle : {
+                                detail : '背景颜色',
+                                default: null
+                            },
+                            alpha : {
+                                detail : '背景透明度',
+                                default: null
+                            }
+                        }
                     },
-                    fillStyle : {
-                        detail : '背景颜色',
-                        default: null
-                    },
-                    alpha : {
-                        detail : '背景透明度',
-                        default: null
+                    yDimension : {
+                        detail : '以为方向的背景色块，y方向',
+                        propertys : {
+                            enabled : {
+                                detail : '是否开启',
+                                default: false
+                            },
+                            splitVals : {
+                                detail : "从x轴上面用来分割区块的vals",
+                                default: null
+                            },
+                            fillStyle : {
+                                detail : '背景颜色',
+                                default: null
+                            },
+                            alpha : {
+                                detail : '背景透明度',
+                                default: null
+                            }
+                        }
                     }
                 }
             }
         }
     }
 
-    constructor( opt, app )
+    constructor( opt, _coord )
     {
-        super( opt, app);
+        super( opt, _coord);
         _.extend( true, this, getDefaultProps( rectGrid.defaultProps() ) );
 
         this.width   = 0;
         this.height  = 0;
-        this.app     = app; //该组件被添加到的目标图表项目，
+        this._coord  = _coord; //该组件被添加到的目标图表项目，
 
         this.pos     = {
             x : 0,
@@ -101,6 +137,8 @@ export default class rectGrid extends event.Dispatcher
     {
         _.extend(true, this , opt); 
         this.sprite = new Canvax.Display.Sprite();
+
+       
     }
 
     setX($n)
@@ -141,41 +179,84 @@ export default class rectGrid extends event.Dispatcher
             return
         };
 
-        var _yAxis = self.app._yAxis[ 0 ];
-        
-        if( self.fill.enabled && self.app && _yAxis && _yAxis.dataSectionGroup && _yAxis.dataSectionGroup.length>1 ){
-            self.yGroupSp  = new Canvax.Display.Sprite(),  self.sprite.addChild(self.yGroupSp);
-            
-            for( var g = 0 , gl = _yAxis.dataSectionGroup.length ; g < gl ; g++ ){
-                
-                var beginY =_yAxis.getPosOf({
-                    val : _yAxis.dataSectionGroup[g][0]
-                });
-                var endY =_yAxis.getPosOf({
-                    val : _yAxis.dataSectionGroup[g].slice(-1)[0]
-                });
-                
-                var groupRect = new Rect({
-                    context : {
-                        x : 0,
-                        y : -beginY,
-                        width : self.width,
-                        height : -( endY - beginY ),
-                        fillStyle : self.getProp( self.fill.fillStyle, g, "#000" ),
-                        fillAlpha : self.getProp( self.fill.alpha, g, 0.025 * (g%2) )
-                    }
-                });
-                
-                self.yGroupSp.addChild( groupRect );
-            };
-        };
+        var _yAxis = self._coord._yAxis[ 0 ];
+        var _xAxis = self._coord._xAxis;
 
-        self.xAxisSp   = new Canvax.Display.Sprite(),  self.sprite.addChild(self.xAxisSp);
-        self.yAxisSp   = new Canvax.Display.Sprite(),  self.sprite.addChild(self.yAxisSp);
         
-        //x轴方向的线集合
-        var arr = self.oneDimension.data;
+        this.fillSp = new Canvax.Display.Sprite();
+        this.sprite.addChild(this.fillSp);
+        _.each( [self.fill.xDimension, self.fill.yDimension], function( fill, ind ){
+            var _axis = ind ? _yAxis : _xAxis;
+            var splitVals = [];
+            if( fill.enabled ){
+                if( !fill.splitVals ){
+                    splitVals = _axis.dataSection;
+                } else {
+                    splitVals = [ _axis.dataSection[0] ].concat( _.flatten([ fill.splitVals ]) );
+                    splitVals.push( _axis.dataSection.slice(-1)[0] );
+                }
+                var fillRanges = [];
+                if(splitVals.length >=2){
+
+                    var range = [];
+                    for(var i=0,l=splitVals.length; i<l; i++){
+                        var pos = _axis.getPosOf({
+                            val : splitVals[i]
+                        });
+                        if(!range.length){
+                            range.push( pos );
+                            continue;
+                        }
+                        if( range.length == 1 ){
+                            if( pos - range[0] < 1 ){
+                                continue;
+                            } else {
+                                range.push( pos );
+                                fillRanges.push( range );
+                                var nextBegin = range[1]
+                                range = [ nextBegin ];
+                            }
+                        }
+                    };
+    
+                    //fill的区间数据准备好了
+                    _.each( fillRanges, function( range, rInd ){
+
+                        var rectCtx = {
+                            fillStyle : self.getProp( fill.fillStyle, rInd, "#000" ),
+                            fillAlpha : self.getProp( fill.alpha, rInd, 0.02 * (rInd%2) )
+                        }
+                        if( !ind ){
+                            //x轴上面排列的fill
+                            rectCtx.x = range[0];
+                            rectCtx.y = 0;
+                            rectCtx.width = range[1] - range[0];
+                            rectCtx.height = -self.height;
+                        } else {
+                            //y轴上面排列的fill
+                            rectCtx.x = 0;
+                            rectCtx.y = -range[0]
+                            rectCtx.width = self.width;
+                            rectCtx.height = -( range[1] - range[0] );
+                        }
+
+                        var fillRect = new Rect({
+                            context : rectCtx
+                        });
+                        
+                        self.fillSp.addChild( fillRect );
+                    } );
+
+                }
+            }
+        } );
+
+
+        self.xAxisSp = new Canvax.Display.Sprite(),  self.sprite.addChild(self.xAxisSp);
+        self.yAxisSp = new Canvax.Display.Sprite(),  self.sprite.addChild(self.yAxisSp);
         
+
+        var arr = _yAxis.layoutData;
         for(var a = 0, al = arr.length; a < al; a++){
             var o = arr[a];
 
@@ -185,13 +266,13 @@ export default class rectGrid extends event.Dispatcher
                 id : "back_line_"+a,
                 context : {
                     y : o.y,
-                    lineType    : self.getProp( self.oneDimension.lineType , a , 'solid'),
-                    lineWidth   : self.getProp( self.oneDimension.lineWidth , a , 1),
-                    strokeStyle : self.getProp( self.oneDimension.strokeStyle , a, '#f0f0f0'),
+                    lineType    : self.getProp( self.line.xDimension.lineType , a , 'solid'),
+                    lineWidth   : self.getProp( self.line.xDimension.lineWidth , a , 1),
+                    strokeStyle : self.getProp( self.line.xDimension.strokeStyle , a, '#f0f0f0'),
                     visible     : true
                 }
             });
-            if(self.oneDimension.enabled){
+            if(self.line.xDimension.enabled){
                 self.xAxisSp.addChild(line);
                 line.context.start.x = 0;
                 line.context.end.x = self.width;
@@ -200,7 +281,7 @@ export default class rectGrid extends event.Dispatcher
         };
 
         //y轴方向的线集合
-        var arr = self.twoDimension.data
+        var arr = _xAxis.layoutData;
         for(var a = 0, al = arr.length; a < al; a++){
             var o = arr[a]
             var line = new Line({
@@ -214,20 +295,20 @@ export default class rectGrid extends event.Dispatcher
                         x : 0,
                         y : -self.height
                     },
-                    lineType    : self.getProp( self.twoDimension.lineType, a, 'solid'),
-                    lineWidth   : self.getProp( self.twoDimension.lineWidth, a, 1),
-                    strokeStyle : self.getProp( self.twoDimension.strokeStyle, a, '#f0f0f0'),
+                    lineType    : self.getProp( self.line.yDimension.lineType, a, 'solid'),
+                    lineWidth   : self.getProp( self.line.yDimension.lineWidth, a, 1),
+                    strokeStyle : self.getProp( self.line.yDimension.strokeStyle, a, '#f0f0f0'),
                     visible     : true
                 }
             });
-            if(self.twoDimension.enabled){
+            if(self.line.yDimension.enabled){
                 self.yAxisSp.addChild(line);
             };
         };
     }
 
     getProp( prop, i, def ){
-        var res = def || prop;
+        var res = def;
         if( prop != null && prop != undefined ){
             if( _.isString( prop ) || _.isNumber( prop ) ){
                 res = prop;

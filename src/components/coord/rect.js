@@ -190,10 +190,7 @@ class Rect extends coordBase
         var _yAxis = this._yAxisLeft || this._yAxisRight;
         
         this._grid.reset({
-            animation:false,
-            oneDimension: {
-                data: _yAxis.layoutData
-            }
+            animation:false
         });
     }
 
@@ -260,12 +257,6 @@ class Rect extends coordBase
         this._grid.draw({
             width        : this._xAxis.width,
             height       : this._yAxis[0].height,
-            oneDimension : {
-                data     : this._yAxis[0].layoutData
-            },
-            towDimension : {
-                data     : this._xAxis.layoutData
-            },
             pos          : {
                 x        : _yAxisW + _padding.left,
                 y        : y
@@ -457,10 +448,7 @@ class Rect extends coordBase
 
         //然后yAxis更新后，对应的背景也要更新
         this._grid.reset({
-            animation:false,
-            oneDimension: {
-                data: this._yAxisLeft ? this._yAxisLeft.layoutData : this._yAxisRight.layoutData
-            }
+            animation:false
         });
     }
 

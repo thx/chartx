@@ -38,7 +38,7 @@
                     ["xfield","uv","pv","click","__index__"],
                     [1,101,20,30000,0],
                     [2,67,51,2600,1],
-                    [3,100,50,850,2]
+                    [3,100,50,-850,2]
                 ];
 
                 var options = {
@@ -55,9 +55,18 @@
                         ],
                         grid : {
                             fill: {
-                                enabled : true,
-                                //fillStyle : ['red','yellow'],
-                                //alpha: 0.5
+                                xDimension:{
+                                    enabled : true,
+                                    splitVals: [ 2 ]
+                                    //fillStyle : ['red','yellow'],
+                                    //alpha: 0.5
+                                },
+                                yDimension:{
+                                    enabled : true,
+                                    splitVals: [ 6000 ]
+                                    //fillStyle : ['red','yellow'],
+                                    //alpha: 0.5
+                                },
                             }
                         }
                     },
