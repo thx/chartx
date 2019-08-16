@@ -35134,6 +35134,7 @@ global$1.registerComponent(lineSchedu, 'lineSchedu');
 
 var Line$c = Canvax.Shapes.Line;
 var Circle$b = Canvax.Shapes.Circle;
+var Text$6 = Canvax.Display.Text;
 
 var markCloumn =
 /*#__PURE__*/
@@ -35211,6 +35212,32 @@ function (_Component) {
               default: 2
             }
           }
+        },
+        label: {
+          detail: '文本',
+          propertys: {
+            enabled: {
+              detail: '是否开启',
+              default: false
+            },
+            fontColor: {
+              detail: '文本字体颜色',
+              default: null
+            },
+            fontSize: {
+              detail: '文本字体大小',
+              default: 12
+            },
+            text: {
+              detail: '文本内容',
+              documentation: "可以是函数",
+              default: null
+            },
+            format: {
+              detail: '文本格式化函数',
+              default: null
+            }
+          }
         }
       };
     }
@@ -35226,12 +35253,23 @@ function (_Component) {
 
     _.extend(true, _assertThisInitialized(_this), getDefaultProps(markCloumn.defaultProps()), opt);
 
-    _this._line = null;
-    _this._nodes = new Canvax.Display.Sprite();
-    _this.nodes = [];
     _this.sprite = new Canvax.Display.Sprite();
 
     _this.app.graphsSprite.addChild(_this.sprite);
+
+    _this._line = null;
+    _this._lineSp = new Canvax.Display.Sprite();
+
+    _this.sprite.addChild(_this._lineSp);
+
+    _this.nodes = [];
+    _this._nodes = new Canvax.Display.Sprite();
+
+    _this.sprite.addChild(_this._nodes);
+
+    _this._labels = new Canvax.Display.Sprite();
+
+    _this.sprite.addChild(_this._labels);
 
     return _this;
   }
@@ -35274,14 +35312,13 @@ function (_Component) {
       if (this.x != null) {
         xNode = _xAxis.getNodeInfoOfPos(this.x);
       }
-
-      me._nodes.removeAllChildren();
-
       me.nodes = [];
       me.on("complete", function () {
         me._drawLine(xNode);
 
         me._drawNodes(xNode);
+
+        me._drawLabels(xNode);
       });
       var i = 0;
 
@@ -35361,7 +35398,8 @@ function (_Component) {
         this._line = new Line$c({
           context: lineOpt
         });
-        this.sprite.addChild(this._line);
+
+        this._lineSp.addChild(this._line);
 
         this._line.on(types.get(), function (e) {
           e.eventInfo = {
@@ -35384,6 +35422,8 @@ function (_Component) {
     value: function _drawNodes() {
       var me = this;
       if (!me.node.enabled) return;
+
+      me._nodes.removeAllChildren();
 
       _.each(me.nodes, function (nodeData) {
         var nodeCtx = _.extend({
@@ -35417,8 +35457,36 @@ function (_Component) {
 
         me._nodes.addChild(_node);
       });
+    }
+  }, {
+    key: "_drawLabels",
+    value: function _drawLabels() {
+      var me = this;
+      if (!me.node.enabled) return;
 
-      this.sprite.addChild(this._nodes);
+      me._labels.removeAllChildren();
+
+      _.each(me.nodes, function (nodeData) {
+        var labelCtx = {
+          x: nodeData.x,
+          y: nodeData.y - me.node.radius - 2,
+          fillStyle: me.label.fontColor || nodeData.color,
+          fontSize: me.label.fontSize,
+          textAlign: "center",
+          textBaseline: "bottom"
+        };
+        var text = me.label.text;
+
+        if (_.isFunction(text)) {
+          text = text.apply(me, [nodeData]);
+        }
+
+        var _label = new Text$6(text, {
+          context: labelCtx
+        });
+
+        me._labels.addChild(_label);
+      });
     }
   }]);
 

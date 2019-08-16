@@ -4,6 +4,7 @@ import { global,_, getDefaultProps, event } from "mmvis"
 
 const Line = Canvax.Shapes.Line;
 const Circle = Canvax.Shapes.Circle;
+const Text = Canvax.Display.Text;
 
 class markCloumn extends Component
 {
@@ -76,6 +77,32 @@ class markCloumn extends Component
                         default: 2
                     }
                 }
+            },
+            label : {
+                detail : '文本',
+                propertys : {
+                    enabled : {
+                        detail : '是否开启',
+                        default: false
+                    },
+                    fontColor: {
+                        detail : '文本字体颜色',
+                        default: null
+                    },
+                    fontSize: {
+                        detail : '文本字体大小',
+                        default: 12
+                    },
+                    text : {
+                        detail : '文本内容',
+                        documentation:"可以是函数",
+                        default: null
+                    },
+                    format : {
+                        detail : '文本格式化函数',
+                        default: null
+                    }
+                }
             }
         }
     }
@@ -86,12 +113,19 @@ class markCloumn extends Component
         this.name = "markcloumn";
         _.extend(true, this , getDefaultProps( markCloumn.defaultProps() ), opt );
 
-        this._line  = null;
-        this._nodes = new Canvax.Display.Sprite();
-        this.nodes  = [];
-
         this.sprite = new Canvax.Display.Sprite();
         this.app.graphsSprite.addChild( this.sprite );
+
+        this._line  = null;
+        this._lineSp = new Canvax.Display.Sprite();
+        this.sprite.addChild( this._lineSp );
+
+        this.nodes  = [];
+        this._nodes = new Canvax.Display.Sprite();
+        this.sprite.addChild( this._nodes );
+        
+        this._labels = new Canvax.Display.Sprite();
+        this.sprite.addChild( this._labels );
     }
 
     draw( opt )
@@ -125,17 +159,15 @@ class markCloumn extends Component
             xNode = _xAxis.getNodeInfoOfPos( this.x )
         };
 
-        
-        me._nodes.removeAllChildren();
         me.nodes = [];
 
         me.on("complete", function(){
             me._drawLine( xNode );
             me._drawNodes( xNode );
+            me._drawLabels( xNode );
         });
 
         var i=0;
-
         var _graphs = this.app.getGraphs();
         _.each( _graphs, function( _g ){
             function _f(){
@@ -201,7 +233,7 @@ class markCloumn extends Component
             this._line = new Line({
                 context : lineOpt
             });
-            this.sprite.addChild( this._line );
+            this._lineSp.addChild( this._line );
             this._line.on( event.types.get() , function (e) {
                 e.eventInfo = {
                     //iNode : this.iNode,
@@ -223,6 +255,8 @@ class markCloumn extends Component
         
         var me = this;
         if( !me.node.enabled ) return;
+
+        me._nodes.removeAllChildren();
         _.each( me.nodes, function( nodeData ){
             var nodeCtx = _.extend({
                 x           : nodeData.x,
@@ -253,9 +287,38 @@ class markCloumn extends Component
 
             me._nodes.addChild( _node );
         } );
-        this.sprite.addChild( this._nodes );
+
+    }
+
+    _drawLabels(){
+        
+        var me = this;
+        if( !me.node.enabled ) return;
+
+        me._labels.removeAllChildren();
+        _.each( me.nodes, function( nodeData ){
+            var labelCtx = {
+                x           : nodeData.x,
+                y           : nodeData.y - me.node.radius - 2, 
+                fillStyle   : me.label.fontColor || nodeData.color,
+                fontSize    : me.label.fontSize,
+                textAlign   : "center",
+                textBaseline: "bottom"
+            };
+            var text = me.label.text;
+            if( _.isFunction( text ) ){
+                text = text.apply( me, [ nodeData ] )
+            }
+            var _label = new Text( text , {
+                context : labelCtx
+            } );
+            me._labels.addChild( _label );
+        } );
+
     }
 }
+
+
 global.registerComponent( markCloumn, 'markcloumn' );
 
 export default markCloumn;
