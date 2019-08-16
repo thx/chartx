@@ -228,7 +228,7 @@ class Tips extends Component {
         var tipsContent;
 
         if (this.content) {
-            tipsContent = _.isFunction(this.content) ? this.content(e.eventInfo) : this.content;
+            tipsContent = _.isFunction(this.content) ? this.content(e.eventInfo, e) : this.content;
         } else {
             tipsContent = this._getDefaultContent(e.eventInfo);
         };

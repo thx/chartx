@@ -270,7 +270,9 @@ class markCloumn extends Component
             var _node = new Circle({
                 context : nodeCtx
             });
+            _node.nodeData = nodeData;
 
+            
             _node.on( event.types.get() , function (e) {
                 e.eventInfo = {
                     //iNode : this.iNode,
@@ -284,7 +286,7 @@ class markCloumn extends Component
                 };
                 me.app.fire( e.type, e );
             });
-
+        
             me._nodes.addChild( _node );
         } );
 

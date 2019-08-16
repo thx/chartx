@@ -33997,7 +33997,7 @@ function (_Component) {
       var tipsContent;
 
       if (this.content) {
-        tipsContent = _.isFunction(this.content) ? this.content(e.eventInfo) : this.content;
+        tipsContent = _.isFunction(this.content) ? this.content(e.eventInfo, e) : this.content;
       } else {
         tipsContent = this._getDefaultContent(e.eventInfo);
       }
@@ -35439,6 +35439,8 @@ function (_Component) {
         var _node = new Circle$b({
           context: nodeCtx
         });
+
+        _node.nodeData = nodeData;
 
         _node.on(types.get(), function (e) {
           e.eventInfo = {

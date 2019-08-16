@@ -71,7 +71,8 @@ var options = {
             field: "pv",
             yAxisAlign: "left",
             node: {
-                enabled : false
+                enabled : true,
+                radius: 6
             }
         },
         {
@@ -114,7 +115,11 @@ var options = {
             }
         }
     ],
-    tips : {},
+    tips : {
+        content: function(e){
+            debugger
+        }
+    },
     datazoom: {}
 }
 
