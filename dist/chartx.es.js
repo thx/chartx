@@ -6972,9 +6972,12 @@ function (_DisplayObjectContain) {
         stage = null;
         i--, l--;
       }
-      this.view.removeChild(this.stageView);
-      this.view.removeChild(this.domView);
-      this.el.removeChild(this.view);
+
+      try {
+        this.view.removeChild(this.stageView);
+        this.view.removeChild(this.domView);
+        this.el.removeChild(this.view);
+      } catch (e) {}
       this.el.innerHTML = "";
       this.event = null;
       this._bufferStage = null;
@@ -7074,7 +7077,9 @@ function (_DisplayObjectContain) {
   }, {
     key: "_afterDelChild",
     value: function _afterDelChild(stage) {
-      this.stageView.removeChild(stage.canvas);
+      try {
+        this.stageView.removeChild(stage.canvas);
+      } catch (error) {}
     }
   }, {
     key: "heartBeat",

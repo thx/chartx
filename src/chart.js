@@ -606,7 +606,7 @@ class Chart extends event.Dispatcher
                     graph.triggerEvent( e );
                 } );
             };
-
+            
             var _tips = me.getComponent({name:'tips'});
             var _coord = me.getComponent({name:'coord'});
 
