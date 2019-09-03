@@ -32360,7 +32360,7 @@ function (_Component) {
       }
 
       if (this.position == "bottom") {
-        y = app.height - app.padding.bottom - height;
+        y = app.height - app.padding.bottom - height / 2; //TODO:这样的设置到了中线了
       }
       var layoutWidth, layoutHeight; //然后把app的padding扩展开来
 

@@ -172,7 +172,7 @@ class Legend extends Component
             x = app.width - app.padding.right - width;
         };
         if( this.position == "bottom" ){
-            y = app.height - app.padding.bottom - height;
+            y = app.height - app.padding.bottom - height/2; //TODO:这样的设置到了中线了
         };
 
 
