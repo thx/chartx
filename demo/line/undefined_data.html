@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
+<title>xChart demo -- bar</title>
+
+<script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
+<script type="text/javascript" src="../../dist/chartx.js"></script>
+<!-- codemirror -->
+<script type="text/javascript" src="../../lib/codemirror/codemirror.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/active-line.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/javascript.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/matchbrackets.js"></script>
+<link rel="stylesheet" href="../../lib/codemirror/codemirror.css">
+<link rel="stylesheet" href="../../lib/codemirror/zenburn.css">
+<link rel="stylesheet" href="../../lib/codemirror/docs.css">
+<!-- codemirror end -->
+<!--bootstrap-->
+<script type="text/javascript" src="../../lib/bootstrap/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap-theme.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/docs.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap.min.css">
+<!--bootstrap end-->
+<script type="text/javascript" src="../../lib/demo.js"></script>
+<link rel="stylesheet" href="../../lib/demo.css">
+</head>
+<body >
+
+<table>
+    <tr>
+        <td id="td-vl">
+            <form><textarea id="code" name="code">
+
+//chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
+//第一行是表头。
+var data= [{"month":"11-09","2018_industry_uv":222333,"2018_shop_uv":123456},{"month":"11-10","2019_industry_uv":222333,"2019_shop_uv":123456}]
+
+//------------------------------
+//为确保js兼容性，以下配置有如下要求
+//    1. 仅支持ES5
+//    2. 仅支持单var声明单变量，严禁多个
+//        good: var a = 1;
+//        bad:  var a, b = 1, 2;
+//------------------------------
+
+// 图表变量，可直接在options中使用，mx-chart组件的variables属性可覆盖以下定义
+var variables = {
+    fieldFormat : function( field ){
+        switch( field ){
+            case "collect":
+            return "人群\r\n规模";
+            case "ad_over":
+            return "整体人群营销覆盖";
+            case "ad_new":
+            return "新增人群营销覆盖";                 
+        }
+    },
+    strokeStyle:function (node) {console.log('node',node);return 'red'},
+    xField: 'month',
+    yField: ["2018_industry_uv","2018_shop_uv","2019_industry_uv","2019_shop_uv"]
+};
+
+// 图表配置定义
+var options = {
+    coord:{
+        type:"rect",
+        xAxis:{
+            field: variables.xField,
+        } 
+    },
+    graphs:[
+        {
+            type:"line",
+            field: variables.yField
+        }
+    ],
+    legend:{
+        position:"bottom",
+        textAlign:"center",
+        label:{
+            format: variables.fieldFormat
+        }
+    },
+    tips: {
+        content:function( e ){
+
+            var str = '<div style="padding: 10px 0 5px;border-bottom:1px solid #ccc" >'+ e.xAxis.value +'</div>';
+            for( var i=0,l=e.nodes.length; i<l ; i++ ){
+                var node = e.nodes[i];
+                var value = node.value == 'null' || node.value == '' || node.value == undefined ? '' : node.value 
+                str += "<div style='padding: 5px 0'>";
+                str += "<span style='background:" + node.color + ";margin-right:8px;margin-top:5px;float:left;width:8px;height:8px;border-radius:4px;overflow:hidden;font-size:0;'></span>";
+                str += variables.fieldFormat( node.field )+"："
+                str += "<span style='color:"+ node.color +"'>"+node.value+"</span>";
+                str += "</div>"
+            }
+            return str;
+        }
+    }
+};
+
+
+try {
+    window.line = Chartx.create("canvasTest" , data , options)
+} catch(e){
+
+}
+
+
+
+            </textarea></form>
+        </td>
+        <td style="padding:0 10px;" id="td-vr">
+            <div id="chartdemo-r">
+            <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
+                <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
+
+                <h4>折线图（bar chart）</h4>
+                <p>
+                    联系人：@释剑
+                </p>
+            </div>
+            <div  class="test-c">
+                <div id="canvasTest" style='width:100%;height:300px;position:relative;'></div>
+            </div>
+
+            </div>
+        </td>
+    </tr>
+</table>
+
+
+</body> 
+</html>
+
+

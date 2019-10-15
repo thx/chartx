@@ -150,14 +150,16 @@ class RadarGraphs extends GraphsBase
             });
             group.area = _poly;
             me.sprite.addChild( _poly );
+            _poly.__hoverFillAlpha = _poly.context.fillAlpha + 0.2;
+            _poly.__fillAlpha = _poly.context.fillAlpha;
 
             _poly.on(event.types.get(), function(e) {
                 
                 if( e.type == "mouseover" ){
-                    this.context.fillAlpha += 0.2
+                    this.context.fillAlpha = this.__hoverFillAlpha
                 };
                 if( e.type == "mouseout" ){
-                    this.context.fillAlpha -= 0.2
+                    this.context.fillAlpha = this.__fillAlpha
                 };
                 
                 me.app.fire( e.type, e );

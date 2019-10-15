@@ -29,7 +29,7 @@ class Polar extends coorBase
                 values        : [0, 360]
             },
             startAngle : {
-                detail : '坐标系其实角度',
+                detail : '坐标系起始角度',
                 documentation : "",
                 default       : 0,
                 values        : [0, 360]
@@ -408,6 +408,11 @@ class Polar extends coorBase
             
         //};
 
+        //如果有label，比如雷达图的label，要预留至少20，这个20现在是拍脑袋想的
+        if( this.aAxis.label.enabled ){
+            _r -= 20;
+        };
+
         this.radius = _r
         
     }
@@ -663,19 +668,29 @@ class Polar extends coorBase
 
         me._aAxisScaleSp.context.x = this.origin.x;
         me._aAxisScaleSp.context.y = this.origin.y;
-
+debugger
         _.each( this.aAxis.data , function( value , i ){
 
-            if( !me.aAxis.label.enabled ) return;
-
             var point = points[i];
+            var text = _.isFunction(me.aAxis.label.format) ? me.aAxis.label.format( value ) : value;
+
+            var nodeData = {
+                value : value,
+                text  : text,
+                iNode : i,
+                field : me.aAxis.field
+            };
+
+            var _enabled = me._getProp( me.aAxis.label.enabled ,nodeData )
+            if( !_enabled ) return;
+
+            
             var c = {
                 x : point.x,
                 y : point.y,
-                fillStyle : me.aAxis.label.fontColor
+                fillStyle : me._getProp( me.aAxis.label.fontColor ,nodeData )
             };
 
-            var text = _.isFunction(me.aAxis.label.format) ? me.aAxis.label.format( value ) : value;
             _.extend( c , me._getTextAlignForPoint(Math.atan2(point.y , point.x)) );
             me._aAxisScaleSp.addChild(new Canvax.Display.Text( text , {
                 context : c
@@ -845,6 +860,19 @@ class Polar extends coorBase
     }
     getSizeAndOrigin(){
         
+    }
+
+    _getProp( p, nodeData, def ){
+        var res = p;
+        if( _.isFunction( p ) ){
+            res = p.apply( this, [ nodeData ] )
+        }
+
+        if( !res && def ){
+            res = def;
+        }
+
+        return res
     }
 }
 

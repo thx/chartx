@@ -426,6 +426,7 @@ class Chart extends event.Dispatcher
     componentsReset( trigger )
     {
         var me = this;
+        
         _.each(this.components , function( p , i ){
             //theme coord graphs额外处理
             if( _.indexOf( me.__highModules, p.name ) != -1 ){
@@ -576,8 +577,9 @@ class Chart extends event.Dispatcher
 
         var _coord = this.getComponent({name:'coord'});
         _coord && _coord.show( field, trigger );
-
+debugger
         _.each( this.getComponents({name:'graphs'}), function( _g ){
+            debugger
             _g.show( field , trigger);
         } );
         this.componentsReset( trigger );
@@ -588,7 +590,9 @@ class Chart extends event.Dispatcher
         var me = this;
         var _coord = me.getComponent({name:'coord'});
         _coord && _coord.hide( field ,trigger );
+        debugger
         _.each( this.getComponents({name:'graphs'}), function( _g ){
+            debugger
             _g.hide( field , trigger );
         } );
         this.componentsReset( trigger );

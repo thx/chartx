@@ -10566,10 +10566,13 @@ var Chartx = (function () {
         });
 
         _coord && _coord.show(field, trigger);
+        debugger;
 
         _.each(this.getComponents({
           name: 'graphs'
         }), function (_g) {
+          debugger;
+
           _g.show(field, trigger);
         });
 
@@ -10585,10 +10588,13 @@ var Chartx = (function () {
         });
 
         _coord && _coord.hide(field, trigger);
+        debugger;
 
         _.each(this.getComponents({
           name: 'graphs'
         }), function (_g) {
+          debugger;
+
           _g.hide(field, trigger);
         });
 
@@ -13647,7 +13653,7 @@ var Chartx = (function () {
             values: [0, 360]
           },
           startAngle: {
-            detail: '坐标系其实角度',
+            detail: '坐标系起始角度',
             documentation: "",
             default: 0,
             values: [0, 360]
@@ -14030,7 +14036,11 @@ var Chartx = (function () {
         });
 
         _r = _.min(anglesRadius); //};
+        //如果有label，比如雷达图的label，要预留至少20，这个20现在是拍脑袋想的
 
+        if (this.aAxis.label.enabled) {
+          _r -= 20;
+        }
         this.radius = _r;
       }
     }, {
@@ -14310,16 +14320,26 @@ var Chartx = (function () {
         var points = me.getPointsOfR(r + 3);
         me._aAxisScaleSp.context.x = this.origin.x;
         me._aAxisScaleSp.context.y = this.origin.y;
+        debugger;
 
         _.each(this.aAxis.data, function (value, i) {
-          if (!me.aAxis.label.enabled) return;
           var point = points[i];
+          var text = _.isFunction(me.aAxis.label.format) ? me.aAxis.label.format(value) : value;
+          var nodeData = {
+            value: value,
+            text: text,
+            iNode: i,
+            field: me.aAxis.field
+          };
+
+          var _enabled = me._getProp(me.aAxis.label.enabled, nodeData);
+
+          if (!_enabled) return;
           var c = {
             x: point.x,
             y: point.y,
-            fillStyle: me.aAxis.label.fontColor
+            fillStyle: me._getProp(me.aAxis.label.fontColor, nodeData)
           };
-          var text = _.isFunction(me.aAxis.label.format) ? me.aAxis.label.format(value) : value;
 
           _.extend(c, me._getTextAlignForPoint(Math.atan2(point.y, point.x)));
 
@@ -14493,6 +14513,21 @@ var Chartx = (function () {
     }, {
       key: "getSizeAndOrigin",
       value: function getSizeAndOrigin() {}
+    }, {
+      key: "_getProp",
+      value: function _getProp(p, nodeData, def) {
+        var res = p;
+
+        if (_.isFunction(p)) {
+          res = p.apply(this, [nodeData]);
+        }
+
+        if (!res && def) {
+          res = def;
+        }
+
+        return res;
+      }
     }]);
 
     return Polar$$1;
@@ -19868,14 +19903,16 @@ var Chartx = (function () {
 
           group.area = _poly;
           me.sprite.addChild(_poly);
+          _poly.__hoverFillAlpha = _poly.context.fillAlpha + 0.2;
+          _poly.__fillAlpha = _poly.context.fillAlpha;
 
           _poly.on(types.get(), function (e) {
             if (e.type == "mouseover") {
-              this.context.fillAlpha += 0.2;
+              this.context.fillAlpha = this.__hoverFillAlpha;
             }
 
             if (e.type == "mouseout") {
-              this.context.fillAlpha -= 0.2;
+              this.context.fillAlpha = this.__fillAlpha;
             }
             me.app.fire(e.type, e);
           });
