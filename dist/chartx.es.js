@@ -10563,13 +10563,10 @@ function (_event$Dispatcher) {
       });
 
       _coord && _coord.show(field, trigger);
-      debugger;
 
       _.each(this.getComponents({
         name: 'graphs'
       }), function (_g) {
-        debugger;
-
         _g.show(field, trigger);
       });
 
@@ -10585,13 +10582,10 @@ function (_event$Dispatcher) {
       });
 
       _coord && _coord.hide(field, trigger);
-      debugger;
 
       _.each(this.getComponents({
         name: 'graphs'
       }), function (_g) {
-        debugger;
-
         _g.hide(field, trigger);
       });
 
@@ -13887,6 +13881,7 @@ function (_coorBase) {
         arr = arr.concat(me.app.dataFrame.getFieldData(field));
       });
 
+      arr.push(0);
       return dataSection.section(arr, 3);
     }
   }, {
@@ -14317,7 +14312,6 @@ function (_coorBase) {
       var points = me.getPointsOfR(r + 3);
       me._aAxisScaleSp.context.x = this.origin.x;
       me._aAxisScaleSp.context.y = this.origin.y;
-      debugger;
 
       _.each(this.aAxis.data, function (value, i) {
         var point = points[i];
@@ -35524,12 +35518,18 @@ function (_Component) {
         if (_.isFunction(text)) {
           text = text.apply(me, [nodeData]);
         }
+        if (!text) return;
 
         var _label = new Text$6(text, {
           context: labelCtx
         });
 
-        me._labels.addChild(_label);
+        me._labels.addChild(_label); //矫正label位置，可能出去了,目前只做了最右侧的检测
+
+
+        if (_label.localToGlobal().x + _label.getTextWidth() / 2 > me.app.width) {
+          _label.context.x = me.app.width - _label.getTextWidth() / 2 - _label.parent.localToGlobal().x;
+        }
       });
     }
   }]);

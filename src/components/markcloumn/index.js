@@ -310,11 +310,19 @@ class markCloumn extends Component
             var text = me.label.text;
             if( _.isFunction( text ) ){
                 text = text.apply( me, [ nodeData ] )
-            }
+            };
+            if( !text ) return;
+
             var _label = new Text( text , {
                 context : labelCtx
             } );
             me._labels.addChild( _label );
+
+            //矫正label位置，可能出去了,目前只做了最右侧的检测
+            if( _label.localToGlobal().x + _label.getTextWidth()/2 > me.app.width ){
+                _label.context.x = me.app.width - _label.getTextWidth()/2-_label.parent.localToGlobal().x;
+            };
+
         } );
 
     }

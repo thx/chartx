@@ -255,6 +255,7 @@ class Polar extends coorBase
     }
 
     _getRDataSection(){
+        
         var me = this;
         //如果用户有主动配置了dataSection,是不需要计算dataSection的
         //目前没有做堆叠的dataSection，后面有需要直接从yAxis的模块中拿
@@ -266,6 +267,8 @@ class Polar extends coorBase
         _.each( _.flatten( [me.rAxis.field] ), function( field ){
             arr = arr.concat( me.app.dataFrame.getFieldData( field ) );
         } );
+        arr.push(0);
+
         return dataSection.section(arr, 3);
         
     }
@@ -668,7 +671,7 @@ class Polar extends coorBase
 
         me._aAxisScaleSp.context.x = this.origin.x;
         me._aAxisScaleSp.context.y = this.origin.y;
-debugger
+
         _.each( this.aAxis.data , function( value , i ){
 
             var point = points[i];

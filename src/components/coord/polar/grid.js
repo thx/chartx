@@ -129,8 +129,9 @@ export default class polarGrid extends event.Dispatcher
         
         var me = this;
         _.each( this.dataSection, function( num, i ){
-            
+
             if( num ) {
+                
                 var r = me.app.getROfNum( num );
                 var points = me.app.getPointsOfR( r );
 

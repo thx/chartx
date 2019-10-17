@@ -577,9 +577,7 @@ class Chart extends event.Dispatcher
 
         var _coord = this.getComponent({name:'coord'});
         _coord && _coord.show( field, trigger );
-debugger
         _.each( this.getComponents({name:'graphs'}), function( _g ){
-            debugger
             _g.show( field , trigger);
         } );
         this.componentsReset( trigger );
@@ -590,9 +588,7 @@ debugger
         var me = this;
         var _coord = me.getComponent({name:'coord'});
         _coord && _coord.hide( field ,trigger );
-        debugger
         _.each( this.getComponents({name:'graphs'}), function( _g ){
-            debugger
             _g.hide( field , trigger );
         } );
         this.componentsReset( trigger );
