@@ -159,6 +159,10 @@ class markCloumn extends Component
             xNode = _xAxis.getNodeInfoOfPos( this.x )
         };
 
+        if( !xNode ){
+            return;
+        };
+
         me.nodes = [];
 
         me.on("complete", function(){

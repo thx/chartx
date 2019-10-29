@@ -11935,15 +11935,18 @@ var Chartx = (function () {
             }
 
             if (ii == l - 2) {
-              //next是最后一个
-              if (textAlign == "center" && next.x + nextWidth / 2 > me.width) {
-                next_left_x = me.width - nextWidth;
-                next._text_x = me.width - nextWidth / 2 + me._getRootPR();
-              }
+              if (next_left_x + nextWidth > me.width + me._getRootPR()) {
+                //只有最后一个溢出了，才需要检测
+                //next是最后一个
+                if (textAlign == "center" && next.x + nextWidth / 2 > me.width) {
+                  next_left_x = me.width - nextWidth;
+                  next._text_x = me.width - nextWidth / 2 + me._getRootPR();
+                }
 
-              if (textAlign == "left" && next.x + nextWidth > me.width) {
-                next_left_x = me.width - nextWidth;
-                next._text_x = me.width - nextWidth;
+                if (textAlign == "left" && next.x + nextWidth > me.width) {
+                  next_left_x = me.width - nextWidth;
+                  next._text_x = me.width - nextWidth;
+                }
               }
             }
 
@@ -12981,6 +12984,21 @@ var Chartx = (function () {
           });
 
           coord.grid.enabled = coord.enabled;
+        }
+
+        if ("animation" in coord) {
+          //如果有给直角坐标系做配置animation，就直接通知到xAxis，yAxis，grid三个子组件
+          _.extend(true, coord.xAxis, {
+            animation: coord.animation
+          });
+
+          _.each(coord.yAxis, function (yAxis$$1) {
+            _.extend(true, yAxis$$1, {
+              animation: coord.animation
+            });
+          });
+
+          coord.grid.animation = coord.animation;
         }
         return coord;
       }
@@ -35350,6 +35368,10 @@ var Chartx = (function () {
 
         if (this.x != null) {
           xNode = _xAxis.getNodeInfoOfPos(this.x);
+        }
+
+        if (!xNode) {
+          return;
         }
         me.nodes = [];
         me.on("complete", function () {

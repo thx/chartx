@@ -158,6 +158,19 @@ class Rect extends coordBase
             });
             coord.grid.enabled = coord.enabled;
         };
+
+        if( "animation" in coord ){
+            //如果有给直角坐标系做配置animation，就直接通知到xAxis，yAxis，grid三个子组件
+            _.extend( true, coord.xAxis, {
+                animation : coord.animation
+            } );
+            _.each( coord.yAxis , function( yAxis ){
+                _.extend( true, yAxis, {
+                    animation : coord.animation
+                } );
+            });
+            coord.grid.animation = coord.animation;
+        };
         
         return coord;
     }

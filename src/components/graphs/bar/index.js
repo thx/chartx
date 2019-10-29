@@ -420,7 +420,7 @@ class BarGraphs extends GraphsBase
                         })
                     };
                 };
-            }
+            };
 
             for (var h = 0; h < me._dataLen; h++) {
 
@@ -596,6 +596,7 @@ class BarGraphs extends GraphsBase
                         groupH.addChild(rectEl);
 
                         rectEl.on(event.types.get(), function(e) {
+                            
                             e.eventInfo = {
                                 trigger : me.node,
                                 nodes : [ this.nodeData ]

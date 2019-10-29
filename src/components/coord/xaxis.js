@@ -479,7 +479,6 @@ export default class xAxis extends Axis
         var l = arr.length;  
         var textAlign = me.label.textAlign; 
 
-    
         //如果用户设置不想要做重叠检测
         if( !this.label.evade || me.trimLayout ){
             _.each( arr , function( layoutItem ){
@@ -499,6 +498,7 @@ export default class xAxis extends Axis
                 if( lastNode ) break;
                 if( arr[i].visible ) lastNode = arr[i];
             };
+            
             if( lastNode ){
                 if( textAlign == "center" && (lastNode.x+lastNode.textWidth/2) > me.width ){
                     lastNode._text_x = me.width - lastNode.textWidth/2 + me._getRootPR();
@@ -547,15 +547,18 @@ export default class xAxis extends Axis
                 };
 
                 if( ii == l-2 ){
-                    //next是最后一个
-                    if( textAlign == "center" && (next.x+nextWidth/2) > me.width ){
-                        next_left_x = me.width - nextWidth;
-                        next._text_x = me.width - nextWidth/2 + me._getRootPR();
-                    }
-                    if( textAlign == "left" && (next.x+nextWidth) > me.width ){
-                        next_left_x = me.width - nextWidth;
-                        next._text_x = me.width - nextWidth;
-                    }
+                    if( next_left_x + nextWidth > me.width + me._getRootPR()){
+                        //只有最后一个溢出了，才需要检测
+                        //next是最后一个
+                        if( textAlign == "center" && (next.x+nextWidth/2) > me.width ){
+                            next_left_x = me.width - nextWidth;
+                            next._text_x = me.width - nextWidth/2 + me._getRootPR();
+                        }
+                        if( textAlign == "left" && (next.x+nextWidth) > me.width ){
+                            next_left_x = me.width - nextWidth;
+                            next._text_x = me.width - nextWidth;
+                        }
+                    };
                 };
 
                 //必须要有1px的间隔
