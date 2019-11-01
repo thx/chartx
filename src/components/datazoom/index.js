@@ -202,6 +202,15 @@ class dataZoom extends Component
         //预设默认的opt.dataZoom
         _.extend( true, this, getDefaultProps( dataZoom.defaultProps() ) , opt);
 
+        if( !("margin" in opt) ){
+            if( this.position == 'bottom' ){
+                this.margin.top = 10;
+            }
+            if( this.position == 'top' ){
+                this.margin.bottom = 10;
+            }
+        }
+
         this.axis = null; //对应哪个轴
         
         this.layout();
@@ -214,6 +223,7 @@ class dataZoom extends Component
     {
 
         let app = this.app;
+        
         if( this.position == "bottom" ){
             //目前dataZoom是固定在bottom位置的
             //_getDataZoomOpt中会矫正x
@@ -371,7 +381,7 @@ class dataZoom extends Component
                     } );
                     _.extend( app.dataFrame.range , range );
                 };
-                
+            
                 //不想要重新构造dataFrame，所以第一个参数为null
                 app.resetData( null , trigger );
                 app.fire("dataZoomDragIng");
@@ -418,9 +428,10 @@ class dataZoom extends Component
 
         opt && _.extend(true, this, opt);
         this._cloneChart = this._getCloneChart()//cloneChart;
+
         this._computeAttrs(opt);
 
-        if( 
+        if(
             _preCount != this.count ||
             ( opt.range && ( opt.range.start != _preStart || opt.range.end != _preEnd ) )
         ){
@@ -449,17 +460,17 @@ class dataZoom extends Component
                 break;
         };
         
-        if(!this.range.max || this.range.max > this.count){
+        if( !this._opt.range || ( this._opt.range && !this._opt.range.max ) || this.range.max > this.count){
             this.range.max = this.count - 1;
         };
         
-        if( !this.range.end || this.range.end > this.dataLen - 1 ){
+        if( !this._opt.range || ( this._opt.range && !this._opt.range.end ) || this.range.end > this.dataLen - 1 ){
             this.range.end = this.dataLen - 1;
             if( this.axisLayoutType == "proportion" ){
                 this.range.end = this.count - 1;
             };
         };
-
+ 
         //如果用户没有配置layoutType但是配置了position
         if( !this.direction && this.position ){
             if( this.position == "left" || this.position == "right" ){

@@ -14,7 +14,7 @@ class Chart extends event.Dispatcher
         this._node = node;
         this._data = data;
         this._opt = opt;
- 
+  
         this.dataFrame = this.initData( data , opt );
 
         this.el = $.query(node) //chart 在页面里面的容器节点，也就是要把这个chart放在哪个节点里
@@ -382,13 +382,11 @@ class Chart extends event.Dispatcher
     {
         var me = this;
 
+        this._data = data;
+
         var preDataLenth = this.dataFrame.org.length;
-        if( data ){
-            this._data = data;
-            this.dataFrame = this.initData( this._data );
-        } else {
-            this.dataFrame.refresh();
-        };
+
+        this.dataFrame.resetData( data );
 
         if( !preDataLenth ){
             //如果之前的数据为空， 那么我们应该这里就直接重绘吧
@@ -397,7 +395,7 @@ class Chart extends event.Dispatcher
             this.draw( this._opt );
             return;
         };
-        
+    
         var _coord = this.getComponent({name:'coord'})
 
         if( _coord ){
@@ -414,14 +412,13 @@ class Chart extends event.Dispatcher
         };
 
         this.fire("resetData");
+    
     }
-
-   
+     
     initData()
     {
         return dataFrame.apply(this, arguments);
     }
-
 
     componentsReset( trigger )
     {

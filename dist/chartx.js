@@ -1641,14 +1641,6 @@ var Chartx = (function () {
   }
 
   function dataFrame (dataOrg, opt) {
-    //数据做一份拷贝，避免污染源数据
-    dataOrg = JSON.parse(JSON.stringify(dataOrg, function (k, v) {
-      if (v === undefined) {
-        return null;
-      }
-
-      return v;
-    }));
     var dataFrame = {
       //数据框架集合
       length: 0,
@@ -1657,12 +1649,12 @@ var Chartx = (function () {
       jsonOrg: [],
       //原始数据的json格式
       data: [],
-      //最原始的数据转化后的数据格式：[o,o,o] o={field:'val1',index:0,data:[1,2,3]}
+      //最原始的数据转化后的数据格式(range取段过后的数据)：[o,o,o] o={field:'val1',index:0,data:[1,2,3]}
       getRowDataAt: _getRowDataAt,
       getRowDataOf: _getRowDataOf,
       getFieldData: _getFieldData,
       getDataOrg: getDataOrg,
-      refresh: _refresh,
+      resetData: _resetData,
       fields: [],
       range: {
         start: 0,
@@ -1672,44 +1664,79 @@ var Chartx = (function () {
 
     };
 
-    if (!dataOrg || dataOrg.length == 0) {
+    function _initHandle(dataOrg) {
+      //数据做一份拷贝，避免污染源数据
+      dataOrg = JSON.parse(JSON.stringify(dataOrg, function (k, v) {
+        if (v === undefined) {
+          return null;
+        }
+
+        return v;
+      }));
+
+      if (!dataOrg || dataOrg.length == 0) {
+        return dataFrame;
+      }
+
+      if (dataOrg.length > 0 && !_.isArray(dataOrg[0])) {
+        dataFrame.jsonOrg = dataOrg;
+        dataOrg = parse2MatrixData(dataOrg);
+        dataFrame.org = dataOrg;
+      } else {
+        dataFrame.org = dataOrg;
+        dataFrame.jsonOrg = parse2JsonData(dataOrg);
+      }
+
+      dataFrame.range.end = dataOrg.length - 1 - 1; //然后检查opts中是否有dataZoom.range
+
+      if (opt) {
+        //兼容下dataZoom 和 datazoom 的大小写配置
+        var _datazoom = opt.dataZoom || opt.datazoom;
+
+        _datazoom && _datazoom.range && _.extend(dataFrame.range, _datazoom.range);
+      }
+
+      if (dataOrg.length && dataOrg[0].length && !~dataOrg[0].indexOf("__index__")) {
+        //如果数据中没有用户自己设置的__index__，那么就主动添加一个__index__，来记录元数据中的index
+        for (var i = 0, l = dataOrg.length; i < l; i++) {
+          if (!i) {
+            dataOrg[0].push("__index__");
+          } else {
+            dataOrg[i].push(i - 1);
+            dataFrame.jsonOrg[i - 1]["__index__"] = i - 1;
+          }
+        }
+      }
+      dataFrame.fields = dataOrg[0] ? dataOrg[0] : []; //所有的字段集合;
+
       return dataFrame;
     }
 
-    if (dataOrg.length > 0 && !_.isArray(dataOrg[0])) {
-      dataFrame.jsonOrg = dataOrg;
-      dataOrg = parse2MatrixData(dataOrg);
-      dataFrame.org = dataOrg;
-    } else {
-      dataFrame.org = dataOrg;
-      dataFrame.jsonOrg = parse2JsonData(dataOrg);
-    }
+    function _resetData(dataOrg) {
+      if (dataOrg) {
+        //重置一些数据
+        dataFrame.org = [];
+        dataFrame.jsonOrg = [];
+        dataFrame.fields = [];
+        dataFrame.data = [];
 
-    dataFrame.range.end = dataOrg.length - 1 - 1; //然后检查opts中是否有dataZoom.range
+        var tempRange = _.extend(true, {}, dataFrame.range);
 
-    if (opt) {
-      //兼容下dataZoom 和 datazoom 的大小写配置
-      var _datazoom = opt.dataZoom || opt.datazoom;
+        _initHandle(dataOrg); //一些当前状态恢复到dataFrame里去 begin
 
-      _datazoom && _datazoom.range && _.extend(dataFrame.range, _datazoom.range);
-    }
 
-    if (dataOrg.length && dataOrg[0].length && !~dataOrg[0].indexOf("__index__")) {
-      //如果数据中没有用户自己设置的__index__，那么就主动添加一个__index__，来记录元数据中的index
-      for (var i = 0, l = dataOrg.length; i < l; i++) {
-        if (!i) {
-          dataOrg[0].push("__index__");
-        } else {
-          dataOrg[i].push(i - 1);
-          dataFrame.jsonOrg[i - 1]["__index__"] = i - 1;
+        _.extend(true, dataFrame.range, tempRange);
+
+        if (dataFrame.range.end > dataFrame.length - 1) {
+          dataFrame.range.end = dataFrame.length - 1;
+        }
+
+        if (dataFrame.range.start > dataFrame.length - 1 || dataFrame.range.start > dataFrame.range.end) {
+          dataFrame.range.start = 0;
         }
       }
-    }
-    dataFrame.fields = dataOrg[0] ? dataOrg[0] : []; //所有的字段集合;
+      //比如datazoom修改了dataFrame.range
 
-    dataFrame.data = _getData();
-
-    function _refresh() {
       dataFrame.data = _getData();
     }
 
@@ -1882,6 +1909,9 @@ var Chartx = (function () {
       return list;
     }
 
+    _initHandle(dataOrg);
+
+    dataFrame.data = _getData();
     return dataFrame;
   }
 
@@ -5345,6 +5375,7 @@ var Chartx = (function () {
     CIRC: 2,
     ELIP: 3
   };
+
   var TRANSFORM_PROPS = ["x", "y", "scaleX", "scaleY", "rotation", "scaleOrigin", "rotateOrigin"]; //所有和样式相关的属性
   //appha 有 自己的 处理方式
 
@@ -5532,10 +5563,9 @@ var Chartx = (function () {
           },
           visible: optCtx.visible || true,
           globalAlpha: optCtx.globalAlpha || 1 //样式部分迁移到shape中
-          //平凡的clone数据非常的耗时，还是走回原来的路
-          //var _contextATTRS = _.extend( true , _.clone(CONTEXT_DEFAULT), opt.context );
 
-        };
+        }; //平凡的clone数据非常的耗时，还是走回原来的路
+        //var _contextATTRS = _.extend( true , _.clone(CONTEXT_DEFAULT), opt.context );
 
         _.extend(true, _contextATTRS, opt.context); //有些引擎内部设置context属性的时候是不用上报心跳的，比如做热点检测的时候
 
@@ -10346,14 +10376,9 @@ var Chartx = (function () {
       key: "resetData",
       value: function resetData(data, trigger) {
         var me = this;
+        this._data = data;
         var preDataLenth = this.dataFrame.org.length;
-
-        if (data) {
-          this._data = data;
-          this.dataFrame = this.initData(this._data);
-        } else {
-          this.dataFrame.refresh();
-        }
+        this.dataFrame.resetData(data);
 
         if (!preDataLenth) {
           //如果之前的数据为空， 那么我们应该这里就直接重绘吧
@@ -32823,6 +32848,16 @@ var Chartx = (function () {
 
       _.extend(true, _assertThisInitialized(_this), getDefaultProps(dataZoom.defaultProps()), opt);
 
+      if (!("margin" in opt)) {
+        if (_this.position == 'bottom') {
+          _this.margin.top = 10;
+        }
+
+        if (_this.position == 'top') {
+          _this.margin.bottom = 10;
+        }
+      }
+
       _this.axis = null; //对应哪个轴
 
       _this.layout();
@@ -33069,11 +33104,11 @@ var Chartx = (function () {
             break;
         }
 
-        if (!this.range.max || this.range.max > this.count) {
+        if (!this._opt.range || this._opt.range && !this._opt.range.max || this.range.max > this.count) {
           this.range.max = this.count - 1;
         }
 
-        if (!this.range.end || this.range.end > this.dataLen - 1) {
+        if (!this._opt.range || this._opt.range && !this._opt.range.end || this.range.end > this.dataLen - 1) {
           this.range.end = this.dataLen - 1;
 
           if (this.axisLayoutType == "proportion") {
