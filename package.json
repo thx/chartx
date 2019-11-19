@@ -22,7 +22,7 @@
     "email": "252759102@qq.com"
   },
   "repository": "git",
-  "main": "./dist/umd/chartx.js",
+  "main": "./dist/chartx.js",
   "module": "./src/index.js",
   "devDependencies": {
     "@babel/core": "^7.2.2",

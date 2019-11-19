@@ -95,7 +95,7 @@ let rollupDist = ()=>{
             output: outputOptions,
             watch: {
               include : './dist/**/*.js',
-              exclude : './dist/index_*.js'
+              exclude : './dist/chartx.js'
             }
         });
 
@@ -121,11 +121,12 @@ let rollupDist = ()=>{
                 };
                 rollupNum++;
 
-                // pipeline(
-                //     gulp.src(['./dist/index_*.js', '!./dist/chartx.js']),
-                //     uglify(),
-                //     gulp.dest('./dist/')
-                // );
+                pipeline(
+                    //gulp.src(['./dist/index_*.js', '!./dist/chartx.js']),
+                    gulp.src(['./dist/chartx.js']),
+                    uglify(),
+                    gulp.dest('./dist/')
+                );
 
                 resolve( event );
             };
