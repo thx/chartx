@@ -3,8 +3,6 @@
         "type":"command",
         "command":{
             "cmd":[
-                "tnpm i",
-                "npm run build",
                 "mv ./dist $BUILD_DEST"
             ]
         }
