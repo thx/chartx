@@ -1,1 +1,133 @@
-"use strict";!function(n,e){if("function"==typeof define&&define.amd)define(["exports"],e);else if("undefined"!=typeof exports)e(exports);else{var r={};e(r),(void 0).undefined=r}}(0,function(n){Object.defineProperty(n,"__esModule",{value:!0});var o={value:function(){}};function e(){for(var n,e=0,r=arguments.length,t={};e<r;++e){if(!(n=arguments[e]+"")||n in t)throw new Error("illegal type: "+n);t[n]=[]}return new i(t)}function i(n){this._=n}function l(n,e){for(var r,t=0,i=n.length;t<i;++t)if((r=n[t]).name===e)return r.value}function u(n,e,r){for(var t=0,i=n.length;t<i;++t)if(n[t].name===e){n[t]=o,n=n.slice(0,t).concat(n.slice(t+1));break}return null!=r&&n.push({name:e,value:r}),n}i.prototype=e.prototype={constructor:i,on:function(n,e){var r,t=this._,i=function(n,t){return n.trim().split(/^|\s+/).map(function(n){var e="",r=n.indexOf(".");if(0<=r&&(e=n.slice(r+1),n=n.slice(0,r)),n&&!t.hasOwnProperty(n))throw new Error("unknown type: "+n);return{type:n,name:e}})}(n+"",t),o=-1,f=i.length;if(!(arguments.length<2)){if(null!=e&&"function"!=typeof e)throw new Error("invalid callback: "+e);for(;++o<f;)if(r=(n=i[o]).type)t[r]=u(t[r],n.name,e);else if(null==e)for(r in t)t[r]=u(t[r],n.name,null);return this}for(;++o<f;)if((r=(n=i[o]).type)&&(r=l(t[r],n.name)))return r},copy:function(){var n={},e=this._;for(var r in e)n[r]=e[r].slice();return new i(n)},call:function(n,e){if(0<(r=arguments.length-2))for(var r,t,i=new Array(r),o=0;o<r;++o)i[o]=arguments[o+2];if(!this._.hasOwnProperty(n))throw new Error("unknown type: "+n);for(o=0,r=(t=this._[n]).length;o<r;++o)t[o].value.apply(e,i)},apply:function(n,e,r){if(!this._.hasOwnProperty(n))throw new Error("unknown type: "+n);for(var t=this._[n],i=0,o=t.length;i<o;++i)t[i].value.apply(e,r)}},n.default=e});
+"use strict";
+
+(function (global, factory) {
+  if (typeof define === "function" && define.amd) {
+    define(["exports"], factory);
+  } else if (typeof exports !== "undefined") {
+    factory(exports);
+  } else {
+    var mod = {
+      exports: {}
+    };
+    factory(mod.exports);
+    global.undefined = mod.exports;
+  }
+})(void 0, function (exports) {
+  "use strict";
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  var noop = {
+    value: function value() {}
+  };
+
+  function dispatch() {
+    for (var i = 0, n = arguments.length, _ = {}, t; i < n; ++i) {
+      if (!(t = arguments[i] + "") || t in _) throw new Error("illegal type: " + t);
+      _[t] = [];
+    }
+
+    return new Dispatch(_);
+  }
+
+  function Dispatch(_) {
+    this._ = _;
+  }
+
+  function parseTypenames(typenames, types) {
+    return typenames.trim().split(/^|\s+/).map(function (t) {
+      var name = "",
+          i = t.indexOf(".");
+      if (i >= 0) name = t.slice(i + 1), t = t.slice(0, i);
+      if (t && !types.hasOwnProperty(t)) throw new Error("unknown type: " + t);
+      return {
+        type: t,
+        name: name
+      };
+    });
+  }
+
+  Dispatch.prototype = dispatch.prototype = {
+    constructor: Dispatch,
+    on: function on(typename, callback) {
+      var _ = this._,
+          T = parseTypenames(typename + "", _),
+          t,
+          i = -1,
+          n = T.length; // If no callback was specified, return the callback of the given type and name.
+
+      if (arguments.length < 2) {
+        while (++i < n) {
+          if ((t = (typename = T[i]).type) && (t = get(_[t], typename.name))) return t;
+        }
+
+        return;
+      } // If a type was specified, set the callback for the given type and name.
+      // Otherwise, if a null callback was specified, remove callbacks of the given name.
+
+
+      if (callback != null && typeof callback !== "function") throw new Error("invalid callback: " + callback);
+
+      while (++i < n) {
+        if (t = (typename = T[i]).type) _[t] = set(_[t], typename.name, callback);else if (callback == null) for (t in _) {
+          _[t] = set(_[t], typename.name, null);
+        }
+      }
+
+      return this;
+    },
+    copy: function copy() {
+      var copy = {},
+          _ = this._;
+
+      for (var t in _) {
+        copy[t] = _[t].slice();
+      }
+
+      return new Dispatch(copy);
+    },
+    call: function call(type, that) {
+      if ((n = arguments.length - 2) > 0) for (var args = new Array(n), i = 0, n, t; i < n; ++i) {
+        args[i] = arguments[i + 2];
+      }
+      if (!this._.hasOwnProperty(type)) throw new Error("unknown type: " + type);
+
+      for (t = this._[type], i = 0, n = t.length; i < n; ++i) {
+        t[i].value.apply(that, args);
+      }
+    },
+    apply: function apply(type, that, args) {
+      if (!this._.hasOwnProperty(type)) throw new Error("unknown type: " + type);
+
+      for (var t = this._[type], i = 0, n = t.length; i < n; ++i) {
+        t[i].value.apply(that, args);
+      }
+    }
+  };
+
+  function get(type, name) {
+    for (var i = 0, n = type.length, c; i < n; ++i) {
+      if ((c = type[i]).name === name) {
+        return c.value;
+      }
+    }
+  }
+
+  function set(type, name, callback) {
+    for (var i = 0, n = type.length; i < n; ++i) {
+      if (type[i].name === name) {
+        type[i] = noop, type = type.slice(0, i).concat(type.slice(i + 1));
+        break;
+      }
+    }
+
+    if (callback != null) type.push({
+      name: name,
+      value: callback
+    });
+    return type;
+  }
+
+  exports["default"] = dispatch;
+});

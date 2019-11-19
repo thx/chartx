@@ -11,7 +11,9 @@ const pipeline = require('readable-stream').pipeline;
 
 let time = new Date().getTime();
 let _srcPath = "src/**/*.js";
-let outputTypes = [ 'umd','amd','cjs','iife','es' ];
+//let outputTypes = [ 'umd','amd','cjs','iife','es' ];
+//这个构建是本地调试用，所以只需要iife就好了
+let outputTypes = ['iife'] 
 
 let cleanHandle = ()=>{
     return gulp.src('dist/**/*.js', {read: false})
@@ -24,7 +26,7 @@ let babelHandle = ( _src = _srcPath ) => {
         presets: ['@babel/env'],
         plugins: ["@babel/plugin-proposal-class-properties","transform-es2015-modules-umd"]
     }))
-    .pipe(uglify())
+    //.pipe(uglify())
     .pipe(gulp.dest('dist'));
 };
 
@@ -70,13 +72,14 @@ let rollupDist = ()=>{
             resolve({ mainFields:['module', 'main'], browser: true }), 
             commonjs()
         ],
-        external: ["mmvis","canvax"]
+        //external: ["mmvis","canvax"]
     };
     
     let outputOptions = [];
     outputTypes.forEach(type => {
         outputOptions.push( {
-            file: './dist/index_'+type+'.js',
+            //file: './dist/index_'+type+'.js',
+            file: './dist/chartx.js',
             format: type,
             name: 'Chartx',
             globals: {
@@ -98,7 +101,7 @@ let rollupDist = ()=>{
 
         watcher.on('event', event => {
             if( event.code == 'ERROR' ){
-                console.log(event)
+                console.log( event )
             }
             //console.log( event.code )
             //event.code 会是下面其中一个：
@@ -118,11 +121,11 @@ let rollupDist = ()=>{
                 };
                 rollupNum++;
 
-                pipeline(
-                    gulp.src(['./dist/index_*.js', '!./dist/index_es.js']),
-                    uglify(),
-                    gulp.dest('./dist/')
-                );
+                // pipeline(
+                //     gulp.src(['./dist/index_*.js', '!./dist/chartx.js']),
+                //     uglify(),
+                //     gulp.dest('./dist/')
+                // );
 
                 resolve( event );
             };

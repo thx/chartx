@@ -40,8 +40,8 @@
     "rollup-plugin-node-resolve": "5.2.0"
   },
   "dependencies": {
-    "mmvis": "^0.0.78",
-    "canvax": "^2.0.61",
+    "mmvis": "^0.0.79",
+    "canvax": "^2.0.63",
     "fmin": "0.0.2"
   },
   "scripts": {
