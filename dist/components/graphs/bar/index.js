@@ -1,1 +1,1459 @@
-"use strict";!function(e,t){if("function"==typeof define&&define.amd)define(["exports","canvax","../../../utils/tools","../index","mmvis"],t);else if("undefined"!=typeof exports)t(exports,require("canvax"),require("../../../utils/tools"),require("../index"),require("mmvis"));else{var i={};t(i,e.canvax,e.tools,e.index,e.mmvis),e.undefined=i}}(void 0,function(e,t,D,i,G){Object.defineProperty(e,"__esModule",{value:!0});var N=n(t),a=n(i);function n(e){return e&&e.__esModule?e:{default:e}}function l(e){return(l="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(e){return typeof e}:function(e){return e&&"function"==typeof Symbol&&e.constructor===Symbol&&e!==Symbol.prototype?"symbol":typeof e})(e)}function o(e){return(o=Object.setPrototypeOf?Object.getPrototypeOf:function(e){return e.__proto__||Object.getPrototypeOf(e)})(e)}function r(e){if(void 0===e)throw new ReferenceError("this hasn't been initialised - super() hasn't been called");return e}function d(e,t){for(var i=0;i<t.length;i++){var a=t[i];a.enumerable=a.enumerable||!1,a.configurable=!0,"value"in a&&(a.writable=!0),Object.defineProperty(e,a.key,a)}}function s(e,t,i){return t&&d(e.prototype,t),i&&d(e,i),e}function h(e,t){return(h=Object.setPrototypeOf||function(e,t){return e.__proto__=t,e})(e,t)}var f=N.default.AnimationFrame,B=N.default.Shapes.Rect,u=(function(e,t){if("function"!=typeof t&&null!==t)throw new TypeError("Super expression must either be null or a function");e.prototype=Object.create(t&&t.prototype,{constructor:{value:e,writable:!0,configurable:!0}}),t&&h(e,t)}(c,a.default),s(c,null,[{key:"defaultProps",value:function(){return{field:{detail:"字段设置",documentation:"支持二维数组格式的设置，一维方向就是横向分组，二维方向就是纵向的堆叠",default:null},yAxisAlign:{detail:"绘制在哪根y轴上面",default:"left"},absolute:{detail:"是否脱离graphs的位置计算",documentation:"                    trimGraphs的时候是否需要和其他的 bar graphs一起并排计算，                    true的话这个就会和别的重叠,                    和css中得absolute概念一致，脱离文档流的绝对定位",default:!1},proportion:{detail:"比例柱状图",default:!1},node:{detail:"单个数据对应的图形设置",propertys:{width:{detail:"bar的宽度",default:0},maxWidth:{detail:"最大width",default:50},minWidth:{detail:"最小width",default:1},minHeight:{detail:"最小height",default:0},radius:{detail:"叶子节点的圆角半径",default:3},fillStyle:{detail:"bar填充色",default:null},fillAlpha:{detail:"bar透明度",default:.95},xDis:{detail:"单分组内bar之间的间隔",default:null},filter:{detail:"bar过滤处理器",default:null}}},label:{detail:"文本设置",propertys:{enabled:{detail:"是否开启",default:!1},fontColor:{detail:"文本颜色",default:null,documentation:"如果有设置text.fontColor那么优先使用fontColor"},fontSize:{detail:"文本字体大小",default:12},format:{detail:"文本格式化处理函数",default:null},lineWidth:{detail:"文本描边线宽",default:0},strokeStyle:{detail:"文本描边颜色",default:null},rotation:{detail:"旋转角度",default:0},textAlign:{detail:"水平对齐方式",documentation:"left center right",default:"center"},verticalAlign:{detail:"垂直基线对齐方式",documentation:"top middle bottom",default:"bottom"},position:{detail:"文本布局位置",documentation:"top,topRight,right,rightBottom,bottom,bottomLeft,left,leftTop,center",default:"top"},offsetX:{detail:"x偏移量",default:0},offsetY:{detail:"y偏移量",default:0}}},select:{detail:"分组选中",documentation:"                    分组的选中，不是选中具体的某个node，这里的选中靠groupRegion来表现出来,                    目前只有在第一个graphs bar 上配置有效",propertys:{enabled:{detail:"是否开启",default:!1},inds:{detail:"选中的分组索引集合",documentation:"选中的列的索引集合,注意，这里的ind不是当前视图的ind，而是加上了dataFrame.range.start的全局ind",default:[]},width:{detail:"选中态背景宽度",default:1},alpha:{detail:"选中态背景透明度",default:.2},fillStyle:{detail:"选中态背景填充色",default:null},triggerEventType:{detail:"触发选中效果的事件",default:"click"}}}}}}]),s(c,[{key:"init",value:function(){this.barsSp=new N.default.Display.Sprite({id:"barsSp"}),this.txtsSp=new N.default.Display.Sprite({id:"txtsSp",context:{}})}},{key:"getNodesAt",value:function(a){var n=this.data,l=[];return G._.each(this.enabledField,function(e,t){if(G._.isArray(e))G._.each(e,function(e,t){var i=n[e]?n[e][a]:null;i&&l.push(i)});else{var i=n[e]?n[e][a]:null;i&&l.push(i)}}),l}},{key:"_getTargetField",value:function(e,t,i,a){if(G._.isString(a))return a;if(G._.isArray(a)){var n=a[e];if(G._.isString(n))return n;if(G._.isArray(n))return n[t]}}},{key:"_getColor",value:function(e,t){var i=t.field,a=G._.flatten([this.field]),n=this.app.getComponent({name:"coord"}).getFieldMapOf(i);if(G._.isFunction(e)&&(e=e.apply(this,[t])),G._.isString(e)&&(e=e),G._.isArray(e)&&(e=G._.flatten(e)[G._.indexOf(a,i)]),e&&e.lineargradient&&e.lineargradient.length)if(0!=t.rectHeight){var l=this.ctx.createLinearGradient(t.x,t.fromY+t.rectHeight,t.x,t.fromY);G._.each(e.lineargradient,function(e){l.addColorStop(e.position,e.color)}),e=l}else e=e.lineargradient[parseInt(e.lineargradient.length/2)].color;return null==e&&(e=n.color),e}},{key:"_getBarWidth",value:function(e,t){return this.node.width?G._.isFunction(this.node.width)?this.node._width=this.node.width(e):this.node._width=this.node.width:(this.node._width=t-Math.max(1,.2*t),1==this.node._width&&3<e&&(this.node._width=e-2)),this.node._width<1&&(this.node._width=1),this.node._width=parseInt(this.node._width),this.node._width>this.node.maxWidth&&(this.node._width=this.node.maxWidth),this.node._width}},{key:"show",value:function(){this.draw()}},{key:"hide",value:function(a){G._.each(this.barsSp.children,function(e,t){var i=e.getChildById("bar_"+t+"_"+a);i&&i.destroy()}),G._.each(this.txtsSp.children,function(e,t){var i=e.getChildById("text_"+t+"_"+a);i&&i.destroy()}),this.draw()}},{key:"resetData",value:function(e){this.dataFrame=e,this.draw()}},{key:"clean",value:function(){this.data={},this.barsSp.removeAllChildren(),this.label.enabled&&this.txtsSp.removeAllChildren()}},{key:"draw",value:function(e){e=e||{},G._.extend(!0,this,e);var A=this,k=A.animation&&!e.resize;if(this.data=this._trimGraphs(),0==this.enabledField.length||0==this._dataLen)return A._preDataLen=0,void this.clean();var F=A._preDataLen,O=this.enabledField.length,L=0,P=A.node._count=0,I=A.app.getComponents({name:"graphs",type:"bar"});G._.each(I,function(e,t){e==A&&(P=t)}),G._.each(this.enabledField,function(e,t){var i=(e=G._.flatten([e])).length;if(0!=i){L=A.width/A._dataLen,A._barsLen=A._dataLen*O;for(var a=0;a<A._dataLen;a++){var n=null;if(0==t){if(a<=F-1?n=A.barsSp.getChildById("barGroup_"+a):(n=new N.default.Display.Sprite({id:"barGroup_"+a}),A.barsSp.addChild(n),n.iNode=a),!P){var l,o=L*A.select.width;1<A.select.width&&(o=A.select.width),a<=F-1?((l=n.getChildById("group_region_"+a)).context.width=o,l.context.x=L*a+(L-o)/2,l.context.globalAlpha=-1<G._.indexOf(A.select.inds,A.dataFrame.range.start+a)?A.select.alpha:0):(l=new B({id:"group_region_"+a,pointChkPriority:!1,hoverClone:!1,xyToInt:!1,context:{x:L*a+(L-o)/2,y:-A.height,width:o,height:A.height,fillStyle:A._getGroupRegionStyle(a),globalAlpha:-1<G._.indexOf(A.select.inds,A.dataFrame.range.start+a)?A.select.alpha:0}}),n.addChild(l),l.iNode=a,l.on(G.event.types.get(),function(e){e.eventInfo={iNode:this.iNode},C.bind(this)(e),A.app.fire(e.type,e)}))}}else n=A.barsSp.getChildById("barGroup_"+a);var r=null;0==t?a<=F-1?r=A.txtsSp.getChildById("txtGroup_"+a):(r=new N.default.Display.Sprite({id:"txtGroup_"+a}),A.txtsSp.addChild(r),r.iGroup=t):r=A.txtsSp.getChildById("txtGroup_"+a);for(var d=0;d<i;d++){A.node._count++;var s=A.data[e[d]][a];s.iGroup=t,s.iNode=a,s.iLay=d;var h=s.y-s.fromY;isNaN(s.value)?h=0:Math.abs(h)<A.node.minHeight&&(h=A.node.minHeight),s.rectHeight=h;var f=A._getColor(A.node.fillStyle,s);if((s.color=f)instanceof CanvasGradient&&A.node.fillStyle.lineargradient){var u=A.node.fillStyle.lineargradient[parseInt(A.node.fillStyle.lineargradient.length/2)];u&&(s.color=u.color)}var c={x:Math.round(s.x),y:s.fromY,width:A.node._width,height:h,fillStyle:f,fillAlpha:A.node.fillAlpha,scaleY:-1};s.width=c.width;var p={x:c.x,y:s.yOriginPoint.pos,width:c.width,height:c.height,fillStyle:c.fillStyle,fillAlpha:A.node.fillAlpha,scaleY:0};if(A.node.radius&&s.isLeaf&&!A.proportion){var y=Math.min(A.node._width/2,Math.abs(h));y=Math.min(y,A.node.radius),p.radius=[y,y,0,0]}k||(delete p.scaleY,p.y=c.y);var g=null,_="bar_"+a+"_"+s.field;if(a<=F-1&&(g=n.getChildById(_)),g?g.context.fillStyle=f:((g=new B({id:_,context:p})).field=s.field,n.addChild(g),g.on(G.event.types.get(),function(e){e.eventInfo={trigger:A.node,nodes:[this.nodeData]},C.bind(this)(e),A.app.fire(e.type,e)})),g.finalPos=c,g.iGroup=t,g.iNode=a,g.iLay=d,(g.nodeData=s).nodeElement=g,A.node.filter&&A.node.filter.apply(g,[s,A]),A.label.enabled){var b=s.value;if(G._.isFunction(A.label.format)){var v=A.label.format(b,s);void 0===v&&null===v||(b=v)}if(null==b||""===b)continue;G._.isNumber(b)&&(b=(0,D.numAddSymbol)(b));var x={fillStyle:A.label.fontColor||c.fillStyle,fontSize:A.label.fontSize,lineWidth:A.label.lineWidth,strokeStyle:A.label.strokeStyle||c.fillStyle,textBaseline:A.label.verticalAlign,rotation:A.label.rotation},m=A._getTextPos(c,s);x.x=m.x,x.y=m.y,x.textAlign=A._getTextAlign(c,s);var w=null,S="text_"+a+"_"+s.field;a<=F-1&&(w=r.getChildById(S)),w?(w.resetText(b),w.context.x=x.x,w.context.y=x.y):((w=new N.default.Display.Text(b,{id:S,context:x})).field=s.field,r.addChild(w))}}}}function C(e){if(A.select.enabled&&e.type==A.select.triggerEventType){var t=A.dataFrame.range.start+this.iNode;-1<G._.indexOf(A.select.inds,t)?G._.each(I,function(e){e.unselectAt(t)}):G._.each(I,function(e){e.selectAt(t)})}}}),this.sprite.addChild(this.barsSp),this.label.enabled&&this.sprite.addChild(this.txtsSp),this.sprite.context.x=this.origin.x,this.sprite.context.y=this.origin.y,this.grow(function(){A.fire("complete")},{delay:0,duration:300,animate:k}),A._preDataLen=A._dataLen}},{key:"setEnabledField",value:function(){this.enabledField=this.app.getComponent({name:"coord"}).filterEnabledFields(this.field)}},{key:"_getGroupRegionStyle",value:function(e){var t=this,i=t.select.fillStyle;return G._.isArray(t.select.fillStyle)&&(i=t.select.fillStyle[e]),G._.isFunction(t.select.fillStyle)&&(i=t.select.fillStyle.apply(this,[{iNode:e,rowData:t.dataFrame.getRowDataAt(e)}])),null==i?t.select._fillStyle:i}},{key:"_trimGraphs",value:function(){var y=this,g=this.app.getComponent({name:"coord"});this.setEnabledField(),this.data={};var t=[],i=0,a=0,n=!1;this.absolute?(t=[this],i=this.enabledField.length):G._.each(y.app.getComponents({name:"graphs",type:"bar"}),function(e){e.absolute||(e===y&&(n=!0),n?e.setEnabledField():a+=e.enabledField.length,i+=e.enabledField.length,t.push(e))});var _=g.getAxis({type:"xAxis"}).getCellLength(),e=_/(i+1),b=this._getBarWidth(_,e),v=e-b;null!=this.node.xDis&&(v=this.node.xDis);var x=(_-b*i-v*(i-1))/2;a&&(x+=(v+b)*a);var l=this.dataFrame.getDataOrg(this.enabledField),o=y.getGraphSelectOpt();return!y.select.inds.length&&o&&o.inds&&o.inds.length&&(y.select.inds=G._.clone(o.inds)),G._.each(l,function(u,c){var p=[];G._.each(u,function(e,f){p[f]=[],y._dataLen=e.length,G._.each(e,function(e,i){var a=e;y.proportion&&(a=0,G._.each(u,function(e,t){a+=e[i]}));var t=y._getTargetField(c,f,i,y.enabledField),n=g.getPoint({iNode:i,field:t,value:{y:e}}),l=n.pos.x,o=l-_/2+x+(b+v)*c,r=0;r=y.proportion?-e/a*g.height:n.pos.y,isNaN(r)&&(r=0);var h=g.getAxisOriginPoint({field:t}),d=function e(t,i,a,n,l){var o=t[i-1];if(!o)return h.pos;var r=o[a].y,d=o[a].value,s=h.value;return s<=n?s<=d?(o[a].isLeaf=!1,r):e(t,i-1,a,n,l):d<s?(o[a].isLeaf=!1,r):e(t,i-1,a,n,l)}(p,f,i,e,r);r+=d-h.pos;var s={type:"bar",value:e,vInd:f,vCount:a,field:t,fromX:o,fromY:d,x:o,y:r,width:b,yOriginPoint:h,isLeaf:!0,xAxis:g.getAxis({type:"xAxis"}).getNodeInfoOfX(l),iNode:i,rowData:y.dataFrame.getRowDataAt(i),color:null,selected:!1};y.data[s.field]||(y.data[s.field]=p[f]),-1<G._.indexOf(y.select.inds,i)&&(s.selected=!0),p[f].push(s)})})}),y.data}},{key:"_getTextAlign",value:function(e,t){var i=this.label.textAlign;return t.value<t.yOriginPoint.value&&("left"==i?i="right":"right"==i&&(i="left")),i}},{key:"_getTextPos",value:function(e,t){var i={x:0,y:0},a=e.x,n=e.y,l=!0;switch(e.y>=t.y&&(l=!1),this.label.position){case"top":a=e.x+e.width/2,n=e.y+e.height,l&&(n+=16);break;case"topRight":a=e.x+e.width,n=e.y+e.height,l&&(n+=16);break;case"right":a=e.x+e.width,n=e.y+e.height/2;break;case"rightBottom":a=e.x+e.width,n=e.y;break;case"bottom":a=e.x+e.width/2,n=e.y;break;case"bottomLeft":a=e.x,n=e.y;break;case"left":a=e.x,n=e.y+e.height/2;break;case"leftTop":a=e.x,n=e.y+e.height,l&&(n+=16);break;case"center":a=e.x+e.width/2,n=e.y+e.height/2}a-=this.label.offsetX;var o=1;return t.value<t.yOriginPoint.value&&(o=-1),n-=o*this.label.offsetY,i.x=a,i.y=n,i}},{key:"grow",value:function(r,e){var d=this;if(d._preDataLen>d._dataLen)for(var t=d._dataLen,i=d._preDataLen;t<i;t++)d.barsSp.getChildAt(t).destroy(),d.label.enabled&&d.txtsSp.getChildAt(t).destroy(),t--,i--;if(e.animate){var s=G._.extend({delay:Math.min(1e3/this._barsLen,80),easing:"Linear.None",duration:500},e),h=0;G._.each(d.enabledField,function(e,t){var i=(e=G._.flatten([e])).length;if(0!=i)for(var a=0;a<d._dataLen;a++)for(var n=0;n<i;n++){var l=d.data[e[n]][a],o=d.barsSp.getChildById("barGroup_"+a).getChildById("bar_"+a+"_"+l.field);0==s.duration?(o.context.scaleY=1,o.context.y=1*o.finalPos.y,o.context.x=o.finalPos.x,o.context.width=o.finalPos.width,o.context.height=o.finalPos.height):(o._tweenObj&&f.destroyTween(o._tweenObj),o._tweenObj=o.animate({scaleY:1,y:1*o.finalPos.y,x:o.finalPos.x,width:o.finalPos.width,height:o.finalPos.height},{duration:s.duration,easing:s.easing,delay:a*s.delay,onUpdate:function(){},onComplete:function(e){e.width<3&&this.context&&(this.context.radius=0),++h===d.node._count&&r&&r(d)},id:o.id}))}})}else r&&r(d)}},{key:"selectAt",value:function(e){var a=this;if(!(-1<G._.indexOf(this.select.inds,e))){this.select.inds.push(e);var n=e-this.dataFrame.range.start;G._.each(this.data,function(e,t){var i=e[n];i.selected=!0,a.setNodeElementStyle(i)});var t=this.barsSp.getChildById("barGroup_"+n);if(t){var i=t.getChildById("group_region_"+n);i&&(i.context.globalAlpha=this.select.alpha)}}}},{key:"unselectAt",value:function(e){var a=this;if(-1!=G._.indexOf(this.select.inds,e)){var t=G._.indexOf(this.select.inds,e);this.select.inds.splice(t,1);var n=e-this.dataFrame.range.start;G._.each(this.data,function(e,t){var i=e[n];i.selected=!1,a.setNodeElementStyle(i)});var i=this.barsSp.getChildById("barGroup_"+n);if(i){var l=i.getChildById("group_region_"+n);l&&(l.context.globalAlpha=0)}}}},{key:"getSelectedRowList",value:function(){var t=[],i=this;return G._.each(i.select.inds,function(e){t.push(i.dataFrame.jsonOrg[e])}),t}},{key:"setNodeElementStyle",value:function(e){var t=this._getColor(this.node.fillStyle,e);e.nodeElement.context.fillStyle=t}},{key:"getGraphSelectOpt",value:function(){var t=this._opt.select;if(!t){var e=this.app.getComponents({name:"graphs",type:"bar"});G._.each(e,function(e){if(t)return!1;!t&&e._opt.select&&(t=e.select)})}return t}}]),c);function c(e,t){var i;return function(e,t){if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}(this,c),(i=function(e,t){return!t||"object"!==l(t)&&"function"!=typeof t?r(e):t}(this,o(c).call(this,e,t))).type="bar",i.enabledField=null,i.node={_width:0,_count:0},i.select={_fillStyle:"#092848"},i._barsLen=0,i.txtsSp=null,G._.extend(!0,r(i),(0,G.getDefaultProps)(c.defaultProps()),e),i.init(),i}G.global.registerComponent(u,"graphs","bar"),e.default=u});
+"use strict";
+
+(function (global, factory) {
+  if (typeof define === "function" && define.amd) {
+    define(["exports", "canvax", "../../../utils/tools", "../index", "mmvis"], factory);
+  } else if (typeof exports !== "undefined") {
+    factory(exports, require("canvax"), require("../../../utils/tools"), require("../index"), require("mmvis"));
+  } else {
+    var mod = {
+      exports: {}
+    };
+    factory(mod.exports, global.canvax, global.tools, global.index, global.mmvis);
+    global.undefined = mod.exports;
+  }
+})(void 0, function (exports, _canvax, _tools, _index2, _mmvis) {
+  "use strict";
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+
+  var _canvax2 = _interopRequireDefault(_canvax);
+
+  var _index3 = _interopRequireDefault(_index2);
+
+  function _interopRequireDefault(obj) {
+    return obj && obj.__esModule ? obj : {
+      default: obj
+    };
+  }
+
+  function _typeof(obj) {
+    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
+      _typeof = function _typeof(obj) {
+        return typeof obj;
+      };
+    } else {
+      _typeof = function _typeof(obj) {
+        return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+      };
+    }
+
+    return _typeof(obj);
+  }
+
+  function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+
+  function _possibleConstructorReturn(self, call) {
+    if (call && (_typeof(call) === "object" || typeof call === "function")) {
+      return call;
+    }
+
+    return _assertThisInitialized(self);
+  }
+
+  function _getPrototypeOf(o) {
+    _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) {
+      return o.__proto__ || Object.getPrototypeOf(o);
+    };
+    return _getPrototypeOf(o);
+  }
+
+  function _assertThisInitialized(self) {
+    if (self === void 0) {
+      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+    }
+
+    return self;
+  }
+
+  function _defineProperties(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor) descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+
+  function _createClass(Constructor, protoProps, staticProps) {
+    if (protoProps) _defineProperties(Constructor.prototype, protoProps);
+    if (staticProps) _defineProperties(Constructor, staticProps);
+    return Constructor;
+  }
+
+  function _inherits(subClass, superClass) {
+    if (typeof superClass !== "function" && superClass !== null) {
+      throw new TypeError("Super expression must either be null or a function");
+    }
+
+    subClass.prototype = Object.create(superClass && superClass.prototype, {
+      constructor: {
+        value: subClass,
+        writable: true,
+        configurable: true
+      }
+    });
+    if (superClass) _setPrototypeOf(subClass, superClass);
+  }
+
+  function _setPrototypeOf(o, p) {
+    _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) {
+      o.__proto__ = p;
+      return o;
+    };
+
+    return _setPrototypeOf(o, p);
+  }
+
+  var AnimationFrame = _canvax2["default"].AnimationFrame;
+  var Rect = _canvax2["default"].Shapes.Rect;
+
+  var BarGraphs = function (_GraphsBase) {
+    _inherits(BarGraphs, _GraphsBase);
+
+    _createClass(BarGraphs, null, [{
+      key: "defaultProps",
+      value: function defaultProps() {
+        return {
+          field: {
+            detail: '字段设置',
+            documentation: '支持二维数组格式的设置，一维方向就是横向分组，二维方向就是纵向的堆叠',
+            "default": null
+          },
+          yAxisAlign: {
+            detail: '绘制在哪根y轴上面',
+            "default": 'left'
+          },
+          absolute: {
+            detail: '是否脱离graphs的位置计算',
+            documentation: '\
+                    trimGraphs的时候是否需要和其他的 bar graphs一起并排计算，\
+                    true的话这个就会和别的重叠,\
+                    和css中得absolute概念一致，脱离文档流的绝对定位',
+            "default": false
+          },
+          proportion: {
+            detail: '比例柱状图',
+            "default": false
+          },
+          node: {
+            detail: '单个数据对应的图形设置',
+            propertys: {
+              width: {
+                detail: 'bar的宽度',
+                "default": 0
+              },
+              maxWidth: {
+                detail: '最大width',
+                "default": 50
+              },
+              minWidth: {
+                detail: '最小width',
+                "default": 1
+              },
+              minHeight: {
+                detail: '最小height',
+                "default": 0
+              },
+              radius: {
+                detail: '叶子节点的圆角半径',
+                "default": 3
+              },
+              fillStyle: {
+                detail: 'bar填充色',
+                "default": null
+              },
+              fillAlpha: {
+                detail: 'bar透明度',
+                "default": 0.95
+              },
+              xDis: {
+                detail: '单分组内bar之间的间隔',
+                "default": null
+              },
+              filter: {
+                detail: 'bar过滤处理器',
+                "default": null
+              }
+            }
+          },
+          label: {
+            detail: '文本设置',
+            propertys: {
+              enabled: {
+                detail: '是否开启',
+                "default": false
+              },
+              fontColor: {
+                detail: '文本颜色',
+                "default": null,
+                documentation: '如果有设置text.fontColor那么优先使用fontColor'
+              },
+              fontSize: {
+                detail: '文本字体大小',
+                "default": 12
+              },
+              format: {
+                detail: '文本格式化处理函数',
+                "default": null
+              },
+              lineWidth: {
+                detail: '文本描边线宽',
+                "default": 0
+              },
+              strokeStyle: {
+                detail: '文本描边颜色',
+                "default": null
+              },
+              rotation: {
+                detail: '旋转角度',
+                "default": 0
+              },
+              textAlign: {
+                detail: '水平对齐方式',
+                documentation: 'left center right',
+                "default": 'center'
+              },
+              verticalAlign: {
+                detail: '垂直基线对齐方式',
+                documentation: 'top middle bottom',
+                "default": 'bottom'
+              },
+              position: {
+                detail: '文本布局位置',
+                documentation: 'top,topRight,right,rightBottom,bottom,bottomLeft,left,leftTop,center',
+                "default": 'top'
+              },
+              offsetX: {
+                detail: 'x偏移量',
+                "default": 0
+              },
+              offsetY: {
+                detail: 'y偏移量',
+                "default": 0
+              }
+            }
+          },
+          select: {
+            detail: '分组选中',
+            documentation: '\
+                    分组的选中，不是选中具体的某个node，这里的选中靠groupRegion来表现出来,\
+                    目前只有在第一个graphs bar 上配置有效',
+            propertys: {
+              enabled: {
+                detail: '是否开启',
+                "default": false
+              },
+              inds: {
+                detail: '选中的分组索引集合',
+                documentation: '选中的列的索引集合,注意，这里的ind不是当前视图的ind，而是加上了dataFrame.range.start的全局ind',
+                "default": []
+              },
+              width: {
+                detail: '选中态背景宽度',
+                "default": 1
+              },
+              alpha: {
+                detail: '选中态背景透明度',
+                "default": 0.2
+              },
+              fillStyle: {
+                detail: '选中态背景填充色',
+                "default": null
+              },
+              triggerEventType: {
+                detail: '触发选中效果的事件',
+                "default": 'click'
+              }
+            }
+          }
+        };
+      }
+    }]);
+
+    function BarGraphs(opt, app) {
+      var _this;
+
+      _classCallCheck(this, BarGraphs);
+
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(BarGraphs).call(this, opt, app));
+      _this.type = "bar";
+      _this.enabledField = null;
+      _this.node = {
+        _width: 0,
+        _count: 0 //总共有多少个bar
+
+      }; //分组的选中，不是选中具体的某个node，这里的选中靠groupRegion来表现出来
+      //只有在第一个graphs bar 上配置有效
+
+      _this.select = {
+        _fillStyle: "#092848" //和bar.fillStyle一样可以支持array function
+
+      };
+      _this._barsLen = 0;
+      _this.txtsSp = null;
+
+      _mmvis._.extend(true, _assertThisInitialized(_this), (0, _mmvis.getDefaultProps)(BarGraphs.defaultProps()), opt);
+
+      _this.init();
+
+      return _this;
+    }
+
+    _createClass(BarGraphs, [{
+      key: "init",
+      value: function init() {
+        this.barsSp = new _canvax2["default"].Display.Sprite({
+          id: "barsSp"
+        });
+        this.txtsSp = new _canvax2["default"].Display.Sprite({
+          id: "txtsSp",
+          context: {//visible: false
+          }
+        });
+      }
+    }, {
+      key: "getNodesAt",
+      value: function getNodesAt(index) {
+        //该index指当前
+        var data = this.data;
+        var _nodesInfoList = []; //节点信息集合
+
+        _mmvis._.each(this.enabledField, function (fs, i) {
+          if (_mmvis._.isArray(fs)) {
+            _mmvis._.each(fs, function (_fs, ii) {
+              //fs的结构两层到顶了
+              var nodeData = data[_fs] ? data[_fs][index] : null;
+              nodeData && _nodesInfoList.push(nodeData);
+            });
+          } else {
+            var nodeData = data[fs] ? data[fs][index] : null;
+            nodeData && _nodesInfoList.push(nodeData);
+          }
+        });
+
+        return _nodesInfoList;
+      }
+    }, {
+      key: "_getTargetField",
+      value: function _getTargetField(b, v, i, field) {
+        if (_mmvis._.isString(field)) {
+          return field;
+        } else if (_mmvis._.isArray(field)) {
+          var res = field[b];
+
+          if (_mmvis._.isString(res)) {
+            return res;
+          } else if (_mmvis._.isArray(res)) {
+            return res[v];
+          }
+
+          ;
+        }
+      }
+    }, {
+      key: "_getColor",
+      value: function _getColor(color, nodeData) {
+        var me = this;
+        var field = nodeData.field;
+
+        var _flattenField = _mmvis._.flatten([this.field]);
+
+        var fieldMap = this.app.getComponent({
+          name: 'coord'
+        }).getFieldMapOf(field);
+
+        if (_mmvis._.isFunction(color)) {
+          color = color.apply(this, [nodeData]);
+        }
+
+        ; //field对应的索引，， 取颜色这里不要用i
+
+        if (_mmvis._.isString(color)) {
+          color = color;
+        }
+
+        ;
+
+        if (_mmvis._.isArray(color)) {
+          color = _mmvis._.flatten(color)[_mmvis._.indexOf(_flattenField, field)];
+        }
+
+        ;
+
+        if (color && color.lineargradient && color.lineargradient.length) {
+          if (nodeData.rectHeight != 0) {
+            var _style = me.ctx.createLinearGradient(nodeData.x, nodeData.fromY + nodeData.rectHeight, nodeData.x, nodeData.fromY);
+
+            _mmvis._.each(color.lineargradient, function (item) {
+              _style.addColorStop(item.position, item.color);
+            });
+
+            color = _style;
+          } else {
+            color = color.lineargradient[parseInt(color.lineargradient.length / 2)].color;
+          }
+
+          ;
+        }
+
+        ;
+
+        if (color === undefined || color === null) {
+          //只有undefined(用户配置了function),null才会认为需要还原皮肤色
+          //“”都会认为是用户主动想要设置的，就为是用户不想他显示
+          color = fieldMap.color;
+        }
+
+        ;
+        return color;
+      }
+    }, {
+      key: "_getBarWidth",
+      value: function _getBarWidth(cellWidth, ceilWidth2) {
+        if (this.node.width) {
+          if (_mmvis._.isFunction(this.node.width)) {
+            this.node._width = this.node.width(cellWidth);
+          } else {
+            this.node._width = this.node.width;
+          }
+        } else {
+          this.node._width = ceilWidth2 - Math.max(1, ceilWidth2 * 0.2); //这里的判断逻辑用意已经忘记了，先放着， 有问题在看
+
+          if (this.node._width == 1 && cellWidth > 3) {
+            this.node._width = cellWidth - 2;
+          }
+
+          ;
+        }
+
+        ;
+        this.node._width < 1 && (this.node._width = 1);
+        this.node._width = parseInt(this.node._width);
+
+        if (this.node._width > this.node.maxWidth) {
+          this.node._width = this.node.maxWidth;
+        }
+
+        ;
+        return this.node._width;
+      }
+    }, {
+      key: "show",
+      value: function show(field) {
+        this.draw();
+      }
+    }, {
+      key: "hide",
+      value: function hide(field) {
+        _mmvis._.each(this.barsSp.children, function (h_groupSp, h) {
+          var _bar = h_groupSp.getChildById("bar_" + h + "_" + field);
+
+          _bar && _bar.destroy();
+        });
+
+        _mmvis._.each(this.txtsSp.children, function (sp, h) {
+          var _label = sp.getChildById("text_" + h + "_" + field);
+
+          _label && _label.destroy();
+        });
+
+        this.draw();
+      }
+    }, {
+      key: "resetData",
+      value: function resetData(dataFrame, dataTrigger) {
+        this.dataFrame = dataFrame;
+        this.draw();
+      }
+    }, {
+      key: "clean",
+      value: function clean() {
+        this.data = {};
+        this.barsSp.removeAllChildren();
+
+        if (this.label.enabled) {
+          this.txtsSp.removeAllChildren();
+        }
+
+        ;
+      }
+    }, {
+      key: "draw",
+      value: function draw(opt) {
+        !opt && (opt = {}); //第二个data参数去掉，直接trimgraphs获取最新的data
+
+        _mmvis._.extend(true, this, opt);
+
+        var me = this;
+        var animate = me.animation && !opt.resize;
+        this.data = this._trimGraphs();
+
+        if (this.enabledField.length == 0 || this._dataLen == 0) {
+          me._preDataLen = 0;
+          this.clean();
+          return;
+        }
+
+        ;
+        var preDataLen = me._preDataLen; //纵向的分组，主要用于 resetData 的时候，对比前后data数量用
+
+        var groupsLen = this.enabledField.length;
+        var itemW = 0;
+        me.node._count = 0;
+        var preGraphs = 0;
+        var barGraphs = me.app.getComponents({
+          name: 'graphs',
+          type: 'bar'
+        });
+
+        _mmvis._.each(barGraphs, function (graph, i) {
+          if (graph == me) {
+            preGraphs = i;
+          }
+
+          ;
+        });
+
+        _mmvis._.each(this.enabledField, function (h_group, i) {
+          h_group = _mmvis._.flatten([h_group]);
+          /*
+          //h_group为横向的分组。如果yAxis.field = ["uv","pv"]的话，
+          //h_group就会为两组，一组代表uv 一组代表pv。
+          var spg = new Canvax.Display.Sprite({ id : "barGroup"+i });
+          */
+          //vLen 为一单元bar上面纵向堆叠的 length
+          //比如yAxis.field = [?
+          //    ["uv","pv"],  vLen == 2
+          //    "click"       vLen == 1
+          //]
+          //if (h <= preDataLen - 1)的话说明本次绘制之前sprite里面已经有bar了。需要做特定的动画效果走过去
+
+          var vLen = h_group.length;
+          if (vLen == 0) return; //itemW 还是要跟着xAxis的xDis保持一致
+
+          itemW = me.width / me._dataLen;
+          me._barsLen = me._dataLen * groupsLen; // this bind到了 对应的元素上面
+
+          function barGroupSectedHandle(e) {
+            if (me.select.enabled && e.type == me.select.triggerEventType) {
+              //如果开启了图表的选中交互
+              var ind = me.dataFrame.range.start + this.iNode; //region触发的selected，需要把所有的graphs都执行一遍
+
+              if (_mmvis._.indexOf(me.select.inds, ind) > -1) {
+                //说明已经选中了
+                _mmvis._.each(barGraphs, function (barGraph) {
+                  barGraph.unselectAt(ind);
+                });
+              } else {
+                _mmvis._.each(barGraphs, function (barGraph) {
+                  barGraph.selectAt(ind);
+                });
+              }
+
+              ;
+            }
+
+            ;
+          }
+
+          ;
+
+          for (var h = 0; h < me._dataLen; h++) {
+            //bar的group
+            var groupH = null;
+
+            if (i == 0) {
+              //横向的分组
+              if (h <= preDataLen - 1) {
+                groupH = me.barsSp.getChildById("barGroup_" + h);
+              } else {
+                groupH = new _canvax2["default"].Display.Sprite({
+                  id: "barGroup_" + h
+                });
+                me.barsSp.addChild(groupH);
+                groupH.iNode = h;
+              }
+
+              ;
+
+              if (!preGraphs) {
+                //只有preGraphs == 0，第一组graphs的时候才需要加载这个region
+                //这个x轴单元 nodes的分组，添加第一个rect用来接受一些事件处理
+                //以及显示selected状态
+                var groupRegion;
+                var groupRegionWidth = itemW * me.select.width;
+
+                if (me.select.width > 1) {
+                  //说明是具体指
+                  groupRegionWidth = me.select.width;
+                }
+
+                ;
+
+                if (h <= preDataLen - 1) {
+                  groupRegion = groupH.getChildById("group_region_" + h);
+                  groupRegion.context.width = groupRegionWidth;
+                  groupRegion.context.x = itemW * h + (itemW - groupRegionWidth) / 2;
+                  groupRegion.context.globalAlpha = _mmvis._.indexOf(me.select.inds, me.dataFrame.range.start + h) > -1 ? me.select.alpha : 0;
+                } else {
+                  groupRegion = new Rect({
+                    id: "group_region_" + h,
+                    pointChkPriority: false,
+                    hoverClone: false,
+                    xyToInt: false,
+                    context: {
+                      x: itemW * h + (itemW - groupRegionWidth) / 2,
+                      y: -me.height,
+                      width: groupRegionWidth,
+                      height: me.height,
+                      fillStyle: me._getGroupRegionStyle(h),
+                      globalAlpha: _mmvis._.indexOf(me.select.inds, me.dataFrame.range.start + h) > -1 ? me.select.alpha : 0
+                    }
+                  });
+                  groupH.addChild(groupRegion);
+                  groupRegion.iNode = h; //触发注册的事件
+
+                  groupRegion.on(_mmvis.event.types.get(), function (e) {
+                    e.eventInfo = {
+                      iNode: this.iNode //TODO:这里设置了的话，会导致多graphs里获取不到别的graphs的nodes信息了
+                      //nodes : me.getNodesAt( this.iNode ) 
+
+                    };
+                    barGroupSectedHandle.bind(this)(e); //触发root统一设置e.eventInfo.nodes,所以上面不需要设置
+                    //TODO: fire需要最后触发，因为在比如click时间中要拿到所有的 上面select触发的选中态list值
+
+                    me.app.fire(e.type, e);
+                  });
+                }
+              }
+
+              ;
+            } else {
+              groupH = me.barsSp.getChildById("barGroup_" + h);
+            }
+
+            ; //txt的group begin
+
+            var txtGroupH = null;
+
+            if (i == 0) {
+              if (h <= preDataLen - 1) {
+                txtGroupH = me.txtsSp.getChildById("txtGroup_" + h);
+              } else {
+                txtGroupH = new _canvax2["default"].Display.Sprite({
+                  id: "txtGroup_" + h
+                });
+                me.txtsSp.addChild(txtGroupH);
+                txtGroupH.iGroup = i;
+              }
+
+              ;
+            } else {
+              txtGroupH = me.txtsSp.getChildById("txtGroup_" + h);
+            }
+
+            ; //txt的group begin
+
+            for (var v = 0; v < vLen; v++) {
+              me.node._count++; //单个的bar，从纵向的底部开始堆叠矩形
+
+              var nodeData = me.data[h_group[v]][h];
+              nodeData.iGroup = i, nodeData.iNode = h, nodeData.iLay = v;
+              var rectHeight = nodeData.y - nodeData.fromY;
+
+              if (isNaN(nodeData.value)) {
+                rectHeight = 0;
+              } else {
+                if (Math.abs(rectHeight) < me.node.minHeight) {
+                  rectHeight = me.node.minHeight;
+                }
+              }
+
+              ;
+              nodeData.rectHeight = rectHeight;
+
+              var fillStyle = me._getColor(me.node.fillStyle, nodeData);
+
+              nodeData.color = fillStyle; //如果用户配置了渐变， 那么tips里面就取对应的中间位置的颜色
+
+              if (fillStyle instanceof CanvasGradient) {
+                if (me.node.fillStyle.lineargradient) {
+                  var _middleStyle = me.node.fillStyle.lineargradient[parseInt(me.node.fillStyle.lineargradient.length / 2)];
+
+                  if (_middleStyle) {
+                    nodeData.color = _middleStyle.color;
+                  }
+
+                  ;
+                }
+              }
+
+              ;
+              var finalPos = {
+                x: Math.round(nodeData.x),
+                y: nodeData.fromY,
+                width: me.node._width,
+                height: rectHeight,
+                fillStyle: fillStyle,
+                fillAlpha: me.node.fillAlpha,
+                scaleY: -1
+              };
+              nodeData.width = finalPos.width;
+              var rectCtx = {
+                x: finalPos.x,
+                y: nodeData.yOriginPoint.pos,
+                //0,
+                width: finalPos.width,
+                height: finalPos.height,
+                fillStyle: finalPos.fillStyle,
+                fillAlpha: me.node.fillAlpha,
+                scaleY: 0
+              };
+
+              if (!!me.node.radius && nodeData.isLeaf && !me.proportion) {
+                var radiusR = Math.min(me.node._width / 2, Math.abs(rectHeight));
+                radiusR = Math.min(radiusR, me.node.radius);
+                rectCtx.radius = [radiusR, radiusR, 0, 0];
+              }
+
+              ;
+
+              if (!animate) {
+                delete rectCtx.scaleY;
+                rectCtx.y = finalPos.y;
+              }
+
+              ;
+              var rectEl = null;
+              var barId = "bar_" + h + "_" + nodeData.field;
+
+              if (h <= preDataLen - 1) {
+                rectEl = groupH.getChildById(barId);
+              }
+
+              ;
+
+              if (rectEl) {
+                rectEl.context.fillStyle = fillStyle;
+              } else {
+                rectEl = new Rect({
+                  id: barId,
+                  context: rectCtx
+                });
+                rectEl.field = nodeData.field;
+                groupH.addChild(rectEl);
+                rectEl.on(_mmvis.event.types.get(), function (e) {
+                  e.eventInfo = {
+                    trigger: me.node,
+                    nodes: [this.nodeData]
+                  };
+                  barGroupSectedHandle.bind(this)(e); //如果开启了分组的选中，如果后续实现了单个bar的选中，那么就要和分组的选中区分开来，单个选中优先
+                  // if( me.select.enabled && e.type == me.select.triggerEventType ){
+                  //     //如果开启了图表的选中交互
+                  //     var ind = me.dataFrame.range.start + this.iNode;
+                  //     //region触发的selected，需要把所有的graphs都执行一遍
+                  //     if( _.indexOf( me.select.inds, ind ) > -1 ){
+                  //         //说明已经选中了
+                  //         _.each( barGraphs, function( barGraph ){
+                  //             barGraph.unselectAt( ind );
+                  //         })
+                  //     } else {
+                  //         _.each( barGraphs, function( barGraph ){
+                  //             barGraph.selectAt( ind );
+                  //         })
+                  //     };
+                  // };
+
+                  me.app.fire(e.type, e);
+                });
+              }
+
+              ;
+              rectEl.finalPos = finalPos;
+              rectEl.iGroup = i, rectEl.iNode = h, rectEl.iLay = v; //nodeData, nodeElement ， data和图形之间互相引用的属性约定
+
+              rectEl.nodeData = nodeData;
+              nodeData.nodeElement = rectEl;
+              me.node.filter && me.node.filter.apply(rectEl, [nodeData, me]); //label begin ------------------------------
+
+              if (me.label.enabled) {
+                var value = nodeData.value;
+
+                if (_mmvis._.isFunction(me.label.format)) {
+                  var _formatc = me.label.format(value, nodeData);
+
+                  if (_formatc !== undefined || _formatc !== null) {
+                    value = _formatc;
+                  }
+                }
+
+                ;
+
+                if (value === undefined || value === null || value === "") {
+                  continue;
+                }
+
+                ;
+
+                if (_mmvis._.isNumber(value)) {
+                  value = (0, _tools.numAddSymbol)(value);
+                }
+
+                ;
+                var textCtx = {
+                  fillStyle: me.label.fontColor || finalPos.fillStyle,
+                  fontSize: me.label.fontSize,
+                  lineWidth: me.label.lineWidth,
+                  strokeStyle: me.label.strokeStyle || finalPos.fillStyle,
+                  //textAlign     : me.label.textAlign, 在后面的_getTextAlign中设置
+                  textBaseline: me.label.verticalAlign,
+                  rotation: me.label.rotation
+                }; //然后根据position, offset确定x,y
+
+                var _textPos = me._getTextPos(finalPos, nodeData);
+
+                textCtx.x = _textPos.x;
+                textCtx.y = _textPos.y;
+                textCtx.textAlign = me._getTextAlign(finalPos, nodeData); //文字
+
+                var textEl = null;
+                var textId = "text_" + h + "_" + nodeData.field;
+
+                if (h <= preDataLen - 1) {
+                  textEl = txtGroupH.getChildById(textId);
+                }
+
+                ;
+
+                if (textEl) {
+                  //do something
+                  textEl.resetText(value);
+                  textEl.context.x = textCtx.x;
+                  textEl.context.y = textCtx.y;
+                } else {
+                  textEl = new _canvax2["default"].Display.Text(value, {
+                    id: textId,
+                    context: textCtx
+                  });
+                  textEl.field = nodeData.field;
+                  txtGroupH.addChild(textEl);
+                }
+
+                ;
+
+                if (!animate) {//TODO：现在暂时没有做text的animate
+                }
+
+                ;
+              } //label end ------------------------------
+
+            }
+
+            ;
+          }
+        });
+
+        this.sprite.addChild(this.barsSp); //如果有text设置， 就要吧text的txtsSp也添加到sprite
+
+        if (this.label.enabled) {
+          this.sprite.addChild(this.txtsSp);
+        }
+
+        ;
+        this.sprite.context.x = this.origin.x;
+        this.sprite.context.y = this.origin.y;
+        this.grow(function () {
+          me.fire("complete");
+        }, {
+          delay: 0,
+          duration: 300,
+          animate: animate
+        });
+        me._preDataLen = me._dataLen;
+      }
+    }, {
+      key: "setEnabledField",
+      value: function setEnabledField() {
+        //要根据自己的 field，从enabledFields中根据enabled数据，计算一个 enabled版本的field子集
+        this.enabledField = this.app.getComponent({
+          name: 'coord'
+        }).filterEnabledFields(this.field);
+      }
+    }, {
+      key: "_getGroupRegionStyle",
+      value: function _getGroupRegionStyle(iNode) {
+        var me = this;
+        var _groupRegionStyle = me.select.fillStyle;
+
+        if (_mmvis._.isArray(me.select.fillStyle)) {
+          _groupRegionStyle = me.select.fillStyle[iNode];
+        }
+
+        ;
+
+        if (_mmvis._.isFunction(me.select.fillStyle)) {
+          _groupRegionStyle = me.select.fillStyle.apply(this, [{
+            iNode: iNode,
+            rowData: me.dataFrame.getRowDataAt(iNode)
+          }]);
+        }
+
+        ;
+
+        if (_groupRegionStyle === undefined || _groupRegionStyle === null) {
+          return me.select._fillStyle;
+        }
+
+        ;
+        return _groupRegionStyle;
+      }
+    }, {
+      key: "_trimGraphs",
+      value: function _trimGraphs() {
+        var me = this;
+
+        var _coord = this.app.getComponent({
+          name: 'coord'
+        }); //用来计算下面的hLen
+
+
+        this.setEnabledField();
+        this.data = {};
+        var layoutGraphs = [];
+        var hLen = 0; //总共有多少列（ 一个xAxis单元分组内 ）
+
+        var preHLen = 0; //自己前面有多少个列（ 一个xAxis单元分组内 ）
+
+        var _preHLenOver = false;
+
+        if (!this.absolute) {
+          _mmvis._.each(me.app.getComponents({
+            name: 'graphs',
+            type: 'bar'
+          }), function (_g) {
+            if (!_g.absolute) {
+              if (_g === me) {
+                _preHLenOver = true;
+              }
+
+              ;
+
+              if (_preHLenOver) {
+                //排在me后面的 graphs，需要计算setEnabledField，才能计算出来 全部的hLen
+                _g.setEnabledField();
+              } else {
+                preHLen += _g.enabledField.length;
+              }
+
+              hLen += _g.enabledField.length;
+              layoutGraphs.push(_g);
+            }
+          });
+        } else {
+          layoutGraphs = [this];
+          hLen = this.enabledField.length;
+        }
+
+        ;
+
+        var cellWidth = _coord.getAxis({
+          type: 'xAxis'
+        }).getCellLength(); //x方向的二维长度，就是一个bar分组里面可能有n个子bar柱子，那么要二次均分
+
+
+        var ceilWidth2 = cellWidth / (hLen + 1); //知道了ceilWidth2 后 检测下 barW是否需要调整
+
+        var barW = this._getBarWidth(cellWidth, ceilWidth2);
+
+        var barDis = ceilWidth2 - barW;
+
+        if (this.node.xDis != null) {
+          barDis = this.node.xDis;
+        }
+
+        ;
+        var disLeft = (cellWidth - barW * hLen - barDis * (hLen - 1)) / 2;
+
+        if (preHLen) {
+          disLeft += (barDis + barW) * preHLen;
+        }
+
+        ; //var tmpData = [];
+        //然后计算出对于结构的dataOrg
+
+        var dataOrg = this.dataFrame.getDataOrg(this.enabledField);
+        var selectOpt = me.getGraphSelectOpt(); //自己的select.inds为空的情况下，才需要寻找是不是别的graphs设置了inds
+
+        if (!me.select.inds.length && selectOpt && selectOpt.inds && selectOpt.inds.length) {
+          me.select.inds = _mmvis._.clone(selectOpt.inds);
+        }
+
+        ; //dataOrg和field是一一对应的
+
+        _mmvis._.each(dataOrg, function (hData, b) {
+          //hData，可以理解为一根竹子 横向的分组数据，这个hData上面还可能有纵向的堆叠
+          //tempBarData 一根柱子的数据， 这个柱子是个数据，上面可以有n个子元素对应的竹节
+          var tempBarData = [];
+
+          _mmvis._.each(hData, function (vSectionData, v) {
+            tempBarData[v] = []; //vSectionData 代表某个字段下面的一组数据比如 uv
+
+            me._dataLen = vSectionData.length; //vSectionData为具体的一个field对应的一组数据
+
+            _mmvis._.each(vSectionData, function (val, i) {
+              var vCount = val;
+
+              if (me.proportion) {
+                //先计算总量
+                vCount = 0;
+
+                _mmvis._.each(hData, function (team, ti) {
+                  vCount += team[i];
+                });
+              }
+
+              ;
+
+              var field = me._getTargetField(b, v, i, me.enabledField); //返回一个和value的结构对应的point结构{x:  y: }
+
+
+              var point = _coord.getPoint({
+                iNode: i,
+                field: field,
+                value: {
+                  //x:
+                  y: val
+                }
+              });
+
+              var _x = point.pos.x;
+              var x = _x - cellWidth / 2 + disLeft + (barW + barDis) * b;
+              var y = 0;
+
+              if (me.proportion) {
+                y = -val / vCount * _coord.height;
+              } else {
+                y = point.pos.y;
+              }
+
+              ;
+
+              if (isNaN(y)) {
+                y = 0;
+              }
+
+              ;
+
+              var yOriginPoint = _coord.getAxisOriginPoint({
+                field: field
+              });
+
+              function _getFromY(tempBarData, v, i, val, y) {
+                var preData = tempBarData[v - 1];
+
+                if (!preData) {
+                  return yOriginPoint.pos;
+                }
+
+                ;
+                var preY = preData[i].y;
+                var preVal = preData[i].value;
+                var yBaseNumber = yOriginPoint.value;
+
+                if (val >= yBaseNumber) {
+                  //如果大于基线的，那么就寻找之前所有大于基线的
+                  if (preVal >= yBaseNumber) {
+                    //能找到，先把pre的isLeaf设置为false
+                    preData[i].isLeaf = false;
+                    return preY;
+                  } else {
+                    return _getFromY(tempBarData, v - 1, i, val, y);
+                  }
+                } else {
+                  if (preVal < yBaseNumber) {
+                    //能找到，先把pre的isLeaf设置为false
+                    preData[i].isLeaf = false;
+                    return preY;
+                  } else {
+                    return _getFromY(tempBarData, v - 1, i, val, y);
+                  }
+                }
+              } //找到其着脚点,一般就是 yOriginPoint.pos
+
+
+              var fromY = _getFromY(tempBarData, v, i, val, y);
+
+              y += fromY - yOriginPoint.pos;
+              var nodeData = {
+                type: "bar",
+                value: val,
+                vInd: v,
+                //如果是堆叠图的话，这个node在堆叠中得位置
+                vCount: vCount,
+                //纵向方向的总数,比瑞堆叠了uv(100),pv(100),那么这个vCount就是200，比例柱状图的话，外部tips定制content的时候需要用到
+                field: field,
+                fromX: x,
+                fromY: fromY,
+                x: x,
+                y: y,
+                width: barW,
+                yOriginPoint: yOriginPoint,
+                isLeaf: true,
+                xAxis: _coord.getAxis({
+                  type: 'xAxis'
+                }).getNodeInfoOfX(_x),
+                iNode: i,
+                rowData: me.dataFrame.getRowDataAt(i),
+                color: null,
+                //focused       : false,  //是否获取焦点，外扩
+                selected: false //是否选中
+
+              };
+
+              if (!me.data[nodeData.field]) {
+                me.data[nodeData.field] = tempBarData[v];
+              }
+
+              ; //如果某个graph 配置了select ----start
+
+              if (_mmvis._.indexOf(me.select.inds, i) > -1) {
+                nodeData.selected = true;
+              }
+
+              ;
+              tempBarData[v].push(nodeData);
+            });
+          }); //tempBarData.length && tmpData.push( tempBarData );
+
+        });
+
+        return me.data; //return tmpData;
+      }
+    }, {
+      key: "_getTextAlign",
+      value: function _getTextAlign(bar, nodeData) {
+        var textAlign = this.label.textAlign;
+
+        if (nodeData.value < nodeData.yOriginPoint.value) {
+          if (textAlign == "left") {
+            textAlign = "right";
+          } else if (textAlign == "right") {
+            textAlign = "left";
+          }
+        }
+
+        ;
+        return textAlign;
+      }
+    }, {
+      key: "_getTextPos",
+      value: function _getTextPos(bar, nodeData) {
+        var me = this;
+        var point = {
+          x: 0,
+          y: 0
+        };
+        var x = bar.x,
+            y = bar.y;
+        var isNegative = true; //是负数
+
+        if (bar.y >= nodeData.y) {
+          isNegative = false;
+        }
+
+        ;
+
+        switch (me.label.position) {
+          case "top":
+            x = bar.x + bar.width / 2;
+            y = bar.y + bar.height;
+
+            if (isNegative) {
+              y += 16;
+            }
+
+            ;
+            break;
+
+          case "topRight":
+            x = bar.x + bar.width;
+            y = bar.y + bar.height;
+
+            if (isNegative) {
+              y += 16;
+            }
+
+            ;
+            break;
+
+          case "right":
+            x = bar.x + bar.width;
+            y = bar.y + bar.height / 2;
+            break;
+
+          case "rightBottom":
+            x = bar.x + bar.width;
+            y = bar.y;
+            break;
+
+          case "bottom":
+            x = bar.x + bar.width / 2;
+            y = bar.y;
+            break;
+
+          case "bottomLeft":
+            x = bar.x;
+            y = bar.y;
+            break;
+
+          case "left":
+            x = bar.x;
+            y = bar.y + bar.height / 2;
+            break;
+
+          case "leftTop":
+            x = bar.x;
+            y = bar.y + bar.height;
+
+            if (isNegative) {
+              y += 16;
+            }
+
+            ;
+            break;
+
+          case "center":
+            x = bar.x + bar.width / 2;
+            y = bar.y + bar.height / 2;
+            break;
+        }
+
+        ;
+        x -= me.label.offsetX;
+        var i = 1;
+
+        if (nodeData.value < nodeData.yOriginPoint.value) {
+          i = -1;
+        }
+
+        ;
+        y -= i * me.label.offsetY;
+        point.x = x;
+        point.y = y;
+        return point;
+      }
+    }, {
+      key: "grow",
+      value: function grow(callback, opt) {
+        var me = this; //console.log( me._preDataLen+"|"+ me._dataLen)
+        //先把已经不在当前range范围内的元素destroy掉
+
+        if (me._preDataLen > me._dataLen) {
+          for (var i = me._dataLen, l = me._preDataLen; i < l; i++) {
+            me.barsSp.getChildAt(i).destroy();
+            me.label.enabled && me.txtsSp.getChildAt(i).destroy();
+            i--;
+            l--;
+          }
+
+          ;
+        }
+
+        ;
+
+        if (!opt.animate) {
+          callback && callback(me);
+          return;
+        }
+
+        ;
+        var sy = 1;
+
+        var optsions = _mmvis._.extend({
+          delay: Math.min(1000 / this._barsLen, 80),
+          easing: "Linear.None",
+          //"Back.Out",
+          duration: 500
+        }, opt);
+
+        var barCount = 0;
+
+        _mmvis._.each(me.enabledField, function (h_group, g) {
+          h_group = _mmvis._.flatten([h_group]);
+          var vLen = h_group.length;
+          if (vLen == 0) return;
+
+          for (var h = 0; h < me._dataLen; h++) {
+            for (var v = 0; v < vLen; v++) {
+              var nodeData = me.data[h_group[v]][h];
+              var group = me.barsSp.getChildById("barGroup_" + h);
+              var bar = group.getChildById("bar_" + h + "_" + nodeData.field);
+
+              if (optsions.duration == 0) {
+                bar.context.scaleY = sy;
+                bar.context.y = sy * sy * bar.finalPos.y;
+                bar.context.x = bar.finalPos.x;
+                bar.context.width = bar.finalPos.width;
+                bar.context.height = bar.finalPos.height;
+              } else {
+                if (bar._tweenObj) {
+                  AnimationFrame.destroyTween(bar._tweenObj);
+                }
+
+                ;
+                bar._tweenObj = bar.animate({
+                  scaleY: sy,
+                  y: sy * bar.finalPos.y,
+                  x: bar.finalPos.x,
+                  width: bar.finalPos.width,
+                  height: bar.finalPos.height
+                }, {
+                  duration: optsions.duration,
+                  easing: optsions.easing,
+                  delay: h * optsions.delay,
+                  onUpdate: function onUpdate(arg) {},
+                  onComplete: function onComplete(arg) {
+                    if (arg.width < 3 && this.context) {
+                      this.context.radius = 0;
+                    }
+
+                    barCount++;
+
+                    if (barCount === me.node._count) {
+                      callback && callback(me);
+                    }
+                  },
+                  id: bar.id
+                });
+              }
+
+              ;
+            }
+
+            ;
+          }
+
+          ;
+        });
+      }
+    }, {
+      key: "selectAt",
+      value: function selectAt(ind) {
+        var me = this;
+        if (_mmvis._.indexOf(this.select.inds, ind) > -1) return;
+        this.select.inds.push(ind); //因为这里是带上了start的全局的index，
+
+        var index = ind - this.dataFrame.range.start;
+
+        _mmvis._.each(this.data, function (list, f) {
+          var nodeData = list[index];
+          nodeData.selected = true;
+          me.setNodeElementStyle(nodeData);
+        });
+
+        var group = this.barsSp.getChildById("barGroup_" + index);
+
+        if (group) {
+          var groupRegion = group.getChildById("group_region_" + index);
+
+          if (groupRegion) {
+            groupRegion.context.globalAlpha = this.select.alpha;
+          }
+        }
+      }
+    }, {
+      key: "unselectAt",
+      value: function unselectAt(ind) {
+        var me = this;
+        if (_mmvis._.indexOf(this.select.inds, ind) == -1) return;
+
+        var _index = _mmvis._.indexOf(this.select.inds, ind);
+
+        this.select.inds.splice(_index, 1);
+        var index = ind - this.dataFrame.range.start;
+
+        _mmvis._.each(this.data, function (list, f) {
+          var nodeData = list[index];
+          nodeData.selected = false;
+          me.setNodeElementStyle(nodeData);
+        });
+
+        var group = this.barsSp.getChildById("barGroup_" + index);
+
+        if (group) {
+          var groupRegion = group.getChildById("group_region_" + index);
+
+          if (groupRegion) {
+            groupRegion.context.globalAlpha = 0;
+          }
+        }
+      }
+    }, {
+      key: "getSelectedRowList",
+      value: function getSelectedRowList() {
+        var rowDatas = [];
+        var me = this;
+
+        _mmvis._.each(me.select.inds, function (ind) {
+          //TODO: 这里的inds 是全局的，而getRowDataAt只能获取到当前视图内的数据
+          //所以用这个接口会有问题
+          //var index = ind - me.dataFrame.range.start;
+          //rowDatas.push( me.dataFrame.getRowDataAt( index ) )
+          rowDatas.push(me.dataFrame.jsonOrg[ind]);
+        });
+
+        return rowDatas;
+      }
+    }, {
+      key: "setNodeElementStyle",
+      value: function setNodeElementStyle(nodeData) {
+        var me = this;
+
+        var fillStyle = me._getColor(me.node.fillStyle, nodeData);
+
+        nodeData.nodeElement.context.fillStyle = fillStyle;
+      }
+    }, {
+      key: "getGraphSelectOpt",
+      value: function getGraphSelectOpt() {
+        var me = this; //如果某个graph 配置了select ----start
+
+        var selectOpt = me._opt.select;
+
+        if (!selectOpt) {
+          var barGraphs = me.app.getComponents({
+            name: 'graphs',
+            type: 'bar'
+          });
+
+          _mmvis._.each(barGraphs, function (barGraph) {
+            if (selectOpt) return false;
+
+            if (!selectOpt && barGraph._opt.select) {
+              selectOpt = barGraph.select;
+            }
+
+            ;
+          });
+        }
+
+        ;
+        return selectOpt;
+      }
+    }]);
+
+    return BarGraphs;
+  }(_index3["default"]);
+
+  _mmvis.global.registerComponent(BarGraphs, 'graphs', 'bar');
+
+  exports["default"] = BarGraphs;
+});

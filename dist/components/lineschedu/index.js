@@ -1,1 +1,338 @@
-"use strict";!function(t,e){if("function"==typeof define&&define.amd)define(["exports","../component","canvax","mmvis"],e);else if("undefined"!=typeof exports)e(exports,require("../component"),require("canvax"),require("mmvis"));else{var i={};e(i,t.component,t.canvax,t.mmvis),t.undefined=i}}(void 0,function(t,e,i,y){Object.defineProperty(t,"__esModule",{value:!0});var n=o(e),g=o(i);function o(t){return t&&t.__esModule?t:{default:t}}function r(t){return(r="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(t){return typeof t}:function(t){return t&&"function"==typeof Symbol&&t.constructor===Symbol&&t!==Symbol.prototype?"symbol":typeof t})(t)}function l(t){return(l=Object.setPrototypeOf?Object.getPrototypeOf:function(t){return t.__proto__||Object.getPrototypeOf(t)})(t)}function a(t){if(void 0===t)throw new ReferenceError("this hasn't been initialised - super() hasn't been called");return t}function s(t,e){for(var i=0;i<e.length;i++){var n=e[i];n.enumerable=n.enumerable||!1,n.configurable=!0,"value"in n&&(n.writable=!0),Object.defineProperty(t,n.key,n)}}function u(t,e,i){return e&&s(t.prototype,e),i&&s(t,i),t}function d(t,e){return(d=Object.setPrototypeOf||function(t,e){return t.__proto__=e,t})(t,e)}var f=(function(t,e){if("function"!=typeof e&&null!==e)throw new TypeError("Super expression must either be null or a function");t.prototype=Object.create(e&&e.prototype,{constructor:{value:t,writable:!0,configurable:!0}}),e&&d(t,e)}(p,n.default),u(p,null,[{key:"defaultProps",value:function(){return{lineField:{detail:"对应的line字段",default:null},style:{detail:"默认色",default:"#3995ff"},fillStyle:{detail:"节点填充色",default:"#ffffff"},lineWidth:{detail:"线宽",default:2},radius:{detail:"圆点半径",default:6},timeFontSize:{detail:"时间文本大小",default:14},timeFontColor:{detail:"时间文本颜色",default:"#606060"},listFontSize:{detail:"列表信息文本大小",default:12}}}}]),u(p,[{key:"reset",value:function(t){y._.extend(!0,this,t),this.lineDatas=null,this.sprite.removeAllChildren(),this.draw()}},{key:"draw",value:function(){var t=this,e=this.app.getComponent({name:"coord"});this.pos={x:e.origin.x,y:e.origin.y},this.setPosition();var i=t.app.getComponent({name:"graphs",type:"line",field:t.lineField});t.lineDatas=i.data[t.lineField].data;var n=this.app.getComponent({name:"coord"}).getAxis({type:"xAxis"}).getIndexOfVal(this.time);if(-1!=n){var o=this.lineDatas[n];if(null!=o.y){var r=t._getNodeY(o,e),l=o.x,a=new g.default.Display.Sprite({context:{x:l-20}});this.sprite.addChild(a);var s=0,u=new g.default.Display.Text(t.time,{context:{fillStyle:this.timeFontColor||this.style,fontSize:this.timeFontSize}});a.addChild(u),s=u.getTextHeight();var d=u.getTextWidth(),f=new g.default.Display.Text(y._.flatten([t.list]).join("\n"),{context:{y:s,fillStyle:this.listFontColor||this.style,fontSize:this.listFontSize}});a.addChild(f),s+=f.getTextHeight(),(d=Math.max(d,f.getTextWidth()))+l-20>e.width+t.app.padding.right&&(a.context.x=e.width+t.app.padding.right,u.context.textAlign="right",f.context.textAlign="right");var p=0;"online"==t.status?(p=r-(this.radius+3)-s,Math.abs(p)>e.origin.y&&(p=-e.origin.y,r=-(e.origin.y-(this.radius+3)-s))):0<(p=r+(this.radius+3))+s&&(p=-s,r=-(this.radius+3)-s),a.context.y=p;var h=new g.default.Shapes.BrokenLine({context:{pointList:[[l,r],[l,o.y]],strokeStyle:t.style,lineWidth:t.lineWidth}});t.sprite.addChild(h);var c=new g.default.Shapes.Circle({context:{x:l,y:r,r:t.radius,fillStyle:t.fillStyle,strokeStyle:t.style,lineWidth:t.lineWidth}});t.sprite.addChild(c)}}}},{key:"_getNodeY",value:function(t,e){var i=this.app.height,n=(e.height,t.y);return"online"==this.status?n-=Math.min(50,.3*(i-Math.abs(n))):n+=Math.min(50,.3*Math.abs(n)),n}}]),p);function p(t,e){var i;return function(t,e){if(!(t instanceof e))throw new TypeError("Cannot call a class as a function")}(this,p),(i=function(t,e){return!e||"object"!==r(e)&&"function"!=typeof e?a(t):e}(this,l(p).call(this,t,e))).name="lineSchedu",y._.extend(!0,a(i),(0,y.getDefaultProps)(p.defaultProps()),t),i.lineDatas=null,i.sprite=new g.default.Display.Sprite,i.app.graphsSprite.addChild(i.sprite),i}y.global.registerComponent(f,"lineSchedu"),t.default=f});
+"use strict";
+
+(function (global, factory) {
+  if (typeof define === "function" && define.amd) {
+    define(["exports", "../component", "canvax", "mmvis"], factory);
+  } else if (typeof exports !== "undefined") {
+    factory(exports, require("../component"), require("canvax"), require("mmvis"));
+  } else {
+    var mod = {
+      exports: {}
+    };
+    factory(mod.exports, global.component, global.canvax, global.mmvis);
+    global.undefined = mod.exports;
+  }
+})(void 0, function (exports, _component, _canvax, _mmvis) {
+  "use strict";
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+
+  var _component2 = _interopRequireDefault(_component);
+
+  var _canvax2 = _interopRequireDefault(_canvax);
+
+  function _interopRequireDefault(obj) {
+    return obj && obj.__esModule ? obj : {
+      default: obj
+    };
+  }
+
+  function _typeof(obj) {
+    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
+      _typeof = function _typeof(obj) {
+        return typeof obj;
+      };
+    } else {
+      _typeof = function _typeof(obj) {
+        return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+      };
+    }
+
+    return _typeof(obj);
+  }
+
+  function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+
+  function _possibleConstructorReturn(self, call) {
+    if (call && (_typeof(call) === "object" || typeof call === "function")) {
+      return call;
+    }
+
+    return _assertThisInitialized(self);
+  }
+
+  function _getPrototypeOf(o) {
+    _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) {
+      return o.__proto__ || Object.getPrototypeOf(o);
+    };
+    return _getPrototypeOf(o);
+  }
+
+  function _assertThisInitialized(self) {
+    if (self === void 0) {
+      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+    }
+
+    return self;
+  }
+
+  function _defineProperties(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor) descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+
+  function _createClass(Constructor, protoProps, staticProps) {
+    if (protoProps) _defineProperties(Constructor.prototype, protoProps);
+    if (staticProps) _defineProperties(Constructor, staticProps);
+    return Constructor;
+  }
+
+  function _inherits(subClass, superClass) {
+    if (typeof superClass !== "function" && superClass !== null) {
+      throw new TypeError("Super expression must either be null or a function");
+    }
+
+    subClass.prototype = Object.create(superClass && superClass.prototype, {
+      constructor: {
+        value: subClass,
+        writable: true,
+        configurable: true
+      }
+    });
+    if (superClass) _setPrototypeOf(subClass, superClass);
+  }
+
+  function _setPrototypeOf(o, p) {
+    _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) {
+      o.__proto__ = p;
+      return o;
+    };
+
+    return _setPrototypeOf(o, p);
+  }
+
+  var lineSchedu = function (_Component) {
+    _inherits(lineSchedu, _Component);
+
+    _createClass(lineSchedu, null, [{
+      key: "defaultProps",
+      value: function defaultProps() {
+        return {
+          lineField: {
+            detail: '对应的line字段',
+            "default": null
+          },
+          style: {
+            detail: '默认色',
+            "default": '#3995ff'
+          },
+          fillStyle: {
+            detail: '节点填充色',
+            "default": "#ffffff"
+          },
+          lineWidth: {
+            detail: '线宽',
+            "default": 2
+          },
+          radius: {
+            detail: '圆点半径',
+            "default": 6
+          },
+          timeFontSize: {
+            detail: '时间文本大小',
+            "default": 14
+          },
+          timeFontColor: {
+            detail: '时间文本颜色',
+            "default": '#606060'
+          },
+          listFontSize: {
+            detail: '列表信息文本大小',
+            "default": 12
+          }
+        };
+      }
+    }]);
+
+    function lineSchedu(opt, app) {
+      var _this;
+
+      _classCallCheck(this, lineSchedu);
+
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(lineSchedu).call(this, opt, app));
+      _this.name = "lineSchedu";
+
+      _mmvis._.extend(true, _assertThisInitialized(_this), (0, _mmvis.getDefaultProps)(lineSchedu.defaultProps()), opt);
+
+      _this.lineDatas = null;
+      _this.sprite = new _canvax2["default"].Display.Sprite();
+
+      _this.app.graphsSprite.addChild(_this.sprite);
+
+      return _this;
+    }
+
+    _createClass(lineSchedu, [{
+      key: "reset",
+      value: function reset(opt) {
+        _mmvis._.extend(true, this, opt);
+
+        this.lineDatas = null;
+        this.sprite.removeAllChildren();
+        this.draw();
+      }
+    }, {
+      key: "draw",
+      value: function draw() {
+        var me = this;
+
+        var _coord = this.app.getComponent({
+          name: 'coord'
+        });
+
+        this.pos = {
+          x: _coord.origin.x,
+          y: _coord.origin.y
+        };
+        this.setPosition();
+        var lineGraphs = me.app.getComponent({
+          name: 'graphs',
+          type: "line",
+          field: me.lineField
+        });
+        me.lineDatas = lineGraphs.data[me.lineField].data;
+        var iNode = this.app.getComponent({
+          name: "coord"
+        }).getAxis({
+          type: "xAxis"
+        }).getIndexOfVal(this.time);
+
+        if (iNode == -1) {
+          return;
+        }
+
+        ;
+        var nodeData = this.lineDatas[iNode];
+
+        if (nodeData.y != undefined) {
+          var y = me._getNodeY(nodeData, _coord);
+
+          var x = nodeData.x;
+
+          var _txtSp = new _canvax2["default"].Display.Sprite({
+            context: {
+              x: x - 20
+            }
+          });
+
+          this.sprite.addChild(_txtSp);
+          var txtHeight = 0;
+
+          var _title = new _canvax2["default"].Display.Text(me.time, {
+            context: {
+              fillStyle: this.timeFontColor || this.style,
+              fontSize: this.timeFontSize
+            }
+          });
+
+          _txtSp.addChild(_title);
+
+          var txtHeight = _title.getTextHeight();
+
+          var txtWidth = _title.getTextWidth();
+
+          var _list = new _canvax2["default"].Display.Text(_mmvis._.flatten([me.list]).join("\n"), {
+            context: {
+              y: txtHeight,
+              fillStyle: this.listFontColor || this.style,
+              fontSize: this.listFontSize
+            }
+          });
+
+          _txtSp.addChild(_list);
+
+          txtHeight += _list.getTextHeight();
+          txtWidth = Math.max(txtWidth, _list.getTextWidth());
+
+          if (txtWidth + x - 20 > _coord.width + me.app.padding.right) {
+            _txtSp.context.x = _coord.width + me.app.padding.right;
+            _title.context.textAlign = "right";
+            _list.context.textAlign = "right";
+          }
+
+          ;
+          var tsTop = 0;
+
+          if (me.status == "online") {
+            tsTop = y - (this.radius + 3) - txtHeight;
+
+            if (Math.abs(tsTop) > _coord.origin.y) {
+              tsTop = -_coord.origin.y;
+              y = -(_coord.origin.y - (this.radius + 3) - txtHeight);
+            }
+
+            ;
+          } else {
+            tsTop = y + (this.radius + 3);
+
+            if (tsTop + txtHeight > 0) {
+              tsTop = -txtHeight;
+              y = -(this.radius + 3) - txtHeight;
+            }
+
+            ;
+          }
+
+          ;
+          _txtSp.context.y = tsTop;
+
+          var _line = new _canvax2["default"].Shapes.BrokenLine({
+            context: {
+              pointList: [[x, y], [x, nodeData.y]],
+              strokeStyle: me.style,
+              lineWidth: me.lineWidth
+            }
+          });
+
+          me.sprite.addChild(_line);
+
+          var _node = new _canvax2["default"].Shapes.Circle({
+            context: {
+              x: x,
+              y: y,
+              r: me.radius,
+              fillStyle: me.fillStyle,
+              strokeStyle: me.style,
+              lineWidth: me.lineWidth
+            }
+          });
+
+          me.sprite.addChild(_node);
+        }
+      }
+    }, {
+      key: "_getNodeY",
+      value: function _getNodeY(nodeData, _coord) {
+        var appHeight = this.app.height;
+        var coordHeight = _coord.height;
+        var y = nodeData.y;
+
+        if (this.status == "online") {
+          y -= Math.min(50, (appHeight - Math.abs(y)) * 0.3);
+        } else {
+          y += Math.min(50, Math.abs(y) * 0.3);
+        }
+
+        ;
+        return y;
+      }
+    }]);
+
+    return lineSchedu;
+  }(_component2["default"]);
+
+  _mmvis.global.registerComponent(lineSchedu, 'lineSchedu');
+
+  exports["default"] = lineSchedu;
+});

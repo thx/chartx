@@ -1,1 +1,602 @@
-"use strict";!function(t,e){if("function"==typeof define&&define.amd)define(["exports","canvax","../index","mmvis"],e);else if("undefined"!=typeof exports)e(exports,require("canvax"),require("../index"),require("mmvis"));else{var l={};e(l,t.canvax,t.index,t.mmvis),t.undefined=l}}(void 0,function(t,e,l,b){Object.defineProperty(t,"__esModule",{value:!0});var h=n(e);function n(t){return t&&t.__esModule?t:{default:t}}function i(t){return(i="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(t){return typeof t}:function(t){return t&&"function"==typeof Symbol&&t.constructor===Symbol&&t!==Symbol.prototype?"symbol":typeof t})(t)}function a(t){return(a=Object.setPrototypeOf?Object.getPrototypeOf:function(t){return t.__proto__||Object.getPrototypeOf(t)})(t)}function o(t){if(void 0===t)throw new ReferenceError("this hasn't been initialised - super() hasn't been called");return t}function r(t,e){for(var l=0;l<e.length;l++){var n=e[l];n.enumerable=n.enumerable||!1,n.configurable=!0,"value"in n&&(n.writable=!0),Object.defineProperty(t,n.key,n)}}function d(t,e,l){return e&&r(t.prototype,e),l&&r(t,l),t}function u(t,e){return(u=Object.setPrototypeOf||function(t,e){return t.__proto__=e,t})(t,e)}var f=(function(t,e){if("function"!=typeof e&&null!==e)throw new TypeError("Super expression must either be null or a function");t.prototype=Object.create(e&&e.prototype,{constructor:{value:t,writable:!0,configurable:!0}}),e&&u(t,e)}(s,n(l).default),d(s,null,[{key:"defaultProps",value:function(){return{node:{detail:"进度条设置",propertys:{width:{detail:"进度条的宽度",default:20},radius:{detail:"进度条两端的圆角半径",default:10},fillStyle:{detail:"进度条的填充色",documentation:"可以是单个颜色，也可以是数组，也可以是一个函数,也可以是个lineargradient",default:null}}},label:{detail:"进度值文本",propertys:{enabled:{detail:"是否启用label",default:"true"},unit:{detail:"单位值，默认%",default:"%"},unitColor:{detail:"单位值的颜色",default:null},unitFontSize:{detail:"单位值的大小",default:14},fontColor:{detail:"label颜色",default:null},fontSize:{detail:"label文本大小",default:26},fixNum:{detail:"toFixed的位数",default:2},format:{detail:"label格式化处理函数",default:function(t){return t.toFixed(this.label.fixNum)}},lineWidth:{detail:"label文本描边线宽",default:null},strokeStyle:{detail:"label描边颜色",default:null},rotation:{detail:"label旋转角度",default:0},textAlign:{detail:"label textAlign",default:"center",values:["left","center","right"]},verticalAlign:{detail:"label verticalAlign",default:"middle",values:["top","middle","bottom"]},position:{detail:"label位置",default:"origin"},offsetX:{detail:"label在x方向的偏移量",default:0},offsetY:{detail:"label在y方向的偏移量",default:0}}},bgEnabled:{detail:"是否开启背景",default:!0},bgColor:{detail:"进度条背景颜色",default:"#f7f7f7"},radius:{detail:"半径",default:null},allAngle:{detail:"总角度",documentation:"默认为null，则和坐标系同步",default:null},startAngle:{detail:"其实角度",documentation:"默认为null，则和坐标系同步",default:null}}}}]),d(s,[{key:"init",value:function(){}},{key:"draw",value:function(t){t=t||{};var e=this;b._.extend(!0,this,t),e.grow(function(t){e.data=e._trimGraphs(t),e._widget()}),this.sprite.context.x=this.origin.x,this.sprite.context.y=this.origin.y}},{key:"_trimGraphs",value:function(d){var u=this;null==d&&(d=1);var t=this.app.getComponent({name:"coord"});this.enabledField=t.filterEnabledFields(this.field);var f=u.startAngle||t.startAngle,s=u.allAngle||t.allAngle;startAngle,allAngle,this.bgNodeData=this._getNodeData(f,s),this.bgNodeData.fillStyle=this._getStyle(this.bgNodeData,this.bgColor);var e={};return b._.each(this.enabledField,function(o){var t=u.dataFrame.getFieldData(o),r=[];b._.each(t,function(t,e){t*=d;var l=r.slice(-1)[0],n=l?l.endAngle:f,i=s*(t/100),a=u._getNodeData(n,i,o,t,e);a.fillStyle=u._getStyle(a,u.node.fillStyle),r.push(a)}),e[o]=r}),e}},{key:"_getNodeData",value:function(t,e,l,n,i){var a=this,o=this.app.getComponent({name:"coord"}),r=t+e/2,d=t+e,u=Math.PI*t/180,f=Math.PI*r/180,s=Math.PI*d/180,c=a.radius||o.radius,g=c-a.node.width,p={field:l,value:n,text:n,iNode:i,allAngle:e,startAngle:t,middleAngle:r,endAngle:d,startRadian:u,middleRadian:f,endRadian:s,outRadius:c,innerRadius:g,startOutPoint:o.getPointInRadianOfR(u,c),middleOutPoint:o.getPointInRadianOfR(f,c),endOutPoint:o.getPointInRadianOfR(s,c),startInnerPoint:o.getPointInRadianOfR(u,g),middleInnerPoint:o.getPointInRadianOfR(f,g),endInnerPoint:o.getPointInRadianOfR(s,g),rowData:a.dataFrame.getRowDataAt(i),fillStyle:null};return l&&a.label.format&&b._.isFunction(a.label.format)&&(p.text=a.label.format.apply(this,[n,p])),p}},{key:"_widget",value:function(){var p=this;if(p.bgEnabled){var t=p._getPathStr(this.bgNodeData);p._bgPathElement?p._bgPathElement.context.path=t:(p._bgPathElement=new h.default.Shapes.Path({context:{path:t}}),p.sprite.addChild(p._bgPathElement)),p._bgPathElement.context.fillStyle=this.bgNodeData.fillStyle}b._.each(this.data,function(t){b._.each(t,function(t,e){var l=p._getPathStr(t),n="progress_bar_"+t.field+"_"+e,i=p.sprite.getChildById(n);if(i?i.context.path=l:(i=new h.default.Shapes.Path({id:n,context:{path:l}}),p.sprite.addChild(i)),i.context.fillStyle=t.fillStyle,p.label.enabled){var a="progress_label_"+t.field+"_sprite_"+e,o=p.sprite.getChildById(a);o||(o=new h.default.Display.Sprite({id:a}),p.sprite.addChild(o)),o.context.x=p.label.offsetX-6,o.context.y=p.label.offsetY;var r={fillStyle:p.label.fontColor||t.fillStyle,fontSize:p.label.fontSize,lineWidth:p.label.lineWidth,strokeStyle:p.label.strokeStyle,textAlign:p.label.textAlign,textBaseline:p.label.verticalAlign,rotation:p.label.rotation},d="progress_label_"+t.field+"_"+e;if(u=o.getChildById(d))u.resetText(t.text),b._.extend(u.context,r);else{var u=new h.default.Display.Text(t.text,{id:d,context:r});o.addChild(u)}var f="progress_label_"+t.field+"_symbol_"+e,s=o.getChildById(f),c={x:u.getTextWidth()/2+2,y:3,fillStyle:p.label.unitColor||p.label.fontColor||t.fillStyle,fontSize:p.label.unitFontSize,textAlign:"left",textBaseline:p.label.verticalAlign};if(s)b._.extend(s.context,c);else{var g=p.label.unit;s=new h.default.Display.Text(g,{id:f,context:c}),o.addChild(s)}}})})}},{key:"_getPathStr",value:function(t){var e="M"+t.startOutPoint.x+" "+t.startOutPoint.y;return e+="A"+t.outRadius+" "+t.outRadius+" 0 0 1 "+t.middleOutPoint.x+" "+t.middleOutPoint.y,e+="A"+t.outRadius+" "+t.outRadius+" 0 0 1 "+t.endOutPoint.x+" "+t.endOutPoint.y,t.allAngle,e+="L"+t.endInnerPoint.x+" "+t.endInnerPoint.y,e+="A"+t.innerRadius+" "+t.innerRadius+" 0 0 0 "+t.middleInnerPoint.x+" "+t.middleInnerPoint.y,e+="A"+t.innerRadius+" "+t.innerRadius+" 0 0 0 "+t.startInnerPoint.x+" "+t.startInnerPoint.y,e+="Z"}},{key:"_getStyle",value:function(t,e,l){var n=this.app.getComponent({name:"coord"}).getFieldMapOf(t.field);if(l=l||(n?n.color:"#171717"),e&&(b._.isString(e)&&(i=e),b._.isArray(e)&&(i=e[t.iNode]),b._.isFunction(e)&&(i=e.apply(this,arguments)),e&&e.lineargradient)){var i=this.ctx.createLinearGradient(t.startOutPoint.x,t.startOutPoint.y,t.endOutPoint.x,t.endOutPoint.y);b._.each(e.lineargradient,function(t,e){i.addColorStop(t.position,t.color)})}return i=i||l}}]),s);function s(t,e){var l;return function(t,e){if(!(t instanceof e))throw new TypeError("Cannot call a class as a function")}(this,s),(l=function(t,e){return!e||"object"!==i(e)&&"function"!=typeof e?o(t):e}(this,a(s).call(this,t,e))).type="progress",b._.extend(!0,o(l),(0,b.getDefaultProps)(s.defaultProps()),t),l.bgNodeData=null,l.init(),l}b.global.registerComponent(f,"graphs","progress"),t.default=f});
+"use strict";
+
+(function (global, factory) {
+  if (typeof define === "function" && define.amd) {
+    define(["exports", "canvax", "../index", "mmvis"], factory);
+  } else if (typeof exports !== "undefined") {
+    factory(exports, require("canvax"), require("../index"), require("mmvis"));
+  } else {
+    var mod = {
+      exports: {}
+    };
+    factory(mod.exports, global.canvax, global.index, global.mmvis);
+    global.undefined = mod.exports;
+  }
+})(void 0, function (exports, _canvax, _index, _mmvis) {
+  "use strict";
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+
+  var _canvax2 = _interopRequireDefault(_canvax);
+
+  var _index2 = _interopRequireDefault(_index);
+
+  function _interopRequireDefault(obj) {
+    return obj && obj.__esModule ? obj : {
+      default: obj
+    };
+  }
+
+  function _typeof(obj) {
+    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
+      _typeof = function _typeof(obj) {
+        return typeof obj;
+      };
+    } else {
+      _typeof = function _typeof(obj) {
+        return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+      };
+    }
+
+    return _typeof(obj);
+  }
+
+  function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+
+  function _possibleConstructorReturn(self, call) {
+    if (call && (_typeof(call) === "object" || typeof call === "function")) {
+      return call;
+    }
+
+    return _assertThisInitialized(self);
+  }
+
+  function _getPrototypeOf(o) {
+    _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) {
+      return o.__proto__ || Object.getPrototypeOf(o);
+    };
+    return _getPrototypeOf(o);
+  }
+
+  function _assertThisInitialized(self) {
+    if (self === void 0) {
+      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+    }
+
+    return self;
+  }
+
+  function _defineProperties(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor) descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+
+  function _createClass(Constructor, protoProps, staticProps) {
+    if (protoProps) _defineProperties(Constructor.prototype, protoProps);
+    if (staticProps) _defineProperties(Constructor, staticProps);
+    return Constructor;
+  }
+
+  function _inherits(subClass, superClass) {
+    if (typeof superClass !== "function" && superClass !== null) {
+      throw new TypeError("Super expression must either be null or a function");
+    }
+
+    subClass.prototype = Object.create(superClass && superClass.prototype, {
+      constructor: {
+        value: subClass,
+        writable: true,
+        configurable: true
+      }
+    });
+    if (superClass) _setPrototypeOf(subClass, superClass);
+  }
+
+  function _setPrototypeOf(o, p) {
+    _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) {
+      o.__proto__ = p;
+      return o;
+    };
+
+    return _setPrototypeOf(o, p);
+  }
+
+  var Progress = function (_GraphsBase) {
+    _inherits(Progress, _GraphsBase);
+
+    _createClass(Progress, null, [{
+      key: "defaultProps",
+      value: function defaultProps() {
+        return {
+          node: {
+            detail: '进度条设置',
+            propertys: {
+              width: {
+                detail: '进度条的宽度',
+                "default": 20
+              },
+              radius: {
+                detail: '进度条两端的圆角半径',
+                "default": 10 //默认为width的一半
+
+              },
+              fillStyle: {
+                detail: '进度条的填充色',
+                documentation: '可以是单个颜色，也可以是数组，也可以是一个函数,也可以是个lineargradient',
+                "default": null
+              }
+            }
+          },
+          label: {
+            detail: '进度值文本',
+            propertys: {
+              enabled: {
+                detail: '是否启用label',
+                "default": 'true'
+              },
+              unit: {
+                detail: '单位值，默认%',
+                "default": '%'
+              },
+              unitColor: {
+                detail: '单位值的颜色',
+                "default": null
+              },
+              unitFontSize: {
+                detail: '单位值的大小',
+                "default": 14
+              },
+              fontColor: {
+                detail: 'label颜色',
+                "default": null //默认同node.fillStyle
+
+              },
+              fontSize: {
+                detail: 'label文本大小',
+                "default": 26
+              },
+              fixNum: {
+                detail: 'toFixed的位数',
+                "default": 2
+              },
+              format: {
+                detail: 'label格式化处理函数',
+                "default": function _default(val, nodeData) {
+                  return val.toFixed(this.label.fixNum);
+                }
+              },
+              lineWidth: {
+                detail: 'label文本描边线宽',
+                "default": null
+              },
+              strokeStyle: {
+                detail: 'label描边颜色',
+                "default": null
+              },
+              rotation: {
+                detail: 'label旋转角度',
+                "default": 0
+              },
+              textAlign: {
+                detail: 'label textAlign',
+                "default": 'center',
+                values: ['left', 'center', 'right']
+              },
+              //left center right
+              verticalAlign: {
+                detail: 'label verticalAlign',
+                "default": 'middle',
+                values: ['top', 'middle', 'bottom']
+              },
+              //top middle bottom
+              position: {
+                detail: 'label位置',
+                "default": 'origin'
+              },
+              offsetX: {
+                detail: 'label在x方向的偏移量',
+                "default": 0
+              },
+              offsetY: {
+                detail: 'label在y方向的偏移量',
+                "default": 0
+              }
+            }
+          },
+          bgEnabled: {
+            detail: '是否开启背景',
+            "default": true
+          },
+          bgColor: {
+            detail: '进度条背景颜色',
+            "default": '#f7f7f7'
+          },
+          radius: {
+            detail: '半径',
+            "default": null
+          },
+          allAngle: {
+            detail: '总角度',
+            documentation: '默认为null，则和坐标系同步',
+            "default": null
+          },
+          startAngle: {
+            detail: '其实角度',
+            documentation: '默认为null，则和坐标系同步',
+            "default": null
+          }
+        };
+      }
+    }]);
+
+    function Progress(opt, app) {
+      var _this;
+
+      _classCallCheck(this, Progress);
+
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(Progress).call(this, opt, app));
+      _this.type = "progress";
+
+      _mmvis._.extend(true, _assertThisInitialized(_this), (0, _mmvis.getDefaultProps)(Progress.defaultProps()), opt);
+
+      _this.bgNodeData = null; //背景的nodeData数据，和data里面的结构保持一致
+
+      _this.init();
+
+      return _this;
+    }
+
+    _createClass(Progress, [{
+      key: "init",
+      value: function init() {}
+    }, {
+      key: "draw",
+      value: function draw(opt) {
+        !opt && (opt = {});
+        var me = this;
+
+        _mmvis._.extend(true, this, opt);
+
+        me.grow(function (process) {
+          me.data = me._trimGraphs(process);
+
+          me._widget();
+        });
+        this.sprite.context.x = this.origin.x;
+        this.sprite.context.y = this.origin.y;
+      }
+    }, {
+      key: "_trimGraphs",
+      value: function _trimGraphs(scale) {
+        var me = this;
+
+        if (scale == undefined) {
+          scale = 1;
+        }
+
+        ;
+
+        var _coord = this.app.getComponent({
+          name: 'coord'
+        }); //用来计算下面的hLen
+
+
+        this.enabledField = _coord.filterEnabledFields(this.field); //整个的
+
+        var _startAngle = me.startAngle || _coord.startAngle;
+
+        var _allAngle = me.allAngle || _coord.allAngle;
+
+        var _endAngle = startAngle + allAngle;
+
+        this.bgNodeData = this._getNodeData(_startAngle, _allAngle);
+        this.bgNodeData.fillStyle = this._getStyle(this.bgNodeData, this.bgColor);
+        var data = {};
+
+        _mmvis._.each(this.enabledField, function (field) {
+          var dataOrg = me.dataFrame.getFieldData(field);
+          var nodeDatas = [];
+
+          _mmvis._.each(dataOrg, function (val, i) {
+            val *= scale;
+            var preNodeData = nodeDatas.slice(-1)[0];
+            var startAngle = preNodeData ? preNodeData.endAngle : _startAngle;
+            var allAngle = _allAngle * (val / 100);
+
+            var nodeData = me._getNodeData(startAngle, allAngle, field, val, i);
+
+            nodeData.fillStyle = me._getStyle(nodeData, me.node.fillStyle);
+            nodeDatas.push(nodeData);
+          });
+
+          data[field] = nodeDatas;
+        });
+
+        return data;
+      }
+    }, {
+      key: "_getNodeData",
+      value: function _getNodeData(startAngle, allAngle, field, val, i) {
+        var me = this;
+
+        var _coord = this.app.getComponent({
+          name: 'coord'
+        });
+
+        var middleAngle = startAngle + allAngle / 2;
+        var endAngle = startAngle + allAngle;
+        var startRadian = Math.PI * startAngle / 180; //起始弧度
+
+        var middleRadian = Math.PI * middleAngle / 180;
+        var endRadian = Math.PI * endAngle / 180; //终点弧度
+
+        var outRadius = me.radius || _coord.radius;
+        var innerRadius = outRadius - me.node.width;
+
+        var startOutPoint = _coord.getPointInRadianOfR(startRadian, outRadius);
+
+        var middleOutPoint = _coord.getPointInRadianOfR(middleRadian, outRadius);
+
+        var endOutPoint = _coord.getPointInRadianOfR(endRadian, outRadius);
+
+        var startInnerPoint = _coord.getPointInRadianOfR(startRadian, innerRadius);
+
+        var middleInnerPoint = _coord.getPointInRadianOfR(middleRadian, innerRadius);
+
+        var endInnerPoint = _coord.getPointInRadianOfR(endRadian, innerRadius);
+
+        var nodeData = {
+          field: field,
+          value: val,
+          text: val,
+          //value format后的数据
+          iNode: i,
+          allAngle: allAngle,
+          startAngle: startAngle,
+          middleAngle: middleAngle,
+          endAngle: endAngle,
+          startRadian: startRadian,
+          middleRadian: middleRadian,
+          endRadian: endRadian,
+          outRadius: outRadius,
+          innerRadius: innerRadius,
+          startOutPoint: startOutPoint,
+          middleOutPoint: middleOutPoint,
+          endOutPoint: endOutPoint,
+          startInnerPoint: startInnerPoint,
+          middleInnerPoint: middleInnerPoint,
+          endInnerPoint: endInnerPoint,
+          rowData: me.dataFrame.getRowDataAt(i),
+          fillStyle: null
+        };
+
+        if (field) {
+          if (me.label.format && _mmvis._.isFunction(me.label.format)) {
+            nodeData.text = me.label.format.apply(this, [val, nodeData]);
+          }
+
+          ;
+        }
+
+        ;
+        /*  样式的设置全部在外面处理
+        if( field ){
+            //没有field的说明是bgNodeData的调用,
+            nodeData.fillStyle = me._getStyle( nodeData, me.node.fillStyle );
+        };
+        */
+
+        /*
+        if( allAngle%360 > 180 ){
+            nodeData.large_arc_flag = 1;
+        };
+        */
+
+        return nodeData;
+      }
+    }, {
+      key: "_widget",
+      value: function _widget() {
+        var me = this;
+
+        if (me.bgEnabled) {
+          var bgPathStr = me._getPathStr(this.bgNodeData);
+
+          if (me._bgPathElement) {
+            me._bgPathElement.context.path = bgPathStr;
+          } else {
+            me._bgPathElement = new _canvax2["default"].Shapes.Path({
+              context: {
+                path: bgPathStr
+              }
+            });
+            me.sprite.addChild(me._bgPathElement);
+          }
+
+          ;
+          me._bgPathElement.context.fillStyle = this.bgNodeData.fillStyle;
+        }
+
+        ;
+
+        _mmvis._.each(this.data, function (nodeDatas) {
+          _mmvis._.each(nodeDatas, function (nodeData, i) {
+            var pathStr = me._getPathStr(nodeData);
+
+            var elId = "progress_bar_" + nodeData.field + "_" + i;
+            var pathElement = me.sprite.getChildById(elId);
+
+            if (pathElement) {
+              pathElement.context.path = pathStr;
+            } else {
+              pathElement = new _canvax2["default"].Shapes.Path({
+                id: elId,
+                context: {
+                  path: pathStr
+                }
+              });
+              me.sprite.addChild(pathElement);
+            }
+
+            ;
+            pathElement.context.fillStyle = nodeData.fillStyle;
+
+            if (me.label.enabled) {
+              var labelSpId = "progress_label_" + nodeData.field + "_sprite_" + i;
+              var labelSpElement = me.sprite.getChildById(labelSpId);
+
+              if (labelSpElement) {
+                labelSpElement;
+              } else {
+                labelSpElement = new _canvax2["default"].Display.Sprite({
+                  id: labelSpId
+                });
+                me.sprite.addChild(labelSpElement);
+              }
+
+              ;
+              labelSpElement.context.x = me.label.offsetX - 6; //%好会占一部分位置 所以往左边偏移6
+
+              labelSpElement.context.y = me.label.offsetY;
+              var labelCtx = {
+                fillStyle: me.label.fontColor || nodeData.fillStyle,
+                fontSize: me.label.fontSize,
+                lineWidth: me.label.lineWidth,
+                strokeStyle: me.label.strokeStyle,
+                textAlign: me.label.textAlign,
+                textBaseline: me.label.verticalAlign,
+                rotation: me.label.rotation
+              };
+              var labelId = "progress_label_" + nodeData.field + "_" + i;
+              var labelElement = labelSpElement.getChildById(labelId);
+
+              if (labelElement) {
+                labelElement.resetText(nodeData.text);
+
+                _mmvis._.extend(labelElement.context, labelCtx);
+              } else {
+                var labelElement = new _canvax2["default"].Display.Text(nodeData.text, {
+                  id: labelId,
+                  context: labelCtx
+                });
+                labelSpElement.addChild(labelElement);
+              }
+
+              ;
+              var labelSymbolId = "progress_label_" + nodeData.field + "_symbol_" + i;
+              var labelSymbolElement = labelSpElement.getChildById(labelSymbolId);
+              var lebelSymbolCxt = {
+                x: labelElement.getTextWidth() / 2 + 2,
+                y: 3,
+                fillStyle: me.label.unitColor || me.label.fontColor || nodeData.fillStyle,
+                fontSize: me.label.unitFontSize,
+                textAlign: "left",
+                textBaseline: me.label.verticalAlign
+              };
+
+              if (labelSymbolElement) {
+                _mmvis._.extend(labelSymbolElement.context, lebelSymbolCxt);
+              } else {
+                var unitText = me.label.unit;
+                var labelSymbolElement = new _canvax2["default"].Display.Text(unitText, {
+                  id: labelSymbolId,
+                  context: lebelSymbolCxt
+                });
+                labelSpElement.addChild(labelSymbolElement);
+              }
+
+              ;
+            }
+
+            ;
+          });
+        });
+      }
+    }, {
+      key: "_getPathStr",
+      value: function _getPathStr(nodeData) {
+        var pathStr = "M" + nodeData.startOutPoint.x + " " + nodeData.startOutPoint.y;
+        pathStr += "A" + nodeData.outRadius + " " + nodeData.outRadius + " 0 0 1 " + nodeData.middleOutPoint.x + " " + nodeData.middleOutPoint.y;
+        pathStr += "A" + nodeData.outRadius + " " + nodeData.outRadius + " 0 0 1 " + nodeData.endOutPoint.x + " " + nodeData.endOutPoint.y;
+        var actionType = "L";
+
+        if (nodeData.allAngle % 360 == 0) {//actionType = "M" 
+        }
+
+        ;
+        pathStr += actionType + nodeData.endInnerPoint.x + " " + nodeData.endInnerPoint.y;
+        pathStr += "A" + nodeData.innerRadius + " " + nodeData.innerRadius + " 0 0 0 " + nodeData.middleInnerPoint.x + " " + nodeData.middleInnerPoint.y;
+        pathStr += "A" + nodeData.innerRadius + " " + nodeData.innerRadius + " 0 0 0 " + nodeData.startInnerPoint.x + " " + nodeData.startInnerPoint.y;
+        pathStr += "Z";
+        return pathStr;
+      }
+    }, {
+      key: "_getStyle",
+      value: function _getStyle(nodeData, prop, def) {
+        var me = this;
+
+        var _coord = this.app.getComponent({
+          name: 'coord'
+        });
+
+        var fieldMap = _coord.getFieldMapOf(nodeData.field);
+
+        def = def || (fieldMap ? fieldMap.color : "#171717");
+        var style;
+
+        if (prop) {
+          if (_mmvis._.isString(prop)) {
+            style = prop;
+          }
+
+          ;
+
+          if (_mmvis._.isArray(prop)) {
+            style = prop[nodeData.iNode];
+          }
+
+          ;
+
+          if (_mmvis._.isFunction(prop)) {
+            style = prop.apply(this, arguments);
+          }
+
+          ;
+
+          if (prop && prop.lineargradient) {
+            var style = me.ctx.createLinearGradient(nodeData.startOutPoint.x, nodeData.startOutPoint.y, nodeData.endOutPoint.x, nodeData.endOutPoint.y);
+
+            _mmvis._.each(prop.lineargradient, function (item, i) {
+              style.addColorStop(item.position, item.color);
+            });
+          }
+
+          ;
+        }
+
+        if (!style) {
+          style = def;
+        }
+
+        return style;
+      }
+    }]);
+
+    return Progress;
+  }(_index2["default"]);
+
+  _mmvis.global.registerComponent(Progress, 'graphs', 'progress');
+
+  exports["default"] = Progress;
+});

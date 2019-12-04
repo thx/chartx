@@ -1,1 +1,68 @@
-"use strict";!function(e,n){if("function"==typeof define&&define.amd)define(["exports"],n);else if("undefined"!=typeof exports)n(exports);else{var t={};n(t),(void 0).undefined=t}}(0,function(e){function r(e,n,t){return(n[0]-e[0])*(t[1]-e[1])-(n[1]-e[1])*(t[0]-e[0])}Object.defineProperty(e,"__esModule",{value:!0}),e.default=function(e){var n=function(e){for(var n=[],t=0;t<e.length;t++){for(;2<=n.length&&r(n[n.length-2],n[n.length-1],e[t])<=0;)n.pop();n.push(e[t])}return n.pop(),n}(e),t=function(e){for(var n=e.reverse(),t=[],o=0;o<n.length;o++){for(;2<=t.length&&r(t[t.length-2],t[t.length-1],n[o])<=0;)t.pop();t.push(n[o])}return t.pop(),t}(e).concat(n);return t.push(e[0]),t}});
+"use strict";
+
+(function (global, factory) {
+  if (typeof define === "function" && define.amd) {
+    define(["exports"], factory);
+  } else if (typeof exports !== "undefined") {
+    factory(exports);
+  } else {
+    var mod = {
+      exports: {}
+    };
+    factory(mod.exports);
+    global.undefined = mod.exports;
+  }
+})(void 0, function (exports) {
+  "use strict";
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+
+  function _cross(o, a, b) {
+    return (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
+  }
+
+  function _upperTangent(pointset) {
+    var lower = [];
+
+    for (var l = 0; l < pointset.length; l++) {
+      while (lower.length >= 2 && _cross(lower[lower.length - 2], lower[lower.length - 1], pointset[l]) <= 0) {
+        lower.pop();
+      }
+
+      lower.push(pointset[l]);
+    }
+
+    lower.pop();
+    return lower;
+  }
+
+  function _lowerTangent(pointset) {
+    var reversed = pointset.reverse(),
+        upper = [];
+
+    for (var u = 0; u < reversed.length; u++) {
+      while (upper.length >= 2 && _cross(upper[upper.length - 2], upper[upper.length - 1], reversed[u]) <= 0) {
+        upper.pop();
+      }
+
+      upper.push(reversed[u]);
+    }
+
+    upper.pop();
+    return upper;
+  } // pointset has to be sorted by X
+
+
+  function convex(pointset) {
+    var upper = _upperTangent(pointset),
+        lower = _lowerTangent(pointset);
+
+    var convex = lower.concat(upper);
+    convex.push(pointset[0]);
+    return convex;
+  }
+
+  exports["default"] = convex;
+});

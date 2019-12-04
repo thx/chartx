@@ -1,1 +1,476 @@
-"use strict";!function(t,n){if("function"==typeof define&&define.amd)define(["exports","../utils/dispatch"],n);else if("undefined"!=typeof exports)n(exports,require("../utils/dispatch"));else{var e={};n(e,t.dispatch),t.undefined=e}}(void 0,function(t,n){Object.defineProperty(t,"__esModule",{value:!0});var e,r=(e=n)&&e.__esModule?e:{default:e};var q=Math.PI/180,D=64,S=2048;function a(t){return t.text}function i(){return"serif"}function o(){return"normal"}function u(t){return Math.sqrt(t.value)}function f(){return 30*(~~(6*Math.random())-3)}function b(){return 1}function z(t,n,e,r){if(!n.sprite){var a=t.context,i=t.ratio;a.clearRect(0,0,(D<<5)/i,S/i);var o=0,u=0,f=0,l=e.length;for(--r;++r<l;){n=e[r],a.save(),a.font=n.style+" "+n.weight+" "+~~((n.size+1)/i)+"px "+n.font;var c=a.measureText(n.text+"m").width*i,s=n.size<<1;if(n.rotate){var h=Math.sin(n.rotate*q),x=Math.cos(n.rotate*q),y=c*x,d=c*h,v=s*x,g=s*h;c=Math.max(Math.abs(y+g),Math.abs(y-g))+31>>5<<5,s=~~Math.max(Math.abs(d+v),Math.abs(d-v))}else c=c+31>>5<<5;if(f<s&&(f=s),D<<5<=o+c&&(u+=f,f=o=0),S<=u+s)break;a.translate((o+(c>>1))/i,(u+(s>>1))/i),n.rotate&&a.rotate(n.rotate*q),a.fillText(n.text,0,0),n.padding&&(a.lineWidth=2*n.padding,a.strokeText(n.text,0,0)),a.restore(),n.width=c,n.height=s,n.xoff=o,n.yoff=u,n.x1=c>>1,n.y1=s>>1,n.x0=-n.x1,n.y0=-n.y1,n.hasText=!0,o+=c}for(var p=a.getImageData(0,0,(D<<5)/i,S/i).data,M=[];0<=--r;)if((n=e[r]).hasText){for(var m=(c=n.width)>>5,w=(s=n.y1-n.y0,0);w<s*m;w++)M[w]=0;if(null==(o=n.xoff))return;u=n.yoff;for(var b=0,z=-1,I=0;I<s;I++){for(w=0;w<c;w++){var k=m*I+(w>>5),T=p[(u+I)*(D<<5)+(o+w)<<2]?1<<31-w%32:0;M[k]|=T,b|=T}b?z=I:(n.y0++,s--,I--,u++)}n.y1=n.y0+z,n.sprite=M.slice(0,(n.y1-n.y0)*m)}}}function _(t,n,e){e>>=5;for(var r,a=t.sprite,i=t.width>>5,o=t.x-(i<<4),u=127&o,f=32-u,l=t.y1-t.y0,c=(t.y+t.y0)*e+(o>>5),s=0;s<l;s++){for(var h=r=0;h<=i;h++)if((r<<f|(h<i?(r=a[s*i+h])>>>u:0))&n[c+h])return!0;c+=e}return!1}function I(t,n){var e=t[0],r=t[1];n.x+n.x0<e.x&&(e.x=n.x+n.x0),n.y+n.y0<e.y&&(e.y=n.y+n.y0),n.x+n.x1>r.x&&(r.x=n.x+n.x1),n.y+n.y1>r.y&&(r.y=n.y+n.y1)}function C(t){var n=t[0]/t[1];return function(t){return[n*(t*=.1)*Math.cos(t),t*Math.sin(t)]}}function P(){return document.createElement("canvas")}function W(t){return"function"==typeof t?t:function(){return t}}var j={archimedean:C,rectangular:function(t){var e=4*t[0]/t[1],r=0,a=0;return function(t){var n=t<0?-1:1;switch(Math.sqrt(1+4*n*t)-n&3){case 0:r+=e;break;case 1:a+=4;break;case 2:r-=e;break;default:a-=4}return[r,a]}}};t.default=function(){var k=[256,256],l=a,c=i,s=u,h=o,x=o,y=f,d=b,T=C,n=[],v=1/0,g=(0,r.default)("word","end"),p=null,q=Math.random,M={},m=P;function w(t,n,e){k[0],k[1];for(var r,a,i,o,u,f=n.x,l=n.y,c=Math.sqrt(k[0]*k[0]+k[1]*k[1]),s=T(k),h=q()<.5?1:-1,x=-h;(r=s(x+=h))&&(a=~~r[0],i=~~r[1],!(Math.min(Math.abs(a),Math.abs(i))>=c));)if(n.x=f+a,n.y=l+i,!(n.x+n.x0<0||n.y+n.y0<0||n.x+n.x1>k[0]||n.y+n.y1>k[1]||e&&_(n,t,k[0])||e&&(u=e,!((o=n).x+o.x1>u[0].x&&o.x+o.x0<u[1].x&&o.y+o.y1>u[0].y&&o.y+o.y0<u[1].y)))){for(var y,d=n.sprite,v=n.width>>5,g=k[0]>>5,p=n.x-(v<<4),M=127&p,m=32-M,w=n.y1-n.y0,b=(n.y+n.y0)*g+(p>>5),z=0;z<w;z++){for(var I=y=0;I<=v;I++)t[b+I]|=y<<m|(I<v?(y=d[z*v+I])>>>M:0);b+=g}return delete n.sprite,!0}return!1}return M.canvas=function(t){return arguments.length?(m=W(t),M):m},M.start=function(){var e=function(t){t.width=t.height=1;var n=Math.sqrt(t.getContext("2d").getImageData(0,0,1,1).data.length>>2);t.width=(D<<5)/n,t.height=S/n;var e=t.getContext("2d");return e.fillStyle=e.strokeStyle="red",e.textAlign="center",{context:e,ratio:n}}(m()),r=function(t){var n=[],e=-1;for(;++e<t;)n[e]=0;return n}((k[0]>>5)*k[1]),a=null,i=n.length,o=-1,u=[],f=n.map(function(t,n){return t.text=l.call(this,t,n),t.font=c.call(this,t,n),t.style=h.call(this,t,n),t.weight=x.call(this,t,n),t.rotate=y.call(this,t,n),t.size=~~s.call(this,t,n),t.padding=d.call(this,t,n),t}).sort(function(t,n){return n.size-t.size});return p&&clearInterval(p),p=setInterval(t,0),t(),M;function t(){for(var t=Date.now();Date.now()-t<v&&++o<i&&p;){var n=f[o];n.x=k[0]*(q()+.5)>>1,n.y=k[1]*(q()+.5)>>1,z(e,n,f,o),n.hasText&&w(r,n,a)&&(u.push(n),g.call("word",M,n),a?I(a,n):a=[{x:n.x+n.x0,y:n.y+n.y0},{x:n.x+n.x1,y:n.y+n.y1}],n.x-=k[0]>>1,n.y-=k[1]>>1)}i<=o&&(M.stop(),g.call("end",M,u,a))}},M.stop=function(){return p&&(clearInterval(p),p=null),M},M.timeInterval=function(t){return arguments.length?(v=null==t?1/0:t,M):v},M.words=function(t){return arguments.length?(n=t,M):n},M.size=function(t){return arguments.length?(k=[+t[0],+t[1]],M):k},M.font=function(t){return arguments.length?(c=W(t),M):c},M.fontStyle=function(t){return arguments.length?(h=W(t),M):h},M.fontWeight=function(t){return arguments.length?(x=W(t),M):x},M.rotate=function(t){return arguments.length?(y=W(t),M):y},M.text=function(t){return arguments.length?(l=W(t),M):l},M.spiral=function(t){return arguments.length?(T=j[t]||t,M):T},M.fontSize=function(t){return arguments.length?(s=W(t),M):s},M.padding=function(t){return arguments.length?(d=W(t),M):d},M.random=function(t){return arguments.length?(q=t,M):q},M.on=function(){var t=g.on.apply(g,arguments);return t===g?M:t},M}});
+"use strict";
+
+(function (global, factory) {
+  if (typeof define === "function" && define.amd) {
+    define(["exports", "../utils/dispatch"], factory);
+  } else if (typeof exports !== "undefined") {
+    factory(exports, require("../utils/dispatch"));
+  } else {
+    var mod = {
+      exports: {}
+    };
+    factory(mod.exports, global.dispatch);
+    global.undefined = mod.exports;
+  }
+})(void 0, function (exports, _dispatch) {
+  "use strict";
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+
+  var _dispatch2 = _interopRequireDefault(_dispatch);
+
+  function _interopRequireDefault(obj) {
+    return obj && obj.__esModule ? obj : {
+      default: obj
+    };
+  }
+
+  // Word cloud layout by Jason Davies, https://www.jasondavies.com/wordcloud/
+  // Algorithm due to Jonathan Feinberg, http://static.mrfeinberg.com/bv_ch03.pdf
+  var cloudRadians = Math.PI / 180,
+      cw = 1 << 11 >> 5,
+      ch = 1 << 11;
+
+  var cloud = function cloud() {
+    var size = [256, 256],
+        text = cloudText,
+        font = cloudFont,
+        fontSize = cloudFontSize,
+        fontStyle = cloudFontNormal,
+        fontWeight = cloudFontNormal,
+        rotate = cloudRotate,
+        padding = cloudPadding,
+        spiral = archimedeanSpiral,
+        words = [],
+        timeInterval = Infinity,
+        event = (0, _dispatch2["default"])("word", "end"),
+        timer = null,
+        random = Math.random,
+        cloud = {},
+        canvas = cloudCanvas;
+
+    cloud.canvas = function (_) {
+      return arguments.length ? (canvas = functor(_), cloud) : canvas;
+    };
+
+    cloud.start = function () {
+      var contextAndRatio = getContext(canvas()),
+          board = zeroArray((size[0] >> 5) * size[1]),
+          bounds = null,
+          n = words.length,
+          i = -1,
+          tags = [],
+          data = words.map(function (d, i) {
+        d.text = text.call(this, d, i);
+        d.font = font.call(this, d, i);
+        d.style = fontStyle.call(this, d, i);
+        d.weight = fontWeight.call(this, d, i);
+        d.rotate = rotate.call(this, d, i);
+        d.size = ~~fontSize.call(this, d, i);
+        d.padding = padding.call(this, d, i);
+        return d;
+      }).sort(function (a, b) {
+        return b.size - a.size;
+      });
+      if (timer) clearInterval(timer);
+      timer = setInterval(step, 0);
+      step();
+      return cloud;
+
+      function step() {
+        var start = Date.now();
+
+        while (Date.now() - start < timeInterval && ++i < n && timer) {
+          var d = data[i];
+          d.x = size[0] * (random() + .5) >> 1;
+          d.y = size[1] * (random() + .5) >> 1;
+          cloudSprite(contextAndRatio, d, data, i);
+
+          if (d.hasText && place(board, d, bounds)) {
+            tags.push(d);
+            event.call("word", cloud, d);
+            if (bounds) cloudBounds(bounds, d);else bounds = [{
+              x: d.x + d.x0,
+              y: d.y + d.y0
+            }, {
+              x: d.x + d.x1,
+              y: d.y + d.y1
+            }]; // Temporary hack
+
+            d.x -= size[0] >> 1;
+            d.y -= size[1] >> 1;
+          }
+        }
+
+        if (i >= n) {
+          cloud.stop();
+          event.call("end", cloud, tags, bounds);
+        }
+      }
+    };
+
+    cloud.stop = function () {
+      if (timer) {
+        clearInterval(timer);
+        timer = null;
+      }
+
+      return cloud;
+    };
+
+    function getContext(canvas) {
+      canvas.width = canvas.height = 1;
+      var ratio = Math.sqrt(canvas.getContext("2d").getImageData(0, 0, 1, 1).data.length >> 2);
+      canvas.width = (cw << 5) / ratio;
+      canvas.height = ch / ratio;
+      var context = canvas.getContext("2d");
+      context.fillStyle = context.strokeStyle = "red";
+      context.textAlign = "center";
+      return {
+        context: context,
+        ratio: ratio
+      };
+    }
+
+    function place(board, tag, bounds) {
+      var perimeter = [{
+        x: 0,
+        y: 0
+      }, {
+        x: size[0],
+        y: size[1]
+      }],
+          startX = tag.x,
+          startY = tag.y,
+          maxDelta = Math.sqrt(size[0] * size[0] + size[1] * size[1]),
+          s = spiral(size),
+          dt = random() < .5 ? 1 : -1,
+          t = -dt,
+          dxdy,
+          dx,
+          dy;
+
+      while (dxdy = s(t += dt)) {
+        dx = ~~dxdy[0];
+        dy = ~~dxdy[1];
+        if (Math.min(Math.abs(dx), Math.abs(dy)) >= maxDelta) break;
+        tag.x = startX + dx;
+        tag.y = startY + dy;
+        if (tag.x + tag.x0 < 0 || tag.y + tag.y0 < 0 || tag.x + tag.x1 > size[0] || tag.y + tag.y1 > size[1]) continue; // TODO only check for collisions within current bounds.
+
+        if (!bounds || !cloudCollide(tag, board, size[0])) {
+          if (!bounds || collideRects(tag, bounds)) {
+            var sprite = tag.sprite,
+                w = tag.width >> 5,
+                sw = size[0] >> 5,
+                lx = tag.x - (w << 4),
+                sx = lx & 0x7f,
+                msx = 32 - sx,
+                h = tag.y1 - tag.y0,
+                x = (tag.y + tag.y0) * sw + (lx >> 5),
+                last;
+
+            for (var j = 0; j < h; j++) {
+              last = 0;
+
+              for (var i = 0; i <= w; i++) {
+                board[x + i] |= last << msx | (i < w ? (last = sprite[j * w + i]) >>> sx : 0);
+              }
+
+              x += sw;
+            }
+
+            delete tag.sprite;
+            return true;
+          }
+        }
+      }
+
+      return false;
+    }
+
+    cloud.timeInterval = function (_) {
+      return arguments.length ? (timeInterval = _ == null ? Infinity : _, cloud) : timeInterval;
+    };
+
+    cloud.words = function (_) {
+      return arguments.length ? (words = _, cloud) : words;
+    };
+
+    cloud.size = function (_) {
+      return arguments.length ? (size = [+_[0], +_[1]], cloud) : size;
+    };
+
+    cloud.font = function (_) {
+      return arguments.length ? (font = functor(_), cloud) : font;
+    };
+
+    cloud.fontStyle = function (_) {
+      return arguments.length ? (fontStyle = functor(_), cloud) : fontStyle;
+    };
+
+    cloud.fontWeight = function (_) {
+      return arguments.length ? (fontWeight = functor(_), cloud) : fontWeight;
+    };
+
+    cloud.rotate = function (_) {
+      return arguments.length ? (rotate = functor(_), cloud) : rotate;
+    };
+
+    cloud.text = function (_) {
+      return arguments.length ? (text = functor(_), cloud) : text;
+    };
+
+    cloud.spiral = function (_) {
+      return arguments.length ? (spiral = spirals[_] || _, cloud) : spiral;
+    };
+
+    cloud.fontSize = function (_) {
+      return arguments.length ? (fontSize = functor(_), cloud) : fontSize;
+    };
+
+    cloud.padding = function (_) {
+      return arguments.length ? (padding = functor(_), cloud) : padding;
+    };
+
+    cloud.random = function (_) {
+      return arguments.length ? (random = _, cloud) : random;
+    };
+
+    cloud.on = function () {
+      var value = event.on.apply(event, arguments);
+      return value === event ? cloud : value;
+    };
+
+    return cloud;
+  };
+
+  function cloudText(d) {
+    return d.text;
+  }
+
+  function cloudFont() {
+    return "serif";
+  }
+
+  function cloudFontNormal() {
+    return "normal";
+  }
+
+  function cloudFontSize(d) {
+    return Math.sqrt(d.value);
+  }
+
+  function cloudRotate() {
+    return (~~(Math.random() * 6) - 3) * 30;
+  }
+
+  function cloudPadding() {
+    return 1;
+  } // Fetches a monochrome sprite bitmap for the specified text.
+  // Load in batches for speed.
+
+
+  function cloudSprite(contextAndRatio, d, data, di) {
+    if (d.sprite) return;
+    var c = contextAndRatio.context,
+        ratio = contextAndRatio.ratio;
+    c.clearRect(0, 0, (cw << 5) / ratio, ch / ratio);
+    var x = 0,
+        y = 0,
+        maxh = 0,
+        n = data.length;
+    --di;
+
+    while (++di < n) {
+      d = data[di];
+      c.save();
+      c.font = d.style + " " + d.weight + " " + ~~((d.size + 1) / ratio) + "px " + d.font;
+      var w = c.measureText(d.text + "m").width * ratio,
+          h = d.size << 1;
+
+      if (d.rotate) {
+        var sr = Math.sin(d.rotate * cloudRadians),
+            cr = Math.cos(d.rotate * cloudRadians),
+            wcr = w * cr,
+            wsr = w * sr,
+            hcr = h * cr,
+            hsr = h * sr;
+        w = Math.max(Math.abs(wcr + hsr), Math.abs(wcr - hsr)) + 0x1f >> 5 << 5;
+        h = ~~Math.max(Math.abs(wsr + hcr), Math.abs(wsr - hcr));
+      } else {
+        w = w + 0x1f >> 5 << 5;
+      }
+
+      if (h > maxh) maxh = h;
+
+      if (x + w >= cw << 5) {
+        x = 0;
+        y += maxh;
+        maxh = 0;
+      }
+
+      if (y + h >= ch) break;
+      c.translate((x + (w >> 1)) / ratio, (y + (h >> 1)) / ratio);
+      if (d.rotate) c.rotate(d.rotate * cloudRadians);
+      c.fillText(d.text, 0, 0);
+      if (d.padding) c.lineWidth = 2 * d.padding, c.strokeText(d.text, 0, 0);
+      c.restore();
+      d.width = w;
+      d.height = h;
+      d.xoff = x;
+      d.yoff = y;
+      d.x1 = w >> 1;
+      d.y1 = h >> 1;
+      d.x0 = -d.x1;
+      d.y0 = -d.y1;
+      d.hasText = true;
+      x += w;
+    }
+
+    var pixels = c.getImageData(0, 0, (cw << 5) / ratio, ch / ratio).data,
+        sprite = [];
+
+    while (--di >= 0) {
+      d = data[di];
+      if (!d.hasText) continue;
+      var w = d.width,
+          w32 = w >> 5,
+          h = d.y1 - d.y0; // Zero the buffer
+
+      for (var i = 0; i < h * w32; i++) {
+        sprite[i] = 0;
+      }
+
+      x = d.xoff;
+      if (x == null) return;
+      y = d.yoff;
+      var seen = 0,
+          seenRow = -1;
+
+      for (var j = 0; j < h; j++) {
+        for (var i = 0; i < w; i++) {
+          var k = w32 * j + (i >> 5),
+              m = pixels[(y + j) * (cw << 5) + (x + i) << 2] ? 1 << 31 - i % 32 : 0;
+          sprite[k] |= m;
+          seen |= m;
+        }
+
+        if (seen) seenRow = j;else {
+          d.y0++;
+          h--;
+          j--;
+          y++;
+        }
+      }
+
+      d.y1 = d.y0 + seenRow;
+      d.sprite = sprite.slice(0, (d.y1 - d.y0) * w32);
+    }
+  } // Use mask-based collision detection.
+
+
+  function cloudCollide(tag, board, sw) {
+    sw >>= 5;
+    var sprite = tag.sprite,
+        w = tag.width >> 5,
+        lx = tag.x - (w << 4),
+        sx = lx & 0x7f,
+        msx = 32 - sx,
+        h = tag.y1 - tag.y0,
+        x = (tag.y + tag.y0) * sw + (lx >> 5),
+        last;
+
+    for (var j = 0; j < h; j++) {
+      last = 0;
+
+      for (var i = 0; i <= w; i++) {
+        if ((last << msx | (i < w ? (last = sprite[j * w + i]) >>> sx : 0)) & board[x + i]) return true;
+      }
+
+      x += sw;
+    }
+
+    return false;
+  }
+
+  function cloudBounds(bounds, d) {
+    var b0 = bounds[0],
+        b1 = bounds[1];
+    if (d.x + d.x0 < b0.x) b0.x = d.x + d.x0;
+    if (d.y + d.y0 < b0.y) b0.y = d.y + d.y0;
+    if (d.x + d.x1 > b1.x) b1.x = d.x + d.x1;
+    if (d.y + d.y1 > b1.y) b1.y = d.y + d.y1;
+  }
+
+  function collideRects(a, b) {
+    return a.x + a.x1 > b[0].x && a.x + a.x0 < b[1].x && a.y + a.y1 > b[0].y && a.y + a.y0 < b[1].y;
+  }
+
+  function archimedeanSpiral(size) {
+    var e = size[0] / size[1];
+    return function (t) {
+      return [e * (t *= .1) * Math.cos(t), t * Math.sin(t)];
+    };
+  }
+
+  function rectangularSpiral(size) {
+    var dy = 4,
+        dx = dy * size[0] / size[1],
+        x = 0,
+        y = 0;
+    return function (t) {
+      var sign = t < 0 ? -1 : 1; // See triangular numbers: T_n = n * (n + 1) / 2.
+
+      switch (Math.sqrt(1 + 4 * sign * t) - sign & 3) {
+        case 0:
+          x += dx;
+          break;
+
+        case 1:
+          y += dy;
+          break;
+
+        case 2:
+          x -= dx;
+          break;
+
+        default:
+          y -= dy;
+          break;
+      }
+
+      return [x, y];
+    };
+  } // TODO reuse arrays?
+
+
+  function zeroArray(n) {
+    var a = [],
+        i = -1;
+
+    while (++i < n) {
+      a[i] = 0;
+    }
+
+    return a;
+  }
+
+  function cloudCanvas() {
+    return document.createElement("canvas");
+  }
+
+  function functor(d) {
+    return typeof d === "function" ? d : function () {
+      return d;
+    };
+  }
+
+  var spirals = {
+    archimedean: archimedeanSpiral,
+    rectangular: rectangularSpiral
+  };
+  exports["default"] = cloud;
+});

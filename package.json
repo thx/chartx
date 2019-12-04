@@ -2,7 +2,7 @@
   "name": "chartx",
   "title": "chartx.js",
   "description": "Data Visualization Chart Library",
-  "version": "1.0.166",
+  "version": "1.0.167",
   "homepage": "https://thx.github.io/chartx/",
   "license": "MIT",
   "magixCliConfig": {
@@ -33,6 +33,7 @@
     "gulp": "^4.0.2",
     "gulp-babel": "^8.0.0",
     "gulp-clean": "^0.4.0",
+    "gulp-rename": "^1.4.0",
     "gulp-uglify": "^3.0.2",
     "readable-stream": "^3.4.0",
     "rollup": "1.27.0",
@@ -42,7 +43,8 @@
   "dependencies": {
     "mmvis": "0.0.80",
     "canvax": "2.0.66",
-    "fmin": "0.0.2"
+    "fmin": "0.0.2",
+    "d3-force": "^2.0.1"
   },
   "scripts": {
     "build": "rollup -c",

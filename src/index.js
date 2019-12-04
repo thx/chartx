@@ -24,6 +24,8 @@ import "./components/graphs/sunburst/index"
 import "./components/graphs/sankey/index"
 import "./components/graphs/progress/index"
 import "./components/graphs/relation/index"
+import "./components/graphs/force/index"
+ 
 
 //-----------------------------------------------
 //布局算法

@@ -1,1 +1,464 @@
-"use strict";!function(e,t){if("function"==typeof define&&define.amd)define(["exports","canvax","../index","../../../layout/sankey/index","mmvis"],t);else if("undefined"!=typeof exports)t(exports,require("canvax"),require("../index"),require("../../../layout/sankey/index"),require("mmvis"));else{var n={};t(n,e.canvax,e.index,e.index,e.mmvis),e.undefined=n}}(void 0,function(e,t,n,i,s){Object.defineProperty(e,"__esModule",{value:!0});var r=l(t),a=l(n),u=l(i);function l(e){return e&&e.__esModule?e:{default:e}}function o(e){return(o="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(e){return typeof e}:function(e){return e&&"function"==typeof Symbol&&e.constructor===Symbol&&e!==Symbol.prototype?"symbol":typeof e})(e)}function d(e){return(d=Object.setPrototypeOf?Object.getPrototypeOf:function(e){return e.__proto__||Object.getPrototypeOf(e)})(e)}function f(e){if(void 0===e)throw new ReferenceError("this hasn't been initialised - super() hasn't been called");return e}function p(e,t){for(var n=0;n<t.length;n++){var i=t[n];i.enumerable=i.enumerable||!1,i.configurable=!0,"value"in i&&(i.writable=!0),Object.defineProperty(e,i.key,i)}}function h(e,t,n){return t&&p(e.prototype,t),n&&p(e,n),e}function c(e,t){return(c=Object.setPrototypeOf||function(e,t){return e.__proto__=t,e})(e,t)}var y=r.default.Shapes.Path,v=r.default.Shapes.Rect,_=(function(e,t){if("function"!=typeof t&&null!==t)throw new TypeError("Super expression must either be null or a function");e.prototype=Object.create(t&&t.prototype,{constructor:{value:e,writable:!0,configurable:!0}}),t&&c(e,t)}(g,a.default),h(g,null,[{key:"defaultProps",value:function(){return{keyField:{detail:"key字段",default:null},valueField:{detail:"value字段",default:"value"},parentField:{detail:"parent字段",default:null},node:{detail:"node",propertys:{width:{detail:"节点宽",default:18},padding:{detail:"节点间距",default:10},sort:{detail:"节点排序字段",default:function(e,t){return e.y-t.y}},fillStyle:{detail:"节点背景色",default:null}}},line:{detail:"线设置",propertys:{strokeStyle:{detail:"线颜色",default:"blue"},alpha:{detail:"线透明度",default:.3},focus:{detail:"图形的hover设置",propertys:{enabled:{detail:"是否开启",default:!0}}}}},label:{detail:"文本设置",propertys:{fontColor:{detail:"文本颜色",default:"#666666"},fontSize:{detail:"文本字体大小",default:12},textAlign:{detail:"水平对齐方式",default:"left"},verticalAlign:{detail:"垂直对齐方式",default:"middle"},format:{detail:"文本格式函数",default:null}}}}}}]),h(g,[{key:"init",value:function(){this._links=new r.default.Display.Sprite,this._nodes=new r.default.Display.Sprite,this._labels=new r.default.Display.Sprite,this.sprite.addChild(this._links),this.sprite.addChild(this._nodes),this.sprite.addChild(this._labels)}},{key:"draw",value:function(e){e=e||{},s._.extend(!0,this,e),this.data=this._trimGraphs(),this._widget(),this.sprite.context.x=this.origin.x,this.sprite.context.y=this.origin.y,this.fire("complete")}},{key:"_trimGraphs",value:function(){var i=this,a=[],l=[],e=i.dataFrame.getFieldData(i.keyField),o=i.dataFrame.getFieldData(i.valueField),r=i.dataFrame.getFieldData(i.parentField),d={};return s._.each(e,function(e,t){var n=[];i.parentField&&n.push(r[t]),n=n.concat(e.split(/[|]/)),s._.each(n,function(e){void 0===d[e]&&(d[e]=a.length,a.push({name:e}))})}),s._.each(e,function(e,t){var n=[];i.parentField&&n.push(r[t]),2==(n=n.concat(e.split(/[|]/))).length&&l.push({source:d[n[0]],target:d[n[1]],value:o[t]})}),(0,u.default)().nodeWidth(this.node.width).nodePadding(this.node.padding).nodeSort(this.node.sort).size([this.width,this.height]).nodes(a).links(l).layout(16)}},{key:"_widget",value:function(){this._drawNodes(),this._drawLinks(),this._drawLabels()}},{key:"_getColor",value:function(e,t,n){var i=e;return s._.isArray(i)&&(i=i[n]),s._.isFunction(i)&&(i=i(t)),i=i||this.app.getTheme(n)}},{key:"_drawNodes",value:function(){var e=this.data.nodes(),a=this;s._.each(e,function(e,t){var n=a._getColor(a.node.fillStyle,e,t),i=new v({xyToInt:!1,context:{x:e.x,y:e.y,width:a.data.nodeWidth(),height:Math.max(e.dy,1),fillStyle:n}});i.data=e,a._nodes.addChild(i)})}},{key:"_drawLinks",value:function(){var e=this.data.links(),l=this;s._.each(e,function(e,t){var n=l._getColor(l.line.strokeStyle,e,t),i=l.data.link()(e),a=new y({xyToInt:!1,context:{path:i,fillStyle:n,globalAlpha:l.line.alpha,cursor:"pointer"}});a.__glpha=l.line.alpha,a.link=e,a.on(s.event.types.get(),function(e){l.line.focus.enabled&&("mouseover"==e.type&&(this.__glpha+=.1),"mouseout"==e.type&&(this.__glpha-=.1));var t=this.link;t.type="sankey",e.eventInfo={trigger:l.node,title:t.source.name+" --<span style='position:relative;top:-0.5px;font-size:16px;left:-3px;'>></span> "+t.target.name,nodes:[t]},l.app.fire(e.type,e)}),l._links.addChild(a)})}},{key:"_drawLabels",value:function(){var e=this.data.nodes(),o=this;s._.each(e,function(e){var t=o.label.textAlign,n=e.x+o.data.nodeWidth()+4,i=e.y+Math.max(e.dy/2,1),a=o.label.format?o.label.format(e.name,e):e.name,l=new r.default.Display.Text(a,{context:{x:n,y:i,fillStyle:o.label.fontColor,fontSize:o.label.fontSize,textAlign:t,textBaseline:o.label.verticalAlign}});o._labels.addChild(l),l.getTextWidth()+n>o.width&&(l.context.x=e.x-4,l.context.textAlign="right")})}}]),g);function g(e,t){var n;return function(e,t){if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}(this,g),(n=function(e,t){return!t||"object"!==o(t)&&"function"!=typeof t?f(e):t}(this,d(g).call(this,e,t))).type="sankey",s._.extend(!0,f(n),(0,s.getDefaultProps)(g.defaultProps()),e),n.init(),n}s.global.registerComponent(_,"graphs","sankey"),e.default=_});
+"use strict";
+
+(function (global, factory) {
+  if (typeof define === "function" && define.amd) {
+    define(["exports", "canvax", "../index", "../../../layout/sankey/index", "mmvis"], factory);
+  } else if (typeof exports !== "undefined") {
+    factory(exports, require("canvax"), require("../index"), require("../../../layout/sankey/index"), require("mmvis"));
+  } else {
+    var mod = {
+      exports: {}
+    };
+    factory(mod.exports, global.canvax, global.index, global.index, global.mmvis);
+    global.undefined = mod.exports;
+  }
+})(void 0, function (exports, _canvax, _index, _index3, _mmvis) {
+  "use strict";
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+
+  var _canvax2 = _interopRequireDefault(_canvax);
+
+  var _index2 = _interopRequireDefault(_index);
+
+  var _index4 = _interopRequireDefault(_index3);
+
+  function _interopRequireDefault(obj) {
+    return obj && obj.__esModule ? obj : {
+      default: obj
+    };
+  }
+
+  function _typeof(obj) {
+    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
+      _typeof = function _typeof(obj) {
+        return typeof obj;
+      };
+    } else {
+      _typeof = function _typeof(obj) {
+        return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+      };
+    }
+
+    return _typeof(obj);
+  }
+
+  function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+
+  function _possibleConstructorReturn(self, call) {
+    if (call && (_typeof(call) === "object" || typeof call === "function")) {
+      return call;
+    }
+
+    return _assertThisInitialized(self);
+  }
+
+  function _getPrototypeOf(o) {
+    _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) {
+      return o.__proto__ || Object.getPrototypeOf(o);
+    };
+    return _getPrototypeOf(o);
+  }
+
+  function _assertThisInitialized(self) {
+    if (self === void 0) {
+      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+    }
+
+    return self;
+  }
+
+  function _defineProperties(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor) descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+
+  function _createClass(Constructor, protoProps, staticProps) {
+    if (protoProps) _defineProperties(Constructor.prototype, protoProps);
+    if (staticProps) _defineProperties(Constructor, staticProps);
+    return Constructor;
+  }
+
+  function _inherits(subClass, superClass) {
+    if (typeof superClass !== "function" && superClass !== null) {
+      throw new TypeError("Super expression must either be null or a function");
+    }
+
+    subClass.prototype = Object.create(superClass && superClass.prototype, {
+      constructor: {
+        value: subClass,
+        writable: true,
+        configurable: true
+      }
+    });
+    if (superClass) _setPrototypeOf(subClass, superClass);
+  }
+
+  function _setPrototypeOf(o, p) {
+    _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) {
+      o.__proto__ = p;
+      return o;
+    };
+
+    return _setPrototypeOf(o, p);
+  }
+
+  var Path = _canvax2["default"].Shapes.Path;
+  var Rect = _canvax2["default"].Shapes.Rect;
+
+  var sankeyGraphs = function (_GraphsBase) {
+    _inherits(sankeyGraphs, _GraphsBase);
+
+    _createClass(sankeyGraphs, null, [{
+      key: "defaultProps",
+      value: function defaultProps() {
+        return {
+          keyField: {
+            detail: 'key字段',
+            "default": null
+          },
+          valueField: {
+            detail: 'value字段',
+            "default": 'value'
+          },
+          parentField: {
+            detail: 'parent字段',
+            "default": null
+          },
+          node: {
+            detail: 'node',
+            propertys: {
+              width: {
+                detail: '节点宽',
+                "default": 18
+              },
+              padding: {
+                detail: '节点间距',
+                "default": 10
+              },
+              sort: {
+                detail: '节点排序字段',
+                "default": function _default(a, b) {
+                  return a.y - b.y;
+                }
+              },
+              fillStyle: {
+                detail: '节点背景色',
+                "default": null
+              }
+            }
+          },
+          line: {
+            detail: '线设置',
+            propertys: {
+              strokeStyle: {
+                detail: '线颜色',
+                "default": 'blue'
+              },
+              alpha: {
+                detail: '线透明度',
+                "default": 0.3
+              },
+              focus: {
+                detail: '图形的hover设置',
+                propertys: {
+                  enabled: {
+                    detail: '是否开启',
+                    "default": true
+                  }
+                }
+              }
+            }
+          },
+          label: {
+            detail: '文本设置',
+            propertys: {
+              fontColor: {
+                detail: '文本颜色',
+                "default": '#666666'
+              },
+              fontSize: {
+                detail: '文本字体大小',
+                "default": 12
+              },
+              textAlign: {
+                detail: '水平对齐方式',
+                "default": 'left'
+              },
+              verticalAlign: {
+                detail: '垂直对齐方式',
+                "default": 'middle'
+              },
+              format: {
+                detail: '文本格式函数',
+                "default": null
+              }
+            }
+          }
+        };
+      }
+    }]);
+
+    function sankeyGraphs(opt, app) {
+      var _this;
+
+      _classCallCheck(this, sankeyGraphs);
+
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(sankeyGraphs).call(this, opt, app));
+      _this.type = "sankey";
+
+      _mmvis._.extend(true, _assertThisInitialized(_this), (0, _mmvis.getDefaultProps)(sankeyGraphs.defaultProps()), opt);
+
+      _this.init();
+
+      return _this;
+    }
+
+    _createClass(sankeyGraphs, [{
+      key: "init",
+      value: function init() {
+        this._links = new _canvax2["default"].Display.Sprite();
+        this._nodes = new _canvax2["default"].Display.Sprite();
+        this._labels = new _canvax2["default"].Display.Sprite();
+        this.sprite.addChild(this._links);
+        this.sprite.addChild(this._nodes);
+        this.sprite.addChild(this._labels);
+      }
+    }, {
+      key: "draw",
+      value: function draw(opt) {
+        !opt && (opt = {});
+
+        _mmvis._.extend(true, this, opt);
+
+        this.data = this._trimGraphs();
+
+        this._widget();
+
+        this.sprite.context.x = this.origin.x;
+        this.sprite.context.y = this.origin.y;
+        this.fire("complete");
+      }
+    }, {
+      key: "_trimGraphs",
+      value: function _trimGraphs() {
+        var me = this;
+        var nodes = [];
+        var links = [];
+        var keyDatas = me.dataFrame.getFieldData(me.keyField);
+        var valueDatas = me.dataFrame.getFieldData(me.valueField);
+        var parentFields = me.dataFrame.getFieldData(me.parentField);
+        var nodeMap = {}; //name:ind
+
+        _mmvis._.each(keyDatas, function (key, i) {
+          var nodeNames = [];
+
+          if (me.parentField) {
+            nodeNames.push(parentFields[i]);
+          }
+
+          ;
+          nodeNames = nodeNames.concat(key.split(/[|]/));
+
+          _mmvis._.each(nodeNames, function (name) {
+            if (nodeMap[name] === undefined) {
+              nodeMap[name] = nodes.length;
+              nodes.push({
+                name: name
+              });
+            }
+          });
+        });
+
+        _mmvis._.each(keyDatas, function (key, i) {
+          //var nodeNames = key.split(/[,|]/);
+          var nodeNames = [];
+
+          if (me.parentField) {
+            nodeNames.push(parentFields[i]);
+          }
+
+          ;
+          nodeNames = nodeNames.concat(key.split(/[|]/));
+
+          if (nodeNames.length == 2) {
+            links.push({
+              source: nodeMap[nodeNames[0]],
+              target: nodeMap[nodeNames[1]],
+              value: valueDatas[i]
+            });
+          }
+        });
+
+        return (0, _index4["default"])().nodeWidth(this.node.width).nodePadding(this.node.padding).nodeSort(this.node.sort).size([this.width, this.height]).nodes(nodes).links(links).layout(16);
+      }
+    }, {
+      key: "_widget",
+      value: function _widget() {
+        this._drawNodes();
+
+        this._drawLinks();
+
+        this._drawLabels();
+      }
+    }, {
+      key: "_getColor",
+      value: function _getColor(style, node, ind) {
+        var me = this;
+        var color = style;
+
+        if (_mmvis._.isArray(color)) {
+          color = color[ind];
+        }
+
+        if (_mmvis._.isFunction(color)) {
+          color = color(node);
+        }
+
+        if (!color) {
+          color = me.app.getTheme(ind);
+        }
+
+        return color;
+      }
+    }, {
+      key: "_drawNodes",
+      value: function _drawNodes() {
+        var nodes = this.data.nodes();
+        var me = this;
+
+        _mmvis._.each(nodes, function (node, i) {
+          var nodeColor = me._getColor(me.node.fillStyle, node, i);
+
+          var nodeEl = new Rect({
+            xyToInt: false,
+            context: {
+              x: node.x,
+              y: node.y,
+              width: me.data.nodeWidth(),
+              height: Math.max(node.dy, 1),
+              fillStyle: nodeColor
+            }
+          });
+          nodeEl.data = node;
+
+          me._nodes.addChild(nodeEl);
+        });
+      }
+    }, {
+      key: "_drawLinks",
+      value: function _drawLinks() {
+        var links = this.data.links();
+        var me = this;
+
+        _mmvis._.each(links, function (link, i) {
+          var linkColor = me._getColor(me.line.strokeStyle, link, i);
+
+          var d = me.data.link()(link);
+
+          var _path = new Path({
+            xyToInt: false,
+            context: {
+              path: d,
+              fillStyle: linkColor,
+              //lineWidth: Math.max(1, link.dy),
+              globalAlpha: me.line.alpha,
+              cursor: "pointer"
+            }
+          });
+
+          _path.__glpha = me.line.alpha;
+          _path.link = link;
+
+          _path.on(_mmvis.event.types.get(), function (e) {
+            if (me.line.focus.enabled) {
+              if (e.type == 'mouseover') {
+                this.__glpha += 0.1;
+              }
+
+              ;
+
+              if (e.type == 'mouseout') {
+                this.__glpha -= 0.1;
+              }
+
+              ;
+            }
+
+            ;
+            var linkData = this.link; //type给tips用
+
+            linkData.type = "sankey";
+            e.eventInfo = {
+              trigger: me.node,
+              title: linkData.source.name + " --<span style='position:relative;top:-0.5px;font-size:16px;left:-3px;'>></span> " + linkData.target.name,
+              nodes: [linkData]
+            }; //fire到root上面去的是为了让root去处理tips
+
+            me.app.fire(e.type, e);
+          });
+
+          me._links.addChild(_path);
+        });
+      }
+    }, {
+      key: "_drawLabels",
+      value: function _drawLabels() {
+        var nodes = this.data.nodes();
+        var me = this;
+
+        _mmvis._.each(nodes, function (node) {
+          var textAlign = me.label.textAlign;
+          var x = node.x + me.data.nodeWidth() + 4;
+          /*
+          if( x > me.width/2 ){
+              x  = node.x - 4;
+              textAlign = 'right';
+          } else {
+              x += 4;
+          };
+          */
+
+          var y = node.y + Math.max(node.dy / 2, 1);
+          var txt = me.label.format ? me.label.format(node.name, node) : node.name;
+          var label = new _canvax2["default"].Display.Text(txt, {
+            context: {
+              x: x,
+              y: y,
+              fillStyle: me.label.fontColor,
+              fontSize: me.label.fontSize,
+              textAlign: textAlign,
+              textBaseline: me.label.verticalAlign
+            }
+          });
+
+          me._labels.addChild(label);
+
+          if (label.getTextWidth() + x > me.width) {
+            label.context.x = node.x - 4;
+            label.context.textAlign = 'right';
+          }
+
+          ;
+        });
+      }
+    }]);
+
+    return sankeyGraphs;
+  }(_index2["default"]);
+
+  _mmvis.global.registerComponent(sankeyGraphs, 'graphs', 'sankey');
+
+  exports["default"] = sankeyGraphs;
+});

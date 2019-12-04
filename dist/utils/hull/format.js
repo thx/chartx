@@ -1,1 +1,47 @@
-"use strict";!function(e,n){if("function"==typeof define&&define.amd)define(["exports"],n);else if("undefined"!=typeof exports)n(exports);else{var t={};n(t),(void 0).undefined=t}}(0,function(e){Object.defineProperty(e,"__esModule",{value:!0}),e.default={toXy:function(e,n){return void 0===n?e.slice():e.map(function(e){return new Function("pt","return [pt"+n[0]+",pt"+n[1]+"];")(e)})},fromXy:function(e,n){return void 0===n?e.slice():e.map(function(e){return new Function("pt","const o = {}; o"+n[0]+"= pt[0]; o"+n[1]+"= pt[1]; return o;")(e)})}}});
+"use strict";
+
+(function (global, factory) {
+  if (typeof define === "function" && define.amd) {
+    define(["exports"], factory);
+  } else if (typeof exports !== "undefined") {
+    factory(exports);
+  } else {
+    var mod = {
+      exports: {}
+    };
+    factory(mod.exports);
+    global.undefined = mod.exports;
+  }
+})(void 0, function (exports) {
+  "use strict";
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  exports["default"] = {
+    toXy: function toXy(pointset, format) {
+      if (format === undefined) {
+        return pointset.slice();
+      }
+
+      return pointset.map(function (pt) {
+        /*jslint evil: true */
+        var _getXY = new Function('pt', 'return [pt' + format[0] + ',' + 'pt' + format[1] + '];');
+
+        return _getXY(pt);
+      });
+    },
+    fromXy: function fromXy(pointset, format) {
+      if (format === undefined) {
+        return pointset.slice();
+      }
+
+      return pointset.map(function (pt) {
+        /*jslint evil: true */
+        var _getObj = new Function('pt', 'const o = {}; o' + format[0] + '= pt[0]; o' + format[1] + '= pt[1]; return o;');
+
+        return _getObj(pt);
+      });
+    }
+  };
+});

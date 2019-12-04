@@ -1,1 +1,783 @@
-"use strict";!function(e,t){if("function"==typeof define&&define.amd)define(["exports","canvax","mmvis"],t);else if("undefined"!=typeof exports)t(exports,require("canvax"),require("mmvis"));else{var n={};t(n,e.canvax,e.mmvis),e.undefined=n}}(void 0,function(e,t,a){Object.defineProperty(e,"__esModule",{value:!0}),e.default=void 0;var n,i=(n=t)&&n.__esModule?n:{default:n};function s(e){return(s="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(e){return typeof e}:function(e){return e&&"function"==typeof Symbol&&e.constructor===Symbol&&e!==Symbol.prototype?"symbol":typeof e})(e)}function o(e,t){for(var n=0;n<t.length;n++){var i=t[n];i.enumerable=i.enumerable||!1,i.configurable=!0,"value"in i&&(i.writable=!0),Object.defineProperty(e,i.key,i)}}function r(e,t){return!t||"object"!==s(t)&&"function"!=typeof t?function(e){if(void 0!==e)return e;throw new ReferenceError("this hasn't been initialised - super() hasn't been called")}(e):t}function l(e){return(l=Object.setPrototypeOf?Object.getPrototypeOf:function(e){return e.__proto__||Object.getPrototypeOf(e)})(e)}function c(e,t){return(c=Object.setPrototypeOf||function(e,t){return e.__proto__=t,e})(e,t)}var d,u,f,h=i.default.Shapes.Sector,R=i.default.Shapes.Path,p=i.default.AnimationFrame,g=(function(e,t){if("function"!=typeof t&&null!==t)throw new TypeError("Super expression must either be null or a function");e.prototype=Object.create(t&&t.prototype,{constructor:{value:e,writable:!0,configurable:!0}}),t&&c(e,t)}(x,a.event.Dispatcher),d=x,(u=[{key:"init",value:function(){this.sprite=new i.default.Display.Sprite,this.sectorsSp=new i.default.Display.Sprite,this.sprite.addChild(this.sectorsSp),this.selectedSp=new i.default.Display.Sprite,this.sprite.addChild(this.selectedSp),this._graphs.label.enabled&&(this.textSp=new i.default.Display.Sprite)}},{key:"draw",value:function(e){a._.extend(!0,this,e),this.sprite.context.x=this.origin.x,this.sprite.context.y=this.origin.y,this._widget()}},{key:"resetData",value:function(e){var t=this;this.data=e,t.destroyLabel();for(var n=0,i=0;i<t.sectors.length;i++){var s=t.sectors[i],o=this.data.list[i];s.animate({r:o.outRadius,startAngle:o.startAngle,endAngle:o.endAngle},{duration:280,onComplete:function(){++n==t.sectors.length&&t._graphs.label.enabled&&t._startWidgetLabel()}})}}},{key:"_widget",value:function(){var t=this,e=t.data.list,n=t.data.total;if(0<e.length&&0<n){t.textSp&&t.sprite.addChild(t.textSp);for(var i=0;i<e.length;i++){var s=e[i],o=new h({hoverClone:!1,xyToInt:!1,context:{x:s.focused?s.outOffsetx:0,y:s.focused?s.outOffsety:0,r0:s.innerRadius,r:s.outRadius,startAngle:s.startAngle,endAngle:s.endAngle,fillStyle:s.fillStyle,cursor:"pointer"},id:"sector"+i});(o.nodeData=s).focusEnabled&&o.hover(function(e){t.focusOf(this.nodeData)},function(e){this.nodeData.selected||t.unfocusOf(this.nodeData)}),o.on(a.event.types.get(),function(e){e.eventInfo={trigger:t._graphs.node,nodes:[this.nodeData]},t._graphs.app.fire(e.type,e)}),t.sectorsSp.addChildAt(o,0),t.sectors.push(o)}t._graphs.label.enabled&&t._startWidgetLabel()}}},{key:"focusOf",value:function(e,t){e.focused||(this.sectors[e.iNode].animate({x:e.outOffsetx,y:e.outOffsety},{duration:100,onComplete:function(){t&&t()}}),e.focused=!0)}},{key:"unfocusOf",value:function(e,t){e.focused&&(this.sectors[e.iNode].animate({x:0,y:0},{duration:100,onComplete:function(){t&&t()}}),e.focused=!1)}},{key:"selectOf",value:function(e){var t=this;if(this.sectors.length&&e.selectEnabled){var n=this.sectors[e.iNode];e.selected||(e.focused?this.addCheckedSec(n):(e._focusTigger="select",this.focusOf(e,function(){t.addCheckedSec(n)})),e.selected=!0)}}},{key:"unselectOf",value:function(e){var t=this.sectors[e.iNode];if(e.selected&&e.selectEnabled){var n=this;n.cancelCheckedSec(t,function(){"select"==e._focusTigger&&n.unfocusOf(e)}),e.selected=!1}}},{key:"addCheckedSec",value:function(e,t){var n=e.context,i=e.nodeData;if(n){var s=new h({xyToInt:!1,context:{x:n.x,y:n.y,r0:n.r-1,r:n.r+i.selectedR,startAngle:n.startAngle,endAngle:n.startAngle,fillStyle:n.fillStyle,globalAlpha:i.selectedAlpha},id:"selected_"+e.id});e._selectedSec=s,this.selectedSp.addChild(s),this.completed?s.animate({endAngle:n.endAngle},{duration:this._getAngleTime(n),onComplete:function(){t&&t()}}):s.context.endAngle=n.endAngle}}},{key:"cancelCheckedSec",value:function(e,t){var n=e._selectedSec;n.animate({startAngle:n.context.endAngle-.5},{duration:this._getAngleTime(e.context),onComplete:function(){delete e._selectedSec,n.destroy(),t&&t()}})}},{key:"_getAngleTime",value:function(e){return Math.abs(e.startAngle-e.endAngle)/360*500}},{key:"grow",value:function(e){var d=this;a._.each(d.sectors,function(e,t){e.context&&(e.context.r0=0,e.context.r=0,e.context.startAngle=d._graphs.startAngle,e.context.endAngle=d._graphs.startAngle)}),d._hideGrowLabel();var t=p.registTween({from:{process:0},to:{process:1},duration:500,onUpdate:function(e){for(var t=0;t<d.sectors.length;t++){var n=d.sectors[t],i=n.nodeData,s=n.context,o=i.startAngle,a=i.endAngle,r=i.outRadius,l=i.innerRadius;if(s){if(s.r=r*e.process,s.r0=l*e.process,0==t)s.startAngle=o,s.endAngle=o+(a-o)*e.process;else{var c=function(e){var t=e-1,n=d.sectors[t].context;return 0==t?n?n.endAngle:0:n?n.endAngle:arguments.callee(t)}(t);s.startAngle=c,s.endAngle=s.startAngle+(a-o)*e.process}n._selectedSec&&(n._selectedSec.context.r0=s.r-1,n._selectedSec.context.r=s.r+i.selectedR,n._selectedSec.context.startAngle=s.startAngle,n._selectedSec.context.endAngle=s.endAngle)}}},onComplete:function(){d.sprite._removeTween(t),d._showGrowLabel(),d.completed=!0,e&&e()}});d.sprite._tweens.push(t)}},{key:"_widgetLabel",value:function(e,t,n,i,s,o){var a,r,l,c,d,u,f,h,p,g,x,y,v=this,b=0,S=v.data.list,_=2==e||3==e,m=3==e||4==e,A=_?n:i;0<t.length&&t.sort(function(e,t){return m?S[e].edgey-S[t].edgey:S[t].edgey-S[e].edgey});for(var w=0;w<t.length;w++){a=t[w];var C=S[a],k=C.outRadius+C.moveDis;if(!(!C.enabled||C.y<A||b>=v.textMaxCount)){b++,l=C.edgey,c=Math.abs(C.edgex),d=l-r,0!=w&&(Math.abs(d)<15||m&&d<0||!m&&0<d)&&(l=m?r+15:r-15,0<k-Math.abs(l)&&(c=Math.sqrt(Math.pow(k,2)-Math.pow(l,2))),(_&&-c>C.edgex||!_&&c<C.edgex)&&(c=Math.abs(C.edgex))),s&&(g=_?o.left:o.right,x=t.length-w,y=m?g-15*x:g+15*x,(m&&y<l||!m&&l<y)&&(l=y)),r=l,s||(_?o.left=r:o.right=r);var O=_?-c-5:c+5,L=O+v.origin.x,M=l+v.origin.y;if(L>v._graphs.app.width||M<0||M>v._graphs.app.height)return;var Q="M"+C.centerx+","+C.centery;Q+="Q"+C.outx+","+C.outy+","+O+","+l;var T=new R({context:{lineType:"solid",path:Q,lineWidth:1,strokeStyle:C.fillStyle}}),D=C.labelText,E=document.createElement("div");switch(E.style.cssText=" ;position:absolute;left:-1000px;top:-1000px;color:"+C.fillStyle,E.innerHTML=D,v.domContainer.appendChild(E),u=E.offsetWidth,f=E.offsetHeight,h=_?-c:c,p=l,e){case 1:h+=5,p-=f/2;break;case 2:case 3:h-=u+5,p-=f/2;break;case 4:h+=5,p-=f/2}E.style.left=h+v.origin.x+"px",E.style.top=p+v.origin.y+"px",v.textSp.addChild(T),v.textList.push({width:u,height:f,x:h+v.origin.x,y:p+v.origin.y,data:C,textTxt:D,textEle:E})}}}},{key:"_startWidgetLabel",value:function(){for(var e,t,n=this,i=n.data.list,s=0,o=0,a=[],r=[{indexs:[],count:0},{indexs:[],count:0},{indexs:[],count:0},{indexs:[],count:0}],l={right:{startQuadrant:4,endQuadrant:1,clockwise:!0,indexs:[]},left:{startQuadrant:3,endQuadrant:2,clockwise:!1,indexs:[]}},c=0;c<i.length;c++){var d=i[c].quadrant;r[d-1].indexs.push(c),r[d-1].count++}1<r[0].count&&r[0].indexs.reverse(),1<r[2].count&&r[2].indexs.reverse(),r[0].count>r[3].count&&(l.right.startQuadrant=1,l.right.endQuadrant=4,l.right.clockwise=!1),r[1].count>r[2].count&&(l.left.startQuadrant=2,l.left.endQuadrant=3,l.left.clockwise=!0),l.right.indexs=r[l.right.startQuadrant-1].indexs.concat(r[l.right.endQuadrant-1].indexs),l.left.indexs=r[l.left.startQuadrant-1].indexs.concat(r[l.left.endQuadrant-1].indexs),l.right.indexs.length>n.textMaxCount&&((t=l.right.indexs.slice(0)).sort(function(e,t){return i[t].y-i[e].y}),e=t.slice(n.textMaxCount),i[e[0]].percentage,s=i[e[0]].y),l.left.indexs.length>n.textMaxCount&&((t=l.left.indexs.slice(0)).sort(function(e,t){return i[t].y-i[e].y}),e=t.slice(n.textMaxCount),i[e[0]].percentage,o=i[e[0]].y),a.push(l.right.startQuadrant),a.push(l.right.endQuadrant),a.push(l.left.startQuadrant),a.push(l.left.endQuadrant);var u={};for(c=0;c<a.length;c++){var f=1==c||3==c;n._widgetLabel(a[c],r[a[c]-1].indexs,o,s,f,u)}}},{key:"destroyLabel",value:function(){var t=this;this.textSp&&this.textSp.removeAllChildren(),a._.each(this.textList,function(e){t.domContainer.removeChild(e.textEle)}),this.textList=[]}},{key:"_showGrowLabel",value:function(){this.textSp&&this.textSp.context&&(this.textSp.context.globalAlpha=1,a._.each(this.textList,function(e){e.textEle.style.visibility="visible"}))}},{key:"_hideGrowLabel",value:function(){this.textSp&&this.textSp.context&&(this.textSp.context.globalAlpha=0,a._.each(this.textList,function(e){e.textEle.style.visibility="hidden"}))}}])&&o(d.prototype,u),void(f&&o(d,f)),x);function x(e,t){var n;return function(e,t){if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}(this,x),(n=r(this,l(x).call(this))).width=0,n.height=0,n.origin={x:0,y:0},n._graphs=e,n.domContainer=e.app.canvax.domView,n.data=t,n.sprite=null,n.textSp=null,n.sectorsSp=null,n.selectedSp=null,n.init(),n.sectors=[],n.textMaxCount=15,n.textList=[],n.completed=!1,n}e.default=g});
+"use strict";
+
+(function (global, factory) {
+  if (typeof define === "function" && define.amd) {
+    define(["exports", "canvax", "mmvis"], factory);
+  } else if (typeof exports !== "undefined") {
+    factory(exports, require("canvax"), require("mmvis"));
+  } else {
+    var mod = {
+      exports: {}
+    };
+    factory(mod.exports, global.canvax, global.mmvis);
+    global.undefined = mod.exports;
+  }
+})(void 0, function (exports, _canvax, _mmvis) {
+  "use strict";
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  exports.default = undefined;
+
+  var _canvax2 = _interopRequireDefault(_canvax);
+
+  function _interopRequireDefault(obj) {
+    return obj && obj.__esModule ? obj : {
+      default: obj
+    };
+  }
+
+  function _typeof(obj) {
+    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
+      _typeof = function _typeof(obj) {
+        return typeof obj;
+      };
+    } else {
+      _typeof = function _typeof(obj) {
+        return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+      };
+    }
+
+    return _typeof(obj);
+  }
+
+  function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+
+  function _defineProperties(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor) descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+
+  function _createClass(Constructor, protoProps, staticProps) {
+    if (protoProps) _defineProperties(Constructor.prototype, protoProps);
+    if (staticProps) _defineProperties(Constructor, staticProps);
+    return Constructor;
+  }
+
+  function _possibleConstructorReturn(self, call) {
+    if (call && (_typeof(call) === "object" || typeof call === "function")) {
+      return call;
+    }
+
+    return _assertThisInitialized(self);
+  }
+
+  function _assertThisInitialized(self) {
+    if (self === void 0) {
+      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+    }
+
+    return self;
+  }
+
+  function _getPrototypeOf(o) {
+    _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) {
+      return o.__proto__ || Object.getPrototypeOf(o);
+    };
+    return _getPrototypeOf(o);
+  }
+
+  function _inherits(subClass, superClass) {
+    if (typeof superClass !== "function" && superClass !== null) {
+      throw new TypeError("Super expression must either be null or a function");
+    }
+
+    subClass.prototype = Object.create(superClass && superClass.prototype, {
+      constructor: {
+        value: subClass,
+        writable: true,
+        configurable: true
+      }
+    });
+    if (superClass) _setPrototypeOf(subClass, superClass);
+  }
+
+  function _setPrototypeOf(o, p) {
+    _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) {
+      o.__proto__ = p;
+      return o;
+    };
+
+    return _setPrototypeOf(o, p);
+  }
+
+  var Sector = _canvax2["default"].Shapes.Sector;
+  var Path = _canvax2["default"].Shapes.Path;
+  var AnimationFrame = _canvax2["default"].AnimationFrame;
+
+  var Pie = function (_event$Dispatcher) {
+    _inherits(Pie, _event$Dispatcher);
+
+    function Pie(_graphs, data) {
+      var _this;
+
+      _classCallCheck(this, Pie);
+
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(Pie).call(this));
+      _this.width = 0;
+      _this.height = 0;
+      _this.origin = {
+        x: 0,
+        y: 0
+      }; //这个pie所属的graphs对象
+
+      _this._graphs = _graphs;
+      _this.domContainer = _graphs.app.canvax.domView;
+      _this.data = data;
+      _this.sprite = null;
+      _this.textSp = null;
+      _this.sectorsSp = null;
+      _this.selectedSp = null;
+
+      _this.init();
+
+      _this.sectors = [];
+      _this.textMaxCount = 15;
+      _this.textList = [];
+      _this.completed = false; //首次加载动画是否完成
+
+      return _this;
+    }
+
+    _createClass(Pie, [{
+      key: "init",
+      value: function init() {
+        this.sprite = new _canvax2["default"].Display.Sprite();
+        this.sectorsSp = new _canvax2["default"].Display.Sprite();
+        this.sprite.addChild(this.sectorsSp);
+        this.selectedSp = new _canvax2["default"].Display.Sprite();
+        this.sprite.addChild(this.selectedSp);
+
+        if (this._graphs.label.enabled) {
+          this.textSp = new _canvax2["default"].Display.Sprite();
+        }
+
+        ;
+      }
+    }, {
+      key: "draw",
+      value: function draw(opt) {
+        var me = this;
+
+        _mmvis._.extend(true, this, opt);
+
+        this.sprite.context.x = me.origin.x;
+        this.sprite.context.y = me.origin.y;
+
+        me._widget();
+      }
+    }, {
+      key: "resetData",
+      value: function resetData(data) {
+        var me = this;
+        this.data = data;
+        me.destroyLabel();
+        var completedNum = 0;
+
+        for (var i = 0; i < me.sectors.length; i++) {
+          var sec = me.sectors[i];
+          var secData = this.data.list[i];
+          sec.animate({
+            r: secData.outRadius,
+            startAngle: secData.startAngle,
+            endAngle: secData.endAngle
+          }, {
+            duration: 280,
+            onComplete: function onComplete() {
+              completedNum++;
+
+              if (completedNum == me.sectors.length) {
+                if (me._graphs.label.enabled) {
+                  me._startWidgetLabel();
+                }
+
+                ;
+              }
+            }
+          });
+        }
+      }
+    }, {
+      key: "_widget",
+      value: function _widget() {
+        var me = this;
+        var list = me.data.list;
+        var total = me.data.total;
+        var moreSecData;
+
+        if (list.length > 0 && total > 0) {
+          me.textSp && me.sprite.addChild(me.textSp);
+
+          for (var i = 0; i < list.length; i++) {
+            var item = list[i]; //扇形主体          
+
+            var sector = new Sector({
+              hoverClone: false,
+              xyToInt: false,
+              //扇形不需要自动取整
+              context: {
+                x: item.focused ? item.outOffsetx : 0,
+                y: item.focused ? item.outOffsety : 0,
+                r0: item.innerRadius,
+                r: item.outRadius,
+                startAngle: item.startAngle,
+                endAngle: item.endAngle,
+                fillStyle: item.fillStyle,
+                //iNode: item.iNode,
+                cursor: "pointer"
+              },
+              id: 'sector' + i
+            });
+            sector.nodeData = item;
+            item.focusEnabled && sector.hover(function (e) {
+              me.focusOf(this.nodeData);
+            }, function (e) {
+              !this.nodeData.selected && me.unfocusOf(this.nodeData);
+            }); //触发注册的事件
+
+            sector.on(_mmvis.event.types.get(), function (e) {
+              //me.fire( e.type, e );
+              e.eventInfo = {
+                trigger: me._graphs.node,
+                nodes: [this.nodeData]
+              }; //图表触发，用来处理Tips
+
+              me._graphs.app.fire(e.type, e);
+            });
+            me.sectorsSp.addChildAt(sector, 0);
+            me.sectors.push(sector);
+          }
+
+          ;
+
+          if (me._graphs.label.enabled) {
+            me._startWidgetLabel();
+          }
+
+          ;
+        }
+      }
+    }, {
+      key: "focusOf",
+      value: function focusOf(node, callback) {
+        if (node.focused) return;
+        var me = this;
+        var sec = me.sectors[node.iNode];
+        sec.animate({
+          x: node.outOffsetx,
+          y: node.outOffsety
+        }, {
+          duration: 100,
+          onComplete: function onComplete() {
+            callback && callback();
+          }
+        });
+        node.focused = true;
+      }
+    }, {
+      key: "unfocusOf",
+      value: function unfocusOf(node, callback) {
+        if (!node.focused) return;
+        var me = this;
+        var sec = me.sectors[node.iNode];
+        sec.animate({
+          x: 0,
+          y: 0
+        }, {
+          duration: 100,
+          onComplete: function onComplete() {
+            callback && callback();
+          }
+        });
+        node.focused = false;
+      }
+    }, {
+      key: "selectOf",
+      value: function selectOf(node, e) {
+        var me = this;
+
+        if (!this.sectors.length || !node.selectEnabled) {
+          return;
+        }
+
+        ;
+        var sec = this.sectors[node.iNode];
+
+        if (node.selected) {
+          return;
+        }
+
+        ;
+
+        if (!node.focused) {
+          node._focusTigger = "select";
+          this.focusOf(node, function () {
+            me.addCheckedSec(sec);
+          });
+        } else {
+          this.addCheckedSec(sec);
+        }
+
+        ;
+        node.selected = true;
+      }
+    }, {
+      key: "unselectOf",
+      value: function unselectOf(node, e) {
+        var sec = this.sectors[node.iNode];
+
+        if (!node.selected || !node.selectEnabled) {
+          return;
+        }
+
+        ;
+        var me = this;
+        me.cancelCheckedSec(sec, function () {
+          if (node._focusTigger == "select") {
+            me.unfocusOf(node);
+          }
+
+          ;
+        });
+        node.selected = false;
+      }
+    }, {
+      key: "addCheckedSec",
+      value: function addCheckedSec(sec, callback) {
+        var secc = sec.context;
+        var nodeData = sec.nodeData;
+        if (!secc) return;
+        var sector = new Sector({
+          xyToInt: false,
+          context: {
+            x: secc.x,
+            y: secc.y,
+            r0: secc.r - 1,
+            r: secc.r + nodeData.selectedR,
+            startAngle: secc.startAngle,
+            endAngle: secc.startAngle,
+            //secc.endAngle,
+            fillStyle: secc.fillStyle,
+            globalAlpha: nodeData.selectedAlpha
+          },
+          id: 'selected_' + sec.id
+        });
+        sec._selectedSec = sector;
+        this.selectedSp.addChild(sector);
+
+        if (this.completed) {
+          sector.animate({
+            endAngle: secc.endAngle
+          }, {
+            duration: this._getAngleTime(secc),
+            onComplete: function onComplete() {
+              callback && callback();
+            }
+          });
+        } else {
+          sector.context.endAngle = secc.endAngle;
+        }
+      }
+    }, {
+      key: "cancelCheckedSec",
+      value: function cancelCheckedSec(sec, callback) {
+        var selectedSec = sec._selectedSec;
+        selectedSec.animate({
+          startAngle: selectedSec.context.endAngle - 0.5
+        }, {
+          duration: this._getAngleTime(sec.context),
+          onComplete: function onComplete() {
+            delete sec._selectedSec;
+            selectedSec.destroy();
+            callback && callback();
+          }
+        });
+      }
+    }, {
+      key: "_getAngleTime",
+      value: function _getAngleTime(secc) {
+        return Math.abs(secc.startAngle - secc.endAngle) / 360 * 500;
+      }
+    }, {
+      key: "grow",
+      value: function grow(callback) {
+        var me = this;
+
+        _mmvis._.each(me.sectors, function (sec, iNode) {
+          if (sec.context) {
+            sec.context.r0 = 0;
+            sec.context.r = 0;
+            sec.context.startAngle = me._graphs.startAngle;
+            sec.context.endAngle = me._graphs.startAngle;
+          }
+        });
+
+        me._hideGrowLabel();
+
+        var _tween = AnimationFrame.registTween({
+          from: {
+            process: 0
+          },
+          to: {
+            process: 1
+          },
+          duration: 500,
+          onUpdate: function onUpdate(status) {
+            for (var i = 0; i < me.sectors.length; i++) {
+              var sec = me.sectors[i];
+              var nodeData = sec.nodeData;
+              var secc = sec.context;
+              var _startAngle = nodeData.startAngle;
+              var _endAngle = nodeData.endAngle;
+              var _r = nodeData.outRadius;
+              var _r0 = nodeData.innerRadius;
+
+              if (secc) {
+                secc.r = _r * status.process;
+                secc.r0 = _r0 * status.process;
+
+                if (i == 0) {
+                  secc.startAngle = _startAngle;
+                  secc.endAngle = _startAngle + (_endAngle - _startAngle) * status.process;
+                } else {
+                  var lastEndAngle = function (iNode) {
+                    var lastIndex = iNode - 1;
+                    var lastSecc = me.sectors[lastIndex].context;
+
+                    if (lastIndex == 0) {
+                      return lastSecc ? lastSecc.endAngle : 0;
+                    }
+
+                    if (lastSecc) {
+                      return lastSecc.endAngle;
+                    } else {
+                      return arguments.callee(lastIndex);
+                    }
+                  }(i);
+
+                  secc.startAngle = lastEndAngle;
+                  secc.endAngle = secc.startAngle + (_endAngle - _startAngle) * status.process;
+                } //如果已经被选中，有一个选中态
+
+
+                if (sec._selectedSec) {
+                  sec._selectedSec.context.r0 = secc.r - 1;
+                  sec._selectedSec.context.r = secc.r + nodeData.selectedR;
+                  sec._selectedSec.context.startAngle = secc.startAngle;
+                  sec._selectedSec.context.endAngle = secc.endAngle;
+                }
+              }
+            }
+          },
+          onComplete: function onComplete() {
+            //把下面me.sprite._tweens.push( _tween );的 动画实例删除
+            me.sprite._removeTween(_tween);
+
+            me._showGrowLabel();
+
+            me.completed = true;
+            callback && callback();
+          }
+        });
+
+        me.sprite._tweens.push(_tween);
+      }
+    }, {
+      key: "_widgetLabel",
+      value: function _widgetLabel(quadrant, indexs, lmin, rmin, isEnd, ySpaceInfo) {
+        var me = this;
+        var count = 0;
+        var data = me.data.list;
+        var minTxtDis = 15;
+        var textOffsetX = 5;
+        var currentIndex;
+        var preY, currentY, adjustX, txtDis, bwidth, bheight, bx, by;
+        var yBound, remainingNum, remainingY;
+        var clockwise = quadrant == 2 || quadrant == 4;
+        var isleft = quadrant == 2 || quadrant == 3;
+        var isup = quadrant == 3 || quadrant == 4;
+        var minY = isleft ? lmin : rmin; //text的绘制顺序做修正，text的Y值在饼图上半部分（isup）时，Y值越小的先画，反之Y值在饼图下部分时，Y值越大的先画.
+
+        if (indexs.length > 0) {
+          indexs.sort(function (a, b) {
+            return isup ? data[a].edgey - data[b].edgey : data[b].edgey - data[a].edgey;
+          });
+        }
+
+        for (var i = 0; i < indexs.length; i++) {
+          currentIndex = indexs[i];
+          var itemData = data[currentIndex];
+          var outCircleRadius = itemData.outRadius + itemData.moveDis; //若Y值小于最小值，不画text    
+
+          if (!itemData.enabled || itemData.y < minY || count >= me.textMaxCount) continue;
+          count++;
+          currentY = itemData.edgey;
+          adjustX = Math.abs(itemData.edgex);
+          txtDis = currentY - preY;
+
+          if (i != 0 && (Math.abs(txtDis) < minTxtDis || isup && txtDis < 0 || !isup && txtDis > 0)) {
+            currentY = isup ? preY + minTxtDis : preY - minTxtDis;
+
+            if (outCircleRadius - Math.abs(currentY) > 0) {
+              adjustX = Math.sqrt(Math.pow(outCircleRadius, 2) - Math.pow(currentY, 2));
+            }
+
+            if (isleft && -adjustX > itemData.edgex || !isleft && adjustX < itemData.edgex) {
+              adjustX = Math.abs(itemData.edgex);
+            }
+          }
+
+          if (isEnd) {
+            yBound = isleft ? ySpaceInfo.left : ySpaceInfo.right;
+            remainingNum = indexs.length - i;
+            remainingY = isup ? yBound - remainingNum * minTxtDis : yBound + remainingNum * minTxtDis;
+
+            if (isup && currentY > remainingY || !isup && currentY < remainingY) {
+              currentY = remainingY;
+            }
+          }
+
+          preY = currentY;
+
+          if (!isEnd) {
+            if (isleft) {
+              ySpaceInfo.left = preY;
+            } else {
+              ySpaceInfo.right = preY;
+            }
+          }
+
+          ;
+          var currentX = isleft ? -adjustX - textOffsetX : adjustX + textOffsetX;
+          var globalX = currentX + me.origin.x;
+          var globalY = currentY + me.origin.y;
+
+          if (globalX > me._graphs.app.width || globalY < 0 || globalY > me._graphs.app.height) {
+            return;
+          }
+
+          ;
+          var pathStr = "M" + itemData.centerx + "," + itemData.centery;
+          pathStr += "Q" + itemData.outx + "," + itemData.outy + "," + currentX + "," + currentY;
+          var path = new Path({
+            context: {
+              lineType: 'solid',
+              path: pathStr,
+              lineWidth: 1,
+              strokeStyle: itemData.fillStyle
+            }
+          }); //指示文字
+
+          /*
+          var textTxt = itemData.labelText;
+          //如果用户format过，那么就用用户指定的格式
+          //如果没有就默认拼接
+          if( !this._graphs.label.format ){
+              if( textTxt ){
+                  textTxt = textTxt + "：" + itemData.percentage + "%" 
+              } else {
+                  textTxt = itemData.percentage + "%" 
+              }
+          };
+          */
+
+          var textTxt = itemData.labelText;
+          var branchTxt = document.createElement("div");
+          branchTxt.style.cssText = " ;position:absolute;left:-1000px;top:-1000px;color:" + itemData.fillStyle + "";
+          branchTxt.innerHTML = textTxt;
+          me.domContainer.appendChild(branchTxt);
+          bwidth = branchTxt.offsetWidth;
+          bheight = branchTxt.offsetHeight;
+          bx = isleft ? -adjustX : adjustX;
+          by = currentY;
+
+          switch (quadrant) {
+            case 1:
+              bx += textOffsetX;
+              by -= bheight / 2;
+              break;
+
+            case 2:
+              bx -= bwidth + textOffsetX;
+              by -= bheight / 2;
+              break;
+
+            case 3:
+              bx -= bwidth + textOffsetX;
+              by -= bheight / 2;
+              break;
+
+            case 4:
+              bx += textOffsetX;
+              by -= bheight / 2;
+              break;
+          }
+
+          ;
+          branchTxt.style.left = bx + me.origin.x + "px";
+          branchTxt.style.top = by + me.origin.y + "px";
+          me.textSp.addChild(path);
+          me.textList.push({
+            width: bwidth,
+            height: bheight,
+            x: bx + me.origin.x,
+            y: by + me.origin.y,
+            data: itemData,
+            textTxt: textTxt,
+            textEle: branchTxt
+          });
+        }
+      }
+    }, {
+      key: "_startWidgetLabel",
+      value: function _startWidgetLabel() {
+        var me = this;
+        var data = me.data.list;
+        var rMinPercentage = 0,
+            lMinPercentage = 0,
+            rMinY = 0,
+            lMinY = 0;
+        var quadrantsOrder = [];
+        var quadrantInfo = [{
+          indexs: [],
+          count: 0
+        }, {
+          indexs: [],
+          count: 0
+        }, {
+          indexs: [],
+          count: 0
+        }, {
+          indexs: [],
+          count: 0
+        }]; //默认从top开始画
+
+        var widgetInfo = {
+          right: {
+            startQuadrant: 4,
+            endQuadrant: 1,
+            clockwise: true,
+            indexs: []
+          },
+          left: {
+            startQuadrant: 3,
+            endQuadrant: 2,
+            clockwise: false,
+            indexs: []
+          }
+        };
+
+        for (var i = 0; i < data.length; i++) {
+          var cur = data[i].quadrant;
+          quadrantInfo[cur - 1].indexs.push(i);
+          quadrantInfo[cur - 1].count++;
+        } //1,3象限的绘制顺序需要反转
+
+
+        if (quadrantInfo[0].count > 1) quadrantInfo[0].indexs.reverse();
+        if (quadrantInfo[2].count > 1) quadrantInfo[2].indexs.reverse();
+
+        if (quadrantInfo[0].count > quadrantInfo[3].count) {
+          widgetInfo.right.startQuadrant = 1;
+          widgetInfo.right.endQuadrant = 4;
+          widgetInfo.right.clockwise = false;
+        }
+
+        if (quadrantInfo[1].count > quadrantInfo[2].count) {
+          widgetInfo.left.startQuadrant = 2;
+          widgetInfo.left.endQuadrant = 3;
+          widgetInfo.left.clockwise = true;
+        }
+
+        widgetInfo.right.indexs = quadrantInfo[widgetInfo.right.startQuadrant - 1].indexs.concat(quadrantInfo[widgetInfo.right.endQuadrant - 1].indexs);
+        widgetInfo.left.indexs = quadrantInfo[widgetInfo.left.startQuadrant - 1].indexs.concat(quadrantInfo[widgetInfo.left.endQuadrant - 1].indexs);
+        var overflowIndexs, sortedIndexs;
+
+        if (widgetInfo.right.indexs.length > me.textMaxCount) {
+          sortedIndexs = widgetInfo.right.indexs.slice(0);
+          sortedIndexs.sort(function (a, b) {
+            return data[b].y - data[a].y;
+          });
+          overflowIndexs = sortedIndexs.slice(me.textMaxCount);
+          rMinPercentage = data[overflowIndexs[0]].percentage;
+          rMinY = data[overflowIndexs[0]].y;
+        }
+
+        if (widgetInfo.left.indexs.length > me.textMaxCount) {
+          sortedIndexs = widgetInfo.left.indexs.slice(0);
+          sortedIndexs.sort(function (a, b) {
+            return data[b].y - data[a].y;
+          });
+          overflowIndexs = sortedIndexs.slice(me.textMaxCount);
+          lMinPercentage = data[overflowIndexs[0]].percentage;
+          lMinY = data[overflowIndexs[0]].y;
+        }
+
+        quadrantsOrder.push(widgetInfo.right.startQuadrant);
+        quadrantsOrder.push(widgetInfo.right.endQuadrant);
+        quadrantsOrder.push(widgetInfo.left.startQuadrant);
+        quadrantsOrder.push(widgetInfo.left.endQuadrant);
+        var ySpaceInfo = {};
+
+        for (var i = 0; i < quadrantsOrder.length; i++) {
+          var isEnd = i == 1 || i == 3;
+
+          me._widgetLabel(quadrantsOrder[i], quadrantInfo[quadrantsOrder[i] - 1].indexs, lMinY, rMinY, isEnd, ySpaceInfo);
+        }
+      }
+    }, {
+      key: "destroyLabel",
+      value: function destroyLabel() {
+        var me = this;
+
+        if (this.textSp) {
+          this.textSp.removeAllChildren();
+        }
+
+        ;
+
+        _mmvis._.each(this.textList, function (lab) {
+          me.domContainer.removeChild(lab.textEle);
+        });
+
+        this.textList = [];
+      }
+    }, {
+      key: "_showGrowLabel",
+      value: function _showGrowLabel() {
+        if (this.textSp && this.textSp.context) {
+          this.textSp.context.globalAlpha = 1;
+
+          _mmvis._.each(this.textList, function (lab) {
+            lab.textEle.style.visibility = "visible";
+          });
+        }
+      }
+    }, {
+      key: "_hideGrowLabel",
+      value: function _hideGrowLabel() {
+        if (this.textSp && this.textSp.context) {
+          this.textSp.context.globalAlpha = 0;
+
+          _mmvis._.each(this.textList, function (lab) {
+            lab.textEle.style.visibility = "hidden";
+          });
+        }
+      }
+    }]);
+
+    return Pie;
+  }(_mmvis.event.Dispatcher);
+
+  exports.default = Pie;
+});

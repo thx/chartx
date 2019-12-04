@@ -1,1 +1,427 @@
-"use strict";!function(e,t){if("function"==typeof define&&define.amd)define(["exports","./group","../index","mmvis"],t);else if("undefined"!=typeof exports)t(exports,require("./group"),require("../index"),require("mmvis"));else{var i={};t(i,e.group,e.index,e.mmvis),e.undefined=i}}(void 0,function(e,t,i,p){Object.defineProperty(e,"__esModule",{value:!0});var h=n(t);function n(e){return e&&e.__esModule?e:{default:e}}function r(e){return(r="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(e){return typeof e}:function(e){return e&&"function"==typeof Symbol&&e.constructor===Symbol&&e!==Symbol.prototype?"symbol":typeof e})(e)}function o(e){return(o=Object.setPrototypeOf?Object.getPrototypeOf:function(e){return e.__proto__||Object.getPrototypeOf(e)})(e)}function a(e){if(void 0===e)throw new ReferenceError("this hasn't been initialised - super() hasn't been called");return e}function u(e,t){for(var i=0;i<t.length;i++){var n=t[i];n.enumerable=n.enumerable||!1,n.configurable=!0,"value"in n&&(n.writable=!0),Object.defineProperty(e,n.key,n)}}function s(e,t,i){return t&&u(e.prototype,t),i&&u(e,i),e}function f(e,t){return(f=Object.setPrototypeOf||function(e,t){return e.__proto__=t,e})(e,t)}var l=(function(e,t){if("function"!=typeof t&&null!==t)throw new TypeError("Super expression must either be null or a function");e.prototype=Object.create(t&&t.prototype,{constructor:{value:e,writable:!0,configurable:!0}}),t&&f(e,t)}(d,n(i).default),s(d,null,[{key:"defaultProps",value:function(){return{field:{detail:"字段配置，支持二维数组格式",default:null},yAxisAlign:{detail:"绘制在哪根y轴上面",default:"left"},_props:[h.default]}}}]),s(d,[{key:"init",value:function(){}},{key:"draw",value:function(e){return e=e||{},this.width=e.width,this.height=e.height,p._.extend(!0,this.origin,e.origin),this.sprite.context.x=this.origin.x,this.sprite.context.y=this.origin.y,this.data=this._trimGraphs(),this._setGroupsForYfield(this.data,null,e),this.animation&&!e.resize?this.grow():this.fire("complete"),this}},{key:"resetData",value:function(e,t){var i=this;e&&(i.dataFrame=e,i.data=i._trimGraphs()),p._.each(i.groups,function(e){e.resetData(i.data[e.field].data,t)})}},{key:"setEnabledField",value:function(){this.enabledField=this.app.getComponent({name:"coord"}).filterEnabledFields(this.field)}},{key:"_trimGraphs",value:function(){var f=this,l=this.app.getComponent({name:"coord"}),d={};return f.setEnabledField(),p._.each(p._.flatten(f.enabledField),function(e,t){var i=f.app.getComponent({name:"coord"}).getFieldMapOf(e),n=f.dataFrame.getFieldData(e);if(n){for(var r=[],o=0,a=n.length;o<a;o++){var u=l.getPoint({iNode:o,field:e,value:{y:n[o]}}),s={type:"line",iGroup:t,iNode:o,field:e,value:n[o],x:u.pos.x,y:u.pos.y,rowData:f.dataFrame.getRowDataAt(o),color:i.color};r.push(s)}d[e]={yAxis:i.yAxis,field:e,data:r}}}),d}},{key:"grow",value:function(i){var n=0,r=this.groups.length,o=this;return p._.each(this.groups,function(e,t){e._grow(function(){n++,i&&i(e),n==r&&o.fire("complete")})}),this}},{key:"show",value:function(e){var i=this;-1!=p._.indexOf(p._.flatten([i.field]),e)&&(this.data=this._trimGraphs(),this._setGroupsForYfield(this.data,e),p._.each(this.groups,function(e,t){e.resetData(i.data[e.field].data)}))}},{key:"hide",value:function(e){var i=this,t=i.getGroupIndex(e);!this.groups.length||t<0||(this.groups.splice(t,1)[0].destroy(),this.data=this._trimGraphs(),p._.each(this.groups,function(e,t){e.resetData(i.data[e.field].data)}))}},{key:"getGroupIndex",value:function(e){for(var t=-1,i=0,n=this.groups.length;i<n;i++)if(this.groups[i].field===e){t=i;break}return t}},{key:"getGroup",value:function(e){return this.groups[this.getGroupIndex(e)]}},{key:"_setGroupsForYfield",value:function(e,s,f){var l=this;f=f||{},s=s&&p._.flatten([s]);var d=p._.flatten([this.field]);p._.each(e,function(e,t){if(!s||-1!=p._.indexOf(s,t)){var i=l.app.getComponent({name:"coord"}).getFieldMapOf(t),n=p._.indexOf(d,t),r=new h.default(i,n,l._opt,l.ctx,l.height,l.width,l);r.draw({animation:l.animation&&!f.resize},e.data);for(var o=!1,a=0,u=l.groups.length;a<u;a++)if(n<l.groups[a].iGroup){l.groups.splice(a,0,r),o=!0,l.sprite.addChildAt(r.sprite,a);break}o||(l.groups.push(r),l.sprite.addChild(r.sprite))}})}},{key:"getNodesAt",value:function(i,n){var r=[];return p._.each(this.groups,function(e){var t=e.getNodeInfoAt(i,n);t&&r.push(t)}),r}},{key:"getNodesOfPos",value:function(i){var n=[];return p._.each(this.groups,function(e){var t=e.getNodeInfoOfX(i);t&&n.push(t)}),n}}]),d);function d(e,t){var i;return function(e,t){if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}(this,d),(i=function(e,t){return!t||"object"!==r(t)&&"function"!=typeof t?a(e):t}(this,o(d).call(this,e,t))).type="line",i.enabledField=null,i.groups=[],p._.extend(!0,a(i),(0,p.getDefaultProps)(d.defaultProps()),e),i.init(),i}p.global.registerComponent(l,"graphs","line"),e.default=l});
+"use strict";
+
+(function (global, factory) {
+  if (typeof define === "function" && define.amd) {
+    define(["exports", "./group", "../index", "mmvis"], factory);
+  } else if (typeof exports !== "undefined") {
+    factory(exports, require("./group"), require("../index"), require("mmvis"));
+  } else {
+    var mod = {
+      exports: {}
+    };
+    factory(mod.exports, global.group, global.index, global.mmvis);
+    global.undefined = mod.exports;
+  }
+})(void 0, function (exports, _group, _index, _mmvis) {
+  "use strict";
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+
+  var _group2 = _interopRequireDefault(_group);
+
+  var _index2 = _interopRequireDefault(_index);
+
+  function _interopRequireDefault(obj) {
+    return obj && obj.__esModule ? obj : {
+      default: obj
+    };
+  }
+
+  function _typeof(obj) {
+    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
+      _typeof = function _typeof(obj) {
+        return typeof obj;
+      };
+    } else {
+      _typeof = function _typeof(obj) {
+        return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+      };
+    }
+
+    return _typeof(obj);
+  }
+
+  function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+
+  function _possibleConstructorReturn(self, call) {
+    if (call && (_typeof(call) === "object" || typeof call === "function")) {
+      return call;
+    }
+
+    return _assertThisInitialized(self);
+  }
+
+  function _getPrototypeOf(o) {
+    _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) {
+      return o.__proto__ || Object.getPrototypeOf(o);
+    };
+    return _getPrototypeOf(o);
+  }
+
+  function _assertThisInitialized(self) {
+    if (self === void 0) {
+      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+    }
+
+    return self;
+  }
+
+  function _defineProperties(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor) descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+
+  function _createClass(Constructor, protoProps, staticProps) {
+    if (protoProps) _defineProperties(Constructor.prototype, protoProps);
+    if (staticProps) _defineProperties(Constructor, staticProps);
+    return Constructor;
+  }
+
+  function _inherits(subClass, superClass) {
+    if (typeof superClass !== "function" && superClass !== null) {
+      throw new TypeError("Super expression must either be null or a function");
+    }
+
+    subClass.prototype = Object.create(superClass && superClass.prototype, {
+      constructor: {
+        value: subClass,
+        writable: true,
+        configurable: true
+      }
+    });
+    if (superClass) _setPrototypeOf(subClass, superClass);
+  }
+
+  function _setPrototypeOf(o, p) {
+    _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) {
+      o.__proto__ = p;
+      return o;
+    };
+
+    return _setPrototypeOf(o, p);
+  }
+
+  var LineGraphs = function (_GraphsBase) {
+    _inherits(LineGraphs, _GraphsBase);
+
+    _createClass(LineGraphs, null, [{
+      key: "defaultProps",
+      value: function defaultProps() {
+        return {
+          field: {
+            detail: '字段配置，支持二维数组格式',
+            "default": null
+          },
+          yAxisAlign: {
+            detail: '绘制在哪根y轴上面',
+            "default": 'left'
+          },
+          _props: [_group2["default"]]
+        };
+      }
+    }]);
+
+    function LineGraphs(opt, app) {
+      var _this;
+
+      _classCallCheck(this, LineGraphs);
+
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(LineGraphs).call(this, opt, app));
+      _this.type = "line";
+      _this.enabledField = null;
+      _this.groups = []; //群组集合
+
+      _mmvis._.extend(true, _assertThisInitialized(_this), (0, _mmvis.getDefaultProps)(LineGraphs.defaultProps()), opt);
+
+      _this.init();
+
+      return _this;
+    }
+
+    _createClass(LineGraphs, [{
+      key: "init",
+      value: function init() {}
+    }, {
+      key: "draw",
+      value: function draw(opt) {
+        !opt && (opt = {});
+        this.width = opt.width;
+        this.height = opt.height;
+
+        _mmvis._.extend(true, this.origin, opt.origin);
+
+        this.sprite.context.x = this.origin.x;
+        this.sprite.context.y = this.origin.y;
+        this.data = this._trimGraphs();
+
+        this._setGroupsForYfield(this.data, null, opt); //this.grow();
+
+
+        if (this.animation && !opt.resize) {
+          this.grow();
+        } else {
+          this.fire("complete");
+        }
+
+        return this;
+      }
+    }, {
+      key: "resetData",
+      value: function resetData(dataFrame, dataTrigger) {
+        var me = this;
+
+        if (dataFrame) {
+          me.dataFrame = dataFrame;
+          me.data = me._trimGraphs();
+        }
+
+        ;
+
+        _mmvis._.each(me.groups, function (g) {
+          g.resetData(me.data[g.field].data, dataTrigger);
+        });
+      }
+    }, {
+      key: "setEnabledField",
+      value: function setEnabledField() {
+        //要根据自己的 field，从enabledFields中根据enabled数据，计算一个 enabled版本的field子集
+        this.enabledField = this.app.getComponent({
+          name: 'coord'
+        }).filterEnabledFields(this.field);
+      }
+    }, {
+      key: "_trimGraphs",
+      value: function _trimGraphs() {
+        var me = this;
+
+        var _coord = this.app.getComponent({
+          name: 'coord'
+        }); //{"uv":{}.. ,"click": "pv":]}
+        //这样按照字段摊平的一维结构
+
+
+        var tmpData = {};
+        me.setEnabledField();
+
+        _mmvis._.each(_mmvis._.flatten(me.enabledField), function (field, i) {
+          //var maxValue = 0;
+          var fieldMap = me.app.getComponent({
+            name: 'coord'
+          }).getFieldMapOf(field); //单条line的全部data数据
+
+          var _lineData = me.dataFrame.getFieldData(field);
+
+          if (!_lineData) return; //console.log( JSON.stringify( _lineData ) )
+
+          var _data = [];
+
+          for (var b = 0, bl = _lineData.length; b < bl; b++) {
+            //返回一个和value的结构对应的point结构{x:  y: }
+            var point = _coord.getPoint({
+              iNode: b,
+              field: field,
+              value: {
+                //x:
+                y: _lineData[b]
+              }
+            });
+
+            var node = {
+              type: "line",
+              iGroup: i,
+              iNode: b,
+              field: field,
+              value: _lineData[b],
+              x: point.pos.x,
+              y: point.pos.y,
+              rowData: me.dataFrame.getRowDataAt(b),
+              color: fieldMap.color //默认设置皮肤颜色，动态的在group里面会被修改
+
+            };
+
+            _data.push(node);
+          }
+
+          ;
+          tmpData[field] = {
+            yAxis: fieldMap.yAxis,
+            field: field,
+            data: _data
+          };
+        });
+
+        return tmpData;
+      }
+    }, {
+      key: "grow",
+      value: function grow(callback) {
+        var gi = 0;
+        var gl = this.groups.length;
+        var me = this;
+
+        _mmvis._.each(this.groups, function (g, i) {
+          g._grow(function () {
+            gi++;
+            callback && callback(g);
+
+            if (gi == gl) {
+              me.fire("complete");
+            }
+          });
+        });
+
+        return this;
+      }
+    }, {
+      key: "show",
+      value: function show(field) {
+        var me = this; //这个field不再这个graphs里面的，不相关
+
+        if (_mmvis._.indexOf(_mmvis._.flatten([me.field]), field) == -1) {
+          return;
+        }
+
+        ;
+        this.data = this._trimGraphs();
+
+        this._setGroupsForYfield(this.data, field);
+
+        _mmvis._.each(this.groups, function (g, i) {
+          g.resetData(me.data[g.field].data);
+        });
+      }
+    }, {
+      key: "hide",
+      value: function hide(field) {
+        var me = this;
+        var i = me.getGroupIndex(field);
+
+        if (!this.groups.length || i < 0) {
+          return;
+        }
+
+        ;
+        this.groups.splice(i, 1)[0].destroy();
+        this.data = this._trimGraphs();
+
+        _mmvis._.each(this.groups, function (g, i) {
+          g.resetData(me.data[g.field].data);
+        });
+      }
+    }, {
+      key: "getGroupIndex",
+      value: function getGroupIndex(field) {
+        var ind = -1;
+
+        for (var i = 0, l = this.groups.length; i < l; i++) {
+          if (this.groups[i].field === field) {
+            ind = i;
+            break;
+          }
+        }
+
+        return ind;
+      }
+    }, {
+      key: "getGroup",
+      value: function getGroup(field) {
+        return this.groups[this.getGroupIndex(field)];
+      }
+    }, {
+      key: "_setGroupsForYfield",
+      value: function _setGroupsForYfield(data, fields, opt) {
+        var me = this;
+        !opt && (opt = {});
+
+        if (fields) {
+          //如果有传入field参数，那么就说明只需要从data里面挑选指定的field来添加
+          //一般用在add()执行的时候
+          fields = _mmvis._.flatten([fields]);
+        }
+
+        var _flattenField = _mmvis._.flatten([this.field]);
+
+        _mmvis._.each(data, function (g, field) {
+          if (fields && _mmvis._.indexOf(fields, field) == -1) {
+            //如果有传入fields，但是当前field不在fields里面的话，不需要处理
+            //说明该group已经在graphs里面了
+            return;
+          }
+
+          ;
+          var fieldMap = me.app.getComponent({
+            name: 'coord'
+          }).getFieldMapOf(field); //iGroup 是这条group在本graphs中的ind，而要拿整个图表层级的index， 就是fieldMap.ind
+
+          var iGroup = _mmvis._.indexOf(_flattenField, field);
+
+          var group = new _group2["default"](fieldMap, iGroup, //不同于fieldMap.ind
+          me._opt, me.ctx, me.height, me.width, me);
+          group.draw({
+            animation: me.animation && !opt.resize
+          }, g.data);
+          var insert = false; //在groups数组中插入到比自己_groupInd小的元素前面去
+
+          for (var gi = 0, gl = me.groups.length; gi < gl; gi++) {
+            if (iGroup < me.groups[gi].iGroup) {
+              me.groups.splice(gi, 0, group);
+              insert = true;
+              me.sprite.addChildAt(group.sprite, gi);
+              break;
+            }
+          }
+
+          ; //否则就只需要直接push就好了
+
+          if (!insert) {
+            me.groups.push(group);
+            me.sprite.addChild(group.sprite);
+          }
+
+          ;
+        });
+      }
+    }, {
+      key: "getNodesAt",
+      value: function getNodesAt(ind, e) {
+        var _nodesInfoList = []; //节点信息集合
+
+        _mmvis._.each(this.groups, function (group) {
+          var node = group.getNodeInfoAt(ind, e);
+          node && _nodesInfoList.push(node);
+        });
+
+        return _nodesInfoList;
+      }
+    }, {
+      key: "getNodesOfPos",
+      value: function getNodesOfPos(x) {
+        var _nodesInfoList = []; //节点信息集合
+
+        _mmvis._.each(this.groups, function (group) {
+          var node = group.getNodeInfoOfX(x);
+          node && _nodesInfoList.push(node);
+        });
+
+        return _nodesInfoList;
+      }
+    }]);
+
+    return LineGraphs;
+  }(_index2["default"]);
+
+  _mmvis.global.registerComponent(LineGraphs, 'graphs', 'line');
+
+  exports["default"] = LineGraphs;
+});
