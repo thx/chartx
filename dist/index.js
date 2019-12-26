@@ -37,6 +37,7 @@
   ; //皮肤设定end -----------------
 
   var chartx = {
+    version: '1.0.167',
     options: {}
   };
 

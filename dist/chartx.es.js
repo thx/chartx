@@ -36445,6 +36445,8 @@ var force$1 = createCommonjsModule(function (module, exports) {
   var Path = _canvax2["default"].Shapes.Path;
   var Arrow = _canvax2["default"].Shapes.Arrow;
   var Circle = _canvax2["default"].Shapes.Circle;
+  var Text = _canvax2["default"].Display.Text;
+  var Line = _canvax2["default"].Shapes.Line;
 
   var Force = function (_GraphsBase) {
     _inherits(Force, _GraphsBase);
@@ -36486,7 +36488,7 @@ var force$1 = createCommonjsModule(function (module, exports) {
               },
               fillStyle: {
                 detail: '节点背景色',
-                "default": '#e5e5e5'
+                "default": '#acdf7d'
               },
               strokeStyle: {
                 detail: '描边颜色',
@@ -36646,6 +36648,10 @@ var force$1 = createCommonjsModule(function (module, exports) {
           var content = this._getContent(rowData);
 
           var key = fields.length == 1 ? fields[0] : fields;
+          var element = new _canvax2["default"].Display.Sprite({
+            id: "nodeSp_" + key
+          });
+          this.graphsSp.addChild(element);
           var node = {
             type: "force",
             iNode: i,
@@ -36654,9 +36660,7 @@ var force$1 = createCommonjsModule(function (module, exports) {
             content: content,
             ctype: this._checkHtml(content) ? 'html' : 'canvas',
             //下面三个属性在_setElementAndSize中设置
-            element: new _canvax2["default"].Display.Sprite({
-              id: "nodeSp_" + key
-            }),
+            element: element,
             //外面传的layout数据可能没有element，widget的时候要检测下
             width: null,
             height: null,
@@ -36712,35 +36716,84 @@ var force$1 = createCommonjsModule(function (module, exports) {
           node.nodeData = d;
           return node;
         });
+        var _this$data$size = this.data.size,
+            width = _this$data$size.width,
+            height = _this$data$size.height;
         var simulation = force.forceSimulation(nodes).force("link", force.forceLink(links).id(function (d) {
           return d.id;
-        })).force("charge", force.forceManyBody()).force("center", force.forceCenter(this.data.size.width / 2, this.data.size.height / 2));
+        })).force("charge", force.forceManyBody()).force("center", force.forceCenter(width / 2, height / 2)).force("x", force.forceX(width / 2).strength(0.045)).force("y", force.forceY(height / 2).strength(0.045));
         nodes.forEach(function (node) {
-          var fillStyle = me.getProp(me.node.fillStyle, node);
-          var strokeStyle = me.getProp(me.node.strokeStyle, node); //let radius = _.flatten([me.getProp(me.node.radius, node)]);
+          var fillStyle = me.getProp(me.node.fillStyle, node.nodeData);
+          var strokeStyle = me.getProp(me.node.strokeStyle, node.nodeData); //let radius = _.flatten([me.getProp(me.node.radius, node)]);
 
-          var _elem = new Circle({
+          var _node = new Circle({
             context: {
-              r: 5,
+              r: 8,
               fillStyle: fillStyle,
               strokeStyle: strokeStyle
             }
           });
 
-          _this2.nodesSp.addChild(_elem);
+          node.nodeData.element.addChild(_node);
 
-          node.nodeData.element = _elem;
+          var _label = new Text(node.nodeData.rowData.label, {
+            context: {
+              fontSize: 11,
+              fillStyle: "#bfa08b",
+              textBaseline: "middle",
+              textAlign: "center",
+              globalAlpha: 0.7
+            }
+          });
+
+          node.nodeData.element.addChild(_label);
+        });
+        links.forEach(function (link) {
+          var lineWidth = me.getProp(me.line.lineWidth, link.nodeData);
+          var strokeStyle = me.getProp(me.line.strokeStyle, link.nodeData);
+
+          var _line = new Line({
+            context: {
+              lineWidth: lineWidth,
+              strokeStyle: strokeStyle,
+              start: {
+                x: 0,
+                y: 0
+              },
+              end: {
+                x: 0,
+                y: 0
+              },
+              globalAlpha: 0.4
+            }
+          });
+
+          _this2.edgesSp.addChild(_line);
+
+          link.line = _line;
         });
         simulation.on("tick", function () {
+          if (simulation.alpha() <= 0.05) {
+            simulation.stop();
+            return;
+          }
           nodes.forEach(function (node) {
-            debugger;
             var elemCtx = node.nodeData.element.context;
 
             if (elemCtx) {
               elemCtx.x = node.x;
               elemCtx.y = node.y;
             }
-            //var strokeStyle = me.getProp( me.line.strokeStyle, edge );
+          });
+          links.forEach(function (link) {
+            var lineCtx = link.line.context;
+
+            if (lineCtx) {
+              lineCtx.start.x = link.source.x;
+              lineCtx.start.y = link.source.y;
+              lineCtx.end.x = link.target.x;
+              lineCtx.end.y = link.target.y;
+            }
           });
         });
       }
@@ -36780,7 +36833,7 @@ var force$1 = createCommonjsModule(function (module, exports) {
       value: function getProp(prop, nodeData) {
         var _prop = prop;
 
-        if (this._isField(prop)) {
+        if (this._isField(prop) && nodeData.rowData) {
           _prop = nodeData.rowData[prop];
         } else {
           if (_mmvis._.isArray(prop)) {
@@ -52299,7 +52352,7 @@ var tips = createCommonjsModule(function (module, exports) {
             "default": '#999999'
           },
           positionOfPoint: {
-            detail: '在触发点的位置',
+            detail: 'tips在触发点的位置，默认在右侧',
             "default": 'right'
           },
           offsetX: {
@@ -54797,6 +54850,7 @@ var dist = createCommonjsModule(function (module, exports) {
   }
 
   var chartx = {
+    version: '1.0.167',
     options: {}
   };
 

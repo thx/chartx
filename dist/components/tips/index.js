@@ -147,7 +147,7 @@
             "default": '#999999'
           },
           positionOfPoint: {
-            detail: '在触发点的位置',
+            detail: 'tips在触发点的位置，默认在右侧',
             "default": 'right'
           },
           offsetX: {

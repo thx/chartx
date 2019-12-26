@@ -1,14 +1,19 @@
+const _pkg = require('./package.json');
+
 const gulp = require('gulp');
 const babel = require('gulp-babel');
 const rollup = require('rollup');
 const commonjs = require('rollup-plugin-commonjs');
 const resolve = require('rollup-plugin-node-resolve');
+
 const colors = require('colors-console');
 const clean = require('gulp-clean');
 
 const uglify = require('gulp-uglify');
 const pipeline = require('readable-stream').pipeline;
 const rename = require('gulp-rename')
+
+const replace = require('gulp-string-replace');
 
 let time = new Date().getTime();
 let _srcPath = "src/**/*.js";
@@ -26,6 +31,13 @@ let babelHandle = ( _src = _srcPath ) => {
     }))
     //.pipe(uglify())
     .pipe( gulp.dest('dist') );
+};
+
+let versionHandle = () => {
+    let version = _pkg.version;
+    return gulp.src( ["dist/index.js"] )
+    .pipe( replace( '__VERSION__', version ) )
+    .pipe( gulp.dest("dist/") )
 };
 
 let copyMMVis = ()=>{
@@ -63,7 +75,6 @@ let babelSrc = ()=>{
 let rollupNum = 0;
 //task rollup
 let rollupDist = ()=>{
-
     let inputOptions = {
         input: './dist/index.js',
         plugins: [
@@ -173,4 +184,4 @@ let watchSrc = () => {
 };
 
 //把mmvis从 node_models 里面copy到本地
-exports.default = gulp.series(cleanHandle, gulp.parallel( copyMMVis,copyCanvax ) , babelSrc, rollupDist, watchSrc );
+exports.default = gulp.series(cleanHandle, gulp.parallel( copyMMVis,copyCanvax ) , babelSrc, versionHandle, rollupDist, watchSrc );

@@ -7,6 +7,8 @@ const Rect = Canvax.Shapes.Rect;
 const Path = Canvax.Shapes.Path;
 const Arrow = Canvax.Shapes.Arrow;
 const Circle = Canvax.Shapes.Circle;
+const Text = Canvax.Display.Text;
+const Line = Canvax.Shapes.Line;
 
 
 class Force extends GraphsBase {
@@ -45,7 +47,7 @@ class Force extends GraphsBase {
                     },
                     fillStyle: {
                         detail: '节点背景色',
-                        default: '#e5e5e5'
+                        default: '#acdf7d'
                     },
                     strokeStyle: {
                         detail: '描边颜色',
@@ -193,6 +195,10 @@ class Force extends GraphsBase {
             var fields = _.flatten([(rowData[this.keyField] + "").split(",")]);
             var content = this._getContent(rowData);
             var key = fields.length == 1 ? fields[0] : fields;
+            var element = new Canvax.Display.Sprite({
+                id: "nodeSp_"+key
+            });
+            this.graphsSp.addChild( element );
 
             var node = {
                 type: "force",
@@ -203,9 +209,7 @@ class Force extends GraphsBase {
                 ctype: this._checkHtml(content) ? 'html' : 'canvas',
 
                 //下面三个属性在_setElementAndSize中设置
-                element: new Canvax.Display.Sprite({
-                    id: "nodeSp_"+key
-                }), //外面传的layout数据可能没有element，widget的时候要检测下
+                element:element, //外面传的layout数据可能没有element，widget的时候要检测下
                 width  : null,
                 height : null,
                 radius : 1, //默认为1
@@ -247,7 +251,7 @@ class Force extends GraphsBase {
 
         let keyField = this.keyField;
         let valField = this.valueField;
-        const links = this.data.edges.map(d => {
+        let links = this.data.edges.map(d => {
             //source: "Napoleon", target: "Myriel", value: 1
             return {
                 source: d.source[ keyField ], 
@@ -257,50 +261,94 @@ class Force extends GraphsBase {
             }
         });
         
-        const nodes = this.data.nodes.map(d => {
+        let nodes = this.data.nodes.map(d => {
             let node = Object.create(d)
             node.id = d.key;
             node.nodeData = d;
             return node
         });
       
+        let { width,height } = this.data.size;
+
         const simulation = force.forceSimulation( nodes )
             .force("link", force.forceLink( links ).id(d => d.id))
             .force("charge", force.forceManyBody())
-            .force("center", force.forceCenter( this.data.size.width / 2, this.data.size.height / 2));
+            .force("center", force.forceCenter(width / 2, height / 2))
+            .force("x", force.forceX( width/2 ).strength(0.045))
+            .force("y", force.forceY( height/2 ).strength(0.045))
 
         nodes.forEach(node => {
 
-            let fillStyle = me.getProp(me.node.fillStyle, node);
-            let strokeStyle = me.getProp(me.node.strokeStyle, node);
+            let fillStyle = me.getProp(me.node.fillStyle, node.nodeData);
+            let strokeStyle = me.getProp(me.node.strokeStyle, node.nodeData);
             //let radius = _.flatten([me.getProp(me.node.radius, node)]);
-
-            let _elem = new Circle({
+            let _node = new Circle({
                 context: {
-                    r : 5,
+                    r : 8,
                     fillStyle, strokeStyle
                 }
             });
+            node.nodeData.element.addChild( _node );
 
-            this.nodesSp.addChild( _elem );
+            let _label = new Text( node.nodeData.rowData.label, {
+                context: {
+                    fontSize: 11,
+                    fillStyle: "#bfa08b",
+                    textBaseline: "middle",
+                    textAlign: "center",
+                    globalAlpha: 0.7
+                }
+            } );
+            node.nodeData.element.addChild( _label );
+            
+        });
 
-            node.nodeData.element = _elem;
+        links.forEach( link => {
+            let lineWidth = me.getProp( me.line.lineWidth, link.nodeData );
+            let strokeStyle = me.getProp( me.line.strokeStyle, link.nodeData );
 
+            let _line = new Line({
+                context: {
+                    lineWidth,strokeStyle,
+                    start : {
+                        x:0,y:0
+                    },
+                    end: {
+                        x:0,y:0
+                    },
+                    globalAlpha: 0.4
+                }
+            })
+            this.edgesSp.addChild(_line);
+
+            link.line = _line;
         });
 
         simulation.on("tick",()=>{
+            if( simulation.alpha() <= 0.05 ){
+                simulation.stop();
+                return;
+            };
             nodes.forEach(node => {
-                debugger
                 let elemCtx = node.nodeData.element.context;
                 if( elemCtx ){
                     elemCtx.x = node.x;
                     elemCtx.y = node.y;
                 };
-
-                //var lineWidth = me.getProp( me.line.lineWidth, edge );
-                //var strokeStyle = me.getProp( me.line.strokeStyle, edge );
             });
+            links.forEach(link => {
+                let lineCtx = link.line.context;
+                if( lineCtx ){
+                    lineCtx.start.x = link.source.x;
+                    lineCtx.start.y = link.source.y;
+                    lineCtx.end.x = link.target.x;
+                    lineCtx.end.y = link.target.y;
+                }
+            });
+            
         });
+
+        
 
     }
      
@@ -333,7 +381,7 @@ class Force extends GraphsBase {
 
     getProp( prop, nodeData ) {
         var _prop = prop;
-        if( this._isField( prop ) ){
+        if( this._isField( prop ) && nodeData.rowData ){
             _prop = nodeData.rowData[ prop ];
         } else {
             if( _.isArray( prop ) ){
