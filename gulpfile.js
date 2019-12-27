@@ -56,7 +56,7 @@ let babelHandle = ( _src = _srcPath ) => {
                 [ "@babel/plugin-transform-runtime"]
             ]
         }))
-        //.pipe(uglify())
+        .pipe(uglify())
         .pipe( gulp.dest('dist') )
         .on('finish', ()=>{
             console.log( 'babel finish' )
