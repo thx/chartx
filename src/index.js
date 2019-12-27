@@ -1,5 +1,5 @@
 
-import {global} from "mmvis"
+import {global,version as mmvisVersion} from "mmvis"
 
 //2d图表元类
 import "./chart"
@@ -56,6 +56,7 @@ if( projectTheme && projectTheme.length ){
 
 var chartx = {
     version : '__VERSION__',
+    mmvisVersion: mmvisVersion,
     options : {}
 };
 for( var p in global ){
