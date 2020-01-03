@@ -1,1 +1,346 @@
-"use strict";var _interopRequireDefault=require("@babel/runtime/helpers/interopRequireDefault");Object.defineProperty(exports,"__esModule",{value:!0}),exports.default=void 0;var _classCallCheck2=_interopRequireDefault(require("@babel/runtime/helpers/classCallCheck")),_possibleConstructorReturn2=_interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn")),_getPrototypeOf2=_interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf")),_assertThisInitialized2=_interopRequireDefault(require("@babel/runtime/helpers/assertThisInitialized")),_createClass2=_interopRequireDefault(require("@babel/runtime/helpers/createClass")),_inherits2=_interopRequireDefault(require("@babel/runtime/helpers/inherits")),_group=_interopRequireDefault(require("./group")),_index=_interopRequireDefault(require("../index")),_mmvis=require("mmvis"),LineGraphs=function(e){function r(e,t){var i;return(0,_classCallCheck2.default)(this,r),(i=(0,_possibleConstructorReturn2.default)(this,(0,_getPrototypeOf2.default)(r).call(this,e,t))).type="line",i.enabledField=null,i.groups=[],_mmvis._.extend(!0,(0,_assertThisInitialized2.default)(i),(0,_mmvis.getDefaultProps)(r.defaultProps()),e),i.init(),i}return(0,_inherits2.default)(r,e),(0,_createClass2.default)(r,null,[{key:"defaultProps",value:function(){return{field:{detail:"字段配置，支持二维数组格式",default:null},yAxisAlign:{detail:"绘制在哪根y轴上面",default:"left"},_props:[_group.default]}}}]),(0,_createClass2.default)(r,[{key:"init",value:function(){}},{key:"draw",value:function(e){return e=e||{},this.width=e.width,this.height=e.height,_mmvis._.extend(!0,this.origin,e.origin),this.sprite.context.x=this.origin.x,this.sprite.context.y=this.origin.y,this.data=this._trimGraphs(),this._setGroupsForYfield(this.data,null,e),this.animation&&!e.resize?this.grow():this.fire("complete"),this}},{key:"resetData",value:function(e,t){var i=this;e&&(i.dataFrame=e,i.data=i._trimGraphs()),_mmvis._.each(i.groups,function(e){e.resetData(i.data[e.field].data,t)})}},{key:"setEnabledField",value:function(){this.enabledField=this.app.getComponent({name:"coord"}).filterEnabledFields(this.field)}},{key:"_trimGraphs",value:function(){var l=this,d=this.app.getComponent({name:"coord"}),p={};return l.setEnabledField(),_mmvis._.each(_mmvis._.flatten(l.enabledField),function(e,t){var i=l.app.getComponent({name:"coord"}).getFieldMapOf(e),r=l.dataFrame.getFieldData(e);if(r){for(var a=[],s=0,n=r.length;s<n;s++){var u=d.getPoint({iNode:s,field:e,value:{y:r[s]}}),o={type:"line",iGroup:t,iNode:s,field:e,value:r[s],x:u.pos.x,y:u.pos.y,rowData:l.dataFrame.getRowDataAt(s),color:i.color};a.push(o)}p[e]={yAxis:i.yAxis,field:e,data:a}}}),p}},{key:"grow",value:function(i){var r=0,a=this.groups.length,s=this;return _mmvis._.each(this.groups,function(e,t){e._grow(function(){r++,i&&i(e),r==a&&s.fire("complete")})}),this}},{key:"show",value:function(e){var i=this;-1!=_mmvis._.indexOf(_mmvis._.flatten([i.field]),e)&&(this.data=this._trimGraphs(),this._setGroupsForYfield(this.data,e),_mmvis._.each(this.groups,function(e,t){e.resetData(i.data[e.field].data)}))}},{key:"hide",value:function(e){var i=this,t=i.getGroupIndex(e);!this.groups.length||t<0||(this.groups.splice(t,1)[0].destroy(),this.data=this._trimGraphs(),_mmvis._.each(this.groups,function(e,t){e.resetData(i.data[e.field].data)}))}},{key:"getGroupIndex",value:function(e){for(var t=-1,i=0,r=this.groups.length;i<r;i++)if(this.groups[i].field===e){t=i;break}return t}},{key:"getGroup",value:function(e){return this.groups[this.getGroupIndex(e)]}},{key:"_setGroupsForYfield",value:function(e,o,l){var d=this;l=l||{},o=o&&_mmvis._.flatten([o]);var p=_mmvis._.flatten([this.field]);_mmvis._.each(e,function(e,t){if(!o||-1!=_mmvis._.indexOf(o,t)){var i=d.app.getComponent({name:"coord"}).getFieldMapOf(t),r=_mmvis._.indexOf(p,t),a=new _group.default(i,r,d._opt,d.ctx,d.height,d.width,d);a.draw({animation:d.animation&&!l.resize},e.data);for(var s=!1,n=0,u=d.groups.length;n<u;n++)if(r<d.groups[n].iGroup){d.groups.splice(n,0,a),s=!0,d.sprite.addChildAt(a.sprite,n);break}s||(d.groups.push(a),d.sprite.addChild(a.sprite))}})}},{key:"getNodesAt",value:function(i,r){var a=[];return _mmvis._.each(this.groups,function(e){var t=e.getNodeInfoAt(i,r);t&&a.push(t)}),a}},{key:"getNodesOfPos",value:function(i){var r=[];return _mmvis._.each(this.groups,function(e){var t=e.getNodeInfoOfX(i);t&&r.push(t)}),r}}]),r}(_index.default);_mmvis.global.registerComponent(LineGraphs,"graphs","line");var _default=LineGraphs;exports.default=_default;
+"use strict";
+
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports["default"] = void 0;
+
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
+
+var _assertThisInitialized2 = _interopRequireDefault(require("@babel/runtime/helpers/assertThisInitialized"));
+
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
+
+var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _group = _interopRequireDefault(require("./group"));
+
+var _index = _interopRequireDefault(require("../index"));
+
+var _canvax = require("canvax");
+
+var _tools = require("../../../utils/tools");
+
+var LineGraphs =
+/*#__PURE__*/
+function (_GraphsBase) {
+  (0, _inherits2["default"])(LineGraphs, _GraphsBase);
+  (0, _createClass2["default"])(LineGraphs, null, [{
+    key: "defaultProps",
+    value: function defaultProps() {
+      return {
+        field: {
+          detail: '字段配置，支持二维数组格式',
+          "default": null
+        },
+        yAxisAlign: {
+          detail: '绘制在哪根y轴上面',
+          "default": 'left'
+        },
+        _props: [_group["default"]]
+      };
+    }
+  }]);
+
+  function LineGraphs(opt, app) {
+    var _this;
+
+    (0, _classCallCheck2["default"])(this, LineGraphs);
+    _this = (0, _possibleConstructorReturn2["default"])(this, (0, _getPrototypeOf2["default"])(LineGraphs).call(this, opt, app));
+    _this.type = "line";
+    _this.enabledField = null;
+    _this.groups = []; //群组集合
+
+    _canvax._.extend(true, (0, _assertThisInitialized2["default"])(_this), (0, _tools.getDefaultProps)(LineGraphs.defaultProps()), opt);
+
+    _this.init();
+
+    return _this;
+  }
+
+  (0, _createClass2["default"])(LineGraphs, [{
+    key: "init",
+    value: function init() {}
+  }, {
+    key: "draw",
+    value: function draw(opt) {
+      !opt && (opt = {});
+      this.width = opt.width;
+      this.height = opt.height;
+
+      _canvax._.extend(true, this.origin, opt.origin);
+
+      this.sprite.context.x = this.origin.x;
+      this.sprite.context.y = this.origin.y;
+      this.data = this._trimGraphs();
+
+      this._setGroupsForYfield(this.data, null, opt); //this.grow();
+
+
+      if (this.animation && !opt.resize) {
+        this.grow();
+      } else {
+        this.fire("complete");
+      }
+
+      return this;
+    }
+  }, {
+    key: "resetData",
+    value: function resetData(dataFrame, dataTrigger) {
+      var me = this;
+
+      if (dataFrame) {
+        me.dataFrame = dataFrame;
+        me.data = me._trimGraphs();
+      }
+
+      ;
+
+      _canvax._.each(me.groups, function (g) {
+        g.resetData(me.data[g.field].data, dataTrigger);
+      });
+    }
+  }, {
+    key: "setEnabledField",
+    value: function setEnabledField() {
+      //要根据自己的 field，从enabledFields中根据enabled数据，计算一个 enabled版本的field子集
+      this.enabledField = this.app.getComponent({
+        name: 'coord'
+      }).filterEnabledFields(this.field);
+    } //dataFrame
+
+  }, {
+    key: "_trimGraphs",
+    value: function _trimGraphs() {
+      var me = this;
+
+      var _coord = this.app.getComponent({
+        name: 'coord'
+      }); //{"uv":{}.. ,"click": "pv":]}
+      //这样按照字段摊平的一维结构
+
+
+      var tmpData = {};
+      me.setEnabledField();
+
+      _canvax._.each(_canvax._.flatten(me.enabledField), function (field, i) {
+        //var maxValue = 0;
+        var fieldMap = me.app.getComponent({
+          name: 'coord'
+        }).getFieldMapOf(field); //单条line的全部data数据
+
+        var _lineData = me.dataFrame.getFieldData(field);
+
+        if (!_lineData) return; //console.log( JSON.stringify( _lineData ) )
+
+        var _data = [];
+
+        for (var b = 0, bl = _lineData.length; b < bl; b++) {
+          //返回一个和value的结构对应的point结构{x:  y: }
+          var point = _coord.getPoint({
+            iNode: b,
+            field: field,
+            value: {
+              //x:
+              y: _lineData[b]
+            }
+          });
+
+          var node = {
+            type: "line",
+            iGroup: i,
+            iNode: b,
+            field: field,
+            value: _lineData[b],
+            x: point.pos.x,
+            y: point.pos.y,
+            rowData: me.dataFrame.getRowDataAt(b),
+            color: fieldMap.color //默认设置皮肤颜色，动态的在group里面会被修改
+
+          };
+
+          _data.push(node);
+        }
+
+        ;
+        tmpData[field] = {
+          yAxis: fieldMap.yAxis,
+          field: field,
+          data: _data
+        };
+      });
+
+      return tmpData;
+    }
+    /**
+     * 生长动画
+     */
+
+  }, {
+    key: "grow",
+    value: function grow(callback) {
+      var gi = 0;
+      var gl = this.groups.length;
+      var me = this;
+
+      _canvax._.each(this.groups, function (g) {
+        g._grow(function () {
+          gi++;
+          callback && callback(g);
+
+          if (gi == gl) {
+            me.fire("complete");
+          }
+        });
+      });
+
+      return this;
+    }
+  }, {
+    key: "show",
+    value: function show(field) {
+      var me = this; //这个field不再这个graphs里面的，不相关
+
+      if (_canvax._.indexOf(_canvax._.flatten([me.field]), field) == -1) {
+        return;
+      }
+
+      ;
+      this.data = this._trimGraphs();
+
+      this._setGroupsForYfield(this.data, field);
+
+      _canvax._.each(this.groups, function (g) {
+        g.resetData(me.data[g.field].data);
+      });
+    }
+  }, {
+    key: "hide",
+    value: function hide(field) {
+      var me = this;
+      var i = me.getGroupIndex(field);
+
+      if (!this.groups.length || i < 0) {
+        return;
+      }
+
+      ;
+      this.groups.splice(i, 1)[0].destroy();
+      this.data = this._trimGraphs();
+
+      _canvax._.each(this.groups, function (g) {
+        g.resetData(me.data[g.field].data);
+      });
+    }
+  }, {
+    key: "getGroupIndex",
+    value: function getGroupIndex(field) {
+      var ind = -1;
+
+      for (var i = 0, l = this.groups.length; i < l; i++) {
+        if (this.groups[i].field === field) {
+          ind = i;
+          break;
+        }
+      }
+
+      return ind;
+    }
+  }, {
+    key: "getGroup",
+    value: function getGroup(field) {
+      return this.groups[this.getGroupIndex(field)];
+    }
+  }, {
+    key: "_setGroupsForYfield",
+    value: function _setGroupsForYfield(data, fields, opt) {
+      var me = this;
+      !opt && (opt = {});
+
+      if (fields) {
+        //如果有传入field参数，那么就说明只需要从data里面挑选指定的field来添加
+        //一般用在add()执行的时候
+        fields = _canvax._.flatten([fields]);
+      }
+
+      var _flattenField = _canvax._.flatten([this.field]);
+
+      _canvax._.each(data, function (g, field) {
+        if (fields && _canvax._.indexOf(fields, field) == -1) {
+          //如果有传入fields，但是当前field不在fields里面的话，不需要处理
+          //说明该group已经在graphs里面了
+          return;
+        }
+
+        ;
+        var fieldMap = me.app.getComponent({
+          name: 'coord'
+        }).getFieldMapOf(field); //iGroup 是这条group在本graphs中的ind，而要拿整个图表层级的index， 就是fieldMap.ind
+
+        var iGroup = _canvax._.indexOf(_flattenField, field);
+
+        var group = new _group["default"](fieldMap, iGroup, //不同于fieldMap.ind
+        me._opt, me.ctx, me.height, me.width, me);
+        group.draw({
+          animation: me.animation && !opt.resize
+        }, g.data);
+        var insert = false; //在groups数组中插入到比自己_groupInd小的元素前面去
+
+        for (var gi = 0, gl = me.groups.length; gi < gl; gi++) {
+          if (iGroup < me.groups[gi].iGroup) {
+            me.groups.splice(gi, 0, group);
+            insert = true;
+            me.sprite.addChildAt(group.sprite, gi);
+            break;
+          }
+        }
+
+        ; //否则就只需要直接push就好了
+
+        if (!insert) {
+          me.groups.push(group);
+          me.sprite.addChild(group.sprite);
+        }
+
+        ;
+      });
+    }
+  }, {
+    key: "getNodesAt",
+    value: function getNodesAt(ind, e) {
+      var _nodesInfoList = []; //节点信息集合
+
+      _canvax._.each(this.groups, function (group) {
+        var node = group.getNodeInfoAt(ind, e);
+        node && _nodesInfoList.push(node);
+      });
+
+      return _nodesInfoList;
+    }
+  }, {
+    key: "getNodesOfPos",
+    value: function getNodesOfPos(x) {
+      var _nodesInfoList = []; //节点信息集合
+
+      _canvax._.each(this.groups, function (group) {
+        var node = group.getNodeInfoOfX(x);
+        node && _nodesInfoList.push(node);
+      });
+
+      return _nodesInfoList;
+    }
+  }]);
+  return LineGraphs;
+}(_index["default"]);
+
+_index["default"].registerComponent(LineGraphs, 'graphs', 'line');
+
+var _default = LineGraphs;
+exports["default"] = _default;

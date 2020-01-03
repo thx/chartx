@@ -1,1 +1,436 @@
-"use strict";var _interopRequireDefault=require("@babel/runtime/helpers/interopRequireDefault");Object.defineProperty(exports,"__esModule",{value:!0}),exports.default=void 0;var _classCallCheck2=_interopRequireDefault(require("@babel/runtime/helpers/classCallCheck")),_possibleConstructorReturn2=_interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn")),_getPrototypeOf2=_interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf")),_assertThisInitialized2=_interopRequireDefault(require("@babel/runtime/helpers/assertThisInitialized")),_createClass2=_interopRequireDefault(require("@babel/runtime/helpers/createClass")),_inherits2=_interopRequireDefault(require("@babel/runtime/helpers/inherits")),_component=_interopRequireDefault(require("../component")),_canvax=_interopRequireDefault(require("canvax")),_mmvis=require("mmvis"),Line=_canvax.default.Shapes.Line,Circle=_canvax.default.Shapes.Circle,Text=_canvax.default.Display.Text,markCloumn=function(e){function i(e,t){var l;return(0,_classCallCheck2.default)(this,i),(l=(0,_possibleConstructorReturn2.default)(this,(0,_getPrototypeOf2.default)(i).call(this,e,t))).name="markcloumn",_mmvis._.extend(!0,(0,_assertThisInitialized2.default)(l),(0,_mmvis.getDefaultProps)(i.defaultProps()),e),l.sprite=new _canvax.default.Display.Sprite,l.app.graphsSprite.addChild(l.sprite),l._line=null,l._lineSp=new _canvax.default.Display.Sprite,l.sprite.addChild(l._lineSp),l.nodes=[],l._nodes=new _canvax.default.Display.Sprite,l.sprite.addChild(l._nodes),l._labels=new _canvax.default.Display.Sprite,l.sprite.addChild(l._labels),l}return(0,_inherits2.default)(i,e),(0,_createClass2.default)(i,null,[{key:"defaultProps",value:function(){return{xVal:{detail:"x的value值",default:null},x:{detail:"x的像素值",default:null},markTo:{detail:"标准哪个目标字段",documentation:"如果设置了这个字段，那么line的起点将是这个graphs上的node节点",default:null},line:{detail:"线的配置",propertys:{enabled:{detail:"是否开启",default:!0},lineWidth:{detail:"线宽",default:2},strokeStyle:{detail:"线的颜色",default:"#d5d5d5"},lineType:{detail:"线的样式，虚线(dashed)实线(solid)",default:"solid"},startY:{detail:"startY",default:0},endY:{detail:"startY",default:null}}},node:{detail:"数据图形节点",propertys:{enabled:{detail:"是否开启",default:!0},radius:{detail:"节点半径",default:5},fillStyle:{detail:"节点图形的背景色",default:"#ffffff"},strokeStyle:{detail:"节点图形的描边色，默认和line.strokeStyle保持一致",default:null},lineWidth:{detail:"节点图形边宽大小",default:2}}},label:{detail:"文本",propertys:{enabled:{detail:"是否开启",default:!1},fontColor:{detail:"文本字体颜色",default:null},fontSize:{detail:"文本字体大小",default:12},text:{detail:"文本内容",documentation:"可以是函数",default:null},format:{detail:"文本格式化函数",default:null}}}}}}]),(0,_createClass2.default)(i,[{key:"draw",value:function(e){e=e||{},this.width=e.width,this.height=e.height,this.origin=e.origin,this.sprite.context.x=this.origin.x,this.sprite.context.y=this.origin.y,this._widget()}},{key:"reset",value:function(e){e&&_mmvis._.extend(!0,this,e),this._widget()}},{key:"_widget",value:function(){var i,n=this,e=this.app.getComponent({name:"coord"})._xAxis;if(null!=this.xVal&&(i=e.getNodeInfoOfVal(this.xVal)),null!=this.x&&(i=e.getNodeInfoOfPos(this.x)),i){n.nodes=[],n.on("complete",function(){n._drawLine(i),n._drawNodes(i),n._drawLabels(i)});var a=0,r=this.app.getGraphs();_mmvis._.each(r,function(l){function e(){if(a++,!n.markTo||-1!=_mmvis._.flatten([l.field]).indexOf(n.markTo)){var e=l.getNodesOfPos(i.x);if(n.markTo){var t=_mmvis._.find(e,function(e){return e.field==n.markTo});t&&(n.nodes=[t])}else n.nodes=n.nodes.concat(e)}a==r.length&&n.fire("complete")}l.inited?e():l.on("complete",function(){e()})})}}},{key:"_drawLine",value:function(e){var t=this;if(t.line.enabled){var l=_mmvis._.extend(!0,{x:parseInt(e.x),start:{x:0,y:0},end:{x:0,y:-t.height},lineWidth:1,strokeStyle:"#cccccc"},this.line);if(null!=t.line.endY){var i=0;_mmvis._.isNumber(t.line.endY)&&(i=t.line.endY),"auto"==t.line.endY&&_mmvis._.each(t.nodes,function(e){i=Math.min(e.y)}),l.end.y=i}this._line?_mmvis._.extend(this._line.context,l):(this._line=new Line({context:l}),this._lineSp.addChild(this._line),this._line.on(_mmvis.event.types.get(),function(e){e.eventInfo={xAxis:{},nodes:t.nodes},null!=t.xVal&&(e.eventInfo.xAxis.value=t.xVal,e.eventInfo.xAxis.text=t.xVal+"",e.eventInfo.title=t.xVal+""),t.app.fire(e.type,e)}))}}},{key:"_drawNodes",value:function(){var i=this;i.node.enabled&&(i._nodes.removeAllChildren(),_mmvis._.each(i.nodes,function(t){var e=_mmvis._.extend({x:t.x,y:t.y,cursor:"pointer",r:i.node.radius,lineWidth:i.node.lineWidth||t.lineWidth,strokeStyle:i.node.strokeStyle||t.color,fillStyle:i.node.fillStyle||t.fillStyle}),l=new Circle({context:e});l.nodeData=t,l.on(_mmvis.event.types.get(),function(e){e.eventInfo={xAxis:{},nodes:[t]},null!=i.xVal&&(e.eventInfo.xAxis.value=i.xVal,e.eventInfo.xAxis.text=i.xVal+"",e.eventInfo.title=i.xVal+""),i.app.fire(e.type,e)}),i._nodes.addChild(l)}))}},{key:"_drawLabels",value:function(){var n=this;n.node.enabled&&(n._labels.removeAllChildren(),_mmvis._.each(n.nodes,function(e){var t={x:e.x,y:e.y-n.node.radius-2,fillStyle:n.label.fontColor||e.color,fontSize:n.label.fontSize,textAlign:"center",textBaseline:"bottom"},l=n.label.text;if(_mmvis._.isFunction(l)&&(l=l.apply(n,[e])),l){var i=new Text(l,{context:t});n._labels.addChild(i),i.localToGlobal().x+i.getTextWidth()/2>n.app.width&&(i.context.x=n.app.width-i.getTextWidth()/2-i.parent.localToGlobal().x)}}))}}]),i}(_component.default);_mmvis.global.registerComponent(markCloumn,"markcloumn");var _default=markCloumn;exports.default=_default;
+"use strict";
+
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports["default"] = void 0;
+
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
+
+var _assertThisInitialized2 = _interopRequireDefault(require("@babel/runtime/helpers/assertThisInitialized"));
+
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
+
+var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _component = _interopRequireDefault(require("../component"));
+
+var _canvax = _interopRequireDefault(require("canvax"));
+
+var _tools = require("../../utils/tools");
+
+var _ = _canvax["default"]._,
+    event = _canvax["default"].event;
+var Line = _canvax["default"].Shapes.Line;
+var Circle = _canvax["default"].Shapes.Circle;
+var Text = _canvax["default"].Display.Text;
+
+var markCloumn =
+/*#__PURE__*/
+function (_Component) {
+  (0, _inherits2["default"])(markCloumn, _Component);
+  (0, _createClass2["default"])(markCloumn, null, [{
+    key: "defaultProps",
+    value: function defaultProps() {
+      return {
+        xVal: {
+          detail: 'x的value值',
+          "default": null
+        },
+        x: {
+          detail: 'x的像素值',
+          "default": null
+        },
+        markTo: {
+          detail: '标准哪个目标字段',
+          documentation: '如果设置了这个字段，那么line的起点将是这个graphs上的node节点',
+          "default": null
+        },
+        line: {
+          detail: '线的配置',
+          propertys: {
+            enabled: {
+              detail: '是否开启',
+              "default": true
+            },
+            lineWidth: {
+              detail: '线宽',
+              "default": 2
+            },
+            strokeStyle: {
+              detail: '线的颜色',
+              "default": '#d5d5d5'
+            },
+            lineType: {
+              detail: '线的样式，虚线(dashed)实线(solid)',
+              "default": 'solid'
+            },
+            startY: {
+              detail: 'startY',
+              "default": 0
+            },
+            endY: {
+              detail: 'startY',
+              "default": null //'node'
+
+            }
+          }
+        },
+        node: {
+          detail: '数据图形节点',
+          propertys: {
+            enabled: {
+              detail: '是否开启',
+              "default": true
+            },
+            radius: {
+              detail: '节点半径',
+              "default": 5
+            },
+            fillStyle: {
+              detail: '节点图形的背景色',
+              "default": '#ffffff'
+            },
+            strokeStyle: {
+              detail: '节点图形的描边色，默认和line.strokeStyle保持一致',
+              "default": null
+            },
+            lineWidth: {
+              detail: '节点图形边宽大小',
+              "default": 2
+            }
+          }
+        },
+        label: {
+          detail: '文本',
+          propertys: {
+            enabled: {
+              detail: '是否开启',
+              "default": false
+            },
+            fontColor: {
+              detail: '文本字体颜色',
+              "default": null
+            },
+            fontSize: {
+              detail: '文本字体大小',
+              "default": 12
+            },
+            text: {
+              detail: '文本内容',
+              documentation: "可以是函数",
+              "default": null
+            },
+            format: {
+              detail: '文本格式化函数',
+              "default": null
+            }
+          }
+        }
+      };
+    }
+  }]);
+
+  function markCloumn(opt, app) {
+    var _this;
+
+    (0, _classCallCheck2["default"])(this, markCloumn);
+    _this = (0, _possibleConstructorReturn2["default"])(this, (0, _getPrototypeOf2["default"])(markCloumn).call(this, opt, app));
+    _this.name = "markcloumn";
+
+    _.extend(true, (0, _assertThisInitialized2["default"])(_this), (0, _tools.getDefaultProps)(markCloumn.defaultProps()), opt);
+
+    _this.sprite = new _canvax["default"].Display.Sprite();
+
+    _this.app.graphsSprite.addChild(_this.sprite);
+
+    _this._line = null;
+    _this._lineSp = new _canvax["default"].Display.Sprite();
+
+    _this.sprite.addChild(_this._lineSp);
+
+    _this.nodes = [];
+    _this._nodes = new _canvax["default"].Display.Sprite();
+
+    _this.sprite.addChild(_this._nodes);
+
+    _this._labels = new _canvax["default"].Display.Sprite();
+
+    _this.sprite.addChild(_this._labels);
+
+    return _this;
+  }
+
+  (0, _createClass2["default"])(markCloumn, [{
+    key: "draw",
+    value: function draw(opt) {
+      !opt && (opt = {});
+      this.width = opt.width;
+      this.height = opt.height;
+      this.origin = opt.origin;
+      this.sprite.context.x = this.origin.x;
+      this.sprite.context.y = this.origin.y;
+
+      this._widget();
+    }
+  }, {
+    key: "reset",
+    value: function reset(opt) {
+      opt && _.extend(true, this, opt);
+
+      this._widget();
+    }
+  }, {
+    key: "_widget",
+    value: function _widget() {
+      var me = this;
+
+      var _coord = this.app.getComponent({
+        name: 'coord'
+      });
+
+      var _xAxis = _coord._xAxis;
+      var xNode;
+
+      if (this.xVal != null) {
+        xNode = _xAxis.getNodeInfoOfVal(this.xVal);
+      }
+
+      ;
+
+      if (this.x != null) {
+        xNode = _xAxis.getNodeInfoOfPos(this.x);
+      }
+
+      ;
+
+      if (!xNode) {
+        return;
+      }
+
+      ;
+      me.nodes = [];
+      me.on("complete", function () {
+        me._drawLine(xNode);
+
+        me._drawNodes(xNode);
+
+        me._drawLabels(xNode);
+      });
+      var i = 0;
+
+      var _graphs = this.app.getGraphs();
+
+      _.each(_graphs, function (_g) {
+        function _f() {
+          i++;
+
+          if (me.markTo && _.flatten([_g.field]).indexOf(me.markTo) == -1) {//非markTo  的graph 跳过
+          } else {
+            var nodes = _g.getNodesOfPos(xNode.x);
+
+            if (me.markTo) {
+              var _node = _.find(nodes, function (node) {
+                return node.field == me.markTo;
+              });
+
+              _node && (me.nodes = [_node]);
+            } else {
+              me.nodes = me.nodes.concat(nodes);
+            }
+
+            ;
+          }
+
+          ;
+
+          if (i == _graphs.length) {
+            me.fire("complete");
+          }
+
+          ;
+        }
+
+        ;
+
+        if (_g.inited) {
+          _f();
+        } else {
+          _g.on('complete', function () {
+            _f();
+          });
+        }
+
+        ;
+      });
+    }
+  }, {
+    key: "_drawLine",
+    value: function _drawLine(xNode) {
+      var me = this;
+      if (!me.line.enabled) return;
+
+      var lineOpt = _.extend(true, {
+        x: parseInt(xNode.x),
+        start: {
+          x: 0,
+          y: 0
+        },
+        end: {
+          x: 0,
+          y: -me.height
+        },
+        //默认贯穿整个画布
+        lineWidth: 1,
+        strokeStyle: "#cccccc"
+      }, this.line);
+
+      if (me.line.endY != null) {
+        var y = 0;
+
+        if (_.isNumber(me.line.endY)) {
+          y = me.line.endY;
+        }
+
+        ;
+
+        if (me.line.endY == 'auto') {
+          _.each(me.nodes, function (node) {
+            y = Math.min(node.y);
+          });
+        }
+
+        ;
+        lineOpt.end.y = y;
+      }
+
+      ;
+
+      if (this._line) {
+        _.extend(this._line.context, lineOpt);
+      } else {
+        this._line = new Line({
+          context: lineOpt
+        });
+
+        this._lineSp.addChild(this._line);
+
+        this._line.on(event.types.get(), function (e) {
+          e.eventInfo = {
+            //iNode : this.iNode,
+            xAxis: {},
+            nodes: me.nodes
+          };
+
+          if (me.xVal != null) {
+            e.eventInfo.xAxis.value = me.xVal;
+            e.eventInfo.xAxis.text = me.xVal + '';
+            e.eventInfo.title = me.xVal + '';
+          }
+
+          ;
+          me.app.fire(e.type, e);
+        });
+      }
+
+      ; //线条渲染结束
+    }
+  }, {
+    key: "_drawNodes",
+    value: function _drawNodes() {
+      var me = this;
+      if (!me.node.enabled) return;
+
+      me._nodes.removeAllChildren();
+
+      _.each(me.nodes, function (nodeData) {
+        var nodeCtx = _.extend({
+          x: nodeData.x,
+          y: nodeData.y,
+          cursor: "pointer",
+          r: me.node.radius,
+          lineWidth: me.node.lineWidth || nodeData.lineWidth,
+          strokeStyle: me.node.strokeStyle || nodeData.color,
+          fillStyle: me.node.fillStyle || nodeData.fillStyle
+        });
+
+        var _node = new Circle({
+          context: nodeCtx
+        });
+
+        _node.nodeData = nodeData;
+
+        _node.on(event.types.get(), function (e) {
+          e.eventInfo = {
+            //iNode : this.iNode,
+            xAxis: {},
+            nodes: [nodeData]
+          };
+
+          if (me.xVal != null) {
+            e.eventInfo.xAxis.value = me.xVal;
+            e.eventInfo.xAxis.text = me.xVal + '';
+            e.eventInfo.title = me.xVal + '';
+          }
+
+          ;
+          me.app.fire(e.type, e);
+        });
+
+        me._nodes.addChild(_node);
+      });
+    }
+  }, {
+    key: "_drawLabels",
+    value: function _drawLabels() {
+      var me = this;
+      if (!me.node.enabled) return;
+
+      me._labels.removeAllChildren();
+
+      _.each(me.nodes, function (nodeData) {
+        var labelCtx = {
+          x: nodeData.x,
+          y: nodeData.y - me.node.radius - 2,
+          fillStyle: me.label.fontColor || nodeData.color,
+          fontSize: me.label.fontSize,
+          textAlign: "center",
+          textBaseline: "bottom"
+        };
+        var text = me.label.text;
+
+        if (_.isFunction(text)) {
+          text = text.apply(me, [nodeData]);
+        }
+
+        ;
+        if (!text) return;
+
+        var _label = new Text(text, {
+          context: labelCtx
+        });
+
+        me._labels.addChild(_label); //矫正label位置，可能出去了,目前只做了最右侧的检测
+
+
+        if (_label.localToGlobal().x + _label.getTextWidth() / 2 > me.app.width) {
+          _label.context.x = me.app.width - _label.getTextWidth() / 2 - _label.parent.localToGlobal().x;
+        }
+
+        ;
+      });
+    }
+  }]);
+  return markCloumn;
+}(_component["default"]);
+
+_component["default"].registerComponent(markCloumn, 'markcloumn');
+
+var _default = markCloumn;
+exports["default"] = _default;

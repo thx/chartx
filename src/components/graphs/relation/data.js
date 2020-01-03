@@ -2,7 +2,7 @@
  * 把json数据转化为关系图的数据格式
  */
 
-import { _ } from "mmvis"
+import { _ } from "canvax"
 
 //判断数据是否符合json格式要求的规范，
 //如：
@@ -19,7 +19,7 @@ import { _ } from "mmvis"
 // }];
 
 
-const parentKey = 'parent';
+//const parentKey = 'parent';
 const defaultFieldKey = '__key__';
 
 let childrenKey = 'children';
@@ -67,13 +67,14 @@ function jsonToArrayForRelation(data, options ,_childrenField ) {
 
     let childrens = [];
     let index = 0;
-    let item = undefined;
-
-    _.each(data, item => {
-        childrens.push(item)
+    
+    _.each(data, _item => {
+        childrens.push(_item)
     });
 
-    while (item = childrens.pop()) {
+   
+    while ( childrens.length ) {
+        let item = childrens.pop();
         if (!item[key]) item[key] = index;
         let _child = item[childrenKey]
         if (_child) {
@@ -109,6 +110,7 @@ function jsonToArrayForRelation(data, options ,_childrenField ) {
         }
         index++;
     }
+
     // wm = null;
     return result;
 }
@@ -146,7 +148,7 @@ function arrayToTreeJsonForRelation(data, options){
     //有了第一层就好办了
     function getChildren( list ){
 
-        _.each( list, function( node, i ){
+        _.each( list, function( node ){
             if( node.__cycle ) return;
             var key = node[ options.field ];
             _.each( _edges, function( edge, ekey ){

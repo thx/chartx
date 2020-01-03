@@ -1,8 +1,9 @@
 import Component from "../component"
 import Canvax from "canvax"
-import { global,_ , getDefaultProps} from "mmvis"
+import {getDefaultProps} from "../../utils/tools"
 
-const Line = Canvax.Shapes.Line
+let Line = Canvax.Shapes.Line
+let _ = Canvax._;
 
 class barTgi extends Component
 {
@@ -33,7 +34,7 @@ class barTgi extends Component
                     },
                     strokeStyle : {
                         detail : '线颜色',
-                        default : function( val, i ){
+                        default : function( val ){
                             if( val >= this.standardVal ){
                                 return "#43cbb5"
                             } else {
@@ -152,5 +153,5 @@ class barTgi extends Component
         return res;
     }
 }
-global.registerComponent( barTgi, 'barTgi' );
+Component.registerComponent( barTgi, 'barTgi' );
 export default barTgi;

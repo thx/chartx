@@ -1,9 +1,10 @@
 import Canvax from "canvax"
 import GraphsBase from "../index"
 import cloudLayout from "../../../layout/cloud"
-import { global,_,event,getDefaultProps } from "mmvis"
+import {getDefaultProps} from "../../../utils/tools"
 
-const Text = Canvax.Display.Text;
+let {_,event} = Canvax;
+let Text = Canvax.Display.Text;
 
 class CloudGraphs extends GraphsBase
 {
@@ -139,7 +140,7 @@ class CloudGraphs extends GraphsBase
         return ind;
     }
 
-    _getFontSize( rowData, val )
+    _getFontSize( rowData )
     {
         var size = this.node.minFontSize;
 
@@ -193,8 +194,8 @@ class CloudGraphs extends GraphsBase
         var me = this;
 
         //查找fontSize的max和min
-        var maxFontSizeVal = 0;
-        var minFontSizeVal = 0;
+        //var maxFontSizeVal = 0;
+        //var minFontSizeVal = 0;
         if( _.isString( this.node.fontSize ) ){
             _.each( me.dataFrame.getFieldData( this.node.fontSize ), function( val ){
                 me.node._maxFontSizeVal = Math.max( me.node._maxFontSizeVal, val );
@@ -240,7 +241,7 @@ class CloudGraphs extends GraphsBase
 
         layout.start();
 
-        function draw( data , e ) {
+        function draw( data ) {
             
             me.data = data;
             me.sprite.removeAllChildren()
@@ -269,9 +270,9 @@ class CloudGraphs extends GraphsBase
                 });
                 me.sprite.addChild(tagTxt);
 
-                me.node.focus.enabled && tagTxt.hover(function(e){
+                me.node.focus.enabled && tagTxt.hover(function(){
                     me.focusAt( this.nodeData.iNode );
-                } , function(e){
+                } , function(){
                     !this.nodeData.selected && me.unfocusAt( this.nodeData.iNode );
                 });
 
@@ -339,6 +340,6 @@ class CloudGraphs extends GraphsBase
 
 }
 
-global.registerComponent( CloudGraphs, 'graphs', 'cloud' );
+GraphsBase.registerComponent( CloudGraphs, 'graphs', 'cloud' );
 
 export default CloudGraphs;

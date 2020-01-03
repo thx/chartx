@@ -1,6 +1,7 @@
 import Group from "./group"
 import GraphsBase from "../index"
-import { global, _, getDefaultProps } from "mmvis"
+import { _ } from "canvax"
+import {getDefaultProps} from "../../../utils/tools"
 
 class LineGraphs extends GraphsBase
 {
@@ -155,7 +156,7 @@ class LineGraphs extends GraphsBase
         var gi = 0;
         var gl = this.groups.length;
         var me = this;
-        _.each(this.groups, function(g, i) {
+        _.each(this.groups, function(g) {
             g._grow(function(){
                 gi++;
                 callback && callback( g );
@@ -179,7 +180,7 @@ class LineGraphs extends GraphsBase
         this.data = this._trimGraphs();
         this._setGroupsForYfield( this.data , field );
         
-        _.each(this.groups, function(g, i) {
+        _.each(this.groups, function(g) {
             g.resetData( me.data[ g.field ].data );
         });
     }
@@ -196,7 +197,7 @@ class LineGraphs extends GraphsBase
         this.groups.splice(i, 1)[0].destroy();
         this.data = this._trimGraphs();
 
-        _.each(this.groups, function(g, i) {
+        _.each(this.groups, function(g) {
             g.resetData( me.data[ g.field ].data );
         });
     }
@@ -302,6 +303,6 @@ class LineGraphs extends GraphsBase
     }
 }
 
-global.registerComponent( LineGraphs, 'graphs', 'line' );
+GraphsBase.registerComponent( LineGraphs, 'graphs', 'line' );
 
 export default LineGraphs;

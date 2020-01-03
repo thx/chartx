@@ -10,6 +10,7 @@ const pipeline = require('readable-stream').pipeline;
 const rename = require('gulp-rename');
 const replace = require('gulp-string-replace');
 const fs = require('fs-extra');
+const eslint = require('gulp-eslint');
 
 let time = new Date().getTime();
 let _srcPath = "src/**/*.js";
@@ -56,7 +57,10 @@ let babelHandle = ( _src = _srcPath ) => {
                 [ "@babel/plugin-transform-runtime"]
             ]
         }))
-        .pipe(uglify())
+        //.pipe(eslint())
+        //.pipe(eslint.format())
+        //.pipe(eslint.failAfterError())
+        //.pipe(uglify())
         .pipe( gulp.dest('dist') )
         .on('finish', ()=>{
             console.log( 'babel finish' )
@@ -80,39 +84,12 @@ let versionHandle = () => {
     
 };
 
-let copyMMVis = ()=>{
-    return new Promise( resolve=>{
-        gulp.src( [ './node_modules/mmvis/dist/index_iife.min.js' ] )
-        .pipe(rename( 'mmvis.min.js' ))
-        .pipe( gulp.dest('dist/lib') )
-        .on('finish', ()=>{
-            console.log( 'copy mmvis finish' )
-            resolve();
-        });
-    } );
-};
-let copyCanvax = ()=>{
-    return new Promise( resolve=>{
-        gulp.src( [ './node_modules/canvax/dist/index.min.js' ] )
-        .pipe(rename('canvax.min.js'))
-        .pipe( gulp.dest('dist/lib') )
-        .on('finish', ()=>{
-            console.log( 'copy canvax finish' )
-            resolve();
-        });
-    } );
-};
-
-
-
 //task babel
 let babelSrc = ()=>{
     return babelHandle();
 };
 
-let rollupNum = 0;
-//task rollup
-let rollupDist = ()=>{
+let getRollupOpts = ($model='dev')=>{
     let inputOptions = {
         input: './dist/index.js',
         plugins: [
@@ -125,33 +102,41 @@ let rollupDist = ()=>{
         {
             file: './dist/chartx.js',
             format: 'iife',
-            name: 'Chartx',
+            name: ['chartx'],
             globals: {
-                mmvis: 'mmvis',
-                canvax: 'canvax'
+                Canvax: 'Canvax'
             }
         }
     ];
-    //TODO后面会判断，如果发布上线的时候才把这个es模块和umd模块提交上去
-    outputOptions = outputOptions.concat([{
-        file: './dist/chartx.es.js',
-        format: 'es',
-        name: 'Chartx',
-        globals: {
-            mmvis: 'mmvis',
-            canvax: 'canvax'
-        }
-    },
-    {
-        file: './dist/chartx.umd.js',
-        format: 'umd',
-        name: 'Chartx',
-        globals: {
-            mmvis: 'mmvis',
-            canvax: 'canvax'
-        }
-    }]);
-   
+
+    if( $model == 'publish' ){
+        //TODO后面会判断，如果发布上线的时候才把这个es模块和umd模块提交上去
+        outputOptions = outputOptions.concat([{
+            file: './dist/chartx.es.js',
+            format: 'es',
+            name: 'chartx',
+            globals: {
+                Canvax: 'Canvax'
+            }
+        },
+        {
+            file: './dist/chartx.umd.js',
+            format: 'umd',
+            name: 'chartx',
+            globals: {
+                Canvax: 'Canvax'
+            }
+        }]);
+    }
+
+    return { inputOptions, outputOptions }
+}
+
+let rollupNum = 0;
+//task rollup
+let rollupDist = ()=>{
+    
+    let { inputOptions, outputOptions } = getRollupOpts();
 
     return new Promise( resolve => {
         const watcher = rollup.watch({
@@ -159,7 +144,7 @@ let rollupDist = ()=>{
             output: outputOptions,
             watch: {
               include : './dist/**/*.js',
-              exclude : './dist/chartx.js'
+              exclude : ['./dist/chartx.js']
             }
         });
 
@@ -212,4 +197,4 @@ let watchSrc = () => {
 };
 
 //把mmvis从 node_models 里面copy到本地
-exports.default = gulp.series(cleanHandle, copyMMVis, copyCanvax, babelSrc, versionHandle, rollupDist, watchSrc);
+exports.default = gulp.series(cleanHandle, babelSrc, versionHandle, rollupDist, watchSrc);

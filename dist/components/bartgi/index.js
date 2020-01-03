@@ -1,1 +1,204 @@
-"use strict";var _interopRequireDefault=require("@babel/runtime/helpers/interopRequireDefault");Object.defineProperty(exports,"__esModule",{value:!0}),exports.default=void 0;var _classCallCheck2=_interopRequireDefault(require("@babel/runtime/helpers/classCallCheck")),_possibleConstructorReturn2=_interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn")),_getPrototypeOf2=_interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf")),_assertThisInitialized2=_interopRequireDefault(require("@babel/runtime/helpers/assertThisInitialized")),_createClass2=_interopRequireDefault(require("@babel/runtime/helpers/createClass")),_inherits2=_interopRequireDefault(require("@babel/runtime/helpers/inherits")),_component=_interopRequireDefault(require("../component")),_canvax=_interopRequireDefault(require("canvax")),_mmvis=require("mmvis"),Line=_canvax.default.Shapes.Line,barTgi=function(e){function i(e,t){var a;return(0,_classCallCheck2.default)(this,i),(a=(0,_possibleConstructorReturn2.default)(this,(0,_getPrototypeOf2.default)(i).call(this,e,t))).name="barTgi",a.data=null,a.barDatas=null,a._yAxis=null,a.sprite=null,a.pos={x:0,y:0},_mmvis._.extend(!0,(0,_assertThisInitialized2.default)(a),(0,_mmvis.getDefaultProps)(i.defaultProps()),e),a._yAxis=a.app.getComponent({name:"coord"})._yAxis["left"==a.yAxisAlign?0:1],a.sprite=new _canvax.default.Display.Sprite,a.app.graphsSprite.addChild(a.sprite),a}return(0,_inherits2.default)(i,e),(0,_createClass2.default)(i,null,[{key:"defaultProps",value:function(){return{field:{detail:"字段配置",default:null},barField:{detail:"这个bartgi组件对应的bar Graph 的field",default:null},yAxisAlign:{detail:"这个bartgi组件回到到哪个y轴",default:"left"},standardVal:{detail:"tgi标准线",default:100},line:{detail:"bar对应的tgi线配置",propertys:{lineWidth:{detail:"线宽",default:3},strokeStyle:{detail:"线颜色",default:function(e){return e>=this.standardVal?"#43cbb5":"#ff6060"}}}}}}}]),(0,_createClass2.default)(i,[{key:"reset",value:function(e){_mmvis._.extend(!0,this,e),this.barDatas=null,this.data=null,this.sprite.removeAllChildren(),this.draw()}},{key:"draw",value:function(){var l=this,e=this.app.getComponent({name:"coord"});this.pos={x:e.origin.x,y:e.origin.y},this.setPosition(),_mmvis._.each(l.app.getComponents({name:"graphs"}),function(e){if("bar"==e.type&&e.data[l.barField])return l.barDatas=e.data[l.barField],!1}),this.data=_mmvis._.flatten(l.app.dataFrame.getDataOrg(l.field)),this.barDatas&&_mmvis._.each(this.data,function(e,t){var a=-l._yAxis.getPosOfVal(e),i=l.barDatas[t],r=new Line({context:{start:{x:i.x,y:a},end:{x:i.x+i.width,y:a},lineWidth:2,strokeStyle:l._getProp(l.line.strokeStyle,e,t)}});l.sprite.addChild(r)})}},{key:"_getProp",value:function(e,t,a){var i=e;return _mmvis._.isFunction(e)&&(i=e.apply(this,[t,a])),i}}]),i}(_component.default);_mmvis.global.registerComponent(barTgi,"barTgi");var _default2=barTgi;exports.default=_default2;
+"use strict";
+
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports["default"] = void 0;
+
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
+
+var _assertThisInitialized2 = _interopRequireDefault(require("@babel/runtime/helpers/assertThisInitialized"));
+
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
+
+var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _component = _interopRequireDefault(require("../component"));
+
+var _canvax = _interopRequireDefault(require("canvax"));
+
+var _tools = require("../../utils/tools");
+
+var Line = _canvax["default"].Shapes.Line;
+var _ = _canvax["default"]._;
+
+var barTgi =
+/*#__PURE__*/
+function (_Component) {
+  (0, _inherits2["default"])(barTgi, _Component);
+  (0, _createClass2["default"])(barTgi, null, [{
+    key: "defaultProps",
+    value: function defaultProps() {
+      return {
+        field: {
+          detail: '字段配置',
+          "default": null
+        },
+        barField: {
+          detail: '这个bartgi组件对应的bar Graph 的field',
+          "default": null
+        },
+        yAxisAlign: {
+          detail: '这个bartgi组件回到到哪个y轴',
+          "default": 'left'
+        },
+        standardVal: {
+          detail: 'tgi标准线',
+          "default": 100
+        },
+        line: {
+          detail: 'bar对应的tgi线配置',
+          propertys: {
+            lineWidth: {
+              detail: '线宽',
+              "default": 3
+            },
+            strokeStyle: {
+              detail: '线颜色',
+              "default": function _default(val) {
+                if (val >= this.standardVal) {
+                  return "#43cbb5";
+                } else {
+                  return "#ff6060";
+                }
+              }
+            }
+          }
+        }
+      };
+    }
+  }]);
+
+  function barTgi(opt, app) {
+    var _this;
+
+    (0, _classCallCheck2["default"])(this, barTgi);
+    _this = (0, _possibleConstructorReturn2["default"])(this, (0, _getPrototypeOf2["default"])(barTgi).call(this, opt, app));
+    _this.name = "barTgi"; //this.field = null;
+    //this.barField = null;
+
+    _this.data = null;
+    _this.barDatas = null;
+    _this._yAxis = null; //this.yAxisAlign = "left";
+
+    _this.sprite = null; //this.standardVal = 100;
+
+    _this.pos = {
+      x: 0,
+      y: 0
+    };
+    /*
+    this.line = {
+        lineWidth : 3,
+        strokeStyle : function( val, i ){
+            if( val >= this.standardVal ){
+                return "#43cbb5"
+            } else {
+                return "#ff6060"
+            }
+        }
+    };
+    */
+
+    _.extend(true, (0, _assertThisInitialized2["default"])(_this), (0, _tools.getDefaultProps)(barTgi.defaultProps()), opt);
+
+    _this._yAxis = _this.app.getComponent({
+      name: 'coord'
+    })._yAxis[_this.yAxisAlign == "left" ? 0 : 1];
+    _this.sprite = new _canvax["default"].Display.Sprite();
+
+    _this.app.graphsSprite.addChild(_this.sprite);
+
+    return _this;
+  }
+
+  (0, _createClass2["default"])(barTgi, [{
+    key: "reset",
+    value: function reset(opt) {
+      _.extend(true, this, opt);
+
+      this.barDatas = null;
+      this.data = null;
+      this.sprite.removeAllChildren();
+      this.draw();
+    }
+  }, {
+    key: "draw",
+    value: function draw() {
+      var me = this;
+
+      var _coord = this.app.getComponent({
+        name: 'coord'
+      });
+
+      this.pos = {
+        x: _coord.origin.x,
+        y: _coord.origin.y
+      };
+      this.setPosition();
+
+      _.each(me.app.getComponents({
+        name: 'graphs'
+      }), function (_g) {
+        if (_g.type == "bar" && _g.data[me.barField]) {
+          me.barDatas = _g.data[me.barField];
+          return false;
+        }
+      });
+
+      this.data = _.flatten(me.app.dataFrame.getDataOrg(me.field));
+
+      if (!this.barDatas) {
+        return;
+      }
+
+      ;
+
+      _.each(this.data, function (tgi, i) {
+        var y = -me._yAxis.getPosOfVal(tgi);
+        var barData = me.barDatas[i];
+
+        var _tgiLine = new Line({
+          context: {
+            start: {
+              x: barData.x,
+              y: y
+            },
+            end: {
+              x: barData.x + barData.width,
+              y: y
+            },
+            lineWidth: 2,
+            strokeStyle: me._getProp(me.line.strokeStyle, tgi, i)
+          }
+        });
+
+        me.sprite.addChild(_tgiLine);
+      });
+    }
+  }, {
+    key: "_getProp",
+    value: function _getProp(val, tgi, i) {
+      var res = val;
+
+      if (_.isFunction(val)) {
+        res = val.apply(this, [tgi, i]);
+      }
+
+      ;
+      return res;
+    }
+  }]);
+  return barTgi;
+}(_component["default"]);
+
+_component["default"].registerComponent(barTgi, 'barTgi');
+
+var _default2 = barTgi;
+exports["default"] = _default2;

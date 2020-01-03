@@ -1,10 +1,11 @@
 import Component from "../component"
 import Canvax from "canvax"
-import { global,_ ,getDefaultProps} from "mmvis"
 import Trigger from "../trigger"
+import {getDefaultProps} from "../../utils/tools"
 
-const Line = Canvax.Shapes.Line;
-const Rect = Canvax.Shapes.Rect;
+let _ = Canvax._;
+let Line = Canvax.Shapes.Line;
+let Rect = Canvax.Shapes.Rect;
 
 class dataZoom extends Component
 {
@@ -386,7 +387,7 @@ class dataZoom extends Component
                 app.resetData( null , trigger );
                 app.fire("dataZoomDragIng");
             },
-            dragEnd: function(range) {
+            dragEnd: function() {
                 app.updateChecked && app.updateChecked();
                 app.fire("dataZoomDragEnd");
             }
@@ -417,7 +418,7 @@ class dataZoom extends Component
         this.sprite.destroy();
     }
 
-    reset( opt , dataFrame )
+    reset( opt )
     {
         
         !opt && ( opt = {} );
@@ -592,7 +593,7 @@ class dataZoom extends Component
                 dragEnabled : me.left.eventEnabled,
                 context: btnLeftCtx
             });
-            me._btnLeft.on("draging" , function(e){
+            me._btnLeft.on("draging" , function(){
                 
                 this.context.y = - me.btnOut / 2 + 1
                 if(this.context.x < 0){
@@ -613,7 +614,7 @@ class dataZoom extends Component
                 me._setRange();
 
             });
-            me._btnLeft.on("dragend" , function(e){
+            me._btnLeft.on("dragend" , function(){
                 me.dragEnd( me.range );
             });
             this.dataZoomBtns.addChild( this._btnLeft );
@@ -640,7 +641,7 @@ class dataZoom extends Component
                 context: btnRightCtx
             });
 
-            me._btnRight.on("draging" , function(e){
+            me._btnRight.on("draging" , function(){
                 
                 this.context.y = - me.btnOut / 2 + 1
                 if( this.context.x > me.width - me.btnWidth ){
@@ -655,7 +656,7 @@ class dataZoom extends Component
                 me.rangeRect.context.width = this.context.x - me._btnLeft.context.x - me.btnWidth;
                 me._setRange();
             });
-            me._btnRight.on("dragend" , function(e){
+            me._btnRight.on("dragend" , function(){
                 me.dragEnd( me.range );
             });
             this.dataZoomBtns.addChild( this._btnRight );
@@ -682,7 +683,7 @@ class dataZoom extends Component
                 dragEnabled : true,
                 context : rangeRectCtx
             });
-            this.rangeRect.on("draging" , function(e){
+            this.rangeRect.on("draging" , function(){
                 
                 this.context.y = 1;
                 if( this.context.x < me.btnWidth ){
@@ -696,7 +697,7 @@ class dataZoom extends Component
                 me._setRange( "btnCenter" );
 
             });
-            this.rangeRect.on("dragend" , function(e){
+            this.rangeRect.on("dragend" , function(){
                 me.dragEnd( me.range );
             });
             this.dataZoomBtns.addChild( this.rangeRect );
@@ -873,6 +874,6 @@ class dataZoom extends Component
 
 }
 
-global.registerComponent( dataZoom, 'dataZoom' );
+Component.registerComponent( dataZoom, 'dataZoom' );
 
 export default dataZoom;

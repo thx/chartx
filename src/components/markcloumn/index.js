@@ -1,10 +1,11 @@
 import Component from "../component"
 import Canvax from "canvax"
-import { global,_, getDefaultProps, event } from "mmvis"
+import {getDefaultProps} from "../../utils/tools"
 
-const Line = Canvax.Shapes.Line;
-const Circle = Canvax.Shapes.Circle;
-const Text = Canvax.Display.Text;
+let { _, event } = Canvax;
+let Line = Canvax.Shapes.Line;
+let Circle = Canvax.Shapes.Circle;
+let Text = Canvax.Display.Text;
 
 class markCloumn extends Component
 {
@@ -111,7 +112,7 @@ class markCloumn extends Component
     {
         super(opt, app);
         this.name = "markcloumn";
-        _.extend(true, this , getDefaultProps( markCloumn.defaultProps() ), opt );
+        _.extend(true, this, getDefaultProps( markCloumn.defaultProps() ), opt );
 
         this.sprite = new Canvax.Display.Sprite();
         this.app.graphsSprite.addChild( this.sprite );
@@ -333,6 +334,6 @@ class markCloumn extends Component
 }
 
 
-global.registerComponent( markCloumn, 'markcloumn' );
+Component.registerComponent( markCloumn, 'markcloumn' );
 
 export default markCloumn;

@@ -1,8 +1,9 @@
 import Component from "../component"
 import Canvax from "canvax"
-import { global,_, getDefaultProps } from "mmvis"
+import { getDefaultProps } from "../../utils/tools"
 
-const Line = Canvax.Shapes.Line;
+let _ = Canvax._;
+let Line = Canvax.Shapes.Line;
 
 class Cross extends Component
 {
@@ -120,6 +121,6 @@ class Cross extends Component
 
 }
 
-global.registerComponent( Cross, 'cross' );
+Component.registerComponent( Cross, 'cross' );
 
 export default Cross;

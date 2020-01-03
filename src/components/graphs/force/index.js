@@ -1,14 +1,12 @@
 import Canvax from "canvax"
 import GraphsBase from "../index"
-import { global, _, getDefaultProps, event, dataFrame } from "mmvis"
 import * as force from "../../../layout/force/index";
+import { getDefaultProps } from "../../../utils/tools"
 
-const Rect = Canvax.Shapes.Rect;
-const Path = Canvax.Shapes.Path;
-const Arrow = Canvax.Shapes.Arrow;
-const Circle = Canvax.Shapes.Circle;
-const Text = Canvax.Display.Text;
-const Line = Canvax.Shapes.Line;
+let _ = Canvax._
+let Circle = Canvax.Shapes.Circle;
+let Text = Canvax.Display.Text;
+let Line = Canvax.Shapes.Line;
 
 
 class Force extends GraphsBase {
@@ -375,7 +373,7 @@ class Force extends GraphsBase {
         return ~this.dataFrame.fields.indexOf(str)
     }
 
-    getNodesAt(index) {
+    getNodesAt() {
 
     }
 
@@ -396,6 +394,6 @@ class Force extends GraphsBase {
 
 }
 
-global.registerComponent(Force, 'graphs', 'force');
+GraphsBase.registerComponent(Force, 'graphs', 'force');
 
 export default Force

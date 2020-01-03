@@ -1,1 +1,252 @@
-"use strict";var _interopRequireDefault=require("@babel/runtime/helpers/interopRequireDefault");Object.defineProperty(exports,"__esModule",{value:!0}),exports.default=void 0;var _classCallCheck2=_interopRequireDefault(require("@babel/runtime/helpers/classCallCheck")),_possibleConstructorReturn2=_interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn")),_getPrototypeOf2=_interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf")),_assertThisInitialized2=_interopRequireDefault(require("@babel/runtime/helpers/assertThisInitialized")),_createClass2=_interopRequireDefault(require("@babel/runtime/helpers/createClass")),_inherits2=_interopRequireDefault(require("@babel/runtime/helpers/inherits")),_component=_interopRequireDefault(require("../component")),_canvax=_interopRequireDefault(require("canvax")),_mmvis=require("mmvis"),lineSchedu=function(e){function a(e,t){var i;return(0,_classCallCheck2.default)(this,a),(i=(0,_possibleConstructorReturn2.default)(this,(0,_getPrototypeOf2.default)(a).call(this,e,t))).name="lineSchedu",_mmvis._.extend(!0,(0,_assertThisInitialized2.default)(i),(0,_mmvis.getDefaultProps)(a.defaultProps()),e),i.lineDatas=null,i.sprite=new _canvax.default.Display.Sprite,i.app.graphsSprite.addChild(i.sprite),i}return(0,_inherits2.default)(a,e),(0,_createClass2.default)(a,null,[{key:"defaultProps",value:function(){return{lineField:{detail:"对应的line字段",default:null},style:{detail:"默认色",default:"#3995ff"},fillStyle:{detail:"节点填充色",default:"#ffffff"},lineWidth:{detail:"线宽",default:2},radius:{detail:"圆点半径",default:6},timeFontSize:{detail:"时间文本大小",default:14},timeFontColor:{detail:"时间文本颜色",default:"#606060"},listFontSize:{detail:"列表信息文本大小",default:12}}}}]),(0,_createClass2.default)(a,[{key:"reset",value:function(e){_mmvis._.extend(!0,this,e),this.lineDatas=null,this.sprite.removeAllChildren(),this.draw()}},{key:"draw",value:function(){var e=this,t=this.app.getComponent({name:"coord"});this.pos={x:t.origin.x,y:t.origin.y},this.setPosition();var i=e.app.getComponent({name:"graphs",type:"line",field:e.lineField});e.lineDatas=i.data[e.lineField].data;var a=this.app.getComponent({name:"coord"}).getAxis({type:"xAxis"}).getIndexOfVal(this.time);if(-1!=a){var l=this.lineDatas[a];if(null!=l.y){var r=e._getNodeY(l,t),n=l.x,s=new _canvax.default.Display.Sprite({context:{x:n-20}});this.sprite.addChild(s);var u=0,o=new _canvax.default.Display.Text(e.time,{context:{fillStyle:this.timeFontColor||this.style,fontSize:this.timeFontSize}});s.addChild(o);u=o.getTextHeight();var d=o.getTextWidth(),h=new _canvax.default.Display.Text(_mmvis._.flatten([e.list]).join("\n"),{context:{y:u,fillStyle:this.listFontColor||this.style,fontSize:this.listFontSize}});s.addChild(h),u+=h.getTextHeight(),(d=Math.max(d,h.getTextWidth()))+n-20>t.width+e.app.padding.right&&(s.context.x=t.width+e.app.padding.right,o.context.textAlign="right",h.context.textAlign="right");var p=0;"online"==e.status?(p=r-(this.radius+3)-u,Math.abs(p)>t.origin.y&&(p=-t.origin.y,r=-(t.origin.y-(this.radius+3)-u))):0<(p=r+(this.radius+3))+u&&(p=-u,r=-(this.radius+3)-u),s.context.y=p;var f=new _canvax.default.Shapes.BrokenLine({context:{pointList:[[n,r],[n,l.y]],strokeStyle:e.style,lineWidth:e.lineWidth}});e.sprite.addChild(f);var c=new _canvax.default.Shapes.Circle({context:{x:n,y:r,r:e.radius,fillStyle:e.fillStyle,strokeStyle:e.style,lineWidth:e.lineWidth}});e.sprite.addChild(c)}}}},{key:"_getNodeY",value:function(e,t){var i=this.app.height,a=(t.height,e.y);return"online"==this.status?a-=Math.min(50,.3*(i-Math.abs(a))):a+=Math.min(50,.3*Math.abs(a)),a}}]),a}(_component.default);_mmvis.global.registerComponent(lineSchedu,"lineSchedu");var _default=lineSchedu;exports.default=_default;
+"use strict";
+
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports["default"] = void 0;
+
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
+
+var _assertThisInitialized2 = _interopRequireDefault(require("@babel/runtime/helpers/assertThisInitialized"));
+
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
+
+var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _component = _interopRequireDefault(require("../component"));
+
+var _canvax = _interopRequireDefault(require("canvax"));
+
+var _tools = require("../../utils/tools");
+
+var _ = _canvax["default"]._;
+
+var lineSchedu =
+/*#__PURE__*/
+function (_Component) {
+  (0, _inherits2["default"])(lineSchedu, _Component);
+  (0, _createClass2["default"])(lineSchedu, null, [{
+    key: "defaultProps",
+    value: function defaultProps() {
+      return {
+        lineField: {
+          detail: '对应的line字段',
+          "default": null
+        },
+        style: {
+          detail: '默认色',
+          "default": '#3995ff'
+        },
+        fillStyle: {
+          detail: '节点填充色',
+          "default": "#ffffff"
+        },
+        lineWidth: {
+          detail: '线宽',
+          "default": 2
+        },
+        radius: {
+          detail: '圆点半径',
+          "default": 6
+        },
+        timeFontSize: {
+          detail: '时间文本大小',
+          "default": 14
+        },
+        timeFontColor: {
+          detail: '时间文本颜色',
+          "default": '#606060'
+        },
+        listFontSize: {
+          detail: '列表信息文本大小',
+          "default": 12
+        }
+      };
+    }
+  }]);
+
+  function lineSchedu(opt, app) {
+    var _this;
+
+    (0, _classCallCheck2["default"])(this, lineSchedu);
+    _this = (0, _possibleConstructorReturn2["default"])(this, (0, _getPrototypeOf2["default"])(lineSchedu).call(this, opt, app));
+    _this.name = "lineSchedu";
+
+    _.extend(true, (0, _assertThisInitialized2["default"])(_this), (0, _tools.getDefaultProps)(lineSchedu.defaultProps()), opt);
+
+    _this.lineDatas = null;
+    _this.sprite = new _canvax["default"].Display.Sprite();
+
+    _this.app.graphsSprite.addChild(_this.sprite);
+
+    return _this;
+  }
+
+  (0, _createClass2["default"])(lineSchedu, [{
+    key: "reset",
+    value: function reset(opt) {
+      _.extend(true, this, opt);
+
+      this.lineDatas = null;
+      this.sprite.removeAllChildren();
+      this.draw();
+    }
+  }, {
+    key: "draw",
+    value: function draw() {
+      var me = this;
+
+      var _coord = this.app.getComponent({
+        name: 'coord'
+      });
+
+      this.pos = {
+        x: _coord.origin.x,
+        y: _coord.origin.y
+      };
+      this.setPosition();
+      var lineGraphs = me.app.getComponent({
+        name: 'graphs',
+        type: "line",
+        field: me.lineField
+      });
+      me.lineDatas = lineGraphs.data[me.lineField].data;
+      var iNode = this.app.getComponent({
+        name: "coord"
+      }).getAxis({
+        type: "xAxis"
+      }).getIndexOfVal(this.time);
+
+      if (iNode == -1) {
+        return;
+      }
+
+      ;
+      var nodeData = this.lineDatas[iNode];
+
+      if (nodeData.y != undefined) {
+        var y = me._getNodeY(nodeData, _coord);
+
+        var x = nodeData.x;
+
+        var _txtSp = new _canvax["default"].Display.Sprite({
+          context: {
+            x: x - 20
+          }
+        });
+
+        this.sprite.addChild(_txtSp);
+        var txtHeight = 0;
+
+        var _title = new _canvax["default"].Display.Text(me.time, {
+          context: {
+            fillStyle: this.timeFontColor || this.style,
+            fontSize: this.timeFontSize
+          }
+        });
+
+        _txtSp.addChild(_title);
+
+        txtHeight = _title.getTextHeight();
+
+        var txtWidth = _title.getTextWidth();
+
+        var _list = new _canvax["default"].Display.Text(_.flatten([me.list]).join("\n"), {
+          context: {
+            y: txtHeight,
+            fillStyle: this.listFontColor || this.style,
+            fontSize: this.listFontSize
+          }
+        });
+
+        _txtSp.addChild(_list);
+
+        txtHeight += _list.getTextHeight();
+        txtWidth = Math.max(txtWidth, _list.getTextWidth());
+
+        if (txtWidth + x - 20 > _coord.width + me.app.padding.right) {
+          _txtSp.context.x = _coord.width + me.app.padding.right;
+          _title.context.textAlign = "right";
+          _list.context.textAlign = "right";
+        }
+
+        ;
+        var tsTop = 0;
+
+        if (me.status == "online") {
+          tsTop = y - (this.radius + 3) - txtHeight;
+
+          if (Math.abs(tsTop) > _coord.origin.y) {
+            tsTop = -_coord.origin.y;
+            y = -(_coord.origin.y - (this.radius + 3) - txtHeight);
+          }
+
+          ;
+        } else {
+          tsTop = y + (this.radius + 3);
+
+          if (tsTop + txtHeight > 0) {
+            tsTop = -txtHeight;
+            y = -(this.radius + 3) - txtHeight;
+          }
+
+          ;
+        }
+
+        ;
+        _txtSp.context.y = tsTop;
+
+        var _line = new _canvax["default"].Shapes.BrokenLine({
+          context: {
+            pointList: [[x, y], [x, nodeData.y]],
+            strokeStyle: me.style,
+            lineWidth: me.lineWidth
+          }
+        });
+
+        me.sprite.addChild(_line);
+
+        var _node = new _canvax["default"].Shapes.Circle({
+          context: {
+            x: x,
+            y: y,
+            r: me.radius,
+            fillStyle: me.fillStyle,
+            strokeStyle: me.style,
+            lineWidth: me.lineWidth
+          }
+        });
+
+        me.sprite.addChild(_node);
+      }
+    }
+  }, {
+    key: "_getNodeY",
+    value: function _getNodeY(nodeData, _coord) {
+      var appHeight = this.app.height;
+      var coordHeight = _coord.height;
+      var y = nodeData.y;
+
+      if (this.status == "online") {
+        y -= Math.min(50, (appHeight - Math.abs(y)) * 0.3);
+      } else {
+        y += Math.min(50, Math.abs(y) * 0.3);
+      }
+
+      ;
+      return y;
+    }
+  }]);
+  return lineSchedu;
+}(_component["default"]);
+
+_component["default"].registerComponent(lineSchedu, 'lineSchedu');
+
+var _default = lineSchedu;
+exports["default"] = _default;

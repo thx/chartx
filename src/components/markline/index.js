@@ -1,10 +1,11 @@
 import Component from "../component"
 import Canvax from "canvax"
-import { global,_ ,getDefaultProps} from "mmvis"
+import { getDefaultProps } from "../../utils/tools"
 
-const BrokenLine = Canvax.Shapes.BrokenLine;
-const Sprite = Canvax.Display.Sprite;
-const Text = Canvax.Display.Text;
+let _ = Canvax._;
+let BrokenLine = Canvax.Shapes.BrokenLine;
+let Sprite = Canvax.Display.Sprite;
+let Text = Canvax.Display.Text;
 
 class MarkLine extends Component
 {
@@ -257,7 +258,7 @@ class MarkLine extends Component
 
     _getYVal( yVal )
     {
-        var yVal = yVal || this.yVal;
+        yVal = yVal || this.yVal;
         var y = yVal;
         if( _.isFunction( yVal ) ){
             y = yVal.apply( this );
@@ -288,5 +289,5 @@ class MarkLine extends Component
     }
 }
 
-global.registerComponent( MarkLine, 'markLine' );
+Component.registerComponent( MarkLine, 'markLine' );
 export default  MarkLine

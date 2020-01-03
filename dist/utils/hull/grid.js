@@ -1,1 +1,87 @@
-"use strict";function Grid(e,t){this._cells=[],this._cellSize=t,this._reverseCellSize=1/t;for(var l=0;l<e.length;l++){var i=e[l],r=this.coordToCellNum(i[0]),o=this.coordToCellNum(i[1]);if(this._cells[r])this._cells[r][o]?this._cells[r][o].push(i):this._cells[r][o]=[i];else{var s=[];s[o]=[i],this._cells[r]=s}}}function grid(e,t){return new Grid(e,t)}Object.defineProperty(exports,"__esModule",{value:!0}),exports.default=void 0,Grid.prototype={cellPoints:function(e,t){return void 0!==this._cells[e]&&void 0!==this._cells[e][t]?this._cells[e][t]:[]},rangePoints:function(e){for(var t=this.coordToCellNum(e[0]),l=this.coordToCellNum(e[1]),i=this.coordToCellNum(e[2]),r=this.coordToCellNum(e[3]),o=[],s=t;s<=i;s++)for(var c=l;c<=r;c++)Array.prototype.push.apply(o,this.cellPoints(s,c));return o},removePoint:function(e){for(var t,l=this.coordToCellNum(e[0]),i=this.coordToCellNum(e[1]),r=this._cells[l][i],o=0;o<r.length;o++)if(r[o][0]===e[0]&&r[o][1]===e[1]){t=o;break}return r.splice(t,1),r},trunc:Math.trunc||function(e){return e-e%1},coordToCellNum:function(e){return this.trunc(e*this._reverseCellSize)},extendBbox:function(e,t){return[e[0]-t*this._cellSize,e[1]-t*this._cellSize,e[2]+t*this._cellSize,e[3]+t*this._cellSize]}};var _default=grid;exports.default=_default;
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports["default"] = void 0;
+
+function Grid(points, cellSize) {
+  this._cells = [];
+  this._cellSize = cellSize;
+  this._reverseCellSize = 1 / cellSize;
+
+  for (var i = 0; i < points.length; i++) {
+    var point = points[i];
+    var x = this.coordToCellNum(point[0]);
+    var y = this.coordToCellNum(point[1]);
+
+    if (!this._cells[x]) {
+      var array = [];
+      array[y] = [point];
+      this._cells[x] = array;
+    } else if (!this._cells[x][y]) {
+      this._cells[x][y] = [point];
+    } else {
+      this._cells[x][y].push(point);
+    }
+  }
+}
+
+Grid.prototype = {
+  cellPoints: function cellPoints(x, y) {
+    // (Number, Number) -> Array
+    return this._cells[x] !== undefined && this._cells[x][y] !== undefined ? this._cells[x][y] : [];
+  },
+  rangePoints: function rangePoints(bbox) {
+    // (Array) -> Array
+    var tlCellX = this.coordToCellNum(bbox[0]);
+    var tlCellY = this.coordToCellNum(bbox[1]);
+    var brCellX = this.coordToCellNum(bbox[2]);
+    var brCellY = this.coordToCellNum(bbox[3]);
+    var points = [];
+
+    for (var x = tlCellX; x <= brCellX; x++) {
+      for (var y = tlCellY; y <= brCellY; y++) {
+        Array.prototype.push.apply(points, this.cellPoints(x, y));
+      }
+    }
+
+    return points;
+  },
+  removePoint: function removePoint(point) {
+    // (Array) -> Array
+    var cellX = this.coordToCellNum(point[0]);
+    var cellY = this.coordToCellNum(point[1]);
+    var cell = this._cells[cellX][cellY];
+    var pointIdxInCell;
+
+    for (var i = 0; i < cell.length; i++) {
+      if (cell[i][0] === point[0] && cell[i][1] === point[1]) {
+        pointIdxInCell = i;
+        break;
+      }
+    }
+
+    cell.splice(pointIdxInCell, 1);
+    return cell;
+  },
+  trunc: Math.trunc || function (val) {
+    // (number) -> number
+    return val - val % 1;
+  },
+  coordToCellNum: function coordToCellNum(x) {
+    // (number) -> number
+    return this.trunc(x * this._reverseCellSize);
+  },
+  extendBbox: function extendBbox(bbox, scaleFactor) {
+    // (Array, Number) -> Array
+    return [bbox[0] - scaleFactor * this._cellSize, bbox[1] - scaleFactor * this._cellSize, bbox[2] + scaleFactor * this._cellSize, bbox[3] + scaleFactor * this._cellSize];
+  }
+};
+
+function grid(points, cellSize) {
+  return new Grid(points, cellSize);
+}
+
+var _default = grid;
+exports["default"] = _default;

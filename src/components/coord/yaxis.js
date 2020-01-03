@@ -1,9 +1,9 @@
 import Canvax from "canvax"
-import {numAddSymbol} from "../../utils/tools"
-import {_, getDefaultProps} from "mmvis"
+import {numAddSymbol,getDefaultProps} from "../../utils/tools"
 import Axis from "./axis"
 
-const Line = Canvax.Shapes.Line;
+let _ = Canvax._;
+let Line = Canvax.Shapes.Line;
 
 export default class yAxis extends Axis
 {
@@ -411,7 +411,7 @@ export default class yAxis extends Axis
         
         //把 rulesSprite.children中多余的给remove掉
         if( me.rulesSprite.children.length >= visibleInd ){
-            for( var al = visibleInd,pl = me.rulesSprite.children.length;al<pl;al++  ){
+            for( let al = visibleInd,pl = me.rulesSprite.children.length;al<pl;al++  ){
                 me.rulesSprite.getChildAt( al ).remove();
                 al--,pl--;
             };

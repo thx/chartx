@@ -1,10 +1,10 @@
 import Canvax from "canvax"
 import GraphsBase from "../index"
-import {numAddSymbol} from "../../../utils/tools"
-import { global, _ , event , getDefaultProps} from "mmvis"
+import {numAddSymbol,getDefaultProps} from "../../../utils/tools"
 
-const Text = Canvax.Display.Text;
-const Polygon = Canvax.Shapes.Polygon;
+let {_,event} = Canvax;
+let Text = Canvax.Display.Text;
+let Polygon = Canvax.Shapes.Polygon;
 
 class FunnelGraphs extends GraphsBase
 {
@@ -122,9 +122,8 @@ class FunnelGraphs extends GraphsBase
         //第二个data参数去掉，直接trimgraphs获取最新的data
         _.extend(true, this, opt);
 
-        var me = this;
-
-        var animate = me.animation && !opt.resize;
+        //var me = this;
+        //var animate = me.animation && !opt.resize;
 
         this._computerAttr();
 
@@ -287,6 +286,6 @@ class FunnelGraphs extends GraphsBase
 
 }
 
-global.registerComponent( FunnelGraphs, 'graphs', 'funnel' );
+GraphsBase.registerComponent( FunnelGraphs, 'graphs', 'funnel' );
 
 export default FunnelGraphs;

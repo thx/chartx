@@ -1,1 +1,211 @@
-"use strict";var _interopRequireDefault=require("@babel/runtime/helpers/interopRequireDefault");Object.defineProperty(exports,"__esModule",{value:!0}),exports.default=void 0;var _intersect2=_interopRequireDefault(require("./intersect")),_grid=_interopRequireDefault(require("./grid")),_format=_interopRequireDefault(require("./format")),_convex=_interopRequireDefault(require("./convex"));function _filterDuplicates(e){for(var t=[e[0]],r=e[0],n=1;n<e.length;n++){var o=e[n];r[0]===o[0]&&r[1]===o[1]||t.push(o),r=o}return t}function _sortByX(e){return e.sort(function(e,t){return e[0]-t[0]||e[1]-t[1]})}function _sqLength(e,t){return Math.pow(t[0]-e[0],2)+Math.pow(t[1]-e[1],2)}function _cos(e,t,r){var n=[t[0]-e[0],t[1]-e[1]],o=[r[0]-e[0],r[1]-e[1]],u=_sqLength(e,t),i=_sqLength(e,r);return(n[0]*o[0]+n[1]*o[1])/Math.sqrt(u*i)}function _intersect(e,t){for(var r=0;r<t.length-1;r++){var n=[t[r],t[r+1]];if(!(e[0][0]===n[0][0]&&e[0][1]===n[0][1]||e[0][0]===n[1][0]&&e[0][1]===n[1][1])&&(0,_intersect2.default)(e,n))return!0}return!1}function _occupiedArea(e){for(var t=1/0,r=1/0,n=-1/0,o=-1/0,u=e.length-1;0<=u;u--)e[u][0]<t&&(t=e[u][0]),e[u][1]<r&&(r=e[u][1]),e[u][0]>n&&(n=e[u][0]),e[u][1]>o&&(o=e[u][1]);return[n-t,o-r]}function _bBoxAround(e){return[Math.min(e[0][0],e[1][0]),Math.min(e[0][1],e[1][1]),Math.max(e[0][0],e[1][0]),Math.max(e[0][1],e[1][1])]}function _midPoint(e,t,r){for(var n,o,u=null,i=MAX_CONCAVE_ANGLE_COS,_=MAX_CONCAVE_ANGLE_COS,a=0;a<t.length;a++)n=_cos(e[0],e[1],t[a]),o=_cos(e[1],e[0],t[a]),i<n&&_<o&&!_intersect([e[0],t[a]],r)&&!_intersect([e[1],t[a]],r)&&(i=n,_=o,u=t[a]);return u}function _concave(e,t,r,n,o){for(var u=!1,i=0;i<e.length-1;i++){var _=[e[i],e[i+1]],a=_[0][0]+","+_[0][1]+","+_[1][0]+","+_[1][1];if(!(_sqLength(_[0],_[1])<t||o.has(a))){for(var f=0,c=_bBoxAround(_),l=void 0,s=void 0,d=void 0;l=(c=n.extendBbox(c,f))[2]-c[0],s=c[3]-c[1],f++,null===(d=_midPoint(_,n.rangePoints(c),e))&&(r[0]>l||r[1]>s););l>=r[0]&&s>=r[1]&&o.add(a),null!==d&&(e.splice(i+1,0,d),n.removePoint(d),u=!0)}}return u?_concave(e,t,r,n,o):e}function hull(e,t,r){var n=t||20,o=_filterDuplicates(_sortByX(_format.default.toXy(e,r)));if(o.length<4)return o.concat([o[0]]);var u=_occupiedArea(o),i=[u[0]*MAX_SEARCH_BBOX_SIZE_PERCENT,u[1]*MAX_SEARCH_BBOX_SIZE_PERCENT],_=(0,_convex.default)(o),a=o.filter(function(e){return _.indexOf(e)<0}),f=Math.ceil(1/(o.length/(u[0]*u[1]))),c=_concave(_,Math.pow(n,2),i,(0,_grid.default)(a,f),new Set);return r?_format.default.fromXy(c,r):c}var MAX_CONCAVE_ANGLE_COS=Math.cos(90/(180/Math.PI)),MAX_SEARCH_BBOX_SIZE_PERCENT=.6,_default=hull;exports.default=_default;
+"use strict";
+
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports["default"] = void 0;
+
+var _intersect2 = _interopRequireDefault(require("./intersect"));
+
+var _grid = _interopRequireDefault(require("./grid"));
+
+var _format = _interopRequireDefault(require("./format"));
+
+var _convex = _interopRequireDefault(require("./convex"));
+
+/*
+ (c) 2014-2019, Andrii Heonia
+ Hull.js, a JavaScript library for concave hull generation by set of points.
+ https://github.com/AndriiHeonia/hull
+*/
+function _filterDuplicates(pointset) {
+  var unique = [pointset[0]];
+  var lastPoint = pointset[0];
+
+  for (var i = 1; i < pointset.length; i++) {
+    var currentPoint = pointset[i];
+
+    if (lastPoint[0] !== currentPoint[0] || lastPoint[1] !== currentPoint[1]) {
+      unique.push(currentPoint);
+    }
+
+    lastPoint = currentPoint;
+  }
+
+  return unique;
+}
+
+function _sortByX(pointset) {
+  return pointset.sort(function (a, b) {
+    return a[0] - b[0] || a[1] - b[1];
+  });
+}
+
+function _sqLength(a, b) {
+  return Math.pow(b[0] - a[0], 2) + Math.pow(b[1] - a[1], 2);
+}
+
+function _cos(o, a, b) {
+  var aShifted = [a[0] - o[0], a[1] - o[1]],
+      bShifted = [b[0] - o[0], b[1] - o[1]],
+      sqALen = _sqLength(o, a),
+      sqBLen = _sqLength(o, b),
+      dot = aShifted[0] * bShifted[0] + aShifted[1] * bShifted[1];
+
+  return dot / Math.sqrt(sqALen * sqBLen);
+}
+
+function _intersect(segment, pointset) {
+  for (var i = 0; i < pointset.length - 1; i++) {
+    var seg = [pointset[i], pointset[i + 1]];
+
+    if (segment[0][0] === seg[0][0] && segment[0][1] === seg[0][1] || segment[0][0] === seg[1][0] && segment[0][1] === seg[1][1]) {
+      continue;
+    }
+
+    if ((0, _intersect2["default"])(segment, seg)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+function _occupiedArea(pointset) {
+  var minX = Infinity;
+  var minY = Infinity;
+  var maxX = -Infinity;
+  var maxY = -Infinity;
+
+  for (var i = pointset.length - 1; i >= 0; i--) {
+    if (pointset[i][0] < minX) {
+      minX = pointset[i][0];
+    }
+
+    if (pointset[i][1] < minY) {
+      minY = pointset[i][1];
+    }
+
+    if (pointset[i][0] > maxX) {
+      maxX = pointset[i][0];
+    }
+
+    if (pointset[i][1] > maxY) {
+      maxY = pointset[i][1];
+    }
+  }
+
+  return [maxX - minX, // width
+  maxY - minY // height
+  ];
+}
+
+function _bBoxAround(edge) {
+  return [Math.min(edge[0][0], edge[1][0]), // left
+  Math.min(edge[0][1], edge[1][1]), // top
+  Math.max(edge[0][0], edge[1][0]), // right
+  Math.max(edge[0][1], edge[1][1]) // bottom
+  ];
+}
+
+function _midPoint(edge, innerPoints, convex) {
+  var point = null,
+      angle1Cos = MAX_CONCAVE_ANGLE_COS,
+      angle2Cos = MAX_CONCAVE_ANGLE_COS,
+      a1Cos,
+      a2Cos;
+
+  for (var i = 0; i < innerPoints.length; i++) {
+    a1Cos = _cos(edge[0], edge[1], innerPoints[i]);
+    a2Cos = _cos(edge[1], edge[0], innerPoints[i]);
+
+    if (a1Cos > angle1Cos && a2Cos > angle2Cos && !_intersect([edge[0], innerPoints[i]], convex) && !_intersect([edge[1], innerPoints[i]], convex)) {
+      angle1Cos = a1Cos;
+      angle2Cos = a2Cos;
+      point = innerPoints[i];
+    }
+  }
+
+  return point;
+}
+
+function _concave(convex, maxSqEdgeLen, maxSearchArea, grid, edgeSkipList) {
+  var midPointInserted = false;
+
+  for (var i = 0; i < convex.length - 1; i++) {
+    var edge = [convex[i], convex[i + 1]]; // generate a key in the format X0,Y0,X1,Y1
+
+    var keyInSkipList = edge[0][0] + ',' + edge[0][1] + ',' + edge[1][0] + ',' + edge[1][1];
+
+    if (_sqLength(edge[0], edge[1]) < maxSqEdgeLen || edgeSkipList.has(keyInSkipList)) {
+      continue;
+    }
+
+    var scaleFactor = 0;
+
+    var bBoxAround = _bBoxAround(edge);
+
+    var bBoxWidth = void 0;
+    var bBoxHeight = void 0;
+    var midPoint = void 0;
+
+    do {
+      bBoxAround = grid.extendBbox(bBoxAround, scaleFactor);
+      bBoxWidth = bBoxAround[2] - bBoxAround[0];
+      bBoxHeight = bBoxAround[3] - bBoxAround[1];
+      midPoint = _midPoint(edge, grid.rangePoints(bBoxAround), convex);
+      scaleFactor++;
+    } while (midPoint === null && (maxSearchArea[0] > bBoxWidth || maxSearchArea[1] > bBoxHeight));
+
+    if (bBoxWidth >= maxSearchArea[0] && bBoxHeight >= maxSearchArea[1]) {
+      edgeSkipList.add(keyInSkipList);
+    }
+
+    if (midPoint !== null) {
+      convex.splice(i + 1, 0, midPoint);
+      grid.removePoint(midPoint);
+      midPointInserted = true;
+    }
+  }
+
+  if (midPointInserted) {
+    return _concave(convex, maxSqEdgeLen, maxSearchArea, grid, edgeSkipList);
+  }
+
+  return convex;
+}
+
+function hull(pointset, concavity, format) {
+  var maxEdgeLen = concavity || 20;
+
+  var points = _filterDuplicates(_sortByX(_format["default"].toXy(pointset, format)));
+
+  if (points.length < 4) {
+    return points.concat([points[0]]);
+  }
+
+  var occupiedArea = _occupiedArea(points);
+
+  var maxSearchArea = [occupiedArea[0] * MAX_SEARCH_BBOX_SIZE_PERCENT, occupiedArea[1] * MAX_SEARCH_BBOX_SIZE_PERCENT];
+  var convex = (0, _convex["default"])(points);
+  var innerPoints = points.filter(function (pt) {
+    return convex.indexOf(pt) < 0;
+  });
+  var cellSize = Math.ceil(1 / (points.length / (occupiedArea[0] * occupiedArea[1])));
+
+  var concave = _concave(convex, Math.pow(maxEdgeLen, 2), maxSearchArea, (0, _grid["default"])(innerPoints, cellSize), new Set());
+
+  if (format) {
+    return _format["default"].fromXy(concave, format);
+  } else {
+    return concave;
+  }
+}
+
+var MAX_CONCAVE_ANGLE_COS = Math.cos(90 / (180 / Math.PI)); // angle = 90 deg
+
+var MAX_SEARCH_BBOX_SIZE_PERCENT = 0.6;
+var _default = hull;
+exports["default"] = _default;

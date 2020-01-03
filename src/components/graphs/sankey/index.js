@@ -4,10 +4,11 @@
 import Canvax from "canvax"
 import GraphsBase from "../index"
 import sankeyLayout from "../../../layout/sankey/index"
-import { global,_,event,getDefaultProps } from "mmvis"
+import {getDefaultProps} from "../../../utils/tools"
 
-const Path = Canvax.Shapes.Path;
-const Rect = Canvax.Shapes.Rect;
+let { _,event } = Canvax;
+let Path = Canvax.Shapes.Path;
+let Rect = Canvax.Shapes.Rect;
 
 class sankeyGraphs extends GraphsBase
 {
@@ -332,6 +333,6 @@ class sankeyGraphs extends GraphsBase
 
 }
 
-global.registerComponent( sankeyGraphs, 'graphs', 'sankey' );
+GraphsBase.registerComponent( sankeyGraphs, 'graphs', 'sankey' );
 
 export default sankeyGraphs;

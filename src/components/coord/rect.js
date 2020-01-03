@@ -3,7 +3,9 @@ import Canvax from "canvax"
 import xAxisConstructor from "./xaxis"
 import yAxisConstructor from "./yaxis"
 import Grid from "./grid"
-import { global,_,getDefaultProps,event } from "mmvis"
+import {getDefaultProps} from "../../utils/tools"
+
+let { _,event } = Canvax
 
 
 class Rect extends coordBase
@@ -175,7 +177,7 @@ class Rect extends coordBase
         return coord;
     }
 
-    init(opt)
+    init()
     {
 
         this._initModules();
@@ -184,7 +186,7 @@ class Rect extends coordBase
         this.fieldsMap = this.setFieldsMap( {type: "yAxis"} );
     }
 
-    resetData( dataFrame , dataTrigger )
+    resetData( dataFrame )
     {
         var me = this;
         this.dataFrame = dataFrame;
@@ -200,7 +202,7 @@ class Rect extends coordBase
 
         this._resetXY_axisLine_pos();
 
-        var _yAxis = this._yAxisLeft || this._yAxisRight;
+        //var _yAxis = this._yAxisLeft || this._yAxisRight;
         
         this._grid.reset({
             animation:false
@@ -600,6 +602,6 @@ class Rect extends coordBase
 
 }
 
-global.registerComponent( Rect, 'coord', 'rect' );
+coordBase.registerComponent( Rect, 'coord', 'rect' );
 
 export default Rect;

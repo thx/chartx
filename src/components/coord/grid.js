@@ -1,8 +1,9 @@
 import Canvax from "canvax"
-import { _, event,getDefaultProps } from "mmvis"
+import {getDefaultProps} from "../../utils/tools"
 
-const Line = Canvax.Shapes.Line;
-const Rect = Canvax.Shapes.Rect;
+let { _, event } = Canvax;
+let Line = Canvax.Shapes.Line;
+let Rect = Canvax.Shapes.Rect;
 
 export default class rectGrid extends event.Dispatcher
 {
@@ -281,10 +282,10 @@ export default class rectGrid extends event.Dispatcher
         };
 
         //y轴方向的线集合
-        var arr = _xAxis.layoutData;
-        for(var a = 0, al = arr.length; a < al; a++){
-            var o = arr[a]
-            var line = new Line({
+        arr = _xAxis.layoutData;
+        for(a = 0, al = arr.length; a < al; a++){
+            let o = arr[a]
+            let line = new Line({
                 context : {
                     x : o.x,
                     start       : {

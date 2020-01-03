@@ -1,10 +1,10 @@
 import Canvax from "canvax"
-import {numAddSymbol} from "../../../utils/tools"
+import {numAddSymbol,getDefaultProps} from "../../../utils/tools"
 import GraphsBase from "../index"
-import { global, _, event, getDefaultProps } from "mmvis"
 
-const AnimationFrame = Canvax.AnimationFrame;
-const Rect = Canvax.Shapes.Rect;
+let { _, event } = Canvax;
+let AnimationFrame = Canvax.AnimationFrame;
+let Rect = Canvax.Shapes.Rect;
 
 class BarGraphs extends GraphsBase
 {
@@ -212,9 +212,9 @@ class BarGraphs extends GraphsBase
         var data = this.data;
         
         var _nodesInfoList = []; //节点信息集合
-        _.each( this.enabledField, function( fs, i ){
+        _.each( this.enabledField, function( fs ){
             if( _.isArray(fs) ){
-                _.each( fs, function( _fs, ii ){
+                _.each( fs, function( _fs ){
                     //fs的结构两层到顶了
                     var nodeData = data[ _fs ] ? data[ _fs ][ index ] : null;
                     nodeData && _nodesInfoList.push( nodeData );
@@ -255,7 +255,7 @@ class BarGraphs extends GraphsBase
         };
         //field对应的索引，， 取颜色这里不要用i
         if (_.isString(color)) {
-            color = color
+            //color = color
         };
         if (_.isArray(color)) {
             color = _.flatten(color)[ _.indexOf( _flattenField, field ) ];
@@ -306,7 +306,7 @@ class BarGraphs extends GraphsBase
         return this.node._width;
     }
 
-    show( field ){
+    show(  ){
         this.draw();
     }
 
@@ -324,7 +324,7 @@ class BarGraphs extends GraphsBase
         this.draw();
     }
 
-    resetData( dataFrame , dataTrigger )
+    resetData( dataFrame )
     {
         this.dataFrame = dataFrame;
         this.draw();
@@ -829,7 +829,7 @@ class BarGraphs extends GraphsBase
                     if (me.proportion) {
                         //先计算总量
                         vCount = 0;
-                        _.each( hData, function(team, ti) {
+                        _.each( hData, function(team) {
                             vCount += team[i]
                         });
                     };
@@ -1053,7 +1053,7 @@ class BarGraphs extends GraphsBase
         }, opt);
 
         var barCount = 0;
-        _.each(me.enabledField, function(h_group, g) {
+        _.each(me.enabledField, function(h_group) {
             h_group = _.flatten([ h_group ]);
             var vLen = h_group.length;
             if (vLen == 0) return;
@@ -1088,7 +1088,7 @@ class BarGraphs extends GraphsBase
                             duration: optsions.duration,
                             easing: optsions.easing,
                             delay: h * optsions.delay,
-                            onUpdate: function(arg) {
+                            onUpdate: function() {
 
                             },
                             onComplete: function(arg) {
@@ -1123,7 +1123,7 @@ class BarGraphs extends GraphsBase
         //因为这里是带上了start的全局的index，
         var index = ind - this.dataFrame.range.start;
 
-        _.each( this.data, function( list, f ){
+        _.each( this.data, function( list ){
             var nodeData = list[ index ];
             nodeData.selected = true;
             me.setNodeElementStyle( nodeData );
@@ -1147,7 +1147,7 @@ class BarGraphs extends GraphsBase
         this.select.inds.splice( _index, 1 );
 
         var index = ind - this.dataFrame.range.start;
-        _.each( this.data, function( list, f ){
+        _.each( this.data, function( list ){
             var nodeData = list[ index ];
             nodeData.selected = false;
             me.setNodeElementStyle( nodeData );
@@ -1203,6 +1203,6 @@ class BarGraphs extends GraphsBase
     }
 }
 
-global.registerComponent( BarGraphs, 'graphs', 'bar' );
+GraphsBase.registerComponent( BarGraphs, 'graphs', 'bar' );
 
 export default BarGraphs;

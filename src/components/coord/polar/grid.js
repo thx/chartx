@@ -1,6 +1,7 @@
 import Canvax from "canvax"
-import { _, event, getDefaultProps } from "mmvis"
+import {getDefaultProps} from "../../../utils/tools"
 
+let { _, event } = Canvax
 const Line = Canvax.Shapes.Line;
 const Circle = Canvax.Shapes.Circle;
 const Polygon = Canvax.Shapes.Polygon;

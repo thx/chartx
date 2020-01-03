@@ -4,9 +4,10 @@
 import Canvax from "canvax"
 import GraphsBase from "../index"
 import Partition from "../../../layout/partition"
-import {global, _,event,getDefaultProps } from "mmvis"
+import {getDefaultProps} from "../../../utils/tools"
 
-const Sector = Canvax.Shapes.Sector;
+let { _,event } = Canvax;
+let Sector = Canvax.Shapes.Sector;
 
 class sunburstGraphs extends GraphsBase
 {
@@ -210,9 +211,9 @@ class sunburstGraphs extends GraphsBase
 
                 me.sprite.addChild( sector );
 
-                sector.hover(function(e){
+                sector.hover(function(){
                     me._focus( layoutData , group );
-                } , function(e){
+                } , function(){
                     me._unfocus( layoutData , group );
                 });
                 sector.on(event.types.get(), function(e) {
@@ -276,8 +277,7 @@ class sunburstGraphs extends GraphsBase
         me._focusParent( layoutData );
     }
 
-    _unfocus(layoutData, group){
-        var me = this;
+    _unfocus(){
         _.each( this.data , function( d ){
             d.sector && (d.sector.context.globalAlpha = 1);
         } );
@@ -308,5 +308,5 @@ class sunburstGraphs extends GraphsBase
     }
 }
 
-global.registerComponent( sunburstGraphs, 'graphs', 'sunburst' );
+GraphsBase.registerComponent( sunburstGraphs, 'graphs', 'sunburst' );
 export default sunburstGraphs;

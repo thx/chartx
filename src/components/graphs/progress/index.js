@@ -1,6 +1,8 @@
 import Canvax from "canvax"
 import GraphsBase from "../index"
-import { global,_, getDefaultProps } from "mmvis"
+import {getDefaultProps} from "../../../utils/tools"
+
+let _ = Canvax._;
 
 class Progress extends GraphsBase
 {
@@ -57,7 +59,7 @@ class Progress extends GraphsBase
                     },
                     format    : {
                         detail : 'label格式化处理函数',
-                        default: function(val, nodeData){
+                        default: function(val){
                             return val.toFixed( this.label.fixNum );
                         }
                     },
@@ -171,7 +173,7 @@ class Progress extends GraphsBase
         //整个的
         var _startAngle = me.startAngle || _coord.startAngle;
         var _allAngle = me.allAngle || _coord.allAngle;
-        var _endAngle = startAngle + allAngle;
+        //var _endAngle = startAngle + allAngle;
         
         this.bgNodeData = this._getNodeData( _startAngle, _allAngle );
         this.bgNodeData.fillStyle = this._getStyle( this.bgNodeData, this.bgColor );
@@ -339,7 +341,7 @@ class Progress extends GraphsBase
                         labelElement.resetText( nodeData.text );
                         _.extend( labelElement.context, labelCtx );
                     } else {
-                        var labelElement = new Canvax.Display.Text( nodeData.text, {
+                        labelElement = new Canvax.Display.Text( nodeData.text, {
                             id : labelId,
                             context : labelCtx
                         } );
@@ -362,7 +364,7 @@ class Progress extends GraphsBase
                     } else {
                         
                         var unitText = me.label.unit;
-                        var labelSymbolElement = new Canvax.Display.Text( unitText, {
+                        labelSymbolElement = new Canvax.Display.Text( unitText, {
                             id : labelSymbolId,
                             context : lebelSymbolCxt
                         } );
@@ -413,8 +415,8 @@ class Progress extends GraphsBase
             };
             if( prop && prop.lineargradient ){
     
-                var style = me.ctx.createLinearGradient( nodeData.startOutPoint.x ,nodeData.startOutPoint.y, nodeData.endOutPoint.x, nodeData.endOutPoint.y );
-                _.each( prop.lineargradient , function( item , i ){
+                style = me.ctx.createLinearGradient( nodeData.startOutPoint.x ,nodeData.startOutPoint.y, nodeData.endOutPoint.x, nodeData.endOutPoint.y );
+                _.each( prop.lineargradient , function( item ){
                     style.addColorStop( item.position , item.color);
                 });
     
@@ -430,6 +432,6 @@ class Progress extends GraphsBase
 
 }
 
-global.registerComponent( Progress, 'graphs', 'progress' );
+GraphsBase.registerComponent( Progress, 'graphs', 'progress' );
 
 export default Progress;

@@ -1,6 +1,8 @@
 import Component from "../component"
 import Canvax from "canvax"
-import { _,getDefaultProps } from "mmvis"
+import {getDefaultProps} from "../../utils/tools"
+
+let _ = Canvax._;
 
 export default class coordBase extends Component
 {
@@ -118,7 +120,7 @@ export default class coordBase extends Component
     {
         var me = this;
         function set( maps ){
-            _.each( maps , function( map , i ){
+            _.each( maps , function( map ){
                 if( _.isArray( map ) ){
                     set( map )
                 } else if( map.field && map.field == field ) {
@@ -134,7 +136,7 @@ export default class coordBase extends Component
         var me = this;
         var fieldMap = null;
         function get( maps ){
-            _.each( maps , function( map , i ){
+            _.each( maps , function( map ){
                 if( _.isArray( map ) ){
                     get( map )
                 } else if( map.field && map.field == field ) {
@@ -155,14 +157,14 @@ export default class coordBase extends Component
         var enabledFields = [];
         var axisType = axis ? axis.type : "yAxis";
 
-        _.each( this.fieldsMap, function( bamboo, b ){
+        _.each( this.fieldsMap, function( bamboo ){
             if( _.isArray( bamboo ) ){
                 //多节竹子，堆叠
 
                 var fields = [];
                 
                 //设置完fields后，返回这个group属于left还是right的axis
-                _.each( bamboo, function( obj, v ){
+                _.each( bamboo, function( obj ){
                     if( obj[ axisType ] === axis && obj.field && obj.enabled ){
                         fields.push( obj.field );
                     }
@@ -245,15 +247,15 @@ export default class coordBase extends Component
      * @param { opt.iNode  } iNode 用来查找对应的xaxis的value
      * @param { opt.value {xval: yval:} }
      */
-    getPoint( opt ){
+    getPoint(  ){
         
     }
 
-    getAxisOriginPoint(exp){
+    getAxisOriginPoint(){
 
     }
 
-    getOriginPos(exp){
+    getOriginPos(){
 
     }
     
@@ -267,10 +269,7 @@ export default class coordBase extends Component
     getAxiss( opt ){
 
         var arr = [];
-        var expCount = 0;
-        for( var p in opt ){
-            expCount++;
-        };
+        var expCount = Object.keys(opt).length;
 
         _.each( this._axiss, function( item ){
             var i= 0;

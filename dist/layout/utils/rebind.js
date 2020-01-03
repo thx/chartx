@@ -1,1 +1,25 @@
-"use strict";function _rebind(r,t,n){return function(){var e=n.apply(t,arguments);return e===t?r:e}}function _default(e,r){for(var t,n=1,u=arguments.length;++n<u;)e[t=arguments[n]]=_rebind(e,r,r[t]);return e}Object.defineProperty(exports,"__esModule",{value:!0}),exports.default=_default;
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports["default"] = _default;
+
+function _rebind(target, source, method) {
+  return function () {
+    var value = method.apply(source, arguments);
+    return value === source ? target : value;
+  };
+}
+
+function _default(target, source) {
+  var i = 1,
+      n = arguments.length,
+      method;
+
+  while (++i < n) {
+    target[method = arguments[i]] = _rebind(target, source, source[method]);
+  }
+
+  return target;
+}

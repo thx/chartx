@@ -4,11 +4,12 @@ import GraphsBase from "../index"
 import {venn, lossFunction, normalizeSolution, scaleSolution} from "../../../layout/venn/layout";
 import {intersectionArea, distance, getCenter} from "../../../layout/venn/circleintersection";
 import {nelderMead} from "fmin";
-import { global, _, event, getDefaultProps } from "mmvis"
+import {getDefaultProps} from "../../../utils/tools"
 
-const Text = Canvax.Display.Text;
-const Path = Canvax.Shapes.Path;
-const Circle = Canvax.Shapes.Circle;
+let { _, event } = Canvax;
+let Text = Canvax.Display.Text;
+let Path = Canvax.Shapes.Path;
+let Circle = Canvax.Shapes.Circle;
 
 class VennGraphs extends GraphsBase
 {
@@ -155,7 +156,7 @@ class VennGraphs extends GraphsBase
         this.fire("complete");
     }
 
-    resetData( dataFrame , dataTrigger )
+    resetData( dataFrame )
     {
         this.dataFrame = dataFrame;
         this.data = this._trimGraphs(); 
@@ -193,7 +194,7 @@ class VennGraphs extends GraphsBase
 
         var circleInd = 0;
         var pathInd = 0;
-        _.each( data , function(d , ind) {
+        _.each( data , function(d) {
             if( d.label ){
                 if( d.sets.length > 1 && !me.label.showInter ){
                     //不显示path的文本
@@ -297,17 +298,17 @@ class VennGraphs extends GraphsBase
 
         //那么有多余的元素要去除掉 begin
         if( me.venn_circles.children.length > me._dataCircleLen ){
-            for( var i=me._dataCircleLen; i<me.venn_circles.children.length; i++ ){
+            for( let i=me._dataCircleLen; i<me.venn_circles.children.length; i++ ){
                 me.venn_circles.getChildAt( i-- ).destroy();
             }
         };
         if( me.venn_paths.children.length > me._dataPathLen ){
-            for( var i=me._dataPathLen; i<me.venn_paths.children.length; i++ ){
+            for( let i=me._dataPathLen; i<me.venn_paths.children.length; i++ ){
                 me.venn_paths.getChildAt( i-- ).destroy();
             }
         };
         if( me.venn_labels.children.length > me._dataLabelLen ){
-            for( var i=me._dataLabelLen; i<me.venn_labels.children.length; i++ ){
+            for( let i=me._dataLabelLen; i<me.venn_labels.children.length; i++ ){
                 me.venn_labels.getChildAt( i-- ).destroy();
             }
         };
@@ -316,7 +317,7 @@ class VennGraphs extends GraphsBase
         let circleInd = 0;
         let pathInd = 0;
         let labelInd = 0;
-        _.each( this.data , function( nodeData, i ){
+        _.each( this.data , function( nodeData ){
             var shape = nodeData.shape;
             var _shape;
             var isNewShape = true;
@@ -382,9 +383,9 @@ class VennGraphs extends GraphsBase
                 _shape.nodeData = nodeData;
                 nodeData._node = _shape;
 
-                me.node.focus.enabled && _shape.hover(function(e){
+                me.node.focus.enabled && _shape.hover(function(){
                     me.focusAt( this.nodeData.iNode );
-                } , function(e){
+                } , function(){
                     !this.nodeData.selected && me.unfocusAt( this.nodeData.iNode );
                 });
 
@@ -679,6 +680,6 @@ function intersectionAreaPath(circles) {
 //venn computeTextCentres 需要的相关代码 end
 
 
-global.registerComponent( VennGraphs, 'graphs', 'venn' );
+GraphsBase.registerComponent( VennGraphs, 'graphs', 'venn' );
 
 export default VennGraphs;

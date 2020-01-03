@@ -1,4 +1,7 @@
-import {axis as baseAxis, _, getDefaultProps} from "mmvis"
+import baseAxis from "../../core/axis"
+import { _ } from "canvax"
+import {getDefaultProps} from "../../utils/tools"
+
 export default class Axis extends baseAxis
 {
     static defaultProps(){
@@ -163,7 +166,7 @@ export default class Axis extends baseAxis
         }
     }
 
-    constructor(opt, dataOrg, _coord)
+    constructor(opt, dataOrg)
     {
         super(opt, dataOrg);
         _.extend( true, this, getDefaultProps( Axis.defaultProps() ) );

@@ -1,12 +1,14 @@
 import Canvax from "canvax"
 import GraphsBase from "../index"
-import { global, _, getDefaultProps, event, dataFrame } from "mmvis"
+import global from "../../../global"
+import dataFrame from "../../../core/dataFrame"
+import {getDefaultProps} from "../../../utils/tools"
 import { checkDataIsJson, jsonToArrayForRelation, arrayToTreeJsonForRelation } from './data';
 
-const Rect = Canvax.Shapes.Rect;
-const Path = Canvax.Shapes.Path;
-const Arrow = Canvax.Shapes.Arrow;
-const Circle = Canvax.Shapes.Circle;
+let { _, event } = Canvax;
+let Rect = Canvax.Shapes.Rect;
+let Path = Canvax.Shapes.Path;
+let Arrow = Canvax.Shapes.Arrow;
 
  
 /**
@@ -333,6 +335,7 @@ class Relation extends GraphsBase {
     //point is global point
     scale(scale, point) {
         return;
+
         if (this.status.transform.scale == scale) {
             return;
         };
@@ -351,6 +354,8 @@ class Relation extends GraphsBase {
 
         var newLeftTopPoint = this.graphsSp.localToGlobal({ x: 0, y: 0 }, this.sprite);
         console.log(JSON.stringify(newLeftTopPoint))
+
+        
         //this._grahsSpClone.context.x = newLeftTopPoint.x;
         //this._grahsSpClone.context.y = newLeftTopPoint.y;
     }
@@ -489,16 +494,15 @@ class Relation extends GraphsBase {
         return data
     }
 
-    treeLayout( data ){
-        var tree = global.layout.tree().separation(function(a, b) {
-            //设置横向节点之间的间距
-            var totalWidth = a.width + b.width;
-            return (totalWidth/2) + 10;
-        });
+    treeLayout(  ){
+        // var tree = global.layout.tree().separation(function(a, b) {
+        //     //设置横向节点之间的间距
+        //     var totalWidth = a.width + b.width;
+        //     return (totalWidth/2) + 10;
+        // });
         
-        var nodes = tree.nodes( this.jsonData[0] ).reverse();
-	    var links = tree.links(nodes);
-        
+        // var nodes = tree.nodes( this.jsonData[0] ).reverse();
+        // var links = tree.links(nodes);
     }
 
     widget() {
@@ -819,7 +823,7 @@ class Relation extends GraphsBase {
 
     }
 
-    getNodesAt(index) {
+    getNodesAt() {
 
     }
 
@@ -840,6 +844,6 @@ class Relation extends GraphsBase {
 
 }
 
-global.registerComponent(Relation, 'graphs', 'relation');
+GraphsBase.registerComponent(Relation, 'graphs', 'relation');
 
 export default Relation

@@ -1,1 +1,373 @@
-"use strict";var _interopRequireDefault=require("@babel/runtime/helpers/interopRequireDefault");Object.defineProperty(exports,"__esModule",{value:!0}),exports.default=void 0;var _classCallCheck2=_interopRequireDefault(require("@babel/runtime/helpers/classCallCheck")),_possibleConstructorReturn2=_interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn")),_getPrototypeOf2=_interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf")),_assertThisInitialized2=_interopRequireDefault(require("@babel/runtime/helpers/assertThisInitialized")),_createClass2=_interopRequireDefault(require("@babel/runtime/helpers/createClass")),_inherits2=_interopRequireDefault(require("@babel/runtime/helpers/inherits")),_component=_interopRequireDefault(require("../component")),_canvax=_interopRequireDefault(require("canvax")),_mmvis=require("mmvis"),coordBase=function(e){function r(e,i){var t;return(0,_classCallCheck2.default)(this,r),t=(0,_possibleConstructorReturn2.default)(this,(0,_getPrototypeOf2.default)(r).call(this,e,i)),_mmvis._.extend(!0,(0,_assertThisInitialized2.default)(t),(0,_mmvis.getDefaultProps)(r.defaultProps())),t.name="coord",t._opt=e,t.app=i,t.dataFrame=t.app.dataFrame,t.sprite=new _canvax.default.Display.Sprite({name:"coord_"+e.type}),t.app.coordSprite.addChild(t.sprite),t.fieldsMap=null,t.induce=null,t._axiss=[],t}return(0,_inherits2.default)(r,e),(0,_createClass2.default)(r,null,[{key:"defaultProps",value:function(){return{type:{detail:"坐标系组件",documentation:"坐标系组件，可选值有'rect'（二维直角坐标系）,'polar'（二维极坐标系）,'box'（三维直角坐标系） ",insertText:"type: ",default:"",values:["rect","polar","box","polar3d"]},width:{detail:"坐标系width",default:0},height:{detail:"坐标系height",default:0},origin:{detail:"坐标系原点",propertys:{x:{detail:"原点x位置",default:0},y:{detail:"原点x位置",default:0}}}}}}]),(0,_createClass2.default)(r,[{key:"setFieldsMap",value:function(e){var n=this,l=0,s=e.type||"yAxis",i=[];return _mmvis._.each(this.getAxiss(e),function(e){e.field&&(i=i.concat(e.field))}),function e(i){_mmvis._.isString(i)&&(i=[i]);for(var t=_mmvis._.clone(i),r=0,a=i.length;r<a;r++)_mmvis._.isString(i[r])&&(t[r]={field:i[r],enabled:!0,color:n.app.getTheme(l),ind:l++},t[r][s]=n.getAxis({type:s,field:i[r]})),_mmvis._.isArray(i[r])&&(t[r]=e(i[r]));return t}(i)}},{key:"setFieldEnabled",value:function(r){!function t(e){_mmvis._.each(e,function(e,i){_mmvis._.isArray(e)?t(e):e.field&&e.field==r&&(e.enabled=!e.enabled)})}(this.fieldsMap)}},{key:"getFieldMapOf",value:function(r){var a=null;return function t(e){_mmvis._.each(e,function(e,i){if(_mmvis._.isArray(e))t(e);else if(e.field&&e.field==r)return a=e,!1})}(this.fieldsMap),a}},{key:"getEnabledFieldsOf",value:function(r){var a=[],n=r?r.type:"yAxis";return _mmvis._.each(this.fieldsMap,function(e,i){if(_mmvis._.isArray(e)){var t=[];_mmvis._.each(e,function(e,i){e[n]===r&&e.field&&e.enabled&&t.push(e.field)}),t.length&&a.push(t)}else e[n]===r&&e.field&&e.enabled&&a.push(e.field)}),a}},{key:"filterEnabledFields",value:function(e){var t=this,r=[];return _mmvis._.isArray(e)||(e=[e]),_mmvis._.each(e,function(e){if(_mmvis._.isArray(e)){var i=[];_mmvis._.each(e,function(e){t.getFieldMapOf(e).enabled&&i.push(e)}),i.length&&r.push(i)}else t.getFieldMapOf(e).enabled&&r.push(e)}),r}},{key:"getAxisDataFrame",value:function(e){return{field:e,org:this.dataFrame.getDataOrg(e,function(e){return null==e||""==e?e:isNaN(Number(e))?e:Number(e)})}}},{key:"hide",value:function(e){this.changeFieldEnabled(e)}},{key:"show",value:function(e){this.changeFieldEnabled(e)}},{key:"getSizeAndOrigin",value:function(){return{width:this.width,height:this.height,origin:this.origin}}},{key:"getPoint",value:function(){}},{key:"getAxisOriginPoint",value:function(){}},{key:"getOriginPos",value:function(){}},{key:"getAxis",value:function(e){return this.getAxiss(e)[0]}},{key:"getAxiss",value:function(l){var s=[],u=0;for(var e in l)u++;return _mmvis._.each(this._axiss,function(e){var i=0;for(var t in l)if("field"==t){var r=_mmvis._.flatten([e[t]]),a=_mmvis._.flatten([l[t]]),n=!0;_mmvis._.each(a,function(e){-1==_mmvis._.indexOf(r,e)&&(n=!1)}),n&&i++}else JSON.stringify(e[t])==JSON.stringify(l[t])&&i++;u==i&&s.push(e)}),s}}]),r}(_component.default);exports.default=coordBase;
+"use strict";
+
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports["default"] = void 0;
+
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
+
+var _assertThisInitialized2 = _interopRequireDefault(require("@babel/runtime/helpers/assertThisInitialized"));
+
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
+
+var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _component = _interopRequireDefault(require("../component"));
+
+var _canvax = _interopRequireDefault(require("canvax"));
+
+var _tools = require("../../utils/tools");
+
+var _ = _canvax["default"]._;
+
+var coordBase =
+/*#__PURE__*/
+function (_Component) {
+  (0, _inherits2["default"])(coordBase, _Component);
+  (0, _createClass2["default"])(coordBase, null, [{
+    key: "defaultProps",
+    value: function defaultProps() {
+      return {
+        type: {
+          detail: '坐标系组件',
+          documentation: "坐标系组件，可选值有'rect'（二维直角坐标系）,'polar'（二维极坐标系）,'box'（三维直角坐标系） ",
+          insertText: "type: ",
+          "default": "",
+          values: ["rect", "polar", "box", "polar3d"]
+        },
+        width: {
+          detail: '坐标系width',
+          "default": 0
+        },
+        height: {
+          detail: '坐标系height',
+          "default": 0
+        },
+        origin: {
+          detail: '坐标系原点',
+          propertys: {
+            x: {
+              detail: '原点x位置',
+              "default": 0
+            },
+            y: {
+              detail: '原点x位置',
+              "default": 0
+            }
+          }
+        }
+      };
+    }
+  }]);
+
+  function coordBase(opt, app) {
+    var _this;
+
+    (0, _classCallCheck2["default"])(this, coordBase);
+    _this = (0, _possibleConstructorReturn2["default"])(this, (0, _getPrototypeOf2["default"])(coordBase).call(this, opt, app));
+
+    _.extend(true, (0, _assertThisInitialized2["default"])(_this), (0, _tools.getDefaultProps)(coordBase.defaultProps()));
+
+    _this.name = "coord";
+    _this._opt = opt;
+    _this.app = app;
+    _this.dataFrame = _this.app.dataFrame;
+    _this.sprite = new _canvax["default"].Display.Sprite({
+      name: "coord_" + opt.type
+    });
+
+    _this.app.coordSprite.addChild(_this.sprite);
+    /*
+    吧原始的field转换为对应结构的显示树
+    ["uv"] --> [
+        {field:'uv',enabled:true ,yAxis: yAxisleft }
+        ...
+    ]
+    */
+
+
+    _this.fieldsMap = null;
+    _this.induce = null;
+    _this._axiss = []; //所有轴的集合
+
+    return _this;
+  } //和原始field结构保持一致，但是对应的field换成 {field: , enabled:...}结构
+
+
+  (0, _createClass2["default"])(coordBase, [{
+    key: "setFieldsMap",
+    value: function setFieldsMap(axisExp) {
+      var me = this;
+      var fieldInd = 0;
+      var axisType = axisExp.type || "yAxis";
+      var fieldsArr = [];
+
+      _.each(this.getAxiss(axisExp), function (_axis) {
+        if (_axis.field) {
+          fieldsArr = fieldsArr.concat(_axis.field);
+        }
+
+        ;
+      });
+
+      function _set(fields) {
+        if (_.isString(fields)) {
+          fields = [fields];
+        }
+
+        ;
+
+        var clone_fields = _.clone(fields);
+
+        for (var i = 0, l = fields.length; i < l; i++) {
+          if (_.isString(fields[i])) {
+            clone_fields[i] = {
+              field: fields[i],
+              enabled: true,
+              //yAxis : me.getAxis({type:'yAxis', field:fields[i] }),
+              color: me.app.getTheme(fieldInd),
+              ind: fieldInd++
+            };
+            clone_fields[i][axisType] = me.getAxis({
+              type: axisType,
+              field: fields[i]
+            });
+          }
+
+          ;
+
+          if (_.isArray(fields[i])) {
+            clone_fields[i] = _set(fields[i], fieldInd);
+          }
+
+          ;
+        }
+
+        ;
+        return clone_fields;
+      }
+
+      ;
+      return _set(fieldsArr);
+    } //设置 fieldsMap 中对应field 的 enabled状态
+
+  }, {
+    key: "setFieldEnabled",
+    value: function setFieldEnabled(field) {
+      var me = this;
+
+      function set(maps) {
+        _.each(maps, function (map) {
+          if (_.isArray(map)) {
+            set(map);
+          } else if (map.field && map.field == field) {
+            map.enabled = !map.enabled;
+          }
+        });
+      }
+
+      set(me.fieldsMap);
+    }
+  }, {
+    key: "getFieldMapOf",
+    value: function getFieldMapOf(field) {
+      var me = this;
+      var fieldMap = null;
+
+      function get(maps) {
+        _.each(maps, function (map) {
+          if (_.isArray(map)) {
+            get(map);
+          } else if (map.field && map.field == field) {
+            fieldMap = map;
+            return false;
+          }
+        });
+      }
+
+      get(me.fieldsMap);
+      return fieldMap;
+    } //从 fieldsMap 中过滤筛选出来一个一一对应的 enabled为true的对象结构
+    //这个方法还必须要返回的数据里描述出来多y轴的结构。否则外面拿到数据后并不好处理那个数据对应哪个轴
+
+  }, {
+    key: "getEnabledFieldsOf",
+    value: function getEnabledFieldsOf(axis) {
+      var enabledFields = [];
+      var axisType = axis ? axis.type : "yAxis";
+
+      _.each(this.fieldsMap, function (bamboo) {
+        if (_.isArray(bamboo)) {
+          //多节竹子，堆叠
+          var fields = []; //设置完fields后，返回这个group属于left还是right的axis
+
+          _.each(bamboo, function (obj) {
+            if (obj[axisType] === axis && obj.field && obj.enabled) {
+              fields.push(obj.field);
+            }
+          });
+
+          fields.length && enabledFields.push(fields);
+        } else {
+          //单节棍
+          if (bamboo[axisType] === axis && bamboo.field && bamboo.enabled) {
+            enabledFields.push(bamboo.field);
+          }
+        }
+
+        ;
+      });
+
+      return enabledFields;
+    } //如果有传参数 fields 进来，那么就把这个指定的 fields 过滤掉 enabled==false的field
+    //只留下enabled的field 结构
+
+  }, {
+    key: "filterEnabledFields",
+    value: function filterEnabledFields(fields) {
+      var me = this;
+      var arr = [];
+      if (!_.isArray(fields)) fields = [fields];
+
+      _.each(fields, function (f) {
+        if (!_.isArray(f)) {
+          if (me.getFieldMapOf(f).enabled) {
+            arr.push(f);
+          }
+        } else {
+          //如果这个是个纵向数据，说明就是堆叠配置
+          var varr = [];
+
+          _.each(f, function (v_f) {
+            if (me.getFieldMapOf(v_f).enabled) {
+              varr.push(v_f);
+            }
+          });
+
+          if (varr.length) {
+            arr.push(varr);
+          }
+        }
+      });
+
+      return arr;
+    }
+  }, {
+    key: "getAxisDataFrame",
+    value: function getAxisDataFrame(fields) {
+      return {
+        field: fields,
+        org: this.dataFrame.getDataOrg(fields, function (val) {
+          if (val === undefined || val === null || val == "") {
+            return val;
+          }
+
+          return isNaN(Number(val)) ? val : Number(val);
+        })
+      };
+    }
+  }, {
+    key: "hide",
+    value: function hide(field) {
+      this.changeFieldEnabled(field);
+    }
+  }, {
+    key: "show",
+    value: function show(field) {
+      this.changeFieldEnabled(field);
+    }
+  }, {
+    key: "getSizeAndOrigin",
+    value: function getSizeAndOrigin() {
+      return {
+        width: this.width,
+        height: this.height,
+        origin: this.origin
+      };
+    }
+    /**
+     * @param { opt.field  } field 用来查找对应的yAxis
+     * @param { opt.iNode  } iNode 用来查找对应的xaxis的value
+     * @param { opt.value {xval: yval:} }
+     */
+
+  }, {
+    key: "getPoint",
+    value: function getPoint() {}
+  }, {
+    key: "getAxisOriginPoint",
+    value: function getAxisOriginPoint() {}
+  }, {
+    key: "getOriginPos",
+    value: function getOriginPos() {} //获取对应轴的接口
+
+  }, {
+    key: "getAxis",
+    value: function getAxis(opt) {
+      var axiss = this.getAxiss(opt);
+      return axiss[0];
+    }
+  }, {
+    key: "getAxiss",
+    value: function getAxiss(opt) {
+      var arr = [];
+      var expCount = Object.keys(opt).length;
+
+      _.each(this._axiss, function (item) {
+        var i = 0;
+
+        for (var p in opt) {
+          if (p == 'field') {
+            //字段的判断条件不同
+            var fs = _.flatten([item[p]]);
+
+            var expFs = _.flatten([opt[p]]);
+
+            var inFs = true;
+
+            _.each(expFs, function (exp) {
+              if (_.indexOf(fs, exp) == -1) {
+                //任何一个field不再fs内， 说明配对不成功
+                inFs = false;
+              }
+            });
+
+            if (inFs) {
+              i++;
+            }
+
+            ;
+          } else {
+            if (JSON.stringify(item[p]) == JSON.stringify(opt[p])) {
+              i++;
+            }
+
+            ;
+          }
+
+          ;
+        }
+
+        ;
+
+        if (expCount == i) {
+          arr.push(item);
+        }
+
+        ;
+      });
+
+      return arr;
+    }
+  }]);
+  return coordBase;
+}(_component["default"]);
+
+exports["default"] = coordBase;

@@ -13,12 +13,16 @@
 //应用场景中一般需要用到的属性有
 //width, height, origin(默认为width/2,height/2)
 
-import coorBase from "./index"
+import coordBase from "./index"
 import Canvax from "canvax"
 import Grid from "./polar/grid"
-import { global,dataSection,_,getDefaultProps,event } from "mmvis"
+import dataSection from "../../core/dataSection"
 
-class Polar extends coorBase
+import {getDefaultProps} from "../../utils/tools"
+
+let { _,event } = Canvax
+
+class Polar extends coordBase
 {
     static defaultProps(){
         return {
@@ -170,7 +174,7 @@ class Polar extends coorBase
         return coord
     }
 
-    init(opt)
+    init()
     {
 
         this._initModules();
@@ -231,7 +235,7 @@ class Polar extends coorBase
     }
 
 
-    resetData( dataFrame , dataTrigger )
+    resetData( )
     {
 
     }
@@ -789,7 +793,7 @@ class Polar extends coorBase
 
         //angle全部都换算到0-360范围内
         var angle = (me.getRadianInPoint( point ) * 180 / Math.PI - me.aAxis.beginAngle) % me.allAngle;
-        var r = Math.sqrt( Math.pow( point.x, 2 ) + Math.pow( point.y, 2 ) );
+        //var r = Math.sqrt( Math.pow( point.x, 2 ) + Math.pow( point.y, 2 ) );
 
         var aAxisInd = 0;
         var aLen = me.aAxis.angleList.length;
@@ -858,7 +862,7 @@ class Polar extends coorBase
     }
 
     //TODO待实现
-    getPoint( opt ){
+    getPoint(){
 
     }
     getSizeAndOrigin(){
@@ -879,6 +883,6 @@ class Polar extends coorBase
     }
 }
 
-global.registerComponent( Polar, 'coord', 'polar' );
+coordBase.registerComponent( Polar, 'coord', 'polar' );
 
 export default Polar;

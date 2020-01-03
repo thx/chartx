@@ -1,8 +1,9 @@
 import Canvax from "canvax"
 import {numAddSymbol} from "../../utils/tools"
-import { _, getDefaultProps } from "mmvis"
 import Axis from "./axis"
+import {getDefaultProps} from "../../utils/tools"
 
+let _ = Canvax._;
 const Line = Canvax.Shapes.Line;
 
 export default class xAxis extends Axis
@@ -169,19 +170,19 @@ export default class xAxis extends Axis
             
                         var textWidth = txt.getTextWidth();
                         var textHeight = txt.getTextHeight();
-                        var width = textWidth; //文本在外接矩形width
+                        //var width = textWidth; //文本在外接矩形width
                         var height = textHeight;//文本在外接矩形height
 
                         if (!!me.label.rotation) {
                             //有设置旋转
                             if ( me.label.rotation == 90 ) {
-                                width  = textHeight;
+                                //width  = textHeight;
                                 height = textWidth;
                             } else {
                                 var sinR = Math.sin(Math.abs(me.label.rotation) * Math.PI / 180);
-                                var cosR = Math.cos(Math.abs(me.label.rotation) * Math.PI / 180);
+                                //var cosR = Math.cos(Math.abs(me.label.rotation) * Math.PI / 180);
                                 height = parseInt( sinR * textWidth );
-                                width = parseInt( cosR * textWidth );
+                                //width = parseInt( cosR * textWidth );
                             };
                         };
 
@@ -397,7 +398,7 @@ export default class xAxis extends Axis
         
         //把sprite.children中多余的给remove掉
         if( this.rulesSprite.children.length >= visibleInd ){
-            for( var al = visibleInd,pl = this.rulesSprite.children.length;al<pl;al++  ){
+            for( let al = visibleInd,pl = this.rulesSprite.children.length; al<pl; al++  ){
                 this.rulesSprite.getChildAt( al ).remove();
                 al--,pl--;
             };

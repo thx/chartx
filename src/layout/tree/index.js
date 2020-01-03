@@ -1,5 +1,5 @@
 import Hierarchy from "../hierarchy"
-import { global } from "mmvis"
+import global from "../../global"
 
 // Node-link tree diagram using the Reingold-Tilford "tidy" algorithm
 var TREE = function() {

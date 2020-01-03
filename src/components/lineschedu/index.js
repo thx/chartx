@@ -1,6 +1,8 @@
 import Component from "../component"
 import Canvax from "canvax"
-import { global,_, getDefaultProps } from "mmvis"
+import { getDefaultProps } from "../../utils/tools"
+
+let _ = Canvax._;
 
 class lineSchedu extends Component
 {
@@ -107,7 +109,7 @@ class lineSchedu extends Component
                 } 
             } );
             _txtSp.addChild( _title );
-            var txtHeight = _title.getTextHeight();
+            txtHeight = _title.getTextHeight();
             var txtWidth = _title.getTextWidth();
 
             var _list = new Canvax.Display.Text(_.flatten([me.list]).join("\n") , {
@@ -187,6 +189,6 @@ class lineSchedu extends Component
 
 }
 
-global.registerComponent( lineSchedu, 'lineSchedu' );
+Component.registerComponent( lineSchedu, 'lineSchedu' );
 
 export default lineSchedu

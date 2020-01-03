@@ -1,6 +1,7 @@
 import Pie from "./pie"
 import GraphsBase from "../index"
-import { global, _,getDefaultProps } from "mmvis"
+import { _ } from "canvax"
+import { getDefaultProps } from "../../../utils/tools"
 
 class PieGraphs extends GraphsBase
 {
@@ -317,33 +318,25 @@ class PieGraphs extends GraphsBase
                             switch (angleRatio) {
                                 case 0:
                                     return 1;
-                                    break;
                                 case 1:
                                     return 2;
-                                    break;
                                 case 2:
                                     return 3;
-                                    break;
                                 case 3:
                                 case 4:
                                     return 4;
-                                    break;
                             }
                         } else if (ang < 0) {
                             switch (angleRatio) {
                                 case 0:
                                     return 4;
-                                    break;
                                 case -1:
                                     return 3;
-                                    break;
                                 case -2:
                                     return 2;
-                                    break;
                                 case -3:
                                 case -4:
                                     return 1;
-                                    break;
                             }
                         }
                     } (midAngle);
@@ -410,7 +403,7 @@ class PieGraphs extends GraphsBase
             color = prop[ iNode ];
         };
         if (_.isFunction( prop )) {
-            color = s.apply( this , [ layoutData ] );
+            color = prop.apply( this , [ layoutData ] );
         };
 
         if( !color ){
@@ -459,10 +452,10 @@ class PieGraphs extends GraphsBase
         return legendData;
     }
 
-    tipsPointerOf( e ){
+    tipsPointerOf( ){
     }
 
-    tipsPointerHideOf( e ){
+    tipsPointerHideOf( ){
     }
 
 
@@ -494,6 +487,6 @@ class PieGraphs extends GraphsBase
     
 }
 
-global.registerComponent( PieGraphs, 'graphs', 'pie' );
+GraphsBase.registerComponent( PieGraphs, 'graphs', 'pie' );
 
 export default PieGraphs;

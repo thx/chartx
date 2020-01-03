@@ -1,1 +1,127 @@
-"use strict";var _interopRequireDefault=require("@babel/runtime/helpers/interopRequireDefault");Object.defineProperty(exports,"__esModule",{value:!0}),exports.default=void 0;var _classCallCheck2=_interopRequireDefault(require("@babel/runtime/helpers/classCallCheck")),_possibleConstructorReturn2=_interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn")),_getPrototypeOf2=_interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf")),_assertThisInitialized2=_interopRequireDefault(require("@babel/runtime/helpers/assertThisInitialized")),_createClass2=_interopRequireDefault(require("@babel/runtime/helpers/createClass")),_inherits2=_interopRequireDefault(require("@babel/runtime/helpers/inherits")),_canvax=_interopRequireDefault(require("canvax")),_mmvis=require("mmvis"),_component=_interopRequireDefault(require("../component")),waterMark=function(e){function a(e,t){var r;return(0,_classCallCheck2.default)(this,a),(r=(0,_possibleConstructorReturn2.default)(this,(0,_getPrototypeOf2.default)(a).call(this,e,t))).name="waterMark",r.width=r.app.width,r.height=r.app.height,_mmvis._.extend(!0,(0,_assertThisInitialized2.default)(r),(0,_mmvis.getDefaultProps)(a.defaultProps()),e),r.spripte=new _canvax.default.Display.Sprite({id:"watermark"}),r.app.stage.addChild(r.spripte),r.draw(),r}return(0,_inherits2.default)(a,e),(0,_createClass2.default)(a,null,[{key:"defaultProps",value:function(){return{text:{detail:"水印内容",default:"chartx"},fontSize:{detail:"字体大小",default:20},fontColor:{detail:"水印颜色",default:"#cccccc"},alpha:{detail:"水印透明度",default:.2},rotation:{detail:"水印旋转角度",default:45}}}}]),(0,_createClass2.default)(a,[{key:"draw",value:function(){for(var e=new _canvax.default.Display.Text(this.text,{context:{fontSize:this.fontSize,fillStyle:this.fontColor}}),t=e.getTextWidth(),r=e.getTextHeight(),a=parseInt(this.height/(5*r))+1,i=parseInt(this.width/(1.5*t))+1,l=0;l<a;l++)for(var s=0;s<i;s++){var u=new _canvax.default.Display.Text(this.text,{context:{rotation:this.rotation,fontSize:this.fontSize,fillStyle:this.fontColor,globalAlpha:this.alpha}});u.context.x=1.5*t*s+.25*t,u.context.y=5*r*l,this.spripte.addChild(u)}}}]),a}(_component.default);_mmvis.global.registerComponent(waterMark,"waterMark");var _default=waterMark;exports.default=_default;
+"use strict";
+
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports["default"] = void 0;
+
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
+
+var _assertThisInitialized2 = _interopRequireDefault(require("@babel/runtime/helpers/assertThisInitialized"));
+
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
+
+var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _canvax = _interopRequireDefault(require("canvax"));
+
+var _tools = require("../../utils/tools");
+
+var _component = _interopRequireDefault(require("../component"));
+
+/**
+ * 水印组件
+ */
+var _ = _canvax["default"]._;
+
+var waterMark =
+/*#__PURE__*/
+function (_Component) {
+  (0, _inherits2["default"])(waterMark, _Component);
+  (0, _createClass2["default"])(waterMark, null, [{
+    key: "defaultProps",
+    value: function defaultProps() {
+      return {
+        text: {
+          detail: '水印内容',
+          "default": 'chartx'
+        },
+        fontSize: {
+          detail: '字体大小',
+          "default": 20
+        },
+        fontColor: {
+          detail: '水印颜色',
+          "default": '#cccccc'
+        },
+        alpha: {
+          detail: '水印透明度',
+          "default": 0.2
+        },
+        rotation: {
+          detail: '水印旋转角度',
+          "default": 45
+        }
+      };
+    }
+  }]);
+
+  function waterMark(opt, app) {
+    var _this;
+
+    (0, _classCallCheck2["default"])(this, waterMark);
+    _this = (0, _possibleConstructorReturn2["default"])(this, (0, _getPrototypeOf2["default"])(waterMark).call(this, opt, app));
+    _this.name = "waterMark";
+    _this.width = _this.app.width;
+    _this.height = _this.app.height;
+
+    _.extend(true, (0, _assertThisInitialized2["default"])(_this), (0, _tools.getDefaultProps)(waterMark.defaultProps()), opt);
+
+    _this.spripte = new _canvax["default"].Display.Sprite({
+      id: "watermark"
+    });
+
+    _this.app.stage.addChild(_this.spripte);
+
+    _this.draw();
+
+    return _this;
+  }
+
+  (0, _createClass2["default"])(waterMark, [{
+    key: "draw",
+    value: function draw() {
+      var textEl = new _canvax["default"].Display.Text(this.text, {
+        context: {
+          fontSize: this.fontSize,
+          fillStyle: this.fontColor
+        }
+      });
+      var textW = textEl.getTextWidth();
+      var textH = textEl.getTextHeight();
+      var rowCount = parseInt(this.height / (textH * 5)) + 1;
+      var coluCount = parseInt(this.width / (textW * 1.5)) + 1;
+
+      for (var r = 0; r < rowCount; r++) {
+        for (var c = 0; c < coluCount; c++) {
+          //TODO:text 的 clone有问题
+          //var cloneText = textEl.clone();
+          var _textEl = new _canvax["default"].Display.Text(this.text, {
+            context: {
+              rotation: this.rotation,
+              fontSize: this.fontSize,
+              fillStyle: this.fontColor,
+              globalAlpha: this.alpha
+            }
+          });
+
+          _textEl.context.x = textW * 1.5 * c + textW * .25;
+          _textEl.context.y = textH * 5 * r;
+          this.spripte.addChild(_textEl);
+        }
+      }
+    }
+  }]);
+  return waterMark;
+}(_component["default"]);
+
+_component["default"].registerComponent(waterMark, 'waterMark');
+
+var _default = waterMark;
+exports["default"] = _default;

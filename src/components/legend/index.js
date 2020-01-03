@@ -1,9 +1,10 @@
 import Component from "../component"
 import Canvax from "canvax"
-import { global,_, getDefaultProps,event} from "mmvis"
 import Trigger from "../trigger"
+import {getDefaultProps} from "../../utils/tools"
 
-const Circle = Canvax.Shapes.Circle
+let { _,event} = Canvax;
+let Circle = Canvax.Shapes.Circle;
 
 class Legend extends Component
 {
@@ -390,6 +391,6 @@ class Legend extends Component
     }
 }
 
-global.registerComponent( Legend, 'legend' );
+Component.registerComponent( Legend, 'legend' );
 
 export default Legend;

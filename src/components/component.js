@@ -1,5 +1,9 @@
+import global from "../global"
 import Canvax from "canvax"
-import {event,getDefaultProps,_} from "mmvis"
+import {getDefaultProps} from "../utils/tools"
+
+let { event, _ } = Canvax;
+
 
 export default class Component extends event.Dispatcher
 {
@@ -12,7 +16,12 @@ export default class Component extends event.Dispatcher
         }
     }
 
-    static _isComponentRoot(){return true}
+    static registerComponent( compModule, name, type ){
+        return global.registerComponent( compModule, name, type );
+    }
+
+    //global.getProps 中会用到
+    static _isComponentRoot(){ return true }
 
     constructor(opt, app)
     {

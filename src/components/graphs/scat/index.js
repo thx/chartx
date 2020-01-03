@@ -1,12 +1,13 @@
 import Canvax from "canvax"
 import GraphsBase from "../index"
-import { global,_,event,getDefaultProps } from "mmvis"
+import {getDefaultProps} from "../../../utils/tools"
 import hull from "../../../utils/hull/index"
 
-const Circle = Canvax.Shapes.Circle;
-const Rect = Canvax.Shapes.Rect;
-const Line = Canvax.Shapes.Line;
-const Polygon = Canvax.Shapes.Polygon;
+let { _,event } = Canvax;
+let Circle = Canvax.Shapes.Circle;
+let Rect = Canvax.Shapes.Rect;
+let Line = Canvax.Shapes.Line;
+let Polygon = Canvax.Shapes.Polygon;
 
 //TODO iGroup 的实现有问题
 
@@ -203,7 +204,7 @@ class ScatGraphs extends GraphsBase
                     },
                     format: {
                         detail: 'label格式化处理函数',
-                        default:function(txt, nodeData){ 
+                        default:function(txt){ 
                             return txt 
                         }
                     },
@@ -312,7 +313,7 @@ class ScatGraphs extends GraphsBase
         return this;
     }
 
-    resetData( dataFrame , dataTrigger )
+    resetData( dataFrame )
     {
         this.dataFrame = dataFrame;
         this.data = this._trimGraphs();
@@ -990,7 +991,7 @@ class ScatGraphs extends GraphsBase
         nodeData.selected = false;
     }
 
-    getNodesOfPos( x, y )
+    getNodesOfPos( )
     {
         //sat的 getNodesOfPos 一定要有两个点
         var _nodesInfoList = []; //节点信息集合
@@ -999,6 +1000,6 @@ class ScatGraphs extends GraphsBase
 
 }
 
-global.registerComponent( ScatGraphs, 'graphs', 'scat' );
+GraphsBase.registerComponent( ScatGraphs, 'graphs', 'scat' );
 
 export default ScatGraphs;

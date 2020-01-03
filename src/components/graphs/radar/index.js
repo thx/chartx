@@ -1,9 +1,10 @@
 import Canvax from "canvax"
 import GraphsBase from "../index"
-import { global,_,event,getDefaultProps } from "mmvis"
+import { getDefaultProps } from "../../../utils/tools"
 
-const Polygon = Canvax.Shapes.Polygon;
-const Circle = Canvax.Shapes.Circle;
+let {_, event} = Canvax;
+let Polygon = Canvax.Shapes.Polygon;
+let Circle = Canvax.Shapes.Circle;
 
 class RadarGraphs extends GraphsBase
 {
@@ -98,7 +99,7 @@ class RadarGraphs extends GraphsBase
     {
         !opt && (opt ={});
         
-        var me = this;
+        //var me = this;
         _.extend(true, this, opt);
         this.data = this._trimGraphs();
         
@@ -122,7 +123,7 @@ class RadarGraphs extends GraphsBase
             };
 
             var pointList = [];
-            _.each( list , function( node, i ){
+            _.each( list , function( node ){
                 pointList.push([ node.point.x, node.point.y ]);
             } );
 
@@ -227,10 +228,10 @@ class RadarGraphs extends GraphsBase
             } );
         }
     }
-    tipsPointerHideOf( e )
+    tipsPointerHideOf( )
     {
         var me = this;
-        _.each( me.data , function( g, i ){
+        _.each( me.data , function( g ){
             _.each( g , function( node ){
                 me.unfocusOf( node );
             } );
@@ -346,9 +347,9 @@ class RadarGraphs extends GraphsBase
         var data = this.data;
         var _nodesInfoList = []; //节点信息集合
         
-        _.each( this.enabledField, function( fs, i ){
+        _.each( this.enabledField, function( fs ){
             if( _.isArray(fs) ){
-                _.each( fs, function( _fs, ii ){
+                _.each( fs, function( _fs ){
                     //fs的结构两层到顶了
                     var node = data[ _fs ][ index ];
                     node && _nodesInfoList.push( node );
@@ -363,6 +364,6 @@ class RadarGraphs extends GraphsBase
     }
 }
 
-global.registerComponent( RadarGraphs, 'graphs', 'radar' );
+GraphsBase.registerComponent( RadarGraphs, 'graphs', 'radar' );
 
 export default RadarGraphs;

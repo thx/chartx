@@ -1,6 +1,8 @@
 import Component from "../component"
 import Canvax from "canvax"
-import { global,_ ,getDefaultProps} from "mmvis"
+import {getDefaultProps} from "../../utils/tools"
+
+let _ = Canvax._;
 
 class barGuide extends Component
 {
@@ -178,6 +180,6 @@ class barGuide extends Component
     }
 }
 
-global.registerComponent( barGuide, 'barGuide' );
+Component.registerComponent( barGuide, 'barGuide' );
 
 export default barGuide;

@@ -1,1 +1,810 @@
-"use strict";var _interopRequireDefault=require("@babel/runtime/helpers/interopRequireDefault");Object.defineProperty(exports,"__esModule",{value:!0}),exports.default=void 0;var _classCallCheck2=_interopRequireDefault(require("@babel/runtime/helpers/classCallCheck")),_possibleConstructorReturn2=_interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn")),_getPrototypeOf2=_interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf")),_assertThisInitialized2=_interopRequireDefault(require("@babel/runtime/helpers/assertThisInitialized")),_createClass2=_interopRequireDefault(require("@babel/runtime/helpers/createClass")),_inherits2=_interopRequireDefault(require("@babel/runtime/helpers/inherits")),_canvax=_interopRequireDefault(require("canvax")),_index=_interopRequireDefault(require("../index")),_layout=require("../../../layout/venn/layout"),_circleintersection=require("../../../layout/venn/circleintersection"),_fmin=require("fmin"),_mmvis=require("mmvis"),Text=_canvax.default.Display.Text,Path=_canvax.default.Shapes.Path,Circle=_canvax.default.Shapes.Circle,VennGraphs=function(e){function i(e,t){var n;return(0,_classCallCheck2.default)(this,i),(n=(0,_possibleConstructorReturn2.default)(this,(0,_getPrototypeOf2.default)(i).call(this,e,t))).type="venn",n.vennData=null,_mmvis._.extend(!0,(0,_assertThisInitialized2.default)(n),(0,_mmvis.getDefaultProps)(i.defaultProps()),e),n._dataCircleLen=0,n._dataLabelLen=0,n._dataPathLen=0,n.init(),n}return(0,_inherits2.default)(i,e),(0,_createClass2.default)(i,null,[{key:"defaultProps",value:function(){return{keyField:{detail:"key字段",default:"name"},valueField:{detail:"value字段",default:"value"},node:{detail:"单个节点配置",propertys:{strokeStyle:{detail:"边框颜色",default:null},lineWidth:{detail:"边框大小",default:2},strokeAlpha:{detail:"边框透明度",default:0},fillStyle:{detail:"背景色",default:null},fillAlpha:{detail:"背景透明度",default:.25},focus:{detail:"hover设置",propertys:{enabled:{detail:"是否开启",default:!0},strokeAlpha:{detail:"边框透明度",default:.3}}},select:{detail:"选中设置",propertys:{enabled:{detail:"是否开启",default:!0},lineWidth:{detail:"描边宽度",default:2},strokeStyle:{detail:"描边颜色",default:"#666666"}}}}},label:{detail:"文本设置",propertys:{field:{detail:"获取文本的字段",default:null},fontSize:{detail:"字体大小",default:14},fontColor:{detail:"文本颜色",default:null},fontWeight:{detail:"fontWeight",default:"normal"},showInter:{detail:"是否显示相交部分的文本",default:!0}}}}}}]),(0,_createClass2.default)(i,[{key:"init",value:function(){this.venn_circles=new _canvax.default.Display.Sprite({id:"venn_circles"}),this.sprite.addChild(this.venn_circles),this.venn_paths=new _canvax.default.Display.Sprite({id:"venn_paths"}),this.sprite.addChild(this.venn_paths),this.venn_labels=new _canvax.default.Display.Sprite({id:"venn_labels"}),this.sprite.addChild(this.venn_labels)}},{key:"draw",value:function(e){e=e||{},_mmvis._.extend(!0,this,e),this.data=this._trimGraphs(),this._widget(),this.sprite.context.x=this.app.padding.left,this.sprite.context.y=this.app.padding.top,this.fire("complete")}},{key:"resetData",value:function(e){this.dataFrame=e,this.data=this._trimGraphs(),this._widget()}},{key:"_trimGraphs",value:function(){var i=this,e=i._vennData(),t=_layout.venn,n=_layout.lossFunction,l=Math.PI/2,a={},r={};if(this._dataCircleLen=0,this._dataLabelLen=0,(this._dataPathLen=0)<e.length){var s=t(e,{lossFunction:n});s=(0,_layout.normalizeSolution)(s,l,null),a=(0,_layout.scaleSolution)(s,this.width,this.height,0),r=computeTextCentres(a,e)}var o=0,d=0;return _mmvis._.each(e,function(e,t){if(e.label&&(1<e.sets.length&&!i.label.showInter||(e.labelPosition=r[e.nodeId],i._dataLabelLen++)),1<e.sets.length){var n=intersectionAreaPath(e.sets.map(function(e){return a[e]}));e.shape={type:"path",path:n,pathInd:d++},i._dataPathLen++}else 1==e.sets.length&&(e.shape=_mmvis._.extend({type:"circle",circleInd:o++},a[e.nodeId]),i._dataCircleLen++)}),e}},{key:"_vennData",value:function(){for(var e=[],t=this,n=0,i=this.dataFrame.length;n<i;n++){var l=t.dataFrame.getRowDataAt(n),a={type:"venn",iNode:n,nodeId:null,rowData:l,sets:null,size:null,value:null,fillStyle:null,strokeStyle:null,label:null,labelPosition:null};for(var r in l){var s=l[r];r==t.keyField?(_mmvis._.isArray(s)||(s=s.split(/[,|]/)),a.sets=s,a.nodeId=s.join()):r==t.valueField?(a.size=s,a.value=s):r==t.label.field&&(a.label=s)}e.push(a)}return e}},{key:"_getStyle",value:function(e,t,n,i){var l;return _mmvis._.isString(e)&&(l=e),_mmvis._.isFunction(e)&&(l=e(n)),l||null==t||(l=this.app.getTheme(t)),l||null==i||(l=i),l}},{key:"_widget",value:function(){var c=this;if(c.venn_circles.children.length>c._dataCircleLen)for(var e=c._dataCircleLen;e<c.venn_circles.children.length;e++)c.venn_circles.getChildAt(e--).destroy();if(c.venn_paths.children.length>c._dataPathLen)for(e=c._dataPathLen;e<c.venn_paths.children.length;e++)c.venn_paths.getChildAt(e--).destroy();if(c.venn_labels.children.length>c._dataLabelLen)for(e=c._dataLabelLen;e<c.venn_labels.children.length;e++)c.venn_labels.getChildAt(e--).destroy();var f=0,p=0,v=0;_mmvis._.each(this.data,function(e,t){var n,i=e.shape,l=!0;if(i){var a;if("circle"==i.type){var r=c._getStyle(c.node.fillStyle,i.circleInd,e),s=c._getStyle(c.node.strokeStyle,i.circleInd,e);e.fillStyle=r,e.strokeStyle=s,a={x:i.x,y:i.y,r:i.radius,fillStyle:r,fillAlpha:c.node.fillAlpha,lineWidth:c.node.lineWidth,strokeStyle:s,strokeAlpha:c.node.strokeAlpha},(n=c.venn_circles.getChildAt(f++))?(l=!1,n.animate(a)):(n=new Circle({pointChkPriority:!1,hoverClone:!1,context:a}),c.venn_circles.addChild(n))}"path"==e.shape.type&&(a={path:i.path,fillStyle:"#ffffff",fillAlpha:0,lineWidth:c.node.lineWidth,strokeStyle:"#ffffff",strokeAlpha:0},(n=c.venn_paths.getChildAt(p++))?(l=!1,n.context.path=i.path):(n=new Path({pointChkPriority:!1,context:a}),c.venn_paths.addChild(n))),(n.nodeData=e)._node=n,c.node.focus.enabled&&n.hover(function(e){c.focusAt(this.nodeData.iNode)},function(e){this.nodeData.selected||c.unfocusAt(this.nodeData.iNode)}),l&&n.on(_mmvis.event.types.get(),function(e){e.eventInfo={trigger:c.node,title:null,nodes:[this.nodeData]},c.app.fire(e.type,e)})}if(e.label&&c.label.enabled){var o=c._getStyle(c.label.fontColor,i.circleInd,e,"#999"),d=c.label.fontSize;if(1<e.sets.length&&(c.label.showInter?d-=2:d=0),d){var u={x:e.labelPosition.x,y:e.labelPosition.y,fontSize:d,textBaseline:"middle",textAlign:"center",fontWeight:c.label.fontWeight,fillStyle:o},h=c.venn_labels.getChildAt(v++);h?(h.resetText(e.label),h.animate(u)):(h=new Text(e.label,{context:u}),c.venn_labels.addChild(h))}}})}},{key:"focusAt",value:function(e){var t=this.data[e];if(this.node.focus.enabled&&!t.focused){var n=t._node.context;1<t.sets.length?n.strokeAlpha=1:n.strokeAlpha=this.node.focus.strokeAlpha,t.focused=!0}}},{key:"unfocusAt",value:function(e){var t=this.data[e];this.node.focus.enabled&&t.focused&&(t._node.context.strokeAlpha=this.node.strokeAlpha,t.focused=!1)}},{key:"selectAt",value:function(e){var t=this.data[e];if(this.node.select.enabled&&!t.selected){var n=t._node.context;n.lineWidth=this.node.select.lineWidth,n.strokeAlpha=this.node.select.strokeAlpha,n.strokeStyle=this.node.select.strokeStyle,t.selected=!0}}},{key:"unselectAt",value:function(e){var t=this.data[e];this.node.select.enabled&&t.selected&&(t._node.context.strokeStyle=this.node.strokeStyle,t.selected=!1)}}]),i}(_index.default);function getOverlappingCircles(e){var t={},n=[];for(var i in e)n.push(i),t[i]=[];for(var l=0;l<n.length;l++)for(var a=e[n[l]],r=l+1;r<n.length;++r){var s=e[n[r]],o=(0,_circleintersection.distance)(a,s);o+s.radius<=a.radius+1e-10?t[n[r]].push(n[l]):o+a.radius<=s.radius+1e-10&&t[n[l]].push(n[r])}return t}function computeTextCentres(e,t){for(var n={},i=getOverlappingCircles(e),l=0;l<t.length;++l){for(var a=t[l].sets,r={},s={},o=0;o<a.length;++o){r[a[o]]=!0;for(var d=i[a[o]],u=0;u<d.length;++u)s[d[u]]=!0}var h=[],c=[];for(var f in e)f in r?h.push(e[f]):f in s||c.push(e[f]);var p=computeTextCentre(h,c);(n[a]=p).disjoint&&0<t[l].size&&console.log("WARNING: area "+a+" not represented on screen")}return n}function computeTextCentre(t,n){var e,i=[];for(e=0;e<t.length;++e){var l=t[e];i.push({x:l.x,y:l.y}),i.push({x:l.x+l.radius/2,y:l.y}),i.push({x:l.x-l.radius/2,y:l.y}),i.push({x:l.x,y:l.y+l.radius/2}),i.push({x:l.x,y:l.y-l.radius/2})}var a=i[0],r=circleMargin(i[0],t,n);for(e=1;e<i.length;++e){var s=circleMargin(i[e],t,n);r<=s&&(a=i[e],r=s)}var o=(0,_fmin.nelderMead)(function(e){return-1*circleMargin({x:e[0],y:e[1]},t,n)},[a.x,a.y],{maxIterations:500,minErrorDelta:1e-10}).x,d={x:o[0],y:o[1]},u=!0;for(e=0;e<t.length;++e)if((0,_circleintersection.distance)(d,t[e])>t[e].radius){u=!1;break}for(e=0;e<n.length;++e)if((0,_circleintersection.distance)(d,n[e])<n[e].radius){u=!1;break}if(!u)if(1==t.length)d={x:t[0].x,y:t[0].y};else{var h={};(0,_circleintersection.intersectionArea)(t,h),d=0===h.arcs.length?{x:0,y:-1e3,disjoint:!0}:1==h.arcs.length?{x:h.arcs[0].circle.x,y:h.arcs[0].circle.y}:n.length?computeTextCentre(t,[]):(0,_circleintersection.getCenter)(h.arcs.map(function(e){return e.p1}))}return d}function circleMargin(e,t,n){var i,l,a=t[0].radius-(0,_circleintersection.distance)(t[0],e);for(i=1;i<t.length;++i)(l=t[i].radius-(0,_circleintersection.distance)(t[i],e))<=a&&(a=l);for(i=0;i<n.length;++i)(l=(0,_circleintersection.distance)(n[i],e)-n[i].radius)<=a&&(a=l);return a}function circlePath(e,t,n){var i=[];return i.push("\nM",e,t),i.push("\nm",-n,0),i.push("\na",n,n,0,1,0,2*n,0),i.push("\na",n,n,0,1,0,2*-n,0),i.join(" ")}function intersectionAreaPath(e){var t={};(0,_circleintersection.intersectionArea)(e,t);var n=t.arcs;if(0===n.length)return"M 0 0";if(1==n.length){var i=n[0].circle;return circlePath(i.x,i.y,i.radius)}for(var l=["\nM",n[0].p2.x,n[0].p2.y],a=0;a<n.length;++a){var r=n[a],s=r.circle.radius,o=r.width>s;l.push("\nA",s,s,0,o?1:0,1,r.p1.x,r.p1.y)}return l.join(" ")+" z"}_mmvis.global.registerComponent(VennGraphs,"graphs","venn");var _default=VennGraphs;exports.default=_default;
+"use strict";
+
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports["default"] = void 0;
+
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
+
+var _assertThisInitialized2 = _interopRequireDefault(require("@babel/runtime/helpers/assertThisInitialized"));
+
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
+
+var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _canvax = _interopRequireDefault(require("canvax"));
+
+var _index = _interopRequireDefault(require("../index"));
+
+var _layout = require("../../../layout/venn/layout");
+
+var _circleintersection = require("../../../layout/venn/circleintersection");
+
+var _fmin = require("fmin");
+
+var _tools = require("../../../utils/tools");
+
+var _ = _canvax["default"]._,
+    event = _canvax["default"].event;
+var Text = _canvax["default"].Display.Text;
+var Path = _canvax["default"].Shapes.Path;
+var Circle = _canvax["default"].Shapes.Circle;
+
+var VennGraphs =
+/*#__PURE__*/
+function (_GraphsBase) {
+  (0, _inherits2["default"])(VennGraphs, _GraphsBase);
+  (0, _createClass2["default"])(VennGraphs, null, [{
+    key: "defaultProps",
+    value: function defaultProps() {
+      return {
+        keyField: {
+          detail: 'key字段',
+          "default": 'name'
+        },
+        valueField: {
+          detail: 'value字段',
+          "default": 'value'
+        },
+        node: {
+          detail: '单个节点配置',
+          propertys: {
+            strokeStyle: {
+              detail: '边框颜色',
+              "default": null
+            },
+            lineWidth: {
+              detail: '边框大小',
+              "default": 2
+            },
+            strokeAlpha: {
+              detail: '边框透明度',
+              "default": 0
+            },
+            fillStyle: {
+              detail: '背景色',
+              "default": null
+            },
+            fillAlpha: {
+              detail: '背景透明度',
+              "default": 0.25
+            },
+            focus: {
+              detail: 'hover设置',
+              propertys: {
+                enabled: {
+                  detail: '是否开启',
+                  "default": true
+                },
+                strokeAlpha: {
+                  detail: '边框透明度',
+                  "default": 0.3
+                }
+              }
+            },
+            select: {
+              detail: '选中设置',
+              propertys: {
+                enabled: {
+                  detail: '是否开启',
+                  "default": true
+                },
+                lineWidth: {
+                  detail: '描边宽度',
+                  "default": 2
+                },
+                strokeStyle: {
+                  detail: '描边颜色',
+                  "default": '#666666'
+                }
+              }
+            }
+          }
+        },
+        label: {
+          detail: '文本设置',
+          propertys: {
+            field: {
+              detail: '获取文本的字段',
+              "default": null
+            },
+            fontSize: {
+              detail: '字体大小',
+              "default": 14
+            },
+            fontColor: {
+              detail: '文本颜色',
+              "default": null
+            },
+            fontWeight: {
+              detail: 'fontWeight',
+              "default": 'normal'
+            },
+            showInter: {
+              detail: '是否显示相交部分的文本',
+              "default": true
+            }
+          }
+        }
+      };
+    }
+  }]);
+
+  function VennGraphs(opt, app) {
+    var _this;
+
+    (0, _classCallCheck2["default"])(this, VennGraphs);
+    _this = (0, _possibleConstructorReturn2["default"])(this, (0, _getPrototypeOf2["default"])(VennGraphs).call(this, opt, app));
+    _this.type = "venn";
+    _this.vennData = null;
+
+    _.extend(true, (0, _assertThisInitialized2["default"])(_this), (0, _tools.getDefaultProps)(VennGraphs.defaultProps()), opt); //_trimGraphs后，计算出来本次data的一些属性
+
+
+    _this._dataCircleLen = 0;
+    _this._dataLabelLen = 0;
+    _this._dataPathLen = 0;
+
+    _this.init();
+
+    return _this;
+  }
+
+  (0, _createClass2["default"])(VennGraphs, [{
+    key: "init",
+    value: function init() {
+      this.venn_circles = new _canvax["default"].Display.Sprite({
+        id: "venn_circles"
+      });
+      this.sprite.addChild(this.venn_circles);
+      this.venn_paths = new _canvax["default"].Display.Sprite({
+        id: "venn_paths"
+      });
+      this.sprite.addChild(this.venn_paths);
+      this.venn_labels = new _canvax["default"].Display.Sprite({
+        id: "venn_labels"
+      });
+      this.sprite.addChild(this.venn_labels);
+    }
+  }, {
+    key: "draw",
+    value: function draw(opt) {
+      !opt && (opt = {});
+
+      _.extend(true, this, opt);
+
+      this.data = this._trimGraphs();
+
+      this._widget();
+
+      this.sprite.context.x = this.app.padding.left;
+      this.sprite.context.y = this.app.padding.top;
+      this.fire("complete");
+    }
+  }, {
+    key: "resetData",
+    value: function resetData(dataFrame) {
+      this.dataFrame = dataFrame;
+      this.data = this._trimGraphs();
+
+      this._widget();
+    }
+  }, {
+    key: "_trimGraphs",
+    value: function _trimGraphs() {
+      var me = this;
+
+      var data = me._vennData();
+
+      var layoutFunction = _layout.venn;
+      var loss = _layout.lossFunction;
+      var orientation = Math.PI / 2;
+      var orientationOrder = null;
+      var normalize = true;
+      var circles = {};
+      var textCentres = {};
+      this._dataCircleLen = 0;
+      this._dataLabelLen = 0;
+      this._dataPathLen = 0;
+
+      if (data.length > 0) {
+        var solution = layoutFunction(data, {
+          lossFunction: loss
+        });
+
+        if (normalize) {
+          solution = (0, _layout.normalizeSolution)(solution, orientation, orientationOrder);
+        }
+
+        ; //第4个参数本是padding，但是这里的width,height已经是减去过padding的
+        //所以就传0
+
+        circles = (0, _layout.scaleSolution)(solution, this.width, this.height, 0);
+        textCentres = computeTextCentres(circles, data);
+      }
+
+      ;
+      var circleInd = 0;
+      var pathInd = 0;
+
+      _.each(data, function (d) {
+        if (d.label) {
+          if (d.sets.length > 1 && !me.label.showInter) {//不显示path的文本
+            // ...
+          } else {
+            d.labelPosition = textCentres[d.nodeId];
+            me._dataLabelLen++;
+          }
+        }
+
+        ;
+
+        if (d.sets.length > 1) {
+          var _path = intersectionAreaPath(d.sets.map(function (set) {
+            return circles[set];
+          }));
+
+          d.shape = {
+            type: 'path',
+            path: _path,
+            pathInd: pathInd++
+          };
+          me._dataPathLen++;
+        } else if (d.sets.length == 1) {
+          d.shape = _.extend({
+            type: 'circle',
+            circleInd: circleInd++
+          }, circles[d.nodeId]);
+          me._dataCircleLen++;
+        }
+      });
+
+      return data;
+    }
+  }, {
+    key: "_vennData",
+    value: function _vennData() {
+      var data = [];
+      var me = this;
+
+      for (var i = 0, l = this.dataFrame.length; i < l; i++) {
+        var rowData = me.dataFrame.getRowDataAt(i);
+        var obj = {
+          type: "venn",
+          iNode: i,
+          nodeId: null,
+          rowData: rowData,
+          sets: null,
+          //size和value是同一个值，size是 vennLayout 需要用到的属性
+          //value是 chartx中和其他图表的值属性保持统一，比如tips中就会读取value
+          size: null,
+          value: null,
+          //这两个在绘制的时候赋值
+          fillStyle: null,
+          strokeStyle: null,
+          label: null,
+          labelPosition: null
+        };
+
+        for (var p in rowData) {
+          var val = rowData[p];
+
+          if (p == me.keyField) {
+            if (!_.isArray(val)) {
+              val = val.split(/[,|]/);
+            }
+
+            ;
+            obj.sets = val;
+            obj.nodeId = val.join();
+          } else if (p == me.valueField) {
+            obj.size = val;
+            obj.value = val;
+          } else if (p == me.label.field) {
+            obj.label = val;
+          }
+
+          ;
+        }
+
+        data.push(obj);
+      }
+
+      ;
+      return data;
+    }
+  }, {
+    key: "_getStyle",
+    value: function _getStyle(style, ind, nodeData, defColor) {
+      var color;
+
+      if (_.isString(style)) {
+        color = style;
+      }
+
+      if (_.isFunction(style)) {
+        color = style(nodeData);
+      }
+
+      if (!color && ind != undefined) {
+        color = this.app.getTheme(ind);
+      }
+
+      if (!color && defColor != undefined) {
+        color = defColor;
+      }
+
+      return color;
+    }
+  }, {
+    key: "_widget",
+    value: function _widget() {
+      var me = this; //那么有多余的元素要去除掉 begin
+
+      if (me.venn_circles.children.length > me._dataCircleLen) {
+        for (var i = me._dataCircleLen; i < me.venn_circles.children.length; i++) {
+          me.venn_circles.getChildAt(i--).destroy();
+        }
+      }
+
+      ;
+
+      if (me.venn_paths.children.length > me._dataPathLen) {
+        for (var _i = me._dataPathLen; _i < me.venn_paths.children.length; _i++) {
+          me.venn_paths.getChildAt(_i--).destroy();
+        }
+      }
+
+      ;
+
+      if (me.venn_labels.children.length > me._dataLabelLen) {
+        for (var _i2 = me._dataLabelLen; _i2 < me.venn_labels.children.length; _i2++) {
+          me.venn_labels.getChildAt(_i2--).destroy();
+        }
+      }
+
+      ; //那么有多余的元素要去除掉 end
+
+      var circleInd = 0;
+      var pathInd = 0;
+      var labelInd = 0;
+
+      _.each(this.data, function (nodeData) {
+        var shape = nodeData.shape;
+
+        var _shape;
+
+        var isNewShape = true;
+
+        if (shape) {
+          var context;
+
+          if (shape.type == 'circle') {
+            var fillStyle = me._getStyle(me.node.fillStyle, shape.circleInd, nodeData);
+
+            var strokeStyle = me._getStyle(me.node.strokeStyle, shape.circleInd, nodeData);
+
+            nodeData.fillStyle = fillStyle;
+            nodeData.strokeStyle = strokeStyle;
+            context = {
+              x: shape.x,
+              y: shape.y,
+              r: shape.radius,
+              fillStyle: fillStyle,
+              fillAlpha: me.node.fillAlpha,
+              lineWidth: me.node.lineWidth,
+              strokeStyle: strokeStyle,
+              strokeAlpha: me.node.strokeAlpha
+            };
+            _shape = me.venn_circles.getChildAt(circleInd++);
+
+            if (!_shape) {
+              _shape = new Circle({
+                pointChkPriority: false,
+                hoverClone: false,
+                context: context
+              });
+              me.venn_circles.addChild(_shape);
+            } else {
+              isNewShape = false;
+
+              _shape.animate(context);
+            }
+          }
+
+          ;
+
+          if (nodeData.shape.type == 'path') {
+            context = {
+              path: shape.path,
+              fillStyle: "#ffffff",
+              fillAlpha: 0,
+              //me.node.fillAlpha,
+              lineWidth: me.node.lineWidth,
+              strokeStyle: "#ffffff",
+              strokeAlpha: 0 //me.node.strokeAlpha
+
+            };
+            _shape = me.venn_paths.getChildAt(pathInd++);
+
+            if (!_shape) {
+              _shape = new Path({
+                pointChkPriority: false,
+                context: context
+              });
+              me.venn_paths.addChild(_shape);
+            } else {
+              isNewShape = false;
+              _shape.context.path = shape.path; //_shape.animate( context )
+            }
+          }
+
+          ;
+          _shape.nodeData = nodeData;
+          nodeData._node = _shape;
+          me.node.focus.enabled && _shape.hover(function () {
+            me.focusAt(this.nodeData.iNode);
+          }, function () {
+            !this.nodeData.selected && me.unfocusAt(this.nodeData.iNode);
+          }); //新创建的元素才需要绑定事件，因为复用的原件已经绑定过事件了
+
+          if (isNewShape) {
+            _shape.on(event.types.get(), function (e) {
+              e.eventInfo = {
+                trigger: me.node,
+                title: null,
+                nodes: [this.nodeData]
+              }; //fire到root上面去的是为了让root去处理tips
+
+              me.app.fire(e.type, e);
+            });
+          }
+
+          ;
+        }
+
+        if (nodeData.label && me.label.enabled) {
+          var fontColor = me._getStyle(me.label.fontColor, shape.circleInd, nodeData, "#999");
+
+          var fontSize = me.label.fontSize;
+
+          if (nodeData.sets.length > 1) {
+            if (!me.label.showInter) {
+              fontSize = 0;
+            } else {
+              fontSize -= 2;
+            }
+          }
+
+          ;
+
+          if (fontSize) {
+            var _textContext = {
+              x: nodeData.labelPosition.x,
+              y: nodeData.labelPosition.y,
+              fontSize: fontSize,
+              //fontFamily: me.label.fontFamily,
+              textBaseline: "middle",
+              textAlign: "center",
+              fontWeight: me.label.fontWeight,
+              fillStyle: fontColor
+            };
+
+            var _txt = me.venn_labels.getChildAt(labelInd++);
+
+            if (!_txt) {
+              _txt = new Text(nodeData.label, {
+                context: _textContext
+              });
+              me.venn_labels.addChild(_txt);
+            } else {
+              _txt.resetText(nodeData.label);
+
+              _txt.animate(_textContext);
+            }
+          }
+        }
+      });
+    }
+  }, {
+    key: "focusAt",
+    value: function focusAt(ind) {
+      var nodeData = this.data[ind];
+      if (!this.node.focus.enabled || nodeData.focused) return;
+      var nctx = nodeData._node.context; //nctx.strokeAlpha += 0.5;
+
+      if (nodeData.sets.length > 1) {
+        //path
+        nctx.strokeAlpha = 1;
+      } else {
+        //circle
+        nctx.strokeAlpha = this.node.focus.strokeAlpha;
+      }
+
+      nodeData.focused = true;
+    }
+  }, {
+    key: "unfocusAt",
+    value: function unfocusAt(ind) {
+      var nodeData = this.data[ind];
+      if (!this.node.focus.enabled || !nodeData.focused) return;
+      var nctx = nodeData._node.context; //nctx.strokeAlpha = 0.5;
+
+      nctx.strokeAlpha = this.node.strokeAlpha;
+      nodeData.focused = false;
+    }
+  }, {
+    key: "selectAt",
+    value: function selectAt(ind) {
+      var nodeData = this.data[ind];
+      if (!this.node.select.enabled || nodeData.selected) return;
+      var nctx = nodeData._node.context;
+      nctx.lineWidth = this.node.select.lineWidth;
+      nctx.strokeAlpha = this.node.select.strokeAlpha;
+      nctx.strokeStyle = this.node.select.strokeStyle;
+      nodeData.selected = true;
+    }
+  }, {
+    key: "unselectAt",
+    value: function unselectAt(ind) {
+      var nodeData = this.data[ind];
+      if (!this.node.select.enabled || !nodeData.selected) return;
+      var nctx = nodeData._node.context;
+      nctx.strokeStyle = this.node.strokeStyle;
+      nodeData.selected = false;
+    }
+  }]);
+  return VennGraphs;
+}(_index["default"]); //venn computeTextCentres 需要的相关代码 begin
+
+
+function getOverlappingCircles(circles) {
+  var ret = {},
+      circleids = [];
+
+  for (var circleid in circles) {
+    circleids.push(circleid);
+    ret[circleid] = [];
+  }
+
+  for (var i = 0; i < circleids.length; i++) {
+    var a = circles[circleids[i]];
+
+    for (var j = i + 1; j < circleids.length; ++j) {
+      var b = circles[circleids[j]],
+          d = (0, _circleintersection.distance)(a, b);
+
+      if (d + b.radius <= a.radius + 1e-10) {
+        ret[circleids[j]].push(circleids[i]);
+      } else if (d + a.radius <= b.radius + 1e-10) {
+        ret[circleids[i]].push(circleids[j]);
+      }
+    }
+  }
+
+  return ret;
+}
+
+function computeTextCentres(circles, areas) {
+  var ret = {},
+      overlapped = getOverlappingCircles(circles);
+
+  for (var i = 0; i < areas.length; ++i) {
+    var area = areas[i].sets,
+        areaids = {},
+        exclude = {};
+
+    for (var j = 0; j < area.length; ++j) {
+      areaids[area[j]] = true;
+      var overlaps = overlapped[area[j]];
+
+      for (var k = 0; k < overlaps.length; ++k) {
+        exclude[overlaps[k]] = true;
+      }
+    }
+
+    var interior = [],
+        exterior = [];
+
+    for (var setid in circles) {
+      if (setid in areaids) {
+        interior.push(circles[setid]);
+      } else if (!(setid in exclude)) {
+        exterior.push(circles[setid]);
+      }
+    }
+
+    var centre = computeTextCentre(interior, exterior);
+    ret[area] = centre;
+
+    if (centre.disjoint && areas[i].size > 0) {
+      console.log("WARNING: area " + area + " not represented on screen");
+    }
+  }
+
+  return ret;
+}
+
+function computeTextCentre(interior, exterior) {
+  var points = [],
+      i;
+
+  for (i = 0; i < interior.length; ++i) {
+    var c = interior[i];
+    points.push({
+      x: c.x,
+      y: c.y
+    });
+    points.push({
+      x: c.x + c.radius / 2,
+      y: c.y
+    });
+    points.push({
+      x: c.x - c.radius / 2,
+      y: c.y
+    });
+    points.push({
+      x: c.x,
+      y: c.y + c.radius / 2
+    });
+    points.push({
+      x: c.x,
+      y: c.y - c.radius / 2
+    });
+  }
+
+  var initial = points[0],
+      margin = circleMargin(points[0], interior, exterior);
+
+  for (i = 1; i < points.length; ++i) {
+    var m = circleMargin(points[i], interior, exterior);
+
+    if (m >= margin) {
+      initial = points[i];
+      margin = m;
+    }
+  } // maximize the margin numerically
+
+
+  var solution = (0, _fmin.nelderMead)(function (p) {
+    return -1 * circleMargin({
+      x: p[0],
+      y: p[1]
+    }, interior, exterior);
+  }, [initial.x, initial.y], {
+    maxIterations: 500,
+    minErrorDelta: 1e-10
+  }).x;
+  var ret = {
+    x: solution[0],
+    y: solution[1]
+  }; // check solution, fallback as needed (happens if fully overlapped
+  // etc)
+
+  var valid = true;
+
+  for (i = 0; i < interior.length; ++i) {
+    if ((0, _circleintersection.distance)(ret, interior[i]) > interior[i].radius) {
+      valid = false;
+      break;
+    }
+  }
+
+  for (i = 0; i < exterior.length; ++i) {
+    if ((0, _circleintersection.distance)(ret, exterior[i]) < exterior[i].radius) {
+      valid = false;
+      break;
+    }
+  }
+
+  if (!valid) {
+    if (interior.length == 1) {
+      ret = {
+        x: interior[0].x,
+        y: interior[0].y
+      };
+    } else {
+      var areaStats = {};
+      (0, _circleintersection.intersectionArea)(interior, areaStats);
+
+      if (areaStats.arcs.length === 0) {
+        ret = {
+          'x': 0,
+          'y': -1000,
+          disjoint: true
+        };
+      } else if (areaStats.arcs.length == 1) {
+        ret = {
+          'x': areaStats.arcs[0].circle.x,
+          'y': areaStats.arcs[0].circle.y
+        };
+      } else if (exterior.length) {
+        // try again without other circles
+        ret = computeTextCentre(interior, []);
+      } else {
+        // take average of all the points in the intersection
+        // polygon. this should basically never happen
+        // and has some issues:
+        // https://github.com/benfred/venn.js/issues/48#issuecomment-146069777
+        ret = (0, _circleintersection.getCenter)(areaStats.arcs.map(function (a) {
+          return a.p1;
+        }));
+      }
+    }
+  }
+
+  return ret;
+}
+
+function circleMargin(current, interior, exterior) {
+  var margin = interior[0].radius - (0, _circleintersection.distance)(interior[0], current),
+      i,
+      m;
+
+  for (i = 1; i < interior.length; ++i) {
+    m = interior[i].radius - (0, _circleintersection.distance)(interior[i], current);
+
+    if (m <= margin) {
+      margin = m;
+    }
+  }
+
+  for (i = 0; i < exterior.length; ++i) {
+    m = (0, _circleintersection.distance)(exterior[i], current) - exterior[i].radius;
+
+    if (m <= margin) {
+      margin = m;
+    }
+  }
+
+  return margin;
+}
+
+function circlePath(x, y, r) {
+  var ret = [];
+  ret.push("\nM", x, y);
+  ret.push("\nm", -r, 0);
+  ret.push("\na", r, r, 0, 1, 0, r * 2, 0);
+  ret.push("\na", r, r, 0, 1, 0, -r * 2, 0);
+  return ret.join(" ");
+}
+/** returns a svg path of the intersection area of a bunch of circles */
+
+
+function intersectionAreaPath(circles) {
+  var stats = {};
+  (0, _circleintersection.intersectionArea)(circles, stats);
+  var arcs = stats.arcs;
+
+  if (arcs.length === 0) {
+    return "M 0 0";
+  } else if (arcs.length == 1) {
+    var circle = arcs[0].circle;
+    return circlePath(circle.x, circle.y, circle.radius);
+  } else {
+    // draw path around arcs
+    var ret = ["\nM", arcs[0].p2.x, arcs[0].p2.y];
+
+    for (var i = 0; i < arcs.length; ++i) {
+      var arc = arcs[i],
+          r = arc.circle.radius,
+          wide = arc.width > r;
+      ret.push("\nA", r, r, 0, wide ? 1 : 0, 1, arc.p1.x, arc.p1.y);
+    }
+
+    return ret.join(" ") + " z";
+  }
+} //venn computeTextCentres 需要的相关代码 end
+
+
+_index["default"].registerComponent(VennGraphs, 'graphs', 'venn');
+
+var _default = VennGraphs;
+exports["default"] = _default;

@@ -22,8 +22,8 @@
     "email": "252759102@qq.com"
   },
   "repository": "git",
-  "main": "./dist/chartx.js",
-  "module": "./src/index.js",
+  "main": "./dist/index_cjs.js",
+  "module": "./dist/index_es.js",
   "files": [
     "/dist"
   ],
@@ -33,12 +33,15 @@
     "@babel/plugin-transform-runtime": "^7.7.6",
     "@babel/preset-env": "^7.2.3",
     "@babel/runtime": "^7.7.7",
+    "babel-eslint": "^8.2.6",
     "babel-plugin-transform-es2015-modules-umd": "^6.24.1",
     "colors-console": "^1.0.3",
+    "eslint": "^4.19.1",
     "fs-extra": "^8.1.0",
     "gulp": "^4.0.2",
     "gulp-babel": "^8.0.0",
     "gulp-clean": "^0.4.0",
+    "gulp-eslint": "^6.0.0",
     "gulp-rename": "^1.4.0",
     "gulp-string-replace": "^1.1.2",
     "gulp-uglify": "^3.0.2",
@@ -48,8 +51,7 @@
     "rollup-plugin-node-resolve": "5.2.0"
   },
   "dependencies": {
-    "mmvis": "0.0.89",
-    "canvax": "2.0.67",
+    "canvax": "file:../canvax",
     "fmin": "0.0.2",
     "d3-force": "^2.0.1"
   },

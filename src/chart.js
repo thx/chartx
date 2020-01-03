@@ -1,6 +1,8 @@
+import global from "./global"
 import Canvax from "canvax"
-import { _ , dataFrame, $ , global , event } from "mmvis"
+import dataFrame from "./core/dataFrame"
 
+let { _ , $ , event } = Canvax;
 const _padding = 20;
 
 class Chart extends event.Dispatcher
@@ -47,6 +49,7 @@ class Chart extends event.Dispatcher
 
         //这三类组件是优先级最高的组件，所有的组件的模块化和绘制，都要一次在这三个完成后实现
         this.__highModules = [ "theme", "coord", "graphs" ];
+        
         //组件管理机制,所有的组件都绘制在这个地方
         this.components = [];
       
@@ -57,10 +60,10 @@ class Chart extends event.Dispatcher
 
     init()
     {
-        var me = this;
+        let me = this;
 
         //init全部用 this._opt
-        var opt = this._opt;
+        let opt = this._opt;
 
         //padding数据也要重置为起始值
         this.padding = this._getPadding();
@@ -68,7 +71,7 @@ class Chart extends event.Dispatcher
         //先依次init 处理 "theme", "coord", "graphs" 三个优先级最高的模块
         _.each( this.__highModules, function( compName ){
             if( !opt[compName] ) return;
-            var comps = _.flatten([ opt[compName] ]);
+            let comps = _.flatten([ opt[compName] ]);
 
             //them是一个数组的组件。so特殊处理
             if( compName == "theme" ){
@@ -81,27 +84,27 @@ class Chart extends event.Dispatcher
                     (compName == "coord" && !comp.type ) || 
                     (compName == "graphs" && !comp.field && !comp.keyField  )
                 ) return; 
-                var compModule = me.componentModules.get(compName, comp.type);
+                let compModule = me.componentModules.get(compName, comp.type);
                 if( compModule ){
-                    var _comp = new compModule( comp, me );
+                    let _comp = new compModule( comp, me );
                     me.components.push( _comp );
                 };
             } );
         } );
 
         //PS: theme 组件优先级最高，在registerComponents之前已经加载过
-        for( var _p in this._opt ){
+        for( let _p in this._opt ){
             //非coord graphs theme，其实后面也可以统一的
             if( _.indexOf( this.__highModules, _p ) == -1 ){
-                var comps = this._opt[ _p ];
+                let comps = this._opt[ _p ];
                 //所有的组件都按照数组方式处理，这里，组件里面就不需要再这样处理了
                 if( ! _.isArray( comps ) ){
                     comps = [ comps ];
                 };
                 _.each( comps, function( comp ){
-                    var compModule = me.componentModules.get( _p, comp.type );
+                    let compModule = me.componentModules.get( _p, comp.type );
                     if( compModule ){
-                        var _comp = new compModule( comp, me );
+                        let _comp = new compModule( comp, me );
                         me.components.push( _comp );
                     }
                 } );
@@ -112,17 +115,17 @@ class Chart extends event.Dispatcher
     
     draw(opt)
     {
-        var me = this;
+        let me = this;
         !opt && (opt ={});
-        var _coord = this.getComponent({name:'coord'});
+        let _coord = this.getComponent({name:'coord'});
 
         if( _coord && _coord.horizontal ){
             this._drawBeginHorizontal();
         };
 
-        var width = this.width - this.padding.left - this.padding.right;
-        var height = this.height - this.padding.top - this.padding.bottom;
-        var origin = { x : this.padding.left,y : this.padding.top }
+        let width = this.width - this.padding.left - this.padding.right;
+        let height = this.height - this.padding.top - this.padding.bottom;
+        let origin = { x : this.padding.left,y : this.padding.top }
 
         if( _coord ){
             //先绘制好坐标系统
@@ -138,9 +141,9 @@ class Chart extends event.Dispatcher
             return;
         };
     
-        var _graphs = this.getComponents({name:'graphs'});
-        var graphsCount = _graphs.length;
-        var completeNum = 0;
+        let _graphs = this.getComponents({name:'graphs'});
+        let graphsCount = _graphs.length;
+        let completeNum = 0;
 
         opt = _.extend( opt, {
             width  : width,
@@ -160,8 +163,8 @@ class Chart extends event.Dispatcher
         } );
 
         //绘制除开coord graphs 以外的所有组件
-        for( var i=0,l=this.components.length; i<l; i++ ){
-            var p = this.components[i];
+        for( let i=0,l=this.components.length; i<l; i++ ){
+            let p = this.components[i];
             if( _.indexOf( this.__highModules, p.name ) == -1 ){
                 p.draw( opt );
             };
@@ -179,9 +182,9 @@ class Chart extends event.Dispatcher
     {
         //横向了之后， 要把4个padding值轮换一下
         //top,right 对调 ， bottom,left 对调
-        var padding = this.padding;
+        let padding = this.padding;
         
-        var num = padding.top;
+        let num = padding.top;
         padding.top = padding.right;
         padding.right = padding.bottom;
         padding.bottom = padding.left;
@@ -193,7 +196,7 @@ class Chart extends event.Dispatcher
     //绘制完毕后的横向处理
     _drawEndHorizontal() 
     {
-        var ctx = this.graphsSprite.context;
+        let ctx = this.graphsSprite.context;
         ctx.x += ((this.width - this.height) / 2);
         ctx.y += ((this.height - this.width) / 2);
         ctx.rotation = 90;
@@ -203,7 +206,7 @@ class Chart extends event.Dispatcher
     }
 
     _horizontalGraphsText(){
-        var me = this;
+        let me = this;
         function _horizontalText( el ){
             
             if( el.children ){
@@ -213,9 +216,9 @@ class Chart extends event.Dispatcher
             };
             if( el.type == "text" && !el.__horizontal ){
                 
-                var ctx = el.context;
-                var w = ctx.width;
-                var h = ctx.height;
+                let ctx = el.context;
+                let w = ctx.width;
+                let h = ctx.height;
 
                 ctx.rotation = ctx.rotation - 90;
 
@@ -231,7 +234,7 @@ class Chart extends event.Dispatcher
 
     _getPadding(){
         
-        var paddingVal = _padding;
+        let paddingVal = _padding;
 
         if( this._opt.coord && "padding" in this._opt.coord ){
             if( !_.isObject(this._opt.coord.padding) ){
@@ -239,7 +242,7 @@ class Chart extends event.Dispatcher
             }
         };
 
-        var paddingObj = {
+        let paddingObj = {
             top: paddingVal,
             right: paddingVal,
             bottom: paddingVal,
@@ -258,8 +261,8 @@ class Chart extends event.Dispatcher
     //ind 如果有就获取对应索引的具体颜色值
     getTheme( ind )
     {
-        var colors = global.getGlobalTheme();
-        var _theme = this.getComponent({name:'theme'});
+        let colors = global.getGlobalTheme();
+        let _theme = this.getComponent({name:'theme'});
         if( _theme ) {
             colors = _theme.get();
         };
@@ -307,9 +310,9 @@ class Chart extends event.Dispatcher
     clean()
     {
         //保留所有的stage，stage下面得元素全部 destroy 掉
-        for (var i=0,l=this.canvax.children.length;i<l;i++){
-            var stage = this.canvax.getChildAt(i);
-            for( var s = 0 , sl=stage.children.length ; s<sl ; s++){
+        for (let i=0,l=this.canvax.children.length;i<l;i++){
+            let stage = this.canvax.getChildAt(i);
+            for( let s = 0 , sl=stage.children.length ; s<sl ; s++){
                 stage.getChildAt(s).destroy();
                 s--;
                 sl--;
@@ -330,8 +333,8 @@ class Chart extends event.Dispatcher
      */
     resize()
     {
-        var _w = parseInt(this.el.offsetWidth);
-        var _h = parseInt(this.el.offsetHeight);
+        let _w = parseInt(this.el.offsetWidth);
+        let _h = parseInt(this.el.offsetHeight);
         if( _w == this.width && _h == this.height ) return;
         
         this.width = _w;
@@ -380,11 +383,11 @@ class Chart extends event.Dispatcher
      */
     resetData(data , trigger)
     {
-        var me = this;
+        let me = this;
 
         this._data = data;
 
-        var preDataLenth = this.dataFrame.org.length;
+        let preDataLenth = this.dataFrame.org.length;
 
         this.dataFrame.resetData( data );
 
@@ -396,7 +399,7 @@ class Chart extends event.Dispatcher
             return;
         };
     
-        var _coord = this.getComponent({name:'coord'})
+        let _coord = this.getComponent({name:'coord'})
 
         if( _coord ){
             _coord.resetData( this.dataFrame , trigger);
@@ -422,7 +425,7 @@ class Chart extends event.Dispatcher
 
     componentsReset( trigger )
     {
-        var me = this;
+        let me = this;
         
         _.each(this.components , function( p , i ){
             //theme coord graphs额外处理
@@ -439,7 +442,7 @@ class Chart extends event.Dispatcher
 
     getComponentById( id )
     {
-        var comp;
+        let comp;
         _.each( this.components, function( c ){
             if( c.id && c.id == id ){
                 comp = c;
@@ -454,13 +457,13 @@ class Chart extends event.Dispatcher
     }
 
     getComponents( opt, components ){
-        var arr = [];
-        var expCount = 0;
+        let arr = [];
+        let expCount = 0;
         if( !components ){
             components = this.components;
         };
 
-        for( var p in opt ){
+        for( let p in opt ){
             expCount++;
         };
 
@@ -469,8 +472,8 @@ class Chart extends event.Dispatcher
         };
 
         _.each( components, function( comp ){
-            var i = 0;
-            for( var p in opt ){
+            let i = 0;
+            for( let p in opt ){
                 if( JSON.stringify( comp[p] ) == JSON.stringify( opt[p] ) ){
                     i++;
                 };
@@ -486,7 +489,7 @@ class Chart extends event.Dispatcher
     //从graphs里面去根据opt做一一对比，比对成功为true
     //count为要查询的数量， 如果为1，则
     getGraph( opt ){
-        var graphs = this.getGraphs( opt );
+        let graphs = this.getGraphs( opt );
         return graphs[0];
     }
 
@@ -497,7 +500,7 @@ class Chart extends event.Dispatcher
     //获取graphs根据id
     getGraphById( id )
     {
-        var _g;
+        let _g;
         _.each( this.getComponents({name:'graphs'}), function( g ){
             if( g.id == id ){
                 _g = g;
@@ -518,8 +521,8 @@ class Chart extends event.Dispatcher
     //只有field为多组数据的时候才需要legend，给到legend组件来调用
     getLegendData()
     {
-        var me   = this;
-        var data = [];
+        let me   = this;
+        let data = [];
 
         //这里涌来兼容pie等的图例，其实后续可以考虑后面所有的graphs都提供一个getLegendData的方法
         //那么就可以统一用这个方法， 下面的代码就可以去掉了
@@ -530,7 +533,7 @@ class Chart extends event.Dispatcher
                     return d.name == item.name
                 } ) ) return;
 
-                var legendItem = _.extend(true, {}, item);
+                let legendItem = _.extend(true, {}, item);
                 legendItem.color = item.fillStyle || item.color || item.style;
 
                 data.push( legendItem )
@@ -542,10 +545,10 @@ class Chart extends event.Dispatcher
 
         //------------------------------------------------------------//
 
-        var _coord = me.getComponent({name:'coord'});
+        let _coord = me.getComponent({name:'coord'});
         _.each( _.flatten( _coord.fieldsMap ) , function( map , i ){
             //因为yAxis上面是可以单独自己配置field的，所以，这部分要过滤出 legend data
-            var isGraphsField = false;
+            let isGraphsField = false;
             _.each( me._opt.graphs, function( gopt ){
                 if( _.indexOf( _.flatten([ gopt.field ]), map.field ) > -1 ){
                     isGraphsField = true;
@@ -570,9 +573,9 @@ class Chart extends event.Dispatcher
 
     show( field , trigger )
     {
-        var me = this;
+        let me = this;
 
-        var _coord = this.getComponent({name:'coord'});
+        let _coord = this.getComponent({name:'coord'});
         _coord && _coord.show( field, trigger );
         _.each( this.getComponents({name:'graphs'}), function( _g ){
             _g.show( field , trigger);
@@ -582,8 +585,8 @@ class Chart extends event.Dispatcher
 
     hide( field , trigger)
     {
-        var me = this;
-        var _coord = me.getComponent({name:'coord'});
+        let me = this;
+        let _coord = me.getComponent({name:'coord'});
         _coord && _coord.hide( field ,trigger );
         _.each( this.getComponents({name:'graphs'}), function( _g ){
             _g.hide( field , trigger );
@@ -594,7 +597,7 @@ class Chart extends event.Dispatcher
 
     _bindEvent()
     {
-        var me = this;
+        let me = this;
         this.on(event.types.get() , function(e){
             //触发每个graphs级别的事件，
             //用户交互事件先执行，还可以修改e的内容修改tips内容
@@ -604,8 +607,8 @@ class Chart extends event.Dispatcher
                 } );
             };
             
-            var _tips = me.getComponent({name:'tips'});
-            var _coord = me.getComponent({name:'coord'});
+            let _tips = me.getComponent({name:'tips'});
+            let _coord = me.getComponent({name:'coord'});
 
             if( _tips ){
                 
@@ -637,7 +640,7 @@ class Chart extends event.Dispatcher
             e.eventInfo = {};
         };
 
-        var _coord = this.getComponent({name:'coord'});
+        let _coord = this.getComponent({name:'coord'});
         if( _coord ){
             e.eventInfo = _coord.getTipsInfoHandler(e);
         };
@@ -650,8 +653,8 @@ class Chart extends event.Dispatcher
         //比如鼠标移动到多柱子组合的具体某根bar上面，e.eventInfo.nodes = [ {bardata} ] 就有了这个bar的数据
         //那么tips就只显示这个bardata的数据
         if( !e.eventInfo.nodes || !e.eventInfo.nodes.length ){
-            var nodes = [];
-            var iNode = e.eventInfo.iNode;
+            let nodes = [];
+            let iNode = e.eventInfo.iNode;
             
             _.each( this.getComponents({name:'graphs'}), function( _g ){
                 nodes = nodes.concat( _g.getNodesAt( iNode, e ) );

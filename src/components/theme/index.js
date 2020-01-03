@@ -2,7 +2,7 @@
  * 皮肤组件，不是一个具体的ui组件
  */
 import Component from "../component"
-import { global,_ } from "mmvis"
+import { _ } from "canvax"
 
 class Theme extends Component
 {
@@ -46,6 +46,6 @@ class Theme extends Component
 
 }
 
-global.registerComponent( Theme, 'theme' );
+Component.registerComponent( Theme, 'theme' );
 
 export default Theme;

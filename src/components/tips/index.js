@@ -1,10 +1,10 @@
 import Component from "../component"
 import Canvax from "canvax"
-import { numAddSymbol } from "../../utils/tools"
-import { global,_,getDefaultProps } from "mmvis"
+import { numAddSymbol,getDefaultProps } from "../../utils/tools"
 
-const Rect = Canvax.Shapes.Rect;
-const Line = Canvax.Shapes.Line;
+let _ = Canvax._;
+let Rect = Canvax.Shapes.Rect;
+let Line = Canvax.Shapes.Line;
 
 class Tips extends Component {
 
@@ -88,7 +88,7 @@ class Tips extends Component {
         });
         this.app.stage.addChild(this.sprite);
 
-        var me = this;
+        let me = this;
         this.sprite.on("destroy", function () {
             me._tipDom = null;
         });
@@ -106,7 +106,7 @@ class Tips extends Component {
             this.eventInfo = e.eventInfo;
 
             //TODO:这里要优化，canvax后续要提供直接获取canvax实例的方法
-            var stage = e.target.getStage();
+            let stage = e.target.getStage();
             if( stage ){
                 this.cW = stage.context.width;
                 this.cH = stage.context.height;
@@ -118,7 +118,7 @@ class Tips extends Component {
             };
             
 
-            var content = this._setContent(e);
+            let content = this._setContent(e);
             if (content) {
                 this._setPosition(e);
                 this.sprite.toFront();
@@ -140,7 +140,7 @@ class Tips extends Component {
 
         if (e.eventInfo) {
             this.eventInfo = e.eventInfo;
-            var content = this._setContent(e);
+            let content = this._setContent(e);
             if (content) {
                 this._setPosition(e);
 
@@ -176,9 +176,9 @@ class Tips extends Component {
     _setPosition(e) {
         if (!this.enabled) return;
         if (!this._tipDom) return;
-        var pos = e.pos || e.target.localToGlobal(e.point);
-        var x = this._checkX(pos.x + this.offsetX);
-        var y = this._checkY(pos.y + this.offsetY);
+        let pos = e.pos || e.target.localToGlobal(e.point);
+        let x = this._checkX(pos.x + this.offsetX);
+        let y = this._checkY(pos.y + this.offsetY);
 
         this._tipDom.style.cssText += ";visibility:visible;left:" + x + "px;top:" + y + "px;-webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;";
 
@@ -207,7 +207,7 @@ class Tips extends Component {
     }
 
     _setContent(e) {
-        var tipxContent = this._getContent(e);
+        let tipxContent = this._getContent(e);
         if (!tipxContent && tipxContent !== 0) {
             return;
         };
@@ -225,7 +225,7 @@ class Tips extends Component {
 
     _getContent(e) {
 
-        var tipsContent;
+        let tipsContent;
 
         if (this.content) {
             tipsContent = _.isFunction(this.content) ? this.content(e.eventInfo, e) : this.content;
@@ -237,7 +237,7 @@ class Tips extends Component {
     }
 
     _getDefaultContent(info) {
-        var str = "";
+        let str = "";
         if( !info.nodes.length ){
             return str;
         };
@@ -251,10 +251,10 @@ class Tips extends Component {
             };
             */
 
-            var style = node.color || node.fillStyle || node.strokeStyle;
-            var name = node.name || node.field || node.content;
-            var value = typeof(node.value) == "object" ? JSON.stringify(node.value) : numAddSymbol(node.value);
-            var hasVal = node.value || node.value == 0
+            let style = node.color || node.fillStyle || node.strokeStyle;
+            let name = node.name || node.field || node.content;
+            let value = typeof(node.value) == "object" ? JSON.stringify(node.value) : numAddSymbol(node.value);
+            let hasVal = node.value || node.value == 0
 
             str += "<div style='line-height:1.5;font-size:12px;padding:0 4px;'>"
             if( style ){
@@ -281,7 +281,7 @@ class Tips extends Component {
      */
     _checkX(x) {
         if (this.positionInRange) {
-            var w = this.dW + 2; //后面的2 是 两边的 linewidth
+            let w = this.dW + 2; //后面的2 是 两边的 linewidth
             if (x < 0) {
                 x = 0;
             }
@@ -298,7 +298,7 @@ class Tips extends Component {
      */
     _checkY(y) {
         if (this.positionInRange) {
-            var h = this.dH + 2; //后面的2 是 两边的 linewidth
+            let h = this.dH + 2; //后面的2 是 两边的 linewidth
             if (y < 0) {
                 y = 0;
             }
@@ -315,21 +315,21 @@ class Tips extends Component {
         if( !e.eventInfo || !e.eventInfo.xAxis ) {
             return;
         };
-        var _coord = this.app.getComponent({name:'coord'});
+        let _coord = this.app.getComponent({name:'coord'});
 
         //目前只实现了直角坐标系的tipsPointer
         if (!_coord || _coord.type != 'rect') return;
 
         if (!this.pointer) return;
 
-        var el = this._tipsPointer;
-        var y = _coord.origin.y - _coord.height;
-        var x = 0;
+        let el = this._tipsPointer;
+        let y = _coord.origin.y - _coord.height;
+        let x = 0;
         if (this.pointer == "line") {
             x = _coord.origin.x + e.eventInfo.xAxis.x;
         }
         if (this.pointer == "region") {
-            var regionWidth = _coord._xAxis.getCellLengthOfPos( e.eventInfo.xAxis.x );
+            let regionWidth = _coord._xAxis.getCellLengthOfPos( e.eventInfo.xAxis.x );
             x = _coord.origin.x + e.eventInfo.xAxis.x - regionWidth / 2;
             if (e.eventInfo.xAxis.ind < 0) {
                 //当没有任何数据的时候， e.eventInfo.xAxis.ind==-1
@@ -358,7 +358,7 @@ class Tips extends Component {
                 });
             };
             if (this.pointer == "region") {
-                var regionWidth = _coord._xAxis.getCellLengthOfPos( x );
+                let regionWidth = _coord._xAxis.getCellLengthOfPos( x );
                 el = new Rect({
                     //xyToInt : false,
                     context: {
@@ -398,7 +398,7 @@ class Tips extends Component {
             return;
         };
 
-        var _coord = this.app.getComponent({name:'coord'});
+        let _coord = this.app.getComponent({name:'coord'});
         //目前只实现了直角坐标系的tipsPointer
         if (!_coord || _coord.type != 'rect') return;
 
@@ -413,7 +413,7 @@ class Tips extends Component {
         if( !e.eventInfo || !e.eventInfo.xAxis ) {
             return;
         };
-        var _coord = this.app.getComponent({name:'coord'});
+        let _coord = this.app.getComponent({name:'coord'});
 
         //目前只实现了直角坐标系的tipsPointer
         if (!_coord || _coord.type != 'rect') return;
@@ -422,17 +422,17 @@ class Tips extends Component {
 
         //console.log("move");
 
-        var el = this._tipsPointer;
-        var x = _coord.origin.x + e.eventInfo.xAxis.x;
+        let el = this._tipsPointer;
+        let x = _coord.origin.x + e.eventInfo.xAxis.x;
         if (this.pointer == "region") {
-            var regionWidth = _coord._xAxis.getCellLengthOfPos( e.eventInfo.xAxis.x );
+            let regionWidth = _coord._xAxis.getCellLengthOfPos( e.eventInfo.xAxis.x );
             x = _coord.origin.x + e.eventInfo.xAxis.x - regionWidth / 2;
             if (e.eventInfo.xAxis.ind < 0) {
                 //当没有任何数据的时候， e.eventInfo.xAxis.ind==-1
                 x = _coord.origin.x;
             }
         };
-        var y = _coord.origin.y - _coord.height;
+        let y = _coord.origin.y - _coord.height;
 
         if (x == el.__targetX) {
             return;
@@ -461,5 +461,5 @@ class Tips extends Component {
 
 }
 
-global.registerComponent( Tips, 'tips' );
+Component.registerComponent( Tips, 'tips' );
 export default Tips;

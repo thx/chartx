@@ -1,7 +1,8 @@
 import Canvax from "canvax"
-import { _,event,getDefaultProps } from "mmvis"
+import { getDefaultProps } from "../../../utils/tools"
 
-const Circle = Canvax.Shapes.Circle;
+let {_,event} = Canvax;
+let Circle = Canvax.Shapes.Circle;
 
 export default class PlanetGroup
 {
@@ -183,7 +184,7 @@ export default class PlanetGroup
 
     init()
     {
-        var me = this;
+        //var me = this;
         var _coord = this.app.getComponent({name:'coord'});
         this.sprite = new Canvax.Display.Sprite({
             id : "group_"+this.iGroup,
@@ -320,7 +321,7 @@ export default class PlanetGroup
             //测试代码end------------------------------------------------------
 
             //该半径圆弧上，可以绘制一个星球的最小弧度值
-            var minRadianItem = Math.atan( this.pit.radius / _r );
+            //var minRadianItem = Math.atan( this.pit.radius / _r );
 
             _rings.push( {
                 arcs    : arcs,
@@ -336,7 +337,7 @@ export default class PlanetGroup
 
         //计算每个环的最大可以创建星球数量,然后把所有的数量相加做分母。
         //然后计算自己的比例去 planets 里面拿对应比例的数据
-        _.each( _rings , function( ring , i ){
+        _.each( _rings , function( ring ){
             //先计算上这个轨道上排排站一共可以放的下多少个星球
             //一个星球需要多少弧度
             var minRadian = Math.asin( me.pit.radius / ring.radius ) * 2;
@@ -441,13 +442,13 @@ export default class PlanetGroup
     }
 
     //索引区间分段法 待实现
-    _setRings_indexRange( planets )
+    _setRings_indexRange( )
     {
     }
 
     //值区间分段法
     //todo:这样确实就很可能数据集中在两段中间没有 待实现
-    _setRings_valRange( planets )
+    _setRings_valRange(  )
     {
     }
 

@@ -1,12 +1,13 @@
 import Canvax from "canvax"
-import {getPath} from "../../../utils/tools"
-import { _ , color, event, getDefaultProps } from "mmvis"
+import {getPath,getDefaultProps} from "../../../utils/tools"
+import { colorRgb } from "../../../utils/color"
 
-const AnimationFrame = Canvax.AnimationFrame;
-const BrokenLine = Canvax.Shapes.BrokenLine;
-const Circle = Canvax.Shapes.Circle;
-const Isogon = Canvax.Shapes.Isogon;
-const Path = Canvax.Shapes.Path;
+let { _, event } = Canvax;
+let AnimationFrame = Canvax.AnimationFrame;
+let BrokenLine = Canvax.Shapes.BrokenLine;
+let Circle = Canvax.Shapes.Circle;
+let Isogon = Canvax.Shapes.Isogon;
+let Path = Canvax.Shapes.Path;
  
 
 export default class LineGraphsGroup extends event.Dispatcher
@@ -167,7 +168,7 @@ export default class LineGraphsGroup extends event.Dispatcher
         this.init(opt)
     }
 
-    init(opt)
+    init()
     {
         this.sprite = new Canvax.Display.Sprite();
     }
@@ -308,7 +309,7 @@ export default class LineGraphsGroup extends event.Dispatcher
         me._grow();
     }
 
-    _grow(callback , opt)
+    _grow(callback)
     {
         var me = this;
 
@@ -544,7 +545,7 @@ export default class LineGraphsGroup extends event.Dispatcher
             //创建一个线性渐变
             fill_gradient = me.ctx.createLinearGradient(topP[0], topP[1], topP[0], 0);
 
-            var rgb = color.colorRgb( _fillStyle );
+            var rgb = colorRgb( _fillStyle );
             var rgba0 = rgb.replace(')', ', ' + me._getProp(me.area.alpha[0]) + ')').replace('RGB', 'RGBA');
             fill_gradient.addColorStop(0, rgba0);
 
@@ -589,7 +590,7 @@ export default class LineGraphsGroup extends event.Dispatcher
             //创建一个线性渐变
             //console.log( topP[0] + "|"+ topP[1]+ "|"+  topP[0]+ "|"+ bottomP[1] )
             _style = me.ctx.createLinearGradient(topP[0], topP[1], topP[0], bottomP[1]);
-            _.each( this._opt.line.strokeStyle.lineargradient , function( item , i ){
+            _.each( this._opt.line.strokeStyle.lineargradient , function( item ){
                 _style.addColorStop( item.position , item.color);
             });
 

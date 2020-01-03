@@ -1,1 +1,383 @@
-"use strict";var _interopRequireDefault=require("@babel/runtime/helpers/interopRequireDefault");Object.defineProperty(exports,"__esModule",{value:!0}),exports.default=void 0;var _classCallCheck2=_interopRequireDefault(require("@babel/runtime/helpers/classCallCheck")),_possibleConstructorReturn2=_interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn")),_getPrototypeOf2=_interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf")),_assertThisInitialized2=_interopRequireDefault(require("@babel/runtime/helpers/assertThisInitialized")),_createClass2=_interopRequireDefault(require("@babel/runtime/helpers/createClass")),_inherits2=_interopRequireDefault(require("@babel/runtime/helpers/inherits")),_canvax=_interopRequireDefault(require("canvax")),_mmvis=require("mmvis"),Line=_canvax.default.Shapes.Line,Rect=_canvax.default.Shapes.Rect,rectGrid=function(e){function l(e,i){var t;return(0,_classCallCheck2.default)(this,l),t=(0,_possibleConstructorReturn2.default)(this,(0,_getPrototypeOf2.default)(l).call(this,e,i)),_mmvis._.extend(!0,(0,_assertThisInitialized2.default)(t),(0,_mmvis.getDefaultProps)(l.defaultProps())),t.width=0,t.height=0,t._coord=i,t.pos={x:0,y:0},t.sprite=null,t.xAxisSp=null,t.yAxisSp=null,t.init(e),t}return(0,_inherits2.default)(l,e),(0,_createClass2.default)(l,null,[{key:"defaultProps",value:function(){return{enabled:{detail:"是否开启grid绘制",default:!0},line:{detail:"网格线条配置",propertys:{xDimension:{detail:"一维方向的网格线",propertys:{enabled:{detail:"是否开启",default:!0},data:[],lineType:{detail:"线的样式，虚线或者实现",default:"solid"},lineWidth:{detail:"线宽",default:1},strokeStyle:{detail:"线颜色",default:"#f0f0f0"}}},yDimension:{detail:"二维方向的网格线",propertys:{enabled:{detail:"是否开启",default:!1},data:[],lineType:{detail:"线的样式，虚线或者实现",default:"solid"},lineWidth:{detail:"线宽",default:1},strokeStyle:{detail:"线颜色",default:"#f0f0f0"}}}}},fill:{detail:"背景色配置",propertys:{xDimension:{detail:"以为方向的背景色块，x方向",propertys:{enabled:{detail:"是否开启",default:!1},splitVals:{detail:"从x轴上面用来分割区块的vals",default:null},fillStyle:{detail:"背景颜色",default:null},alpha:{detail:"背景透明度",default:null}}},yDimension:{detail:"以为方向的背景色块，y方向",propertys:{enabled:{detail:"是否开启",default:!1},splitVals:{detail:"从x轴上面用来分割区块的vals",default:null},fillStyle:{detail:"背景颜色",default:null},alpha:{detail:"背景透明度",default:null}}}}}}}}]),(0,_createClass2.default)(l,[{key:"init",value:function(e){_mmvis._.extend(!0,this,e),this.sprite=new _canvax.default.Display.Sprite}},{key:"setX",value:function(e){this.sprite.context.x=e}},{key:"setY",value:function(e){this.sprite.context.y=e}},{key:"draw",value:function(e){_mmvis._.extend(!0,this,e),this._widget(),this.setX(this.pos.x),this.setY(this.pos.y)}},{key:"clean",value:function(){this.sprite.removeAllChildren()}},{key:"reset",value:function(e){this.sprite.removeAllChildren(),this.draw(e)}},{key:"_widget",value:function(){var u=this;if(this.enabled){var o=u._coord._yAxis[0],p=u._coord._xAxis;this.fillSp=new _canvax.default.Display.Sprite,this.sprite.addChild(this.fillSp),_mmvis._.each([u.fill.xDimension,u.fill.yDimension],function(a,n){var e=n?o:p,i=[];if(a.enabled){a.splitVals?(i=[e.dataSection[0]].concat(_mmvis._.flatten([a.splitVals]))).push(e.dataSection.slice(-1)[0]):i=e.dataSection;var t=[];if(2<=i.length){for(var l=[],s=0,r=i.length;s<r;s++){var d=e.getPosOf({val:i[s]});if(l.length){if(1==l.length){if(d-l[0]<1)continue;l.push(d),t.push(l),l=[l[1]]}}else l.push(d)}_mmvis._.each(t,function(e,i){var t={fillStyle:u.getProp(a.fillStyle,i,"#000"),fillAlpha:u.getProp(a.alpha,i,i%2*.02)};n?(t.x=0,t.y=-e[0],t.width=u.width,t.height=-(e[1]-e[0])):(t.x=e[0],t.y=0,t.width=e[1]-e[0],t.height=-u.height);var l=new Rect({context:t});u.fillSp.addChild(l)})}}}),u.xAxisSp=new _canvax.default.Display.Sprite,u.sprite.addChild(u.xAxisSp),u.yAxisSp=new _canvax.default.Display.Sprite,u.sprite.addChild(u.yAxisSp);for(var e=0,i=(l=o.layoutData).length;e<i;e++){if((a=l[e]).visible){var t=new Line({id:"back_line_"+e,context:{y:a.y,lineType:u.getProp(u.line.xDimension.lineType,e,"solid"),lineWidth:u.getProp(u.line.xDimension.lineWidth,e,1),strokeStyle:u.getProp(u.line.xDimension.strokeStyle,e,"#f0f0f0"),visible:!0}});u.line.xDimension.enabled&&(u.xAxisSp.addChild(t),t.context.start.x=0,t.context.end.x=u.width)}}var l;for(e=0,i=(l=p.layoutData).length;e<i;e++){var a=l[e];t=new Line({context:{x:a.x,start:{x:0,y:0},end:{x:0,y:-u.height},lineType:u.getProp(u.line.yDimension.lineType,e,"solid"),lineWidth:u.getProp(u.line.yDimension.lineWidth,e,1),strokeStyle:u.getProp(u.line.yDimension.strokeStyle,e,"#f0f0f0"),visible:!0}});u.line.yDimension.enabled&&u.yAxisSp.addChild(t)}}}},{key:"getProp",value:function(e,i,t){var l=t;return null!=e&&null!=e&&((_mmvis._.isString(e)||_mmvis._.isNumber(e))&&(l=e),_mmvis._.isFunction(e)&&(l=e.apply(this,[i,t])),_mmvis._.isArray(e)&&(l=e[i])),l}}]),l}(_mmvis.event.Dispatcher);exports.default=rectGrid;
+"use strict";
+
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports["default"] = void 0;
+
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
+
+var _assertThisInitialized2 = _interopRequireDefault(require("@babel/runtime/helpers/assertThisInitialized"));
+
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
+
+var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _canvax = _interopRequireDefault(require("canvax"));
+
+var _tools = require("../../utils/tools");
+
+var _ = _canvax["default"]._,
+    event = _canvax["default"].event;
+var Line = _canvax["default"].Shapes.Line;
+var Rect = _canvax["default"].Shapes.Rect;
+
+var rectGrid =
+/*#__PURE__*/
+function (_event$Dispatcher) {
+  (0, _inherits2["default"])(rectGrid, _event$Dispatcher);
+  (0, _createClass2["default"])(rectGrid, null, [{
+    key: "defaultProps",
+    value: function defaultProps() {
+      return {
+        enabled: {
+          detail: '是否开启grid绘制',
+          "default": true
+        },
+        line: {
+          detail: '网格线条配置',
+          propertys: {
+            xDimension: {
+              detail: '一维方向的网格线',
+              propertys: {
+                enabled: {
+                  detail: '是否开启',
+                  "default": true
+                },
+                data: [],
+                lineType: {
+                  detail: '线的样式，虚线或者实现',
+                  "default": 'solid'
+                },
+                lineWidth: {
+                  detail: '线宽',
+                  "default": 1
+                },
+                strokeStyle: {
+                  detail: '线颜色',
+                  "default": '#f0f0f0'
+                }
+              }
+            },
+            yDimension: {
+              detail: '二维方向的网格线',
+              propertys: {
+                enabled: {
+                  detail: '是否开启',
+                  "default": false
+                },
+                data: [],
+                lineType: {
+                  detail: '线的样式，虚线或者实现',
+                  "default": 'solid'
+                },
+                lineWidth: {
+                  detail: '线宽',
+                  "default": 1
+                },
+                strokeStyle: {
+                  detail: '线颜色',
+                  "default": '#f0f0f0'
+                }
+              }
+            }
+          }
+        },
+        fill: {
+          detail: '背景色配置',
+          propertys: {
+            xDimension: {
+              detail: '以为方向的背景色块，x方向',
+              propertys: {
+                enabled: {
+                  detail: '是否开启',
+                  "default": false
+                },
+                splitVals: {
+                  detail: "从x轴上面用来分割区块的vals",
+                  "default": null //默认等于xaxis的dataSection
+
+                },
+                fillStyle: {
+                  detail: '背景颜色',
+                  "default": null
+                },
+                alpha: {
+                  detail: '背景透明度',
+                  "default": null
+                }
+              }
+            },
+            yDimension: {
+              detail: '以为方向的背景色块，y方向',
+              propertys: {
+                enabled: {
+                  detail: '是否开启',
+                  "default": false
+                },
+                splitVals: {
+                  detail: "从x轴上面用来分割区块的vals",
+                  "default": null
+                },
+                fillStyle: {
+                  detail: '背景颜色',
+                  "default": null
+                },
+                alpha: {
+                  detail: '背景透明度',
+                  "default": null
+                }
+              }
+            }
+          }
+        }
+      };
+    }
+  }]);
+
+  function rectGrid(opt, _coord) {
+    var _this;
+
+    (0, _classCallCheck2["default"])(this, rectGrid);
+    _this = (0, _possibleConstructorReturn2["default"])(this, (0, _getPrototypeOf2["default"])(rectGrid).call(this, opt, _coord));
+
+    _.extend(true, (0, _assertThisInitialized2["default"])(_this), (0, _tools.getDefaultProps)(rectGrid.defaultProps()));
+
+    _this.width = 0;
+    _this.height = 0;
+    _this._coord = _coord; //该组件被添加到的目标图表项目，
+
+    _this.pos = {
+      x: 0,
+      y: 0
+    };
+    _this.sprite = null; //总的sprite
+
+    _this.xAxisSp = null; //x轴上的线集合
+
+    _this.yAxisSp = null; //y轴上的线集合
+
+    _this.init(opt);
+
+    return _this;
+  }
+
+  (0, _createClass2["default"])(rectGrid, [{
+    key: "init",
+    value: function init(opt) {
+      _.extend(true, this, opt);
+
+      this.sprite = new _canvax["default"].Display.Sprite();
+    }
+  }, {
+    key: "setX",
+    value: function setX($n) {
+      this.sprite.context.x = $n;
+    }
+  }, {
+    key: "setY",
+    value: function setY($n) {
+      this.sprite.context.y = $n;
+    }
+  }, {
+    key: "draw",
+    value: function draw(opt) {
+      _.extend(true, this, opt); //this._configData(opt);
+
+
+      this._widget();
+
+      this.setX(this.pos.x);
+      this.setY(this.pos.y);
+    }
+  }, {
+    key: "clean",
+    value: function clean() {
+      this.sprite.removeAllChildren();
+    }
+  }, {
+    key: "reset",
+    value: function reset(opt) {
+      this.sprite.removeAllChildren();
+      this.draw(opt);
+    }
+  }, {
+    key: "_widget",
+    value: function _widget() {
+      var self = this;
+
+      if (!this.enabled) {
+        return;
+      }
+
+      ;
+      var _yAxis = self._coord._yAxis[0];
+      var _xAxis = self._coord._xAxis;
+      this.fillSp = new _canvax["default"].Display.Sprite();
+      this.sprite.addChild(this.fillSp);
+
+      _.each([self.fill.xDimension, self.fill.yDimension], function (fill, ind) {
+        var _axis = ind ? _yAxis : _xAxis;
+
+        var splitVals = [];
+
+        if (fill.enabled) {
+          if (!fill.splitVals) {
+            splitVals = _axis.dataSection;
+          } else {
+            splitVals = [_axis.dataSection[0]].concat(_.flatten([fill.splitVals]));
+            splitVals.push(_axis.dataSection.slice(-1)[0]);
+          }
+
+          var fillRanges = [];
+
+          if (splitVals.length >= 2) {
+            var range = [];
+
+            for (var i = 0, l = splitVals.length; i < l; i++) {
+              var pos = _axis.getPosOf({
+                val: splitVals[i]
+              });
+
+              if (!range.length) {
+                range.push(pos);
+                continue;
+              }
+
+              if (range.length == 1) {
+                if (pos - range[0] < 1) {
+                  continue;
+                } else {
+                  range.push(pos);
+                  fillRanges.push(range);
+                  var nextBegin = range[1];
+                  range = [nextBegin];
+                }
+              }
+            }
+
+            ; //fill的区间数据准备好了
+
+            _.each(fillRanges, function (range, rInd) {
+              var rectCtx = {
+                fillStyle: self.getProp(fill.fillStyle, rInd, "#000"),
+                fillAlpha: self.getProp(fill.alpha, rInd, 0.02 * (rInd % 2))
+              };
+
+              if (!ind) {
+                //x轴上面排列的fill
+                rectCtx.x = range[0];
+                rectCtx.y = 0;
+                rectCtx.width = range[1] - range[0];
+                rectCtx.height = -self.height;
+              } else {
+                //y轴上面排列的fill
+                rectCtx.x = 0;
+                rectCtx.y = -range[0];
+                rectCtx.width = self.width;
+                rectCtx.height = -(range[1] - range[0]);
+              }
+
+              var fillRect = new Rect({
+                context: rectCtx
+              });
+              self.fillSp.addChild(fillRect);
+            });
+          }
+        }
+      });
+
+      self.xAxisSp = new _canvax["default"].Display.Sprite(), self.sprite.addChild(self.xAxisSp);
+      self.yAxisSp = new _canvax["default"].Display.Sprite(), self.sprite.addChild(self.yAxisSp);
+      var arr = _yAxis.layoutData;
+
+      for (var a = 0, al = arr.length; a < al; a++) {
+        var o = arr[a];
+        if (!o.visible) continue;
+        var line = new Line({
+          id: "back_line_" + a,
+          context: {
+            y: o.y,
+            lineType: self.getProp(self.line.xDimension.lineType, a, 'solid'),
+            lineWidth: self.getProp(self.line.xDimension.lineWidth, a, 1),
+            strokeStyle: self.getProp(self.line.xDimension.strokeStyle, a, '#f0f0f0'),
+            visible: true
+          }
+        });
+
+        if (self.line.xDimension.enabled) {
+          self.xAxisSp.addChild(line);
+          line.context.start.x = 0;
+          line.context.end.x = self.width;
+        }
+
+        ;
+      }
+
+      ; //y轴方向的线集合
+
+      arr = _xAxis.layoutData;
+
+      for (a = 0, al = arr.length; a < al; a++) {
+        var _o = arr[a];
+
+        var _line = new Line({
+          context: {
+            x: _o.x,
+            start: {
+              x: 0,
+              y: 0
+            },
+            end: {
+              x: 0,
+              y: -self.height
+            },
+            lineType: self.getProp(self.line.yDimension.lineType, a, 'solid'),
+            lineWidth: self.getProp(self.line.yDimension.lineWidth, a, 1),
+            strokeStyle: self.getProp(self.line.yDimension.strokeStyle, a, '#f0f0f0'),
+            visible: true
+          }
+        });
+
+        if (self.line.yDimension.enabled) {
+          self.yAxisSp.addChild(_line);
+        }
+
+        ;
+      }
+
+      ;
+    }
+  }, {
+    key: "getProp",
+    value: function getProp(prop, i, def) {
+      var res = def;
+
+      if (prop != null && prop != undefined) {
+        if (_.isString(prop) || _.isNumber(prop)) {
+          res = prop;
+        }
+
+        if (_.isFunction(prop)) {
+          res = prop.apply(this, [i, def]);
+        }
+
+        if (_.isArray(prop)) {
+          res = prop[i];
+        }
+      }
+
+      ;
+      return res;
+    }
+  }]);
+  return rectGrid;
+}(event.Dispatcher);
+
+exports["default"] = rectGrid;

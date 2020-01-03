@@ -1,8 +1,9 @@
 import Component from "../component"
 import Canvax from "canvax"
-import { _, getDefaultProps } from "mmvis"
+import { getDefaultProps } from "../../utils/tools"
 
-const AnimationFrame = Canvax.AnimationFrame;
+let AnimationFrame = Canvax.AnimationFrame;
+let _ = Canvax._;
 
 export default class GraphsBase extends Component
 {
@@ -140,7 +141,7 @@ export default class GraphsBase extends Component
             onUpdate: function ( status ) {
                 _.isFunction( callback ) && callback( status.process );
             },
-            onComplete: function (status) {
+            onComplete: function () {
                 this._growTween = null;
                 me.fire("complete");
             }

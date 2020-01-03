@@ -1,11 +1,11 @@
 //单环pie
 
 import Canvax from "canvax"
-import { _,event } from "mmvis"
 
-const Sector = Canvax.Shapes.Sector
-const Path = Canvax.Shapes.Path
-const AnimationFrame = Canvax.AnimationFrame
+let { _,event } = Canvax;
+let Sector = Canvax.Shapes.Sector
+let Path = Canvax.Shapes.Path
+let AnimationFrame = Canvax.AnimationFrame
 
 export default class Pie extends event.Dispatcher
 {
@@ -107,7 +107,7 @@ export default class Pie extends event.Dispatcher
         var list = me.data.list;
         var total = me.data.total;
 
-        var moreSecData;
+        //var moreSecData;
         if ( list.length > 0 && total > 0 ) {
             me.textSp && me.sprite.addChild(me.textSp);
             for (var i = 0; i < list.length; i++) {
@@ -133,9 +133,9 @@ export default class Pie extends event.Dispatcher
             
                 sector.nodeData = item;
 
-                item.focusEnabled && sector.hover(function(e){
+                item.focusEnabled && sector.hover(function(){
                     me.focusOf( this.nodeData );
-                } , function(e){
+                } , function(){
                     !this.nodeData.selected && me.unfocusOf( this.nodeData );
                 });
 
@@ -202,7 +202,7 @@ export default class Pie extends event.Dispatcher
         node.focused = false;
     }
 
-    selectOf ( node , e ) 
+    selectOf ( node ) 
     {
         var me = this;
         if( !this.sectors.length || !node.selectEnabled ){
@@ -226,7 +226,7 @@ export default class Pie extends event.Dispatcher
         node.selected = true;
     }
 
-    unselectOf ( node , e ) 
+    unselectOf ( node ) 
     {
         var sec = this.sectors[ node.iNode ];
         if (!node.selected || !node.selectEnabled) {
@@ -307,7 +307,7 @@ export default class Pie extends event.Dispatcher
     {
         var me = this;
         
-        _.each(me.sectors, function (sec, iNode) {
+        _.each(me.sectors, function (sec) {
             if (sec.context) {
                 sec.context.r0 = 0;
                 sec.context.r = 0;

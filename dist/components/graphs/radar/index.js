@@ -1,1 +1,451 @@
-"use strict";var _interopRequireDefault=require("@babel/runtime/helpers/interopRequireDefault");Object.defineProperty(exports,"__esModule",{value:!0}),exports.default=void 0;var _classCallCheck2=_interopRequireDefault(require("@babel/runtime/helpers/classCallCheck")),_possibleConstructorReturn2=_interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn")),_getPrototypeOf2=_interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf")),_assertThisInitialized2=_interopRequireDefault(require("@babel/runtime/helpers/assertThisInitialized")),_createClass2=_interopRequireDefault(require("@babel/runtime/helpers/createClass")),_inherits2=_interopRequireDefault(require("@babel/runtime/helpers/inherits")),_canvax=_interopRequireDefault(require("canvax")),_index=_interopRequireDefault(require("../index")),_mmvis=require("mmvis"),Polygon=_canvax.default.Shapes.Polygon,Circle=_canvax.default.Shapes.Circle,RadarGraphs=function(e){function a(e,t){var i;return(0,_classCallCheck2.default)(this,a),(i=(0,_possibleConstructorReturn2.default)(this,(0,_getPrototypeOf2.default)(a).call(this,e,t))).type="radar",i.enabledField=null,i.groups={},_mmvis._.extend(!0,(0,_assertThisInitialized2.default)(i),(0,_mmvis.getDefaultProps)(a.defaultProps()),e),i.init(),i}return(0,_inherits2.default)(a,e),(0,_createClass2.default)(a,null,[{key:"defaultProps",value:function(){return{field:{detail:"字段配置",default:null},line:{detail:"线配置",propertys:{enabled:{detail:"是否显示",default:!0},lineWidth:{detail:"线宽",default:2},strokeStyle:{detail:"线颜色",default:null}}},area:{detail:"面积区域配置",propertys:{enabled:{detail:"是否显示",default:!0},fillStyle:{detail:"面积背景色",default:null},fillAlpha:{detail:"面积透明度",default:.1}}},node:{detail:"线上面的单数据节点图形配置",propertys:{enabled:{detail:"是否显示",default:!0},strokeStyle:{detail:"边框色",default:"#ffffff"},radius:{detail:"半径",default:4},lineWidth:{detail:"边框大小",default:1}}}}}}]),(0,_createClass2.default)(a,[{key:"init",value:function(){}},{key:"draw",value:function(e){e=e||{};_mmvis._.extend(!0,this,e),this.data=this._trimGraphs(),this._widget(),this.sprite.context.x=this.origin.x,this.sprite.context.y=this.origin.y,this.fire("complete")}},{key:"_widget",value:function(){var u=this,d=this.app.getComponent({name:"coord"}),f=0;_mmvis._.each(this.data,function(e,t){var i={},a=[];_mmvis._.each(e,function(e,t){a.push([e.point.x,e.point.y])});var l=d.getFieldMapOf(t),n=u._getStyle(u.line.strokeStyle,f,l.color,l),r={pointList:a,cursor:"pointer"};u.line.enabled&&(r.lineWidth=u.line.lineWidth,r.strokeStyle=n),u.area.enabled&&(r.fillStyle=u._getStyle(u.area.fillStyle,f,l.color,l),r.fillAlpha=u._getStyle(u.area.fillAlpha,f,1,l));var o=new Polygon({hoverClone:!1,context:r});if(i.area=o,u.sprite.addChild(o),o.__hoverFillAlpha=o.context.fillAlpha+.2,o.__fillAlpha=o.context.fillAlpha,o.on(_mmvis.event.types.get(),function(e){"mouseover"==e.type&&(this.context.fillAlpha=this.__hoverFillAlpha),"mouseout"==e.type&&(this.context.fillAlpha=this.__fillAlpha),u.app.fire(e.type,e)}),u.node.enabled){var s=[];_mmvis._.each(e,function(e,t){a.push([e.point.x,e.point.y]);var i=new Circle({context:{cursor:"pointer",x:e.point.x,y:e.point.y,r:u.node.radius,lineWidth:u.node.lineWidth,strokeStyle:u.node.strokeStyle,fillStyle:n}});u.sprite.addChild(i),i.iNode=t,i.nodeData=e,i._strokeStyle=n,i.on(_mmvis.event.types.get(),function(e){e.aAxisInd=this.iNode,e.eventInfo={trigger:u.node,nodes:[this.nodeData]},u.app.fire(e.type,e)}),s.push(i)}),i.nodes=s}u.groups[t]=i,f++})}},{key:"tipsPointerOf",value:function(e){var a=this;a.tipsPointerHideOf(e),e.eventInfo&&e.eventInfo.nodes&&_mmvis._.each(e.eventInfo.nodes,function(i){a.data[i.field]&&_mmvis._.each(a.data[i.field],function(e,t){i.iNode==t&&a.focusOf(e)})})}},{key:"tipsPointerHideOf",value:function(){var i=this;_mmvis._.each(i.data,function(e,t){_mmvis._.each(e,function(e){i.unfocusOf(e)})})}},{key:"focusOf",value:function(e){if(!e.focused){var t=this.groups[e.field].nodes[e.iNode];t.context.r+=1,t.context.fillStyle=this.node.strokeStyle,t.context.strokeStyle=t._strokeStyle,e.focused=!0}}},{key:"unfocusOf",value:function(e){if(e.focused){var t=this.groups[e.field].nodes[e.iNode];--t.context.r,t.context.fillStyle=t._strokeStyle,t.context.strokeStyle=this.node.strokeStyle,e.focused=!1}}},{key:"hide",value:function(e){var t=this.app.getComponent({name:"coord"});this.enabledField=t.filterEnabledFields(this.field);var i=this.groups[e];i&&(i.area.context.visible=!1,_mmvis._.each(i.nodes,function(e){e.context.visible=!1}))}},{key:"show",value:function(e){var t=this.app.getComponent({name:"coord"});this.enabledField=t.filterEnabledFields(this.field);var i=this.groups[e];i&&(i.area.context.visible=!0,_mmvis._.each(i.nodes,function(e){e.context.visible=!0}))}},{key:"_trimGraphs",value:function(){var s=this,u=this.app.getComponent({name:"coord"});this.enabledField=u.filterEnabledFields(this.field);var e={};return _mmvis._.each(this.enabledField,function(l){var n=s.dataFrame.getFieldData(l),r=u.getFieldMapOf(l),o=[];_mmvis._.each(u.aAxis.angleList,function(e,t){var i=Math.PI*e/180,a=u.getPointInRadianOfR(i,u.getROfNum(n[t]));o.push({type:"radar",field:l,iNode:t,rowData:s.dataFrame.getRowDataAt(t),focused:!1,value:n[t],point:a,color:r.color})}),e[l]=o}),e}},{key:"_getStyle",value:function(e,t,i,a){var l=i;return(_mmvis._.isString(e)||_mmvis._.isNumber(e))&&(l=e),_mmvis._.isArray(e)&&(l=e[t]),_mmvis._.isFunction(e)&&(l=e(t,a)),null==l&&(l=i),l}},{key:"getNodesAt",value:function(a){var l=this.data,n=[];return _mmvis._.each(this.enabledField,function(e,t){if(_mmvis._.isArray(e))_mmvis._.each(e,function(e,t){var i=l[e][a];i&&n.push(i)});else{var i=l[e][a];i&&n.push(i)}}),n}}]),a}(_index.default);_mmvis.global.registerComponent(RadarGraphs,"graphs","radar");var _default=RadarGraphs;exports.default=_default;
+"use strict";
+
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports["default"] = void 0;
+
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
+
+var _assertThisInitialized2 = _interopRequireDefault(require("@babel/runtime/helpers/assertThisInitialized"));
+
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
+
+var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _canvax = _interopRequireDefault(require("canvax"));
+
+var _index = _interopRequireDefault(require("../index"));
+
+var _tools = require("../../../utils/tools");
+
+var _ = _canvax["default"]._,
+    event = _canvax["default"].event;
+var Polygon = _canvax["default"].Shapes.Polygon;
+var Circle = _canvax["default"].Shapes.Circle;
+
+var RadarGraphs =
+/*#__PURE__*/
+function (_GraphsBase) {
+  (0, _inherits2["default"])(RadarGraphs, _GraphsBase);
+  (0, _createClass2["default"])(RadarGraphs, null, [{
+    key: "defaultProps",
+    value: function defaultProps() {
+      return {
+        field: {
+          detail: '字段配置',
+          "default": null
+        },
+        line: {
+          detail: '线配置',
+          propertys: {
+            enabled: {
+              detail: '是否显示',
+              "default": true
+            },
+            lineWidth: {
+              detail: '线宽',
+              "default": 2
+            },
+            strokeStyle: {
+              detail: '线颜色',
+              "default": null
+            }
+          }
+        },
+        area: {
+          detail: '面积区域配置',
+          propertys: {
+            enabled: {
+              detail: '是否显示',
+              "default": true
+            },
+            fillStyle: {
+              detail: '面积背景色',
+              "default": null
+            },
+            fillAlpha: {
+              detail: '面积透明度',
+              "default": 0.1
+            }
+          }
+        },
+        node: {
+          detail: '线上面的单数据节点图形配置',
+          propertys: {
+            enabled: {
+              detail: '是否显示',
+              "default": true
+            },
+            strokeStyle: {
+              detail: '边框色',
+              "default": '#ffffff'
+            },
+            radius: {
+              detail: '半径',
+              "default": 4
+            },
+            lineWidth: {
+              detail: '边框大小',
+              "default": 1
+            }
+          }
+        }
+      };
+    }
+  }]);
+
+  function RadarGraphs(opt, app) {
+    var _this;
+
+    (0, _classCallCheck2["default"])(this, RadarGraphs);
+    _this = (0, _possibleConstructorReturn2["default"])(this, (0, _getPrototypeOf2["default"])(RadarGraphs).call(this, opt, app));
+    _this.type = "radar";
+    _this.enabledField = null;
+    _this.groups = {//uv : {
+      //   area : ,
+      //   nodes: 
+      //}
+    };
+
+    _.extend(true, (0, _assertThisInitialized2["default"])(_this), (0, _tools.getDefaultProps)(RadarGraphs.defaultProps()), opt);
+
+    _this.init();
+
+    return _this;
+  }
+
+  (0, _createClass2["default"])(RadarGraphs, [{
+    key: "init",
+    value: function init() {}
+  }, {
+    key: "draw",
+    value: function draw(opt) {
+      !opt && (opt = {}); //var me = this;
+
+      _.extend(true, this, opt);
+
+      this.data = this._trimGraphs();
+
+      this._widget();
+
+      this.sprite.context.x = this.origin.x;
+      this.sprite.context.y = this.origin.y;
+      this.fire("complete");
+    }
+  }, {
+    key: "_widget",
+    value: function _widget() {
+      var me = this;
+
+      var _coord = this.app.getComponent({
+        name: 'coord'
+      });
+
+      var iGroup = 0;
+
+      _.each(this.data, function (list, field) {
+        var group = {};
+        var pointList = [];
+
+        _.each(list, function (node) {
+          pointList.push([node.point.x, node.point.y]);
+        });
+
+        var fieldMap = _coord.getFieldMapOf(field);
+
+        var _strokeStyle = me._getStyle(me.line.strokeStyle, iGroup, fieldMap.color, fieldMap);
+
+        var polyCtx = {
+          pointList: pointList,
+          cursor: "pointer"
+        };
+
+        if (me.line.enabled) {
+          polyCtx.lineWidth = me.line.lineWidth;
+          polyCtx.strokeStyle = _strokeStyle;
+        }
+
+        ;
+
+        if (me.area.enabled) {
+          polyCtx.fillStyle = me._getStyle(me.area.fillStyle, iGroup, fieldMap.color, fieldMap);
+          polyCtx.fillAlpha = me._getStyle(me.area.fillAlpha, iGroup, 1, fieldMap);
+        }
+
+        ;
+
+        var _poly = new Polygon({
+          hoverClone: false,
+          context: polyCtx
+        });
+
+        group.area = _poly;
+        me.sprite.addChild(_poly);
+        _poly.__hoverFillAlpha = _poly.context.fillAlpha + 0.2;
+        _poly.__fillAlpha = _poly.context.fillAlpha;
+
+        _poly.on(event.types.get(), function (e) {
+          if (e.type == "mouseover") {
+            this.context.fillAlpha = this.__hoverFillAlpha;
+          }
+
+          ;
+
+          if (e.type == "mouseout") {
+            this.context.fillAlpha = this.__fillAlpha;
+          }
+
+          ;
+          me.app.fire(e.type, e);
+        });
+
+        if (me.node.enabled) {
+          //绘制圆点
+          var _nodes = [];
+
+          _.each(list, function (node, i) {
+            pointList.push([node.point.x, node.point.y]);
+
+            var _node = new Circle({
+              context: {
+                cursor: "pointer",
+                x: node.point.x,
+                y: node.point.y,
+                r: me.node.radius,
+                lineWidth: me.node.lineWidth,
+                strokeStyle: me.node.strokeStyle,
+                fillStyle: _strokeStyle
+              }
+            });
+
+            me.sprite.addChild(_node);
+            _node.iNode = i;
+            _node.nodeData = node;
+            _node._strokeStyle = _strokeStyle;
+
+            _node.on(event.types.get(), function (e) {
+              //这样就会直接用这个aAxisInd了，不会用e.point去做计算
+              e.aAxisInd = this.iNode;
+              e.eventInfo = {
+                trigger: me.node,
+                nodes: [this.nodeData]
+              };
+              me.app.fire(e.type, e);
+            });
+
+            _nodes.push(_node);
+          });
+
+          group.nodes = _nodes;
+        }
+
+        ;
+        me.groups[field] = group;
+        iGroup++;
+      });
+    }
+  }, {
+    key: "tipsPointerOf",
+    value: function tipsPointerOf(e) {
+      var me = this;
+      me.tipsPointerHideOf(e);
+
+      if (e.eventInfo && e.eventInfo.nodes) {
+        _.each(e.eventInfo.nodes, function (eventNode) {
+          if (me.data[eventNode.field]) {
+            _.each(me.data[eventNode.field], function (n, i) {
+              if (eventNode.iNode == i) {
+                me.focusOf(n);
+              } //else {
+              //    me.unfocusOf(n);
+              //}
+
+            });
+          }
+
+          ;
+        });
+      }
+    }
+  }, {
+    key: "tipsPointerHideOf",
+    value: function tipsPointerHideOf() {
+      var me = this;
+
+      _.each(me.data, function (g) {
+        _.each(g, function (node) {
+          me.unfocusOf(node);
+        });
+      });
+    }
+  }, {
+    key: "focusOf",
+    value: function focusOf(node) {
+      if (node.focused) return;
+      var me = this;
+      var _node = me.groups[node.field].nodes[node.iNode];
+      _node.context.r += 1;
+      _node.context.fillStyle = me.node.strokeStyle;
+      _node.context.strokeStyle = _node._strokeStyle;
+      node.focused = true;
+    }
+  }, {
+    key: "unfocusOf",
+    value: function unfocusOf(node) {
+      if (!node.focused) return;
+      var me = this;
+      var _node = me.groups[node.field].nodes[node.iNode];
+      _node.context.r -= 1;
+      _node.context.fillStyle = _node._strokeStyle;
+      _node.context.strokeStyle = me.node.strokeStyle;
+      node.focused = false;
+    }
+  }, {
+    key: "hide",
+    value: function hide(field) {
+      //用来计算下面的hLen
+      var _coord = this.app.getComponent({
+        name: 'coord'
+      });
+
+      this.enabledField = _coord.filterEnabledFields(this.field);
+      var group = this.groups[field];
+
+      if (group) {
+        group.area.context.visible = false;
+
+        _.each(group.nodes, function (element) {
+          element.context.visible = false;
+        });
+      }
+    }
+  }, {
+    key: "show",
+    value: function show(field) {
+      var _coord = this.app.getComponent({
+        name: 'coord'
+      });
+
+      this.enabledField = _coord.filterEnabledFields(this.field);
+      var group = this.groups[field];
+
+      if (group) {
+        group.area.context.visible = true;
+
+        _.each(group.nodes, function (element) {
+          element.context.visible = true;
+        });
+      }
+    }
+  }, {
+    key: "_trimGraphs",
+    value: function _trimGraphs() {
+      var me = this;
+
+      var _coord = this.app.getComponent({
+        name: 'coord'
+      }); //用来计算下面的hLen
+
+
+      this.enabledField = _coord.filterEnabledFields(this.field);
+      var data = {};
+
+      _.each(this.enabledField, function (field) {
+        var dataOrg = me.dataFrame.getFieldData(field);
+
+        var fieldMap = _coord.getFieldMapOf(field);
+
+        var arr = [];
+
+        _.each(_coord.aAxis.angleList, function (_a, i) {
+          //弧度
+          var _r = Math.PI * _a / 180;
+
+          var point = _coord.getPointInRadianOfR(_r, _coord.getROfNum(dataOrg[i]));
+
+          arr.push({
+            type: "radar",
+            field: field,
+            iNode: i,
+            rowData: me.dataFrame.getRowDataAt(i),
+            focused: false,
+            value: dataOrg[i],
+            point: point,
+            color: fieldMap.color
+          });
+        });
+
+        data[field] = arr;
+      });
+
+      return data;
+    }
+  }, {
+    key: "_getStyle",
+    value: function _getStyle(style, iGroup, def, fieldMap) {
+      var _s = def;
+
+      if (_.isString(style) || _.isNumber(style)) {
+        _s = style;
+      }
+
+      ;
+
+      if (_.isArray(style)) {
+        _s = style[iGroup];
+      }
+
+      ;
+
+      if (_.isFunction(style)) {
+        _s = style(iGroup, fieldMap);
+      }
+
+      ;
+
+      if (_s === undefined || _s === null) {
+        //只有undefined(用户配置了function),null才会认为需要还原皮肤色
+        //“”都会认为是用户主动想要设置的，就为是用户不想他显示
+        _s = def;
+      }
+
+      ;
+      return _s;
+    }
+  }, {
+    key: "getNodesAt",
+    value: function getNodesAt(index) {
+      //该index指当前
+      var data = this.data;
+      var _nodesInfoList = []; //节点信息集合
+
+      _.each(this.enabledField, function (fs) {
+        if (_.isArray(fs)) {
+          _.each(fs, function (_fs) {
+            //fs的结构两层到顶了
+            var node = data[_fs][index];
+            node && _nodesInfoList.push(node);
+          });
+        } else {
+          var node = data[fs][index];
+          node && _nodesInfoList.push(node);
+        }
+      });
+
+      return _nodesInfoList;
+    }
+  }]);
+  return RadarGraphs;
+}(_index["default"]);
+
+_index["default"].registerComponent(RadarGraphs, 'graphs', 'radar');
+
+var _default = RadarGraphs;
+exports["default"] = _default;
