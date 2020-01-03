@@ -441,7 +441,7 @@ function (_GraphsBase) {
         /*
         //h_group为横向的分组。如果yAxis.field = ["uv","pv"]的话，
         //h_group就会为两组，一组代表uv 一组代表pv。
-        var spg = new Canvax.Display.Sprite({ id : "barGroup"+i });
+        let spg = new Canvax.Display.Sprite({ id : "barGroup"+i });
         */
         //vLen 为一单元bar上面纵向堆叠的 length
         //比如yAxis.field = [?
@@ -502,7 +502,7 @@ function (_GraphsBase) {
               //只有preGraphs == 0，第一组graphs的时候才需要加载这个region
               //这个x轴单元 nodes的分组，添加第一个rect用来接受一些事件处理
               //以及显示selected状态
-              var groupRegion;
+              var groupRegion = void 0;
               var groupRegionWidth = itemW * me.select.width;
 
               if (me.select.width > 1) {
@@ -672,7 +672,7 @@ function (_GraphsBase) {
                 barGroupSectedHandle.bind(this)(e); //如果开启了分组的选中，如果后续实现了单个bar的选中，那么就要和分组的选中区分开来，单个选中优先
                 // if( me.select.enabled && e.type == me.select.triggerEventType ){
                 //     //如果开启了图表的选中交互
-                //     var ind = me.dataFrame.range.start + this.iNode;
+                //     let ind = me.dataFrame.range.start + this.iNode;
                 //     //region触发的selected，需要把所有的graphs都执行一遍
                 //     if( _.indexOf( me.select.inds, ind ) > -1 ){
                 //         //说明已经选中了
@@ -900,7 +900,7 @@ function (_GraphsBase) {
         disLeft += (barDis + barW) * preHLen;
       }
 
-      ; //var tmpData = [];
+      ; //let tmpData = [];
       //然后计算出对于结构的dataOrg
 
       var dataOrg = this.dataFrame.getDataOrg(this.enabledField);
@@ -1326,7 +1326,7 @@ function (_GraphsBase) {
       _.each(me.select.inds, function (ind) {
         //TODO: 这里的inds 是全局的，而getRowDataAt只能获取到当前视图内的数据
         //所以用这个接口会有问题
-        //var index = ind - me.dataFrame.range.start;
+        //let index = ind - me.dataFrame.range.start;
         //rowDatas.push( me.dataFrame.getRowDataAt( index ) )
         rowDatas.push(me.dataFrame.jsonOrg[ind]);
       });

@@ -196,7 +196,7 @@ function () {
   (0, _createClass2["default"])(PlanetGroup, [{
     key: "init",
     value: function init() {
-      //var me = this;
+      //let me = this;
       var _coord = this.app.getComponent({
         name: 'coord'
       });
@@ -331,7 +331,7 @@ function () {
 
         /*
         _.each( arcs, function( arc ){
-            var sector = new Canvax.Shapes.Sector({
+            let sector = new Canvax.Shapes.Sector({
                 context: {
                     r: _r,
                     startAngle: arc[0].radian*180/Math.PI,
@@ -345,7 +345,7 @@ function () {
         */
         //测试代码end------------------------------------------------------
         //该半径圆弧上，可以绘制一个星球的最小弧度值
-        //var minRadianItem = Math.atan( this.pit.radius / _r );
+        //let minRadianItem = Math.atan( this.pit.radius / _r );
 
 
         _rings.push({
@@ -398,7 +398,7 @@ function () {
               ring.pits.push(pit); //测试占位情况代码begin---------------------------------------------
 
               /*
-              var point = me.app.getComponent({name:'coord'}).getPointInRadianOfR( pit.middle , ring.radius )
+              let point = me.app.getComponent({name:'coord'}).getPointInRadianOfR( pit.middle , ring.radius )
               me.sprite.addChild(new Circle({
                   context:{
                       x : point.x,

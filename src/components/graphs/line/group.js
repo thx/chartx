@@ -184,7 +184,7 @@ export default class LineGraphsGroup extends event.Dispatcher
     //自我销毁
     destroy()
     {
-        var me = this;
+        let me = this;
         me.sprite.animate({
             globalAlpha : 0
         } , {
@@ -198,7 +198,7 @@ export default class LineGraphsGroup extends event.Dispatcher
     //styleType , normals , iGroup
     _getColor(s, iNode)
     {
-        var color = this._getProp(s, iNode);
+        let color = this._getProp(s, iNode);
         if ( color === undefined || color === null ) {
             //这个时候可以先取线的style，和线保持一致
             color = this._getLineStrokeStyle();
@@ -222,7 +222,7 @@ export default class LineGraphsGroup extends event.Dispatcher
             return s[ this.iGroup ]
         };
         if (_.isFunction(s)) {
-            var _nodesInfo = [];
+            let _nodesInfo = [];
             if( iNode != undefined ){
                 _nodesInfo.push( this.data[ iNode ] );
             };
@@ -236,15 +236,15 @@ export default class LineGraphsGroup extends event.Dispatcher
     //这个是tips需要用到的 
     getNodeInfoAt( $index, e )
     {
-        var o = this.data[ $index ];
+        let o = this.data[ $index ];
         if( e && e.eventInfo && e.eventInfo.dimension_1 ){
-            var lt = e.eventInfo.dimension_1.layoutType;
+            let lt = e.eventInfo.dimension_1.layoutType;
             if( lt == 'proportion' ){
                //$index则代表的xpos，需要计算出来data中和$index最近的值作为 node
-               var xDis;
-               for( var i=0,l=this.data.length; i<l; i++ ){
-                   var _node = this.data[i];
-                   var _xDis = Math.abs(_node.x - $index);
+               let xDis;
+               for( let i=0,l=this.data.length; i<l; i++ ){
+                   let _node = this.data[i];
+                   let _xDis = Math.abs(_node.x - $index);
                    if( xDis == undefined || _xDis < xDis ){
                        xDis = _xDis;
                        o = _node;
@@ -267,7 +267,7 @@ export default class LineGraphsGroup extends event.Dispatcher
      */
     resetData(data, dataTrigger)
     {
-        var me = this;
+        let me = this;
 
         if( data ){
             this.data = data;
@@ -275,10 +275,10 @@ export default class LineGraphsGroup extends event.Dispatcher
 
         me._pointList = this._getPointList( this.data );
         
-        var plen = me._pointList.length;
-        var cplen = me._currPointList.length;
+        let plen = me._pointList.length;
+        let cplen = me._currPointList.length;
 
-        var params = {
+        let params = {
             left : 0, //默认左边数据没变
             right : plen - cplen
         };
@@ -311,7 +311,7 @@ export default class LineGraphsGroup extends event.Dispatcher
 
     _grow(callback)
     {
-        var me = this;
+        let me = this;
 
         if( !me.data.length ){
             //因为在index中有调用
@@ -326,18 +326,18 @@ export default class LineGraphsGroup extends event.Dispatcher
             me._area.context.path = me._fillLine(me._bline);
             me._area.context.fillStyle = me._getFillStyle();
 
-            var iNode=0;
+            let iNode=0;
             _.each( list, function( point, i ){
                 if( _.isNumber( point[1] ) ){
                     if( me._nodes ){
-                        var _node = me._nodes.getChildAt(iNode);
+                        let _node = me._nodes.getChildAt(iNode);
                         if( _node ){
                             _node.context.x = point[0];
                             _node.context.y = point[1];
                         }
                     }
                     if( me._labels ){
-                        var _text = me._labels.getChildAt(iNode);
+                        let _text = me._labels.getChildAt(iNode);
                         if( _text ){
                             _text.context.x = point[0];
                             _text.context.y = point[1] - 3;
@@ -355,9 +355,9 @@ export default class LineGraphsGroup extends event.Dispatcher
             to: me._getPointPosStr(me._pointList),
             desc: me.field,
             onUpdate: function( arg ) {
-                for (var p in arg) {
-                    var ind = parseInt(p.split("_")[2]);
-                    var xory = parseInt(p.split("_")[1]);
+                for (let p in arg) {
+                    let ind = parseInt(p.split("_")[2]);
+                    let xory = parseInt(p.split("_")[1]);
                     me._currPointList[ind] && (me._currPointList[ind][xory] = arg[p]); //p_1_n中间的1代表x or y
                 };
                 _update( me._currPointList );
@@ -380,7 +380,7 @@ export default class LineGraphsGroup extends event.Dispatcher
 
     _getPointPosStr(list)
     {
-        var obj = {};
+        let obj = {};
         _.each(list, function(p, i) {
             if( !p ){
                 //折线图中这个节点可能没有
@@ -395,9 +395,9 @@ export default class LineGraphsGroup extends event.Dispatcher
 
     _getPointList(data)
     {
-        var list = [];
-        for (var a = 0, al = data.length; a < al; a++) {
-            var o = data[a];
+        let list = [];
+        for (let a = 0, al = data.length; a < al; a++) {
+            let o = data[a];
             list.push([
                 o.x,
                 o.y
@@ -408,7 +408,7 @@ export default class LineGraphsGroup extends event.Dispatcher
 
     _widget( opt )
     {
-        var me = this;
+        let me = this;
         !opt && (opt ={});
         
         me._pointList = this._getPointList(me.data);
@@ -417,12 +417,12 @@ export default class LineGraphsGroup extends event.Dispatcher
             //filter后，data可能length==0
             return;
         };
-        var list = [];
+        let list = [];
         if (opt.animation) {
-            var firstNode = this._getFirstNode();
-            var firstY = firstNode ? firstNode.y : undefined;
-            for (var a = 0, al = me.data.length; a < al; a++) {
-                var o = me.data[a];
+            let firstNode = this._getFirstNode();
+            let firstY = firstNode ? firstNode.y : undefined;
+            for (let a = 0, al = me.data.length; a < al; a++) {
+                let o = me.data[a];
                 list.push([
                     o.x,
                     _.isNumber( o.y ) ? firstY : o.y
@@ -434,7 +434,7 @@ export default class LineGraphsGroup extends event.Dispatcher
         
         me._currPointList = list;
 
-        var blineCtx = {
+        let blineCtx = {
             pointList: list,
             lineWidth: me.line.lineWidth,
             y: me.y,
@@ -451,7 +451,7 @@ export default class LineGraphsGroup extends event.Dispatcher
             },
             lineCap: "round"
         };
-        var bline = new BrokenLine({ //线条
+        let bline = new BrokenLine({ //线条
             context: blineCtx
         });
 
@@ -469,7 +469,7 @@ export default class LineGraphsGroup extends event.Dispatcher
         me.sprite.addChild(bline);
         me._bline = bline;
 
-        var area = new Path({ //填充
+        let area = new Path({ //填充
             context: {
                 path: me._fillLine(bline),
                 fillStyle: me._getFillStyle(), 
@@ -496,9 +496,9 @@ export default class LineGraphsGroup extends event.Dispatcher
 
     _getFirstNode()
     {
-        var _firstNode = null;
-        for( var i=0,l=this.data.length; i<l; i++ ){
-            var nodeData = this.data[i];
+        let _firstNode = null;
+        for( let i=0,l=this.data.length; i<l; i++ ){
+            let nodeData = this.data[i];
             if( _.isNumber( nodeData.y ) ){
                 if( _firstNode === null || ( this._yAxis.align == "right" ) ){
                     //_yAxis为右轴的话，
@@ -515,12 +515,12 @@ export default class LineGraphsGroup extends event.Dispatcher
 
     _getFillStyle()
     {
-        var me = this;
+        let me = this;
     
-        var fill_gradient = null;
+        let fill_gradient = null;
 
         // _fillStyle 可以 接受渐变色，可以不用_getColor， _getColor会过滤掉渐变色
-        var _fillStyle = me._getProp(me.area.fillStyle) || me._getLineStrokeStyle( null, "fillStyle" );
+        let _fillStyle = me._getProp(me.area.fillStyle) || me._getLineStrokeStyle( null, "fillStyle" );
 
         if (_.isArray(me.area.alpha) && !(_fillStyle instanceof CanvasGradient)) {
             //alpha如果是数组，那么就是渐变背景，那么就至少要有两个值
@@ -534,7 +534,7 @@ export default class LineGraphsGroup extends event.Dispatcher
             };
 
             //从bline中找到最高的点
-            var topP = _.min(me._bline.context.pointList, function(p) {
+            let topP = _.min(me._bline.context.pointList, function(p) {
                 return p[1]
             });
 
@@ -545,11 +545,11 @@ export default class LineGraphsGroup extends event.Dispatcher
             //创建一个线性渐变
             fill_gradient = me.ctx.createLinearGradient(topP[0], topP[1], topP[0], 0);
 
-            var rgb = colorRgb( _fillStyle );
-            var rgba0 = rgb.replace(')', ', ' + me._getProp(me.area.alpha[0]) + ')').replace('RGB', 'RGBA');
+            let rgb = colorRgb( _fillStyle );
+            let rgba0 = rgb.replace(')', ', ' + me._getProp(me.area.alpha[0]) + ')').replace('RGB', 'RGBA');
             fill_gradient.addColorStop(0, rgba0);
 
-            var rgba1 = rgb.replace(')', ', ' + me.area.alpha[1] + ')').replace('RGB', 'RGBA');
+            let rgba1 = rgb.replace(')', ', ' + me.area.alpha[1] + ')').replace('RGB', 'RGBA');
             fill_gradient.addColorStop(1, rgba1);
 
             _fillStyle = fill_gradient;
@@ -560,8 +560,8 @@ export default class LineGraphsGroup extends event.Dispatcher
 
     _getLineStrokeStyle( pointList, from )
     {
-        var me = this;
-        var _style
+        let me = this;
+        let _style
         if( !this._opt.line || !this._opt.line.strokeStyle ){
             //如果用户没有配置line.strokeStyle，那么就用默认的
             return this.line.strokeStyle;
@@ -572,10 +572,10 @@ export default class LineGraphsGroup extends event.Dispatcher
             //从bline中找到最高的点
             !pointList && ( pointList = this._bline.context.pointList );
             
-            var topP = _.min(pointList, function(p) {
+            let topP = _.min(pointList, function(p) {
                 return p[1];
             });
-            var bottomP = _.max(pointList, function(p) {
+            let bottomP = _.max(pointList, function(p) {
                 return p[1];
             });
             if( from == "fillStyle" ){
@@ -586,7 +586,7 @@ export default class LineGraphsGroup extends event.Dispatcher
                 return null;
             };
        
-            //var bottomP = [ 0 , 0 ];
+            //let bottomP = [ 0 , 0 ];
             //创建一个线性渐变
             //console.log( topP[0] + "|"+ topP[1]+ "|"+  topP[0]+ "|"+ bottomP[1] )
             _style = me.ctx.createLinearGradient(topP[0], topP[1], topP[0], bottomP[1]);
@@ -611,8 +611,8 @@ export default class LineGraphsGroup extends event.Dispatcher
 
     _createNodes()
     {
-        var me = this;
-        var list = me._currPointList;
+        let me = this;
+        let list = me._currPointList;
 
         //if ((me.node.enabled || list.length == 1) && !!me.line.lineWidth) { //拐角的圆点
             if( !this._nodes ){
@@ -620,23 +620,23 @@ export default class LineGraphsGroup extends event.Dispatcher
                 this.sprite.addChild(this._nodes);
             };
             
-            var iNode = 0; //这里不能和下面的a对等，以为list中有很多无效的节点
-            for (var a = 0, al = list.length; a < al; a++) {
+            let iNode = 0; //这里不能和下面的a对等，以为list中有很多无效的节点
+            for (let a = 0, al = list.length; a < al; a++) {
 
-                var _nodeColor = me._getColor( (me.node.strokeStyle || me.line.strokeStyle), a );
+                let _nodeColor = me._getColor( (me.node.strokeStyle || me.line.strokeStyle), a );
                 me.data[a].color = _nodeColor; //回写回data里，tips的是用的到
                 if( !me.node.enabled ){
                     //不能写return， 是因为每个data的color还是需要计算一遍
                     continue;
                 };
 
-                var _point = me._currPointList[a];
+                let _point = me._currPointList[a];
                 if( !_point || !_.isNumber( _point[1] ) ){
                     //折线图中有可能这个point为undefined
                     continue;
                 };
 
-                var context = {
+                let context = {
                     x: _point[0],
                     y: _point[1],
                     r: me._getProp(me.node.radius, a),
@@ -648,9 +648,9 @@ export default class LineGraphsGroup extends event.Dispatcher
 
                 
 
-                var nodeConstructor = Circle;
+                let nodeConstructor = Circle;
 
-                var _shapeType = me._getProp(me.node.shapeType, a)
+                let _shapeType = me._getProp(me.node.shapeType, a)
 
                 if( _shapeType == "isogon" ){
                     nodeConstructor = Isogon;
@@ -661,7 +661,7 @@ export default class LineGraphsGroup extends event.Dispatcher
                     context.path = me._getProp( me.node.path, a );
                 };
 
-                var nodeEl = me._nodes.children[ iNode ];
+                let nodeEl = me._nodes.children[ iNode ];
 
                 //同一个元素，才能直接extend context
                 if( nodeEl ){
@@ -684,9 +684,9 @@ export default class LineGraphsGroup extends event.Dispatcher
                 };
                  
                 if ( me.node.corner ) { //拐角才有节点
-                    var y = me._pointList[a][1];
-                    var pre = me._pointList[a - 1];
-                    var next = me._pointList[a + 1];
+                    let y = me._pointList[a][1];
+                    let pre = me._pointList[a - 1];
+                    let next = me._pointList[a + 1];
                     if (pre && next) {
                         if (y == pre[1] && y == next[1]) {
                             nodeEl.context.visible = false;
@@ -699,7 +699,7 @@ export default class LineGraphsGroup extends event.Dispatcher
 
             //把过多的circle节点删除了
             if( me._nodes.children.length > iNode ){
-                for( var i = iNode,l=me._nodes.children.length; i<l; i++ ){
+                for( let i = iNode,l=me._nodes.children.length; i<l; i++ ){
                     me._nodes.children[i].destroy();
                     i--;
                     l--;
@@ -711,8 +711,8 @@ export default class LineGraphsGroup extends event.Dispatcher
     _createTexts()
     {
         
-        var me = this;
-        var list = me._currPointList;
+        let me = this;
+        let list = me._currPointList;
 
         if ( me.label.enabled ) { //节点上面的文本info
             if(!this._labels){
@@ -720,15 +720,15 @@ export default class LineGraphsGroup extends event.Dispatcher
                 this.sprite.addChild(this._labels);
             }
             
-            var iNode = 0; //这里不能和下面的a对等，以为list中有很多无效的节点
-            for (var a = 0, al = list.length; a < al; a++) {
-                var _point = list[a];
+            let iNode = 0; //这里不能和下面的a对等，以为list中有很多无效的节点
+            for (let a = 0, al = list.length; a < al; a++) {
+                let _point = list[a];
                 if( !_point || !_.isNumber( _point[1] ) ){
                     //折线图中有可能这个point为undefined
                     continue;
                 };
 
-                var context = {
+                let context = {
                     x: _point[0],
                     y: _point[1] - 3,
                     fontSize: this.label.fontSize,
@@ -739,7 +739,7 @@ export default class LineGraphsGroup extends event.Dispatcher
                     strokeStyle:"#ffffff"
                 };
 
-                var value = me.data[ a ].value;
+                let value = me.data[ a ].value;
                 if (_.isFunction(me.label.format)) {
                     value = (me.label.format(value, me.data[ a ]) || value );
                 };
@@ -748,7 +748,7 @@ export default class LineGraphsGroup extends event.Dispatcher
                     continue;
                 };
 
-                var _label = this._labels.children[ iNode ];
+                let _label = this._labels.children[ iNode ];
                 if( _label ){
                     _label.resetText( value );
                     _.extend( _label.context, context );
@@ -764,7 +764,7 @@ export default class LineGraphsGroup extends event.Dispatcher
 
             //把过多的circle节点删除了
             if( me._labels.children.length > iNode ){
-                for( var i = iNode,l=me._labels.children.length; i<l; i++ ){
+                for( let i = iNode,l=me._labels.children.length; i<l; i++ ){
                     me._labels.children[i].destroy();
                     i--;
                     l--;
@@ -776,10 +776,10 @@ export default class LineGraphsGroup extends event.Dispatcher
 
     _checkTextPos( _label , ind )
     {
-        var me = this;
-        var list = me._currPointList;
-        var pre = list[ ind - 1 ];
-        var next = list[ ind + 1 ];
+        let me = this;
+        let list = me._currPointList;
+        let pre = list[ ind - 1 ];
+        let next = list[ ind + 1 ];
 
         if( 
             pre && next &&
@@ -793,13 +793,13 @@ export default class LineGraphsGroup extends event.Dispatcher
 
     _fillLine(bline)
     { //填充直线
-        var fillPath = _.clone(bline.context.pointList);
+        let fillPath = _.clone(bline.context.pointList);
 
-        var path = "";
+        let path = "";
         
-        var originPos = -this._yAxis.originPos;
+        let originPos = -this._yAxis.originPos;
 
-        var _currPath = null;
+        let _currPath = null;
 
 
         _.each( fillPath, function( point, i ){
@@ -834,9 +834,9 @@ export default class LineGraphsGroup extends event.Dispatcher
 
     //根据x方向的 val来 获取对应的node， 这个node可能刚好是一个node， 也可能两个node中间的某个位置
     getNodeInfoOfX( x ){
-        var me = this;
-        var nodeInfo;
-        for( var i = 0,l = this.data.length; i<l; i++ ){
+        let me = this;
+        let nodeInfo;
+        for( let i = 0,l = this.data.length; i<l; i++ ){
             if( this.data[i].value !== null && Math.abs( this.data[i].x - x) <= 1 ){
                 //左右相差不到1px的，都算
                 nodeInfo = this.data[ i ];
@@ -844,20 +844,20 @@ export default class LineGraphsGroup extends event.Dispatcher
             }
         };
 
-        var getPointFromXInLine = function( x , line ){
-            var p = {x : x, y: 0};
+        let getPointFromXInLine = function( x , line ){
+            let p = {x : x, y: 0};
             p.y = line[0][1] + ((line[1][1]-line[0][1])/(line[1][0]-line[0][0])) * (x - line[0][0]);
             return p;
         };
 
-        var point;
-        var search = function( points ){
+        let point;
+        let search = function( points ){
 
             if( x<points[0][0] || x>points.slice(-1)[0][0] ){
                 return;
             };
 
-            var midInd = parseInt(points.length / 2);
+            let midInd = parseInt(points.length / 2);
             if( Math.abs(points[midInd][0] - x ) <= 1 ){
                 point = {
                     x: points[midInd][0],
@@ -865,7 +865,7 @@ export default class LineGraphsGroup extends event.Dispatcher
                 };
                 return;
             };
-            var _pl = [];
+            let _pl = [];
             if( x > points[midInd][0] ){
                 if( x < points[midInd+1][0]){
                     point = getPointFromXInLine( x , [ points[midInd] , points[midInd+1] ] );
@@ -893,7 +893,7 @@ export default class LineGraphsGroup extends event.Dispatcher
 
         //和data 中数据的格式保持一致
 
-        var node = {
+        let node = {
             type    : "line",
             iGroup  : me.iGroup,
             iNode   : -1, //并非data中的数据，而是计算出来的数据

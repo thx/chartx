@@ -324,8 +324,8 @@ function (_event$Dispatcher) {
 
       arr = _xAxis.layoutData;
 
-      for (a = 0, al = arr.length; a < al; a++) {
-        var _o = arr[a];
+      for (var _a = 0, _al = arr.length; _a < _al; _a++) {
+        var _o = arr[_a];
 
         var _line = new Line({
           context: {
@@ -338,9 +338,9 @@ function (_event$Dispatcher) {
               x: 0,
               y: -self.height
             },
-            lineType: self.getProp(self.line.yDimension.lineType, a, 'solid'),
-            lineWidth: self.getProp(self.line.yDimension.lineWidth, a, 1),
-            strokeStyle: self.getProp(self.line.yDimension.strokeStyle, a, '#f0f0f0'),
+            lineType: self.getProp(self.line.yDimension.lineType, _a, 'solid'),
+            lineWidth: self.getProp(self.line.yDimension.lineWidth, _a, 1),
+            strokeStyle: self.getProp(self.line.yDimension.strokeStyle, _a, '#f0f0f0'),
             visible: true
           }
         });

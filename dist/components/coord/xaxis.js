@@ -213,7 +213,7 @@ function (_Axis) {
             //从_formatTextSection中取出对应的格式化后的文本
             var txt = me._textElements[i];
             var textWidth = txt.getTextWidth();
-            var textHeight = txt.getTextHeight(); //var width = textWidth; //文本在外接矩形width
+            var textHeight = txt.getTextHeight(); //let width = textWidth; //文本在外接矩形width
 
             var height = textHeight; //文本在外接矩形height
 
@@ -223,7 +223,7 @@ function (_Axis) {
                 //width  = textHeight;
                 height = textWidth;
               } else {
-                var sinR = Math.sin(Math.abs(me.label.rotation) * Math.PI / 180); //var cosR = Math.cos(Math.abs(me.label.rotation) * Math.PI / 180);
+                var sinR = Math.sin(Math.abs(me.label.rotation) * Math.PI / 180); //let cosR = Math.cos(Math.abs(me.label.rotation) * Math.PI / 180);
 
                 height = parseInt(sinR * textWidth); //width = parseInt( cosR * textWidth );
               }

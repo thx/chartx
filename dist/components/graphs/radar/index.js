@@ -127,7 +127,7 @@ function (_GraphsBase) {
   }, {
     key: "draw",
     value: function draw(opt) {
-      !opt && (opt = {}); //var me = this;
+      !opt && (opt = {}); //let me = this;
 
       _.extend(true, this, opt);
 

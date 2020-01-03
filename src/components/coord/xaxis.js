@@ -54,7 +54,7 @@ export default class xAxis extends Axis
 
     _initHandle( opt )
     {
-        var me = this;
+        let me = this;
 
         if( opt ){
             if( opt.isH && (!opt.label || opt.label.rotaion === undefined) ){
@@ -70,7 +70,7 @@ export default class xAxis extends Axis
         _.each( me.dataSection, function( val, i ){
             me._formatTextSection[ i ] = me._getFormatText(val, i);
             //从_formatTextSection中取出对应的格式化后的文本
-            var txt = new Canvax.Display.Text( me._formatTextSection[i] , {
+            let txt = new Canvax.Display.Text( me._formatTextSection[i] , {
                 context: {
                     fontSize: me.label.fontSize
                 }
@@ -156,22 +156,22 @@ export default class xAxis extends Axis
 
     _setXAxisHeight()
     { //检测下文字的高等
-        var me = this;
+        let me = this;
         if (!me.enabled) {
             me.height = 0; 
         } else {
-            var _maxTextHeight = 0;
+            let _maxTextHeight = 0;
 
             if( this.label.enabled ){
                 _.each( me.dataSection, function( val, i ){
 
                         //从_formatTextSection中取出对应的格式化后的文本
-                        var txt = me._textElements[i];
+                        let txt = me._textElements[i];
             
-                        var textWidth = txt.getTextWidth();
-                        var textHeight = txt.getTextHeight();
-                        //var width = textWidth; //文本在外接矩形width
-                        var height = textHeight;//文本在外接矩形height
+                        let textWidth = txt.getTextWidth();
+                        let textHeight = txt.getTextHeight();
+                        //let width = textWidth; //文本在外接矩形width
+                        let height = textHeight;//文本在外接矩形height
 
                         if (!!me.label.rotation) {
                             //有设置旋转
@@ -179,8 +179,8 @@ export default class xAxis extends Axis
                                 //width  = textHeight;
                                 height = textWidth;
                             } else {
-                                var sinR = Math.sin(Math.abs(me.label.rotation) * Math.PI / 180);
-                                //var cosR = Math.cos(Math.abs(me.label.rotation) * Math.PI / 180);
+                                let sinR = Math.sin(Math.abs(me.label.rotation) * Math.PI / 180);
+                                //let cosR = Math.cos(Math.abs(me.label.rotation) * Math.PI / 180);
                                 height = parseInt( sinR * textWidth );
                                 //width = parseInt( cosR * textWidth );
                             };
@@ -201,9 +201,9 @@ export default class xAxis extends Axis
     }
     
     getNodeInfoOfX( x ){
-        var ind = this.getIndexOfPos( x );
-        var val = this.getValOfInd( ind );//this.getValOfPos(x);//
-        var pos = this.getPosOf( {
+        let ind = this.getIndexOfPos( x );
+        let val = this.getValOfInd( ind );//this.getValOfPos(x);//
+        let pos = this.getPosOf( {
             ind : ind,
             val : val
         } );
@@ -211,8 +211,8 @@ export default class xAxis extends Axis
     }
 
     getNodeInfoOfVal( val ){
-        var ind = this.getIndexOfVal( val );
-        var pos = this.getPosOf( {
+        let ind = this.getIndexOfVal( val );
+        let pos = this.getPosOf( {
             ind : ind,
             val : val
         } );
@@ -220,7 +220,7 @@ export default class xAxis extends Axis
     }
 
     _getNodeInfo( ind,val,pos ){
-        var o = {
+        let o = {
             ind        : ind,
             value      : val,
             text       : this._getFormatText( val, ind), //text是 format 后的数据
@@ -233,14 +233,14 @@ export default class xAxis extends Axis
 
     _trimXAxis() 
     {
-        var tmpData = [];
-        var data = this.dataSection;
+        let tmpData = [];
+        let data = this.dataSection;
 
-        for (var a = 0, al  = data.length; a < al; a++ ) {
-            var text = this._formatTextSection[a];
-            var txt = this._textElements[a];
+        for (let a = 0, al  = data.length; a < al; a++ ) {
+            let text = this._formatTextSection[a];
+            let txt = this._textElements[a];
             
-            var o = {
+            let o = {
                 ind : a,
                 value   : data[a],
                 text    : text,
@@ -264,7 +264,7 @@ export default class xAxis extends Axis
 
     _getFormatText( val )
     {
-        var res = val;
+        let res = val;
         if ( _.isFunction(this.label.format) ) {
             res = this.label.format.apply( this, arguments );
         };
@@ -276,35 +276,35 @@ export default class xAxis extends Axis
 
     _widget( opt )
     {
-        var me = this;
+        let me = this;
         !opt && (opt ={});
         if (!me.enabled) {
             me.height = 0;  //width不能为0
             return;
         };
 
-        var arr = me.layoutData;
-        var visibleInd = 0;
+        let arr = me.layoutData;
+        let visibleInd = 0;
 
-        for (var a = 0, al = arr.length; a < al; a++) {
+        for (let a = 0, al = arr.length; a < al; a++) {
              
             _.isFunction(me.filter) && me.filter({
                 layoutData : arr,
                 index      : a
             });
 
-            var o = arr[a];
+            let o = arr[a];
             if( !o.visible ){
                 continue;
             };
 
-            var x = o.x,
+            let x = o.x,
                 y = me.tickLine.lineLength + me.tickLine.distance + me.label.distance;
 
-            var _node = me.rulesSprite.getChildAt( visibleInd );
+            let _node = me.rulesSprite.getChildAt( visibleInd );
 
             //文字 
-            var textContext = {
+            let textContext = {
                 x            : o._text_x || o.x,
                 y            : y,
                 fillStyle    : this.label.fontColor,
@@ -321,7 +321,7 @@ export default class xAxis extends Axis
             };
 
             //tick line
-            var tickLineContext = {
+            let tickLineContext = {
                 x     : x,
                 y     : this.tickLine.distance,
                 end   : {
@@ -332,8 +332,8 @@ export default class xAxis extends Axis
                 strokeStyle: this.tickLine.strokeStyle
             };
 
-            var duration = 300;
-            var delay    = visibleInd * (Math.min(1000 / arr.length, 25));
+            let duration = 300;
+            let delay    = visibleInd * (Math.min(1000 / arr.length, 25));
             if (!me.animation || opt.resize) {
                 duration = 0;
                 delay    = 0;
@@ -406,7 +406,7 @@ export default class xAxis extends Axis
 
         //轴线
         if( this.axisLine.enabled ){
-            var _axisLineCtx = {
+            let _axisLineCtx = {
                 start : {
                     x : 0,
                     y : 0
@@ -420,7 +420,7 @@ export default class xAxis extends Axis
             };
 
             if( !this._axisLine ){
-                var _axisLine = new Line({
+                let _axisLine = new Line({
                     context : _axisLineCtx
                 });
                 this.sprite.addChild( _axisLine );
@@ -443,9 +443,9 @@ export default class xAxis extends Axis
 
     _trimLayoutData()
     {
-        var me = this;
-        var arr = this.layoutData;
-        var l = arr.length;
+        let me = this;
+        let arr = this.layoutData;
+        let l = arr.length;
 
         if( !this.enabled || !l ) return;
 
@@ -466,7 +466,7 @@ export default class xAxis extends Axis
     _getRootPR()
     {
         //找到paddingRight,在最后一个文本右移的时候需要用到
-        var rootPaddingRight = 0;
+        let rootPaddingRight = 0;
         if( this._coord.app ){
             rootPaddingRight = this._coord.app.padding.right;
         };
@@ -475,10 +475,10 @@ export default class xAxis extends Axis
 
     _checkOver()
     {
-        var me = this;
-        var arr = me.layoutData;
-        var l = arr.length;  
-        var textAlign = me.label.textAlign; 
+        let me = this;
+        let arr = me.layoutData;
+        let l = arr.length;  
+        let textAlign = me.label.textAlign; 
 
         //如果用户设置不想要做重叠检测
         if( !this.label.evade || me.trimLayout ){
@@ -494,8 +494,8 @@ export default class xAxis extends Axis
 
             //要避免最后一个label绘制出去了
             //首先找到最后一个visible的label
-            var lastNode;
-            for( var i=l-1; i>=0; i-- ){
+            let lastNode;
+            for( let i=l-1; i>=0; i-- ){
                 if( lastNode ) break;
                 if( arr[i].visible ) lastNode = arr[i];
             };
@@ -515,18 +515,18 @@ export default class xAxis extends Axis
                      
 
         function checkOver(i){
-            var curr = arr[i];
+            let curr = arr[i];
             
             if( curr === undefined ){
                 return;
             };
             curr.visible = true;
 
-            for( var ii=i; ii<l-1; ii++ ){
-                var next = arr[ii+1];
+            for( let ii=i; ii<l-1; ii++ ){
+                let next = arr[ii+1];
 
-                var nextWidth = next.textWidth;
-                var currWidth = curr.textWidth;
+                let nextWidth = next.textWidth;
+                let currWidth = curr.textWidth;
 
                 //如果有设置rotation，那么就固定一个最佳可视单位width为35  暂定
                 if(!!me.label.rotation){
@@ -535,8 +535,8 @@ export default class xAxis extends Axis
                 };
                 
                 //默认left
-                var next_left_x = next.x; //下个节点的起始
-                var curr_right_x = curr.x+currWidth; //当前节点的终点
+                let next_left_x = next.x; //下个节点的起始
+                let curr_right_x = curr.x+currWidth; //当前节点的终点
 
                 if( textAlign == "center" ){
                     next_left_x = next.x - nextWidth/2;

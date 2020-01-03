@@ -174,7 +174,7 @@ class Force extends GraphsBase {
 
     _initData() {
         //和关系图那边保持data格式的统一
-        var data = {
+        let data = {
             nodes: [
                 //{ type,key,content,ctype,width,height,x,y }
             ],
@@ -187,18 +187,18 @@ class Force extends GraphsBase {
             }
         };
 
-        var _nodeMap = {};
-        for (var i = 0; i < this.dataFrame.length; i++) {
-            var rowData = this.dataFrame.getRowDataAt(i);
-            var fields = _.flatten([(rowData[this.keyField] + "").split(",")]);
-            var content = this._getContent(rowData);
-            var key = fields.length == 1 ? fields[0] : fields;
-            var element = new Canvax.Display.Sprite({
+        let _nodeMap = {};
+        for (let i = 0; i < this.dataFrame.length; i++) {
+            let rowData = this.dataFrame.getRowDataAt(i);
+            let fields = _.flatten([(rowData[this.keyField] + "").split(",")]);
+            let content = this._getContent(rowData);
+            let key = fields.length == 1 ? fields[0] : fields;
+            let element = new Canvax.Display.Sprite({
                 id: "nodeSp_"+key
             });
             this.graphsSp.addChild( element );
 
-            var node = {
+            let node = {
                 type: "force",
                 iNode: i,
                 rowData: rowData,
@@ -236,7 +236,7 @@ class Force extends GraphsBase {
 
         //然后给edge填写source 和 target
         _.each( data.edges, function( edge ){
-            var keys = edge.key;
+            let keys = edge.key;
             edge.source = _nodeMap[ keys[0] ];
             edge.target = _nodeMap[ keys[1] ];
         } );
@@ -245,7 +245,7 @@ class Force extends GraphsBase {
     }
 
     widget() {
-        var me = this;
+        let me = this;
 
         let keyField = this.keyField;
         let valField = this.valueField;
@@ -354,13 +354,13 @@ class Force extends GraphsBase {
      * 字符串是否含有html标签的检测
      */
     _checkHtml(str) {
-        var reg = /<[^>]+>/g;
+        let reg = /<[^>]+>/g;
         return reg.test(str);
     }
     _getContent(rowData) {
-        var me = this;
+        let me = this;
 
-        var _c; //this.node.content;
+        let _c; //this.node.content;
         if (this._isField(this.node.content.field)) {
             _c = rowData[ this.node.content.field ];
         };
@@ -378,7 +378,7 @@ class Force extends GraphsBase {
     }
 
     getProp( prop, nodeData ) {
-        var _prop = prop;
+        let _prop = prop;
         if( this._isField( prop ) && nodeData.rowData ){
             _prop = nodeData.rowData[ prop ];
         } else {

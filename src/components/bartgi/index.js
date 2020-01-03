@@ -101,9 +101,9 @@ class barTgi extends Component
 
     draw()
     {
-        var me = this;
+        let me = this;
 
-        var _coord = this.app.getComponent({name:'coord'});
+        let _coord = this.app.getComponent({name:'coord'});
         this.pos = {   
             x: _coord.origin.x,
             y: _coord.origin.y
@@ -123,10 +123,10 @@ class barTgi extends Component
         };
 
         _.each( this.data, function( tgi, i ){
-            var y = -me._yAxis.getPosOfVal( tgi );
-            var barData = me.barDatas[ i ];
+            let y = -me._yAxis.getPosOfVal( tgi );
+            let barData = me.barDatas[ i ];
 
-            var _tgiLine = new Line({
+            let _tgiLine = new Line({
                 context: {
                     start : {
                         x : barData.x,
@@ -146,7 +146,7 @@ class barTgi extends Component
 
     _getProp( val , tgi, i)
     {
-        var res = val;
+        let res = val;
         if( _.isFunction( val ) ){
             res = val.apply( this, [ tgi, i ] )
         };

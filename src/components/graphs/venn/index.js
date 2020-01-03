@@ -172,15 +172,15 @@ class VennGraphs extends GraphsBase
         let orientationOrder = null;
         let normalize = true;
 
-        var circles = {};
-        var textCentres = {};
+        let circles = {};
+        let textCentres = {};
 
         this._dataCircleLen = 0;
         this._dataLabelLen = 0;
         this._dataPathLen = 0;
 
         if (data.length > 0) {
-            var solution = layoutFunction(data, {lossFunction: loss});
+            let solution = layoutFunction(data, {lossFunction: loss});
 
             if (normalize) {
                 solution = normalizeSolution(solution, orientation, orientationOrder);
@@ -192,8 +192,8 @@ class VennGraphs extends GraphsBase
             textCentres = computeTextCentres(circles, data);
         };
 
-        var circleInd = 0;
-        var pathInd = 0;
+        let circleInd = 0;
+        let pathInd = 0;
         _.each( data , function(d) {
             if( d.label ){
                 if( d.sets.length > 1 && !me.label.showInter ){
@@ -205,7 +205,7 @@ class VennGraphs extends GraphsBase
                 }
             };
             if (d.sets.length > 1) {
-                var _path = intersectionAreaPath( d.sets.map(function (set) { return circles[set]; }) );
+                let _path = intersectionAreaPath( d.sets.map(function (set) { return circles[set]; }) );
                 d.shape = {
                     type : 'path',
                     path : _path,
@@ -228,8 +228,8 @@ class VennGraphs extends GraphsBase
         let data = [];
         let me = this;
 
-        for( var i=0,l=this.dataFrame.length; i< l; i++ ){
-            var rowData = me.dataFrame.getRowDataAt( i );
+        for( let i=0,l=this.dataFrame.length; i< l; i++ ){
+            let rowData = me.dataFrame.getRowDataAt( i );
 
             let obj = {
                 type : "venn",
@@ -251,9 +251,9 @@ class VennGraphs extends GraphsBase
                 labelPosition : null,
             };
 
-            for( var p in rowData ){
+            for( let p in rowData ){
 
-                var val = rowData[p];
+                let val = rowData[p];
 
                 if (p == me.keyField) {
                     if (!_.isArray(val)) {
@@ -277,7 +277,7 @@ class VennGraphs extends GraphsBase
     }
 
     _getStyle( style, ind, nodeData, defColor ){
-        var color;
+        let color;
         if( _.isString( style ) ){
             color = style;
         }
@@ -294,7 +294,7 @@ class VennGraphs extends GraphsBase
     }
 
     _widget(){
-        var me = this;
+        let me = this;
 
         //那么有多余的元素要去除掉 begin
         if( me.venn_circles.children.length > me._dataCircleLen ){
@@ -318,14 +318,14 @@ class VennGraphs extends GraphsBase
         let pathInd = 0;
         let labelInd = 0;
         _.each( this.data , function( nodeData ){
-            var shape = nodeData.shape;
-            var _shape;
-            var isNewShape = true;
+            let shape = nodeData.shape;
+            let _shape;
+            let isNewShape = true;
             if( shape ){
-                var context;
+                let context;
                 if( shape.type == 'circle' ){
-                    var fillStyle = me._getStyle( me.node.fillStyle , shape.circleInd, nodeData );
-                    var strokeStyle = me._getStyle( me.node.strokeStyle, shape.circleInd, nodeData );
+                    let fillStyle = me._getStyle( me.node.fillStyle , shape.circleInd, nodeData );
+                    let strokeStyle = me._getStyle( me.node.strokeStyle, shape.circleInd, nodeData );
                     
                     nodeData.fillStyle = fillStyle;
                     nodeData.strokeStyle = strokeStyle;
@@ -407,8 +407,8 @@ class VennGraphs extends GraphsBase
 
             if( nodeData.label && me.label.enabled ){
             
-                var fontColor = me._getStyle( me.label.fontColor, shape.circleInd, nodeData , "#999");
-                var fontSize = me.label.fontSize;
+                let fontColor = me._getStyle( me.label.fontColor, shape.circleInd, nodeData , "#999");
+                let fontSize = me.label.fontSize;
                 if( nodeData.sets.length > 1 ){
                     if( !me.label.showInter ){
                         fontSize = 0;
@@ -418,7 +418,7 @@ class VennGraphs extends GraphsBase
                 };
                 
                 if( fontSize ){
-                    var _textContext = {
+                    let _textContext = {
                         x : nodeData.labelPosition.x,
                         y : nodeData.labelPosition.y,
                         fontSize: fontSize,
@@ -429,7 +429,7 @@ class VennGraphs extends GraphsBase
                         fillStyle: fontColor
                     };
 
-                    var _txt = me.venn_labels.getChildAt( labelInd++ );
+                    let _txt = me.venn_labels.getChildAt( labelInd++ );
                     if( !_txt ){
                         _txt = new Text( nodeData.label, {
                             context : _textContext
@@ -501,15 +501,15 @@ class VennGraphs extends GraphsBase
 
 //venn computeTextCentres 需要的相关代码 begin
 function getOverlappingCircles(circles) {
-    var ret = {}, circleids = [];
-    for (var circleid in circles) {
+    let ret = {}, circleids = [];
+    for (let circleid in circles) {
         circleids.push(circleid);
         ret[circleid] = [];
     }
-    for (var i  = 0; i < circleids.length; i++) {
-        var a = circles[circleids[i]];
-        for (var j = i + 1; j < circleids.length; ++j) {
-            var b = circles[circleids[j]],
+    for (let i  = 0; i < circleids.length; i++) {
+        let a = circles[circleids[i]];
+        for (let j = i + 1; j < circleids.length; ++j) {
+            let b = circles[circleids[j]],
                 d = distance(a, b);
 
             if (d + b.radius <= a.radius + 1e-10) {
@@ -524,26 +524,26 @@ function getOverlappingCircles(circles) {
 }
 
 function computeTextCentres(circles, areas) {
-    var ret = {}, overlapped = getOverlappingCircles(circles);
-    for (var i = 0; i < areas.length; ++i) {
-        var area = areas[i].sets, areaids = {}, exclude = {};
-        for (var j = 0; j < area.length; ++j) {
+    let ret = {}, overlapped = getOverlappingCircles(circles);
+    for (let i = 0; i < areas.length; ++i) {
+        let area = areas[i].sets, areaids = {}, exclude = {};
+        for (let j = 0; j < area.length; ++j) {
             areaids[area[j]] = true;
-            var overlaps = overlapped[area[j]];
-            for (var k = 0; k < overlaps.length; ++k) {
+            let overlaps = overlapped[area[j]];
+            for (let k = 0; k < overlaps.length; ++k) {
                 exclude[overlaps[k]] = true;
             }
         }
 
-        var interior = [], exterior = [];
-        for (var setid in circles) {
+        let interior = [], exterior = [];
+        for (let setid in circles) {
             if (setid in areaids) {
                 interior.push(circles[setid]);
             } else if (!(setid in exclude)) {
                 exterior.push(circles[setid]);
             }
         }
-        var centre = computeTextCentre(interior, exterior);
+        let centre = computeTextCentre(interior, exterior);
         ret[area] = centre;
         if (centre.disjoint && (areas[i].size > 0)) {
             console.log("WARNING: area " + area + " not represented on screen");
@@ -552,18 +552,18 @@ function computeTextCentres(circles, areas) {
     return  ret;
 }
 function computeTextCentre(interior, exterior) {
-    var points = [], i;
+    let points = [], i;
     for (i = 0; i < interior.length; ++i) {
-        var c = interior[i];
+        let c = interior[i];
         points.push({x: c.x, y: c.y});
         points.push({x: c.x + c.radius/2, y: c.y});
         points.push({x: c.x - c.radius/2, y: c.y});
         points.push({x: c.x, y: c.y + c.radius/2});
         points.push({x: c.x, y: c.y - c.radius/2});
     }
-    var initial = points[0], margin = circleMargin(points[0], interior, exterior);
+    let initial = points[0], margin = circleMargin(points[0], interior, exterior);
     for (i = 1; i < points.length; ++i) {
-        var m = circleMargin(points[i], interior, exterior);
+        let m = circleMargin(points[i], interior, exterior);
         if (m >= margin) {
             initial = points[i];
             margin = m;
@@ -571,15 +571,15 @@ function computeTextCentre(interior, exterior) {
     }
 
     // maximize the margin numerically
-    var solution = nelderMead(
+    let solution = nelderMead(
                 function(p) { return -1 * circleMargin({x: p[0], y: p[1]}, interior, exterior); },
                 [initial.x, initial.y],
                 {maxIterations:500, minErrorDelta:1e-10}).x;
-    var ret = {x: solution[0], y: solution[1]};
+    let ret = {x: solution[0], y: solution[1]};
 
     // check solution, fallback as needed (happens if fully overlapped
     // etc)
-    var valid = true;
+    let valid = true;
     for (i = 0; i < interior.length; ++i) {
         if (distance(ret, interior[i]) > interior[i].radius) {
             valid = false;
@@ -598,7 +598,7 @@ function computeTextCentre(interior, exterior) {
         if (interior.length == 1) {
             ret = {x: interior[0].x, y: interior[0].y};
         } else {
-            var areaStats = {};
+            let areaStats = {};
             intersectionArea(interior, areaStats);
 
             if (areaStats.arcs.length === 0) {
@@ -626,7 +626,7 @@ function computeTextCentre(interior, exterior) {
 }
 
 function circleMargin(current, interior, exterior) {
-    var margin = interior[0].radius - distance(interior[0], current), i, m;
+    let margin = interior[0].radius - distance(interior[0], current), i, m;
     for (i = 1; i < interior.length; ++i) {
         m = interior[i].radius - distance(interior[i], current);
         if (m <= margin) {
@@ -644,7 +644,7 @@ function circleMargin(current, interior, exterior) {
 }
 
 function circlePath(x, y, r) {
-    var ret = [];
+    let ret = [];
     ret.push("\nM", x, y);
     ret.push("\nm", -r, 0);
     ret.push("\na", r, r, 0, 1, 0, r *2, 0);
@@ -654,22 +654,22 @@ function circlePath(x, y, r) {
 
 /** returns a svg path of the intersection area of a bunch of circles */
 function intersectionAreaPath(circles) {
-    var stats = {};
+    let stats = {};
     intersectionArea(circles, stats);
-    var arcs = stats.arcs;
+    let arcs = stats.arcs;
 
     if (arcs.length === 0) {
         return "M 0 0";
 
     } else if (arcs.length == 1) {
-        var circle = arcs[0].circle;
+        let circle = arcs[0].circle;
         return circlePath(circle.x, circle.y, circle.radius);
 
     } else {
         // draw path around arcs
-        var ret = ["\nM", arcs[0].p2.x, arcs[0].p2.y];
-        for (var i = 0; i < arcs.length; ++i) {
-            var arc = arcs[i], r = arc.circle.radius, wide = arc.width > r;
+        let ret = ["\nM", arcs[0].p2.x, arcs[0].p2.y];
+        for (let i = 0; i < arcs.length; ++i) {
+            let arc = arcs[i], r = arc.circle.radius, wide = arc.width > r;
             ret.push("\nA", r, r, 0, wide ? 1 : 0, 1,
                      arc.p1.x, arc.p1.y);
         }

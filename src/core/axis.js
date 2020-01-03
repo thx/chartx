@@ -118,7 +118,7 @@ class axis {
 
     calculateProps() {
 
-        var me = this;
+        let me = this;
 
         if (this.layoutType == "proportion") {
 
@@ -152,12 +152,12 @@ class axis {
         this.dataSectionLayout = [];
         _.each(this.dataSection, function (val, i) {
 
-            var ind = i;
+            let ind = i;
             if (me.layoutType == "proportion") {
                 ind = me.getIndexOfVal(val);
             };
 
-            var pos = parseInt(me.getPosOf({
+            let pos = parseInt(me.getPosOf({
                 ind: i,
                 val: val
             }), 10);
@@ -176,13 +176,13 @@ class axis {
         return this.dataSection;
     }
     setDataSection(_dataSection) {
-        var me = this;
+        let me = this;
 
         //如果用户没有配置dataSection，或者用户传了，但是传了个空数组，则自己组装dataSection
         if (_.isEmpty(_dataSection) && _.isEmpty(this._opt.dataSection)) {
             if (this.layoutType == "proportion") {
 
-                var arr = this._getDataSection();
+                let arr = this._getDataSection();
 
                 if ("origin" in me._opt) {
                     arr.push(me._opt.origin);
@@ -207,7 +207,7 @@ class axis {
                     };
                 };
 
-                for (var ai = 0, al = arr.length; ai < al; ai++) {
+                for (let ai = 0, al = arr.length; ai < al; ai++) {
                     arr[ai] = Number(arr[ai]);
                     if (isNaN(arr[ai])) {
                         arr.splice(ai, 1);
@@ -267,7 +267,7 @@ class axis {
         //如果有堆叠，比如[ ["uv","pv"], "click" ]
         //那么这个 this.dataOrg， 也是个对应的结构
         //vLen就会等于2
-        var vLen = 1;
+        let vLen = 1;
 
         _.each(this.dataOrg, function (arr) {
             vLen = Math.max(arr.length, vLen);
@@ -282,9 +282,9 @@ class axis {
 
     }
     _oneDimensional() {
-        var arr = _.flatten(this.dataOrg); //_.flatten( data.org );
+        let arr = _.flatten(this.dataOrg); //_.flatten( data.org );
 
-        for (var i = 0, il = arr.length; i < il; i++) {
+        for (let i = 0, il = arr.length; i < il; i++) {
             arr[i] = arr[i] || 0;
         };
 
@@ -292,9 +292,9 @@ class axis {
     }
     //二维的yAxis设置，肯定是堆叠的比如柱状图，后续也会做堆叠的折线图， 就是面积图
     _twoDimensional() {
-        var d = this.dataOrg;
-        var arr = [];
-        var min;
+        let d = this.dataOrg;
+        let arr = [];
+        let min;
         _.each(d, function (d) {
             if (!d.length) {
                 return
@@ -306,20 +306,20 @@ class axis {
                 return;
             };
 
-            var varr = [];
-            var len = d[0].length;
-            var vLen = d.length;
+            let varr = [];
+            let len = d[0].length;
+            let vLen = d.length;
 
-            for (var i = 0; i < len; i++) {
-                var up_count = 0;
-                var up_i = 0;
+            for (let i = 0; i < len; i++) {
+                let up_count = 0;
+                let up_i = 0;
 
-                var down_count = 0;
-                var down_i = 0;
+                let down_count = 0;
+                let down_i = 0;
 
-                for (var ii = 0; ii < vLen; ii++) {
+                for (let ii = 0; ii < vLen; ii++) {
 
-                    var _val = d[ii][i];
+                    let _val = d[ii][i];
                     if (!_val && _val !== 0) {
                         continue;
                     };
@@ -358,7 +358,7 @@ class axis {
 
     _sort() {
         if (this.sort) {
-            var sort = this._getSortType();
+            let sort = this._getSortType();
             if (sort == "desc") {
 
                 this.dataSection.reverse();
@@ -374,7 +374,7 @@ class axis {
     }
 
     _getSortType() {
-        var _sort;
+        let _sort;
         if (_.isString(this.sort)) {
             _sort = this.sort;
         }
@@ -393,17 +393,17 @@ class axis {
             };
 
             //拿到dataSection中的min和 max 后，用middleweight数据重新设置一遍dataSection
-            var dMin = _.min(this.dataSection);
-            var dMax = _.max(this.dataSection);
-            var newDS = [dMin];
-            var newDSG = [];
+            let dMin = _.min(this.dataSection);
+            let dMax = _.max(this.dataSection);
+            let newDS = [dMin];
+            let newDSG = [];
 
-            for (var i = 0, l = this.middleWeight.length; i < l; i++) {
-                var preMiddleweight = dMin;
+            for (let i = 0, l = this.middleWeight.length; i < l; i++) {
+                let preMiddleweight = dMin;
                 if (i > 0) {
                     preMiddleweight = this.middleWeight[i - 1];
                 };
-                var middleVal = preMiddleweight + parseInt((this.middleWeight[i] - preMiddleweight) / 2);
+                let middleVal = preMiddleweight + parseInt((this.middleWeight[i] - preMiddleweight) / 2);
 
                 newDS.push( middleVal );
                 newDS.push( this.middleWeight[i] );
@@ -414,7 +414,7 @@ class axis {
                     this.middleWeight[i]
                 ]);
             };
-            var lastMW = this.middleWeight.slice(-1)[0];
+            let lastMW = this.middleWeight.slice(-1)[0];
 
             if (dMax > lastMW) {
                 newDS.push(lastMW + (dMax - lastMW) / 2);
@@ -434,14 +434,14 @@ class axis {
     }
 
     _middleWeightPos(){
-        var me = this;
+        let me = this;
         if( this.middleWeightPos ){
             if( !_.isArray( this.middleWeightPos ) ){
                 this.middleWeightPos = [ this.middleWeightPos ]
             };
             //需要校验下middleWeightPos中是有的值之和不能大于1
             //如果大于1了则默认按照均分设置
-            var _count = 0;
+            let _count = 0;
             _.each( this.middleWeightPos, function( pos ){
                 _count += pos;
             } );
@@ -455,9 +455,9 @@ class axis {
         if( this.middleWeight ){
             if( !this.middleWeightPos ){
                 this.middleWeightPos = [];
-                var _prePos = 0;
+                let _prePos = 0;
                 _.each( this.middleWeight, function( ){
-                    var _pos = 1 / (me.middleWeight.length+1);
+                    let _pos = 1 / (me.middleWeight.length+1);
                     _prePos += _pos;
                     me.middleWeightPos.push( _pos );
                 } );
@@ -470,17 +470,17 @@ class axis {
 
     //origin 对应 this.origin 的值
     _getOriginTrans(origin) {
-        var pos = 0;
-        var me = this;
-        var dsgLen = this.dataSectionGroup.length;
-        //var groupLength = this.axisLength / dsgLen;
+        let pos = 0;
+        let me = this;
+        let dsgLen = this.dataSectionGroup.length;
+        let groupLength = this.axisLength / dsgLen;
 
-        for ( var i = 0, l = dsgLen; i < l; i++ ) {
+        for ( let i = 0, l = dsgLen; i < l; i++ ) {
 
-            var ds = this.dataSectionGroup[i];
+            let ds = this.dataSectionGroup[i];
 
-            var groupLength = this.axisLength * this.middleWeightPos[i];
-            var preGroupLenth = 0;
+            groupLength = this.axisLength * this.middleWeightPos[i];
+            let preGroupLenth = 0;
             _.each( this.middleWeightPos, function( mp, mi ){
                 if( mi < i ){
                     preGroupLenth += me.axisLength * mp;
@@ -488,10 +488,10 @@ class axis {
             } );
 
             if (this.layoutType == "proportion") {
-                var min = _.min(ds);
-                var max = _.max(ds);
+                let min = _.min(ds);
+                let max = _.max(ds);
 
-                var amountABS = Math.abs(max - min);
+                let amountABS = Math.abs(max - min);
 
                 if (origin >= min && origin <= max) {
                     pos = ((origin - min) / amountABS * groupLength + preGroupLenth);
@@ -501,7 +501,7 @@ class axis {
 
             } else {
                 /* TODO: 貌似 非proportion 布局 下面的_originTrans 没毛意义啊，先注释掉
-                var valInd = _.indexOf(ds , origin);
+                let valInd = _.indexOf(ds , origin);
                 if( valInd != -1 ){
                     if( this.layoutType == "rule" ){
                         pos = valInd / (ds.length - 1) * groupLength; 
@@ -524,15 +524,15 @@ class axis {
 
     //opt { val ind pos } 一次只能传一个
     _getLayoutDataOf(opt) {
-        var props = ["val", "ind", "pos"];
-        var prop;
+        let props = ["val", "ind", "pos"];
+        let prop;
         _.each(props, function (_p) {
             if (_p in opt) {
                 prop = _p;
             }
         });
 
-        var layoutData;
+        let layoutData;
         _.each(this.dataSectionLayout, function (item) {
             if (item[prop] === opt[prop]) {
                 layoutData = item;
@@ -546,7 +546,7 @@ class axis {
 
         /* val可能会重复，so 这里得到的会有问题，先去掉
         //先检查下 dataSectionLayout 中有没有对应的记录
-        var _pos = this._getLayoutDataOf({ val : val }).pos;
+        let _pos = this._getLayoutDataOf({ val : val }).pos;
         if( _pos != undefined ){
             return _pos;
         };
@@ -558,7 +558,7 @@ class axis {
     }
     getPosOfInd(ind) {
         //先检查下 dataSectionLayout 中有没有对应的记录
-        var _pos = this._getLayoutDataOf({ ind: ind }).pos;
+        let _pos = this._getLayoutDataOf({ ind: ind }).pos;
         if (_pos != undefined) {
             return _pos;
         };
@@ -570,33 +570,33 @@ class axis {
 
     //opt {val, ind} val 或者ind 一定有一个
     getPosOf(opt) {
-        var me = this;
-        var pos;
+        let me = this;
+        let pos;
 
-        var cellCount = this._getCellCount(); //dataOrg上面的真实数据节点数，把轴分成了多少个节点
+        let cellCount = this._getCellCount(); //dataOrg上面的真实数据节点数，把轴分成了多少个节点
 
         if (this.layoutType == "proportion") {
 
-            var dsgLen = this.dataSectionGroup.length;
-            //var groupLength = this.axisLength / dsgLen;
+            let dsgLen = this.dataSectionGroup.length;
+            //let groupLength = this.axisLength / dsgLen;
 
-            for (var i = 0, l = dsgLen; i < l; i++) {
-                var ds = this.dataSectionGroup[i];
+            for (let i = 0, l = dsgLen; i < l; i++) {
+                let ds = this.dataSectionGroup[i];
 
-                var groupLength = this.axisLength * this.middleWeightPos[i];
-                var preGroupLenth = 0;
+                let groupLength = this.axisLength * this.middleWeightPos[i];
+                let preGroupLenth = 0;
                 _.each( this.middleWeightPos, function( mp, mi ){
                     if( mi < i ){
                         preGroupLenth += me.axisLength * mp;
                     };
                 } );
 
-                var min = _.min(ds);
-                var max = _.max(ds);
-                var val = "val" in opt ? opt.val : this.getValOfInd(opt.ind);
+                let min = _.min(ds);
+                let max = _.max(ds);
+                let val = "val" in opt ? opt.val : this.getValOfInd(opt.ind);
                 if (val >= min && val <= max) {
-                    var _origin = this.origin;
-                    var origiInRange = !(_origin < min || _origin > max);
+                    let _origin = this.origin;
+                    let origiInRange = !(_origin < min || _origin > max);
                     //如果 origin 并不在这个区间
                     if ( !origiInRange ) {
                         _origin = min;
@@ -606,9 +606,9 @@ class axis {
                     };
                     
                     //origin不在区间内的话，maxGroupDisABS一定是整个区间， 也就是说这个区间的原点在起点min
-                    var maxGroupDisABS = Math.max(Math.abs(max - _origin), Math.abs(_origin - min));
-                    var amountABS = Math.abs(max - min);
-                    var originPos = (maxGroupDisABS / amountABS) * groupLength;
+                    let maxGroupDisABS = Math.max(Math.abs(max - _origin), Math.abs(_origin - min));
+                    let amountABS = Math.abs(max - min);
+                    let originPos = (maxGroupDisABS / amountABS) * groupLength;
                     pos = (val - _origin) / maxGroupDisABS * originPos + preGroupLenth;
 
                     if (isNaN(pos)) {
@@ -634,7 +634,7 @@ class axis {
                 //TODO 这里在非proportion情况下，如果没有opt.ind 那么getIndexOfVal 其实是有风险的，
                 //因为可能有多个数据的val一样
 
-                var valInd = "ind" in opt ? opt.ind : this.getIndexOfVal(opt.val);
+                let valInd = "ind" in opt ? opt.ind : this.getIndexOfVal(opt.val);
                 if (valInd != -1) {
                     if (this.layoutType == "rule") {
                         //line 的xaxis就是 rule
@@ -647,7 +647,7 @@ class axis {
                               * (valInd+1) 
                               - (this.axisLength/cellCount)/2;
                         */
-                        var _cellLength = this.getCellLength();
+                        let _cellLength = this.getCellLength();
                         pos = _cellLength * (valInd + 1) - _cellLength / 2;
                     };
                 };
@@ -664,7 +664,7 @@ class axis {
 
     getValOfPos(pos) {
         //先检查下 dataSectionLayout 中有没有对应的记录
-        var _val = this._getLayoutDataOf({ pos: pos }).val;
+        let _val = this._getLayoutDataOf({ pos: pos }).val;
         if (_val != undefined) {
             return _val;
         };
@@ -676,7 +676,7 @@ class axis {
     getValOfInd(ind) {
 
         //先检查下 dataSectionLayout 中有没有对应的记录
-        var _val = this._getLayoutDataOf({ ind: ind }).val;
+        let _val = this._getLayoutDataOf({ ind: ind }).val;
         if (_val != undefined) {
             return _val;
         };
@@ -688,7 +688,7 @@ class axis {
         
         } else {
             //这里的index是直接的对应dataOrg的索引
-            var org = ds ? ds : _.flatten(this.dataOrg);
+            let org = ds ? ds : _.flatten(this.dataOrg);
             return org[ind];
         };
         */
@@ -697,20 +697,20 @@ class axis {
 
     //这里的ind
     _getValOfInd(ind) {
-        var me = this;
+        let me = this;
 
-        var org = _.flatten(this.dataOrg);
-        var val;
+        let org = _.flatten(this.dataOrg);
+        let val;
 
         if (this.layoutType == "proportion") {
 
-            //var dsgLen = this.dataSectionGroup.length;
-            //var groupLength = this.axisLength / dsgLen;
+            //let dsgLen = this.dataSectionGroup.length;
+            //let groupLength = this.axisLength / dsgLen;
 
             _.each(this.dataSectionGroup, function (ds, i) {
 
-                var groupLength = me.axisLength * me.middleWeightPos[i];
-                var preGroupLenth = 0;
+                let groupLength = me.axisLength * me.middleWeightPos[i];
+                let preGroupLenth = 0;
                 _.each( me.middleWeightPos, function( mp, mi ){
                     if( mi < i ){
                         preGroupLenth += me.axisLength * mp;
@@ -718,8 +718,8 @@ class axis {
                 } );
 
                 if (parseInt(ind / groupLength) == i || i == me.dataSectionGroup.length - 1) {
-                    var min = _.min(ds);
-                    var max = _.max(ds);
+                    let min = _.min(ds);
+                    let max = _.max(ds);
                     val = min + (max - min) / groupLength * (ind - preGroupLenth);
                     return false;
                 };
@@ -734,15 +734,15 @@ class axis {
     getIndexOfPos(pos) {
 
         //先检查下 dataSectionLayout 中有没有对应的记录
-        var _ind = this._getLayoutDataOf({ pos: pos }).ind;
+        let _ind = this._getLayoutDataOf({ pos: pos }).ind;
         if (_ind != undefined) {
             return _ind;
         };
 
-        var ind = 0;
+        let ind = 0;
 
-        var cellLength = this.getCellLengthOfPos(pos);
-        var cellCount = this._getCellCount();
+        let cellLength = this.getCellLengthOfPos(pos);
+        let cellCount = this._getCellCount();
 
         if (this.layoutType == "proportion") {
             //proportion中的index以像素为单位 所以，传入的像素值就是index
@@ -770,11 +770,11 @@ class axis {
 
     getIndexOfVal(val) {
 
-        var valInd = -1;
+        let valInd = -1;
         if (this.layoutType == "proportion") {
 
             //先检查下 dataSectionLayout 中有没有对应的记录
-            var _ind = this._getLayoutDataOf({ val: val }).ind;
+            let _ind = this._getLayoutDataOf({ val: val }).ind;
             if (_ind != undefined) {
                 return _ind;
             };
@@ -785,7 +785,7 @@ class axis {
         } else {
             _.each(this.dataOrg, function (arr) {
                 _.each(arr, function (list) {
-                    var _ind = _.indexOf(list, val);
+                    let _ind = _.indexOf(list, val);
                     if (_ind != -1) {
                         valInd = _ind;
                     };
@@ -804,9 +804,9 @@ class axis {
         };
 
         //ceilWidth默认按照peak算, 而且不能按照dataSection的length来做分母
-        var axisLength = this.axisLength;
-        var cellLength = axisLength;
-        var cellCount = this._getCellCount();
+        let axisLength = this.axisLength;
+        let cellLength = axisLength;
+        let cellCount = this._getCellCount();
 
         if ( cellCount ) {
 
@@ -852,7 +852,7 @@ class axis {
         };
 
         //总共有几个数据节点，默认平铺整个dataOrg，和x轴的需求刚好契合，而y轴目前不怎么需要用到这个
-        var cellCount = 0;
+        let cellCount = 0;
         if (this.layoutType == "proportion") {
             cellCount = this.axisLength;
         } else {

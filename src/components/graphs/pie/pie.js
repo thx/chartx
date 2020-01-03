@@ -60,7 +60,7 @@ export default class Pie extends event.Dispatcher
 
     draw(opt)
     {
-        var me = this;
+        let me = this;
 
         _.extend(true, this, opt);
 
@@ -73,15 +73,15 @@ export default class Pie extends event.Dispatcher
 
     resetData( data )
     {
-        var me = this;
+        let me = this;
         this.data = data;
         
         me.destroyLabel();
 
-        var completedNum = 0;
-        for (var i = 0; i < me.sectors.length; i++) {
-            var sec = me.sectors[i];
-            var secData = this.data.list[i];
+        let completedNum = 0;
+        for (let i = 0; i < me.sectors.length; i++) {
+            let sec = me.sectors[i];
+            let secData = this.data.list[i];
 
             sec.animate({
                 r : secData.outRadius,
@@ -103,18 +103,18 @@ export default class Pie extends event.Dispatcher
 
     _widget() 
     {
-        var me = this;
-        var list = me.data.list;
-        var total = me.data.total;
+        let me = this;
+        let list = me.data.list;
+        let total = me.data.total;
 
-        //var moreSecData;
+        //let moreSecData;
         if ( list.length > 0 && total > 0 ) {
             me.textSp && me.sprite.addChild(me.textSp);
-            for (var i = 0; i < list.length; i++) {
-                var item = list[i];
+            for (let i = 0; i < list.length; i++) {
+                let item = list[i];
             
                 //扇形主体          
-                var sector = new Sector({
+                let sector = new Sector({
                     hoverClone: false,
                     xyToInt : false, //扇形不需要自动取整
                     context: {
@@ -168,8 +168,8 @@ export default class Pie extends event.Dispatcher
     focusOf( node , callback)
     {
         if( node.focused ) return;
-        var me = this;
-        var sec = me.sectors[ node.iNode ];
+        let me = this;
+        let sec = me.sectors[ node.iNode ];
 
         sec.animate({
             x: node.outOffsetx,
@@ -186,9 +186,9 @@ export default class Pie extends event.Dispatcher
     unfocusOf( node, callback )
     {
         if( !node.focused ) return;
-        var me = this;
+        let me = this;
 
-        var sec = me.sectors[ node.iNode ];
+        let sec = me.sectors[ node.iNode ];
         sec.animate({
             x: 0,
             y: 0
@@ -204,12 +204,12 @@ export default class Pie extends event.Dispatcher
 
     selectOf ( node ) 
     {
-        var me = this;
+        let me = this;
         if( !this.sectors.length || !node.selectEnabled ){
             return;
         };
 
-        var sec = this.sectors[node.iNode];
+        let sec = this.sectors[node.iNode];
      
         if ( node.selected ) {
             return
@@ -228,11 +228,11 @@ export default class Pie extends event.Dispatcher
 
     unselectOf ( node ) 
     {
-        var sec = this.sectors[ node.iNode ];
+        let sec = this.sectors[ node.iNode ];
         if (!node.selected || !node.selectEnabled) {
             return
         };
-        var me = this;
+        let me = this;
         me.cancelCheckedSec(sec, function() {
             if( node._focusTigger == "select" ){
                 me.unfocusOf(node);
@@ -243,12 +243,12 @@ export default class Pie extends event.Dispatcher
 
     addCheckedSec(sec, callback)
     {
-        var secc = sec.context;
-        var nodeData = sec.nodeData;
+        let secc = sec.context;
+        let nodeData = sec.nodeData;
 
         if( !secc ) return;
         
-        var sector = new Sector({
+        let sector = new Sector({
             xyToInt : false,
             context : {
                 x: secc.x,
@@ -282,7 +282,7 @@ export default class Pie extends event.Dispatcher
 
     cancelCheckedSec (sec, callback) 
     {
-        var selectedSec = sec._selectedSec;
+        let selectedSec = sec._selectedSec;
         
         selectedSec.animate({
             startAngle: selectedSec.context.endAngle - 0.5
@@ -305,7 +305,7 @@ export default class Pie extends event.Dispatcher
 
     grow( callback ) 
     {
-        var me = this;
+        let me = this;
         
         _.each(me.sectors, function (sec) {
             if (sec.context) {
@@ -318,7 +318,7 @@ export default class Pie extends event.Dispatcher
 
         me._hideGrowLabel();
 
-        var _tween = AnimationFrame.registTween({
+        let _tween = AnimationFrame.registTween({
             from: {
                 process: 0
             },
@@ -327,15 +327,15 @@ export default class Pie extends event.Dispatcher
             },
             duration: 500,
             onUpdate: function( status ) {
-                for (var i = 0; i < me.sectors.length; i++) {
-                    var sec = me.sectors[i];
-                    var nodeData = sec.nodeData;
-                    var secc = sec.context;
+                for (let i = 0; i < me.sectors.length; i++) {
+                    let sec = me.sectors[i];
+                    let nodeData = sec.nodeData;
+                    let secc = sec.context;
 
-                    var _startAngle = nodeData.startAngle;
-                    var _endAngle   = nodeData.endAngle;
-                    var _r  = nodeData.outRadius;
-                    var _r0 = nodeData.innerRadius;
+                    let _startAngle = nodeData.startAngle;
+                    let _endAngle   = nodeData.endAngle;
+                    let _r  = nodeData.outRadius;
+                    let _r0 = nodeData.innerRadius;
 
                     if (secc) {
                         secc.r = _r * status.process;
@@ -344,9 +344,9 @@ export default class Pie extends event.Dispatcher
                             secc.startAngle = _startAngle;
                             secc.endAngle = _startAngle + (_endAngle - _startAngle) * status.process;
                         } else {
-                            var lastEndAngle = function (iNode) {
-                                var lastIndex = iNode - 1;
-                                var lastSecc = me.sectors[lastIndex].context;
+                            let lastEndAngle = function (iNode) {
+                                let lastIndex = iNode - 1;
+                                let lastSecc = me.sectors[lastIndex].context;
                                 if (lastIndex == 0) {
                                     return lastSecc ? lastSecc.endAngle : 0;
                                 }
@@ -387,20 +387,20 @@ export default class Pie extends event.Dispatcher
 
     _widgetLabel(quadrant, indexs, lmin, rmin, isEnd, ySpaceInfo) 
     {
-        var me = this;
-        var count = 0;
-        var data = me.data.list;
-        var minTxtDis = 15;
-        var textOffsetX = 5;
+        let me = this;
+        let count = 0;
+        let data = me.data.list;
+        let minTxtDis = 15;
+        let textOffsetX = 5;
         
-        var currentIndex;
-        var preY, currentY, adjustX, txtDis, bwidth, bheight, bx, by;
-        var yBound, remainingNum, remainingY;
+        let currentIndex;
+        let preY, currentY, adjustX, txtDis, bwidth, bheight, bx, by;
+        let yBound, remainingNum, remainingY;
         
-        var clockwise = quadrant == 2 || quadrant == 4;
-        var isleft = quadrant == 2 || quadrant == 3;
-        var isup = quadrant == 3 || quadrant == 4;
-        var minY = isleft ? lmin : rmin;
+        let clockwise = quadrant == 2 || quadrant == 4;
+        let isleft = quadrant == 2 || quadrant == 3;
+        let isup = quadrant == 3 || quadrant == 4;
+        let minY = isleft ? lmin : rmin;
 
         //text的绘制顺序做修正，text的Y值在饼图上半部分（isup）时，Y值越小的先画，反之Y值在饼图下部分时，Y值越大的先画.
         if (indexs.length > 0) {
@@ -409,10 +409,10 @@ export default class Pie extends event.Dispatcher
             })
         }
         
-        for (var i = 0; i < indexs.length; i++) {
+        for (let i = 0; i < indexs.length; i++) {
             currentIndex = indexs[i];
-            var itemData = data[currentIndex];
-            var outCircleRadius = itemData.outRadius + itemData.moveDis;
+            let itemData = data[currentIndex];
+            let outCircleRadius = itemData.outRadius + itemData.moveDis;
 
             //若Y值小于最小值，不画text    
             if (!itemData.enabled || itemData.y < minY || count >= me.textMaxCount) continue
@@ -450,18 +450,18 @@ export default class Pie extends event.Dispatcher
                 }
             };
             
-            var currentX = (isleft ? -adjustX-textOffsetX : adjustX+textOffsetX);
-            var globalX = currentX + me.origin.x;
-            var globalY = currentY + me.origin.y;
+            let currentX = (isleft ? -adjustX-textOffsetX : adjustX+textOffsetX);
+            let globalX = currentX + me.origin.x;
+            let globalY = currentY + me.origin.y;
 
             if( globalX > me._graphs.app.width || globalY < 0 || globalY > me._graphs.app.height ){
                 return;
             };
 
-            var pathStr = "M"+itemData.centerx+","+itemData.centery;
+            let pathStr = "M"+itemData.centerx+","+itemData.centery;
             pathStr += "Q"+itemData.outx+","+itemData.outy+","+currentX+","+currentY;
             
-            var path = new Path({
+            let path = new Path({
                 context: {
                     lineType: 'solid',
                     path : pathStr,
@@ -472,7 +472,7 @@ export default class Pie extends event.Dispatcher
 
             //指示文字
             /*
-            var textTxt = itemData.labelText;
+            let textTxt = itemData.labelText;
             //如果用户format过，那么就用用户指定的格式
             //如果没有就默认拼接
             if( !this._graphs.label.format ){
@@ -484,8 +484,8 @@ export default class Pie extends event.Dispatcher
             };
             */
 
-            var textTxt = itemData.labelText;
-            var branchTxt = document.createElement("div");
+            let textTxt = itemData.labelText;
+            let branchTxt = document.createElement("div");
             branchTxt.style.cssText = " ;position:absolute;left:-1000px;top:-1000px;color:" + itemData.fillStyle + ""
             branchTxt.innerHTML = textTxt;
             me.domContainer.appendChild(branchTxt);
@@ -533,15 +533,15 @@ export default class Pie extends event.Dispatcher
 
     _startWidgetLabel()
     {
-        var me = this;
-        var data = me.data.list;
-        var rMinPercentage = 0,
+        let me = this;
+        let data = me.data.list;
+        let rMinPercentage = 0,
             lMinPercentage = 0,
             rMinY = 0,
             lMinY = 0;
-        var quadrantsOrder = [];
+        let quadrantsOrder = [];
 
-        var quadrantInfo = [
+        let quadrantInfo = [
             {
                 indexs: [],
                 count: 0
@@ -558,7 +558,7 @@ export default class Pie extends event.Dispatcher
         ];
 
         //默认从top开始画
-        var widgetInfo = {
+        let widgetInfo = {
             right: {
                 startQuadrant: 4,
                 endQuadrant: 1,
@@ -573,8 +573,8 @@ export default class Pie extends event.Dispatcher
             }
         };
 
-        for (var i = 0; i < data.length; i++) {
-            var cur = data[i].quadrant;
+        for (let i = 0; i < data.length; i++) {
+            let cur = data[i].quadrant;
             quadrantInfo[cur - 1].indexs.push(i);
             quadrantInfo[cur - 1].count++;
         }
@@ -598,7 +598,7 @@ export default class Pie extends event.Dispatcher
         widgetInfo.right.indexs = quadrantInfo[widgetInfo.right.startQuadrant - 1].indexs.concat(quadrantInfo[widgetInfo.right.endQuadrant - 1].indexs);
         widgetInfo.left.indexs = quadrantInfo[widgetInfo.left.startQuadrant - 1].indexs.concat(quadrantInfo[widgetInfo.left.endQuadrant - 1].indexs);
 
-        var overflowIndexs, sortedIndexs;
+        let overflowIndexs, sortedIndexs;
         
         if (widgetInfo.right.indexs.length > me.textMaxCount) {
             sortedIndexs = widgetInfo.right.indexs.slice(0);
@@ -624,17 +624,17 @@ export default class Pie extends event.Dispatcher
         quadrantsOrder.push(widgetInfo.left.startQuadrant);
         quadrantsOrder.push(widgetInfo.left.endQuadrant);
 
-        var ySpaceInfo = {}
+        let ySpaceInfo = {}
 
-        for (var i = 0; i < quadrantsOrder.length; i++) {
-            var isEnd = i == 1 || i == 3;
+        for (let i = 0; i < quadrantsOrder.length; i++) {
+            let isEnd = i == 1 || i == 3;
             me._widgetLabel(quadrantsOrder[i], quadrantInfo[quadrantsOrder[i] - 1].indexs, lMinY, rMinY, isEnd, ySpaceInfo)
         }
     }
 
     destroyLabel()
     {
-        var me = this;
+        let me = this;
         if (this.textSp) {
             this.textSp.removeAllChildren();
         };

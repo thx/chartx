@@ -159,7 +159,7 @@ function (_Component) {
           ;
         } else {
           /*
-          var _arr = [];
+          let _arr = [];
           _.each( arguments, function(item, i){
               if( !!i ){
                   _arr.push( item );

@@ -21,7 +21,7 @@ class Theme extends Component
 
     get( ind )
     {
-        var colors = this.colors;
+        let colors = this.colors;
         if( !_.isArray( colors ) ){
             colors = [ colors ]
         };
@@ -33,7 +33,7 @@ class Theme extends Component
         if( !colors ){
             colors = [];
         };
-        for( var i=0,l=this.colors.length; i<l; i++ ){
+        for( let i=0,l=this.colors.length; i<l; i++ ){
             if( colors[i] ){
                 colors[i] = this.colors[i]
             } else {

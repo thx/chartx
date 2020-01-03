@@ -185,7 +185,7 @@ class Relation extends GraphsBase {
         _.extend(true, this, getDefaultProps(Relation.defaultProps()), opt);
         
         if (this.layout === 'dagre') {
-            var dagreOpts = {
+            let dagreOpts = {
                 graph: {
                     rankdir: 'TB',
                     nodesep: 10,
@@ -246,7 +246,7 @@ class Relation extends GraphsBase {
     }
 
     initInduce() {
-        var me = this;
+        let me = this;
         this.induce = new Rect({
             id: "induce",
             context: {
@@ -258,14 +258,14 @@ class Relation extends GraphsBase {
         });
         this.sprite.addChild( this.induce );
 
-        var _mosedownIng = false;
-        var _lastDragPoint = null;
-        var _preCursor = me.app.canvax.domView.style.cursor;
+        let _mosedownIng = false;
+        let _lastDragPoint = null;
+        let _preCursor = me.app.canvax.domView.style.cursor;
 
         //滚轮缩放相关
-        var _wheelHandleTimeLen = 32; //16*2
-        var _wheelHandleTimeer = null;
-        var _deltaY = 0;
+        let _wheelHandleTimeLen = 32; //16*2
+        let _wheelHandleTimeer = null;
+        let _deltaY = 0;
 
         this.induce.on( event.types.get(), function (e) {
 
@@ -297,16 +297,16 @@ class Relation extends GraphsBase {
                     if (!_wheelHandleTimeer) {
                         _wheelHandleTimeer = setTimeout(function () {
 
-                            var itemLen = 0.02;
+                            let itemLen = 0.02;
 
-                            var _scale = (e.deltaY / 30) * itemLen;
+                            let _scale = (e.deltaY / 30) * itemLen;
                             if (Math.abs(_scale) < 0.04) {
                                 _scale = Math.sign(_scale) * 0.04
                             }
                             if (Math.abs(_scale) > 0.08) {
                                 _scale = Math.sign(_scale) * 0.08
                             }
-                            var scale = me.status.transform.scale + _scale;
+                            let scale = me.status.transform.scale + _scale;
                             if (scale <= 0.1) {
                                 scale = 0.1;
                             }
@@ -315,7 +315,7 @@ class Relation extends GraphsBase {
                                 scale = 1;
                             }
 
-                            var point = e.target.localToGlobal(e.point);
+                            let point = e.target.localToGlobal(e.point);
 
                             me.scale(scale, point);
 
@@ -339,7 +339,7 @@ class Relation extends GraphsBase {
         if (this.status.transform.scale == scale) {
             return;
         };
-        var scaleOrigin = point ? this._grahsSpClone.globalToLocal(point) : { x: 0, y: 0 };
+        let scaleOrigin = point ? this._grahsSpClone.globalToLocal(point) : { x: 0, y: 0 };
 
         console.log(scale, JSON.stringify(point), JSON.stringify(scaleOrigin), JSON.stringify(this.graphsSp._transform));
 
@@ -352,7 +352,7 @@ class Relation extends GraphsBase {
         this.graphsSp.context.scaleX = scale;
         this.graphsSp.context.scaleY = scale;
 
-        var newLeftTopPoint = this.graphsSp.localToGlobal({ x: 0, y: 0 }, this.sprite);
+        let newLeftTopPoint = this.graphsSp.localToGlobal({ x: 0, y: 0 }, this.sprite);
         console.log(JSON.stringify(newLeftTopPoint))
 
         
@@ -383,7 +383,7 @@ class Relation extends GraphsBase {
             this.sprite.context.scaleY = this.height / this.data.size.height;
         }
 
-        var _offsetLet = (this.width - this.data.size.width) / 2;
+        let _offsetLet = (this.width - this.data.size.width) / 2;
         if (_offsetLet < 0) {
             _offsetLet = 0;
         };
@@ -392,7 +392,7 @@ class Relation extends GraphsBase {
     }
 
     _initData() {
-        var data = {
+        let data = {
             nodes: [
                 //{ type,key,content,ctype,width,height,x,y }
             ],
@@ -418,13 +418,13 @@ class Relation extends GraphsBase {
             };
         };
 
-        var _nodeMap = {};
-        for (var i = 0; i < this.dataFrame.length; i++) {
-            var rowData = this.dataFrame.getRowDataAt(i);
-            var fields = _.flatten([(rowData[this.field] + "").split(",")]);
-            var content = this._getContent(rowData);
+        let _nodeMap = {};
+        for (let i = 0; i < this.dataFrame.length; i++) {
+            let rowData = this.dataFrame.getRowDataAt(i);
+            let fields = _.flatten([(rowData[this.field] + "").split(",")]);
+            let content = this._getContent(rowData);
 
-            var node = {
+            let node = {
                 type: "relation",
                 iNode: i,
                 rowData: rowData,
@@ -460,7 +460,7 @@ class Relation extends GraphsBase {
 
         //然后给edge填写source 和 target
         _.each( data.edges, function( edge ){
-            var keys = edge.key;
+            let keys = edge.key;
             edge.source = _nodeMap[ keys[0] ];
             edge.target = _nodeMap[ keys[1] ];
         } );
@@ -469,9 +469,9 @@ class Relation extends GraphsBase {
     }
 
     dagreLayout(data) {
-        var layout = global.layout.dagre;
+        let layout = global.layout.dagre;
 
-        var g = new layout.graphlib.Graph();
+        let g = new layout.graphlib.Graph();
         g.setGraph(this.layoutOpts.graph);
         g.setDefaultEdgeLabel(function () {
             //其实我到现在都还没搞明白setDefaultEdgeLabel的作用
@@ -495,28 +495,28 @@ class Relation extends GraphsBase {
     }
 
     treeLayout(  ){
-        // var tree = global.layout.tree().separation(function(a, b) {
+        // let tree = global.layout.tree().separation(function(a, b) {
         //     //设置横向节点之间的间距
-        //     var totalWidth = a.width + b.width;
+        //     let totalWidth = a.width + b.width;
         //     return (totalWidth/2) + 10;
         // });
         
-        // var nodes = tree.nodes( this.jsonData[0] ).reverse();
-        // var links = tree.links(nodes);
+        // let nodes = tree.nodes( this.jsonData[0] ).reverse();
+        // let links = tree.links(nodes);
     }
 
     widget() {
-        var me = this;
+        let me = this;
         _.each(this.data.edges, function (edge) {
 
             if( me.line.isTree ){
                 me._setTreePoints( edge );
             };
 
-            var lineWidth = me.getProp( me.line.lineWidth, edge );
-            var strokeStyle = me.getProp( me.line.strokeStyle, edge );
+            let lineWidth = me.getProp( me.line.lineWidth, edge );
+            let strokeStyle = me.getProp( me.line.strokeStyle, edge );
 
-            var _bl = new Path({
+            let _bl = new Path({
                 context: {
                     path: me._getPathStr(edge, me.line.inflectionRadius),
                     lineWidth: lineWidth,
@@ -524,7 +524,7 @@ class Relation extends GraphsBase {
                 }
             });
 
-            var arrowControl = edge.points.slice(-2, -1)[0];
+            let arrowControl = edge.points.slice(-2, -1)[0];
             if( me.line.shapeType == "bezier" ){
                 if( me.rankdir == "TB" || me.rankdir == "BT" ){
                     arrowControl.x += (edge.source.x-edge.target.x)/20
@@ -536,7 +536,7 @@ class Relation extends GraphsBase {
             me.edgesSp.addChild(_bl);
 
             /*  edge的xy 就是 可以用来显示label的位置
-            var _circle = new Circle({
+            let _circle = new Circle({
                 context : {
                     r : 4,
                     x : edge.x,
@@ -548,7 +548,7 @@ class Relation extends GraphsBase {
             */
 
             if( me.line.arrow ){
-                var _arrow = new Arrow({
+                let _arrow = new Arrow({
                     context: {
                         control: arrowControl,
                         point: edge.points.slice(-1)[0],
@@ -563,7 +563,7 @@ class Relation extends GraphsBase {
 
         _.each(this.data.nodes, function (node) {
 
-            var _boxShape = new Rect({
+            let _boxShape = new Rect({
                 context: {
                     x: node.x - node.width / 2,
                     y: node.y - node.height / 2,
@@ -596,7 +596,7 @@ class Relation extends GraphsBase {
                 //而且要监听 _boxShape 的任何形变跟随
 
                 _boxShape.on("transform", function () {
-                    var devicePixelRatio = typeof (window) !== 'undefined' ? window.devicePixelRatio : 1;
+                    let devicePixelRatio = typeof (window) !== 'undefined' ? window.devicePixelRatio : 1;
                     node.element.style.transform = "matrix(" + _boxShape.worldTransform.clone().scale(1 / devicePixelRatio, 1 / devicePixelRatio).toArray().join() + ")";
                     node.element.style.transformOrigin = "left top"; //修改为左上角为旋转中心点来和canvas同步
                     node.element.style.marginLeft = me.getProp(me.node.padding, node) * me.status.transform.scale + "px";
@@ -613,7 +613,7 @@ class Relation extends GraphsBase {
     }
 
     _setTreePoints( edge ){
-        var points = edge.points;
+        let points = edge.points;
       
         if( this.rankdir == "TB" || this.rankdir == "BT" ){
             points[0] = {
@@ -646,12 +646,12 @@ class Relation extends GraphsBase {
      */
     _getPathStr(edge, inflectionRadius) {
         
-        var points = edge.points;
+        let points = edge.points;
 
 
-        var head = points[0];
-        var tail = points.slice(-1)[0];
-        var str = "M" + head.x + " " + head.y;
+        let head = points[0];
+        let tail = points.slice(-1)[0];
+        let str = "M" + head.x + " " + head.y;
         
         if( edge.shapeType == "bezier" ){
             if( points.length == 3 ){
@@ -669,16 +669,16 @@ class Relation extends GraphsBase {
                     if( inflectionRadius && i<points.length-1 ){
                         
                         //圆角连线
-                        var prePoint = points[i-1];
-                        var nextPoint= points[i+1];
+                        let prePoint = points[i-1];
+                        let nextPoint= points[i+1];
                         //要从这个点到上个点的半径距离，已point为控制点，绘制nextPoint的半径距离
 
-                        var radius = inflectionRadius;
+                        let radius = inflectionRadius;
                         //radius要做次二次校验，取radius 以及 point 和prePoint距离以及和 nextPoint 的最小值
-                        //var _disPre = Math.abs(Math.sqrt( (prePoint.x - point.x)*(prePoint.x - point.x) + (prePoint.y - point.y)*(prePoint.y - point.y) ));
-                        //var _disNext = Math.abs(Math.sqrt( (nextPoint.x - point.x)*(nextPoint.x - point.x) + (nextPoint.y - point.y)*(nextPoint.y - point.y) ));
-                        var _disPre = Math.max( Math.abs( prePoint.x - point.x )/2, Math.abs( prePoint.y - point.y )/2 );
-                        var _disNext = Math.max( Math.abs( nextPoint.x - point.x )/2, Math.abs( nextPoint.y - point.y )/2 );
+                        //let _disPre = Math.abs(Math.sqrt( (prePoint.x - point.x)*(prePoint.x - point.x) + (prePoint.y - point.y)*(prePoint.y - point.y) ));
+                        //let _disNext = Math.abs(Math.sqrt( (nextPoint.x - point.x)*(nextPoint.x - point.x) + (nextPoint.y - point.y)*(nextPoint.y - point.y) ));
+                        let _disPre = Math.max( Math.abs( prePoint.x - point.x )/2, Math.abs( prePoint.y - point.y )/2 );
+                        let _disNext = Math.max( Math.abs( nextPoint.x - point.x )/2, Math.abs( nextPoint.y - point.y )/2 );
                         radius = _.min( [radius, _disPre, _disNext] );
 
                         //console.log(Math.atan2( point.y - prePoint.y , point.x - prePoint.x ),Math.atan2( nextPoint.y - point.y , nextPoint.x - point.x ))
@@ -692,14 +692,14 @@ class Relation extends GraphsBase {
                             return;
                         } else {
                             function getPointOf( p ){
-                                var _atan2 = Math.atan2( p.y - point.y , p.x - point.x );
+                                let _atan2 = Math.atan2( p.y - point.y , p.x - point.x );
                                 return {
                                     x : point.x+radius * Math.cos( _atan2 ),
                                     y : point.y+radius * Math.sin( _atan2 )
                                 }
                             };
-                            var bezierBegin = getPointOf( prePoint );
-                            var bezierEnd = getPointOf( nextPoint );
+                            let bezierBegin = getPointOf( prePoint );
+                            let bezierEnd = getPointOf( nextPoint );
                             str +=",L"+bezierBegin.x+" "+bezierBegin.y+",Q"+ point.x + " " + point.y+" "+ bezierEnd.x + " " + bezierEnd.y
                         }
                     } else {
@@ -716,14 +716,14 @@ class Relation extends GraphsBase {
      * 字符串是否含有html标签的检测
      */
     _checkHtml(str) {
-        var reg = /<[^>]+>/g;
+        let reg = /<[^>]+>/g;
         return reg.test(str);
     }
 
     _getContent(rowData) {
-        var me = this;
+        let me = this;
 
-        var _c; //this.node.content;
+        let _c; //this.node.content;
         if (this._isField(this.node.content.field)) {
             _c = rowData[ this.node.content.field ];
         };
@@ -738,8 +738,8 @@ class Relation extends GraphsBase {
     }
 
     _getElementAndSize(node) {
-        var me = this;
-        var contentType = node.ctype;
+        let me = this;
+        let contentType = node.ctype;
 
         if (me._isField(contentType)) {
             contentType = node.rowData[contentType];
@@ -756,14 +756,14 @@ class Relation extends GraphsBase {
 
     }
     _getEleAndsetCanvasSize(node) {
-        var me = this;
-        var content = node.content;
-        var width = node.rowData.width, height = node.rowData.height;
+        let me = this;
+        let content = node.content;
+        let width = node.rowData.width, height = node.rowData.height;
 
-        var sprite = new Canvax.Display.Sprite({});
+        let sprite = new Canvax.Display.Sprite({});
 
         //先创建text，根据 text 来计算node需要的width和height
-        var label = new Canvax.Display.Text(content, {
+        let label = new Canvax.Display.Text(content, {
             context: {
                 fillStyle: me.getProp(me.node.content.fontColor, node),
                 textAlign: me.getProp(me.node.content.textAlign, node),
@@ -793,11 +793,11 @@ class Relation extends GraphsBase {
 
     }
     _getEleAndsetHtmlSize(node) {
-        var me = this;
-        var content = node.content;
-        var width = node.rowData.width, height = node.rowData.height;
+        let me = this;
+        let content = node.content;
+        let width = node.rowData.width, height = node.rowData.height;
 
-        var _dom = document.createElement("div");
+        let _dom = document.createElement("div");
         _dom.className = "chartx_relation_node";
         _dom.style.cssText += "; position:absolute;visibility:hidden;"
         _dom.style.cssText += "; color:" + me.getProp(me.node.content.fontColor, node) + ";";
@@ -828,7 +828,7 @@ class Relation extends GraphsBase {
     }
 
     getProp( prop, nodeData ) {
-        var _prop = prop;
+        let _prop = prop;
         if( this._isField( prop ) ){
             _prop = nodeData.rowData[ prop ];
         } else {

@@ -1,4 +1,5 @@
 module.exports = {
+    "parser": "babel-eslint",
     "env": {
         "browser": true,
         "es6": true
@@ -19,13 +20,5 @@ module.exports = {
         "no-inner-declarations":0,
         "no-unreachable":0,
         "no-unused-vars":0
-    },
-    "overrides": [
-        {
-            "files": ["./gulpfile.js"],
-            "rules": {
-                "require-jsdoc": "off"
-            }
-        }
-    ]
+    }
 };

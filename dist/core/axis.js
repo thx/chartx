@@ -572,16 +572,19 @@ function () {
   }, {
     key: "_getOriginTrans",
     value: function _getOriginTrans(origin) {
+      var _this = this;
+
       var pos = 0;
       var me = this;
-      var dsgLen = this.dataSectionGroup.length; //var groupLength = this.axisLength / dsgLen;
+      var dsgLen = this.dataSectionGroup.length;
+      var groupLength = this.axisLength / dsgLen;
 
-      for (var i = 0, l = dsgLen; i < l; i++) {
-        var ds = this.dataSectionGroup[i];
-        var groupLength = this.axisLength * this.middleWeightPos[i];
+      var _loop = function _loop(i, l) {
+        var ds = _this.dataSectionGroup[i];
+        groupLength = _this.axisLength * _this.middleWeightPos[i];
         var preGroupLenth = 0;
 
-        _canvax._.each(this.middleWeightPos, function (mp, mi) {
+        _canvax._.each(_this.middleWeightPos, function (mp, mi) {
           if (mi < i) {
             preGroupLenth += me.axisLength * mp;
           }
@@ -589,7 +592,7 @@ function () {
           ;
         });
 
-        if (this.layoutType == "proportion") {
+        if (_this.layoutType == "proportion") {
           var min = _canvax._.min(ds);
 
           var max = _canvax._.max(ds);
@@ -598,13 +601,13 @@ function () {
 
           if (origin >= min && origin <= max) {
             pos = (origin - min) / amountABS * groupLength + preGroupLenth;
-            break;
+            return "break";
           }
 
           ;
         } else {
           /* TODO: 貌似 非proportion 布局 下面的_originTrans 没毛意义啊，先注释掉
-          var valInd = _.indexOf(ds , origin);
+          let valInd = _.indexOf(ds , origin);
           if( valInd != -1 ){
               if( this.layoutType == "rule" ){
                   pos = valInd / (ds.length - 1) * groupLength; 
@@ -615,6 +618,12 @@ function () {
           };
           */
         }
+      };
+
+      for (var i = 0, l = dsgLen; i < l; i++) {
+        var _ret = _loop(i, l);
+
+        if (_ret === "break") break;
       }
 
       ;
@@ -657,7 +666,7 @@ function () {
     value: function getPosOfVal(val) {
       /* val可能会重复，so 这里得到的会有问题，先去掉
       //先检查下 dataSectionLayout 中有没有对应的记录
-      var _pos = this._getLayoutDataOf({ val : val }).pos;
+      let _pos = this._getLayoutDataOf({ val : val }).pos;
       if( _pos != undefined ){
           return _pos;
       };
@@ -687,6 +696,8 @@ function () {
   }, {
     key: "getPosOf",
     value: function getPosOf(opt) {
+      var _this2 = this;
+
       var me = this;
       var pos;
 
@@ -694,14 +705,14 @@ function () {
 
 
       if (this.layoutType == "proportion") {
-        var dsgLen = this.dataSectionGroup.length; //var groupLength = this.axisLength / dsgLen;
+        var dsgLen = this.dataSectionGroup.length; //let groupLength = this.axisLength / dsgLen;
 
-        for (var i = 0, l = dsgLen; i < l; i++) {
-          var ds = this.dataSectionGroup[i];
-          var groupLength = this.axisLength * this.middleWeightPos[i];
+        var _loop2 = function _loop2(i, l) {
+          var ds = _this2.dataSectionGroup[i];
+          var groupLength = _this2.axisLength * _this2.middleWeightPos[i];
           var preGroupLenth = 0;
 
-          _canvax._.each(this.middleWeightPos, function (mp, mi) {
+          _canvax._.each(_this2.middleWeightPos, function (mp, mi) {
             if (mi < i) {
               preGroupLenth += me.axisLength * mp;
             }
@@ -713,10 +724,10 @@ function () {
 
           var max = _canvax._.max(ds);
 
-          var val = "val" in opt ? opt.val : this.getValOfInd(opt.ind);
+          var val = "val" in opt ? opt.val : _this2.getValOfInd(opt.ind);
 
           if (val >= min && val <= max) {
-            var _origin = this.origin;
+            var _origin = _this2.origin;
             var origiInRange = !(_origin < min || _origin > max); //如果 origin 并不在这个区间
 
             if (!origiInRange) {
@@ -739,12 +750,18 @@ function () {
 
             if (origiInRange) {
               //origin在区间内的时候，才需要便宜_originTrans
-              pos += this._originTrans;
+              pos += _this2._originTrans;
             }
 
             ;
-            break;
+            return "break";
           }
+        };
+
+        for (var i = 0, l = dsgLen; i < l; i++) {
+          var _ret2 = _loop2(i, l);
+
+          if (_ret2 === "break") break;
         }
       } else {
         if (cellCount == 1) {
@@ -825,7 +842,7 @@ function () {
       
       } else {
           //这里的index是直接的对应dataOrg的索引
-          var org = ds ? ds : _.flatten(this.dataOrg);
+          let org = ds ? ds : _.flatten(this.dataOrg);
           return org[ind];
       };
       */
@@ -841,8 +858,8 @@ function () {
       var val;
 
       if (this.layoutType == "proportion") {
-        //var dsgLen = this.dataSectionGroup.length;
-        //var groupLength = this.axisLength / dsgLen;
+        //let dsgLen = this.dataSectionGroup.length;
+        //let groupLength = this.axisLength / dsgLen;
         _canvax._.each(this.dataSectionGroup, function (ds, i) {
           var groupLength = me.axisLength * me.middleWeightPos[i];
           var preGroupLenth = 0;

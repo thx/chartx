@@ -325,25 +325,27 @@ function (_Component) {
 
         for (var p in opt) {
           if (p == 'field') {
-            //字段的判断条件不同
-            var fs = _.flatten([item[p]]);
+            (function () {
+              //字段的判断条件不同
+              var fs = _.flatten([item[p]]);
 
-            var expFs = _.flatten([opt[p]]);
+              var expFs = _.flatten([opt[p]]);
 
-            var inFs = true;
+              var inFs = true;
 
-            _.each(expFs, function (exp) {
-              if (_.indexOf(fs, exp) == -1) {
-                //任何一个field不再fs内， 说明配对不成功
-                inFs = false;
+              _.each(expFs, function (exp) {
+                if (_.indexOf(fs, exp) == -1) {
+                  //任何一个field不再fs内， 说明配对不成功
+                  inFs = false;
+                }
+              });
+
+              if (inFs) {
+                i++;
               }
-            });
 
-            if (inFs) {
-              i++;
-            }
-
-            ;
+              ;
+            })();
           } else {
             if (JSON.stringify(item[p]) == JSON.stringify(opt[p])) {
               i++;

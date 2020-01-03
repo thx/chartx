@@ -147,7 +147,7 @@ class Legend extends Component
     }
 
     _getLegendData( opt ){
-        var legendData = opt.data;
+        let legendData = opt.data;
         if( legendData ){
             _.each( legendData, function( item, i ){
                 item.enabled = true;
@@ -214,7 +214,7 @@ class Legend extends Component
     draw()
     {
         //为了在直角坐标系中，让 textAlign left的时候，图例和坐标系左侧对齐， 好看点, 用心良苦啊
-        var _coord = this.app.getComponent({name:'coord'});
+        let _coord = this.app.getComponent({name:'coord'});
         if( _coord && _coord.type == 'rect' ){
             if( this.textAlign == "left" && (this.position == "top" || this.position == "bottom") ){
                 this.pos.x = _coord.getSizeAndOrigin().origin.x + this.icon.radius;
@@ -228,23 +228,23 @@ class Legend extends Component
     widget()
     {
     
-        var me = this;
+        let me = this;
 
-        var viewWidth = this.app.width - this.app.padding.left - this.app.padding.right;
-        var viewHeight = this.app.height - this.app.padding.top - this.app.padding.bottom;
+        let viewWidth = this.app.width - this.app.padding.left - this.app.padding.right;
+        let viewHeight = this.app.height - this.app.padding.top - this.app.padding.bottom;
 
-        var maxItemWidth = 0;
-        var width=0,height=0;
-        var x=0,y=0;
-        var rows = 1;
+        let maxItemWidth = 0;
+        let width=0,height=0;
+        let x=0,y=0;
+        let rows = 1;
 
-        var isOver = false; //如果legend过多
+        let isOver = false; //如果legend过多
 
         _.each( this.data , function( obj , i ){
 
             if( isOver ) return;
             
-            var _icon = new Circle({
+            let _icon = new Circle({
                 id : "legend_field_icon_"+i,
                 context : {
                     x     : 0,
@@ -259,12 +259,12 @@ class Legend extends Component
                 //... 代理到sprit上面处理
             });
 
-            var _text = obj.name;
+            let _text = obj.name;
             if( me.label.format ){
                 _text = me.label.format(obj.name, obj);
             };
             
-            var txt = new Canvax.Display.Text( _text , {
+            let txt = new Canvax.Display.Text( _text , {
                 id: "legend_field_txt_"+i,
                 context : {
                     x : me.icon.radius + 3 ,
@@ -280,12 +280,12 @@ class Legend extends Component
                 //... 代理到sprit上面处理
             });
 
-            var txtW = txt.getTextWidth();
-            var itemW = txtW + me.icon.radius*2 + 20;
+            let txtW = txt.getTextWidth();
+            let itemW = txtW + me.icon.radius*2 + 20;
 
             maxItemWidth = Math.max( maxItemWidth, itemW );
 
-            var spItemC = {
+            let spItemC = {
                 height : me.icon.height
             };
 
@@ -320,7 +320,7 @@ class Legend extends Component
 
                 width = Math.max( width, x );
             };
-            var sprite = new Canvax.Display.Sprite({
+            let sprite = new Canvax.Display.Sprite({
                 id : "legend_field_"+i,
                 context : spItemC
             });

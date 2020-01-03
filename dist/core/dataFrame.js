@@ -379,7 +379,7 @@ function _default(dataOrg, opt) {
     ;
 
     if (expCount) {
-      for (var i = dataFrame.range.start; i <= dataFrame.range.end; i++) {
+      var _loop = function _loop(i) {
         var matchNum = 0;
 
         _canvax._.each(dataFrame.data, function (fd) {
@@ -394,6 +394,10 @@ function _default(dataOrg, opt) {
         }
 
         ;
+      };
+
+      for (var i = dataFrame.range.start; i <= dataFrame.range.end; i++) {
+        _loop(i);
       }
 
       ;

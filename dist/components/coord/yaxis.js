@@ -369,7 +369,7 @@ function (_Axis) {
 
         ;
         var lineX = 0;
-        var tickLineContext;
+        var tickLineContext = void 0;
 
         if (me.tickLine.enabled) {
           //线条
@@ -388,7 +388,7 @@ function (_Axis) {
 
         ; //文字
 
-        var textContext;
+        var textContext = void 0;
 
         if (me.label.enabled) {
           var txtX = me.align == "left" ? lineX - me.label.distance : lineX + me.tickLine.lineLength + me.label.distance;

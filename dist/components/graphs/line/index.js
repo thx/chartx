@@ -131,7 +131,7 @@ function (_GraphsBase) {
       me.setEnabledField();
 
       _canvax._.each(_canvax._.flatten(me.enabledField), function (field, i) {
-        //var maxValue = 0;
+        //let maxValue = 0;
         var fieldMap = me.app.getComponent({
           name: 'coord'
         }).getFieldMapOf(field); //单条line的全部data数据

@@ -253,7 +253,7 @@ function (_GraphsBase) {
   }, {
     key: "_dataHandle",
     value: function _dataHandle() {
-      var me = this; //var _coord = me.app.getComponent({name:'coord'});
+      var me = this; //let _coord = me.app.getComponent({name:'coord'});
 
       var data = [];
       var dataFrame = me.dataFrame;

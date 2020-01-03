@@ -692,7 +692,7 @@ function (_event$Dispatcher) {
           return null;
         }
 
-        ; //var bottomP = [ 0 , 0 ];
+        ; //let bottomP = [ 0 , 0 ];
         //创建一个线性渐变
         //console.log( topP[0] + "|"+ topP[1]+ "|"+  topP[0]+ "|"+ bottomP[1] )
 

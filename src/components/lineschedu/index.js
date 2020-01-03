@@ -65,16 +65,16 @@ class lineSchedu extends Component
 
     draw()
     {
-        var me = this;
+        let me = this;
         
-        var _coord = this.app.getComponent({name:'coord'});
+        let _coord = this.app.getComponent({name:'coord'});
         this.pos = {   
             x: _coord.origin.x,
             y: _coord.origin.y
         };
         this.setPosition();
 
-        var lineGraphs = me.app.getComponent({
+        let lineGraphs = me.app.getComponent({
             name  : 'graphs',
             type  : "line",
             field : me.lineField
@@ -82,27 +82,27 @@ class lineSchedu extends Component
 
         me.lineDatas = lineGraphs.data[ me.lineField ].data;
 
-        var iNode = this.app.getComponent({name : "coord"}).getAxis({type: "xAxis"}).getIndexOfVal( this.time );
+        let iNode = this.app.getComponent({name : "coord"}).getAxis({type: "xAxis"}).getIndexOfVal( this.time );
         
         if( iNode == -1 ){
             return;
         };
 
-        var nodeData = this.lineDatas[iNode];
+        let nodeData = this.lineDatas[iNode];
 
         if( nodeData.y != undefined ){
-            var y = me._getNodeY( nodeData, _coord );
-            var x = nodeData.x;
+            let y = me._getNodeY( nodeData, _coord );
+            let x = nodeData.x;
 
-            var _txtSp = new Canvax.Display.Sprite({
+            let _txtSp = new Canvax.Display.Sprite({
                 context : {
                     x : x - 20
                 }
             });
             this.sprite.addChild( _txtSp );
-            var txtHeight = 0;
+            let txtHeight = 0;
 
-            var _title = new Canvax.Display.Text( me.time, {
+            let _title = new Canvax.Display.Text( me.time, {
                 context : {
                     fillStyle : this.timeFontColor || this.style,
                     fontSize  : this.timeFontSize
@@ -110,9 +110,9 @@ class lineSchedu extends Component
             } );
             _txtSp.addChild( _title );
             txtHeight = _title.getTextHeight();
-            var txtWidth = _title.getTextWidth();
+            let txtWidth = _title.getTextWidth();
 
-            var _list = new Canvax.Display.Text(_.flatten([me.list]).join("\n") , {
+            let _list = new Canvax.Display.Text(_.flatten([me.list]).join("\n") , {
                 context : {
                     y : txtHeight,
                     fillStyle : this.listFontColor || this.style,
@@ -129,7 +129,7 @@ class lineSchedu extends Component
                 _list.context.textAlign = "right";
             };
 
-            var tsTop = 0;
+            let tsTop = 0;
             if( me.status == "online" ){
                 tsTop = y - (this.radius + 3) - txtHeight;
                 if( Math.abs(tsTop) > _coord.origin.y ){
@@ -146,7 +146,7 @@ class lineSchedu extends Component
             
             _txtSp.context.y = tsTop;
 
-            var _line = new Canvax.Shapes.BrokenLine({
+            let _line = new Canvax.Shapes.BrokenLine({
                 context : {
                     pointList: [
                         [ x, y ], [ x, nodeData.y ]
@@ -158,7 +158,7 @@ class lineSchedu extends Component
 
             me.sprite.addChild( _line );
 
-            var _node = new Canvax.Shapes.Circle({
+            let _node = new Canvax.Shapes.Circle({
                 context : {
                     x : x,
                     y : y,
@@ -176,9 +176,9 @@ class lineSchedu extends Component
 
     _getNodeY(nodeData, _coord){
     
-        var appHeight = this.app.height;
-        var coordHeight = _coord.height;
-        var y = nodeData.y;
+        let appHeight = this.app.height;
+        let coordHeight = _coord.height;
+        let y = nodeData.y;
         if( this.status == "online" ){
             y -= Math.min( 50, (appHeight-Math.abs( y ))*0.3 )
         } else {

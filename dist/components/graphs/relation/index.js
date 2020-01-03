@@ -557,13 +557,13 @@ function (_GraphsBase) {
     }
   }, {
     key: "treeLayout",
-    value: function treeLayout() {// var tree = global.layout.tree().separation(function(a, b) {
+    value: function treeLayout() {// let tree = global.layout.tree().separation(function(a, b) {
       //     //设置横向节点之间的间距
-      //     var totalWidth = a.width + b.width;
+      //     let totalWidth = a.width + b.width;
       //     return (totalWidth/2) + 10;
       // });
-      // var nodes = tree.nodes( this.jsonData[0] ).reverse();
-      // var links = tree.links(nodes);
+      // let nodes = tree.nodes( this.jsonData[0] ).reverse();
+      // let links = tree.links(nodes);
     }
   }, {
     key: "widget",
@@ -602,7 +602,7 @@ function (_GraphsBase) {
         ;
         me.edgesSp.addChild(_bl);
         /*  edge的xy 就是 可以用来显示label的位置
-        var _circle = new Circle({
+        let _circle = new Circle({
             context : {
                 r : 4,
                 x : edge.x,
@@ -746,8 +746,8 @@ function (_GraphsBase) {
               var nextPoint = points[i + 1]; //要从这个点到上个点的半径距离，已point为控制点，绘制nextPoint的半径距离
 
               var radius = inflectionRadius; //radius要做次二次校验，取radius 以及 point 和prePoint距离以及和 nextPoint 的最小值
-              //var _disPre = Math.abs(Math.sqrt( (prePoint.x - point.x)*(prePoint.x - point.x) + (prePoint.y - point.y)*(prePoint.y - point.y) ));
-              //var _disNext = Math.abs(Math.sqrt( (nextPoint.x - point.x)*(nextPoint.x - point.x) + (nextPoint.y - point.y)*(nextPoint.y - point.y) ));
+              //let _disPre = Math.abs(Math.sqrt( (prePoint.x - point.x)*(prePoint.x - point.x) + (prePoint.y - point.y)*(prePoint.y - point.y) ));
+              //let _disNext = Math.abs(Math.sqrt( (nextPoint.x - point.x)*(nextPoint.x - point.x) + (nextPoint.y - point.y)*(nextPoint.y - point.y) ));
 
               var _disPre = Math.max(Math.abs(prePoint.x - point.x) / 2, Math.abs(prePoint.y - point.y) / 2);
 

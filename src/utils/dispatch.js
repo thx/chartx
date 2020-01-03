@@ -41,7 +41,8 @@ Dispatch.prototype = dispatch.prototype = {
     // Otherwise, if a null callback was specified, remove callbacks of the given name.
     if (callback != null && typeof callback !== "function") throw new Error("invalid callback: " + callback);
     while (++i < n) {
-      if (t = (typename = T[i]).type) _[t] = set(_[t], typename.name, callback);
+      t = (typename = T[i]).type;
+      if (t) _[t] = set(_[t], typename.name, callback);
       else if (callback == null) for (t in _) _[t] = set(_[t], typename.name, null);
     }
 

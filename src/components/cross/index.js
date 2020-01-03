@@ -68,9 +68,9 @@ class Cross extends Component
 
     draw()
     {
-        var me = this;
+        let me = this;
 
-        var _coord = this.app.getComponent({name:'coord'});
+        let _coord = this.app.getComponent({name:'coord'});
         this.pos = {   
             x: _coord.origin.x,
             y: _coord.origin.y

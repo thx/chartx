@@ -74,12 +74,12 @@ export default class coordBase extends Component
     //和原始field结构保持一致，但是对应的field换成 {field: , enabled:...}结构
     setFieldsMap( axisExp )
     {
-        var me = this;
-        var fieldInd = 0;
+        let me = this;
+        let fieldInd = 0;
 
-        var axisType = axisExp.type || "yAxis";
+        let axisType = axisExp.type || "yAxis";
 
-        var fieldsArr = [];
+        let fieldsArr = [];
         _.each( this.getAxiss( axisExp ), function( _axis ){
             if( _axis.field ){
                 fieldsArr = fieldsArr.concat( _axis.field );
@@ -92,8 +92,8 @@ export default class coordBase extends Component
                 fields = [fields];
             };
 
-            var clone_fields = _.clone( fields );
-            for(var i = 0 , l=fields.length ; i<l ; i++) {
+            let clone_fields = _.clone( fields );
+            for(let i = 0 , l=fields.length ; i<l ; i++) {
                 if( _.isString( fields[i] ) ){
                     clone_fields[i] = {
                         field   : fields[i],
@@ -118,7 +118,7 @@ export default class coordBase extends Component
     //设置 fieldsMap 中对应field 的 enabled状态
     setFieldEnabled( field )
     {
-        var me = this;
+        let me = this;
         function set( maps ){
             _.each( maps , function( map ){
                 if( _.isArray( map ) ){
@@ -133,8 +133,8 @@ export default class coordBase extends Component
 
     getFieldMapOf( field )
     {
-        var me = this;
-        var fieldMap = null;
+        let me = this;
+        let fieldMap = null;
         function get( maps ){
             _.each( maps , function( map ){
                 if( _.isArray( map ) ){
@@ -154,14 +154,14 @@ export default class coordBase extends Component
     getEnabledFieldsOf( axis )
     {
         
-        var enabledFields = [];
-        var axisType = axis ? axis.type : "yAxis";
+        let enabledFields = [];
+        let axisType = axis ? axis.type : "yAxis";
 
         _.each( this.fieldsMap, function( bamboo ){
             if( _.isArray( bamboo ) ){
                 //多节竹子，堆叠
 
-                var fields = [];
+                let fields = [];
                 
                 //设置完fields后，返回这个group属于left还是right的axis
                 _.each( bamboo, function( obj ){
@@ -186,8 +186,8 @@ export default class coordBase extends Component
     //如果有传参数 fields 进来，那么就把这个指定的 fields 过滤掉 enabled==false的field
     //只留下enabled的field 结构
     filterEnabledFields( fields ){
-        var me = this;
-        var arr = [];
+        let me = this;
+        let arr = [];
         if( !_.isArray( fields ) ) fields = [ fields ];
         _.each( fields, function( f ){
             if( !_.isArray( f ) ){
@@ -196,7 +196,7 @@ export default class coordBase extends Component
                 }
             } else {
                 //如果这个是个纵向数据，说明就是堆叠配置
-                var varr = [];
+                let varr = [];
                 _.each( f, function( v_f ){
                     if( me.getFieldMapOf( v_f ).enabled ){
                         varr.push( v_f );
@@ -262,24 +262,24 @@ export default class coordBase extends Component
 
     //获取对应轴的接口
     getAxis( opt ){
-        var axiss = this.getAxiss( opt );
+        let axiss = this.getAxiss( opt );
         return axiss[0];
     }
 
     getAxiss( opt ){
 
-        var arr = [];
-        var expCount = Object.keys(opt).length;
+        let arr = [];
+        let expCount = Object.keys(opt).length;
 
         _.each( this._axiss, function( item ){
-            var i= 0;
-            for( var p in opt ){
+            let i= 0;
+            for( let p in opt ){
                 if( p == 'field' ){
                     //字段的判断条件不同
-                    var fs = _.flatten( [ item[p] ] );
-                    var expFs = _.flatten( [ opt[p] ] );
+                    let fs = _.flatten( [ item[p] ] );
+                    let expFs = _.flatten( [ opt[p] ] );
 
-                    var inFs = true;
+                    let inFs = true;
                     _.each( expFs, function( exp ){
                         if( _.indexOf(fs, exp) == -1 ){
                             //任何一个field不再fs内， 说明配对不成功

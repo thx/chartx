@@ -8,16 +8,16 @@ exports["default"] = void 0;
 var _canvax = require("canvax");
 
 function normalizeTickInterval(interval, magnitude) {
-  var normalized, i; // var multiples = [1, 2, 2.5, 5, 10];
+  var normalized, i; // let multiples = [1, 2, 2.5, 5, 10];
 
   var multiples = [1, 2, 5, 10]; // round to a tenfold of 1, 2, 2.5 or 5
 
   normalized = interval / magnitude; // normalize the interval to the nearest multiple
 
-  for (var i = 0; i < multiples.length; i++) {
-    interval = multiples[i];
+  for (var _i = 0; _i < multiples.length; _i++) {
+    interval = multiples[_i];
 
-    if (normalized <= (multiples[i] + (multiples[i + 1] || multiples[i])) / 2) {
+    if (normalized <= (multiples[_i] + (multiples[_i + 1] || multiples[_i])) / 2) {
       break;
     }
   } // multiply back to the correct magnitude

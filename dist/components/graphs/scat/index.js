@@ -645,7 +645,7 @@ function (_GraphsBase) {
 
         var _context = me._getNodeContext(nodeData);
 
-        var Shape = nodeData.shapeType == "circle" ? Circle : Rect; //var _nodeElement = me._shapesp.getChildAt( iNode );
+        var Shape = nodeData.shapeType == "circle" ? Circle : Rect; //let _nodeElement = me._shapesp.getChildAt( iNode );
 
         if (!_nodeElement) {
           _nodeElement = new Shape({
@@ -769,14 +769,14 @@ function (_GraphsBase) {
 
         var gi = 0;
 
-        var _loop = function _loop() {
-          _group = _this2._groupData[_groupKey];
-          _groupData = {
+        var _loop = function _loop(_groupKey) {
+          var _group = _this2._groupData[_groupKey];
+          var _groupData = {
             name: _groupKey,
             iGroup: gi,
             data: _group
           };
-          _groupPoints = [];
+          var _groupPoints = [];
 
           function getCirclePoints(nodeData, n) {
             if (!n || n == 1) {
@@ -803,14 +803,19 @@ function (_GraphsBase) {
             _groupPoints = _groupPoints.concat(getCirclePoints(nodeData, me.area.quantile));
           });
 
-          areaPoints = (0, _index2["default"])(_groupPoints, me.area.concavity);
-          defStyle = me.app.getTheme(gi);
-          areaFillStyle = me._getStyle(me.area.fillStyle, _groupData) || defStyle;
-          areaFillAlpha = me._getProp(me.area.fillAlpha, _groupData);
-          areaStrokeStyle = me._getStyle(me.area.strokeStyle, _groupData) || defStyle;
-          areaLineWidth = me._getProp(me.area.lineWidth, _groupData);
-          areaStrokeAlpha = me._getProp(me.area.strokeAlpha, _groupData);
-          _areaElement = new Polygon({
+          var areaPoints = (0, _index2["default"])(_groupPoints, me.area.concavity);
+          var defStyle = me.app.getTheme(gi);
+          var areaFillStyle = me._getStyle(me.area.fillStyle, _groupData) || defStyle;
+
+          var areaFillAlpha = me._getProp(me.area.fillAlpha, _groupData);
+
+          var areaStrokeStyle = me._getStyle(me.area.strokeStyle, _groupData) || defStyle;
+
+          var areaLineWidth = me._getProp(me.area.lineWidth, _groupData);
+
+          var areaStrokeAlpha = me._getProp(me.area.strokeAlpha, _groupData);
+
+          var _areaElement = new Polygon({
             context: {
               pointList: areaPoints,
               fillStyle: areaFillStyle,
@@ -828,23 +833,7 @@ function (_GraphsBase) {
         };
 
         for (var _groupKey in this._groupData) {
-          var _group;
-
-          var _groupData;
-
-          var _groupPoints;
-
-          var areaPoints;
-          var defStyle;
-          var areaFillStyle;
-          var areaFillAlpha;
-          var areaStrokeStyle;
-          var areaLineWidth;
-          var areaStrokeAlpha;
-
-          var _areaElement;
-
-          _loop();
+          _loop(_groupKey);
         }
       }
 

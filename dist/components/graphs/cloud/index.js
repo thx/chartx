@@ -242,8 +242,8 @@ function (_GraphsBase) {
     key: "_drawGraphs",
     value: function _drawGraphs() {
       var me = this; //查找fontSize的max和min
-      //var maxFontSizeVal = 0;
-      //var minFontSizeVal = 0;
+      //let maxFontSizeVal = 0;
+      //let minFontSizeVal = 0;
 
       if (_.isString(this.node.fontSize)) {
         _.each(me.dataFrame.getFieldData(this.node.fontSize), function (val) {

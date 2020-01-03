@@ -123,44 +123,46 @@ function (_coordBase) {
         }
 
         if (graphs.field) {
-          //没有配置field的话就不绘制这个 graphs了
-          var align = "left"; //默认left
+          (function () {
+            //没有配置field的话就不绘制这个 graphs了
+            var align = "left"; //默认left
 
-          if (graphs.yAxisAlign == "right") {
-            align = "right";
-          }
-
-          ;
-          var optsYaxisObj = null;
-          optsYaxisObj = _.find(coord.yAxis, function (obj, i) {
-            return obj.align == align || !obj.align && i == (align == "left" ? 0 : 1);
-          });
-
-          if (!optsYaxisObj) {
-            optsYaxisObj = {
-              align: align,
-              field: []
-            };
-            coord.yAxis.push(optsYaxisObj);
-          } else {
-            if (!optsYaxisObj.align) {
-              optsYaxisObj.align = align;
+            if (graphs.yAxisAlign == "right") {
+              align = "right";
             }
-          }
 
-          if (!optsYaxisObj.field) {
-            optsYaxisObj.field = [];
-          } else {
-            if (!_.isArray(optsYaxisObj.field)) {
-              optsYaxisObj.field = [optsYaxisObj.field];
+            ;
+            var optsYaxisObj = null;
+            optsYaxisObj = _.find(coord.yAxis, function (obj, i) {
+              return obj.align == align || !obj.align && i == (align == "left" ? 0 : 1);
+            });
+
+            if (!optsYaxisObj) {
+              optsYaxisObj = {
+                align: align,
+                field: []
+              };
+              coord.yAxis.push(optsYaxisObj);
+            } else {
+              if (!optsYaxisObj.align) {
+                optsYaxisObj.align = align;
+              }
             }
-          }
 
-          if (_.isArray(graphs.field)) {
-            optsYaxisObj.field = optsYaxisObj.field.concat(graphs.field);
-          } else {
-            optsYaxisObj.field.push(graphs.field);
-          }
+            if (!optsYaxisObj.field) {
+              optsYaxisObj.field = [];
+            } else {
+              if (!_.isArray(optsYaxisObj.field)) {
+                optsYaxisObj.field = [optsYaxisObj.field];
+              }
+            }
+
+            if (_.isArray(graphs.field)) {
+              optsYaxisObj.field = optsYaxisObj.field.concat(graphs.field);
+            } else {
+              optsYaxisObj.field.push(graphs.field);
+            }
+          })();
         }
       }
 
@@ -257,7 +259,7 @@ function (_coordBase) {
         _yAxis.resetData(yAxisDataFrame);
       });
 
-      this._resetXY_axisLine_pos(); //var _yAxis = this._yAxisLeft || this._yAxisRight;
+      this._resetXY_axisLine_pos(); //let _yAxis = this._yAxisLeft || this._yAxisRight;
 
 
       this._grid.reset({
@@ -350,7 +352,7 @@ function (_coordBase) {
           h: h
         });
         /*
-        var _padding = this.app.padding;
+        let _padding = this.app.padding;
         this.width = this._yAxis[0].height;
         this.height = this._xAxis.width;
         this.origin.x = this._xAxis.height + _padding.left;

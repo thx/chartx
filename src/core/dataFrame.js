@@ -17,20 +17,20 @@ function parse2MatrixData( list )
     };
     //检测第一个数据是否为一个array, 否就是传入了一个json格式的数据
     if( list.length > 0 && !_.isArray( list[0] ) ){
-        var newArr = [];
-        var fields = [];
-        var fieldNum = 0;
-        for( var i=0,l=list.length ; i<l ; i++ ){
-            var row = list[i];
+        let newArr = [];
+        let fields = [];
+        let fieldNum = 0;
+        for( let i=0,l=list.length ; i<l ; i++ ){
+            let row = list[i];
             if( i == 0 ){
-                for( var f in row ){
+                for( let f in row ){
                     fields.push( f ); 
                 };
                 newArr.push( fields );
                 fieldNum = fields.length;
             };
-            var _rowData = [];
-            for( var ii=0 ; ii<fieldNum ; ii++ ){
+            let _rowData = [];
+            for( let ii=0 ; ii<fieldNum ; ii++ ){
                 _rowData.push( row[ fields[ii] ] );
             };
             newArr.push( _rowData );
@@ -42,16 +42,16 @@ function parse2MatrixData( list )
     }
 }
 function parse2JsonData( list ){
-    var newArr = list;
+    let newArr = list;
     //检测第一个数据是否为一个array, 否就是传入了一个json格式的数据
     if( list.length > 0 && _.isArray( list[0] ) ){
         newArr = [];
-        var fields = list[0];
-        var fl = fields.length;
+        let fields = list[0];
+        let fl = fields.length;
 
-        for( var i=1,l=list.length ; i<l ; i++ ){
-            var obj = {};
-            for( var fi=0; fi<fl; fi++ ){
+        for( let i=1,l=list.length ; i<l ; i++ ){
+            let obj = {};
+            for( let fi=0; fi<fl; fi++ ){
                 obj[ fields[fi] ] = list[i][fi];
             };
             newArr.push( obj );
@@ -64,7 +64,7 @@ function parse2JsonData( list ){
 
 export default function( dataOrg, opt ){
 
-    var dataFrame  = {        //数据框架集合
+    let dataFrame  = {        //数据框架集合
         length        : 0,
         org           : [],   //最原始的数据，一定是个行列式，因为如果发现是json格式数据，会自动转换为行列式
         jsonOrg       : [],   //原始数据的json格式
@@ -113,13 +113,13 @@ export default function( dataOrg, opt ){
         //然后检查opts中是否有dataZoom.range
         if( opt ){ 
             //兼容下dataZoom 和 datazoom 的大小写配置
-            var _datazoom = opt.dataZoom || opt.datazoom;
+            let _datazoom = opt.dataZoom || opt.datazoom;
             _datazoom && _datazoom.range && _.extend( dataFrame.range, _datazoom.range );
         };
 
         if( dataOrg.length && dataOrg[0].length && !~dataOrg[0].indexOf("__index__") ){
             //如果数据中没有用户自己设置的__index__，那么就主动添加一个__index__，来记录元数据中的index
-            for( var i=0,l=dataOrg.length; i<l; i++ ){
+            for( let i=0,l=dataOrg.length; i<l; i++ ){
                 if( !i ){
                     dataOrg[0].push( "__index__" );
                 } else {
@@ -143,7 +143,7 @@ export default function( dataOrg, opt ){
             dataFrame.fields = [];
             dataFrame.data = [];
 
-            var tempRange = _.extend( true, {}, dataFrame.range );
+            let tempRange = _.extend( true, {}, dataFrame.range );
 
             _initHandle( dataOrg );
 
@@ -165,22 +165,22 @@ export default function( dataOrg, opt ){
     };
 
     function _getData(){
-        var total = [];//已经处理成[o,o,o]   o={field:'val1',index:0,data:[1,2,3]}
-        for(var a = 0, al = dataFrame.fields.length; a < al; a++){
-            var o = {};
+        let total = [];//已经处理成[o,o,o]   o={field:'val1',index:0,data:[1,2,3]}
+        for(let a = 0, al = dataFrame.fields.length; a < al; a++){
+            let o = {};
             o.field = dataFrame.fields[a];
             o.index = a;
             o.data  = [];
             total.push(o);
         };
 
-        var rows = _getValidRows(function( rowData ){
+        let rows = _getValidRows(function( rowData ){
             _.each( dataFrame.fields, function( _field ){
-                var _val = rowData[ _field ];
+                let _val = rowData[ _field ];
                 if( !isNaN( _val ) && _val !== "" && _val !== null ){
                     _val = Number( _val );
                 };
-                var gData = _.find( total, function( g ){
+                let gData = _.find( total, function( g ){
                     return g.field == _field;
                 } );
                 gData && gData.data.push( _val );
@@ -194,10 +194,10 @@ export default function( dataOrg, opt ){
     };
 
     function _getValidRows( callback ){
-        var validRowDatas = [];
+        let validRowDatas = [];
         
         _.each( dataFrame.jsonOrg.slice( dataFrame.range.start, dataFrame.range.end+1 ), function( rowData ){
-            var validRowData=true;
+            let validRowData=true;
             if( _.keys(dataFrame.filters).length ){
                 _.each( dataFrame.filters, function( filter ){
                     if( _.isFunction( filter ) && !filter( rowData ) ){
@@ -221,7 +221,7 @@ export default function( dataOrg, opt ){
         
         if( !lev ) lev = 0;
 
-        var arr = totalList || _getData();
+        let arr = totalList || _getData();
         if( !arr ){
             return;
         }
@@ -230,7 +230,7 @@ export default function( dataOrg, opt ){
         };
 
         function _format( d ){
-            for( var i=0,l=d.length; i<l; i++ ){
+            for( let i=0,l=d.length; i<l; i++ ){
                 d[i] = format( d[i] );
             };
             return d;
@@ -241,18 +241,18 @@ export default function( dataOrg, opt ){
         };
 
         //这个时候的arr只是totalList的过滤，还没有完全的按照$field 中的排序
-        var newData = [];
-        for( var i=0,l=$field.length; i<l ; i++ ){
-            var fieldInTotal = false; //如果该field在数据里面根本没有，那么就说明是无效的field配置
+        let newData = [];
+        for( let i=0,l=$field.length; i<l ; i++ ){
+            let fieldInTotal = false; //如果该field在数据里面根本没有，那么就说明是无效的field配置
             if( _.isArray($field[i]) ){
                 newData.push( getDataOrg( $field[i], format, totalList , lev+1) );
             } else {
             
-                var _fieldData = newData;
+                let _fieldData = newData;
                 if( !lev ){
                     _fieldData = [];
                 };
-                for( var ii=0,iil=arr.length ; ii<iil ; ii++ ){
+                for( let ii=0,iil=arr.length ; ii<iil ; ii++ ){
                      if( $field[i] == arr[ii].field ){
                          fieldInTotal = true;
                          _fieldData.push( _format( arr[ii].data ) );
@@ -271,9 +271,9 @@ export default function( dataOrg, opt ){
      * 获取某一行数据,当前dataFrame.data中
     */ 
     function _getRowDataAt(index){
-        var o = {}
-        var data = dataFrame.data
-        for(var a = 0; a < data.length; a++){
+        let o = {}
+        let data = dataFrame.data
+        for(let a = 0; a < data.length; a++){
             o[data[a].field] = data[a].data[ index ]
         };
         return o;
@@ -284,16 +284,16 @@ export default function( dataOrg, opt ){
      */
     function _getRowDataOf( obj ){
         !obj && (obj={});
-        var arr = [];
+        let arr = [];
 
-        var expCount = 0;
-        for( var p in obj ){
+        let expCount = 0;
+        for( let p in obj ){
             expCount++;
         };
 
         if( expCount ){
-            for( var i=dataFrame.range.start; i<= dataFrame.range.end; i++ ){
-                var matchNum = 0;
+            for( let i=dataFrame.range.start; i<= dataFrame.range.end; i++ ){
+                let matchNum = 0;
                 _.each( dataFrame.data, function( fd ){
                     if( fd.field in obj && fd.data[i] == obj[ fd.field ] ){
                         matchNum++;
@@ -310,8 +310,8 @@ export default function( dataOrg, opt ){
     }
 
     function _getFieldData( field ){
-        var list = [];
-        var _f = _.find( dataFrame.data, function( obj ){
+        let list = [];
+        let _f = _.find( dataFrame.data, function( obj ){
             return obj.field == field;
         } );
         _f && (list = _f.data)

@@ -124,7 +124,7 @@ function (_event$Dispatcher) {
     value: function _widget() {
       var me = this;
       var list = me.data.list;
-      var total = me.data.total; //var moreSecData;
+      var total = me.data.total; //let moreSecData;
 
       if (list.length > 0 && total > 0) {
         me.textSp && me.sprite.addChild(me.textSp);
@@ -490,7 +490,7 @@ function (_event$Dispatcher) {
         }); //指示文字
 
         /*
-        var textTxt = itemData.labelText;
+        let textTxt = itemData.labelText;
         //如果用户format过，那么就用用户指定的格式
         //如果没有就默认拼接
         if( !this._graphs.label.format ){
@@ -640,10 +640,10 @@ function (_event$Dispatcher) {
       quadrantsOrder.push(widgetInfo.left.endQuadrant);
       var ySpaceInfo = {};
 
-      for (var i = 0; i < quadrantsOrder.length; i++) {
-        var isEnd = i == 1 || i == 3;
+      for (var _i = 0; _i < quadrantsOrder.length; _i++) {
+        var isEnd = _i == 1 || _i == 3;
 
-        me._widgetLabel(quadrantsOrder[i], quadrantInfo[quadrantsOrder[i] - 1].indexs, lMinY, rMinY, isEnd, ySpaceInfo);
+        me._widgetLabel(quadrantsOrder[_i], quadrantInfo[quadrantsOrder[_i] - 1].indexs, lMinY, rMinY, isEnd, ySpaceInfo);
       }
     }
   }, {

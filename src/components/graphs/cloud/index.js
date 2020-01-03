@@ -97,7 +97,7 @@ class CloudGraphs extends GraphsBase
         super( opt, app );
 
         this.type = "cloud";
-        var me = this;
+        let me = this;
 
         //坚持一个数据节点的设置都在一个node下面
         this.node = {
@@ -131,25 +131,25 @@ class CloudGraphs extends GraphsBase
 
     getDaraFrameIndOfVal( val )
     {
-        var me = this;
-        var df = this.dataFrame;
-        var org = _.find( df.data, function( d ){
+        let me = this;
+        let df = this.dataFrame;
+        let org = _.find( df.data, function( d ){
             return d.field == me.field;
         } );
-        var ind = _.indexOf( org.data, val );
+        let ind = _.indexOf( org.data, val );
         return ind;
     }
 
     _getFontSize( rowData )
     {
-        var size = this.node.minFontSize;
+        let size = this.node.minFontSize;
 
         if( _.isFunction( this.node.fontSize ) ){
             size = this.node.fontSize( rowData );
         };
 
         if( _.isString( this.node.fontSize ) && this.node.fontSize in rowData ){
-            var val = Number( rowData[ this.node.fontSize ] );
+            let val = Number( rowData[ this.node.fontSize ] );
             if( !isNaN( val ) ){
                 size = this.node.minFontSize + (this.node.maxFontSize-this.node.minFontSize)/(this.node._maxFontSizeVal - this.node._minFontSizeVal) * (val - this.node._minFontSizeVal);
             }
@@ -164,7 +164,7 @@ class CloudGraphs extends GraphsBase
 
     _getRotate( item, ind )
     {
-        var rotation = this.node.rotation;
+        let rotation = this.node.rotation;
         if( _.isFunction( this.node.rotation ) ){
             rotation = this.node.rotation( item, ind ) || 0;
         };
@@ -173,7 +173,7 @@ class CloudGraphs extends GraphsBase
 
     _getFontColor( nodeData )
     {
-        var color;
+        let color;
         if( _.isString( this.node.fontColor ) ){
             color = this.node.fontColor;
         }
@@ -191,11 +191,11 @@ class CloudGraphs extends GraphsBase
 
     _drawGraphs() 
     {
-        var me = this;
+        let me = this;
 
         //查找fontSize的max和min
-        //var maxFontSizeVal = 0;
-        //var minFontSizeVal = 0;
+        //let maxFontSizeVal = 0;
+        //let minFontSizeVal = 0;
         if( _.isString( this.node.fontSize ) ){
             _.each( me.dataFrame.getFieldData( this.node.fontSize ), function( val ){
                 me.node._maxFontSizeVal = Math.max( me.node._maxFontSizeVal, val );
@@ -203,11 +203,11 @@ class CloudGraphs extends GraphsBase
             } );
         }
 
-        var layout = cloudLayout()
+        let layout = cloudLayout()
             .size([me.width, me.height])
             .words(me.dataFrame.getFieldData( me.field ).map(function(d, ind) {
-                var rowData  = me.app.dataFrame.getRowDataAt( me.getDaraFrameIndOfVal( d ) );//这里不能直接用i去从dataFrame里查询,因为cloud layout后，可能会扔掉渲染不下的部分
-                var tag = {
+                let rowData  = me.app.dataFrame.getRowDataAt( me.getDaraFrameIndOfVal( d ) );//这里不能直接用i去从dataFrame里查询,因为cloud layout后，可能会扔掉渲染不下的部分
+                let tag = {
                     type    : "cloud",
                     rowData : rowData,
                     field   : me.field,
@@ -220,7 +220,7 @@ class CloudGraphs extends GraphsBase
 
                 tag.fontColor = me._getFontColor( tag );
 
-                var _txt = d;
+                let _txt = d;
                 if( me.node.format ){
                     _txt = me.node.format( d, tag );
                 };
@@ -254,7 +254,7 @@ class CloudGraphs extends GraphsBase
                 tag.focused  = false;
                 tag.selected = false;
 
-                var tagTxt = new Text(tag.text, {
+                let tagTxt = new Text(tag.text, {
                     context: {
                         x: tag.x,
                         y: tag.y,
@@ -300,28 +300,28 @@ class CloudGraphs extends GraphsBase
 
 
     focusAt( ind ){
-        var nodeData = this.data[ ind ];
+        let nodeData = this.data[ ind ];
         if( !this.node.focus.enabled || nodeData.focused ) return;
 
-        var nctx = nodeData._node.context; 
+        let nctx = nodeData._node.context; 
         nctx.fontSize += 3;
         nodeData.focused = true;
     }
     
     unfocusAt( ind ){
-        var nodeData = this.data[ ind ];
+        let nodeData = this.data[ ind ];
         if( !this.node.focus.enabled || !nodeData.focused ) return;
-        var nctx = nodeData._node.context; 
+        let nctx = nodeData._node.context; 
         nctx.fontSize -= 3;
         nodeData.focused = false;
     }
     
     selectAt( ind ){
         
-        var nodeData = this.data[ ind ];
+        let nodeData = this.data[ ind ];
         if( !this.node.select.enabled || nodeData.selected ) return;
 
-        var nctx = nodeData._node.context; 
+        let nctx = nodeData._node.context; 
         nctx.lineWidth = this.node.select.lineWidth;
         nctx.strokeAlpha = this.node.select.strokeAlpha;
         nctx.strokeStyle = this.node.select.strokeStyle;
@@ -330,9 +330,9 @@ class CloudGraphs extends GraphsBase
     }
 
     unselectAt( ind ){
-        var nodeData = this.data[ ind ];
+        let nodeData = this.data[ ind ];
         if( !this.node.select.enabled || !nodeData.selected ) return;
-        var nctx = nodeData._node.context; 
+        let nctx = nodeData._node.context; 
         nctx.strokeStyle = this.node.strokeStyle;
 
         nodeData.selected = false;

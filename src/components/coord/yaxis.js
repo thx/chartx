@@ -140,7 +140,7 @@ export default class yAxis extends Axis
     {
         if ( this.title.text ) {
             if( !this._title ){
-                var rotation = 0;
+                let rotation = 0;
                 if( this.align == "left" ){
                     rotation = -90;
                 } else {
@@ -173,12 +173,12 @@ export default class yAxis extends Axis
 
     _trimYAxis()
     {
-        var me = this;
-        var tmpData = [];
+        let me = this;
+        let tmpData = [];
         
-        for (var i = 0, l = this.dataSection.length; i < l; i++) {
+        for (let i = 0, l = this.dataSection.length; i < l; i++) {
             
-            var layoutData = {
+            let layoutData = {
                 value   : this.dataSection[ i ],
                 y       : -Math.abs( this.getPosOf( {
                     val : this.dataSection[ i ],
@@ -189,7 +189,7 @@ export default class yAxis extends Axis
             };
 
             //把format提前
-            var text = layoutData.value;
+            let text = layoutData.value;
             if (_.isFunction(me.label.format)) {
                 text = me.label.format.apply(this, [text, i ]);
             };
@@ -202,8 +202,8 @@ export default class yAxis extends Axis
 
         }
 
-        var _preShowInd = 0;
-        for (var a = 0, al = tmpData.length; a < al; a++) {
+        let _preShowInd = 0;
+        for (let a = 0, al = tmpData.length; a < al; a++) {
             if( a == 0 ) continue;
 
             if( _preShowInd == 0 ){
@@ -234,9 +234,9 @@ export default class yAxis extends Axis
 
     _getYAxisDisLine() 
     { //获取y轴顶高到第一条线之间的距离         
-        var disMin = 0
-        var disMax = 2 * disMin
-        var dis = disMin
+        let disMin = 0
+        let disMax = 2 * disMin
+        let dis = disMin
         dis = disMin + this.yMaxHeight % this.dataSection.length;
         dis = dis > disMax ? disMax : dis
         return dis
@@ -244,7 +244,7 @@ export default class yAxis extends Axis
 
     resetWidth(width)
     {
-        var me = this;
+        let me = this;
         me.width = width;
         if( me.align == "left" ){
             me.rulesSprite.context.x = me.width;
@@ -253,34 +253,34 @@ export default class yAxis extends Axis
 
     _widget( opt )
     {
-        var me = this;
+        let me = this;
         !opt && (opt ={});
         if (!me.enabled) {
             me.width = 0;
             return;
         };
         
-        var arr = this.layoutData;
-        var visibleInd = 0;
+        let arr = this.layoutData;
+        let visibleInd = 0;
         me.maxW = 0;
 
-        for (var a = 0, al = arr.length; a < al; a++) {
+        for (let a = 0, al = arr.length; a < al; a++) {
              
             _.isFunction(me.filter) && me.filter({
                 layoutData : arr,
                 index      : a
             });
 
-            var o = arr[a];
+            let o = arr[a];
             if( !o.visible ){
                 continue;
             };
             
-            var y = o.y;
+            let y = o.y;
 
-            var textAlign = me.label.textAlign;
+            let textAlign = me.label.textAlign;
  
-            var posy = y + (a == 0 ? -3 : 0) + (a == arr.length - 1 ? 3 : 0);
+            let posy = y + (a == 0 ? -3 : 0) + (a == arr.length - 1 ? 3 : 0);
             //为横向图表把y轴反转后的 逻辑
             if (me.label.rotation == 90 || me.label.rotation == -90) {
                 textAlign = "center";
@@ -294,15 +294,15 @@ export default class yAxis extends Axis
             };
 
 
-            var aniFrom = 16;
+            let aniFrom = 16;
             if( o.value == me.origin ){
                 aniFrom = 0;
             };
             if( o.value < me.origin ){
                 aniFrom = -16;
             };
-            var lineX = 0;
-            var tickLineContext;
+            let lineX = 0;
+            let tickLineContext;
             if (me.tickLine.enabled) {
                 //线条
                 lineX = me.align == "left" ? - me.tickLine.lineLength - me.tickLine.distance : me.tickLine.distance;
@@ -319,9 +319,9 @@ export default class yAxis extends Axis
             };
 
             //文字
-            var textContext;
+            let textContext;
             if( me.label.enabled ){
-                var txtX = me.align == "left" ? lineX - me.label.distance : lineX + me.tickLine.lineLength + me.label.distance;
+                let txtX = me.align == "left" ? lineX - me.label.distance : lineX + me.tickLine.lineLength + me.label.distance;
                 if( this.isH ){
                     txtX = txtX + (me.align == "left"?-1:1)* 4
                 };
@@ -338,12 +338,12 @@ export default class yAxis extends Axis
                 };
             };
 
-            var duration = 300;
+            let duration = 300;
             if (!me.animation || opt.resize) {
                 duration = 0;
             };
 
-            var _node = this.rulesSprite.getChildAt( visibleInd );
+            let _node = this.rulesSprite.getChildAt( visibleInd );
 
             if( _node ){
                 if( _node._tickLine && me.tickLine.enabled ){
@@ -428,7 +428,7 @@ export default class yAxis extends Axis
             }
         };
 
-        var _originX = 0;
+        let _originX = 0;
         if( me.align == "left" ){
             me.rulesSprite.context.x = me.width;
             _originX = me.width;
@@ -436,7 +436,7 @@ export default class yAxis extends Axis
 
         //轴线
         if( me.axisLine.enabled ){
-            var _axisLineCtx = {
+            let _axisLineCtx = {
                 start : {
                     x : _originX,
                     y : 0
@@ -450,7 +450,7 @@ export default class yAxis extends Axis
             };
 
             if( !this._axisLine ){
-                var _axisLine = new Line({
+                let _axisLine = new Line({
                     context : _axisLineCtx
                 });
                 this.sprite.addChild( _axisLine );
@@ -473,7 +473,7 @@ export default class yAxis extends Axis
 
     _getStyle(s)
     {
-        var res = s;
+        let res = s;
         if (_.isFunction(s)) {
             res = s.call( this , this );
         };

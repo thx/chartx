@@ -211,7 +211,7 @@ function (_GraphsBase) {
 
       var _startAngle = me.startAngle || _coord.startAngle;
 
-      var _allAngle = me.allAngle || _coord.allAngle; //var _endAngle = startAngle + allAngle;
+      var _allAngle = me.allAngle || _coord.allAngle; //let _endAngle = startAngle + allAngle;
 
 
       this.bgNodeData = this._getNodeData(_startAngle, _allAngle);

@@ -99,7 +99,7 @@ class RadarGraphs extends GraphsBase
     {
         !opt && (opt ={});
         
-        //var me = this;
+        //let me = this;
         _.extend(true, this, opt);
         this.data = this._trimGraphs();
         
@@ -113,25 +113,25 @@ class RadarGraphs extends GraphsBase
 
     _widget()
     {
-        var me = this;
-        var _coord = this.app.getComponent({name:'coord'});
+        let me = this;
+        let _coord = this.app.getComponent({name:'coord'});
 
-        var iGroup = 0;
+        let iGroup = 0;
         _.each( this.data, function( list , field ){
 
-            var group = {
+            let group = {
             };
 
-            var pointList = [];
+            let pointList = [];
             _.each( list , function( node ){
                 pointList.push([ node.point.x, node.point.y ]);
             } );
 
-            var fieldMap = _coord.getFieldMapOf( field );
+            let fieldMap = _coord.getFieldMapOf( field );
 
-            var _strokeStyle = me._getStyle( me.line.strokeStyle , iGroup, fieldMap.color, fieldMap );
+            let _strokeStyle = me._getStyle( me.line.strokeStyle , iGroup, fieldMap.color, fieldMap );
 
-            var polyCtx = {
+            let polyCtx = {
                 pointList : pointList,
                 cursor    : "pointer"
             };
@@ -145,7 +145,7 @@ class RadarGraphs extends GraphsBase
                 polyCtx.fillAlpha = me._getStyle( me.area.fillAlpha , iGroup, 1, fieldMap );
             };
 
-            var _poly = new Polygon({
+            let _poly = new Polygon({
                 hoverClone : false,
                 context    : polyCtx
             });
@@ -168,10 +168,10 @@ class RadarGraphs extends GraphsBase
             
             if( me.node.enabled ){
                 //绘制圆点
-                var _nodes = [];
+                let _nodes = [];
                 _.each( list , function( node, i ){
                     pointList.push([ node.point.x, node.point.y ]);
-                    var _node = new Circle({
+                    let _node = new Circle({
                         context : {
                             cursor : "pointer",
                             x : node.point.x,
@@ -209,7 +209,7 @@ class RadarGraphs extends GraphsBase
 
     tipsPointerOf( e )
     {
-        var me = this;
+        let me = this;
         
         me.tipsPointerHideOf( e );
 
@@ -230,7 +230,7 @@ class RadarGraphs extends GraphsBase
     }
     tipsPointerHideOf( )
     {
-        var me = this;
+        let me = this;
         _.each( me.data , function( g ){
             _.each( g , function( node ){
                 me.unfocusOf( node );
@@ -241,8 +241,8 @@ class RadarGraphs extends GraphsBase
     focusOf( node )
     {
         if( node.focused ) return;
-        var me = this;
-        var _node = me.groups[ node.field ].nodes[ node.iNode ];
+        let me = this;
+        let _node = me.groups[ node.field ].nodes[ node.iNode ];
         _node.context.r += 1;
         _node.context.fillStyle = me.node.strokeStyle;
         _node.context.strokeStyle = _node._strokeStyle;
@@ -251,8 +251,8 @@ class RadarGraphs extends GraphsBase
     unfocusOf( node )
     {
         if( !node.focused ) return;
-        var me = this;
-        var _node = me.groups[ node.field ].nodes[ node.iNode ];
+        let me = this;
+        let _node = me.groups[ node.field ].nodes[ node.iNode ];
         _node.context.r -= 1;
         _node.context.fillStyle = _node._strokeStyle;
         _node.context.strokeStyle = me.node.strokeStyle;
@@ -262,9 +262,9 @@ class RadarGraphs extends GraphsBase
     hide( field )
     {
         //用来计算下面的hLen
-        var _coord = this.app.getComponent({name:'coord'});
+        let _coord = this.app.getComponent({name:'coord'});
         this.enabledField = _coord.filterEnabledFields( this.field );
-        var group = this.groups[ field ];
+        let group = this.groups[ field ];
         if( group ){
             group.area.context.visible = false;
             _.each( group.nodes, function( element ){
@@ -276,9 +276,9 @@ class RadarGraphs extends GraphsBase
 
     show( field )
     {
-        var _coord = this.app.getComponent({name:'coord'});
+        let _coord = this.app.getComponent({name:'coord'});
         this.enabledField = _coord.filterEnabledFields( this.field );
-        var group = this.groups[ field ];
+        let group = this.groups[ field ];
         if( group ){
             group.area.context.visible = true;
             _.each( group.nodes, function( element ){
@@ -289,22 +289,22 @@ class RadarGraphs extends GraphsBase
 
     _trimGraphs()
     {
-        var me = this;
-        var _coord = this.app.getComponent({name:'coord'});
+        let me = this;
+        let _coord = this.app.getComponent({name:'coord'});
 
         //用来计算下面的hLen
         this.enabledField = _coord.filterEnabledFields( this.field );
         
-        var data = {}
+        let data = {}
         _.each( this.enabledField, function( field ){
-            var dataOrg = me.dataFrame.getFieldData(field);
-            var fieldMap = _coord.getFieldMapOf( field );
-            var arr = [];
+            let dataOrg = me.dataFrame.getFieldData(field);
+            let fieldMap = _coord.getFieldMapOf( field );
+            let arr = [];
 
             _.each( _coord.aAxis.angleList , function( _a , i ){
                 //弧度
-                var _r = Math.PI * _a / 180;
-                var point = _coord.getPointInRadianOfR( _r, _coord.getROfNum(dataOrg[i]) );
+                let _r = Math.PI * _a / 180;
+                let point = _coord.getPointInRadianOfR( _r, _coord.getROfNum(dataOrg[i]) );
                 arr.push( {
                     type    : "radar",
                     field   : field,
@@ -323,7 +323,7 @@ class RadarGraphs extends GraphsBase
 
     _getStyle( style, iGroup ,def, fieldMap )
     {
-        var _s = def;
+        let _s = def;
         if( _.isString( style ) || _.isNumber( style ) ){
             _s = style;
         };
@@ -344,18 +344,18 @@ class RadarGraphs extends GraphsBase
     getNodesAt(index)
     {
         //该index指当前
-        var data = this.data;
-        var _nodesInfoList = []; //节点信息集合
+        let data = this.data;
+        let _nodesInfoList = []; //节点信息集合
         
         _.each( this.enabledField, function( fs ){
             if( _.isArray(fs) ){
                 _.each( fs, function( _fs ){
                     //fs的结构两层到顶了
-                    var node = data[ _fs ][ index ];
+                    let node = data[ _fs ][ index ];
                     node && _nodesInfoList.push( node );
                 } );
             } else {
-                var node = data[ fs ][ index ];
+                let node = data[ fs ][ index ];
                 node && _nodesInfoList.push( node );
             }
         } );

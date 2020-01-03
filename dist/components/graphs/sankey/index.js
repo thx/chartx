@@ -200,7 +200,7 @@ function (_GraphsBase) {
       });
 
       _.each(keyDatas, function (key, i) {
-        //var nodeNames = key.split(/[,|]/);
+        //let nodeNames = key.split(/[,|]/);
         var nodeNames = [];
 
         if (me.parentField) {

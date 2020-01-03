@@ -289,7 +289,7 @@ function (_Component) {
       cloneEl.style.height = this.btnHeight + "px"; //app.el.offsetHeight + "px";
 
       cloneEl.style.top = "10000px";
-      document.body.appendChild(cloneEl); //var opt = _.extend(true, {}, me._opt);
+      document.body.appendChild(cloneEl); //let opt = _.extend(true, {}, me._opt);
       //_.extend(true, opt, me.getCloneChart() );
       //clone的chart只需要coord 和 graphs 配置就可以了
       //因为画出来后也只需要拿graphs得sprite去贴图
@@ -934,8 +934,9 @@ function (_Component) {
       var count = $o.count || 2;
       var sprite = $o.sprite;
       var dis = $o.dis || 2;
+      var a;
 
-      for (var a = 0, al = count; a < al; a++) {
+      for (a = 0; a < count; a++) {
         sprite.addChild(me._addLine({
           x: a * dis,
           strokeStyle: $o.strokeStyle || ''

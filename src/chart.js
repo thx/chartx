@@ -28,8 +28,8 @@ class Chart extends event.Dispatcher
 
         //Canvax实例
 		this.canvax = new Canvax.App({
-		    el : this.el,
-		    webGL : false
+            el : this.el,
+            webGL : false
 		});
         this.canvax.registEvent();
 
@@ -39,7 +39,7 @@ class Chart extends event.Dispatcher
 
         //设置stage ---------------------------------------------------------begin
 		this.stage = new Canvax.Display.Stage({
-		    id: "main-chart-stage"
+            id: "main-chart-stage"
 		});
         this.canvax.addChild( this.stage );
         //设置stage ---------------------------------------------------------end

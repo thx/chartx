@@ -739,7 +739,7 @@ function (_coordBase) {
 
       var maxNum = _.max(this.rAxis.dataSection);
 
-      var minNum = 0; //var _r = parseInt( Math.min( this.width, this.height ) / 2 );
+      var minNum = 0; //let _r = parseInt( Math.min( this.width, this.height ) / 2 );
 
       var _r = this.radius;
       r = _r * ((num - minNum) / (maxNum - minNum));
@@ -929,7 +929,7 @@ function (_coordBase) {
       ;
       var point = e.point; //angle全部都换算到0-360范围内
 
-      var angle = (me.getRadianInPoint(point) * 180 / Math.PI - me.aAxis.beginAngle) % me.allAngle; //var r = Math.sqrt( Math.pow( point.x, 2 ) + Math.pow( point.y, 2 ) );
+      var angle = (me.getRadianInPoint(point) * 180 / Math.PI - me.aAxis.beginAngle) % me.allAngle; //let r = Math.sqrt( Math.pow( point.x, 2 ) + Math.pow( point.y, 2 ) );
 
       var aAxisInd = 0;
       var aLen = me.aAxis.angleList.length;

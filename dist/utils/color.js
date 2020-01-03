@@ -29,8 +29,8 @@ function colorRgb(hex) {
 
     var sColorChange = [];
 
-    for (var i = 1; i < 7; i += 2) {
-      sColorChange.push(parseInt("0x" + sColor.slice(i, i + 2)));
+    for (var _i = 1; _i < 7; _i += 2) {
+      sColorChange.push(parseInt("0x" + sColor.slice(_i, _i + 2)));
     }
 
     return "RGB(" + sColorChange.join(",") + ")";

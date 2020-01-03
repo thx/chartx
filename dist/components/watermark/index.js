@@ -101,7 +101,7 @@ function (_Component) {
       for (var r = 0; r < rowCount; r++) {
         for (var c = 0; c < coluCount; c++) {
           //TODO:text 的 clone有问题
-          //var cloneText = textEl.clone();
+          //let cloneText = textEl.clone();
           var _textEl = new _canvax["default"].Display.Text(this.text, {
             context: {
               rotation: this.rotation,

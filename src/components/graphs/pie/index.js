@@ -123,12 +123,12 @@ class PieGraphs extends GraphsBase
 
     _computerProps()
     {
-        var w = this.width;
-        var h = this.height;
+        let w = this.width;
+        let h = this.height;
 
         //根据配置情况重新修正 outRadius ，innerRadius ------------
         if( !this.node.outRadius ){
-            var outRadius = Math.min(w, h) / 2;
+            let outRadius = Math.min(w, h) / 2;
             if ( this.label.enabled ) {
                 //要预留moveDis位置来hover sector 的时候外扩
                 outRadius -= this.node.moveDis;
@@ -168,7 +168,7 @@ class PieGraphs extends GraphsBase
         this._pie = new Pie( this , this._trimGraphs( this.data ) );
         this._pie.draw( opt );
 
-        var me = this;
+        let me = this;
         if( this.animation && !opt.resize ){
             this._pie.grow( function(){
                 me.fire("complete");
@@ -192,7 +192,7 @@ class PieGraphs extends GraphsBase
 
     _setEnabled( label, status )
     {
-        var me = this;
+        let me = this;
 
         _.each( this.data, function( item ){
             if( item.label === label ){
@@ -206,16 +206,16 @@ class PieGraphs extends GraphsBase
 
     _dataHandle()
     {
-        var me = this;
-        //var _coord = me.app.getComponent({name:'coord'});
+        let me = this;
+        //let _coord = me.app.getComponent({name:'coord'});
 
-        var data = [];
-        var dataFrame = me.dataFrame;
+        let data = [];
+        let dataFrame = me.dataFrame;
         
-        for( var i=0,l=dataFrame.length; i<l; i++ ){
-            var rowData = dataFrame.getRowDataAt(i);
+        for( let i=0,l=dataFrame.length; i<l; i++ ){
+            let rowData = dataFrame.getRowDataAt(i);
 
-            var layoutData = {
+            let layoutData = {
                 type          : "pie",
                 rowData       : rowData,//把这一行数据给到layoutData引用起来
                 focused       : false,  //是否获取焦点，外扩
@@ -237,7 +237,7 @@ class PieGraphs extends GraphsBase
             };
 
             //设置颜色
-            var color = me._getColor( me.node.fillStyle, layoutData );
+            let color = me._getColor( me.node.fillStyle, layoutData );
             layoutData.fillStyle = layoutData.color = color;
             
             data.push( layoutData );
@@ -263,27 +263,27 @@ class PieGraphs extends GraphsBase
 
     _trimGraphs( data ) 
     {
-        var me = this;
-        var total = 0;
+        let me = this;
+        let total = 0;
 
         me.currentAngle = 0 + me.startAngle % 360;//me.allAngle;
-        var limitAngle = me.allAngle + me.startAngle % me.allAngle;
+        let limitAngle = me.allAngle + me.startAngle % me.allAngle;
 
-        var percentFixedNum = 2;     
+        let percentFixedNum = 2;     
         
         //下面连个变量当node.r设置为数据字段的时候用
-        var maxRval = 0;
-        var minRval = 0;
+        let maxRval = 0;
+        let minRval = 0;
 
         if ( data.length ) {
             //先计算出来value的总量
-            for (var i = 0; i < data.length; i++) {
+            for (let i = 0; i < data.length; i++) {
                 //enabled为false的secData不参与计算
                 if( !data[i].enabled ) continue;
 
                 total += data[i].value;
                 if( me.node.radius && (_.isString(me.node.radius) &&  me.node.radius in data[i].rowData) ){
-                    var _r = Number(data[i].rowData[ me.node.radius ]);
+                    let _r = Number(data[i].rowData[ me.node.radius ]);
                     maxRval = Math.max( maxRval, _r );
                     minRval = Math.min( minRval, _r );
                 }
@@ -291,29 +291,29 @@ class PieGraphs extends GraphsBase
 
             if ( total > 0 ) {
           
-                for (var j = 0; j < data.length; j++) {
-                    var percentage = data[j].value / total;
+                for (let j = 0; j < data.length; j++) {
+                    let percentage = data[j].value / total;
 
                     //enabled为false的sec，比率就设置为0
                     if( !data[j].enabled ){
                         percentage = 0;
                     };
                     
-                    var fixedPercentage = +((percentage * 100).toFixed(percentFixedNum));
+                    let fixedPercentage = +((percentage * 100).toFixed(percentFixedNum));
 
-                    var angle = me.allAngle * percentage;
-                    var endAngle = me.currentAngle + angle > limitAngle ? limitAngle : me.currentAngle + angle;
-                    var cosV = Math.cos((me.currentAngle + angle / 2) / 180 * Math.PI);
-                    var sinV = Math.sin((me.currentAngle + angle / 2) / 180 * Math.PI);
-                    var midAngle = me.currentAngle + angle / 2;
+                    let angle = me.allAngle * percentage;
+                    let endAngle = me.currentAngle + angle > limitAngle ? limitAngle : me.currentAngle + angle;
+                    let cosV = Math.cos((me.currentAngle + angle / 2) / 180 * Math.PI);
+                    let sinV = Math.sin((me.currentAngle + angle / 2) / 180 * Math.PI);
+                    let midAngle = me.currentAngle + angle / 2;
                     cosV = cosV.toFixed(5);
                     sinV = sinV.toFixed(5);
-                    var quadrant = function (ang) {
+                    let quadrant = function (ang) {
                         if (ang >= limitAngle) {
                             ang = limitAngle;
                         }
                         ang = ang % me.allAngle;
-                        var angleRatio = parseInt(ang / 90);
+                        let angleRatio = parseInt(ang / 90);
                         if (ang >= 0) {
                             switch (angleRatio) {
                                 case 0:
@@ -341,13 +341,13 @@ class PieGraphs extends GraphsBase
                         }
                     } (midAngle);
 
-                    var outRadius = me.node.outRadius;
+                    let outRadius = me.node.outRadius;
                     if( me.node.radius && (_.isString(me.node.radius) &&  me.node.radius in data[j].rowData) ){
-                        var _rr = Number( data[j].rowData[me.node.radius] );                  
+                        let _rr = Number( data[j].rowData[me.node.radius] );                  
                         outRadius = parseInt( (me.node.outRadius - me.node.innerRadius) * ( (_rr - minRval)/(maxRval-minRval)  ) + me.node.innerRadius );
                     };
 
-                    var moveDis = me.node.moveDis;
+                    let moveDis = me.node.moveDis;
 
                     _.extend(data[j], {
                         outRadius   : outRadius,
@@ -396,9 +396,9 @@ class PieGraphs extends GraphsBase
 
     _getColor( prop , layoutData)
     {
-        var me = this;
-        var iNode = layoutData.iNode;
-        var color = prop;
+        let me = this;
+        let iNode = layoutData.iNode;
+        let color = prop;
         if (_.isArray( prop )) {
             color = prop[ iNode ];
         };
@@ -415,14 +415,14 @@ class PieGraphs extends GraphsBase
 
     _getLabelText( itemData )
     {
-        var str;
+        let str;
         if( this.label.enabled ){
             if( this.label.format ){
                 if( _.isFunction( this.label.format ) ){
                     str = this.label.format( itemData.label, itemData );
                 }
             } else {
-                var _field = this.label.field || this.groupField
+                let _field = this.label.field || this.groupField
                 if( _field ){
                     str = itemData.rowData[ _field ] + "：" + itemData.percentage + "%" 
                 } else {
@@ -441,7 +441,7 @@ class PieGraphs extends GraphsBase
     getLegendData()
     {
         //return this.data;
-        var legendData = [];
+        let legendData = [];
         _.each( this.data, function(item){
             legendData.push( {
                 name : item.label,
@@ -460,7 +460,7 @@ class PieGraphs extends GraphsBase
 
 
     focusAt( ind ){
-        var nodeData = this._pie.data.list[ ind ];
+        let nodeData = this._pie.data.list[ ind ];
 
         if( !this.node.focus.enabled ) return;
 
@@ -468,19 +468,19 @@ class PieGraphs extends GraphsBase
     }
     
     unfocusAt( ind ){
-        var nodeData = this._pie.data.list[ ind ];
+        let nodeData = this._pie.data.list[ ind ];
         if( !nodeData.node.focus.enabled ) return;
         this._pie.unfocusOf( nodeData );
     }
     
     selectAt( ind ){
-        var nodeData = this._pie.data.list[ ind ];
+        let nodeData = this._pie.data.list[ ind ];
         if( !this.node.select.enabled ) return;
         this._pie.selectOf( nodeData );
     }
 
     unselectAt( ind ){
-        var nodeData = this._pie.data.list[ ind ];
+        let nodeData = this._pie.data.list[ ind ];
         if( !this.node.select.enabled ) return;
         this._pie.unselectOf( nodeData );
     }

@@ -118,10 +118,10 @@ function jsonToArrayForRelation(data, options ,_childrenField ) {
 function arrayToTreeJsonForRelation(data, options){
     // [ { key: 1, name: },{key:'1,2'} ] to [ { name: children: [ {}... ] } ] 
     
-    var _nodes = {}
-    var _edges = {}
+    let _nodes = {}
+    let _edges = {}
     _.each( data, function( item ){
-        var key = item[ options.field ];
+        let key = item[ options.field ];
         if( key.split(',').length == 1 ){
             _nodes[ key ] = item;
         } else {
@@ -130,9 +130,9 @@ function arrayToTreeJsonForRelation(data, options){
     } );
     
     //先找到所有的一层
-    var arr = [];
+    let arr = [];
     _.each( _nodes, function( node, nkey ){
-        var isFirstLev=true;
+        let isFirstLev=true;
         _.each( _edges, function( edge, ekey ){
             if( ekey.split(',')[1] == nkey ){
                 isFirstLev = false;
@@ -150,11 +150,11 @@ function arrayToTreeJsonForRelation(data, options){
 
         _.each( list, function( node ){
             if( node.__cycle ) return;
-            var key = node[ options.field ];
+            let key = node[ options.field ];
             _.each( _edges, function( edge, ekey ){
                 if( ekey.split(',')[0] == key ){
                     //那么说明[1] 就是自己的children
-                    var childNode = _nodes[ ekey.split(',')[1] ];
+                    let childNode = _nodes[ ekey.split(',')[1] ];
 
                     if( childNode ){
                         if( !node.children ) node.children = [];

@@ -155,8 +155,8 @@ function (_GraphsBase) {
     value: function draw(opt) {
       !opt && (opt = {}); //第二个data参数去掉，直接trimgraphs获取最新的data
 
-      _.extend(true, this, opt); //var me = this;
-      //var animate = me.animation && !opt.resize;
+      _.extend(true, this, opt); //let me = this;
+      //let animate = me.animation && !opt.resize;
 
 
       this._computerAttr();
@@ -172,7 +172,7 @@ function (_GraphsBase) {
     key: "_trimGraphs",
     value: function _trimGraphs() {
       if (!this.field) return;
-      var me = this; //var dataOrg = _.clone( this.dataOrg );
+      var me = this; //let dataOrg = _.clone( this.dataOrg );
 
       var layoutData = [];
 

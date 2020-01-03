@@ -1,14 +1,14 @@
 import {_} from "canvax"
 
 function normalizeTickInterval(interval, magnitude) {
-    var normalized, i;
-    // var multiples = [1, 2, 2.5, 5, 10];
-    var multiples = [1, 2, 5, 10];
+    let normalized, i;
+    // let multiples = [1, 2, 2.5, 5, 10];
+    let multiples = [1, 2, 5, 10];
     // round to a tenfold of 1, 2, 2.5 or 5
     normalized = interval / magnitude;
 
     // normalize the interval to the nearest multiple
-    for (var i = 0; i < multiples.length; i++) {
+    for (let i = 0; i < multiples.length; i++) {
         interval = multiples[i];
         if (normalized <= (multiples[i] + (multiples[i + 1] || multiples[i])) / 2) {
             break;
@@ -30,28 +30,28 @@ function getLinearTickPositions(arr,$maxPart,$cfg) {
 
     arr = _.without( arr , undefined , null , "" );
     
-	var scale = $cfg && $cfg.scale ? parseFloat($cfg.scale) :1
+	let scale = $cfg && $cfg.scale ? parseFloat($cfg.scale) :1
 	//返回的数组中的值 是否都为整数(思霏)  防止返回[8, 8.2, 8.4, 8.6, 8.8, 9]   应该返回[8, 9]
-	var isInt = $cfg && $cfg.isInt ? 1 : 0 
+	let isInt = $cfg && $cfg.isInt ? 1 : 0 
 
 	if(isNaN(scale)){
 		scale = 1
 	};
 
-    var max = _.max(arr);
-    var initMax = max
+    let max = _.max(arr);
+    let initMax = max
     max *= scale
-    var min = _.min(arr); 
+    let min = _.min(arr); 
 
     if(min==max){
-    	if(max > 0){
-    		min = 0;
+        if(max > 0){
+            min = 0;
             return [ min , max ];
-    		// min= Math.round(max/2);
-    	} else if(max < 0){
+            // min= Math.round(max/2);
+        } else if(max < 0){
             return [ max , 0 ];
-    		//min = max*2;
-    	} else {
+            //min = max*2;
+        } else {
             max = 1;
             return [0 , max];
         }
@@ -59,26 +59,26 @@ function getLinearTickPositions(arr,$maxPart,$cfg) {
 
     
 
-    var length = max - min;
+    let length = max - min;
     if (length) {
-    	var tempmin = min //保证min>0的时候不会出现负数
-    	min -= length * 0.05;
+        let tempmin = min //保证min>0的时候不会出现负数
+        min -= length * 0.05;
         // S.log(min +":"+ tempmin)
         if(min<0 && tempmin>=0){
-        	min=0
+            min=0
         }
         max += length * 0.05;
     }
     
-    var tickInterval = (max - min) * 0.3;//72 / 365;
-    var magnitude = Math.pow(10, Math.floor(Math.log(tickInterval) / Math.LN10));
+    let tickInterval = (max - min) * 0.3;//72 / 365;
+    let magnitude = Math.pow(10, Math.floor(Math.log(tickInterval) / Math.LN10));
 
     tickInterval = normalizeTickInterval(tickInterval, magnitude);
     if(isInt){
-    	tickInterval = Math.ceil(tickInterval)
+        tickInterval = Math.ceil(tickInterval)
     }
 
-    var pos,
+    let pos,
         lastPos,
         roundedMin = correctFloat(Math.floor(min / tickInterval) * tickInterval),
         roundedMax = correctFloat(Math.ceil(max / tickInterval) * tickInterval),
@@ -104,14 +104,14 @@ function getLinearTickPositions(arr,$maxPart,$cfg) {
         lastPos = pos;
     }
     if(tickPositions.length >= 3){
-    	if(tickPositions[tickPositions.length - 2] >= initMax){
+        if(tickPositions[tickPositions.length - 2] >= initMax){
 			tickPositions.pop()
 		}
     }
     return tickPositions;
 }
 
-var dataSection  = {
+let dataSection  = {
 	section:function($arr,$maxPart,$cfg){
         return _.uniq( getLinearTickPositions($arr,$maxPart,$cfg));
 	}
