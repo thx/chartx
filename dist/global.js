@@ -12,8 +12,6 @@ var _canvax = require("canvax");
 var _parse = _interopRequireDefault(require("./core/parse"));
 
 //图表皮肤
-var globalAnimationEnabled = true; //是否开启全局的动画开关
-
 var globalTheme = ["#ff8533", "#73ace6", "#82d982", "#e673ac", "#cd6bed", "#8282d9", "#c0e650", "#e6ac73", "#6bcded", "#73e6ac", "#ed6bcd", "#9966cc"];
 var components = {
   /*
@@ -230,10 +228,10 @@ var _default = {
     return _comp ? _comp[type] : undefined;
   },
   setAnimationEnabled: function setAnimationEnabled(bool) {
-    globalAnimationEnabled = bool;
+    return _canvax.AnimationFrame.setAnimationEnabled(bool);
   },
   getAnimationEnabled: function getAnimationEnabled(bool) {
-    return globalAnimationEnabled;
+    return _canvax.AnimationFrame.getAnimationEnabled();
   },
   //所有布局算法
   layout: {},

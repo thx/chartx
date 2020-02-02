@@ -1,8 +1,7 @@
 //图表皮肤
-import { _,$ } from "canvax"
+import { _,$,AnimationFrame } from "canvax"
 import parse from './core/parse';
 
-let globalAnimationEnabled = true; //是否开启全局的动画开关
 let globalTheme = ["#ff8533","#73ace6","#82d982","#e673ac","#cd6bed","#8282d9","#c0e650","#e6ac73","#6bcded","#73e6ac","#ed6bcd","#9966cc"];
 let components = {
     /*
@@ -166,7 +165,6 @@ export default {
     registerComponent: function( compModule, name, type="empty" )
     {
 
-        
         let comps = this._getComponentModules().modules;
 
         name = name.toLowerCase();
@@ -198,10 +196,10 @@ export default {
         
     },
     setAnimationEnabled: function( bool ){
-        globalAnimationEnabled = bool
+        return AnimationFrame.setAnimationEnabled(bool)
     },
     getAnimationEnabled: function( bool ){
-        return globalAnimationEnabled;
+        return AnimationFrame.getAnimationEnabled();
     },
 
     //所有布局算法

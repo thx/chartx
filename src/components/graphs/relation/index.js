@@ -3,12 +3,14 @@ import GraphsBase from "../index"
 import global from "../../../global"
 import dataFrame from "../../../core/dataFrame"
 import {getDefaultProps} from "../../../utils/tools"
-import { checkDataIsJson, jsonToArrayForRelation, arrayToTreeJsonForRelation } from './data';
+import { checkDataIsJson, jsonToArrayForRelation, arrayToTreeJsonForRelation } from './data'
+import Zoom from "./zoom"
 
 let { _, event } = Canvax;
 let Rect = Canvax.Shapes.Rect;
 let Path = Canvax.Shapes.Path;
 let Arrow = Canvax.Shapes.Arrow;
+let zoom = new Zoom();
 
  
 /**
@@ -231,18 +233,17 @@ class Relation extends GraphsBase {
         this.graphsSp = new Canvax.Display.Sprite({
             id: "graphsSp"
         });
+
+        //这个view和induce是一一对应的，在induce上面执行拖拽和滚轮缩放，操作的目标元素就是graphsView
+        this.graphsView = new Canvax.Display.Sprite({
+            id: "graphsView"
+        });
         this.graphsSp.addChild(this.edgesSp);
         this.graphsSp.addChild(this.nodesSp);
 
-        //clone一份graphsSp
-        this._grahsSpClone = new Canvax.Display.Sprite({
-            id: "graphsSp_clone"
-        });
+        this.graphsView.addChild(this.graphsSp);
+        this.sprite.addChild(this.graphsView);
 
-        this.sprite.addChild(this.graphsSp);
-        this.sprite.addChild(this._grahsSpClone);
-
-        window.gsp = this.graphsSp
     }
 
     initInduce() {
@@ -259,7 +260,6 @@ class Relation extends GraphsBase {
         this.sprite.addChild( this.induce );
 
         let _mosedownIng = false;
-        let _lastDragPoint = null;
         let _preCursor = me.app.canvax.domView.style.cursor;
 
         //滚轮缩放相关
@@ -270,61 +270,48 @@ class Relation extends GraphsBase {
         this.induce.on( event.types.get(), function (e) {
 
             if (me.status.transform.enabled) {
+                e.preventDefault();
+                let point = e.target.localToGlobal(e.point, me.sprite);
+
                 if (e.type == "mousedown") {
                     me.induce.toFront();
                     _mosedownIng = true;
-                    _lastDragPoint = e.point;
-                    me.app.canvax.domView.style.cursor = "move"
+                    me.app.canvax.domView.style.cursor = "move";
+                    zoom.mouseMoveTo( point )
                 };
                 if (e.type == "mouseup" || e.type == "mouseout") {
                     me.induce.toBack();
                     _mosedownIng = false;
-                    _lastDragPoint = null;
                     me.app.canvax.domView.style.cursor = _preCursor;
                 };
                 if (e.type == "mousemove") {
-                    if (_mosedownIng) {
-                        me.graphsSp.context.x += (e.point.x - _lastDragPoint.x);
-                        me.graphsSp.context.y += (e.point.y - _lastDragPoint.y);
-                        _lastDragPoint = e.point;
+                    if ( _mosedownIng ) {
+                        let {x,y} = zoom.drag( point );
+                        me.graphsView.context.x = x;
+                        me.graphsView.context.y = y;
                     }
                 };
                 if (e.type == "wheel") {
                     if (Math.abs(e.deltaY) > Math.abs(_deltaY)) {
                         _deltaY = e.deltaY;
                     };
-
+                    
                     if (!_wheelHandleTimeer) {
                         _wheelHandleTimeer = setTimeout(function () {
 
-                            let itemLen = 0.02;
-
-                            let _scale = (e.deltaY / 30) * itemLen;
-                            if (Math.abs(_scale) < 0.04) {
-                                _scale = Math.sign(_scale) * 0.04
-                            }
-                            if (Math.abs(_scale) > 0.08) {
-                                _scale = Math.sign(_scale) * 0.08
-                            }
-                            let scale = me.status.transform.scale + _scale;
-                            if (scale <= 0.1) {
-                                scale = 0.1;
-                            }
-                            if (scale >= 1) {
-                                //关系图里面放大看是没必要的
-                                scale = 1;
-                            }
-
-                            let point = e.target.localToGlobal(e.point);
-
-                            me.scale(scale, point);
+                            let {scale,x,y} = zoom.wheel( e, point );
+                        
+                            me.graphsView.context.x = x;
+                            me.graphsView.context.y = y;
+                            me.graphsView.context.scaleX = scale;
+                            me.graphsView.context.scaleY = scale;
+                            me.status.transform.scale = scale;
 
                             _wheelHandleTimeer = null;
                             _deltaY = 0;
+
                         }, _wheelHandleTimeLen);
                     };
-
-                    e.preventDefault();
                 };
             };
 
@@ -332,32 +319,10 @@ class Relation extends GraphsBase {
 
     }
 
-    //point is global point
-    scale(scale, point) {
-        return;
+    //全局画布
+    scale(scale, globalScaleOrigin) {
+      
 
-        if (this.status.transform.scale == scale) {
-            return;
-        };
-        let scaleOrigin = point ? this._grahsSpClone.globalToLocal(point) : { x: 0, y: 0 };
-
-        console.log(scale, JSON.stringify(point), JSON.stringify(scaleOrigin), JSON.stringify(this.graphsSp._transform));
-
-        this.status.transform.scale = scale;
-        this.status.transform.scaleOrigin.x = scaleOrigin.x;
-        this.status.transform.scaleOrigin.y = scaleOrigin.y;
-
-        this.graphsSp.context.scaleOrigin.x = scaleOrigin.x;
-        this.graphsSp.context.scaleOrigin.y = scaleOrigin.y;
-        this.graphsSp.context.scaleX = scale;
-        this.graphsSp.context.scaleY = scale;
-
-        let newLeftTopPoint = this.graphsSp.localToGlobal({ x: 0, y: 0 }, this.sprite);
-        console.log(JSON.stringify(newLeftTopPoint))
-
-        
-        //this._grahsSpClone.context.x = newLeftTopPoint.x;
-        //this._grahsSpClone.context.y = newLeftTopPoint.y;
     }
 
     draw( opt ) {
@@ -377,18 +342,20 @@ class Relation extends GraphsBase {
         this.widget();
         this.sprite.context.x = this.origin.x;
         this.sprite.context.y = this.origin.y;
-        if (this.status.transform.fitView == 'autoZoom') {
 
+        /*
+        if (this.status.transform.fitView == 'autoZoom') {
             this.sprite.context.scaleX = this.width / this.data.size.width;
             this.sprite.context.scaleY = this.height / this.data.size.height;
         }
+        */
 
         let _offsetLet = (this.width - this.data.size.width) / 2;
         if (_offsetLet < 0) {
             _offsetLet = 0;
         };
         this.graphsSp.context.x = _offsetLet;
-        this._grahsSpClone.context.x = _offsetLet;
+
     }
 
     _initData() {

@@ -33,11 +33,14 @@ var _tools = require("../../../utils/tools");
 
 var _data = require("./data");
 
+var _zoom = _interopRequireDefault(require("./zoom"));
+
 var _ = _canvax["default"]._,
     event = _canvax["default"].event;
 var Rect = _canvax["default"].Shapes.Rect;
 var Path = _canvax["default"].Shapes.Path;
 var Arrow = _canvax["default"].Shapes.Arrow;
+var zoom = new _zoom["default"]();
 /**
  * 关系图中 包括了  配置，数据，和布局数据，
  * 默认用配置和数据可以完成绘图， 但是如果有布局数据，就绘图玩额外调用一次绘图，把布局数据传入修正布局效果
@@ -267,16 +270,15 @@ function (_GraphsBase) {
       });
       this.graphsSp = new _canvax["default"].Display.Sprite({
         id: "graphsSp"
+      }); //这个view和induce是一一对应的，在induce上面执行拖拽和滚轮缩放，操作的目标元素就是graphsView
+
+      this.graphsView = new _canvax["default"].Display.Sprite({
+        id: "graphsView"
       });
       this.graphsSp.addChild(this.edgesSp);
-      this.graphsSp.addChild(this.nodesSp); //clone一份graphsSp
-
-      this._grahsSpClone = new _canvax["default"].Display.Sprite({
-        id: "graphsSp_clone"
-      });
-      this.sprite.addChild(this.graphsSp);
-      this.sprite.addChild(this._grahsSpClone);
-      window.gsp = this.graphsSp;
+      this.graphsSp.addChild(this.nodesSp);
+      this.graphsView.addChild(this.graphsSp);
+      this.sprite.addChild(this.graphsView);
     }
   }, {
     key: "initInduce",
@@ -293,7 +295,6 @@ function (_GraphsBase) {
       });
       this.sprite.addChild(this.induce);
       var _mosedownIng = false;
-      var _lastDragPoint = null;
       var _preCursor = me.app.canvax.domView.style.cursor; //滚轮缩放相关
 
       var _wheelHandleTimeLen = 32; //16*2
@@ -302,11 +303,14 @@ function (_GraphsBase) {
       var _deltaY = 0;
       this.induce.on(event.types.get(), function (e) {
         if (me.status.transform.enabled) {
+          e.preventDefault();
+          var point = e.target.localToGlobal(e.point, me.sprite);
+
           if (e.type == "mousedown") {
             me.induce.toFront();
             _mosedownIng = true;
-            _lastDragPoint = e.point;
             me.app.canvax.domView.style.cursor = "move";
+            zoom.mouseMoveTo(point);
           }
 
           ;
@@ -314,7 +318,6 @@ function (_GraphsBase) {
           if (e.type == "mouseup" || e.type == "mouseout") {
             me.induce.toBack();
             _mosedownIng = false;
-            _lastDragPoint = null;
             me.app.canvax.domView.style.cursor = _preCursor;
           }
 
@@ -322,9 +325,12 @@ function (_GraphsBase) {
 
           if (e.type == "mousemove") {
             if (_mosedownIng) {
-              me.graphsSp.context.x += e.point.x - _lastDragPoint.x;
-              me.graphsSp.context.y += e.point.y - _lastDragPoint.y;
-              _lastDragPoint = e.point;
+              var _zoom$drag = zoom.drag(point),
+                  x = _zoom$drag.x,
+                  y = _zoom$drag.y;
+
+              me.graphsView.context.x = x;
+              me.graphsView.context.y = y;
             }
           }
 
@@ -339,38 +345,22 @@ function (_GraphsBase) {
 
             if (!_wheelHandleTimeer) {
               _wheelHandleTimeer = setTimeout(function () {
-                var itemLen = 0.02;
+                var _zoom$wheel = zoom.wheel(e, point),
+                    scale = _zoom$wheel.scale,
+                    x = _zoom$wheel.x,
+                    y = _zoom$wheel.y;
 
-                var _scale = e.deltaY / 30 * itemLen;
-
-                if (Math.abs(_scale) < 0.04) {
-                  _scale = Math.sign(_scale) * 0.04;
-                }
-
-                if (Math.abs(_scale) > 0.08) {
-                  _scale = Math.sign(_scale) * 0.08;
-                }
-
-                var scale = me.status.transform.scale + _scale;
-
-                if (scale <= 0.1) {
-                  scale = 0.1;
-                }
-
-                if (scale >= 1) {
-                  //关系图里面放大看是没必要的
-                  scale = 1;
-                }
-
-                var point = e.target.localToGlobal(e.point);
-                me.scale(scale, point);
+                me.graphsView.context.x = x;
+                me.graphsView.context.y = y;
+                me.graphsView.context.scaleX = scale;
+                me.graphsView.context.scaleY = scale;
+                me.status.transform.scale = scale;
                 _wheelHandleTimeer = null;
                 _deltaY = 0;
               }, _wheelHandleTimeLen);
             }
 
             ;
-            e.preventDefault();
           }
 
           ;
@@ -378,37 +368,11 @@ function (_GraphsBase) {
 
         ;
       });
-    } //point is global point
+    } //全局画布
 
   }, {
     key: "scale",
-    value: function scale(_scale2, point) {
-      return;
-
-      if (this.status.transform.scale == _scale2) {
-        return;
-      }
-
-      ;
-      var scaleOrigin = point ? this._grahsSpClone.globalToLocal(point) : {
-        x: 0,
-        y: 0
-      };
-      console.log(_scale2, JSON.stringify(point), JSON.stringify(scaleOrigin), JSON.stringify(this.graphsSp._transform));
-      this.status.transform.scale = _scale2;
-      this.status.transform.scaleOrigin.x = scaleOrigin.x;
-      this.status.transform.scaleOrigin.y = scaleOrigin.y;
-      this.graphsSp.context.scaleOrigin.x = scaleOrigin.x;
-      this.graphsSp.context.scaleOrigin.y = scaleOrigin.y;
-      this.graphsSp.context.scaleX = _scale2;
-      this.graphsSp.context.scaleY = _scale2;
-      var newLeftTopPoint = this.graphsSp.localToGlobal({
-        x: 0,
-        y: 0
-      }, this.sprite);
-      console.log(JSON.stringify(newLeftTopPoint)); //this._grahsSpClone.context.x = newLeftTopPoint.x;
-      //this._grahsSpClone.context.y = newLeftTopPoint.y;
-    }
+    value: function scale(_scale, globalScaleOrigin) {}
   }, {
     key: "draw",
     value: function draw(opt) {
@@ -431,11 +395,12 @@ function (_GraphsBase) {
       this.widget();
       this.sprite.context.x = this.origin.x;
       this.sprite.context.y = this.origin.y;
-
+      /*
       if (this.status.transform.fitView == 'autoZoom') {
-        this.sprite.context.scaleX = this.width / this.data.size.width;
-        this.sprite.context.scaleY = this.height / this.data.size.height;
+          this.sprite.context.scaleX = this.width / this.data.size.width;
+          this.sprite.context.scaleY = this.height / this.data.size.height;
       }
+      */
 
       var _offsetLet = (this.width - this.data.size.width) / 2;
 
@@ -445,7 +410,6 @@ function (_GraphsBase) {
 
       ;
       this.graphsSp.context.x = _offsetLet;
-      this._grahsSpClone.context.x = _offsetLet;
     }
   }, {
     key: "_initData",
