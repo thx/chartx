@@ -202,7 +202,7 @@ let copyToCdn = ()=> {
             gulp.src(['./dist/chartx.js']), //只有iife需要压缩，因为是给到chartpark拼文件用的
             uglify(),
             //rename({ suffix: '.min' }),
-            gulp.dest('./dist/')
+            gulp.dest('./cdn/')
         ).on("end",()=>{
             resolve();
         });
