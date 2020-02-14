@@ -1,12 +1,13 @@
 import Canvax from "canvax"
 import GraphsBase from "../index"
-import { global,_,event,getDefaultProps } from "mmvis"
+import {getDefaultProps} from "../../../utils/tools"
 import hull from "../../../utils/hull/index"
 
-const Circle = Canvax.Shapes.Circle;
-const Rect = Canvax.Shapes.Rect;
-const Line = Canvax.Shapes.Line;
-const Polygon = Canvax.Shapes.Polygon;
+let { _,event } = Canvax;
+let Circle = Canvax.Shapes.Circle;
+let Rect = Canvax.Shapes.Rect;
+let Line = Canvax.Shapes.Line;
+let Polygon = Canvax.Shapes.Polygon;
 
 //TODO iGroup 的实现有问题
 
@@ -203,7 +204,7 @@ class ScatGraphs extends GraphsBase
                     },
                     format: {
                         detail: 'label格式化处理函数',
-                        default:function(txt, nodeData){ 
+                        default:function(txt){ 
                             return txt 
                         }
                     },
@@ -299,7 +300,7 @@ class ScatGraphs extends GraphsBase
         this.sprite.context.x = this.origin.x;
         this.sprite.context.y = this.origin.y;
 
-        var me = this;
+        let me = this;
         
         if( this.animation && !opt.resize && !me.inited ){
             this.grow( function(){
@@ -312,7 +313,7 @@ class ScatGraphs extends GraphsBase
         return this;
     }
 
-    resetData( dataFrame , dataTrigger )
+    resetData( dataFrame )
     {
         this.dataFrame = dataFrame;
         this.data = this._trimGraphs();
@@ -327,24 +328,24 @@ class ScatGraphs extends GraphsBase
 
     _trimGraphs()
     {
-        var tmplData = [];
+        let tmplData = [];
         this._groupData = {};
 
-        var _coord = this.app.getComponent({name:'coord'});
+        let _coord = this.app.getComponent({name:'coord'});
         
-        var dataLen  = this.dataFrame.length;
+        let dataLen  = this.dataFrame.length;
 
         ////计算半径的时候需要用到， 每次执行_trimGraphs都必须要初始化一次
         this._rData = null;
         this._rMaxValue = null;
         this._rMinValue = null;
 
-        for( var i=0; i<dataLen; i++ ){
+        for( let i=0; i<dataLen; i++ ){
             
-            var rowData = this.dataFrame.getRowDataAt(i);
-            var fieldMap = _coord.getFieldMapOf( this.field );
+            let rowData = this.dataFrame.getRowDataAt(i);
+            let fieldMap = _coord.getFieldMapOf( this.field );
 
-            var point = _coord.getPoint( {
+            let point = _coord.getPoint( {
                 iNode : i,
                 field : this.field,
                 value : {
@@ -357,7 +358,7 @@ class ScatGraphs extends GraphsBase
                 continue;
             };
 
-            var nodeLayoutData = {
+            let nodeLayoutData = {
                 type       : "scat",
                 rowData    : rowData,
                 x          : point.pos.x,
@@ -404,7 +405,7 @@ class ScatGraphs extends GraphsBase
 
             //如果有分组字段，则记录在_groupData，供后面的一些分组需求用，比如area
             if( this.groupField ){
-                var groupVal = rowData[ this.groupField ];
+                let groupVal = rowData[ this.groupField ];
                 if( groupVal ){
                     if( !this._groupData[ groupVal ] ){
                         this._groupData[ groupVal ] = [];
@@ -427,8 +428,8 @@ class ScatGraphs extends GraphsBase
     _setR( nodeLayoutData )
     {
 
-        var r = this.node.normalRadius;
-        var rowData = nodeLayoutData.rowData;
+        let r = this.node.normalRadius;
+        let rowData = nodeLayoutData.rowData;
         if( this.node.radius != null ){
             if( _.isString( this.node.radius ) && rowData[ this.node.radius ] ){
                 //如果配置了某个字段作为r，那么就要自动计算比例
@@ -438,7 +439,7 @@ class ScatGraphs extends GraphsBase
                     this._rMinValue = _.min( this._rData );
                 };
 
-                var rVal = rowData[ this.node.radius ];
+                let rVal = rowData[ this.node.radius ];
 
                 if( this._rMaxValue ==  this._rMinValue ){
                     r = this.node.minRadius + ( this.node.maxRadius - this.node.minRadius )/2;
@@ -494,7 +495,7 @@ class ScatGraphs extends GraphsBase
 
     _getProp( prop, nodeLayoutData )
     {
-        var _prop = prop;
+        let _prop = prop;
         if( _.isArray( prop ) ){
             _prop = prop[ nodeLayoutData.iGroup ]
         };
@@ -505,7 +506,7 @@ class ScatGraphs extends GraphsBase
     }
     _getStyle( style, nodeLayoutData )
     {
-        var _style = style;
+        let _style = style;
         if( _.isArray( style ) ){
             _style = style[ nodeLayoutData.iGroup ]
         };
@@ -526,7 +527,7 @@ class ScatGraphs extends GraphsBase
 
     _setNodeType( nodeLayoutData )
     {
-        var shapeType = this.node.shapeType;
+        let shapeType = this.node.shapeType;
         if( _.isArray( shapeType ) ){
             shapeType = shapeType[ nodeLayoutData.iGroup ]
         };
@@ -543,7 +544,7 @@ class ScatGraphs extends GraphsBase
     //根据layoutdata开始绘制
     _widget()
     {
-        var me = this;
+        let me = this;
         
         _.each( _.flatten([me._shapesp.children,me._textsp.children,me._linesp.children]), function( el ){
             el.__used = false
@@ -552,15 +553,15 @@ class ScatGraphs extends GraphsBase
         
         _.each( me.data , function( nodeData, iNode ){
 
-            var _nodeElement = me._getNodeElement( nodeData, iNode );
+            let _nodeElement = me._getNodeElement( nodeData, iNode );
             if( !_nodeElement ){
                 nodeData.__isNew = true;
             };
 
-            var _context = me._getNodeContext( nodeData );
-            var Shape = nodeData.shapeType == "circle" ? Circle : Rect;
+            let _context = me._getNodeContext( nodeData );
+            let Shape = nodeData.shapeType == "circle" ? Circle : Rect;
 
-            //var _nodeElement = me._shapesp.getChildAt( iNode );
+            //let _nodeElement = me._shapesp.getChildAt( iNode );
             
             if( !_nodeElement ){
                 _nodeElement = new Shape({
@@ -608,8 +609,8 @@ class ScatGraphs extends GraphsBase
 
             if( me.line.enabled ){
 
-                var _line = _nodeElement.lineElement;//me._linesp.getChildAt( iNode );
-                var _lineContext = {
+                let _line = _nodeElement.lineElement;//me._linesp.getChildAt( iNode );
+                let _lineContext = {
                     start : {
                         x : _context.x,
                         y : _context.y+_context.r
@@ -640,8 +641,8 @@ class ScatGraphs extends GraphsBase
             //如果有label
             if( nodeData.label && me.label.enabled ){
         
-                var _label = _nodeElement.labelElement;//me._textsp.getChildAt( iNode );
-                var _labelContext = {};
+                let _label = _nodeElement.labelElement;//me._textsp.getChildAt( iNode );
+                let _labelContext = {};
                 if( !_label ){
                     _label = new Canvax.Display.Text( nodeData.label , {
                         id: "scat_text_"+iNode,
@@ -670,15 +671,15 @@ class ScatGraphs extends GraphsBase
 
             me._areasp.removeAllChildren();
 
-            var gi = 0;
-            for( var _groupKey in this._groupData ){
-                var _group = this._groupData[ _groupKey ];
-                var _groupData = {
+            let gi = 0;
+            for( let _groupKey in this._groupData ){
+                let _group = this._groupData[ _groupKey ];
+                let _groupData = {
                     name : _groupKey,
                     iGroup : gi,
                     data : _group
                 };
-                var _groupPoints = [];
+                let _groupPoints = [];
 
                 function getCirclePoints( nodeData, n ){
 
@@ -686,12 +687,12 @@ class ScatGraphs extends GraphsBase
                         return [ [ nodeData.x, nodeData.y ] ]
                     };
 
-                    var _points = [];
-                    for( var i=0; i<n; i++ ){
-                        var degree = 360/(n-1) * i;
-                        var r = nodeData.radius + 3;
-                        var x = nodeData.x +  Math.cos(Math.PI * 2 / 360 * degree) * r;
-                        var y = nodeData.y+ Math.sin(Math.PI * 2 / 360 * degree) * r;
+                    let _points = [];
+                    for( let i=0; i<n; i++ ){
+                        let degree = 360/(n-1) * i;
+                        let r = nodeData.radius + 3;
+                        let x = nodeData.x +  Math.cos(Math.PI * 2 / 360 * degree) * r;
+                        let y = nodeData.y+ Math.sin(Math.PI * 2 / 360 * degree) * r;
                         _points.push( [x,y] );
                     };
                     return _points;
@@ -700,17 +701,17 @@ class ScatGraphs extends GraphsBase
                 _.each( _group, function( nodeData ){
                     _groupPoints = _groupPoints.concat( getCirclePoints( nodeData , me.area.quantile) );
                 } );
-                var areaPoints = hull( _groupPoints, me.area.concavity );
+                let areaPoints = hull( _groupPoints, me.area.concavity );
 
-                var defStyle = me.app.getTheme( gi );
+                let defStyle = me.app.getTheme( gi );
 
-                var areaFillStyle = me._getStyle( me.area.fillStyle, _groupData ) || defStyle;
-                var areaFillAlpha = me._getProp( me.area.fillAlpha , _groupData );
-                var areaStrokeStyle = me._getStyle( me.area.strokeStyle, _groupData ) || defStyle;
-                var areaLineWidth = me._getProp( me.area.lineWidth , _groupData );
-                var areaStrokeAlpha = me._getProp( me.area.strokeAlpha, _groupData );
+                let areaFillStyle = me._getStyle( me.area.fillStyle, _groupData ) || defStyle;
+                let areaFillAlpha = me._getProp( me.area.fillAlpha , _groupData );
+                let areaStrokeStyle = me._getStyle( me.area.strokeStyle, _groupData ) || defStyle;
+                let areaLineWidth = me._getProp( me.area.lineWidth , _groupData );
+                let areaStrokeAlpha = me._getProp( me.area.strokeAlpha, _groupData );
 
-                var _areaElement = new Polygon({
+                let _areaElement = new Polygon({
                     context : {
                         pointList   : areaPoints,
                         fillStyle   : areaFillStyle,
@@ -745,9 +746,9 @@ class ScatGraphs extends GraphsBase
     }
 
     _getNodeElement( nodeData, iNode ){
-        var me = this;
-        var nodeEle;
-        var dataKey = me.node.dataKey;
+        let me = this;
+        let nodeEle;
+        let dataKey = me.node.dataKey;
         if( !dataKey ){
             nodeEle = me._shapesp.getChildAt( iNode );
         } else {
@@ -756,11 +757,11 @@ class ScatGraphs extends GraphsBase
                 dataKey = dataKey.split(",");
             };
 
-            for( var i=0,l=this._shapesp.children.length; i<l; i++ ){
-                var _nodeEle = this._shapesp.children[i];
-                var isThisNodeEle=true;
-                for( var ii=0,ll=dataKey.length; ii<ll; ii++ ){
-                    var key = dataKey[ii];
+            for( let i=0,l=this._shapesp.children.length; i<l; i++ ){
+                let _nodeEle = this._shapesp.children[i];
+                let isThisNodeEle=true;
+                for( let ii=0,ll=dataKey.length; ii<ll; ii++ ){
+                    let key = dataKey[ii];
                     if( _nodeEle.nodeData.rowData[ key ] != nodeData.rowData[key] ){
                         isThisNodeEle = false;
                         break;
@@ -778,7 +779,7 @@ class ScatGraphs extends GraphsBase
 
     _getTextPosition( _label, opt )
     {
-        var x=0,y=0;
+        let x=0,y=0;
         switch( this.label.position ){
             case "center" :
                 x = opt.x;
@@ -809,7 +810,7 @@ class ScatGraphs extends GraphsBase
                 break;
         };
 
-        var point = {
+        let point = {
             x: x + this.label.offsetX,
             y: y + this.label.offsetY
         };
@@ -819,14 +820,14 @@ class ScatGraphs extends GraphsBase
 
     _getTextContext( _label, _context )
     {
-        var textPoint = this._getTextPosition( _label, _context );
+        let textPoint = this._getTextPosition( _label, _context );
 
-        var fontSize = this.label.fontSize;
+        let fontSize = this.label.fontSize;
         if( _label.getTextWidth() > _context.r*2 ){
             fontSize -= 2;
         };
         
-        var ctx = {
+        let ctx = {
             x: textPoint.x,
             y: textPoint.y,
             fillStyle: this.label.fontColor || _context.fillStyle,
@@ -849,8 +850,8 @@ class ScatGraphs extends GraphsBase
             ctx.y = 0;
         };
         if( this.aniOrigin == "origin" ){
-            var _coord = this.app.getComponent({name:'coord'});
-            var originPoint = _coord.getOriginPos( {field: this.field} );
+            let _coord = this.app.getComponent({name:'coord'});
+            let originPoint = _coord.getOriginPos( {field: this.field} );
             ctx.x = originPoint.x;
             ctx.y = originPoint.y;
         };
@@ -869,7 +870,7 @@ class ScatGraphs extends GraphsBase
 
     _getCircleContext( nodeData )
     {
-        var ctx = {
+        let ctx = {
             x : nodeData.x,
             y : nodeData.y,
             r : nodeData.radius,
@@ -893,9 +894,9 @@ class ScatGraphs extends GraphsBase
      */
     grow( callback )
     {
-        var i = 0;
-        var l = this.data.length-1;
-        var me = this;
+        let i = 0;
+        let l = this.data.length-1;
+        let me = this;
         _.each( this.data , function( nodeData ){
             if( nodeData.__isNew ){
                 me._growNode( nodeData, function(){
@@ -910,7 +911,7 @@ class ScatGraphs extends GraphsBase
     }
 
     _growNode( nodeData, callback ){
-        var me = this;
+        let me = this;
         nodeData.nodeElement.animate({
             x : nodeData.x,
             y : nodeData.y,
@@ -918,7 +919,7 @@ class ScatGraphs extends GraphsBase
         }, {
             onUpdate: function( opt ){
                 if( this.labelElement && this.labelElement.context ){
-                    var _textPoint = me._getTextPosition( this.labelElement, opt );
+                    let _textPoint = me._getTextPosition( this.labelElement, opt );
                     this.labelElement.context.x = _textPoint.x;
                     this.labelElement.context.y = _textPoint.y;
                 };
@@ -935,10 +936,10 @@ class ScatGraphs extends GraphsBase
 
 
     focusAt( ind ){
-        var nodeData = this.data[ ind ];
+        let nodeData = this.data[ ind ];
         if( !this.node.focus.enabled || nodeData.focused ) return;
 
-        var nctx = nodeData.nodeElement.context; 
+        let nctx = nodeData.nodeElement.context; 
         nctx.lineWidth = this.node.focus.lineWidth;
         nctx.strokeAlpha = this.node.focus.strokeAlpha;
         nctx.fillAlpha = this.node.focus.fillAlpha;
@@ -946,9 +947,9 @@ class ScatGraphs extends GraphsBase
     }
     
     unfocusAt( ind ){
-        var nodeData = this.data[ ind ];
+        let nodeData = this.data[ ind ];
         if( !this.node.focus.enabled || !nodeData.focused ) return;
-        var nctx = nodeData.nodeElement.context; 
+        let nctx = nodeData.nodeElement.context; 
         nctx.lineWidth = nodeData.lineWidth;
         nctx.strokeAlpha = nodeData.strokeAlpha;
         nctx.fillAlpha = nodeData.fillAlpha;
@@ -959,10 +960,10 @@ class ScatGraphs extends GraphsBase
     
     selectAt( ind ){
         
-        var nodeData = this.data[ ind ];
+        let nodeData = this.data[ ind ];
         if( !this.node.select.enabled || nodeData.selected ) return;
         
-        var nctx = nodeData.nodeElement.context; 
+        let nctx = nodeData.nodeElement.context; 
         nctx.lineWidth = this.node.select.lineWidth;
         nctx.strokeAlpha = this.node.select.strokeAlpha;
         nctx.fillAlpha = this.node.select.fillAlpha;
@@ -971,10 +972,10 @@ class ScatGraphs extends GraphsBase
     }
 
     unselectAt( ind ){
-        var nodeData = this.data[ ind ];
+        let nodeData = this.data[ ind ];
         if( !this.node.select.enabled || !nodeData.selected ) return;
        
-        var nctx = nodeData.nodeElement.context; 
+        let nctx = nodeData.nodeElement.context; 
 
         if( nodeData.focused ) {
             //有e 说明这个函数是事件触发的，鼠标肯定还在node上面
@@ -990,15 +991,15 @@ class ScatGraphs extends GraphsBase
         nodeData.selected = false;
     }
 
-    getNodesOfPos( x, y )
+    getNodesOfPos( )
     {
         //sat的 getNodesOfPos 一定要有两个点
-        var _nodesInfoList = []; //节点信息集合
+        let _nodesInfoList = []; //节点信息集合
         return _nodesInfoList;
     }
 
 }
 
-global.registerComponent( ScatGraphs, 'graphs', 'scat' );
+GraphsBase.registerComponent( ScatGraphs, 'graphs', 'scat' );
 
 export default ScatGraphs;

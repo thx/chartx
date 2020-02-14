@@ -1,13 +1,15 @@
 import Canvax from "canvax"
 import GraphsBase from "../index"
 import Group from "./group"
-import { global,dataFrame,_,getDefaultProps,event } from "mmvis"
+import dataFrame from "../../../core/dataSection"
+import { getDefaultProps } from "../../../utils/tools"
 
-const Text = Canvax.Display.Text;
-const Circle = Canvax.Shapes.Circle;
-const Line = Canvax.Shapes.Line;
-const Rect = Canvax.Shapes.Rect;
-const Sector = Canvax.Shapes.Sector;
+let { _,event } = Canvax;
+let Text = Canvax.Display.Text;
+let Circle = Canvax.Shapes.Circle;
+let Line = Canvax.Shapes.Line;
+let Rect = Canvax.Shapes.Rect;
+let Sector = Canvax.Shapes.Sector;
 
 class PlanetGraphs extends GraphsBase
 {
@@ -240,10 +242,12 @@ class PlanetGraphs extends GraphsBase
 
     _getMaxR()
     {
-        var _circleMaxR;
-        try{
-            _circleMaxR = this.graphs.group.circle.maxRadius;
-        } catch(e){}
+
+        let _circleMaxR;
+        if( this.graphs && this.graphs.group && this.graphs.group.circle ){
+            _circleMaxR = this.graphs.group.circle.maxRadius
+        }
+
         if( _circleMaxR == undefined ){
             _circleMaxR = 30
         };
@@ -252,19 +256,19 @@ class PlanetGraphs extends GraphsBase
 
     _drawGroups()
     {
-        var me = this;
+        let me = this;
 
-        var groupRStart = this.center.radius + this.center.margin;
+        let groupRStart = this.center.radius + this.center.margin;
       
-        var maxRadius = me.app.getComponent({name:'coord'}).getMaxDisToViewOfOrigin() - me.center.radius - me.center.margin;
+        let maxRadius = me.app.getComponent({name:'coord'}).getMaxDisToViewOfOrigin() - me.center.radius - me.center.margin;
         
-        var _circleMaxR = this._getMaxR();
+        let _circleMaxR = this._getMaxR();
 
         _.each( this.groupDataFrames , function( df , i ){
             
-            var toR = groupRStart + maxRadius*( (df.length) / (me.dataFrame.length) );
+            let toR = groupRStart + maxRadius*( (df.length) / (me.dataFrame.length) );
             
-            var _g = new Group( _.extend(true, {
+            let _g = new Group( _.extend(true, {
                 iGroup : i,
                 groupLen : me.groupDataFrames.length,
                 rRange : {
@@ -293,7 +297,7 @@ class PlanetGraphs extends GraphsBase
 
     _drawCenter()
     {
-        var me = this;
+        let me = this;
         if( this.center.enabled ){
             //绘制中心实心圆
             this._center = new Circle({
@@ -346,15 +350,15 @@ class PlanetGraphs extends GraphsBase
     }
 
     _drawBack(){
-        var me = this;
-        var _coord = this.app.getComponent({name:'coord'});
+        let me = this;
+        let _coord = this.app.getComponent({name:'coord'});
         
         if( me.grid.rings._section.length == 1 ){
 
             //如果只有一个，那么就强制添加到3个
-            var _diffR = (me.grid.rings._section[0].radius - me.center.radius) / me.grid.rings.count;
+            let _diffR = (me.grid.rings._section[0].radius - me.center.radius) / me.grid.rings.count;
             me.grid.rings._section = [];
-            for( var i=0;i<me.grid.rings.count ; i++ ){
+            for( let i=0;i<me.grid.rings.count ; i++ ){
                 me.grid.rings._section.push({
                     radius : me.center.radius + _diffR*(i+1)
                 });
@@ -365,8 +369,8 @@ class PlanetGraphs extends GraphsBase
         };
 
         
-        for( var i=me.grid.rings._section.length-1 ; i>=0 ; i-- ){
-            var _scale = me.grid.rings._section[i];
+        for( let i=me.grid.rings._section.length-1 ; i>=0 ; i-- ){
+            let _scale = me.grid.rings._section[i];
             me.gridSp.addChild( new Circle({
                 context : {
                     x : _coord.origin.x,
@@ -382,19 +386,19 @@ class PlanetGraphs extends GraphsBase
         
         //如果back.rays.count非0， 则绘制从圆心出发的射线
         if( me.grid.rays.count > 1 ){
-            var cx = _coord.origin.x;
-            var cy = _coord.origin.y;
-            var itemAng = 360 / me.grid.rays.count;
-            var _r = _coord.getMaxDisToViewOfOrigin(); //Math.max( me.w, me.h );
+            let cx = _coord.origin.x;
+            let cy = _coord.origin.y;
+            let itemAng = 360 / me.grid.rays.count;
+            let _r = _coord.getMaxDisToViewOfOrigin(); //Math.max( me.w, me.h );
 
             if( me.grid.rings._section.length ){
                 _r = me.grid.rings._section.slice(-1)[0].radius
             }
 
-            for( var i=0,l=me.grid.rays.count; i<l; i++ ){
-                var radian = itemAng*i / 180 * Math.PI;
-                var tx = cx + _r * Math.cos( radian );
-                var ty = cy + _r * Math.sin( radian );
+            for( let i=0,l=me.grid.rays.count; i<l; i++ ){
+                let radian = itemAng*i / 180 * Math.PI;
+                let tx = cx + _r * Math.cos( radian );
+                let ty = cy + _r * Math.sin( radian );
 
                 me.gridSp.addChild( new Line({
                     context : {
@@ -414,7 +418,7 @@ class PlanetGraphs extends GraphsBase
             };
         };
 
-        var _clipRect = new Rect({
+        let _clipRect = new Rect({
             name: "clipRect",
             context : {
                 x : _coord.origin.x-me.app.width/2,
@@ -432,8 +436,8 @@ class PlanetGraphs extends GraphsBase
 
     _getBackProp( p, i )
     {
-        var iGroup = i;
-        var res = null;
+        //let iGroup = i;
+        let res = null;
         if( _.isFunction( p ) ){
             res = p.apply( this , [ {
                 //iGroup : iGroup,
@@ -454,11 +458,11 @@ class PlanetGraphs extends GraphsBase
     }
 
     _drawBewrite(){
-        var me = this;
+        let me = this;
         //如果开启了描述中线
         if( me.bewrite.enabled ){
 
-            var _txt,_txtWidth,_powerTxt,_weakTxt;
+            let _txt,_txtWidth,_powerTxt,_weakTxt;
 
         
             if( me.bewrite.text ){
@@ -489,7 +493,7 @@ class PlanetGraphs extends GraphsBase
                 }
             } );
 
-            var _bewriteSp = new Canvax.Display.Sprite({
+            let _bewriteSp = new Canvax.Display.Sprite({
                 context: {
                     x : this.origin.x,
                     y : this.origin.y
@@ -497,7 +501,7 @@ class PlanetGraphs extends GraphsBase
             });
             me.sprite.addChild(_bewriteSp);
 
-            var _graphR = me.width/2;
+            let _graphR = me.width/2;
 
             function _draw( direction, _txt, _powerTxt, _weakTxt ){
                 //先绘制右边的
@@ -551,9 +555,9 @@ class PlanetGraphs extends GraphsBase
     }
 
     scan(){
-        var me = this;
+        let me = this;
         this._scanAnim && this._scanAnim.stop();
-        var _scanSp = me._getScanSp();
+        let _scanSp = me._getScanSp();
 
         //开始动画
         if( me.__scanIngCurOration == 360 ){
@@ -583,11 +587,11 @@ class PlanetGraphs extends GraphsBase
     }
 
     _drawScan( callback ){
-        var me = this;
+        let me = this;
         
         if( me.scan.enabled ){
 
-            var _scanSp = me._getScanSp();
+            let _scanSp = me._getScanSp();
 
             //开始动画
             if( me.__scanIngCurOration == 360 ){
@@ -642,10 +646,10 @@ class PlanetGraphs extends GraphsBase
 
     _getScanSp(){
         
-        var me = this;
+        let me = this;
 
         //先准备scan元素
-        var _scanSp = me.__scanSp;
+        let _scanSp = me.__scanSp;
 
         if( !_scanSp ){
             
@@ -660,13 +664,13 @@ class PlanetGraphs extends GraphsBase
             me.scanSp.addChild(_scanSp);
             me.__scanSp = _scanSp;
 
-            var r = me.scan.r || me.height/2 - 10;
-            var fillStyle = me.scan.fillStyle || me.center.fillStyle;
+            let r = me.scan.r || me.height/2 - 10;
+            let fillStyle = me.scan.fillStyle || me.center.fillStyle;
 
             //如果开启了扫描效果
-            var count = me.scan.angle;
-            for( var i=0,l=count; i<l; i++ ){
-                var node = new Sector({
+            let count = me.scan.angle;
+            for( let i=0,l=count; i<l; i++ ){
+                let node = new Sector({
                     context: {
                         r: r,
                         fillStyle: fillStyle,
@@ -678,7 +682,7 @@ class PlanetGraphs extends GraphsBase
                 })
                 _scanSp.addChild( node );
             };
-            var _line = new Line({
+            let _line = new Line({
                 context: {
                     end : {
                         x : r,
@@ -696,11 +700,11 @@ class PlanetGraphs extends GraphsBase
     
     _dataGroupHandle()
     {
-        var groupFieldInd = _.indexOf(this.dataFrame.fields , this.groupField);
+        let groupFieldInd = _.indexOf(this.dataFrame.fields , this.groupField);
         if( groupFieldInd >= 0 ){
             //有分组字段，就还要对dataFrame中的数据分下组，然后给到 groupDataFrames
-            var titles = this.dataFrame.org[0];
-            var _dmap = {}; //以分组的字段值做为key
+            let titles = this.dataFrame.org[0];
+            let _dmap = {}; //以分组的字段值做为key
 
             _.each( this.dataFrame.org , function( row , i ){
                 if( i ){
@@ -715,7 +719,7 @@ class PlanetGraphs extends GraphsBase
                 }
             } );
 
-            for( var r in _dmap ){
+            for( let r in _dmap ){
                 this.groupDataFrames.push( dataFrame( _dmap[r] ) );
             };
         } else {
@@ -743,11 +747,10 @@ class PlanetGraphs extends GraphsBase
 
     getAgreeNodeData( trigger , callback)
     {
-        var me = this;
         _.each( this._ringGroups, function( _g ){
-            _.each( _g._rings , function( ring , i ){
-                _.each( ring.planets, function( data , ii){
-                    var rowData = data.rowData;
+            _.each( _g._rings , function( ring ){
+                _.each( ring.planets, function( data ){
+                    let rowData = data.rowData;
                     if( trigger.params.name == rowData[ trigger.params.field ] ){
                         //这个数据符合
                         //data.nodeElement.context.visible = false;
@@ -761,7 +764,7 @@ class PlanetGraphs extends GraphsBase
 
     //获取所有有效的在布局中的nodeData
     getLayoutNodes(){
-        var nodes = [];
+        let nodes = [];
         _.each( this._ringGroups, function( rg ){
             _.each(rg.planets, function( node ){
                 if( node.pit ){
@@ -774,7 +777,7 @@ class PlanetGraphs extends GraphsBase
 
     //获取所有无效的在不在布局的nodeData
     getInvalidNodes(){
-        var nodes = [];
+        let nodes = [];
         _.each( this._ringGroups, function( rg ){
             _.each(rg.planets, function( node ){
                 if( !node.pit ){
@@ -787,7 +790,7 @@ class PlanetGraphs extends GraphsBase
 
     //ind 对应源数据中的index
     selectAt( ind ){
-        var me = this;
+        let me = this;
         _.each( me._ringGroups, function( _g ){
             _g.selectAt( ind );
         } );
@@ -795,7 +798,7 @@ class PlanetGraphs extends GraphsBase
 
     //selectAll
     selectAll(){
-        var me = this;
+        let me = this;
         _.each( me.dataFrame.getFieldData("__index__") , function( _ind ){
             me.selectAt( _ind )
         } );
@@ -803,15 +806,15 @@ class PlanetGraphs extends GraphsBase
 
     //ind 对应源数据中的index
     unselectAt( ind ){
-        var me = this;
+        let me = this;
         _.each( me._ringGroups, function( _g ){
             _g.unselectAt( ind );
         } );
     }
 
     //unselectAll
-    unselectAll( ind ){
-        var me = this;
+    unselectAll(){
+        let me = this;
         _.each( me.dataFrame.getFieldData("__index__") , function( _ind ){
             me.unselectAt( _ind )
         } );
@@ -819,7 +822,7 @@ class PlanetGraphs extends GraphsBase
 
     //获取所有的节点数据
     getSelectedNodes(){
-        var arr = [];
+        let arr = [];
         _.each( this._ringGroups, function( _g ){
             arr = arr.concat( _g.getSelectedNodes() );
         } );
@@ -828,9 +831,9 @@ class PlanetGraphs extends GraphsBase
 
     //获取所有的节点数据对应的原始数据行
     getSelectedRowList(){
-        var arr = [];
+        let arr = [];
         _.each( this._ringGroups, function( _g ){
-            var rows = [];
+            let rows = [];
             _.each( _g.getSelectedNodes(), function( nodeData ){
                 rows.push( nodeData.rowData );
             } );
@@ -844,7 +847,7 @@ class PlanetGraphs extends GraphsBase
     }
 
 
-    resetData( dataFrame , dataTrigger )
+    resetData( dataFrame )
     {
         this.clean();
         this.dataFrame = dataFrame;
@@ -855,7 +858,7 @@ class PlanetGraphs extends GraphsBase
 
 
     clean(){
-        var me = this;
+        let me = this;
         me.groupDataFrames = [];
        
         _.each( me._ringGroups , function(_g){
@@ -867,6 +870,6 @@ class PlanetGraphs extends GraphsBase
 
 }
 
-global.registerComponent( PlanetGraphs, 'graphs', 'planet' );
+GraphsBase.registerComponent( PlanetGraphs, 'graphs', 'planet' );
 
 export default PlanetGraphs;

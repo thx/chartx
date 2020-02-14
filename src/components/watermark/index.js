@@ -2,8 +2,10 @@
  * 水印组件
  */
 import Canvax from "canvax"
-import { global,_,getDefaultProps } from "mmvis"
+import { getDefaultProps } from "../../utils/tools"
 import Component from "../component"
+
+let _ = Canvax._;
 
 class waterMark extends Component
 {
@@ -52,24 +54,24 @@ class waterMark extends Component
     draw()
     {
 
-        var textEl = new Canvax.Display.Text( this.text , {
+        let textEl = new Canvax.Display.Text( this.text , {
             context: {
                 fontSize    : this.fontSize,
                 fillStyle   : this.fontColor
             }
         });
 
-        var textW = textEl.getTextWidth();
-        var textH = textEl.getTextHeight();
+        let textW = textEl.getTextWidth();
+        let textH = textEl.getTextHeight();
 
-        var rowCount = parseInt(this.height / (textH*5)) +1;
-        var coluCount = parseInt(this.width / (textW*1.5)) +1;
+        let rowCount = parseInt(this.height / (textH*5)) +1;
+        let coluCount = parseInt(this.width / (textW*1.5)) +1;
 
-        for( var r=0; r< rowCount; r++){
-            for( var c=0; c< coluCount; c++){
+        for( let r=0; r< rowCount; r++){
+            for( let c=0; c< coluCount; c++){
                 //TODO:text 的 clone有问题
-                //var cloneText = textEl.clone();
-                var _textEl = new Canvax.Display.Text( this.text , {
+                //let cloneText = textEl.clone();
+                let _textEl = new Canvax.Display.Text( this.text , {
                     context: {
                         rotation    : this.rotation,
                         fontSize    : this.fontSize,
@@ -86,6 +88,6 @@ class waterMark extends Component
     }
 }
 
-global.registerComponent( waterMark, 'waterMark' );
+Component.registerComponent( waterMark, 'waterMark' );
 
 export default waterMark;

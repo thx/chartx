@@ -13,12 +13,16 @@
 //应用场景中一般需要用到的属性有
 //width, height, origin(默认为width/2,height/2)
 
-import coorBase from "./index"
+import coordBase from "./index"
 import Canvax from "canvax"
 import Grid from "./polar/grid"
-import { global,dataSection,_,getDefaultProps,event } from "mmvis"
+import dataSection from "../../core/dataSection"
 
-class Polar extends coorBase
+import {getDefaultProps} from "../../utils/tools"
+
+let { _,event } = Canvax
+
+class Polar extends coordBase
 {
     static defaultProps(){
         return {
@@ -129,7 +133,7 @@ class Polar extends coorBase
     setDefaultOpt( coordOpt, app )
     {
       
-        var coord = {
+        let coord = {
             rAxis : {
                 field : []
             },
@@ -144,14 +148,14 @@ class Polar extends coorBase
         };
 
         //根据opt中得Graphs配置，来设置 coord.yAxis
-        var graphsArr = _.flatten( [app._opt.graphs] );
+        let graphsArr = _.flatten( [app._opt.graphs] );
         
         //有graphs的就要用找到这个graphs.field来设置coord.rAxis
-        var arrs = [];
+        let arrs = [];
         _.each( graphsArr, function( graphs ){
             if( graphs.field ){
                 //没有配置field的话就不绘制这个 graphs了
-                var _fs = graphs.field;
+                let _fs = graphs.field;
                 if( !_.isArray( _fs ) ){
                     _fs = [ _fs ];
                 };
@@ -170,7 +174,7 @@ class Polar extends coorBase
         return coord
     }
 
-    init(opt)
+    init()
     {
 
         this._initModules();
@@ -231,7 +235,7 @@ class Polar extends coorBase
     }
 
 
-    resetData( dataFrame , dataTrigger )
+    resetData( )
     {
 
     }
@@ -256,14 +260,14 @@ class Polar extends coorBase
 
     _getRDataSection(){
         
-        var me = this;
+        let me = this;
         //如果用户有主动配置了dataSection,是不需要计算dataSection的
         //目前没有做堆叠的dataSection，后面有需要直接从yAxis的模块中拿
         if( this._opt.rAxis && this._opt.rAxis.dataSection ){
             return this._opt.rAxis.dataSection
         };
 
-        var arr = [];
+        let arr = [];
         _.each( _.flatten( [me.rAxis.field] ), function( field ){
             arr = arr.concat( me.app.dataFrame.getFieldData( field ) );
         } );
@@ -275,13 +279,13 @@ class Polar extends coorBase
 
     _computeAttr()
     {
-        var _r;
+        let _r;
 
-        var scaleXY = 1; //width/height 宽高比
+        let scaleXY = 1; //width/height 宽高比
 
-        var _padding = this.app.padding;
-        var rootWidth = this.app.width;
-        var rootHeight = this.app.height;
+        let _padding = this.app.padding;
+        let rootWidth = this.app.width;
+        let rootHeight = this.app.height;
 
         if( !("width" in this._opt) ){
             this.width = rootWidth - _padding.left - _padding.right;
@@ -290,24 +294,24 @@ class Polar extends coorBase
             this.height = rootHeight - _padding.top - _padding.bottom;
         };  
         
-        var vw = this.width;
-        var vh = this.height;
+        let vw = this.width;
+        let vh = this.height;
      
         //然后根据allAngle startAngle来实现计算出这个polar的和模型 高宽比例
         //if( this.allAngle % 360 != 0 ){
 
             //360的polar高宽比例肯定是1：1的
-            var sinTop=0,sinBottom=0,cosLeft=0,cosRight=0;
+            let sinTop=0,sinBottom=0,cosLeft=0,cosRight=0;
             //如果该坐标系并非一个整圆,那么圆心位置 需要对应的调整，才能铺满整个画布
-            var angles = [ this.startAngle ]
-            for( var i=0,l= (parseInt((this.startAngle+this.allAngle)/90) - parseInt(this.startAngle/90)); i<=l;i++ ){
-                var angle = parseInt(this.startAngle/90)*90 + i*90;
+            let angles = [ this.startAngle ]
+            for( let i=0,l= (parseInt((this.startAngle+this.allAngle)/90) - parseInt(this.startAngle/90)); i<=l;i++ ){
+                let angle = parseInt(this.startAngle/90)*90 + i*90;
                 if( _.indexOf( angles, angle ) == -1 && angle>angles.slice(-1)[0] ){
                     angles.push( angle );
                 };
             };
 
-            var lastAngle = this.startAngle + this.allAngle;
+            let lastAngle = this.startAngle + this.allAngle;
             if( _.indexOf( angles, lastAngle ) == -1 ){
                 angles.push( lastAngle );
             };
@@ -316,11 +320,11 @@ class Polar extends coorBase
                 
                 angle = angle % 360;
                 
-                var _sin = Math.sin( angle*Math.PI/180 );
+                let _sin = Math.sin( angle*Math.PI/180 );
                 if( angle == 180 ){
                     _sin = 0;
                 };
-                var _cos = Math.cos( angle*Math.PI/180 );
+                let _cos = Math.cos( angle*Math.PI/180 );
                 if( angle == 270 || angle == 90 ){
                     _cos = 0;
                 };
@@ -332,12 +336,12 @@ class Polar extends coorBase
             } );
 
             scaleXY = (Math.abs(cosLeft) + Math.abs(cosRight))/(Math.abs(sinTop) + Math.abs(sinBottom))
-            var _num = Math.min( vw, vh );
+            let _num = Math.min( vw, vh );
             if( scaleXY == 1 ){
                 vw = vh = _num;
             } else {
-                var _w = vh * scaleXY;
-                var _h = vw  / scaleXY;
+                let _w = vh * scaleXY;
+                let _h = vw  / scaleXY;
                 if( _w > vw ){
                     //如果超出了， 那么缩放height
                     vh = _h;
@@ -346,23 +350,23 @@ class Polar extends coorBase
                 }
             };
 
-            var x = _padding.left + (this.width-vw)/2;
-            var y = _padding.top + (this.height-vh)/2;
+            let x = _padding.left + (this.width-vw)/2;
+            let y = _padding.top + (this.height-vh)/2;
 
             this.origin = {
                 x : x + vw * (cosLeft/(cosLeft-cosRight)),
                 y : y + vh * (sinTop/(sinTop-sinBottom))
             };
 
-            var distanceToLine = {
+            let distanceToLine = {
                 top    : this.origin.y - y,
                 right  : x+vw - this.origin.x,
                 bottom : y+vh - this.origin.y,
                 left   : this.origin.x - x 
             };
 
-            var anglesRadius = []; //每个角度上面的和边线相交点到origin的距离，可以作为半径
-            var quadrantLines = [
+            let anglesRadius = []; //每个角度上面的和边线相交点到origin的距离，可以作为半径
+            let quadrantLines = [
                 ["right" , "bottom"],
                 ["bottom" , "left"],
                 ["left" , "top"],
@@ -372,24 +376,24 @@ class Polar extends coorBase
                 //判断这个angle在会和哪根边线相交
                 angle = angle%360;
                 
-                var quadrant = parseInt(angle/90); //当前angle在第几象限，每个象限可能相交的边线不同
-                var lines = quadrantLines[quadrant];
+                let quadrant = parseInt(angle/90); //当前angle在第几象限，每个象限可能相交的边线不同
+                let lines = quadrantLines[quadrant];
                 if( angle%90 == 0 ){ //说明在4个正方向，只会和一条边线有可能相交，而且垂直
                     lines = [[ "right","bottom","left","top" ][quadrant]];
                 };
 
-                var _sin = Math.sin( angle*Math.PI/180 );
+                let _sin = Math.sin( angle*Math.PI/180 );
                 if( angle == 180 ){
                     _sin = 0;
                 };
-                var _cos = Math.cos( angle*Math.PI/180 );
+                let _cos = Math.cos( angle*Math.PI/180 );
                 if( angle == 270 || angle == 90 ){
                     _cos = 0;
                 };
 
                 //可能相交的边线集合 top right bottom left
                 _.each( lines , function( line ){
-                    var _r;
+                    let _r;
                     if( line == "top" || line == "bottom" ){
                         //和上下边线的相交
                         if( _sin ){
@@ -421,16 +425,16 @@ class Polar extends coorBase
     }
 
     getMaxDisToViewOfOrigin(){
-        var origin = this.origin;
-        var _r = 0;
-        var _padding = this.app.padding;
-        var rootWidth = this.app.width;
-        var rootHeight = this.app.height;
+        let origin = this.origin;
+        let _r = 0;
+        let _padding = this.app.padding;
+        let rootWidth = this.app.width;
+        let rootHeight = this.app.height;
 
-        var vw = rootWidth - _padding.left - _padding.right;
-        var vh = rootHeight - _padding.top - _padding.bottom;
+        let vw = rootWidth - _padding.left - _padding.right;
+        let vh = rootHeight - _padding.top - _padding.bottom;
 
-        var _distances = [ 
+        let _distances = [ 
             origin.x - _padding.left , //原点到left的距离
             vw + _padding.left - origin.x , //原点到右边的距离
             origin.y - _padding.top , 
@@ -446,7 +450,7 @@ class Polar extends coorBase
     getRadiansAtR( r , width , height)
     {
         
-        var me = this;
+        let me = this;
         if( width == undefined ){
             width = this.width;
         };
@@ -454,27 +458,27 @@ class Polar extends coorBase
             height = this.height;
         };
 
-        var _rs = [];
+        let _rs = [];
         //if( r > maxRadius ){
         //    return [];
         //} else {
             //下面的坐标点都是已经origin为原点的坐标系统里
 
             //矩形的4边框线段
-            var _padding = this.app.padding;
+            let _padding = this.app.padding;
             
             //这个origin 是相对在width，height矩形范围内的圆心，
             //而this.origin 是在整个画布的位置
-            var origin = {
+            let origin = {
                 x : this.origin.x - _padding.left - (this.width-width)/2,
                 y : this.origin.y - _padding.top - (this.height-height)/2
             };
-            var x,y;
+            let x,y;
             
 
             //于上边界的相交点
             //最多有两个交点
-            var distanceT = origin.y;
+            let distanceT = origin.y;
             if( distanceT < r ){
                 x = Math.sqrt( Math.pow(r,2)-Math.pow(distanceT , 2) );
                 _rs = _rs.concat( this._filterPointsInRect([
@@ -485,7 +489,7 @@ class Polar extends coorBase
 
             //于右边界的相交点
             //最多有两个交点
-            var distanceR = width - origin.x;
+            let distanceR = width - origin.x;
             if( distanceR < r ){
                 y = Math.sqrt( Math.pow(r,2)-Math.pow(distanceR , 2) );
                 _rs = _rs.concat( this._filterPointsInRect([
@@ -495,7 +499,7 @@ class Polar extends coorBase
             };
             //于下边界的相交点
             //最多有两个交点
-            var distanceB = height - origin.y;
+            let distanceB = height - origin.y;
             if( distanceB < r ){
                 x = Math.sqrt( Math.pow(r,2)-Math.pow(distanceB , 2) );
                 _rs = _rs.concat( this._filterPointsInRect([
@@ -505,7 +509,7 @@ class Polar extends coorBase
             };
             //于左边界的相交点
             //最多有两个交点
-            var distanceL = origin.x;
+            let distanceL = origin.x;
             if( distanceL < r ){
                 y = Math.sqrt( Math.pow(r,2)-Math.pow(distanceL , 2) );
                 _rs = _rs.concat( this._filterPointsInRect([
@@ -515,7 +519,7 @@ class Polar extends coorBase
             };
 
 
-            var arcs = [];//[ [{point , radian} , {point , radian}] ... ]
+            let arcs = [];//[ [{point , radian} , {point , radian}] ... ]
             //根据相交点的集合，分割弧段
             if( _rs.length == 0 ){
                 //说明整圆都在画布内
@@ -527,8 +531,8 @@ class Polar extends coorBase
             } else {
                 //分割多段
                 _.each( _rs , function( point , i ){
-                    var nextInd = ( i==(_rs.length-1) ? 0 : i+1 );
-                    var nextPoint = _rs.slice( nextInd , nextInd+1 )[0];
+                    let nextInd = ( i==(_rs.length-1) ? 0 : i+1 );
+                    let nextPoint = _rs.slice( nextInd , nextInd+1 )[0];
                     arcs.push([
                         {point: point , radian: me.getRadianInPoint( point )},
                         {point: nextPoint , radian: me.getRadianInPoint( nextPoint )}
@@ -537,7 +541,7 @@ class Polar extends coorBase
             };
 
             //过滤掉不在rect内的弧线段
-            for( var i=0,l=arcs.length ; i<l ; i++ ){
+            for( let i=0,l=arcs.length ; i<l ; i++ ){
                 if( !this._checkArcInRect( arcs[i] , r , origin, width, height) ){
                     arcs.splice(i , 1);
                     i--,l--;
@@ -549,7 +553,7 @@ class Polar extends coorBase
 
     _filterPointsInRect( points , origin, width, height)
     {
-        for( var i=0,l=points.length; i<l ; i++ ){
+        for( let i=0,l=points.length; i<l ; i++ ){
             if( !this._checkPointInRect(points[i], origin, width, height) ){
                 //该点不在root rect范围内，去掉
                 points.splice( i , 1 );
@@ -561,40 +565,40 @@ class Polar extends coorBase
 
     _checkPointInRect(p, origin, width, height)
     {
-        var _tansRoot = { x : p.x + origin.x , y: p.y + origin.y };
+        let _tansRoot = { x : p.x + origin.x , y: p.y + origin.y };
         return !( _tansRoot.x < 0 || _tansRoot.x > width || _tansRoot.y < 0 || _tansRoot.y > height );
     }
 
     //检查由n个相交点分割出来的圆弧是否在rect内
     _checkArcInRect( arc, r, origin, width, height)
     {
-        var start = arc[0];
-        var to = arc[1];
-        var differenceR = to.radian - start.radian;
+        let start = arc[0];
+        let to = arc[1];
+        let differenceR = to.radian - start.radian;
         if( to.radian < start.radian ){
             differenceR = (Math.PI*2 + to.radian) - start.radian;
         };
-        var middleR = (start.radian+differenceR/2)%(Math.PI*2);
+        let middleR = (start.radian+differenceR/2)%(Math.PI*2);
         return this._checkPointInRect( this.getPointInRadianOfR( middleR , r ) , origin, width, height);
     }
 
     //获取某个点相对圆心的弧度值
     getRadianInPoint( point )
     {
-        var pi2 = Math.PI*2;
+        let pi2 = Math.PI*2;
         return (Math.atan2(point.y , point.x)+pi2)%pi2;
     }
 
     //获取某个弧度方向，半径为r的时候的point坐标点位置
     getPointInRadianOfR(radian , r)
     {
-        var pi = Math.PI;
-        var x = Math.cos( radian ) * r;
+        let pi = Math.PI;
+        let x = Math.cos( radian ) * r;
         if( radian == (pi/2) || radian == pi*3/2 ){
             //90度或者270度的时候
             x = 0;
         };
-        var y = Math.sin( radian ) * r;
+        let y = Math.sin( radian ) * r;
         if( radian % pi == 0 ){
             y = 0;
         };
@@ -608,12 +612,12 @@ class Polar extends coorBase
     //获取这个num在dataSectio中对应的半径
     getROfNum( num )
     {
-        var r = 0;
-        var maxNum = _.max( this.rAxis.dataSection );
-        var minNum = 0;
-        //var _r = parseInt( Math.min( this.width, this.height ) / 2 );
+        let r = 0;
+        let maxNum = _.max( this.rAxis.dataSection );
+        let minNum = 0;
+        //let _r = parseInt( Math.min( this.width, this.height ) / 2 );
 
-        var _r = this.radius;
+        let _r = this.radius;
         r = _r * ( (num-minNum) / (maxNum-minNum) );
         return r;
     }
@@ -621,12 +625,12 @@ class Polar extends coorBase
     //获取在r的半径上面，沿aAxis的points
     getPointsOfR( r )
     {
-        var me = this;
-        var points = [];
+        let me = this;
+        let points = [];
         _.each( me.aAxis.angleList, function( _a ){
             //弧度
-            var _r = Math.PI*_a / 180;
-            var point = me.getPointInRadianOfR( _r, r );
+            let _r = Math.PI*_a / 180;
+            let point = me.getPointInRadianOfR( _r, r );
             points.push( point )
         } );
         return points;
@@ -634,29 +638,29 @@ class Polar extends coorBase
 
     _setAAxisAngleList()
     {
-        var me = this;
+        let me = this;
 
         me.aAxis.angleList = [];
 
-        var aAxisArr = this.aAxis.data;
+        let aAxisArr = this.aAxis.data;
         if( this.aAxis.layoutType == "proportion" ){
             aAxisArr = [];
-            for( var i=0, l=this.aAxis.data.length; i<l; i++ ){
+            for( let i=0, l=this.aAxis.data.length; i<l; i++ ){
                 aAxisArr.push( i );
             }
         };
 
-        var allAngle = this.allAngle;
+        let allAngle = this.allAngle;
 
-        var min = 0;
-        var max = _.max( aAxisArr );
+        let min = 0;
+        let max = _.max( aAxisArr );
         if( this.aAxis.layoutType == "proportion" ){
             max ++;
         };
 
         _.each( aAxisArr, function( p ){
             //角度
-            var _a = ((allAngle * ( (p-min)/(max-min) ) + me.aAxis.beginAngle) + allAngle)%allAngle;
+            let _a = ((allAngle * ( (p-min)/(max-min) ) + me.aAxis.beginAngle) + allAngle)%allAngle;
             me.aAxis.angleList.push( _a );
         } );
         
@@ -665,30 +669,30 @@ class Polar extends coorBase
     _drawAAxis()
     {
         //绘制aAxis刻度尺
-        var me = this;
-        var r = me.getROfNum( _.max( this.rAxis.dataSection ) );
-        var points = me.getPointsOfR( r + 3 );
+        let me = this;
+        let r = me.getROfNum( _.max( this.rAxis.dataSection ) );
+        let points = me.getPointsOfR( r + 3 );
 
         me._aAxisScaleSp.context.x = this.origin.x;
         me._aAxisScaleSp.context.y = this.origin.y;
 
         _.each( this.aAxis.data , function( value , i ){
 
-            var point = points[i];
-            var text = _.isFunction(me.aAxis.label.format) ? me.aAxis.label.format( value ) : value;
+            let point = points[i];
+            let text = _.isFunction(me.aAxis.label.format) ? me.aAxis.label.format( value ) : value;
 
-            var nodeData = {
+            let nodeData = {
                 value : value,
                 text  : text,
                 iNode : i,
                 field : me.aAxis.field
             };
 
-            var _enabled = me._getProp( me.aAxis.label.enabled ,nodeData )
+            let _enabled = me._getProp( me.aAxis.label.enabled ,nodeData )
             if( !_enabled ) return;
 
             
-            var c = {
+            let c = {
                 x : point.x,
                 y : point.y,
                 fillStyle : me._getProp( me.aAxis.label.fontColor ,nodeData )
@@ -709,8 +713,8 @@ class Polar extends coorBase
      **/
     _getTextAlignForPoint(r)
     {
-        var textAlign    = "center";
-        var textBaseline = "bottom";
+        let textAlign    = "center";
+        let textBaseline = "bottom";
 
         /* 默认的就不用判断了
         if(r==-Math.PI/2){
@@ -756,14 +760,14 @@ class Polar extends coorBase
 
     getAxisNodeOf( e )
     {
-        var me = this;
-        var aAxisInd = me.getAAxisIndOf( e );
+        let me = this;
+        let aAxisInd = me.getAAxisIndOf( e );
 
         if( aAxisInd === undefined ){
             return;
         }
 
-        var node = {
+        let node = {
             ind   : aAxisInd,
             value : me.aAxis.data[aAxisInd],
             text  : me.aAxis.layoutData[aAxisInd],
@@ -775,7 +779,7 @@ class Polar extends coorBase
     //从event中计算出来这个e.point对应origin的index分段索引值
     getAAxisIndOf( e )
     {
-        var me = this;
+        let me = this;
 
         if( e.aAxisInd !== undefined ){
             return e.aAxisInd;
@@ -785,20 +789,20 @@ class Polar extends coorBase
             return;
         };
 
-        var point = e.point;
+        let point = e.point;
 
         //angle全部都换算到0-360范围内
-        var angle = (me.getRadianInPoint( point ) * 180 / Math.PI - me.aAxis.beginAngle) % me.allAngle;
-        var r = Math.sqrt( Math.pow( point.x, 2 ) + Math.pow( point.y, 2 ) );
+        let angle = (me.getRadianInPoint( point ) * 180 / Math.PI - me.aAxis.beginAngle) % me.allAngle;
+        //let r = Math.sqrt( Math.pow( point.x, 2 ) + Math.pow( point.y, 2 ) );
 
-        var aAxisInd = 0;
-        var aLen = me.aAxis.angleList.length;
+        let aAxisInd = 0;
+        let aLen = me.aAxis.angleList.length;
         _.each( me.aAxis.angleList , function( _a, i ){
 
             _a = (_a - me.aAxis.beginAngle) % me.allAngle;
 
-            var nextInd = i+1;
-            var nextAngle = (me.aAxis.angleList[ nextInd ] - me.aAxis.beginAngle) % me.allAngle;
+            let nextInd = i+1;
+            let nextAngle = (me.aAxis.angleList[ nextInd ] - me.aAxis.beginAngle) % me.allAngle;
             if( i == aLen - 1 ){
                 nextInd = 0;
                 nextAngle = me.allAngle;
@@ -821,7 +825,7 @@ class Polar extends coorBase
 
     _initInduce()
     {
-        var me = this;
+        let me = this;
         me.induce = this._grid.induce;
         me.induce && me.induce.on(event.types.get(), function(e) {
             me.fire( e.type, e );
@@ -833,11 +837,11 @@ class Polar extends coorBase
     getTipsInfoHandler( e )
     {
         //这里只获取xAxis的刻度信息;
-        var me = this;
+        let me = this;
 
-        var aNode = me.getAxisNodeOf( e );
+        let aNode = me.getAxisNodeOf( e );
         
-        var obj = {
+        let obj = {
             //aAxis : aNode,
             //title : aNode.label,
             //iNode : aNode.ind,
@@ -858,7 +862,7 @@ class Polar extends coorBase
     }
 
     //TODO待实现
-    getPoint( opt ){
+    getPoint(){
 
     }
     getSizeAndOrigin(){
@@ -866,7 +870,7 @@ class Polar extends coorBase
     }
 
     _getProp( p, nodeData, def ){
-        var res = p;
+        let res = p;
         if( _.isFunction( p ) ){
             res = p.apply( this, [ nodeData ] )
         }
@@ -879,6 +883,6 @@ class Polar extends coorBase
     }
 }
 
-global.registerComponent( Polar, 'coord', 'polar' );
+coordBase.registerComponent( Polar, 'coord', 'polar' );
 
 export default Polar;

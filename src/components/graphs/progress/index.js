@@ -1,6 +1,8 @@
 import Canvax from "canvax"
 import GraphsBase from "../index"
-import { global,_, getDefaultProps } from "mmvis"
+import {getDefaultProps} from "../../../utils/tools"
+
+let _ = Canvax._;
 
 class Progress extends GraphsBase
 {
@@ -57,7 +59,7 @@ class Progress extends GraphsBase
                     },
                     format    : {
                         detail : 'label格式化处理函数',
-                        default: function(val, nodeData){
+                        default: function(val){
                             return val.toFixed( this.label.fixNum );
                         }
                     },
@@ -143,7 +145,7 @@ class Progress extends GraphsBase
     {
         !opt && (opt ={});
         
-        var me = this;
+        let me = this;
         _.extend(true, this, opt);
 
         me.grow( function( process ){
@@ -157,37 +159,37 @@ class Progress extends GraphsBase
 
     _trimGraphs( scale )
     {
-        var me = this;
+        let me = this;
 
         if( scale == undefined ){
             scale = 1
         };
 
-        var _coord = this.app.getComponent({name:'coord'});
+        let _coord = this.app.getComponent({name:'coord'});
 
         //用来计算下面的hLen
         this.enabledField = _coord.filterEnabledFields( this.field );
 
         //整个的
-        var _startAngle = me.startAngle || _coord.startAngle;
-        var _allAngle = me.allAngle || _coord.allAngle;
-        var _endAngle = startAngle + allAngle;
+        let _startAngle = me.startAngle || _coord.startAngle;
+        let _allAngle = me.allAngle || _coord.allAngle;
+        //let _endAngle = startAngle + allAngle;
         
         this.bgNodeData = this._getNodeData( _startAngle, _allAngle );
         this.bgNodeData.fillStyle = this._getStyle( this.bgNodeData, this.bgColor );
 
-        var data = {};
+        let data = {};
         _.each( this.enabledField, function( field ){
-            var dataOrg = me.dataFrame.getFieldData(field);
+            let dataOrg = me.dataFrame.getFieldData(field);
 
-            var nodeDatas = [];
+            let nodeDatas = [];
 
             _.each( dataOrg, function( val, i ){
                 val *= scale;
-                var preNodeData = nodeDatas.slice(-1)[0];
-                var startAngle = preNodeData ? preNodeData.endAngle : _startAngle;
-                var allAngle = _allAngle * (val/100);
-                var nodeData = me._getNodeData( startAngle, allAngle , field, val,i);
+                let preNodeData = nodeDatas.slice(-1)[0];
+                let startAngle = preNodeData ? preNodeData.endAngle : _startAngle;
+                let allAngle = _allAngle * (val/100);
+                let nodeData = me._getNodeData( startAngle, allAngle , field, val,i);
                 nodeData.fillStyle = me._getStyle( nodeData, me.node.fillStyle );
                 nodeDatas.push( nodeData );
             } );
@@ -198,28 +200,28 @@ class Progress extends GraphsBase
     }
 
     _getNodeData(startAngle, allAngle, field, val, i){
-        var me = this;
-        var _coord = this.app.getComponent({name:'coord'});
-        var middleAngle = startAngle + allAngle/2;
-        var endAngle = startAngle + allAngle;
+        let me = this;
+        let _coord = this.app.getComponent({name:'coord'});
+        let middleAngle = startAngle + allAngle/2;
+        let endAngle = startAngle + allAngle;
 
 
-        var startRadian = Math.PI * startAngle / 180; //起始弧度
-        var middleRadian = Math.PI * middleAngle / 180;
-        var endRadian = Math.PI * endAngle / 180; //终点弧度
+        let startRadian = Math.PI * startAngle / 180; //起始弧度
+        let middleRadian = Math.PI * middleAngle / 180;
+        let endRadian = Math.PI * endAngle / 180; //终点弧度
 
-        var outRadius= me.radius || _coord.radius;
-        var innerRadius = outRadius - me.node.width;
+        let outRadius= me.radius || _coord.radius;
+        let innerRadius = outRadius - me.node.width;
 
-        var startOutPoint = _coord.getPointInRadianOfR( startRadian, outRadius );
-        var middleOutPoint = _coord.getPointInRadianOfR( middleRadian, outRadius );
-        var endOutPoint = _coord.getPointInRadianOfR( endRadian, outRadius );
+        let startOutPoint = _coord.getPointInRadianOfR( startRadian, outRadius );
+        let middleOutPoint = _coord.getPointInRadianOfR( middleRadian, outRadius );
+        let endOutPoint = _coord.getPointInRadianOfR( endRadian, outRadius );
         
-        var startInnerPoint = _coord.getPointInRadianOfR( startRadian, innerRadius );
-        var middleInnerPoint = _coord.getPointInRadianOfR( middleRadian, innerRadius );
-        var endInnerPoint = _coord.getPointInRadianOfR( endRadian, innerRadius );
+        let startInnerPoint = _coord.getPointInRadianOfR( startRadian, innerRadius );
+        let middleInnerPoint = _coord.getPointInRadianOfR( middleRadian, innerRadius );
+        let endInnerPoint = _coord.getPointInRadianOfR( endRadian, innerRadius );
 
-        var nodeData = {
+        let nodeData = {
             field           : field,
             value           : val,
             text            : val, //value format后的数据
@@ -271,10 +273,10 @@ class Progress extends GraphsBase
     }
 
     _widget(){
-        var me = this;
+        let me = this;
 
         if( me.bgEnabled ){
-            var bgPathStr = me._getPathStr( this.bgNodeData );
+            let bgPathStr = me._getPathStr( this.bgNodeData );
             if( me._bgPathElement ){
                 me._bgPathElement.context.path = bgPathStr;
             } else {
@@ -290,10 +292,10 @@ class Progress extends GraphsBase
 
         _.each( this.data, function( nodeDatas ){
             _.each( nodeDatas, function(nodeData,i){
-                var pathStr = me._getPathStr( nodeData );
+                let pathStr = me._getPathStr( nodeData );
 
-                var elId = "progress_bar_"+nodeData.field+"_"+i;
-                var pathElement = me.sprite.getChildById( elId );
+                let elId = "progress_bar_"+nodeData.field+"_"+i;
+                let pathElement = me.sprite.getChildById( elId );
                 if( pathElement ){
                     pathElement.context.path = pathStr;
                 } else {
@@ -310,8 +312,8 @@ class Progress extends GraphsBase
 
                 if( me.label.enabled ){
 
-                    var labelSpId = "progress_label_"+nodeData.field+"_sprite_"+i;
-                    var labelSpElement = me.sprite.getChildById( labelSpId );
+                    let labelSpId = "progress_label_"+nodeData.field+"_sprite_"+i;
+                    let labelSpElement = me.sprite.getChildById( labelSpId );
                     if( labelSpElement ){
                         labelSpElement
                     } else {
@@ -323,7 +325,7 @@ class Progress extends GraphsBase
                     labelSpElement.context.x = me.label.offsetX - 6; //%好会占一部分位置 所以往左边偏移6
                     labelSpElement.context.y = me.label.offsetY;
                     
-                    var labelCtx = {
+                    let labelCtx = {
                         fillStyle   : me.label.fontColor || nodeData.fillStyle,
                         fontSize    : me.label.fontSize,
                         lineWidth   : me.label.lineWidth,
@@ -333,22 +335,22 @@ class Progress extends GraphsBase
                         rotation    : me.label.rotation
                     };
                     
-                    var labelId = "progress_label_"+nodeData.field+"_"+i;
-                    var labelElement = labelSpElement.getChildById( labelId );
+                    let labelId = "progress_label_"+nodeData.field+"_"+i;
+                    let labelElement = labelSpElement.getChildById( labelId );
                     if( labelElement ){
                         labelElement.resetText( nodeData.text );
                         _.extend( labelElement.context, labelCtx );
                     } else {
-                        var labelElement = new Canvax.Display.Text( nodeData.text, {
+                        labelElement = new Canvax.Display.Text( nodeData.text, {
                             id : labelId,
                             context : labelCtx
                         } );
                         labelSpElement.addChild( labelElement );
                     };
 
-                    var labelSymbolId = "progress_label_"+nodeData.field+"_symbol_"+i;
-                    var labelSymbolElement = labelSpElement.getChildById( labelSymbolId );
-                    var lebelSymbolCxt = {
+                    let labelSymbolId = "progress_label_"+nodeData.field+"_symbol_"+i;
+                    let labelSymbolElement = labelSpElement.getChildById( labelSymbolId );
+                    let lebelSymbolCxt = {
                         x            : labelElement.getTextWidth()/2 + 2,
                         y            : 3,
                         fillStyle    : me.label.unitColor || me.label.fontColor || nodeData.fillStyle,
@@ -361,8 +363,8 @@ class Progress extends GraphsBase
                         _.extend( labelSymbolElement.context, lebelSymbolCxt );
                     } else {
                         
-                        var unitText = me.label.unit;
-                        var labelSymbolElement = new Canvax.Display.Text( unitText, {
+                        let unitText = me.label.unit;
+                        labelSymbolElement = new Canvax.Display.Text( unitText, {
                             id : labelSymbolId,
                             context : lebelSymbolCxt
                         } );
@@ -376,11 +378,11 @@ class Progress extends GraphsBase
     }
 
     _getPathStr( nodeData ){
-        var pathStr = "M"+nodeData.startOutPoint.x+" "+nodeData.startOutPoint.y;
+        let pathStr = "M"+nodeData.startOutPoint.x+" "+nodeData.startOutPoint.y;
         pathStr += "A"+nodeData.outRadius+" "+nodeData.outRadius+" 0 0 1 " + nodeData.middleOutPoint.x + " "+ nodeData.middleOutPoint.y;
         pathStr += "A"+nodeData.outRadius+" "+nodeData.outRadius+" 0 0 1 " + nodeData.endOutPoint.x + " "+ nodeData.endOutPoint.y;
 
-        var actionType = "L";
+        let actionType = "L";
         if( nodeData.allAngle % 360 == 0 ){
             //actionType = "M" 
         };
@@ -395,12 +397,12 @@ class Progress extends GraphsBase
     }
 
     _getStyle( nodeData, prop, def ){
-        var me = this;
-        var _coord = this.app.getComponent({name:'coord'});
-        var fieldMap = _coord.getFieldMapOf( nodeData.field );
+        let me = this;
+        let _coord = this.app.getComponent({name:'coord'});
+        let fieldMap = _coord.getFieldMapOf( nodeData.field );
         def = def || (fieldMap ? fieldMap.color : "#171717");
 
-        var style;
+        let style;
         if( prop ){
             if( _.isString(prop) ){
                 style = prop;
@@ -413,8 +415,8 @@ class Progress extends GraphsBase
             };
             if( prop && prop.lineargradient ){
     
-                var style = me.ctx.createLinearGradient( nodeData.startOutPoint.x ,nodeData.startOutPoint.y, nodeData.endOutPoint.x, nodeData.endOutPoint.y );
-                _.each( prop.lineargradient , function( item , i ){
+                style = me.ctx.createLinearGradient( nodeData.startOutPoint.x ,nodeData.startOutPoint.y, nodeData.endOutPoint.x, nodeData.endOutPoint.y );
+                _.each( prop.lineargradient , function( item ){
                     style.addColorStop( item.position , item.color);
                 });
     
@@ -430,6 +432,6 @@ class Progress extends GraphsBase
 
 }
 
-global.registerComponent( Progress, 'graphs', 'progress' );
+GraphsBase.registerComponent( Progress, 'graphs', 'progress' );
 
 export default Progress;

@@ -48,8 +48,8 @@ class chartxReact extends React.Component {
         this.chart && this.chart.resize();
     };
 
-    var optionsChange = (JSON.stringify( this.getChartOptions(prevProps) ) != JSON.stringify(newChartOptions));
-    var dataChange = (JSON.stringify( data ) != JSON.stringify(prevProps.data));
+    let optionsChange = (JSON.stringify( this.getChartOptions(prevProps) ) != JSON.stringify(newChartOptions));
+    let dataChange = (JSON.stringify( data ) != JSON.stringify(prevProps.data));
     if (optionsChange) {
         this.chartOptions = newChartOptions;
         this.chart && this.chart.reset(newChartOptions, data);

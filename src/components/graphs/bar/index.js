@@ -1,10 +1,10 @@
 import Canvax from "canvax"
-import {numAddSymbol} from "../../../utils/tools"
+import {numAddSymbol,getDefaultProps} from "../../../utils/tools"
 import GraphsBase from "../index"
-import { global, _, event, getDefaultProps } from "mmvis"
 
-const AnimationFrame = Canvax.AnimationFrame;
-const Rect = Canvax.Shapes.Rect;
+let { _, event } = Canvax;
+let AnimationFrame = Canvax.AnimationFrame;
+let Rect = Canvax.Shapes.Rect;
 
 class BarGraphs extends GraphsBase
 {
@@ -209,18 +209,18 @@ class BarGraphs extends GraphsBase
     getNodesAt(index)
     {
         //该index指当前
-        var data = this.data;
+        let data = this.data;
         
-        var _nodesInfoList = []; //节点信息集合
-        _.each( this.enabledField, function( fs, i ){
+        let _nodesInfoList = []; //节点信息集合
+        _.each( this.enabledField, function( fs ){
             if( _.isArray(fs) ){
-                _.each( fs, function( _fs, ii ){
+                _.each( fs, function( _fs ){
                     //fs的结构两层到顶了
-                    var nodeData = data[ _fs ] ? data[ _fs ][ index ] : null;
+                    let nodeData = data[ _fs ] ? data[ _fs ][ index ] : null;
                     nodeData && _nodesInfoList.push( nodeData );
                 } );
             } else {
-                var nodeData = data[ fs ] ? data[ fs ][ index ] : null;
+                let nodeData = data[ fs ] ? data[ fs ][ index ] : null;
                 nodeData && _nodesInfoList.push( nodeData );
             }
         } );
@@ -233,7 +233,7 @@ class BarGraphs extends GraphsBase
         if (_.isString(field)) {
             return field;
         } else if (_.isArray(field)) {
-            var res = field[b];
+            let res = field[b];
             if (_.isString(res)) {
                 return res;
             } else if (_.isArray(res)) {
@@ -244,18 +244,18 @@ class BarGraphs extends GraphsBase
 
     _getColor(color, nodeData)
     {
-        var me = this;
-        var field = nodeData.field;
-        var _flattenField = _.flatten( [ this.field ] );
+        let me = this;
+        let field = nodeData.field;
+        let _flattenField = _.flatten( [ this.field ] );
 
-        var fieldMap = this.app.getComponent({name:'coord'}).getFieldMapOf(field);
+        let fieldMap = this.app.getComponent({name:'coord'}).getFieldMapOf(field);
        
         if (_.isFunction( color )) {
             color = color.apply(this, [ nodeData ]);
         };
         //field对应的索引，， 取颜色这里不要用i
         if (_.isString(color)) {
-            color = color
+            //color = color
         };
         if (_.isArray(color)) {
             color = _.flatten(color)[ _.indexOf( _flattenField, field ) ];
@@ -263,7 +263,7 @@ class BarGraphs extends GraphsBase
 
         if( color && color.lineargradient && color.lineargradient.length ){
             if( nodeData.rectHeight != 0 ){
-                var _style = me.ctx.createLinearGradient( nodeData.x, (nodeData.fromY+nodeData.rectHeight), nodeData.x, nodeData.fromY );
+                let _style = me.ctx.createLinearGradient( nodeData.x, (nodeData.fromY+nodeData.rectHeight), nodeData.x, nodeData.fromY );
                 _.each( color.lineargradient , function( item ){
                     _style.addColorStop( item.position , item.color);
                 });
@@ -306,25 +306,25 @@ class BarGraphs extends GraphsBase
         return this.node._width;
     }
 
-    show( field ){
+    show(  ){
         this.draw();
     }
 
     hide( field )
     {
         _.each( this.barsSp.children , function( h_groupSp, h ){
-            var _bar = h_groupSp.getChildById("bar_"+h+"_"+field);
+            let _bar = h_groupSp.getChildById("bar_"+h+"_"+field);
             _bar && _bar.destroy();
         } );
         _.each( this.txtsSp.children , function( sp, h ){
-            var _label = sp.getChildById("text_"+h+"_"+field);
+            let _label = sp.getChildById("text_"+h+"_"+field);
             _label && _label.destroy();
         } );
         
         this.draw();
     }
 
-    resetData( dataFrame , dataTrigger )
+    resetData( dataFrame )
     {
         this.dataFrame = dataFrame;
         this.draw();
@@ -347,9 +347,9 @@ class BarGraphs extends GraphsBase
         //第二个data参数去掉，直接trimgraphs获取最新的data
         _.extend(true, this, opt);
 
-        var me = this;
+        let me = this;
 
-        var animate = me.animation && !opt.resize;
+        let animate = me.animation && !opt.resize;
 
         this.data = this._trimGraphs();
 
@@ -359,15 +359,15 @@ class BarGraphs extends GraphsBase
             return;
         };
 
-        var preDataLen = me._preDataLen; //纵向的分组，主要用于 resetData 的时候，对比前后data数量用
+        let preDataLen = me._preDataLen; //纵向的分组，主要用于 resetData 的时候，对比前后data数量用
 
-        var groupsLen = this.enabledField.length;
-        var itemW = 0;
+        let groupsLen = this.enabledField.length;
+        let itemW = 0;
 
         me.node._count = 0;
 
-        var preGraphs = 0;
-        var barGraphs = me.app.getComponents({name:'graphs',type:'bar'});
+        let preGraphs = 0;
+        let barGraphs = me.app.getComponents({name:'graphs',type:'bar'});
         _.each( barGraphs, function( graph, i ){
             if( graph == me ){
                 preGraphs = i
@@ -381,7 +381,7 @@ class BarGraphs extends GraphsBase
             /*
             //h_group为横向的分组。如果yAxis.field = ["uv","pv"]的话，
             //h_group就会为两组，一组代表uv 一组代表pv。
-            var spg = new Canvax.Display.Sprite({ id : "barGroup"+i });
+            let spg = new Canvax.Display.Sprite({ id : "barGroup"+i });
             */
 
             //vLen 为一单元bar上面纵向堆叠的 length
@@ -392,7 +392,7 @@ class BarGraphs extends GraphsBase
 
             //if (h <= preDataLen - 1)的话说明本次绘制之前sprite里面已经有bar了。需要做特定的动画效果走过去
 
-            var vLen = h_group.length;
+            let vLen = h_group.length;
             if (vLen == 0) return;
 
             //itemW 还是要跟着xAxis的xDis保持一致
@@ -406,7 +406,7 @@ class BarGraphs extends GraphsBase
                 if( me.select.enabled && e.type == me.select.triggerEventType ){
                     
                     //如果开启了图表的选中交互
-                    var ind = me.dataFrame.range.start + this.iNode;
+                    let ind = me.dataFrame.range.start + this.iNode;
 
                     //region触发的selected，需要把所有的graphs都执行一遍
                     if( _.indexOf( me.select.inds, ind ) > -1 ){
@@ -422,10 +422,10 @@ class BarGraphs extends GraphsBase
                 };
             };
 
-            for (var h = 0; h < me._dataLen; h++) {
+            for (let h = 0; h < me._dataLen; h++) {
 
                 //bar的group
-                var groupH = null;
+                let groupH = null;
                 
 
                 if (i == 0) {
@@ -446,8 +446,8 @@ class BarGraphs extends GraphsBase
 
                         //这个x轴单元 nodes的分组，添加第一个rect用来接受一些事件处理
                         //以及显示selected状态
-                        var groupRegion;
-                        var groupRegionWidth = itemW * me.select.width;
+                        let groupRegion;
+                        let groupRegionWidth = itemW * me.select.width;
                         if( me.select.width > 1 ){
                             //说明是具体指
                             groupRegionWidth = me.select.width;
@@ -499,7 +499,7 @@ class BarGraphs extends GraphsBase
                 };
 
                 //txt的group begin
-                var txtGroupH = null;
+                let txtGroupH = null;
                 if (i == 0) {
                     if (h <= preDataLen - 1) {
                         txtGroupH = me.txtsSp.getChildById("txtGroup_" + h);
@@ -515,16 +515,16 @@ class BarGraphs extends GraphsBase
                 };
                 //txt的group begin
 
-                for (var v = 0; v < vLen; v++) {
+                for (let v = 0; v < vLen; v++) {
                     
                     me.node._count ++;
 
                     //单个的bar，从纵向的底部开始堆叠矩形
-                    var nodeData = me.data[h_group[v]][h];
+                    let nodeData = me.data[h_group[v]][h];
 
                     nodeData.iGroup = i, nodeData.iNode = h, nodeData.iLay = v;
 
-                    var rectHeight = nodeData.y - nodeData.fromY;
+                    let rectHeight = nodeData.y - nodeData.fromY;
 
                     if( isNaN(nodeData.value) ){
                         rectHeight = 0;
@@ -536,19 +536,19 @@ class BarGraphs extends GraphsBase
 
                     nodeData.rectHeight = rectHeight;
 
-                    var fillStyle = me._getColor(me.node.fillStyle, nodeData);
+                    let fillStyle = me._getColor(me.node.fillStyle, nodeData);
                     nodeData.color = fillStyle;
                     //如果用户配置了渐变， 那么tips里面就取对应的中间位置的颜色
                     if( fillStyle instanceof CanvasGradient ){
                         if( me.node.fillStyle.lineargradient ){
-                            var _middleStyle = me.node.fillStyle.lineargradient[ parseInt( me.node.fillStyle.lineargradient.length / 2 ) ];
+                            let _middleStyle = me.node.fillStyle.lineargradient[ parseInt( me.node.fillStyle.lineargradient.length / 2 ) ];
                             if( _middleStyle ){
                                 nodeData.color = _middleStyle.color
                             };
                         }
                     };
 
-                    var finalPos = {
+                    let finalPos = {
                         x         : Math.round(nodeData.x),
                         y         : nodeData.fromY, 
                         width     : me.node._width,
@@ -559,7 +559,7 @@ class BarGraphs extends GraphsBase
                     };
                     nodeData.width = finalPos.width;
                     
-                    var rectCtx = {
+                    let rectCtx = {
                         x         : finalPos.x,
                         y         : nodeData.yOriginPoint.pos,//0,
                         width     : finalPos.width,
@@ -570,7 +570,7 @@ class BarGraphs extends GraphsBase
                     };
                     
                     if ( !!me.node.radius && nodeData.isLeaf && !me.proportion ) {
-                        var radiusR = Math.min(me.node._width / 2, Math.abs(rectHeight));
+                        let radiusR = Math.min(me.node._width / 2, Math.abs(rectHeight));
                         radiusR = Math.min(radiusR, me.node.radius);
                         rectCtx.radius = [radiusR, radiusR, 0, 0];
                     };
@@ -580,8 +580,8 @@ class BarGraphs extends GraphsBase
                         rectCtx.y = finalPos.y;
                     };
 
-                    var rectEl = null;
-                    var barId = "bar_"+h+"_"+nodeData.field;
+                    let rectEl = null;
+                    let barId = "bar_"+h+"_"+nodeData.field;
                     if (h <= preDataLen - 1) {
                         rectEl = groupH.getChildById( barId );
                     };
@@ -606,7 +606,7 @@ class BarGraphs extends GraphsBase
                             //如果开启了分组的选中，如果后续实现了单个bar的选中，那么就要和分组的选中区分开来，单个选中优先
                             // if( me.select.enabled && e.type == me.select.triggerEventType ){
                             //     //如果开启了图表的选中交互
-                            //     var ind = me.dataFrame.range.start + this.iNode;
+                            //     let ind = me.dataFrame.range.start + this.iNode;
 
                             //     //region触发的selected，需要把所有的graphs都执行一遍
                             //     if( _.indexOf( me.select.inds, ind ) > -1 ){
@@ -638,9 +638,9 @@ class BarGraphs extends GraphsBase
                     //label begin ------------------------------
                     if ( me.label.enabled ) {
 
-                        var value = nodeData.value;
+                        let value = nodeData.value;
                         if ( _.isFunction(me.label.format) ) {
-                            var _formatc = me.label.format(value, nodeData);
+                            let _formatc = me.label.format(value, nodeData);
                             if( _formatc !== undefined || _formatc !== null ){
                                 value = _formatc
                             }
@@ -654,7 +654,7 @@ class BarGraphs extends GraphsBase
                             value = numAddSymbol(value);
                         };
                         
-                        var textCtx = {
+                        let textCtx = {
                             fillStyle     : me.label.fontColor || finalPos.fillStyle,
                             fontSize      : me.label.fontSize,
                             lineWidth     : me.label.lineWidth,
@@ -664,14 +664,14 @@ class BarGraphs extends GraphsBase
                             rotation      : me.label.rotation
                         };
                         //然后根据position, offset确定x,y
-                        var _textPos = me._getTextPos( finalPos , nodeData );
+                        let _textPos = me._getTextPos( finalPos , nodeData );
                         textCtx.x = _textPos.x;
                         textCtx.y = _textPos.y;
                         textCtx.textAlign = me._getTextAlign(  finalPos , nodeData  );
 
                         //文字
-                        var textEl = null;
-                        var textId = "text_" + h + "_" + nodeData.field;
+                        let textEl = null;
+                        let textId = "text_" + h + "_" + nodeData.field;
                         if (h <= preDataLen - 1) {
                             textEl = txtGroupH.getChildById( textId );
                         }; 
@@ -729,8 +729,8 @@ class BarGraphs extends GraphsBase
 
     _getGroupRegionStyle( iNode )
     {
-        var me = this;
-        var _groupRegionStyle = me.select.fillStyle;
+        let me = this;
+        let _groupRegionStyle = me.select.fillStyle;
         if (_.isArray( me.select.fillStyle )) {
             _groupRegionStyle = me.select.fillStyle[ iNode ];
         };
@@ -749,17 +749,17 @@ class BarGraphs extends GraphsBase
 
     _trimGraphs()
     {
-        var me = this;
-        var _coord = this.app.getComponent({name:'coord'});
+        let me = this;
+        let _coord = this.app.getComponent({name:'coord'});
 
         //用来计算下面的hLen
         this.setEnabledField();
         this.data = {};
 
-        var layoutGraphs = [];
-        var hLen = 0; //总共有多少列（ 一个xAxis单元分组内 ）
-        var preHLen = 0; //自己前面有多少个列（ 一个xAxis单元分组内 ）
-        var _preHLenOver = false;
+        let layoutGraphs = [];
+        let hLen = 0; //总共有多少列（ 一个xAxis单元分组内 ）
+        let preHLen = 0; //自己前面有多少个列（ 一个xAxis单元分组内 ）
+        let _preHLenOver = false;
 
         if( !this.absolute ){
             _.each( me.app.getComponents({name:'graphs',type:'bar'}) , function( _g ){
@@ -782,29 +782,29 @@ class BarGraphs extends GraphsBase
             hLen = this.enabledField.length;
         };
 
-        var cellWidth = _coord.getAxis({type:'xAxis'}).getCellLength();
+        let cellWidth = _coord.getAxis({type:'xAxis'}).getCellLength();
         //x方向的二维长度，就是一个bar分组里面可能有n个子bar柱子，那么要二次均分
-        var ceilWidth2 = cellWidth / (hLen + 1);
+        let ceilWidth2 = cellWidth / (hLen + 1);
 
         //知道了ceilWidth2 后 检测下 barW是否需要调整
-        var barW = this._getBarWidth(cellWidth, ceilWidth2);
-        var barDis = ceilWidth2 - barW;
+        let barW = this._getBarWidth(cellWidth, ceilWidth2);
+        let barDis = ceilWidth2 - barW;
         if( this.node.xDis != null ){
             barDis = this.node.xDis;
         };
         
-        var disLeft = (cellWidth - barW*hLen - barDis*(hLen-1) ) / 2;
+        let disLeft = (cellWidth - barW*hLen - barDis*(hLen-1) ) / 2;
         if( preHLen ){
             disLeft += (barDis + barW) * preHLen;
         };
 
-        //var tmpData = [];
+        //let tmpData = [];
 
         //然后计算出对于结构的dataOrg
-        var dataOrg = this.dataFrame.getDataOrg( this.enabledField );
+        let dataOrg = this.dataFrame.getDataOrg( this.enabledField );
 
 
-        var selectOpt = me.getGraphSelectOpt();
+        let selectOpt = me.getGraphSelectOpt();
         //自己的select.inds为空的情况下，才需要寻找是不是别的graphs设置了inds
         if( !me.select.inds.length && selectOpt && selectOpt.inds && selectOpt.inds.length ){
             me.select.inds = _.clone( selectOpt.inds );
@@ -815,7 +815,7 @@ class BarGraphs extends GraphsBase
             //hData，可以理解为一根竹子 横向的分组数据，这个hData上面还可能有纵向的堆叠
 
             //tempBarData 一根柱子的数据， 这个柱子是个数据，上面可以有n个子元素对应的竹节
-            var tempBarData = [];
+            let tempBarData = [];
             _.each( hData, function( vSectionData, v ){
                 tempBarData[v] = [];
                 //vSectionData 代表某个字段下面的一组数据比如 uv
@@ -825,19 +825,19 @@ class BarGraphs extends GraphsBase
                 //vSectionData为具体的一个field对应的一组数据
                 _.each(vSectionData, function(val, i) {
 
-                    var vCount = val;
+                    let vCount = val;
                     if (me.proportion) {
                         //先计算总量
                         vCount = 0;
-                        _.each( hData, function(team, ti) {
+                        _.each( hData, function(team) {
                             vCount += team[i]
                         });
                     };
 
-                    var field = me._getTargetField(b, v, i, me.enabledField);
+                    let field = me._getTargetField(b, v, i, me.enabledField);
 
                     //返回一个和value的结构对应的point结构{x:  y: }
-                    var point = _coord.getPoint( {
+                    let point = _coord.getPoint( {
                         iNode : i,
                         field : field,
                         value : {
@@ -846,11 +846,11 @@ class BarGraphs extends GraphsBase
                         }
                     } );
 
-                    var _x = point.pos.x;
+                    let _x = point.pos.x;
 
-                    var x = _x - cellWidth / 2 + disLeft + (barW + barDis)*b;
+                    let x = _x - cellWidth / 2 + disLeft + (barW + barDis)*b;
 
-                    var y = 0;
+                    let y = 0;
                     if (me.proportion) {
                         y = -val / vCount * _coord.height;
                     } else {
@@ -861,17 +861,17 @@ class BarGraphs extends GraphsBase
                         y = 0;
                     };
 
-                    var yOriginPoint = _coord.getAxisOriginPoint( { field: field } );
+                    let yOriginPoint = _coord.getAxisOriginPoint( { field: field } );
 
                     function _getFromY( tempBarData, v, i, val, y ){
-                        var preData = tempBarData[v - 1];
+                        let preData = tempBarData[v - 1];
                         if( !preData ){
                             return yOriginPoint.pos;
                         };
 
-                        var preY = preData[i].y;
-                        var preVal = preData[i].value;
-                        var yBaseNumber = yOriginPoint.value;
+                        let preY = preData[i].y;
+                        let preVal = preData[i].value;
+                        let yBaseNumber = yOriginPoint.value;
                         if( val >= yBaseNumber ){
                             //如果大于基线的，那么就寻找之前所有大于基线的
                             if( preVal >= yBaseNumber ){
@@ -893,10 +893,10 @@ class BarGraphs extends GraphsBase
                     }
 
                     //找到其着脚点,一般就是 yOriginPoint.pos
-                    var fromY = _getFromY(tempBarData, v, i, val, y);
+                    let fromY = _getFromY(tempBarData, v, i, val, y);
                     y += fromY - yOriginPoint.pos;
 
-                    var nodeData = {
+                    let nodeData = {
                         type          : "bar",
                         value         : val,
                         vInd          : v, //如果是堆叠图的话，这个node在堆叠中得位置
@@ -941,7 +941,7 @@ class BarGraphs extends GraphsBase
     }
 
     _getTextAlign( bar , nodeData ){
-        var textAlign = this.label.textAlign;
+        let textAlign = this.label.textAlign;
         if( nodeData.value < nodeData.yOriginPoint.value ){
             if( textAlign == "left" ){
                 textAlign = "right"
@@ -954,12 +954,12 @@ class BarGraphs extends GraphsBase
     
     _getTextPos( bar , nodeData ){
 
-        var me = this;
-        var point = {
+        let me = this;
+        let point = {
             x : 0, y : 0
         };
-        var x=bar.x ,y=bar.y;
-        var isNegative = true; //是负数
+        let x=bar.x ,y=bar.y;
+        let isNegative = true; //是负数
         if( bar.y >= nodeData.y ){
             isNegative = false;
         };
@@ -1012,7 +1012,7 @@ class BarGraphs extends GraphsBase
         };
         x -= me.label.offsetX;
 
-        var i = 1;
+        let i = 1;
         if( nodeData.value < nodeData.yOriginPoint.value ){
             i = -1;
         };
@@ -1028,11 +1028,11 @@ class BarGraphs extends GraphsBase
     grow(callback, opt) 
     {
 
-        var me = this;
+        let me = this;
         //console.log( me._preDataLen+"|"+ me._dataLen)
         //先把已经不在当前range范围内的元素destroy掉
         if ( me._preDataLen > me._dataLen) {
-            for (var i = me._dataLen, l = me._preDataLen; i < l; i++) {
+            for (let i = me._dataLen, l = me._preDataLen; i < l; i++) {
                 me.barsSp.getChildAt(i).destroy();
                 me.label.enabled && me.txtsSp.getChildAt(i).destroy();
                 i--;
@@ -1044,28 +1044,28 @@ class BarGraphs extends GraphsBase
             callback && callback(me);
             return;
         };
-        var sy = 1;
+        let sy = 1;
 
-        var optsions = _.extend({
+        let optsions = _.extend({
             delay: Math.min(1000 / this._barsLen, 80),
             easing: "Linear.None",//"Back.Out",
             duration: 500
         }, opt);
 
-        var barCount = 0;
-        _.each(me.enabledField, function(h_group, g) {
+        let barCount = 0;
+        _.each(me.enabledField, function(h_group) {
             h_group = _.flatten([ h_group ]);
-            var vLen = h_group.length;
+            let vLen = h_group.length;
             if (vLen == 0) return;
 
-            for (var h = 0; h < me._dataLen; h++) {
-                for (var v = 0; v < vLen; v++) {
+            for (let h = 0; h < me._dataLen; h++) {
+                for (let v = 0; v < vLen; v++) {
 
-                    var nodeData = me.data[h_group[v]][h];
+                    let nodeData = me.data[h_group[v]][h];
 
-                    var group = me.barsSp.getChildById("barGroup_" + h);
+                    let group = me.barsSp.getChildById("barGroup_" + h);
 
-                    var bar = group.getChildById("bar_" + h + "_" + nodeData.field);
+                    let bar = group.getChildById("bar_" + h + "_" + nodeData.field);
 
                     if ( optsions.duration == 0 ) {
                         bar.context.scaleY = sy;
@@ -1088,7 +1088,7 @@ class BarGraphs extends GraphsBase
                             duration: optsions.duration,
                             easing: optsions.easing,
                             delay: h * optsions.delay,
-                            onUpdate: function(arg) {
+                            onUpdate: function() {
 
                             },
                             onComplete: function(arg) {
@@ -1115,22 +1115,22 @@ class BarGraphs extends GraphsBase
     //这里的ind是包含了start的全局index
     //为什么需要传全局的index呢， 因为这个接口需要对外抛出，外部用户并不需要知道当前dataFrame.range.start
     selectAt( ind ){
-        var me = this;
+        let me = this;
         if( _.indexOf( this.select.inds, ind ) > -1 ) return;
 
         this.select.inds.push( ind );
 
         //因为这里是带上了start的全局的index，
-        var index = ind - this.dataFrame.range.start;
+        let index = ind - this.dataFrame.range.start;
 
-        _.each( this.data, function( list, f ){
-            var nodeData = list[ index ];
+        _.each( this.data, function( list ){
+            let nodeData = list[ index ];
             nodeData.selected = true;
             me.setNodeElementStyle( nodeData );
         } );
-        var group = this.barsSp.getChildById("barGroup_" + index);
+        let group = this.barsSp.getChildById("barGroup_" + index);
         if( group ){
-            var groupRegion = group.getChildById("group_region_"+index);
+            let groupRegion = group.getChildById("group_region_"+index);
             if( groupRegion ){
                 groupRegion.context.globalAlpha = this.select.alpha;
             }
@@ -1139,23 +1139,23 @@ class BarGraphs extends GraphsBase
 
     //这里的ind是包含了start的全局index
     unselectAt( ind ){
-        var me = this;
+        let me = this;
         
         if( _.indexOf( this.select.inds, ind ) == -1 ) return;
 
-        var _index = _.indexOf( this.select.inds, ind );
+        let _index = _.indexOf( this.select.inds, ind );
         this.select.inds.splice( _index, 1 );
 
-        var index = ind - this.dataFrame.range.start;
-        _.each( this.data, function( list, f ){
-            var nodeData = list[ index ];
+        let index = ind - this.dataFrame.range.start;
+        _.each( this.data, function( list ){
+            let nodeData = list[ index ];
             nodeData.selected = false;
             me.setNodeElementStyle( nodeData );
         } );
 
-        var group = this.barsSp.getChildById("barGroup_" + index);
+        let group = this.barsSp.getChildById("barGroup_" + index);
         if( group ){
-            var groupRegion = group.getChildById("group_region_"+index);
+            let groupRegion = group.getChildById("group_region_"+index);
             if( groupRegion ){
                 groupRegion.context.globalAlpha = 0;
             }
@@ -1164,14 +1164,14 @@ class BarGraphs extends GraphsBase
     }
 
     getSelectedRowList(){
-        var rowDatas = [];
-        var me = this;
+        let rowDatas = [];
+        let me = this;
 
         _.each( me.select.inds, function( ind ){
             
             //TODO: 这里的inds 是全局的，而getRowDataAt只能获取到当前视图内的数据
             //所以用这个接口会有问题
-            //var index = ind - me.dataFrame.range.start;
+            //let index = ind - me.dataFrame.range.start;
             //rowDatas.push( me.dataFrame.getRowDataAt( index ) )
 
             rowDatas.push( me.dataFrame.jsonOrg[ind] );
@@ -1181,17 +1181,17 @@ class BarGraphs extends GraphsBase
     }
 
     setNodeElementStyle( nodeData ){
-        var me = this;
-        var fillStyle = me._getColor(me.node.fillStyle, nodeData);
+        let me = this;
+        let fillStyle = me._getColor(me.node.fillStyle, nodeData);
         nodeData.nodeElement.context.fillStyle = fillStyle;
     }
 
     getGraphSelectOpt(){
-        var me = this;
+        let me = this;
         //如果某个graph 配置了select ----start
-        var selectOpt = me._opt.select;
+        let selectOpt = me._opt.select;
         if( !selectOpt ){
-            var barGraphs = me.app.getComponents({name:'graphs',type:'bar'});
+            let barGraphs = me.app.getComponents({name:'graphs',type:'bar'});
             _.each( barGraphs, function( barGraph ){
                 if( selectOpt ) return false;
                 if( !selectOpt && barGraph._opt.select ){
@@ -1203,6 +1203,6 @@ class BarGraphs extends GraphsBase
     }
 }
 
-global.registerComponent( BarGraphs, 'graphs', 'bar' );
+GraphsBase.registerComponent( BarGraphs, 'graphs', 'bar' );
 
 export default BarGraphs;

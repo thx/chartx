@@ -4,9 +4,10 @@
 import Canvax from "canvax"
 import GraphsBase from "../index"
 import Partition from "../../../layout/partition"
-import {global, _,event,getDefaultProps } from "mmvis"
+import {getDefaultProps} from "../../../utils/tools"
 
-const Sector = Canvax.Shapes.Sector;
+let { _,event } = Canvax;
+let Sector = Canvax.Shapes.Sector;
 
 class sunburstGraphs extends GraphsBase
 {
@@ -94,9 +95,9 @@ class sunburstGraphs extends GraphsBase
 
     _trimGraphs(){
 
-        var me = this;
-        var radius = parseInt( Math.min( this.width, this.height ) / 2 );
-        var partition = Partition()
+        let me = this;
+        let radius = parseInt( Math.min( this.width, this.height ) / 2 );
+        let partition = Partition()
             .sort(null)
             .size([2 * Math.PI, radius * radius])
             .value(function(d) {
@@ -106,14 +107,14 @@ class sunburstGraphs extends GraphsBase
 
 
         //安装深度分组
-        var _treeData = this._tansTreeData();
+        let _treeData = this._tansTreeData();
         this.data = partition( _treeData , 0 );
 
         return this.data;
     }
 
     _getDataGroupOfDepth(){
-        var map = {};
+        let map = {};
         _.each( this.data, function( d ){
             map[ d.depth ] = [];
         } );
@@ -121,8 +122,8 @@ class sunburstGraphs extends GraphsBase
             map[ d.depth ].push( d );
         } );
 
-        var arr = [];
-        for( var p in map ){
+        let arr = [];
+        for( let p in map ){
             arr.push( map[ p ] );
         }
         
@@ -131,24 +132,24 @@ class sunburstGraphs extends GraphsBase
 
     _tansTreeData()
     {
-        var dataFrame = this.dataFrame;
-        var treeData = {};
+        let dataFrame = this.dataFrame;
+        let treeData = {};
 
-        var keyData = dataFrame.getFieldData( this.keyField );
-        var valueData = dataFrame.getFieldData( this.valueField );
-        var parentData = dataFrame.getFieldData( this.parentField ); //用parentField去找index
+        let keyData = dataFrame.getFieldData( this.keyField );
+        let valueData = dataFrame.getFieldData( this.valueField );
+        let parentData = dataFrame.getFieldData( this.parentField ); //用parentField去找index
 
         function findChild( obj, parent , ki ){
-            var parentKey = parent ? parent.name : undefined;
-            for( var i=(ki || 0); i<parentData.length; i++ ){
-                var key = parentData[i];
+            let parentKey = parent ? parent.name : undefined;
+            for( let i=(ki || 0); i<parentData.length; i++ ){
+                let key = parentData[i];
                 if( !key && key !== 0 ){
                     key = undefined
                 };
                 if( parentKey === key ){
                     obj.name = keyData[i];
                     obj.iNode = i;
-                    var value = valueData[i];
+                    let value = valueData[i];
                     if( !!value || value === 0 ){
                         obj.value = value;
                     };
@@ -159,7 +160,7 @@ class sunburstGraphs extends GraphsBase
                             if( !obj.children ){
                                 obj.children = [];
                             };
-                            var child = {};
+                            let child = {};
                             findChild(child, obj, ki)
                             obj.children.push( child );
                         }
@@ -176,7 +177,7 @@ class sunburstGraphs extends GraphsBase
 
     _widget(){
 
-        var me = this;
+        let me = this;
 
         _.each( this.dataGroup , function( group , g ){
             _.each( group , function( layoutData, i ){
@@ -186,8 +187,8 @@ class sunburstGraphs extends GraphsBase
                     return;
                 };
 
-                var r = Math.sqrt( layoutData.y + layoutData.dy );
-                var sectorContext = {
+                let r = Math.sqrt( layoutData.y + layoutData.dy );
+                let sectorContext = {
                     r0         : Math.sqrt( layoutData.y ),
                     r          : Math.sqrt( layoutData.y )+2,
                     startAngle : layoutData.x * 180 / Math.PI,
@@ -199,7 +200,7 @@ class sunburstGraphs extends GraphsBase
                     globalAlpha: 0
                 };
 
-                var sector = new Sector({
+                let sector = new Sector({
                     id : "sector_"+g+"_"+i,
                     context : sectorContext
                 });
@@ -210,9 +211,9 @@ class sunburstGraphs extends GraphsBase
 
                 me.sprite.addChild( sector );
 
-                sector.hover(function(e){
+                sector.hover(function(){
                     me._focus( layoutData , group );
-                } , function(e){
+                } , function(){
                     me._unfocus( layoutData , group );
                 });
                 sector.on(event.types.get(), function(e) {
@@ -249,9 +250,9 @@ class sunburstGraphs extends GraphsBase
     }
 
     getNodesAt( iNode ){
-        var nodes = [];
+        let nodes = [];
         if( iNode !== undefined ){
-            var node = _.find( this.data, function( item ){
+            let node = _.find( this.data, function( item ){
                 return item.iNode == iNode
             } );
 
@@ -264,7 +265,7 @@ class sunburstGraphs extends GraphsBase
     }
 
     _focus(layoutData, group){
-        var me = this;
+        let me = this;
         _.each( group , function( d ){
             if( d !== layoutData ){
                 d.sector.context.globalAlpha = me.node.blurAlpha;
@@ -276,15 +277,14 @@ class sunburstGraphs extends GraphsBase
         me._focusParent( layoutData );
     }
 
-    _unfocus(layoutData, group){
-        var me = this;
+    _unfocus(){
         _.each( this.data , function( d ){
             d.sector && (d.sector.context.globalAlpha = 1);
         } );
     }
 
     _focusChildren(d, callback){
-        var me = this;
+        let me = this;
         if(d.children && d.children.length){
             _.each( d.children , function(child){
                 callback( child );
@@ -294,7 +294,7 @@ class sunburstGraphs extends GraphsBase
     }
 
     _focusParent(layoutData){
-        var me = this;
+        let me = this;
         if( layoutData.parent && layoutData.parent.sector && layoutData.parent.group ){
             _.each( layoutData.parent.group , function( d ){
                 if( d === layoutData.parent ){
@@ -308,5 +308,5 @@ class sunburstGraphs extends GraphsBase
     }
 }
 
-global.registerComponent( sunburstGraphs, 'graphs', 'sunburst' );
+GraphsBase.registerComponent( sunburstGraphs, 'graphs', 'sunburst' );
 export default sunburstGraphs;

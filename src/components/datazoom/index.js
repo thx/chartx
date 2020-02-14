@@ -1,10 +1,11 @@
 import Component from "../component"
 import Canvax from "canvax"
-import { global,_ ,getDefaultProps} from "mmvis"
 import Trigger from "../trigger"
+import {getDefaultProps} from "../../utils/tools"
 
-const Line = Canvax.Shapes.Line;
-const Rect = Canvax.Shapes.Rect;
+let _ = Canvax._;
+let Line = Canvax.Shapes.Line;
+let Rect = Canvax.Shapes.Rect;
 
 class dataZoom extends Component
 {
@@ -240,11 +241,11 @@ class dataZoom extends Component
 
     _getCloneChart() 
     {
-        var me = this;
-        var app = this.app;
-        var _coord = app.getCoord();
-        var chartConstructor = app.constructor;//(barConstructor || Bar);
-        var cloneEl = app.el.cloneNode();
+        let me = this;
+        let app = this.app;
+        let _coord = app.getCoord();
+        let chartConstructor = app.constructor;//(barConstructor || Bar);
+        let cloneEl = app.el.cloneNode();
         cloneEl.innerHTML = "";
         cloneEl.id = app.el.id + "_currclone";
         cloneEl.style.position = "absolute";
@@ -253,22 +254,22 @@ class dataZoom extends Component
         cloneEl.style.top = "10000px";
         document.body.appendChild(cloneEl);
 
-        //var opt = _.extend(true, {}, me._opt);
+        //let opt = _.extend(true, {}, me._opt);
         //_.extend(true, opt, me.getCloneChart() );
 
         //clone的chart只需要coord 和 graphs 配置就可以了
         //因为画出来后也只需要拿graphs得sprite去贴图
-        var graphsOpt = [];
+        let graphsOpt = [];
         _.each( app.getComponents({name:'graphs'}), function( _g ){
-            var _field = _g.enabledField || _g.field;
+            let _field = _g.enabledField || _g.field;
             
             if( _.flatten([_field]).length ) {
 
-                var _opt = _.extend( true, {} , _g._opt );
+                let _opt = _.extend( true, {} , _g._opt );
                 
                 _opt.field = _field;
 
-                var miniOpt = {};
+                let miniOpt = {};
                 if( _g.type == "bar" ){
                     miniOpt = {
                         node: {
@@ -299,8 +300,8 @@ class dataZoom extends Component
                 };
 
                 
-                var _h = _coord.height || app.el.offsetHeight;
-                var radiusScale = (me.btnHeight / _h) || 1 ;
+                let _h = _coord.height || app.el.offsetHeight;
+                let radiusScale = (me.btnHeight / _h) || 1 ;
                 if( _g.type == "scat" ){
                     miniOpt = {
                         node : {
@@ -323,7 +324,7 @@ class dataZoom extends Component
             }
         } );
 
-        var opt = {
+        let opt = {
             coord : app._opt.coord,
             graphs : graphsOpt
         };
@@ -335,7 +336,7 @@ class dataZoom extends Component
         opt.coord.enabled = false;
         opt.coord.padding = 0;
 
-        var thumbChart = new chartConstructor(cloneEl, app._data, opt, app.componentModules);
+        let thumbChart = new chartConstructor(cloneEl, app._data, opt, app.componentModules);
         thumbChart.draw();
 
         return {
@@ -347,9 +348,9 @@ class dataZoom extends Component
     _setDataZoomOpt()
     {
 
-        var app = this.app;
-        var coordInfo = app.getComponent({name:'coord'}).getSizeAndOrigin();
-        var me = this;
+        let app = this.app;
+        let coordInfo = app.getComponent({name:'coord'}).getSizeAndOrigin();
+        let me = this;
         
         //初始化 datazoom 模块
         _.extend(true, this, {
@@ -358,7 +359,7 @@ class dataZoom extends Component
                 x: coordInfo.origin.x
             },
             dragIng: function(range) {
-                var trigger;
+                let trigger;
 
                 if( me.axisLayoutType == 'proportion' ){
                     trigger = new Trigger( me, {
@@ -366,11 +367,11 @@ class dataZoom extends Component
                         max : range.end
                     } );
                     app.dataFrame.filters[ 'datazoom' ] = function( rowData ){
-                        var val = rowData[ me.axis.field ];
+                        let val = rowData[ me.axis.field ];
 
                         //把range.start  range.end换算成axis上面对应的数值区间
-                        var min = me.axis.getValOfPos( range.start );
-                        var max = me.axis.getValOfPos( range.end );
+                        let min = me.axis.getValOfPos( range.start );
+                        let max = me.axis.getValOfPos( range.end );
                         
                         return val >= min && val <= max;
                     };
@@ -386,7 +387,7 @@ class dataZoom extends Component
                 app.resetData( null , trigger );
                 app.fire("dataZoomDragIng");
             },
-            dragEnd: function(range) {
+            dragEnd: function() {
                 app.updateChecked && app.updateChecked();
                 app.fire("dataZoomDragEnd");
             }
@@ -417,14 +418,14 @@ class dataZoom extends Component
         this.sprite.destroy();
     }
 
-    reset( opt , dataFrame )
+    reset( opt )
     {
         
         !opt && ( opt = {} );
 
-        var _preCount = this.count;
-        var _preStart = this.range.start;
-        var _preEnd = this.range.end;
+        let _preCount = this.count;
+        let _preStart = this.range.start;
+        let _preEnd = this.range.end;
 
         opt && _.extend(true, this, opt);
         this._cloneChart = this._getCloneChart()//cloneChart;
@@ -445,7 +446,7 @@ class dataZoom extends Component
     //计算属性
     _computeAttrs()
     {
-        var _cloneChart = this._cloneChart.thumbChart
+        let _cloneChart = this._cloneChart.thumbChart
 
         this.dataLen = _cloneChart.dataFrame.length;
         switch( this.axisLayoutType ){
@@ -485,9 +486,9 @@ class dataZoom extends Component
     }
     _getDisPart()
     {
-        var me = this;
-        var min = Math.max( parseInt(me.range.min / 2 / me.count * me.width), 23 );
-        var max = parseInt((me.range.max+1) / me.count * me.width);
+        let me = this;
+        let min = Math.max( parseInt(me.range.min / 2 / me.count * me.width), 23 );
+        let max = parseInt((me.range.max+1) / me.count * me.width);
         //柱状图用得这种x轴布局，不需要 /2
         if( this.axisLayoutType == "peak" ){
             min = Math.max( parseInt(me.range.min / me.count * me.width), 23 );
@@ -521,13 +522,13 @@ class dataZoom extends Component
 
     widget()
     {
-        var me = this;
-        var setLines = function(){
+        let me = this;
+        let setLines = function(){
             me._setLines.apply(me, arguments);
         };
 
         if( me.bg.enabled ){
-            var bgRectCtx = {
+            let bgRectCtx = {
                 x: 0,
                 y: 0,
                 width: me.width,
@@ -550,7 +551,7 @@ class dataZoom extends Component
         }
 
         if(me.underline.enabled){
-            var underlineCtx = {
+            let underlineCtx = {
                 start : {
                     x : me.range.start / me.count * me.width + me.btnWidth / 2,
                     y : me.btnHeight
@@ -574,7 +575,7 @@ class dataZoom extends Component
         }
 
 
-        var btnLeftCtx = {
+        let btnLeftCtx = {
             x: me.range.start / me.count * me.width,
             y: - me.btnOut / 2 + 1,
             width: me.btnWidth,
@@ -592,7 +593,7 @@ class dataZoom extends Component
                 dragEnabled : me.left.eventEnabled,
                 context: btnLeftCtx
             });
-            me._btnLeft.on("draging" , function(e){
+            me._btnLeft.on("draging" , function(){
                 
                 this.context.y = - me.btnOut / 2 + 1
                 if(this.context.x < 0){
@@ -613,14 +614,14 @@ class dataZoom extends Component
                 me._setRange();
 
             });
-            me._btnLeft.on("dragend" , function(e){
+            me._btnLeft.on("dragend" , function(){
                 me.dragEnd( me.range );
             });
             this.dataZoomBtns.addChild( this._btnLeft );
         };
 
         
-        var btnRightCtx = {
+        let btnRightCtx = {
             x: me._getRangeEnd() / me.count * me.width - me.btnWidth,
             y: - me.btnOut / 2 + 1,
             width: me.btnWidth,
@@ -640,7 +641,7 @@ class dataZoom extends Component
                 context: btnRightCtx
             });
 
-            me._btnRight.on("draging" , function(e){
+            me._btnRight.on("draging" , function(){
                 
                 this.context.y = - me.btnOut / 2 + 1
                 if( this.context.x > me.width - me.btnWidth ){
@@ -655,14 +656,14 @@ class dataZoom extends Component
                 me.rangeRect.context.width = this.context.x - me._btnLeft.context.x - me.btnWidth;
                 me._setRange();
             });
-            me._btnRight.on("dragend" , function(e){
+            me._btnRight.on("dragend" , function(){
                 me.dragEnd( me.range );
             });
             this.dataZoomBtns.addChild( this._btnRight );
         };
 
 
-        var rangeRectCtx = {
+        let rangeRectCtx = {
             x : btnLeftCtx.x + me.btnWidth,
             y : 1,
             width : btnRightCtx.x - btnLeftCtx.x - me.btnWidth,
@@ -682,7 +683,7 @@ class dataZoom extends Component
                 dragEnabled : true,
                 context : rangeRectCtx
             });
-            this.rangeRect.on("draging" , function(e){
+            this.rangeRect.on("draging" , function(){
                 
                 this.context.y = 1;
                 if( this.context.x < me.btnWidth ){
@@ -696,7 +697,7 @@ class dataZoom extends Component
                 me._setRange( "btnCenter" );
 
             });
-            this.rangeRect.on("dragend" , function(e){
+            this.rangeRect.on("dragend" , function(){
                 me.dragEnd( me.range );
             });
             this.dataZoomBtns.addChild( this.rangeRect );
@@ -736,12 +737,12 @@ class dataZoom extends Component
 
     _setRange( trigger )
     {
-        var me = this;
-        var _end = me._getRangeEnd();
-        var _preDis = _end - me.range.start;
+        let me = this;
+        let _end = me._getRangeEnd();
+        let _preDis = _end - me.range.start;
 
-        var start = (me._btnLeft.context.x / me.width) * me.count;
-        var end =  ((me._btnRight.context.x + me.btnWidth) / me.width) * me.count;
+        let start = (me._btnLeft.context.x / me.width) * me.count;
+        let end =  ((me._btnRight.context.x + me.btnWidth) / me.width) * me.count;
        
         //console.log( (me._btnRight.context.x + me.btnWidth)+"|"+ me.width + "|" + me.count )
         if( this.axisLayoutType == "peak" ){
@@ -778,14 +779,14 @@ class dataZoom extends Component
     _setLines()
     {
         
-        var me = this
-        var linesLeft  = this.linesLeft;
-        var linesRight = this.linesRight;
-        var linesCenter = this.linesCenter;
+        let me = this
+        let linesLeft  = this.linesLeft;
+        let linesRight = this.linesRight;
+        let linesCenter = this.linesCenter;
         
-        var btnLeft    = this._btnLeft;
-        var btnRight   = this._btnRight;
-        var btnCenter  = this.rangeRect;
+        let btnLeft    = this._btnLeft;
+        let btnRight   = this._btnRight;
+        let btnCenter  = this.rangeRect;
         
         linesLeft.context.x = btnLeft.context.x + (btnLeft.context.width - linesLeft.context.width ) / 2
         linesLeft.context.y = btnLeft.context.y + (btnLeft.context.height - linesLeft.context.height ) / 2
@@ -804,11 +805,12 @@ class dataZoom extends Component
 
     _addLines($o)
     {
-        var me = this
-        var count  = $o.count || 2
-        var sprite = $o.sprite
-        var dis    = $o.dis || 2
-        for(var a = 0, al = count; a < al; a++){
+        let me = this
+        let count  = $o.count || 2
+        let sprite = $o.sprite
+        let dis    = $o.dis || 2
+        let a;
+        for(a = 0; a < count; a++){
             sprite.addChild(me._addLine({
                 x : a * dis,
                 strokeStyle : $o.strokeStyle || ''
@@ -819,8 +821,8 @@ class dataZoom extends Component
 
     _addLine($o)
     {
-        var o = $o || {}
-        var line = new Line({
+        let o = $o || {}
+        let line = new Line({
             id     : o.id || '',
             context: {
                 x: o.x || 0,
@@ -848,10 +850,10 @@ class dataZoom extends Component
             this.__graphssp.destroy();
         };
 
-        var graphssp = this._cloneChart.thumbChart.graphsSprite;
+        let graphssp = this._cloneChart.thumbChart.graphsSprite;
         graphssp.setEventEnable(false);
         
-        var _coor = this._cloneChart.thumbChart.getComponent({name:'coord'});
+        let _coor = this._cloneChart.thumbChart.getComponent({name:'coord'});
 
         graphssp.id = graphssp.id + "_datazoomthumbChartbg"
         graphssp.context.x = -_coor.origin.x; //0;
@@ -873,6 +875,6 @@ class dataZoom extends Component
 
 }
 
-global.registerComponent( dataZoom, 'dataZoom' );
+Component.registerComponent( dataZoom, 'dataZoom' );
 
 export default dataZoom;

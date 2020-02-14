@@ -1,8 +1,9 @@
 import Canvax from "canvax"
-import { _, event,getDefaultProps } from "mmvis"
+import {getDefaultProps} from "../../utils/tools"
 
-const Line = Canvax.Shapes.Line;
-const Rect = Canvax.Shapes.Rect;
+let { _, event } = Canvax;
+let Line = Canvax.Shapes.Line;
+let Rect = Canvax.Shapes.Rect;
 
 export default class rectGrid extends event.Dispatcher
 {
@@ -174,20 +175,20 @@ export default class rectGrid extends event.Dispatcher
     _widget()
     {
         
-        var self  = this;
+        let self  = this;
         if(!this.enabled){
             return
         };
 
-        var _yAxis = self._coord._yAxis[ 0 ];
-        var _xAxis = self._coord._xAxis;
+        let _yAxis = self._coord._yAxis[ 0 ];
+        let _xAxis = self._coord._xAxis;
 
         
         this.fillSp = new Canvax.Display.Sprite();
         this.sprite.addChild(this.fillSp);
         _.each( [self.fill.xDimension, self.fill.yDimension], function( fill, ind ){
-            var _axis = ind ? _yAxis : _xAxis;
-            var splitVals = [];
+            let _axis = ind ? _yAxis : _xAxis;
+            let splitVals = [];
             if( fill.enabled ){
                 if( !fill.splitVals ){
                     splitVals = _axis.dataSection;
@@ -195,12 +196,12 @@ export default class rectGrid extends event.Dispatcher
                     splitVals = [ _axis.dataSection[0] ].concat( _.flatten([ fill.splitVals ]) );
                     splitVals.push( _axis.dataSection.slice(-1)[0] );
                 }
-                var fillRanges = [];
+                let fillRanges = [];
                 if(splitVals.length >=2){
 
-                    var range = [];
-                    for(var i=0,l=splitVals.length; i<l; i++){
-                        var pos = _axis.getPosOf({
+                    let range = [];
+                    for(let i=0,l=splitVals.length; i<l; i++){
+                        let pos = _axis.getPosOf({
                             val : splitVals[i]
                         });
                         if(!range.length){
@@ -213,7 +214,7 @@ export default class rectGrid extends event.Dispatcher
                             } else {
                                 range.push( pos );
                                 fillRanges.push( range );
-                                var nextBegin = range[1]
+                                let nextBegin = range[1]
                                 range = [ nextBegin ];
                             }
                         }
@@ -222,7 +223,7 @@ export default class rectGrid extends event.Dispatcher
                     //fill的区间数据准备好了
                     _.each( fillRanges, function( range, rInd ){
 
-                        var rectCtx = {
+                        let rectCtx = {
                             fillStyle : self.getProp( fill.fillStyle, rInd, "#000" ),
                             fillAlpha : self.getProp( fill.alpha, rInd, 0.02 * (rInd%2) )
                         }
@@ -240,7 +241,7 @@ export default class rectGrid extends event.Dispatcher
                             rectCtx.height = -( range[1] - range[0] );
                         }
 
-                        var fillRect = new Rect({
+                        let fillRect = new Rect({
                             context : rectCtx
                         });
                         
@@ -256,13 +257,13 @@ export default class rectGrid extends event.Dispatcher
         self.yAxisSp = new Canvax.Display.Sprite(),  self.sprite.addChild(self.yAxisSp);
         
 
-        var arr = _yAxis.layoutData;
-        for(var a = 0, al = arr.length; a < al; a++){
-            var o = arr[a];
+        let arr = _yAxis.layoutData;
+        for(let a = 0, al = arr.length; a < al; a++){
+            let o = arr[a];
 
             if( !o.visible ) continue;
           
-            var line = new Line({
+            let line = new Line({
                 id : "back_line_"+a,
                 context : {
                     y : o.y,
@@ -281,10 +282,10 @@ export default class rectGrid extends event.Dispatcher
         };
 
         //y轴方向的线集合
-        var arr = _xAxis.layoutData;
-        for(var a = 0, al = arr.length; a < al; a++){
-            var o = arr[a]
-            var line = new Line({
+        arr = _xAxis.layoutData;
+        for(let a = 0, al = arr.length; a < al; a++){
+            let o = arr[a]
+            let line = new Line({
                 context : {
                     x : o.x,
                     start       : {
@@ -308,7 +309,7 @@ export default class rectGrid extends event.Dispatcher
     }
 
     getProp( prop, i, def ){
-        var res = def;
+        let res = def;
         if( prop != null && prop != undefined ){
             if( _.isString( prop ) || _.isNumber( prop ) ){
                 res = prop;

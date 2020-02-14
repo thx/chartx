@@ -1,6 +1,8 @@
 import Component from "../component"
 import Canvax from "canvax"
-import { global,_ ,getDefaultProps} from "mmvis"
+import {getDefaultProps} from "../../utils/tools"
+
+let _ = Canvax._;
 
 class barGuide extends Component
 {
@@ -109,9 +111,9 @@ class barGuide extends Component
 
     draw()
     {
-        var me = this;
+        let me = this;
         
-        var _coord = this.app.getComponent({name:'coord'});
+        let _coord = this.app.getComponent({name:'coord'});
         this.pos = {   
             x: _coord.origin.x,
             y: _coord.origin.y
@@ -132,10 +134,10 @@ class barGuide extends Component
         };
 
         _.each( this.data, function( val, i ){
-            var y = -me._yAxis.getPosOfVal( val );
-            var barData = me.barDatas[ i ];
+            let y = -me._yAxis.getPosOfVal( val );
+            let barData = me.barDatas[ i ];
 
-            var _node = new Canvax.Shapes.Circle({
+            let _node = new Canvax.Shapes.Circle({
                 context : {
                     x : barData.x + barData.width/2 ,
                     y : y,
@@ -146,11 +148,11 @@ class barGuide extends Component
                 }
             });
 
-            var _label = val;
+            let _label = val;
             if( _.isFunction( me.label.format ) ){
                 _label = me.label.format( val, barData);
             };
-            var _txt = new Canvax.Display.Text( _label , {
+            let _txt = new Canvax.Display.Text( _label , {
                 context : {
                     x : barData.x + barData.width/2,
                     y : y - me.node.radius - 1,
@@ -170,7 +172,7 @@ class barGuide extends Component
 
     _getProp( val , tgi, i)
     {
-        var res = val;
+        let res = val;
         if( _.isFunction( val ) ){
             res = val.apply( this, [ tgi, i ] )
         }
@@ -178,6 +180,6 @@ class barGuide extends Component
     }
 }
 
-global.registerComponent( barGuide, 'barGuide' );
+Component.registerComponent( barGuide, 'barGuide' );
 
 export default barGuide;

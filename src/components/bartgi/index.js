@@ -1,8 +1,9 @@
 import Component from "../component"
 import Canvax from "canvax"
-import { global,_ , getDefaultProps} from "mmvis"
+import {getDefaultProps} from "../../utils/tools"
 
-const Line = Canvax.Shapes.Line
+let Line = Canvax.Shapes.Line
+let _ = Canvax._;
 
 class barTgi extends Component
 {
@@ -33,7 +34,7 @@ class barTgi extends Component
                     },
                     strokeStyle : {
                         detail : '线颜色',
-                        default : function( val, i ){
+                        default : function( val ){
                             if( val >= this.standardVal ){
                                 return "#43cbb5"
                             } else {
@@ -100,9 +101,9 @@ class barTgi extends Component
 
     draw()
     {
-        var me = this;
+        let me = this;
 
-        var _coord = this.app.getComponent({name:'coord'});
+        let _coord = this.app.getComponent({name:'coord'});
         this.pos = {   
             x: _coord.origin.x,
             y: _coord.origin.y
@@ -122,10 +123,10 @@ class barTgi extends Component
         };
 
         _.each( this.data, function( tgi, i ){
-            var y = -me._yAxis.getPosOfVal( tgi );
-            var barData = me.barDatas[ i ];
+            let y = -me._yAxis.getPosOfVal( tgi );
+            let barData = me.barDatas[ i ];
 
-            var _tgiLine = new Line({
+            let _tgiLine = new Line({
                 context: {
                     start : {
                         x : barData.x,
@@ -145,12 +146,12 @@ class barTgi extends Component
 
     _getProp( val , tgi, i)
     {
-        var res = val;
+        let res = val;
         if( _.isFunction( val ) ){
             res = val.apply( this, [ tgi, i ] )
         };
         return res;
     }
 }
-global.registerComponent( barTgi, 'barTgi' );
+Component.registerComponent( barTgi, 'barTgi' );
 export default barTgi;

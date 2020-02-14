@@ -1,4 +1,4 @@
-import { global } from "mmvis"
+import global from "../../global"
 import dagre from "./dagre"
 
 global.registerLayout('dagre', dagre);

@@ -1,6 +1,7 @@
 import Group from "./group"
 import GraphsBase from "../index"
-import { global, _, getDefaultProps } from "mmvis"
+import { _ } from "canvax"
+import {getDefaultProps} from "../../../utils/tools"
 
 class LineGraphs extends GraphsBase
 {
@@ -69,7 +70,7 @@ class LineGraphs extends GraphsBase
     resetData(dataFrame, dataTrigger)
     {
         
-        var me = this;
+        let me = this;
         if( dataFrame ){
             me.dataFrame = dataFrame;
             me.data = me._trimGraphs();
@@ -88,31 +89,31 @@ class LineGraphs extends GraphsBase
     //dataFrame
     _trimGraphs()
     {
-        var me = this;
-        var _coord = this.app.getComponent({name:'coord'});
+        let me = this;
+        let _coord = this.app.getComponent({name:'coord'});
         
         //{"uv":{}.. ,"click": "pv":]}
         //这样按照字段摊平的一维结构
-        var tmpData = {}; 
+        let tmpData = {}; 
 
         me.setEnabledField();
 
         _.each( _.flatten( me.enabledField ) , function( field, i ){
-            //var maxValue = 0;
+            //let maxValue = 0;
 
-            var fieldMap = me.app.getComponent({name:'coord'}).getFieldMapOf( field );
+            let fieldMap = me.app.getComponent({name:'coord'}).getFieldMapOf( field );
 
             //单条line的全部data数据
-            var _lineData = me.dataFrame.getFieldData(field);
+            let _lineData = me.dataFrame.getFieldData(field);
             
             if( !_lineData ) return;
             //console.log( JSON.stringify( _lineData ) )
-            var _data = [];
+            let _data = [];
 
-            for (var b = 0, bl = _lineData.length; b < bl; b++) {
+            for (let b = 0, bl = _lineData.length; b < bl; b++) {
 
                 //返回一个和value的结构对应的point结构{x:  y: }
-                var point = _coord.getPoint( {
+                let point = _coord.getPoint( {
                     iNode : b,
                     field : field,
                     value : {
@@ -121,7 +122,7 @@ class LineGraphs extends GraphsBase
                     }
                 } );
 
-                var node = {
+                let node = {
                     type     : "line",
                     iGroup   : i,
                     iNode    : b,
@@ -152,10 +153,10 @@ class LineGraphs extends GraphsBase
      */
     grow(callback)
     {
-        var gi = 0;
-        var gl = this.groups.length;
-        var me = this;
-        _.each(this.groups, function(g, i) {
+        let gi = 0;
+        let gl = this.groups.length;
+        let me = this;
+        _.each(this.groups, function(g) {
             g._grow(function(){
                 gi++;
                 callback && callback( g );
@@ -169,7 +170,7 @@ class LineGraphs extends GraphsBase
 
     show( field )
     {
-        var me = this;
+        let me = this;
         
         //这个field不再这个graphs里面的，不相关
         if( _.indexOf( _.flatten( [me.field] ), field ) == -1 ){
@@ -179,15 +180,15 @@ class LineGraphs extends GraphsBase
         this.data = this._trimGraphs();
         this._setGroupsForYfield( this.data , field );
         
-        _.each(this.groups, function(g, i) {
+        _.each(this.groups, function(g) {
             g.resetData( me.data[ g.field ].data );
         });
     }
 
     hide( field )
     {
-        var me = this;
-        var i = me.getGroupIndex( field );
+        let me = this;
+        let i = me.getGroupIndex( field );
 
         if( !this.groups.length || i < 0 ){
             return;
@@ -196,15 +197,15 @@ class LineGraphs extends GraphsBase
         this.groups.splice(i, 1)[0].destroy();
         this.data = this._trimGraphs();
 
-        _.each(this.groups, function(g, i) {
+        _.each(this.groups, function(g) {
             g.resetData( me.data[ g.field ].data );
         });
     }
 
     getGroupIndex( field )
     {
-        var ind = -1;
-        for( var i=0,l=this.groups.length; i<l; i++  ){
+        let ind = -1;
+        for( let i=0,l=this.groups.length; i<l; i++  ){
             if( this.groups[i].field === field ){
                 ind = i;
                 break;
@@ -220,7 +221,7 @@ class LineGraphs extends GraphsBase
 
     _setGroupsForYfield(data , fields, opt)
     {
-        var me = this;
+        let me = this;
 
         !opt && (opt ={});
 
@@ -230,7 +231,7 @@ class LineGraphs extends GraphsBase
             fields = _.flatten( [fields] );
         }
 
-        var _flattenField = _.flatten( [ this.field ] );
+        let _flattenField = _.flatten( [ this.field ] );
 
         _.each( data , function( g, field ){
         
@@ -240,12 +241,12 @@ class LineGraphs extends GraphsBase
                 return;
             };
 
-            var fieldMap = me.app.getComponent({name:'coord'}).getFieldMapOf( field );
+            let fieldMap = me.app.getComponent({name:'coord'}).getFieldMapOf( field );
             
             //iGroup 是这条group在本graphs中的ind，而要拿整个图表层级的index， 就是fieldMap.ind
-            var iGroup = _.indexOf( _flattenField, field );
+            let iGroup = _.indexOf( _flattenField, field );
 
-            var group = new Group(
+            let group = new Group(
                 fieldMap,
                 iGroup, //不同于fieldMap.ind
                 me._opt,
@@ -259,9 +260,9 @@ class LineGraphs extends GraphsBase
                 animation : me.animation && !opt.resize
             }, g.data );
 
-            var insert = false;
+            let insert = false;
             //在groups数组中插入到比自己_groupInd小的元素前面去
-            for( var gi=0,gl=me.groups.length ; gi<gl ; gi++ ){
+            for( let gi=0,gl=me.groups.length ; gi<gl ; gi++ ){
                 if( iGroup < me.groups[gi].iGroup ){
 
                     me.groups.splice( gi , 0 , group );
@@ -283,9 +284,9 @@ class LineGraphs extends GraphsBase
 
     getNodesAt( ind, e )
     {
-        var _nodesInfoList = []; //节点信息集合
+        let _nodesInfoList = []; //节点信息集合
         _.each( this.groups, function( group ){
-            var node = group.getNodeInfoAt( ind, e );
+            let node = group.getNodeInfoAt( ind, e );
             node && _nodesInfoList.push( node );
         } );
         return _nodesInfoList;
@@ -293,15 +294,15 @@ class LineGraphs extends GraphsBase
 
     getNodesOfPos( x )
     {
-        var _nodesInfoList = []; //节点信息集合
+        let _nodesInfoList = []; //节点信息集合
         _.each( this.groups, function( group ){
-            var node = group.getNodeInfoOfX( x );
+            let node = group.getNodeInfoOfX( x );
             node && _nodesInfoList.push( node );
         } );
         return _nodesInfoList;
     }
 }
 
-global.registerComponent( LineGraphs, 'graphs', 'line' );
+GraphsBase.registerComponent( LineGraphs, 'graphs', 'line' );
 
 export default LineGraphs;

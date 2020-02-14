@@ -1,6 +1,7 @@
 import Canvax from "canvax"
-import { _, event, getDefaultProps } from "mmvis"
+import {getDefaultProps} from "../../../utils/tools"
 
+let { _, event } = Canvax
 const Line = Canvax.Shapes.Line;
 const Circle = Canvax.Shapes.Circle;
 const Polygon = Canvax.Shapes.Polygon;
@@ -127,15 +128,15 @@ export default class polarGrid extends event.Dispatcher
     _widget()
     {
         
-        var me = this;
+        let me = this;
         _.each( this.dataSection, function( num, i ){
 
             if( num ) {
                 
-                var r = me.app.getROfNum( num );
-                var points = me.app.getPointsOfR( r );
+                let r = me.app.getROfNum( num );
+                let points = me.app.getPointsOfR( r );
 
-                var ctx = {
+                let ctx = {
                     //lineType : me.ring.lineType,
                     lineWidth : me.ring.lineWidth,
                     strokeStyle : me._getStyle( me.ring.strokeStyle , i-1 ),//me.ring.strokeStyle,
@@ -143,8 +144,8 @@ export default class polarGrid extends event.Dispatcher
                     fillAlpha : me.ring.fillAlpha
                 };
 
-                var _ring;
-                var ringType = Circle;
+                let _ring;
+                let ringType = Circle;
                 if( me.ring.shapeType == "circle" ){
                     ctx.r = r;
                     _ring = new ringType({
@@ -174,10 +175,10 @@ export default class polarGrid extends event.Dispatcher
                 };
 
                 //绘制中心出发的蜘蛛网线
-                var aAxisLayoutData = [];
+                let aAxisLayoutData = [];
                 
                 _.each( points, function( point ){
-                    var _line = new Line({
+                    let _line = new Line({
                         context : {
                             end : point,
                             lineWidth : me.ring.lineWidth,

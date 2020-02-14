@@ -1,10 +1,11 @@
 import Component from "../component"
 import Canvax from "canvax"
-import { global,_ ,getDefaultProps} from "mmvis"
+import { getDefaultProps } from "../../utils/tools"
 
-const BrokenLine = Canvax.Shapes.BrokenLine;
-const Sprite = Canvax.Display.Sprite;
-const Text = Canvax.Display.Text;
+let _ = Canvax._;
+let BrokenLine = Canvax.Shapes.BrokenLine;
+let Sprite = Canvax.Display.Sprite;
+let Text = Canvax.Display.Text;
 
 class MarkLine extends Component
 {
@@ -92,25 +93,25 @@ class MarkLine extends Component
     }
 
     _calculateProps(  ){
-        var me = this;
-        var opt = this._opt;
+        let me = this;
+        let opt = this._opt;
 
         //如果markline有target配置，那么只现在target配置里的字段的 markline, 推荐
-        var field = opt.markTo;
+        let field = opt.markTo;
 
-        var _coord = this.app.getComponent({name:'coord'});
+        let _coord = this.app.getComponent({name:'coord'});
 
         if( field && _.indexOf( this.app.dataFrame.fields , field ) == -1 ){
             //如果配置的字段不存在，则不绘制
             return;
         };
 
-        var _yAxis = _coord._yAxis[0]; //默认为左边的y轴
+        let _yAxis = _coord._yAxis[0]; //默认为左边的y轴
         
         if( field ){
             //如果有配置markTo就从 _coord._yAxis中找到这个markTo所属的yAxis对象
             _.each( _coord._yAxis, function( $yAxis, yi ){
-                var fs = _.flatten([ $yAxis.field ]);
+                let fs = _.flatten([ $yAxis.field ]);
                 if( _.indexOf( fs, field ) >= 0 ){
                     _yAxis = $yAxis;
                 }
@@ -122,15 +123,15 @@ class MarkLine extends Component
             _yAxis = _coord._yAxis[ opt.yAxisAlign=="left" ? 0 : 1 ];
         };
 
-        var y;
+        let y;
         if( opt.y !== undefined && opt.y !== null ){
             y = Number( opt.y );
         } else {
             //如果没有配置这个y的属性，就 自动计算出来均值
             //但是均值是自动计算的，比如datazoom在draging的时候
             y = function(){
-                var _fdata = this.app.dataFrame.getFieldData( field );
-                var _count = 0;
+                let _fdata = this.app.dataFrame.getFieldData( field );
+                let _count = 0;
                 _.each( _fdata, function( val ){
                     if( Number( val ) ){
                         _count += val;
@@ -149,13 +150,13 @@ class MarkLine extends Component
             _yAxis.drawWaterLine( y );
         };
 
-        var _fstyle = "#777";
-        var fieldMap = _coord.getFieldMapOf( field );
+        let _fstyle = "#777";
+        let fieldMap = _coord.getFieldMapOf( field );
         if( fieldMap ){
             _fstyle = fieldMap.color;
         };
-        var lineStrokeStyle =  opt.line && opt.line.strokeStyle || _fstyle;
-        var textFillStyle = opt.label && opt.label.fontColor || _fstyle;
+        let lineStrokeStyle =  opt.line && opt.line.strokeStyle || _fstyle;
+        let textFillStyle = opt.label && opt.label.fontColor || _fstyle;
 
         //开始计算赋值到属性上面
         this._yAxis = _yAxis;
@@ -180,11 +181,11 @@ class MarkLine extends Component
 
     widget()
     {
-        var me = this;
+        let me = this;
 
-        var y = this._getYPos();
+        let y = this._getYPos();
 
-        var line = new BrokenLine({               //线条
+        let line = new BrokenLine({               //线条
             id : "line",
             context : {
                 y           : y,
@@ -198,7 +199,7 @@ class MarkLine extends Component
         me._line = line;
 
         if(me.label.enabled){
-            var txt = new Text( me._getLabel() , {           //文字
+            let txt = new Text( me._getLabel() , {           //文字
                 context : me.label
             });
             this._txt = txt;
@@ -214,8 +215,8 @@ class MarkLine extends Component
     {
         opt && _.extend(true, this, opt);
 
-        var me = this;
-        var y = this._getYPos();
+        let me = this;
+        let y = this._getYPos();
 
         if( y != this.line.y ){
             this._line.animate({
@@ -239,8 +240,8 @@ class MarkLine extends Component
 
     _setTxtPos( y )
     {
-        var me = this;
-        var txt = me._txt;
+        let me = this;
+        let txt = me._txt;
         
         if( this._yAxis.align == "left" ){
             txt.context.x = 5;
@@ -257,8 +258,8 @@ class MarkLine extends Component
 
     _getYVal( yVal )
     {
-        var yVal = yVal || this.yVal;
-        var y = yVal;
+        yVal = yVal || this.yVal;
+        let y = yVal;
         if( _.isFunction( yVal ) ){
             y = yVal.apply( this );
         };
@@ -273,8 +274,8 @@ class MarkLine extends Component
 
     _getLabel()
     {
-        var str;
-        var yVal = this._getYVal();
+        let str;
+        let yVal = this._getYVal();
         if( _.isFunction( this.label.format ) ){
             str = this.label.format( yVal , this );
         } else {
@@ -288,5 +289,5 @@ class MarkLine extends Component
     }
 }
 
-global.registerComponent( MarkLine, 'markLine' );
+Component.registerComponent( MarkLine, 'markLine' );
 export default  MarkLine

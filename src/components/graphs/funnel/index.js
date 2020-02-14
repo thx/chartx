@@ -1,10 +1,10 @@
 import Canvax from "canvax"
 import GraphsBase from "../index"
-import {numAddSymbol} from "../../../utils/tools"
-import { global, _ , event , getDefaultProps} from "mmvis"
+import {numAddSymbol,getDefaultProps} from "../../../utils/tools"
 
-const Text = Canvax.Display.Text;
-const Polygon = Canvax.Shapes.Polygon;
+let {_,event} = Canvax;
+let Text = Canvax.Display.Text;
+let Polygon = Canvax.Shapes.Polygon;
 
 class FunnelGraphs extends GraphsBase
 {
@@ -122,9 +122,8 @@ class FunnelGraphs extends GraphsBase
         //第二个data参数去掉，直接trimgraphs获取最新的data
         _.extend(true, this, opt);
 
-        var me = this;
-
-        var animate = me.animation && !opt.resize;
+        //let me = this;
+        //let animate = me.animation && !opt.resize;
 
         this._computerAttr();
 
@@ -141,14 +140,14 @@ class FunnelGraphs extends GraphsBase
     {
         if( !this.field ) return;
 
-        var me = this;
-        //var dataOrg = _.clone( this.dataOrg );
+        let me = this;
+        //let dataOrg = _.clone( this.dataOrg );
 
-        var layoutData = [];
+        let layoutData = [];
 
         _.each( this.dataOrg, function( num , i ){
 
-            var ld = {
+            let ld = {
                 type    : "funnel",
                 field   : me.field,
                 rowData : me.dataFrame.getRowDataAt(i),
@@ -193,21 +192,21 @@ class FunnelGraphs extends GraphsBase
 
     _getNodeWidth( num )
     {
-        var width = this.minNodeWidth + ( (this.maxNodeWidth-this.minNodeWidth) / (this._maxVal-this.minVal) * (num-this.minVal) );
+        let width = this.minNodeWidth + ( (this.maxNodeWidth-this.minNodeWidth) / (this._maxVal-this.minVal) * (num-this.minVal) );
         return parseInt( width );
     }
 
     _getPoints( layoutData , nextLayoutData , preLayoutData )
     {
-        var points = [];
-        var topY = layoutData.iNode * this.node.height;
-        var bottomY = topY + this.node.height;
+        let points = [];
+        let topY = layoutData.iNode * this.node.height;
+        let bottomY = topY + this.node.height;
 
         if( this.sort !== "asc" ){    
             points.push( [ -layoutData.width/2, topY] ); //左上
             points.push( [ layoutData.width/2, topY] ); //右上
 
-            var bottomWidth = this.minNodeWidth;
+            let bottomWidth = this.minNodeWidth;
             if( nextLayoutData ){
                 bottomWidth = nextLayoutData.width;
             };
@@ -215,7 +214,7 @@ class FunnelGraphs extends GraphsBase
             points.push( [ -bottomWidth/2, bottomY] ); //左下
         } else {
             //正金字塔结构的话，是从最上面一个 data 的 top 取min开始
-            var topWidth = this.minNodeWidth;
+            let topWidth = this.minNodeWidth;
             if( preLayoutData ){
                 topWidth = preLayoutData.width;
             };
@@ -230,9 +229,9 @@ class FunnelGraphs extends GraphsBase
 
     _drawGraphs()
     {
-        var me = this;
+        let me = this;
         _.each( this.data , function( ld ){
-            var _polygon = new Polygon({
+            let _polygon = new Polygon({
                 context : {
                     pointList : ld.points,
                     fillStyle : ld.color,
@@ -253,8 +252,8 @@ class FunnelGraphs extends GraphsBase
                 me.app.fire( e.type, e );
             });
 
-            var textAlign = "center";
-            var textPoint = {
+            let textAlign = "center";
+            let textPoint = {
                 x : ld.middlePoint.x,
                 y : ld.middlePoint.y
             };
@@ -269,7 +268,7 @@ class FunnelGraphs extends GraphsBase
                 textAlign = "left";
             };
 
-            var _text = new Text( ld.label , {
+            let _text = new Text( ld.label , {
                 context : {
                     x : textPoint.x,
                     y : textPoint.y,
@@ -287,6 +286,6 @@ class FunnelGraphs extends GraphsBase
 
 }
 
-global.registerComponent( FunnelGraphs, 'graphs', 'funnel' );
+GraphsBase.registerComponent( FunnelGraphs, 'graphs', 'funnel' );
 
 export default FunnelGraphs;

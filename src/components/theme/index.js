@@ -2,7 +2,7 @@
  * 皮肤组件，不是一个具体的ui组件
  */
 import Component from "../component"
-import { global,_ } from "mmvis"
+import { _ } from "canvax"
 
 class Theme extends Component
 {
@@ -21,7 +21,7 @@ class Theme extends Component
 
     get( ind )
     {
-        var colors = this.colors;
+        let colors = this.colors;
         if( !_.isArray( colors ) ){
             colors = [ colors ]
         };
@@ -33,7 +33,7 @@ class Theme extends Component
         if( !colors ){
             colors = [];
         };
-        for( var i=0,l=this.colors.length; i<l; i++ ){
+        for( let i=0,l=this.colors.length; i<l; i++ ){
             if( colors[i] ){
                 colors[i] = this.colors[i]
             } else {
@@ -46,6 +46,6 @@ class Theme extends Component
 
 }
 
-global.registerComponent( Theme, 'theme' );
+Component.registerComponent( Theme, 'theme' );
 
 export default Theme;

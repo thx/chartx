@@ -4,10 +4,11 @@
 import Canvax from "canvax"
 import GraphsBase from "../index"
 import sankeyLayout from "../../../layout/sankey/index"
-import { global,_,event,getDefaultProps } from "mmvis"
+import {getDefaultProps} from "../../../utils/tools"
 
-const Path = Canvax.Shapes.Path;
-const Rect = Canvax.Shapes.Rect;
+let { _,event } = Canvax;
+let Path = Canvax.Shapes.Path;
+let Rect = Canvax.Shapes.Rect;
 
 class sankeyGraphs extends GraphsBase
 {
@@ -137,16 +138,16 @@ class sankeyGraphs extends GraphsBase
 
     _trimGraphs(){
 
-        var me = this;
-        var nodes = [];
-        var links = [];
-        var keyDatas = me.dataFrame.getFieldData( me.keyField );
-        var valueDatas = me.dataFrame.getFieldData( me.valueField );
-        var parentFields = me.dataFrame.getFieldData( me.parentField );
+        let me = this;
+        let nodes = [];
+        let links = [];
+        let keyDatas = me.dataFrame.getFieldData( me.keyField );
+        let valueDatas = me.dataFrame.getFieldData( me.valueField );
+        let parentFields = me.dataFrame.getFieldData( me.parentField );
 
-        var nodeMap = {}; //name:ind
+        let nodeMap = {}; //name:ind
         _.each( keyDatas, function( key, i ){
-            var nodeNames = [];
+            let nodeNames = [];
             if( me.parentField ){
                 nodeNames.push( parentFields[i] );
             };
@@ -164,8 +165,8 @@ class sankeyGraphs extends GraphsBase
 
 
         _.each( keyDatas, function( key , i ){
-            //var nodeNames = key.split(/[,|]/);
-            var nodeNames = [];
+            //let nodeNames = key.split(/[,|]/);
+            let nodeNames = [];
             if( me.parentField ){
                 nodeNames.push( parentFields[i] );
             };
@@ -198,8 +199,8 @@ class sankeyGraphs extends GraphsBase
     }
 
     _getColor( style, node, ind ){
-        var me = this;
-        var color = style;
+        let me = this;
+        let color = style;
         if( _.isArray( color ) ){
             color = color[ ind ];
         }
@@ -214,12 +215,12 @@ class sankeyGraphs extends GraphsBase
 
     _drawNodes() {
         
-        var nodes = this.data.nodes();
-        var me = this;
+        let nodes = this.data.nodes();
+        let me = this;
         _.each(nodes, function(node, i) {
            
-            var nodeColor = me._getColor( me.node.fillStyle, node, i );
-            var nodeEl = new Rect({
+            let nodeColor = me._getColor( me.node.fillStyle, node, i );
+            let nodeEl = new Rect({
                 xyToInt:false,
                 context: {
                     x: node.x,
@@ -236,13 +237,13 @@ class sankeyGraphs extends GraphsBase
     }
 
     _drawLinks(){
-        var links = this.data.links();
-        var me = this;
+        let links = this.data.links();
+        let me = this;
         _.each(links, function(link, i) {
-            var linkColor = me._getColor( me.line.strokeStyle, link , i);
-            var d = me.data.link()(link);
+            let linkColor = me._getColor( me.line.strokeStyle, link , i);
+            let d = me.data.link()(link);
         
-            var _path = new Path({
+            let _path = new Path({
                 xyToInt : false,
                 context: {
                     path: d,
@@ -268,7 +269,7 @@ class sankeyGraphs extends GraphsBase
                     };
                 };
                 
-                var linkData = this.link;
+                let linkData = this.link;
 
                 //type给tips用
                 linkData.type = "sankey";
@@ -290,12 +291,12 @@ class sankeyGraphs extends GraphsBase
 
     _drawLabels(){
         
-        var nodes = this.data.nodes();
-        var me = this;
+        let nodes = this.data.nodes();
+        let me = this;
         _.each(nodes, function(node){
-            var textAlign = me.label.textAlign;
+            let textAlign = me.label.textAlign;
 
-            var x = node.x+me.data.nodeWidth()+4;
+            let x = node.x+me.data.nodeWidth()+4;
 
             /*
             if( x > me.width/2 ){
@@ -306,11 +307,11 @@ class sankeyGraphs extends GraphsBase
             };
             */
 
-            var y = node.y + Math.max(node.dy / 2 , 1);
+            let y = node.y + Math.max(node.dy / 2 , 1);
 
-            var txt = me.label.format ? me.label.format( node.name, node ) : node.name;
+            let txt = me.label.format ? me.label.format( node.name, node ) : node.name;
 
-            var label = new Canvax.Display.Text( txt , {
+            let label = new Canvax.Display.Text( txt , {
                 context: {
                     x : x,
                     y : y,
@@ -332,6 +333,6 @@ class sankeyGraphs extends GraphsBase
 
 }
 
-global.registerComponent( sankeyGraphs, 'graphs', 'sankey' );
+GraphsBase.registerComponent( sankeyGraphs, 'graphs', 'sankey' );
 
 export default sankeyGraphs;

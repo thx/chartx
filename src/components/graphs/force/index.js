@@ -1,12 +1,12 @@
 import Canvax from "canvax"
 import GraphsBase from "../index"
-import { global, _, getDefaultProps, event, dataFrame } from "mmvis"
 import * as force from "../../../layout/force/index";
+import { getDefaultProps } from "../../../utils/tools"
 
-const Rect = Canvax.Shapes.Rect;
-const Path = Canvax.Shapes.Path;
-const Arrow = Canvax.Shapes.Arrow;
-const Circle = Canvax.Shapes.Circle;
+let _ = Canvax._
+let Circle = Canvax.Shapes.Circle;
+let Text = Canvax.Display.Text;
+let Line = Canvax.Shapes.Line;
 
 
 class Force extends GraphsBase {
@@ -45,7 +45,7 @@ class Force extends GraphsBase {
                     },
                     fillStyle: {
                         detail: '节点背景色',
-                        default: '#e5e5e5'
+                        default: '#acdf7d'
                     },
                     strokeStyle: {
                         detail: '描边颜色',
@@ -174,7 +174,7 @@ class Force extends GraphsBase {
 
     _initData() {
         //和关系图那边保持data格式的统一
-        var data = {
+        let data = {
             nodes: [
                 //{ type,key,content,ctype,width,height,x,y }
             ],
@@ -187,14 +187,18 @@ class Force extends GraphsBase {
             }
         };
 
-        var _nodeMap = {};
-        for (var i = 0; i < this.dataFrame.length; i++) {
-            var rowData = this.dataFrame.getRowDataAt(i);
-            var fields = _.flatten([(rowData[this.keyField] + "").split(",")]);
-            var content = this._getContent(rowData);
-            var key = fields.length == 1 ? fields[0] : fields;
+        let _nodeMap = {};
+        for (let i = 0; i < this.dataFrame.length; i++) {
+            let rowData = this.dataFrame.getRowDataAt(i);
+            let fields = _.flatten([(rowData[this.keyField] + "").split(",")]);
+            let content = this._getContent(rowData);
+            let key = fields.length == 1 ? fields[0] : fields;
+            let element = new Canvax.Display.Sprite({
+                id: "nodeSp_"+key
+            });
+            this.graphsSp.addChild( element );
 
-            var node = {
+            let node = {
                 type: "force",
                 iNode: i,
                 rowData: rowData,
@@ -203,9 +207,7 @@ class Force extends GraphsBase {
                 ctype: this._checkHtml(content) ? 'html' : 'canvas',
 
                 //下面三个属性在_setElementAndSize中设置
-                element: new Canvax.Display.Sprite({
-                    id: "nodeSp_"+key
-                }), //外面传的layout数据可能没有element，widget的时候要检测下
+                element:element, //外面传的layout数据可能没有element，widget的时候要检测下
                 width  : null,
                 height : null,
                 radius : 1, //默认为1
@@ -234,7 +236,7 @@ class Force extends GraphsBase {
 
         //然后给edge填写source 和 target
         _.each( data.edges, function( edge ){
-            var keys = edge.key;
+            let keys = edge.key;
             edge.source = _nodeMap[ keys[0] ];
             edge.target = _nodeMap[ keys[1] ];
         } );
@@ -243,11 +245,11 @@ class Force extends GraphsBase {
     }
 
     widget() {
-        var me = this;
+        let me = this;
 
         let keyField = this.keyField;
         let valField = this.valueField;
-        const links = this.data.edges.map(d => {
+        let links = this.data.edges.map(d => {
             //source: "Napoleon", target: "Myriel", value: 1
             return {
                 source: d.source[ keyField ], 
@@ -257,50 +259,94 @@ class Force extends GraphsBase {
             }
         });
         
-        const nodes = this.data.nodes.map(d => {
+        let nodes = this.data.nodes.map(d => {
             let node = Object.create(d)
             node.id = d.key;
             node.nodeData = d;
             return node
         });
       
+        let { width,height } = this.data.size;
+
         const simulation = force.forceSimulation( nodes )
             .force("link", force.forceLink( links ).id(d => d.id))
             .force("charge", force.forceManyBody())
-            .force("center", force.forceCenter( this.data.size.width / 2, this.data.size.height / 2));
+            .force("center", force.forceCenter(width / 2, height / 2))
+            .force("x", force.forceX( width/2 ).strength(0.045))
+            .force("y", force.forceY( height/2 ).strength(0.045))
 
         nodes.forEach(node => {
 
-            let fillStyle = me.getProp(me.node.fillStyle, node);
-            let strokeStyle = me.getProp(me.node.strokeStyle, node);
+            let fillStyle = me.getProp(me.node.fillStyle, node.nodeData);
+            let strokeStyle = me.getProp(me.node.strokeStyle, node.nodeData);
             //let radius = _.flatten([me.getProp(me.node.radius, node)]);
-
-            let _elem = new Circle({
+            let _node = new Circle({
                 context: {
-                    r : 5,
+                    r : 8,
                     fillStyle, strokeStyle
                 }
             });
+            node.nodeData.element.addChild( _node );
 
-            this.nodesSp.addChild( _elem );
+            let _label = new Text( node.nodeData.rowData.label, {
+                context: {
+                    fontSize: 11,
+                    fillStyle: "#bfa08b",
+                    textBaseline: "middle",
+                    textAlign: "center",
+                    globalAlpha: 0.7
+                }
+            } );
+            node.nodeData.element.addChild( _label );
+            
+        });
 
-            node.nodeData.element = _elem;
+        links.forEach( link => {
+            let lineWidth = me.getProp( me.line.lineWidth, link.nodeData );
+            let strokeStyle = me.getProp( me.line.strokeStyle, link.nodeData );
 
+            let _line = new Line({
+                context: {
+                    lineWidth,strokeStyle,
+                    start : {
+                        x:0,y:0
+                    },
+                    end: {
+                        x:0,y:0
+                    },
+                    globalAlpha: 0.4
+                }
+            })
+            this.edgesSp.addChild(_line);
+
+            link.line = _line;
         });
 
         simulation.on("tick",()=>{
+            if( simulation.alpha() <= 0.05 ){
+                simulation.stop();
+                return;
+            };
             nodes.forEach(node => {
-                debugger
                 let elemCtx = node.nodeData.element.context;
                 if( elemCtx ){
                     elemCtx.x = node.x;
                     elemCtx.y = node.y;
                 };
-
-                //var lineWidth = me.getProp( me.line.lineWidth, edge );
-                //var strokeStyle = me.getProp( me.line.strokeStyle, edge );
             });
+            links.forEach(link => {
+                let lineCtx = link.line.context;
+                if( lineCtx ){
+                    lineCtx.start.x = link.source.x;
+                    lineCtx.start.y = link.source.y;
+                    lineCtx.end.x = link.target.x;
+                    lineCtx.end.y = link.target.y;
+                }
+            });
+            
         });
+
+        
 
     }
      
@@ -308,13 +354,13 @@ class Force extends GraphsBase {
      * 字符串是否含有html标签的检测
      */
     _checkHtml(str) {
-        var reg = /<[^>]+>/g;
+        let reg = /<[^>]+>/g;
         return reg.test(str);
     }
     _getContent(rowData) {
-        var me = this;
+        let me = this;
 
-        var _c; //this.node.content;
+        let _c; //this.node.content;
         if (this._isField(this.node.content.field)) {
             _c = rowData[ this.node.content.field ];
         };
@@ -327,13 +373,13 @@ class Force extends GraphsBase {
         return ~this.dataFrame.fields.indexOf(str)
     }
 
-    getNodesAt(index) {
+    getNodesAt() {
 
     }
 
     getProp( prop, nodeData ) {
-        var _prop = prop;
-        if( this._isField( prop ) ){
+        let _prop = prop;
+        if( this._isField( prop ) && nodeData.rowData ){
             _prop = nodeData.rowData[ prop ];
         } else {
             if( _.isArray( prop ) ){
@@ -348,6 +394,6 @@ class Force extends GraphsBase {
 
 }
 
-global.registerComponent(Force, 'graphs', 'force');
+GraphsBase.registerComponent(Force, 'graphs', 'force');
 
 export default Force

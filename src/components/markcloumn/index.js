@@ -1,10 +1,11 @@
 import Component from "../component"
 import Canvax from "canvax"
-import { global,_, getDefaultProps, event } from "mmvis"
+import {getDefaultProps} from "../../utils/tools"
 
-const Line = Canvax.Shapes.Line;
-const Circle = Canvax.Shapes.Circle;
-const Text = Canvax.Display.Text;
+let { _, event } = Canvax;
+let Line = Canvax.Shapes.Line;
+let Circle = Canvax.Shapes.Circle;
+let Text = Canvax.Display.Text;
 
 class markCloumn extends Component
 {
@@ -111,7 +112,7 @@ class markCloumn extends Component
     {
         super(opt, app);
         this.name = "markcloumn";
-        _.extend(true, this , getDefaultProps( markCloumn.defaultProps() ), opt );
+        _.extend(true, this, getDefaultProps( markCloumn.defaultProps() ), opt );
 
         this.sprite = new Canvax.Display.Sprite();
         this.app.graphsSprite.addChild( this.sprite );
@@ -147,11 +148,11 @@ class markCloumn extends Component
     }
 
     _widget(){
-        var me = this;
-        var _coord = this.app.getComponent({name:'coord'});
-        var _xAxis = _coord._xAxis;
+        let me = this;
+        let _coord = this.app.getComponent({name:'coord'});
+        let _xAxis = _coord._xAxis;
 
-        var xNode;
+        let xNode;
         if( this.xVal != null ){
             xNode = _xAxis.getNodeInfoOfVal( this.xVal )
         };
@@ -171,8 +172,8 @@ class markCloumn extends Component
             me._drawLabels( xNode );
         });
 
-        var i=0;
-        var _graphs = this.app.getGraphs();
+        let i=0;
+        let _graphs = this.app.getGraphs();
         _.each( _graphs, function( _g ){
             function _f(){
                 i++;
@@ -181,9 +182,9 @@ class markCloumn extends Component
                     //非markTo  的graph 跳过
                 } else {
                     
-                    var nodes = _g.getNodesOfPos( xNode.x );
+                    let nodes = _g.getNodesOfPos( xNode.x );
                     if( me.markTo ){
-                        var _node = _.find( nodes, function( node ){
+                        let _node = _.find( nodes, function( node ){
                             return node.field == me.markTo
                         } );
                         _node && (me.nodes = [ _node ]);
@@ -208,9 +209,9 @@ class markCloumn extends Component
     }
 
     _drawLine( xNode ){
-        var me = this;
+        let me = this;
         if( !me.line.enabled ) return;
-        var lineOpt     = _.extend(true,{
+        let lineOpt     = _.extend(true,{
             x           : parseInt(xNode.x),
             start       : { x: 0, y: 0 },
             end         : { x: 0, y: -me.height }, //默认贯穿整个画布
@@ -219,7 +220,7 @@ class markCloumn extends Component
         } , this.line);
 
         if( me.line.endY != null ){
-            var y = 0;
+            let y = 0;
             if( _.isNumber( me.line.endY ) ){
                 y = me.line.endY;
             };
@@ -257,12 +258,12 @@ class markCloumn extends Component
 
     _drawNodes(){
         
-        var me = this;
+        let me = this;
         if( !me.node.enabled ) return;
 
         me._nodes.removeAllChildren();
         _.each( me.nodes, function( nodeData ){
-            var nodeCtx = _.extend({
+            let nodeCtx = _.extend({
                 x           : nodeData.x,
                 y           : nodeData.y, 
                 cursor      : "pointer",
@@ -271,7 +272,7 @@ class markCloumn extends Component
                 strokeStyle : me.node.strokeStyle || nodeData.color,
                 fillStyle   : me.node.fillStyle   || nodeData.fillStyle
             });
-            var _node = new Circle({
+            let _node = new Circle({
                 context : nodeCtx
             });
             _node.nodeData = nodeData;
@@ -298,12 +299,12 @@ class markCloumn extends Component
 
     _drawLabels(){
         
-        var me = this;
+        let me = this;
         if( !me.node.enabled ) return;
 
         me._labels.removeAllChildren();
         _.each( me.nodes, function( nodeData ){
-            var labelCtx = {
+            let labelCtx = {
                 x           : nodeData.x,
                 y           : nodeData.y - me.node.radius - 2, 
                 fillStyle   : me.label.fontColor || nodeData.color,
@@ -311,13 +312,13 @@ class markCloumn extends Component
                 textAlign   : "center",
                 textBaseline: "bottom"
             };
-            var text = me.label.text;
+            let text = me.label.text;
             if( _.isFunction( text ) ){
                 text = text.apply( me, [ nodeData ] )
             };
             if( !text ) return;
 
-            var _label = new Text( text , {
+            let _label = new Text( text , {
                 context : labelCtx
             } );
             me._labels.addChild( _label );
@@ -333,6 +334,6 @@ class markCloumn extends Component
 }
 
 
-global.registerComponent( markCloumn, 'markcloumn' );
+Component.registerComponent( markCloumn, 'markcloumn' );
 
 export default markCloumn;

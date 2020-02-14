@@ -1,4 +1,4 @@
-import { _ } from "mmvis"
+import { _ } from "canvax"
 export default function() {
     var sankey = {},
         nodeWidth = 24,

@@ -1,4 +1,4 @@
-import { _ } from "mmvis"
+import { _ } from "canvax"
 
 /**
  * 数字千分位加','号
@@ -73,5 +73,25 @@ export function getPath($arr){
     
     // s += ' ' + Z
     return s
+}
+
+
+export function getDefaultProps( dProps, target={} ){
+    for( var p in dProps ){
+        if( !!p.indexOf( "_" ) ){
+            if( !dProps[ p ] || !dProps[ p ].propertys ){
+                //如果这个属性没有子属性了，那么就说明这个已经是叶子节点了
+                if( _.isObject( dProps[ p ] ) && !_.isFunction(dProps[ p ]) && !_.isArray(dProps[ p ]) ){
+                    target[ p ] = dProps[ p ].default;
+                } else {
+                    target[ p ] = dProps[ p ];
+                };
+            } else {
+                target[ p ] = {};
+                getDefaultProps( dProps[ p ].propertys, target[ p ] );
+            }
+        };
+    }
+    return target;
 }
 

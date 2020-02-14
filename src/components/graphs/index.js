@@ -1,8 +1,9 @@
 import Component from "../component"
 import Canvax from "canvax"
-import { _, getDefaultProps } from "mmvis"
+import { getDefaultProps } from "../../utils/tools"
 
-const AnimationFrame = Canvax.AnimationFrame;
+let AnimationFrame = Canvax.AnimationFrame;
+let _ = Canvax._;
 
 export default class GraphsBase extends Component
 {
@@ -55,7 +56,7 @@ export default class GraphsBase extends Component
         this.app.graphsSprite.addChild( this.sprite );
 
         this._growTween = null;
-        var me = this;
+        let me = this;
         this.sprite.on("destroy" , function(){
             if(me._growTween){
                 AnimationFrame.destroyTween( me._growTween );
@@ -89,8 +90,8 @@ export default class GraphsBase extends Component
     //触发事件, 事件处理函数中的this都指向对应的graphs对象。
     triggerEvent( e )
     {
-        var trigger = e.eventInfo.trigger || this;
-        var fn = trigger[ "on"+e.type ];
+        let trigger = e.eventInfo.trigger || this;
+        let fn = trigger[ "on"+e.type ];
         if( fn && _.isFunction( fn ) ){
             //如果有在pie的配置上面注册对应的事件，则触发
             
@@ -103,7 +104,7 @@ export default class GraphsBase extends Component
                 };
             } else {
                 /*
-                var _arr = [];
+                let _arr = [];
                 _.each( arguments, function(item, i){
                     if( !!i ){
                         _arr.push( item );
@@ -119,13 +120,13 @@ export default class GraphsBase extends Component
     //所有graphs默认的grow
     grow( callback, opt ){
         !opt && (opt = {});
-        var me = this; 
-        var duration = this.aniDuration;
+        let me = this; 
+        let duration = this.aniDuration;
         if( !this.animation ){
             duration = 0;
         };
-        var from = 0;
-        var to = 1;
+        let from = 0;
+        let to = 1;
         if( "from" in opt ) from = opt.from;
         if( "to" in opt ) to = opt.to;
         
@@ -140,7 +141,7 @@ export default class GraphsBase extends Component
             onUpdate: function ( status ) {
                 _.isFunction( callback ) && callback( status.process );
             },
-            onComplete: function (status) {
+            onComplete: function () {
                 this._growTween = null;
                 me.fire("complete");
             }

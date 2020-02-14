@@ -90,17 +90,19 @@ var options = {
             graph : {
                 rankdir: "LR",  
                 //align: "DR",
-                nodesep: 0,//同级node之间的距离
-                edgesep: 0,
-                ranksep: 0, //排与排之间的距离
-                acyclicer : "greedy",
-                //ranker: "longest-path",
+                nodesep: 10,//同级node之间的距离
+                edgesep: 10,
+                ranksep: 10, //排与排之间的距离
+                //acyclicer : "greedy",
+                ranker: "longest-path",//tight-tree
+                
             },
             node : {
 
             },
             edge : {
-
+                labelpos: "l",
+                labeloffset: 0
             }
         },
         //如果完全可视化编辑器编辑出来的布局，就不需要layout算法，编辑器会保存一份layout数据
@@ -115,7 +117,7 @@ var options = {
     tips    : {}
 };
 
-window.bar = Chartx.create("canvasTest" , data , options)
+window.bar = chartx.create("canvasTest" , data , options)
 
             </textarea></form>
         </td>
@@ -130,7 +132,7 @@ window.bar = Chartx.create("canvasTest" , data , options)
                 </p>
             </div>
             <div  class="test-c">
-                <div id="canvasTest" style='width:800px;height:800px;position:relative;'></div>
+                <div id="canvasTest" style='border:1px solid red;width:800px;height:800px;position:relative;'></div>
             </div>
 
             </div>

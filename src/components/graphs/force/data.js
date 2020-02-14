@@ -2,7 +2,7 @@
  * 把json数据转化为关系图的数据格式
  */
 
-import { _ } from "mmvis"
+import { _ } from "canvax"
 
 //判断数据是否符合json格式要求的规范，
 //如：
@@ -18,8 +18,6 @@ import { _ } from "mmvis"
 // 	}],
 // }];
 
-
-const parentKey = 'parent';
 const defaultFieldKey = '__key__';
 
 let childrenKey = 'children';
@@ -67,48 +65,54 @@ function jsonToArrayForRelation(data, options ,_childrenField ) {
 
     let childrens = [];
     let index = 0;
-    let item = undefined;
+    
 
-    _.each(data, item => {
-        childrens.push(item)
+    _.each(data, _item => {
+        childrens.push(_item)
     });
 
-    while (item = childrens.pop()) {
-        if (!item[key]) item[key] = index;
-        let _child = item[childrenKey]
-        if (_child) {
-            _.each(_child, ch => {
-                wm.set(ch, {
-                    parentIndex: index,
-                    parentNode: item
-                })
-            });
-            childrens = childrens.concat(_child.reverse());
-        }
-        let obj = {};
-        _.each(item, (value, key) => {
-            if (key !== childrenKey) {
-                obj[key] = value;
+    if( childrens.length ){
+        
+        while ( childrens.length ) {
+            let item = childrens.pop();
+            if (!item[key]) item[key] = index;
+            let _child = item[childrenKey]
+            if (_child) {
+                _.each(_child, ch => {
+                    wm.set(ch, {
+                        parentIndex: index,
+                        parentNode: item
+                    })
+                });
+                childrens = childrens.concat(_child.reverse());
             }
-        })
-
-        result.push(obj);
-
-        let myWm = wm.get(item);
-
-        if (myWm) {
-            let start = myWm.parentIndex;
-            let startNode = myWm.parentNode
-            let line = {};
-            line.key = [start, index].join(',');
-            if (label) {
-                line[label] = [startNode[label], item[label]].join('_');
+            let obj = {};
+            _.each(item, (value, key) => {
+                if (key !== childrenKey) {
+                    obj[key] = value;
+                }
+            })
+    
+            result.push(obj);
+    
+            let myWm = wm.get(item);
+    
+            if (myWm) {
+                let start = myWm.parentIndex;
+                let startNode = myWm.parentNode
+                let line = {};
+                line.key = [start, index].join(',');
+                if (label) {
+                    line[label] = [startNode[label], item[label]].join('_');
+                }
+    
+                result.push(line)
             }
-
-            result.push(line)
+            index++;
+            
         }
-        index++;
     }
+    
     // wm = null;
     return result;
 }
@@ -116,10 +120,10 @@ function jsonToArrayForRelation(data, options ,_childrenField ) {
 function arrayToTreeJsonForRelation(data, options){
     // [ { key: 1, name: },{key:'1,2'} ] to [ { name: children: [ {}... ] } ] 
     
-    var _nodes = {}
-    var _edges = {}
+    let _nodes = {}
+    let _edges = {}
     _.each( data, function( item ){
-        var key = item[ options.field ];
+        let key = item[ options.field ];
         if( key.split(',').length == 1 ){
             _nodes[ key ] = item;
         } else {
@@ -128,9 +132,9 @@ function arrayToTreeJsonForRelation(data, options){
     } );
     
     //先找到所有的一层
-    var arr = [];
+    let arr = [];
     _.each( _nodes, function( node, nkey ){
-        var isFirstLev=true;
+        let isFirstLev=true;
         _.each( _edges, function( edge, ekey ){
             if( ekey.split(',')[1] == nkey ){
                 isFirstLev = false;
@@ -146,13 +150,13 @@ function arrayToTreeJsonForRelation(data, options){
     //有了第一层就好办了
     function getChildren( list ){
 
-        _.each( list, function( node, i ){
+        _.each( list, function( node ){
             if( node.__cycle ) return;
-            var key = node[ options.field ];
+            let key = node[ options.field ];
             _.each( _edges, function( edge, ekey ){
                 if( ekey.split(',')[0] == key ){
                     //那么说明[1] 就是自己的children
-                    var childNode = _nodes[ ekey.split(',')[1] ];
+                    let childNode = _nodes[ ekey.split(',')[1] ];
 
                     if( childNode ){
                         if( !node.children ) node.children = [];
