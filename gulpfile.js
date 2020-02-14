@@ -196,5 +196,19 @@ let watchSrc = () => {
     return watcher;
 };
 
+let copyToCdn = ()=> {
+    return new Promise( resolve => {
+        return pipeline(
+            gulp.src(['./dist/chartx.js']), //只有iife需要压缩，因为是给到chartpark拼文件用的
+            uglify(),
+            //rename({ suffix: '.min' }),
+            gulp.dest('./dist/')
+        ).on("end",()=>{
+            resolve();
+        });
+    } )
+}
+
 //把mmvis从 node_models 里面copy到本地
 exports.default = gulp.series(cleanHandle, babelSrc, versionHandle, rollupDist, watchSrc);
+exports.cdn = gulp.series( copyToCdn )

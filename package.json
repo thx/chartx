@@ -56,7 +56,7 @@
     "d3-force": "^2.0.1"
   },
   "scripts": {
-    "build": "rollup -c",
-    "dev": "rollup -c -w"
+    "release":"npm publish && npm run cdn",
+    "cdn": "gulp cdn && mm publish"
   }
 }
