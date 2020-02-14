@@ -8240,6 +8240,8 @@ var chartx = (function () {
 
 	var _typeof_1$1 = createCommonjsModule(function (module) {
 	function _typeof(obj) {
+	  "@babel/helpers - typeof";
+
 	  if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
 	    module.exports = _typeof = function _typeof(obj) {
 	      return typeof obj;
@@ -8335,6 +8337,7 @@ var chartx = (function () {
 	* [{field:'field1',index:0,data:[1,2]} ......]
 	* 这样的结构化数据格式。
 	*/
+	//如果应用传入的数据是[{name:name, sex:sex ...} , ...] 这样的数据，就自动转换为chartx需要的矩阵格式数据
 	function parse2MatrixData(list) {
 	  if (list === undefined || list === null) {
 	    list = [];
@@ -9467,6 +9470,12 @@ var chartx = (function () {
 
 
 
+	/**
+	 * 数字千分位加','号
+	 * @param  {[Number]} $n [数字]
+	 * @param  {[type]} $s [千分位上的符号]
+	 * @return {[String]}    [根据$s提供的值 对千分位进行分隔 并且小数点上自动加上'.'号  组合成字符串]
+	 */
 	function numAddSymbol($n, $s) {
 	  var s = Number($n);
 	  var symbol = $s ? $s : ',';
@@ -28223,6 +28232,20 @@ var chartx = (function () {
 	/**
 	 * 把json数据转化为关系图的数据格式
 	 */
+	//判断数据是否符合json格式要求的规范，
+	//如：
+	// [{
+	// 	name: 'xxxx',
+	// 	children: [{
+	// 		name: 'aaaaa'
+	// 	}, {
+	// 		name: 'bbbb',
+	// 		children: [{
+	// 			name: 'ccccc'
+	// 		}]
+	// 	}],
+	// }];
+	//const parentKey = 'parent';
 	var defaultFieldKey = '__key__';
 	var childrenKey = 'children';
 
@@ -28403,55 +28426,41 @@ var chartx = (function () {
 	    y: 0,
 	    //鼠标在画布坐标系内的y，可以理解为全局的缩放原点y
 	    rx: 0,
-	    //mouse real (world) pos
+	    //真实坐标系中的坐标值
 	    ry: 0
-	  }; // lazy programmers globals
-
+	  };
 	  var scale = 1;
-	  var wx = 0; //world zoom origin
-
+	  var wx = 0;
 	  var wy = 0;
-	  var sx = 0; //mouse screen pos
-
-	  var sy = 0; // converts from world coord to screen pixel coord
+	  var sx = 0;
+	  var sy = 0;
 
 	  var zoomedX = function zoomedX() {
 	    var x = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
-	    // scale & origin X
 	    return Math.floor((x - wx) * scale + sx);
 	  };
 
 	  var zoomedY = function zoomedY() {
 	    var y = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
-	    // scale & origin Y
 	    return Math.floor((y - wy) * scale + sy);
-	  }; // Inverse does the reverse of a calculation. Like (3 - 1) * 5 = 10   the inverse is 10 * (1/5) + 1 = 3
-	  // multiply become 1 over ie *5 becomes * 1/5  (or just /5)
-	  // Adds become subtracts and subtract become add.
-	  // and what is first become last and the other way round.
-	  // inverse function converts from screen pixel coord to world coord
-
+	  };
 
 	  var zoomedX_INV = function zoomedX_INV() {
 	    var mouseX = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
-	    // scale & origin INV
 	    return Math.floor((mouseX - sx) * (1 / scale) + wx);
 	  };
 
 	  var zoomedY_INV = function zoomedY_INV() {
 	    var mouseY = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
-	    // scale & origin INV
 	    return Math.floor((mouseY - sy) * (1 / scale) + wy);
 	  };
 
 	  var mouseMoveTo = function mouseMoveTo(point) {
 	    mouse.x = point.x;
 	    mouse.y = point.y;
-	    var xx = mouse.rx; // get last real world pos of mouse
-
+	    var xx = mouse.rx;
 	    var yy = mouse.ry;
-	    mouse.rx = zoomedX_INV(mouse.x); // get the mouse real world pos via inverse scale and translate
-
+	    mouse.rx = zoomedX_INV(mouse.x);
 	    mouse.ry = zoomedY_INV(mouse.y);
 	    return {
 	      xx: xx,
@@ -28485,10 +28494,8 @@ var chartx = (function () {
 	        xx = _mouseMoveTo.xx,
 	        yy = _mouseMoveTo.yy;
 
-	    wx -= mouse.rx - xx; // move the world origin by the distance 
-
-	    wy -= mouse.ry - yy; // moved in world coords
-	    // wx wy 变了，重新计算rx ry
+	    wx -= mouse.rx - xx;
+	    wy -= mouse.ry - yy; // wx wy 变了，重新计算rx ry
 
 	    mouse.rx = zoomedX_INV(mouse.x);
 	    mouse.ry = zoomedY_INV(mouse.y);
@@ -28561,8 +28568,8 @@ var chartx = (function () {
 	    event = _canvax["default"].event;
 	var Rect = _canvax["default"].Shapes.Rect;
 	var Path = _canvax["default"].Shapes.Path;
+	var Circle = _canvax["default"].Shapes.Circle;
 	var Arrow = _canvax["default"].Shapes.Arrow;
-	var zoom$1 = new _zoom["default"]();
 	/**
 	 * 关系图中 包括了  配置，数据，和布局数据，
 	 * 默认用配置和数据可以完成绘图， 但是如果有布局数据，就绘图玩额外调用一次绘图，把布局数据传入修正布局效果
@@ -28753,7 +28760,8 @@ var chartx = (function () {
 	          acyclicer: "greedy"
 	        },
 	        node: {},
-	        edge: {//labelpos: 'c'
+	        edge: {//labelpos: 'c',
+	          //labeloffset: 0
 	        }
 	      };
 
@@ -28779,7 +28787,8 @@ var chartx = (function () {
 	  (0, _createClass2["default"])(Relation, [{
 	    key: "init",
 	    value: function init() {
-	      this.initInduce();
+	      this._initInduce();
+
 	      this.nodesSp = new _canvax["default"].Display.Sprite({
 	        id: "nodesSp"
 	      });
@@ -28797,10 +28806,11 @@ var chartx = (function () {
 	      this.graphsSp.addChild(this.nodesSp);
 	      this.graphsView.addChild(this.graphsSp);
 	      this.sprite.addChild(this.graphsView);
+	      this.zoom = new _zoom["default"]();
 	    }
 	  }, {
-	    key: "initInduce",
-	    value: function initInduce() {
+	    key: "_initInduce",
+	    value: function _initInduce() {
 	      var me = this;
 	      this.induce = new Rect({
 	        id: "induce",
@@ -28828,7 +28838,7 @@ var chartx = (function () {
 	            me.induce.toFront();
 	            _mosedownIng = true;
 	            me.app.canvax.domView.style.cursor = "move";
-	            zoom$1.mouseMoveTo(point);
+	            me.zoom.mouseMoveTo(point);
 	          }
 
 	          if (e.type == "mouseup" || e.type == "mouseout") {
@@ -28839,9 +28849,9 @@ var chartx = (function () {
 
 	          if (e.type == "mousemove") {
 	            if (_mosedownIng) {
-	              var _zoom$drag = zoom$1.drag(point),
-	                  x = _zoom$drag.x,
-	                  y = _zoom$drag.y;
+	              var _me$zoom$drag = me.zoom.drag(point),
+	                  x = _me$zoom$drag.x,
+	                  y = _me$zoom$drag.y;
 
 	              me.graphsView.context.x = x;
 	              me.graphsView.context.y = y;
@@ -28855,10 +28865,10 @@ var chartx = (function () {
 
 	            if (!_wheelHandleTimeer) {
 	              _wheelHandleTimeer = setTimeout(function () {
-	                var _zoom$wheel = zoom$1.wheel(e, point),
-	                    scale = _zoom$wheel.scale,
-	                    x = _zoom$wheel.x,
-	                    y = _zoom$wheel.y;
+	                var _me$zoom$wheel = me.zoom.wheel(e, point),
+	                    scale = _me$zoom$wheel.scale,
+	                    x = _me$zoom$wheel.x,
+	                    y = _me$zoom$wheel.y;
 
 	                me.graphsView.context.x = x;
 	                me.graphsView.context.y = y;
@@ -28886,23 +28896,11 @@ var chartx = (function () {
 
 	      this.data = opt.data || this._initData();
 
-	      if (this.layout == "dagre") {
-	        this.dagreLayout(this.data);
-	      } else if (this.layout == "tree") {
-	        this.treeLayout(this.data);
-	      } else if (_.isFunction(this.layout)) {
-	        //layout需要设置好data中nodes的xy， 以及edges的points，和 size的width，height
-	        this.layout(this.data);
-	      }
+	      this._layoutData();
+
 	      this.widget();
 	      this.sprite.context.x = this.origin.x;
 	      this.sprite.context.y = this.origin.y;
-	      /*
-	      if (this.status.transform.fitView == 'autoZoom') {
-	          this.sprite.context.scaleX = this.width / this.data.size.width;
-	          this.sprite.context.scaleY = this.height / this.data.size.height;
-	      }
-	      */
 
 	      var _offsetLet = (this.width - this.data.size.width) / 2;
 
@@ -28970,11 +28968,18 @@ var chartx = (function () {
 	        _.extend(node, this._getElementAndSize(node));
 
 	        if (fields.length == 1) {
+	          // isNode
 	          node.shapeType = this.getProp(this.node.shapeType, node);
 	          data$1.nodes.push(node);
+	          Object.assign(node, this.layoutOpts.node);
 	          _nodeMap[node.key] = node;
 	        } else {
-	          node.shapeType = this.getProp(this.line.shapeType, node);
+	          // isEdge
+	          node.shapeType = this.getProp(this.line.shapeType, node); //node.labeloffset = 0;
+	          //node.labelpos = 'l';
+	          //额外的会有minlen weight labelpos labeloffset 四个属性可以配置
+
+	          Object.assign(node, this.layoutOpts.edge);
 	          data$1.edges.push(node);
 	        }
 	      }
@@ -28988,8 +28993,21 @@ var chartx = (function () {
 	      return data$1;
 	    }
 	  }, {
-	    key: "dagreLayout",
-	    value: function dagreLayout(data) {
+	    key: "_layoutData",
+	    value: function _layoutData() {
+	      if (this.layout == "dagre") {
+	        this._dagreLayout(this.data);
+	      } else if (this.layout == "tree") {
+	        this._treeLayout(this.data);
+	      } else if (_.isFunction(this.layout)) {
+	        //layout需要设置好data中nodes的xy， 以及edges的points，和 size的width，height
+	        this.layout(this.data);
+	      }
+	    }
+	  }, {
+	    key: "_dagreLayout",
+	    value: function _dagreLayout(data) {
+	      //https://github.com/dagrejs/dagre/wiki
 	      var layout = _global["default"].layout.dagre;
 	      var g = new layout.graphlib.Graph();
 	      g.setGraph(this.layoutOpts.graph);
@@ -29003,17 +29021,20 @@ var chartx = (function () {
 	      });
 
 	      _.each(data.edges, function (edge) {
-	        g.setEdge.apply(g, (0, _toConsumableArray2["default"])(edge.key).concat([edge]));
+	        //后面的参数直接把edge对象传入进去的话，setEdge会吧point 和 x y 等信息写回edge
+	        g.setEdge.apply(g, (0, _toConsumableArray2["default"])(edge.key).concat([edge])); //g.setEdge(edge.key[0],edge.key[1]);
 	      });
 
 	      layout.layout(g);
 	      data.size.width = g.graph().width;
-	      data.size.height = g.graph().height;
+	      data.size.height = g.graph().height; //this.g = g;
+
 	      return data;
-	    }
+	    } //TODO: 待实现，目前其实用dagre可以直接实现tree，但是如果可以用更加轻便的tree也可以尝试下
+
 	  }, {
-	    key: "treeLayout",
-	    value: function treeLayout() {// let tree = global.layout.tree().separation(function(a, b) {
+	    key: "_treeLayout",
+	    value: function _treeLayout() {// let tree = global.layout.tree().separation(function(a, b) {
 	      //     //设置横向节点之间的间距
 	      //     let totalWidth = a.width + b.width;
 	      //     return (totalWidth/2) + 10;
@@ -29025,13 +29046,24 @@ var chartx = (function () {
 	    key: "widget",
 	    value: function widget() {
 	      var me = this;
+	      /*
+	      me.g.edges().forEach( e => {
+	          let edge = me.g.edge(e);
+	          console.log( edge )
+	      } );
+	      */
 
 	      _.each(this.data.edges, function (edge) {
-	        if (me.line.isTree) {
+	        if (me.line.isTree && edge.points.length == 3) {
+	          //严格树状图的话（三个点），就转化成4个点的，有两个拐点
 	          me._setTreePoints(edge);
 	        }
 	        var lineWidth = me.getProp(me.line.lineWidth, edge);
 	        var strokeStyle = me.getProp(me.line.strokeStyle, edge);
+
+	        if (edge.content == "中国湖北") {
+	          debugger;
+	        }
 
 	        var _bl = new Path({
 	          context: {
@@ -29052,18 +29084,31 @@ var chartx = (function () {
 	            arrowControl.y += (edge.source.y - edge.target.y) / 20;
 	          }
 	        }
-	        me.edgesSp.addChild(_bl);
-	        /*  edge的xy 就是 可以用来显示label的位置
-	        let _circle = new Circle({
-	            context : {
-	                r : 4,
-	                x : edge.x,
-	                y : edge.y,
-	                fillStyle: "red"
-	            }
-	        })
-	        me.edgesSp.addChild( _circle );
-	        */
+	        me.edgesSp.addChild(_bl); // edge的xy 就是 可以用来显示label的位置
+
+	        var _circle = new Circle({
+	          context: {
+	            r: 2,
+	            x: edge.x,
+	            y: edge.y,
+	            fillStyle: "red"
+	          }
+	        });
+
+	        var _edgeText = new _canvax["default"].Display.Text(edge.content, {
+	          context: {
+	            x: edge.x,
+	            y: edge.y,
+	            fontSize: 12,
+	            fillStyle: "#ccc",
+	            //me.getProp(me.node.content.fontColor, edge),
+	            textAlign: me.getProp(me.node.content.textAlign, edge),
+	            textBaseline: me.getProp(me.node.content.textBaseline, edge)
+	          }
+	        });
+
+	        me.edgesSp.addChild(_circle);
+	        me.edgesSp.addChild(_edgeText);
 
 	        if (me.line.arrow) {
 	          var _arrow = new Arrow({

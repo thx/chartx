@@ -12,6 +12,19 @@ var _canvax = require("canvax");
 /**
  * 把json数据转化为关系图的数据格式
  */
+//判断数据是否符合json格式要求的规范，
+//如：
+// [{
+// 	name: 'xxxx',
+// 	children: [{
+// 		name: 'aaaaa'
+// 	}, {
+// 		name: 'bbbb',
+// 		children: [{
+// 			name: 'ccccc'
+// 		}]
+// 	}],
+// }];
 var defaultFieldKey = '__key__';
 var childrenKey = 'children';
 

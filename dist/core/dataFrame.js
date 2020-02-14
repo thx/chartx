@@ -16,6 +16,7 @@ var _canvax = require("canvax");
 * [{field:'field1',index:0,data:[1,2]} ......]
 * 这样的结构化数据格式。
 */
+//如果应用传入的数据是[{name:name, sex:sex ...} , ...] 这样的数据，就自动转换为chartx需要的矩阵格式数据
 function parse2MatrixData(list) {
   if (list === undefined || list === null) {
     list = [];

@@ -9,8 +9,8 @@ import Zoom from "./zoom"
 let { _, event } = Canvax;
 let Rect = Canvax.Shapes.Rect;
 let Path = Canvax.Shapes.Path;
+let Circle = Canvax.Shapes.Circle;
 let Arrow = Canvax.Shapes.Arrow;
-let zoom = new Zoom();
 
  
 /**
@@ -199,7 +199,8 @@ class Relation extends GraphsBase {
 
                 },
                 edge: {
-                    //labelpos: 'c'
+                    //labelpos: 'c',
+                    //labeloffset: 0
                 }
             };
             _.extend(true, dagreOpts, this.layoutOpts);
@@ -222,7 +223,7 @@ class Relation extends GraphsBase {
     }
 
     init() {
-        this.initInduce();
+        this._initInduce();
 
         this.nodesSp = new Canvax.Display.Sprite({
             id: "nodesSp"
@@ -244,9 +245,11 @@ class Relation extends GraphsBase {
         this.graphsView.addChild(this.graphsSp);
         this.sprite.addChild(this.graphsView);
 
+        this.zoom = new Zoom();
+
     }
 
-    initInduce() {
+    _initInduce() {
         let me = this;
         this.induce = new Rect({
             id: "induce",
@@ -277,7 +280,7 @@ class Relation extends GraphsBase {
                     me.induce.toFront();
                     _mosedownIng = true;
                     me.app.canvax.domView.style.cursor = "move";
-                    zoom.mouseMoveTo( point )
+                    me.zoom.mouseMoveTo( point )
                 };
                 if (e.type == "mouseup" || e.type == "mouseout") {
                     me.induce.toBack();
@@ -286,7 +289,7 @@ class Relation extends GraphsBase {
                 };
                 if (e.type == "mousemove") {
                     if ( _mosedownIng ) {
-                        let {x,y} = zoom.drag( point );
+                        let {x,y} = me.zoom.drag( point );
                         me.graphsView.context.x = x;
                         me.graphsView.context.y = y;
                     }
@@ -299,7 +302,7 @@ class Relation extends GraphsBase {
                     if (!_wheelHandleTimeer) {
                         _wheelHandleTimeer = setTimeout(function () {
 
-                            let {scale,x,y} = zoom.wheel( e, point );
+                            let {scale,x,y} = me.zoom.wheel( e, point );
                         
                             me.graphsView.context.x = x;
                             me.graphsView.context.y = y;
@@ -322,7 +325,6 @@ class Relation extends GraphsBase {
     //全局画布
     scale(scale, globalScaleOrigin) {
       
-
     }
 
     draw( opt ) {
@@ -330,33 +332,21 @@ class Relation extends GraphsBase {
         _.extend(true, this, opt);
         this.data = opt.data || this._initData();
 
-        if (this.layout == "dagre") {
-            this.dagreLayout( this.data );
-        } else if(this.layout == "tree"){
-            this.treeLayout( this.data );
-        } else if (_.isFunction(this.layout)) {
-            //layout需要设置好data中nodes的xy， 以及edges的points，和 size的width，height
-            this.layout(this.data);
-        };
+        this._layoutData();
 
         this.widget();
         this.sprite.context.x = this.origin.x;
         this.sprite.context.y = this.origin.y;
 
-        /*
-        if (this.status.transform.fitView == 'autoZoom') {
-            this.sprite.context.scaleX = this.width / this.data.size.width;
-            this.sprite.context.scaleY = this.height / this.data.size.height;
-        }
-        */
-
         let _offsetLet = (this.width - this.data.size.width) / 2;
         if (_offsetLet < 0) {
             _offsetLet = 0;
         };
+        
         this.graphsSp.context.x = _offsetLet;
 
     }
+
 
     _initData() {
         let data = {
@@ -416,11 +406,18 @@ class Relation extends GraphsBase {
             _.extend(node, this._getElementAndSize(node));
 
             if (fields.length == 1) {
+                // isNode
                 node.shapeType = this.getProp( this.node.shapeType, node );
                 data.nodes.push(node);
+                Object.assign(node, this.layoutOpts.node);
                 _nodeMap[ node.key ] = node;
             } else {
+                // isEdge
                 node.shapeType = this.getProp( this.line.shapeType, node );
+                //node.labeloffset = 0;
+                //node.labelpos = 'l';
+                //额外的会有minlen weight labelpos labeloffset 四个属性可以配置
+                Object.assign(node, this.layoutOpts.edge);
                 data.edges.push(node);
             };
         };
@@ -435,11 +432,23 @@ class Relation extends GraphsBase {
         return data;
     }
 
-    dagreLayout(data) {
+    _layoutData(){
+        if (this.layout == "dagre") {
+            this._dagreLayout( this.data );
+        } else if(this.layout == "tree"){
+            this._treeLayout( this.data );
+        } else if (_.isFunction(this.layout)) {
+            //layout需要设置好data中nodes的xy， 以及edges的points，和 size的width，height
+            this.layout(this.data);
+        };
+    }
+
+    _dagreLayout(data) {
+        //https://github.com/dagrejs/dagre/wiki
         let layout = global.layout.dagre;
 
         let g = new layout.graphlib.Graph();
-        g.setGraph(this.layoutOpts.graph);
+        g.setGraph( this.layoutOpts.graph );
         g.setDefaultEdgeLabel(function () {
             //其实我到现在都还没搞明白setDefaultEdgeLabel的作用
             return {
@@ -450,7 +459,9 @@ class Relation extends GraphsBase {
             g.setNode(node.key, node);
         });
         _.each(data.edges, function (edge) {
+            //后面的参数直接把edge对象传入进去的话，setEdge会吧point 和 x y 等信息写回edge
             g.setEdge(...edge.key, edge);
+            //g.setEdge(edge.key[0],edge.key[1]);
         });
 
         layout.layout(g);
@@ -458,10 +469,13 @@ class Relation extends GraphsBase {
         data.size.width = g.graph().width;
         data.size.height = g.graph().height;
 
+        //this.g = g;
+
         return data
     }
 
-    treeLayout(  ){
+    //TODO: 待实现，目前其实用dagre可以直接实现tree，但是如果可以用更加轻便的tree也可以尝试下
+    _treeLayout(  ){
         // let tree = global.layout.tree().separation(function(a, b) {
         //     //设置横向节点之间的间距
         //     let totalWidth = a.width + b.width;
@@ -474,15 +488,26 @@ class Relation extends GraphsBase {
 
     widget() {
         let me = this;
-        _.each(this.data.edges, function (edge) {
 
-            if( me.line.isTree ){
+        /*
+        me.g.edges().forEach( e => {
+            let edge = me.g.edge(e);
+            console.log( edge )
+        } );
+        */
+
+        _.each(this.data.edges, function (edge) {
+            
+            if( me.line.isTree && edge.points.length == 3 ){
+                //严格树状图的话（三个点），就转化成4个点的，有两个拐点
                 me._setTreePoints( edge );
             };
 
             let lineWidth = me.getProp( me.line.lineWidth, edge );
             let strokeStyle = me.getProp( me.line.strokeStyle, edge );
-
+if( edge.content == "中国湖北" ){
+    debugger
+}
             let _bl = new Path({
                 context: {
                     path: me._getPathStr(edge, me.line.inflectionRadius),
@@ -502,17 +527,27 @@ class Relation extends GraphsBase {
             };
             me.edgesSp.addChild(_bl);
 
-            /*  edge的xy 就是 可以用来显示label的位置
+            // edge的xy 就是 可以用来显示label的位置
             let _circle = new Circle({
                 context : {
-                    r : 4,
+                    r : 2,
                     x : edge.x,
                     y : edge.y,
                     fillStyle: "red"
                 }
             })
+            let _edgeText = new Canvax.Display.Text(edge.content, {
+                context: {
+                    x : edge.x,y: edge.y,
+                    fontSize: 12,
+                    fillStyle: "#ccc",//me.getProp(me.node.content.fontColor, edge),
+                    textAlign: me.getProp(me.node.content.textAlign, edge),
+                    textBaseline: me.getProp(me.node.content.textBaseline, edge)
+                }
+            })
             me.edgesSp.addChild( _circle );
-            */
+            me.edgesSp.addChild( _edgeText );
+            
 
             if( me.line.arrow ){
                 let _arrow = new Arrow({

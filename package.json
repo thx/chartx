@@ -51,7 +51,7 @@
     "rollup-plugin-node-resolve": "5.2.0"
   },
   "dependencies": {
-    "canvax": "file:../canvax",
+    "canvax": "2.0.68",
     "fmin": "0.0.2",
     "d3-force": "^2.0.1"
   },

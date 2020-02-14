@@ -39,8 +39,8 @@ var _ = _canvax["default"]._,
     event = _canvax["default"].event;
 var Rect = _canvax["default"].Shapes.Rect;
 var Path = _canvax["default"].Shapes.Path;
+var Circle = _canvax["default"].Shapes.Circle;
 var Arrow = _canvax["default"].Shapes.Arrow;
-var zoom = new _zoom["default"]();
 /**
  * 关系图中 包括了  配置，数据，和布局数据，
  * 默认用配置和数据可以完成绘图， 但是如果有布局数据，就绘图玩额外调用一次绘图，把布局数据传入修正布局效果
@@ -231,7 +231,8 @@ function (_GraphsBase) {
           acyclicer: "greedy"
         },
         node: {},
-        edge: {//labelpos: 'c'
+        edge: {//labelpos: 'c',
+          //labeloffset: 0
         }
       };
 
@@ -261,7 +262,8 @@ function (_GraphsBase) {
   (0, _createClass2["default"])(Relation, [{
     key: "init",
     value: function init() {
-      this.initInduce();
+      this._initInduce();
+
       this.nodesSp = new _canvax["default"].Display.Sprite({
         id: "nodesSp"
       });
@@ -279,10 +281,11 @@ function (_GraphsBase) {
       this.graphsSp.addChild(this.nodesSp);
       this.graphsView.addChild(this.graphsSp);
       this.sprite.addChild(this.graphsView);
+      this.zoom = new _zoom["default"]();
     }
   }, {
-    key: "initInduce",
-    value: function initInduce() {
+    key: "_initInduce",
+    value: function _initInduce() {
       var me = this;
       this.induce = new Rect({
         id: "induce",
@@ -310,7 +313,7 @@ function (_GraphsBase) {
             me.induce.toFront();
             _mosedownIng = true;
             me.app.canvax.domView.style.cursor = "move";
-            zoom.mouseMoveTo(point);
+            me.zoom.mouseMoveTo(point);
           }
 
           ;
@@ -325,9 +328,9 @@ function (_GraphsBase) {
 
           if (e.type == "mousemove") {
             if (_mosedownIng) {
-              var _zoom$drag = zoom.drag(point),
-                  x = _zoom$drag.x,
-                  y = _zoom$drag.y;
+              var _me$zoom$drag = me.zoom.drag(point),
+                  x = _me$zoom$drag.x,
+                  y = _me$zoom$drag.y;
 
               me.graphsView.context.x = x;
               me.graphsView.context.y = y;
@@ -345,10 +348,10 @@ function (_GraphsBase) {
 
             if (!_wheelHandleTimeer) {
               _wheelHandleTimeer = setTimeout(function () {
-                var _zoom$wheel = zoom.wheel(e, point),
-                    scale = _zoom$wheel.scale,
-                    x = _zoom$wheel.x,
-                    y = _zoom$wheel.y;
+                var _me$zoom$wheel = me.zoom.wheel(e, point),
+                    scale = _me$zoom$wheel.scale,
+                    x = _me$zoom$wheel.x,
+                    y = _me$zoom$wheel.y;
 
                 me.graphsView.context.x = x;
                 me.graphsView.context.y = y;
@@ -382,25 +385,11 @@ function (_GraphsBase) {
 
       this.data = opt.data || this._initData();
 
-      if (this.layout == "dagre") {
-        this.dagreLayout(this.data);
-      } else if (this.layout == "tree") {
-        this.treeLayout(this.data);
-      } else if (_.isFunction(this.layout)) {
-        //layout需要设置好data中nodes的xy， 以及edges的points，和 size的width，height
-        this.layout(this.data);
-      }
+      this._layoutData();
 
-      ;
       this.widget();
       this.sprite.context.x = this.origin.x;
       this.sprite.context.y = this.origin.y;
-      /*
-      if (this.status.transform.fitView == 'autoZoom') {
-          this.sprite.context.scaleX = this.width / this.data.size.width;
-          this.sprite.context.scaleY = this.height / this.data.size.height;
-      }
-      */
 
       var _offsetLet = (this.width - this.data.size.width) / 2;
 
@@ -474,11 +463,18 @@ function (_GraphsBase) {
         _.extend(node, this._getElementAndSize(node));
 
         if (fields.length == 1) {
+          // isNode
           node.shapeType = this.getProp(this.node.shapeType, node);
           data.nodes.push(node);
+          Object.assign(node, this.layoutOpts.node);
           _nodeMap[node.key] = node;
         } else {
-          node.shapeType = this.getProp(this.line.shapeType, node);
+          // isEdge
+          node.shapeType = this.getProp(this.line.shapeType, node); //node.labeloffset = 0;
+          //node.labelpos = 'l';
+          //额外的会有minlen weight labelpos labeloffset 四个属性可以配置
+
+          Object.assign(node, this.layoutOpts.edge);
           data.edges.push(node);
         }
 
@@ -496,8 +492,23 @@ function (_GraphsBase) {
       return data;
     }
   }, {
-    key: "dagreLayout",
-    value: function dagreLayout(data) {
+    key: "_layoutData",
+    value: function _layoutData() {
+      if (this.layout == "dagre") {
+        this._dagreLayout(this.data);
+      } else if (this.layout == "tree") {
+        this._treeLayout(this.data);
+      } else if (_.isFunction(this.layout)) {
+        //layout需要设置好data中nodes的xy， 以及edges的points，和 size的width，height
+        this.layout(this.data);
+      }
+
+      ;
+    }
+  }, {
+    key: "_dagreLayout",
+    value: function _dagreLayout(data) {
+      //https://github.com/dagrejs/dagre/wiki
       var layout = _global["default"].layout.dagre;
       var g = new layout.graphlib.Graph();
       g.setGraph(this.layoutOpts.graph);
@@ -511,17 +522,20 @@ function (_GraphsBase) {
       });
 
       _.each(data.edges, function (edge) {
-        g.setEdge.apply(g, (0, _toConsumableArray2["default"])(edge.key).concat([edge]));
+        //后面的参数直接把edge对象传入进去的话，setEdge会吧point 和 x y 等信息写回edge
+        g.setEdge.apply(g, (0, _toConsumableArray2["default"])(edge.key).concat([edge])); //g.setEdge(edge.key[0],edge.key[1]);
       });
 
       layout.layout(g);
       data.size.width = g.graph().width;
-      data.size.height = g.graph().height;
+      data.size.height = g.graph().height; //this.g = g;
+
       return data;
-    }
+    } //TODO: 待实现，目前其实用dagre可以直接实现tree，但是如果可以用更加轻便的tree也可以尝试下
+
   }, {
-    key: "treeLayout",
-    value: function treeLayout() {// let tree = global.layout.tree().separation(function(a, b) {
+    key: "_treeLayout",
+    value: function _treeLayout() {// let tree = global.layout.tree().separation(function(a, b) {
       //     //设置横向节点之间的间距
       //     let totalWidth = a.width + b.width;
       //     return (totalWidth/2) + 10;
@@ -533,15 +547,26 @@ function (_GraphsBase) {
     key: "widget",
     value: function widget() {
       var me = this;
+      /*
+      me.g.edges().forEach( e => {
+          let edge = me.g.edge(e);
+          console.log( edge )
+      } );
+      */
 
       _.each(this.data.edges, function (edge) {
-        if (me.line.isTree) {
+        if (me.line.isTree && edge.points.length == 3) {
+          //严格树状图的话（三个点），就转化成4个点的，有两个拐点
           me._setTreePoints(edge);
         }
 
         ;
         var lineWidth = me.getProp(me.line.lineWidth, edge);
         var strokeStyle = me.getProp(me.line.strokeStyle, edge);
+
+        if (edge.content == "中国湖北") {
+          debugger;
+        }
 
         var _bl = new Path({
           context: {
@@ -564,18 +589,31 @@ function (_GraphsBase) {
         }
 
         ;
-        me.edgesSp.addChild(_bl);
-        /*  edge的xy 就是 可以用来显示label的位置
-        let _circle = new Circle({
-            context : {
-                r : 4,
-                x : edge.x,
-                y : edge.y,
-                fillStyle: "red"
-            }
-        })
-        me.edgesSp.addChild( _circle );
-        */
+        me.edgesSp.addChild(_bl); // edge的xy 就是 可以用来显示label的位置
+
+        var _circle = new Circle({
+          context: {
+            r: 2,
+            x: edge.x,
+            y: edge.y,
+            fillStyle: "red"
+          }
+        });
+
+        var _edgeText = new _canvax["default"].Display.Text(edge.content, {
+          context: {
+            x: edge.x,
+            y: edge.y,
+            fontSize: 12,
+            fillStyle: "#ccc",
+            //me.getProp(me.node.content.fontColor, edge),
+            textAlign: me.getProp(me.node.content.textAlign, edge),
+            textBaseline: me.getProp(me.node.content.textBaseline, edge)
+          }
+        });
+
+        me.edgesSp.addChild(_circle);
+        me.edgesSp.addChild(_edgeText);
 
         if (me.line.arrow) {
           var _arrow = new Arrow({

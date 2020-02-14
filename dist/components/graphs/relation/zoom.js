@@ -12,55 +12,41 @@ function _default() {
     y: 0,
     //鼠标在画布坐标系内的y，可以理解为全局的缩放原点y
     rx: 0,
-    //mouse real (world) pos
+    //真实坐标系中的坐标值
     ry: 0
-  }; // lazy programmers globals
-
+  };
   var scale = 1;
-  var wx = 0; //world zoom origin
-
+  var wx = 0;
   var wy = 0;
-  var sx = 0; //mouse screen pos
-
-  var sy = 0; // converts from world coord to screen pixel coord
+  var sx = 0;
+  var sy = 0;
 
   var zoomedX = function zoomedX() {
     var x = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
-    // scale & origin X
     return Math.floor((x - wx) * scale + sx);
   };
 
   var zoomedY = function zoomedY() {
     var y = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
-    // scale & origin Y
     return Math.floor((y - wy) * scale + sy);
-  }; // Inverse does the reverse of a calculation. Like (3 - 1) * 5 = 10   the inverse is 10 * (1/5) + 1 = 3
-  // multiply become 1 over ie *5 becomes * 1/5  (or just /5)
-  // Adds become subtracts and subtract become add.
-  // and what is first become last and the other way round.
-  // inverse function converts from screen pixel coord to world coord
-
+  };
 
   var zoomedX_INV = function zoomedX_INV() {
     var mouseX = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
-    // scale & origin INV
     return Math.floor((mouseX - sx) * (1 / scale) + wx);
   };
 
   var zoomedY_INV = function zoomedY_INV() {
     var mouseY = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
-    // scale & origin INV
     return Math.floor((mouseY - sy) * (1 / scale) + wy);
   };
 
   var mouseMoveTo = function mouseMoveTo(point) {
     mouse.x = point.x;
     mouse.y = point.y;
-    var xx = mouse.rx; // get last real world pos of mouse
-
+    var xx = mouse.rx;
     var yy = mouse.ry;
-    mouse.rx = zoomedX_INV(mouse.x); // get the mouse real world pos via inverse scale and translate
-
+    mouse.rx = zoomedX_INV(mouse.x);
     mouse.ry = zoomedY_INV(mouse.y);
     return {
       xx: xx,
@@ -96,10 +82,8 @@ function _default() {
         xx = _mouseMoveTo.xx,
         yy = _mouseMoveTo.yy;
 
-    wx -= mouse.rx - xx; // move the world origin by the distance 
-
-    wy -= mouse.ry - yy; // moved in world coords
-    // wx wy 变了，重新计算rx ry
+    wx -= mouse.rx - xx;
+    wy -= mouse.ry - yy; // wx wy 变了，重新计算rx ry
 
     mouse.rx = zoomedX_INV(mouse.x);
     mouse.ry = zoomedY_INV(mouse.y);
