@@ -47,8 +47,8 @@ class Tips extends Component {
                 default: 10
             },
             positionInRange : {
-                detail : 'tip的浮层是否限定在画布区域',
-                default: true
+                detail : 'tip的浮层是否限定在画布区域(废弃)',
+                default: false
             },
             pointer : {
                 detail : '触发tips的时候的指针样式',
@@ -117,7 +117,6 @@ class Tips extends Component {
                 };
             };
             
-
             let content = this._setContent(e);
             if (content) {
                 this._setPosition(e);
@@ -173,17 +172,18 @@ class Tips extends Component {
     /**
      *@pos {x:0,y:0}
      */
-    _setPosition(e) {
+    _setPosition( e ) {
+        //tips直接修改为fixed，所以定位直接用e.x e.y 2020-02-27
         if (!this.enabled) return;
         if (!this._tipDom) return;
-        let pos = e.pos || e.target.localToGlobal(e.point);
-        let x = this._checkX(pos.x + this.offsetX);
-        let y = this._checkY(pos.y + this.offsetY);
+
+        let x = this._checkX( e.x + this.offsetX);
+        let y = this._checkY( e.y + this.offsetY);
 
         this._tipDom.style.cssText += ";visibility:visible;left:" + x + "px;top:" + y + "px;-webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;";
 
         if (this.positionOfPoint == "left") {
-            this._tipDom.style.left = this._checkX(pos.x - this.offsetX - this._tipDom.offsetWidth) + "px";
+            this._tipDom.style.left = this._checkX( e.x - this.offsetX - this._tipDom.offsetWidth ) + "px";
         };
     }
 
@@ -193,7 +193,7 @@ class Tips extends Component {
     _creatTipDom(e) {
         this._tipDom = document.createElement("div");
         this._tipDom.className = "chart-tips";
-        this._tipDom.style.cssText += "; border-radius:" + this.borderRadius + "px;background:" + this.fillStyle + ";border:1px solid " + this.strokeStyle + ";visibility:hidden;position:absolute;enabled:inline-block;*enabled:inline;*zoom:1;padding:6px;color:" + this.fontColor + ";line-height:1.5"
+        this._tipDom.style.cssText += "; border-radius:" + this.borderRadius + "px;background:" + this.fillStyle + ";border:1px solid " + this.strokeStyle + ";visibility:hidden;position:fixed;enabled:inline-block;*enabled:inline;*zoom:1;padding:6px;color:" + this.fontColor + ";line-height:1.5"
         this._tipDom.style.cssText += "; box-shadow:1px 1px 3px " + this.strokeStyle + ";"
         this._tipDom.style.cssText += "; border:none;white-space:nowrap;word-wrap:normal;"
         this._tipDom.style.cssText += "; text-align:left;"
@@ -250,7 +250,6 @@ class Tips extends Component {
                 return;
             };
             */
-
             let style = node.color || node.fillStyle || node.strokeStyle;
             let name = node.name || node.field || node.content;
             let value = typeof(node.value) == "object" ? JSON.stringify(node.value) : numAddSymbol(node.value);
@@ -262,51 +261,43 @@ class Tips extends Component {
             };
             if( name ){
                 str += "<span style='margin-right:5px;'>"+name;
-                
                 hasVal && (str += "：");
-                
                 str += "</span>";
             };
-         
             hasVal && (str += value);
-            
             str += "</div>";
         });
         return str;
     }
 
     /**
-     *获取back要显示的x
-     *并且校验是否超出了界限
+     *检测是x方向超过了视窗
      */
     _checkX(x) {
-        if (this.positionInRange) {
-            let w = this.dW + 2; //后面的2 是 两边的 linewidth
-            if (x < 0) {
-                x = 0;
-            }
-            if (x + w > this.cW) {
-                x = this.cW - w;
-            }
+        let w = this.dW + 2; //后面的2 是 两边的 linewidth
+        let scrollLeft = document.body.scrollLeft;
+        let clientWidth = document.body.clientWidth;
+        if( x < scrollLeft ){
+            x = scrollLeft;
+        } else if( x + w > clientWidth ){
+            x = scrollLeft + (clientWidth - w)
         }
-        return x
+        return x;
     }
 
     /**
-     *获取back要显示的x
-     *并且校验是否超出了界限
+     *检测是y方向超过了视窗
      */
     _checkY(y) {
-        if (this.positionInRange) {
-            let h = this.dH + 2; //后面的2 是 两边的 linewidth
-            if (y < 0) {
-                y = 0;
-            }
-            if (y + h > this.cH) {
-                y = this.cH - h;
-            }
+        let h = this.dH + 2; //后面的2 是 两边的 linewidth
+        let scrollTop = document.body.scrollTop;
+        let clientHeight = document.body.clientHeight;
+        if( y < scrollTop ){
+            y = scrollTop;
+        } else if( y + h > clientHeight ){
+            y = scrollTop + (clientHeight - h)
         }
-        return y
+        return y;
     }
 
 

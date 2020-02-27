@@ -69,9 +69,9 @@ export default class Component extends event.Dispatcher
         
     }
 
-    resetData(){
-        console.log( ( this.type || '' ) + '暂无resetData的实现' );
-    }
+    // resetData(){
+    //     console.log( ( this.type || '' ) + '暂无resetData的实现' );
+    // }
 
     setPosition( pos )
     {

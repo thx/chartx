@@ -22,8 +22,8 @@
     "email": "252759102@qq.com"
   },
   "repository": "git",
-  "main": "./dist/index_cjs.js",
-  "module": "./dist/index_es.js",
+  "main": "./dist/index.cjs.js",
+  "module": "./dist/index.es.js",
   "files": [
     "/dist"
   ],
@@ -57,6 +57,6 @@
   },
   "scripts": {
     "release":"npm publish && npm run cdn",
-    "cdn": "gulp cdn && mm publish --nospm"
+    "cdn": "mm cd && gulp cdn && mm publish --nospm"
   }
 }

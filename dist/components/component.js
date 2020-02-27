@@ -100,12 +100,10 @@ function (_event$Dispatcher) {
     value: function destroy() {}
   }, {
     key: "reset",
-    value: function reset() {}
-  }, {
-    key: "resetData",
-    value: function resetData() {
-      console.log((this.type || '') + '暂无resetData的实现');
-    }
+    value: function reset() {} // resetData(){
+    //     console.log( ( this.type || '' ) + '暂无resetData的实现' );
+    // }
+
   }, {
     key: "setPosition",
     value: function setPosition(pos) {

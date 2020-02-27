@@ -76,8 +76,8 @@ function (_Component) {
           "default": 10
         },
         positionInRange: {
-          detail: 'tip的浮层是否限定在画布区域',
-          "default": true
+          detail: 'tip的浮层是否限定在画布区域(废弃)',
+          "default": false
         },
         pointer: {
           detail: '触发tips的时候的指针样式',
@@ -225,18 +225,18 @@ function (_Component) {
   }, {
     key: "_setPosition",
     value: function _setPosition(e) {
+      //tips直接修改为fixed，所以定位直接用e.x e.y 2020-02-27
       if (!this.enabled) return;
       if (!this._tipDom) return;
-      var pos = e.pos || e.target.localToGlobal(e.point);
 
-      var x = this._checkX(pos.x + this.offsetX);
+      var x = this._checkX(e.x + this.offsetX);
 
-      var y = this._checkY(pos.y + this.offsetY);
+      var y = this._checkY(e.y + this.offsetY);
 
       this._tipDom.style.cssText += ";visibility:visible;left:" + x + "px;top:" + y + "px;-webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;";
 
       if (this.positionOfPoint == "left") {
-        this._tipDom.style.left = this._checkX(pos.x - this.offsetX - this._tipDom.offsetWidth) + "px";
+        this._tipDom.style.left = this._checkX(e.x - this.offsetX - this._tipDom.offsetWidth) + "px";
       }
 
       ;
@@ -250,7 +250,7 @@ function (_Component) {
     value: function _creatTipDom(e) {
       this._tipDom = document.createElement("div");
       this._tipDom.className = "chart-tips";
-      this._tipDom.style.cssText += "; border-radius:" + this.borderRadius + "px;background:" + this.fillStyle + ";border:1px solid " + this.strokeStyle + ";visibility:hidden;position:absolute;enabled:inline-block;*enabled:inline;*zoom:1;padding:6px;color:" + this.fontColor + ";line-height:1.5";
+      this._tipDom.style.cssText += "; border-radius:" + this.borderRadius + "px;background:" + this.fillStyle + ";border:1px solid " + this.strokeStyle + ";visibility:hidden;position:fixed;enabled:inline-block;*enabled:inline;*zoom:1;padding:6px;color:" + this.fontColor + ";line-height:1.5";
       this._tipDom.style.cssText += "; box-shadow:1px 1px 3px " + this.strokeStyle + ";";
       this._tipDom.style.cssText += "; border:none;white-space:nowrap;word-wrap:normal;";
       this._tipDom.style.cssText += "; text-align:left;";
@@ -347,45 +347,41 @@ function (_Component) {
       return str;
     }
     /**
-     *获取back要显示的x
-     *并且校验是否超出了界限
+     *检测是x方向超过了视窗
      */
 
   }, {
     key: "_checkX",
     value: function _checkX(x) {
-      if (this.positionInRange) {
-        var w = this.dW + 2; //后面的2 是 两边的 linewidth
+      var w = this.dW + 2; //后面的2 是 两边的 linewidth
 
-        if (x < 0) {
-          x = 0;
-        }
+      var scrollLeft = document.body.scrollLeft;
+      var clientWidth = document.body.clientWidth;
 
-        if (x + w > this.cW) {
-          x = this.cW - w;
-        }
+      if (x < scrollLeft) {
+        x = scrollLeft;
+      } else if (x + w > clientWidth) {
+        x = scrollLeft + (clientWidth - w);
       }
 
       return x;
     }
     /**
-     *获取back要显示的x
-     *并且校验是否超出了界限
+     *检测是y方向超过了视窗
      */
 
   }, {
     key: "_checkY",
     value: function _checkY(y) {
-      if (this.positionInRange) {
-        var h = this.dH + 2; //后面的2 是 两边的 linewidth
+      var h = this.dH + 2; //后面的2 是 两边的 linewidth
 
-        if (y < 0) {
-          y = 0;
-        }
+      var scrollTop = document.body.scrollTop;
+      var clientHeight = document.body.clientHeight;
 
-        if (y + h > this.cH) {
-          y = this.cH - h;
-        }
+      if (y < scrollTop) {
+        y = scrollTop;
+      } else if (y + h > clientHeight) {
+        y = scrollTop + (clientHeight - h);
       }
 
       return y;

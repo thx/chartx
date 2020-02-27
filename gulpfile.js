@@ -89,7 +89,7 @@ let babelSrc = ()=>{
     return babelHandle();
 };
 
-let getRollupOpts = ($model='dev')=>{
+let getRollupOpts = ()=>{
     let inputOptions = {
         input: './dist/index.js',
         plugins: [
@@ -100,19 +100,15 @@ let getRollupOpts = ($model='dev')=>{
     
     let outputOptions = [
         {
-            file: './dist/chartx.js',
+            file: './dist/index.iife.js',
             format: 'iife',
             name: ['chartx'],
             globals: {
                 Canvax: 'Canvax'
             }
-        }
-    ];
-
-    if( $model == 'publish' ){
-        //TODO后面会判断，如果发布上线的时候才把这个es模块和umd模块提交上去
-        outputOptions = outputOptions.concat([{
-            file: './dist/chartx.es.js',
+        },
+        {
+            file: './dist/index.es.js',
             format: 'es',
             name: 'chartx',
             globals: {
@@ -120,14 +116,14 @@ let getRollupOpts = ($model='dev')=>{
             }
         },
         {
-            file: './dist/chartx.umd.js',
-            format: 'umd',
+            file: './dist/index.cjs.js',
+            format: 'cjs',
             name: 'chartx',
             globals: {
                 Canvax: 'Canvax'
             }
-        }]);
-    }
+        }
+    ];
 
     return { inputOptions, outputOptions }
 }
@@ -199,7 +195,7 @@ let watchSrc = () => {
 let copyToCdn = ()=> {
     return new Promise( resolve => {
         return pipeline(
-            gulp.src(['./dist/chartx.js']), //只有iife需要压缩，因为是给到chartpark拼文件用的
+            gulp.src(['./dist/index.iife.js']), //只有iife需要压缩，因为是给到chartpark拼文件用的
             uglify(),
             //rename({ suffix: '.min' }),
             gulp.dest('./cdn/')

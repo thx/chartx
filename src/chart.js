@@ -391,8 +391,19 @@ class Chart extends event.Dispatcher
 
         this.dataFrame.resetData( data );
 
-        if( !preDataLenth ){
+        let graphsList = this.getComponents({name:'graphs'});
+        let allGraphsHasResetData = true;
+        _.each(graphsList, function( _g ){
+            if( !_g.resetData && allGraphsHasResetData ){
+                allGraphsHasResetData = false;
+                return false;
+            }
+        });
+
+
+        if( !preDataLenth || !allGraphsHasResetData ){
             //如果之前的数据为空， 那么我们应该这里就直接重绘吧
+            //如果有其中一个graphs没实现resetData 也 重绘
             this.clean();
             this.init();
             this.draw( this._opt );
@@ -404,7 +415,7 @@ class Chart extends event.Dispatcher
         if( _coord ){
             _coord.resetData( this.dataFrame , trigger);
         };
-        _.each( this.getComponents({name:'graphs'}), function( _g ){
+        _.each( graphsList, function( _g ){
             _g.resetData( me.dataFrame , trigger);
         } );
 
