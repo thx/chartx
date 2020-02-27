@@ -609,6 +609,8 @@ class Chart extends event.Dispatcher
     _bindEvent()
     {
         let me = this;
+        if( this.__bindEvented ) return;
+        
         this.on(event.types.get() , function(e){
             //触发每个graphs级别的事件，
             //用户交互事件先执行，还可以修改e的内容修改tips内容
@@ -641,6 +643,8 @@ class Chart extends event.Dispatcher
 
         });
 
+        //一个项目只需要bind一次
+        this.__bindEvented = true;
     }
 
 

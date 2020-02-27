@@ -245,6 +245,7 @@ function (_event$Dispatcher) {
   }, {
     key: "unselectOf",
     value: function unselectOf(node) {
+      debugger;
       var sec = this.sectors[node.iNode];
 
       if (!node.selected || !node.selectEnabled) {

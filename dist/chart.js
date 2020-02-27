@@ -750,6 +750,7 @@ function (_event$Dispatcher) {
     key: "_bindEvent",
     value: function _bindEvent() {
       var me = this;
+      if (this.__bindEvented) return;
       this.on(event.types.get(), function (e) {
         //触发每个graphs级别的事件，
         //用户交互事件先执行，还可以修改e的内容修改tips内容
@@ -798,7 +799,9 @@ function (_event$Dispatcher) {
         }
 
         ;
-      });
+      }); //一个项目只需要bind一次
+
+      this.__bindEvented = true;
     } //默认的基本tipsinfo处理，极坐标和笛卡尔坐标系统会覆盖
 
   }, {

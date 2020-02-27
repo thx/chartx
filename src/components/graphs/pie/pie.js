@@ -141,7 +141,6 @@ export default class Pie extends event.Dispatcher
 
                 //触发注册的事件
                 sector.on(event.types.get(), function (e) {
-                    
                     //me.fire( e.type, e );
                 
                     e.eventInfo = {
@@ -203,7 +202,7 @@ export default class Pie extends event.Dispatcher
     }
 
     selectOf ( node ) 
-    {
+    { 
         let me = this;
         if( !this.sectors.length || !node.selectEnabled ){
             return;
@@ -228,6 +227,7 @@ export default class Pie extends event.Dispatcher
 
     unselectOf ( node ) 
     {
+        debugger
         let sec = this.sectors[ node.iNode ];
         if (!node.selected || !node.selectEnabled) {
             return
