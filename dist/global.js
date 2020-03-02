@@ -37,7 +37,13 @@ var _default = {
   create: function create(el, _data, _opt) {
     var chart = null;
     var me = this;
-    var data = JSON.parse(JSON.stringify(_data));
+    var data = JSON.parse(JSON.stringify(_data, function (k, v) {
+      if (v === undefined) {
+        return null;
+      }
+
+      return v;
+    })); //data = JSON.parse( JSON.stringify(_data) );
 
     var opt = _.clone(_opt);
 

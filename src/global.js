@@ -28,7 +28,14 @@ export default {
         let chart = null;
         let me = this;
 
-        let data = JSON.parse(JSON.stringify( _data ));
+        let data = JSON.parse( JSON.stringify( _data , function(k,v) {
+            if(v === undefined){
+            return null
+            }
+            return v
+        } ) );
+        //data = JSON.parse( JSON.stringify(_data) );
+        
         let opt  = _.clone( _opt );
 
         let _destroy = function(){

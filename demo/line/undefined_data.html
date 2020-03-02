@@ -32,80 +32,37 @@
         <td id="td-vl">
             <form><textarea id="code" name="code">
 
-//chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
-//第一行是表头。
-var data= [{"month":"11-09","2018_industry_uv":222333,"2018_shop_uv":123456},{"month":"11-10","2019_industry_uv":222333,"2019_shop_uv":123456}]
+            var data = [
+                {"time":"2017-03-21","pv":undefined,"uv":11,"click":12,"ppc":45},
+                {"time":"2017-03-22","pv":null,"uv":32,"click":14,"ppc":34},
+                {"time":"2017-03-23","pv":"","uv":15,"click":12,"ppc":65},
+                {"time":"2017-03-24","pv":15,"uv":23,"click":21,"ppc":23},
+                {"time":"2017-03-25","pv":28,"uv":15,"click":15,"ppc":12}
+            ];
+            var options = {
+                coord: {
+                    type: "rect",
+                    xAxis: {
+                        field: "time"
+                    }
+                },
+                graphs: [
+                {
+                    type: "line",
+                    field: "uv"
+                },
+                {
+                    type: "line",
+                    field: "pv"
+                }
+                ]
+            };
 
-//------------------------------
-//为确保js兼容性，以下配置有如下要求
-//    1. 仅支持ES5
-//    2. 仅支持单var声明单变量，严禁多个
-//        good: var a = 1;
-//        bad:  var a, b = 1, 2;
-//------------------------------
+            try {
+                window.line = chartx.create("canvasTest" , data , options)
+            } catch(e){
 
-// 图表变量，可直接在options中使用，mx-chart组件的variables属性可覆盖以下定义
-var variables = {
-    fieldFormat : function( field ){
-        switch( field ){
-            case "collect":
-            return "人群\r\n规模";
-            case "ad_over":
-            return "整体人群营销覆盖";
-            case "ad_new":
-            return "新增人群营销覆盖";                 
-        }
-    },
-    strokeStyle:function (node) {console.log('node',node);return 'red'},
-    xField: 'month',
-    yField: ["2018_industry_uv","2018_shop_uv","2019_industry_uv","2019_shop_uv"]
-};
-
-// 图表配置定义
-var options = {
-    coord:{
-        type:"rect",
-        xAxis:{
-            field: variables.xField,
-        } 
-    },
-    graphs:[
-        {
-            type:"line",
-            field: variables.yField
-        }
-    ],
-    legend:{
-        position:"bottom",
-        textAlign:"center",
-        label:{
-            format: variables.fieldFormat
-        }
-    },
-    tips: {
-        content:function( e ){
-
-            var str = '<div style="padding: 10px 0 5px;border-bottom:1px solid #ccc" >'+ e.xAxis.value +'</div>';
-            for( var i=0,l=e.nodes.length; i<l ; i++ ){
-                var node = e.nodes[i];
-                var value = node.value == 'null' || node.value == '' || node.value == undefined ? '' : node.value 
-                str += "<div style='padding: 5px 0'>";
-                str += "<span style='background:" + node.color + ";margin-right:8px;margin-top:5px;float:left;width:8px;height:8px;border-radius:4px;overflow:hidden;font-size:0;'></span>";
-                str += variables.fieldFormat( node.field )+"："
-                str += "<span style='color:"+ node.color +"'>"+node.value+"</span>";
-                str += "</div>"
             }
-            return str;
-        }
-    }
-};
-
-
-try {
-    window.line = chartx.create("canvasTest" , data , options)
-} catch(e){
-
-}
 
 
 

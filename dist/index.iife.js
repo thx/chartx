@@ -7891,7 +7891,13 @@ var chartx = (function () {
 	  create: function create(el, _data, _opt) {
 	    var chart = null;
 	    var me = this;
-	    var data = JSON.parse(JSON.stringify(_data));
+	    var data = JSON.parse(JSON.stringify(_data, function (k, v) {
+	      if (v === undefined) {
+	        return null;
+	      }
+
+	      return v;
+	    })); //data = JSON.parse( JSON.stringify(_data) );
 
 	    var opt = _.clone(_opt);
 
@@ -8426,7 +8432,6 @@ var chartx = (function () {
 	      if (v === undefined) {
 	        return null;
 	      }
-
 	      return v;
 	    }));
 
@@ -8476,27 +8481,33 @@ var chartx = (function () {
 	      dataFrame.fields = [];
 	      dataFrame.data = [];
 
-	      var tempRange = Canvax._.extend(true, {}, dataFrame.range);
+	      var preRange = Canvax._.extend(true, {}, dataFrame.range);
 
-	      _initHandle(dataOrg); //一些当前状态恢复到dataFrame里去 begin
+	      var preLen = dataFrame.length; //设置数据之前的数据长度
 
+	      _initHandle(dataOrg);
 
-	      Canvax._.extend(true, dataFrame.range, tempRange);
+	      dataFrame.data = _getDataAndSetDataLen(); //如果之前是有数据的情况，一些当前状态恢复到dataFrame里去 begin
 
-	      if (dataFrame.range.end > dataFrame.length - 1) {
-	        dataFrame.range.end = dataFrame.length - 1;
+	      if (preLen !== 0) {
+	        Canvax._.extend(true, dataFrame.range, preRange);
+
+	        if (dataFrame.range.end > dataFrame.length - 1) {
+	          dataFrame.range.end = dataFrame.length - 1;
+	        }
+
+	        if (dataFrame.range.start > dataFrame.length - 1 || dataFrame.range.start > dataFrame.range.end) {
+	          dataFrame.range.start = 0;
+	        }
 	      }
-
-	      if (dataFrame.range.start > dataFrame.length - 1 || dataFrame.range.start > dataFrame.range.end) {
-	        dataFrame.range.start = 0;
-	      }
+	    } else {
+	      //就算没有dataOrg，但是data还是要重新构建一边的，因为可能dataFrame上面的其他状态被外界改变了
+	      //比如datazoom修改了dataFrame.range
+	      dataFrame.data = _getDataAndSetDataLen();
 	    }
-	    //比如datazoom修改了dataFrame.range
-
-	    dataFrame.data = _getData();
 	  }
 
-	  function _getData() {
+	  function _getDataAndSetDataLen() {
 	    var total = []; //已经处理成[o,o,o]   o={field:'val1',index:0,data:[1,2,3]}
 
 	    for (var a = 0, al = dataFrame.fields.length; a < al; a++) {
@@ -8509,7 +8520,7 @@ var chartx = (function () {
 
 	    var rows = _getValidRows(function (rowData) {
 	      Canvax._.each(dataFrame.fields, function (_field) {
-	        var _val = rowData[_field];
+	        var _val = rowData[_field]; //如果是可以转换为number的数据就尽量转换为number
 
 	        if (!isNaN(_val) && _val !== "" && _val !== null) {
 	          _val = Number(_val);
@@ -8555,7 +8566,7 @@ var chartx = (function () {
 	  function getDataOrg($field, format, totalList, lev) {
 	    if (!lev) lev = 0;
 
-	    var arr = totalList || _getData();
+	    var arr = totalList || _getDataAndSetDataLen();
 
 	    if (!arr) {
 	      return;
@@ -8671,7 +8682,7 @@ var chartx = (function () {
 
 	  _initHandle(dataOrg);
 
-	  dataFrame.data = _getData();
+	  dataFrame.data = _getDataAndSetDataLen();
 	  return dataFrame;
 	}
 	});
@@ -16614,6 +16625,7 @@ var chartx = (function () {
 	      }
 
 	      function _update(list) {
+	        debugger;
 	        me._bline.context.pointList = _.clone(list);
 	        me._bline.context.strokeStyle = me._getLineStrokeStyle(list);
 	        me._area.context.path = me._fillLine(me._bline);

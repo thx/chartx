@@ -87,11 +87,12 @@ export default function( dataOrg, opt ){
     };
 
     function _initHandle( dataOrg ){
+        
         //数据做一份拷贝，避免污染源数据
         dataOrg = JSON.parse( JSON.stringify( dataOrg , function(k,v) {
             if(v === undefined){
-            return null
-            }
+                return null
+            };
             return v
         } ) );
         if( !dataOrg || dataOrg.length == 0 ){
@@ -143,28 +144,37 @@ export default function( dataOrg, opt ){
             dataFrame.fields = [];
             dataFrame.data = [];
 
-            let tempRange = _.extend( true, {}, dataFrame.range );
+            let preRange = _.extend( true, {}, dataFrame.range );
+            let preLen = dataFrame.length; //设置数据之前的数据长度
 
             _initHandle( dataOrg );
+            dataFrame.data = _getDataAndSetDataLen();
 
-            //一些当前状态恢复到dataFrame里去 begin
-            _.extend( true, dataFrame.range, tempRange );
-            if( dataFrame.range.end > dataFrame.length-1 ){
-                dataFrame.range.end = dataFrame.length-1
-            };
-            if( dataFrame.range.start > dataFrame.length-1 || dataFrame.range.start > dataFrame.range.end ){
-                dataFrame.range.start = 0;
-            };
-            //一些当前状态恢复到dataFrame里去 end   
-        };
+            //如果之前是有数据的情况，一些当前状态恢复到dataFrame里去 begin
+            if( preLen !== 0 ){
+                _.extend( true, dataFrame.range, preRange );
+                if( dataFrame.range.end > dataFrame.length-1 ){
+                    dataFrame.range.end = dataFrame.length-1
+                };
+                if( dataFrame.range.start > dataFrame.length-1 || dataFrame.range.start > dataFrame.range.end ){
+                    dataFrame.range.start = 0;
+                };
+                //一些当前状态恢复到dataFrame里去 end  
+            } else {
+                //如果之前是没有数据的，那么就不用管了
+            }
+             
+        } else {
+            //就算没有dataOrg，但是data还是要重新构建一边的，因为可能dataFrame上面的其他状态被外界改变了
+            //比如datazoom修改了dataFrame.range
+            dataFrame.data = _getDataAndSetDataLen();
+        }
 
-        //就算没有dataOrg，但是data还是要重新构建一边的，因为可能dataFrame上面的其他状态被外界改变了
-        //比如datazoom修改了dataFrame.range
-        dataFrame.data = _getData();
+        
         
     };
 
-    function _getData(){
+    function _getDataAndSetDataLen(){
         let total = [];//已经处理成[o,o,o]   o={field:'val1',index:0,data:[1,2,3]}
         for(let a = 0, al = dataFrame.fields.length; a < al; a++){
             let o = {};
@@ -177,6 +187,8 @@ export default function( dataOrg, opt ){
         let rows = _getValidRows(function( rowData ){
             _.each( dataFrame.fields, function( _field ){
                 let _val = rowData[ _field ];
+
+                //如果是可以转换为number的数据就尽量转换为number
                 if( !isNaN( _val ) && _val !== "" && _val !== null ){
                     _val = Number( _val );
                 };
@@ -221,7 +233,7 @@ export default function( dataOrg, opt ){
         
         if( !lev ) lev = 0;
 
-        let arr = totalList || _getData();
+        let arr = totalList || _getDataAndSetDataLen();
         if( !arr ){
             return;
         }
@@ -320,7 +332,7 @@ export default function( dataOrg, opt ){
     }
 
     _initHandle( dataOrg );
-    dataFrame.data = _getData();
+    dataFrame.data = _getDataAndSetDataLen();
 
     return dataFrame;
 }
