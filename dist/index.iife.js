@@ -28951,12 +28951,19 @@ var chartx = (function () {
 	      this.sprite.context.x = this.origin.x;
 	      this.sprite.context.y = this.origin.y;
 
-	      var _offsetLet = (this.width - this.data.size.width) / 2;
+	      var _offsetLeft = (this.width - this.data.size.width) / 2;
 
-	      if (_offsetLet < 0) {
-	        _offsetLet = 0;
+	      if (_offsetLeft < 0) {
+	        _offsetLeft = 0;
 	      }
-	      this.graphsSp.context.x = _offsetLet;
+
+	      var _offsetTop = (this.height - this.data.size.height) / 2;
+
+	      if (_offsetTop < 0) {
+	        _offsetTop = 0;
+	      }
+	      this.graphsSp.context.x = _offsetLeft;
+	      this.graphsSp.context.y = _offsetTop;
 	    } //如果dataTrigger.origin 有传入， 则已经这个origin为参考点做重新布局
 
 	  }, {
