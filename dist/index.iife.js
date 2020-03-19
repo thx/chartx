@@ -41825,6 +41825,27 @@ var chartx = (function () {
 	            arrow: {
 	              detail: '是否有箭头',
 	              "default": true
+	            },
+	            edgeLabel: {
+	              detail: '连线上面的label配置',
+	              propertys: {
+	                fontColor: {
+	                  detail: '文本颜色',
+	                  "default": '#ccc'
+	                },
+	                fontSize: {
+	                  detail: '文本大小',
+	                  "default": 12
+	                },
+	                offsetX: {
+	                  detail: 'x方向偏移量',
+	                  "default": 0
+	                },
+	                offsetY: {
+	                  detail: 'y方向偏移量',
+	                  "default": 0
+	                }
+	              }
 	            }
 	          }
 	        },
@@ -42327,27 +42348,30 @@ var chartx = (function () {
 	        var edgeLabelId = 'label_' + key;
 	        var textAlign = me.getProp(me.node.content.textAlign, edge);
 	        var textBaseline = me.getProp(me.node.content.textBaseline, edge);
+	        var fontSize = me.getProp(me.line.edgeLabel.fontSize, edge);
+	        var fontColor = me.getProp(me.line.edgeLabel.fontColor, edge);
+	        var offsetX = me.getProp(me.line.edgeLabel.offsetX, edge);
+	        var offsetY = me.getProp(me.line.edgeLabel.offsetY, edge);
 
 	        var _edgeLabel = me.labelsSp.getChildById(edgeLabelId);
 
 	        if (_edgeLabel) {
 	          _edgeLabel.resetText(edge.content);
 
-	          _edgeLabel.context.x = edge.x;
-	          _edgeLabel.context.y = edge.y;
-	          _edgeLabel.context.fontSize = 12;
-	          _edgeLabel.context.fillStyle = "#ccc";
+	          _edgeLabel.context.x = edge.x + offsetX;
+	          _edgeLabel.context.y = edge.y + offsetY;
+	          _edgeLabel.context.fontSize = fontSize;
+	          _edgeLabel.context.fillStyle = fontColor;
 	          _edgeLabel.context.textAlign = textAlign;
 	          _edgeLabel.context.textBaseline = textBaseline;
 	        } else {
 	          _edgeLabel = new _canvax["default"].Display.Text(edge.content, {
 	            id: edgeLabelId,
 	            context: {
-	              x: edge.x,
-	              y: edge.y,
-	              fontSize: 12,
-	              fillStyle: "#ccc",
-	              //me.getProp(me.node.content.fontColor, edge),
+	              x: edge.x + offsetX,
+	              y: edge.y + offsetY,
+	              fontSize: fontSize,
+	              fillStyle: fontColor,
 	              textAlign: textAlign,
 	              textBaseline: textBaseline
 	            }
