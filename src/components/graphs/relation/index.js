@@ -5,6 +5,7 @@ import dataFrame from "../../../core/dataFrame"
 import {getDefaultProps} from "../../../utils/tools"
 import { checkDataIsJson, jsonToArrayForRelation, arrayToTreeJsonForRelation } from './data'
 import Zoom from "./zoom"
+import Dagre from "../../../layout/dagre/index"
 
 let { _, event } = Canvax;
 let Rect = Canvax.Shapes.Rect;
@@ -520,7 +521,8 @@ class Relation extends GraphsBase {
 
     _dagreLayout(data) {
         //https://github.com/dagrejs/dagre/wiki
-        let layout = global.layout.dagre;
+        
+        let layout = global.layout.dagre || Dagre;
 
         let g = new layout.graphlib.Graph();
         g.setGraph( this.layoutOpts.graph );

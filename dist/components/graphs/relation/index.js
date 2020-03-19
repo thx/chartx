@@ -35,6 +35,8 @@ var _data = require("./data");
 
 var _zoom = _interopRequireDefault(require("./zoom"));
 
+var _index2 = _interopRequireDefault(require("../../../layout/dagre/index"));
+
 var _ = _canvax["default"]._,
     event = _canvax["default"].event;
 var Rect = _canvax["default"].Shapes.Rect;
@@ -604,7 +606,7 @@ function (_GraphsBase) {
     key: "_dagreLayout",
     value: function _dagreLayout(data) {
       //https://github.com/dagrejs/dagre/wiki
-      var layout = _global["default"].layout.dagre;
+      var layout = _global["default"].layout.dagre || _index2["default"];
       var g = new layout.graphlib.Graph();
       g.setGraph(this.layoutOpts.graph);
       g.setDefaultEdgeLabel(function () {

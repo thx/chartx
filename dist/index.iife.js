@@ -28563,2930 +28563,6 @@ var chartx = (function () {
 
 	unwrapExports(zoom);
 
-	var relation = createCommonjsModule(function (module, exports) {
-
-
-
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	exports["default"] = void 0;
-
-	var _toConsumableArray2 = interopRequireDefault(toConsumableArray);
-
-	var _classCallCheck2 = interopRequireDefault(classCallCheck$1);
-
-	var _possibleConstructorReturn2 = interopRequireDefault(possibleConstructorReturn$1);
-
-	var _getPrototypeOf2 = interopRequireDefault(getPrototypeOf$1);
-
-	var _assertThisInitialized2 = interopRequireDefault(assertThisInitialized$1);
-
-	var _createClass2 = interopRequireDefault(createClass$1);
-
-	var _inherits2 = interopRequireDefault(inherits$1);
-
-	var _canvax = interopRequireDefault(Canvax);
-
-	var _index = interopRequireDefault(graphs);
-
-	var _global = interopRequireDefault(global$1);
-
-	var _dataFrame = interopRequireDefault(dataFrame);
-
-
-
-
-
-	var _zoom = interopRequireDefault(zoom);
-
-	var _ = _canvax["default"]._,
-	    event = _canvax["default"].event;
-	var Rect = _canvax["default"].Shapes.Rect;
-	var Path = _canvax["default"].Shapes.Path;
-	var Circle = _canvax["default"].Shapes.Circle;
-	var Arrow = _canvax["default"].Shapes.Arrow;
-	/**
-	 * 关系图中 包括了  配置，数据，和布局数据，
-	 * 默认用配置和数据可以完成绘图， 但是如果有布局数据，就绘图玩额外调用一次绘图，把布局数据传入修正布局效果
-	 */
-
-	var Relation =
-	/*#__PURE__*/
-	function (_GraphsBase) {
-	  (0, _inherits2["default"])(Relation, _GraphsBase);
-	  (0, _createClass2["default"])(Relation, null, [{
-	    key: "defaultProps",
-	    value: function defaultProps() {
-	      return {
-	        field: {
-	          detail: 'key字段设置',
-	          documentation: '',
-	          "default": null
-	        },
-	        childrenField: {
-	          detail: '树结构数据的关联字段',
-	          documentation: '如果是树结构的关联数据，不是行列式，那么就通过这个字段来建立父子关系',
-	          "default": 'children'
-	        },
-	        //rankdir: "TB",
-	        //align: "DR",
-	        //nodesep: 0,//同级node之间的距离
-	        //edgesep: 0,
-	        //ranksep: 0, //排与排之间的距离
-	        rankdir: {
-	          detail: '布局方向',
-	          "default": null
-	        },
-	        node: {
-	          detail: '单个节点的配置',
-	          propertys: {
-	            shapeType: {
-	              detail: '节点图形，目前只支持rect',
-	              "default": 'rect'
-	            },
-	            maxWidth: {
-	              detail: '节点最大的width',
-	              "default": 200
-	            },
-	            width: {
-	              detail: '内容的width',
-	              "default": null
-	            },
-	            height: {
-	              detail: '内容的height',
-	              "default": null
-	            },
-	            radius: {
-	              detail: '圆角角度',
-	              "default": 6
-	            },
-	            fillStyle: {
-	              detail: '节点背景色',
-	              "default": '#ffffff'
-	            },
-	            strokeStyle: {
-	              detail: '描边颜色',
-	              "default": '#e5e5e5'
-	            },
-	            padding: {
-	              detail: 'node节点容器到内容的边距',
-	              "default": 10
-	            },
-	            content: {
-	              detail: '节点内容配置',
-	              propertys: {
-	                field: {
-	                  detail: '内容字段',
-	                  documentation: '默认content字段',
-	                  "default": 'content'
-	                },
-	                fontColor: {
-	                  detail: '内容文本颜色',
-	                  "default": '#666'
-	                },
-	                format: {
-	                  detail: '内容格式化处理函数',
-	                  "default": null
-	                },
-	                textAlign: {
-	                  detail: "textAlign",
-	                  "default": "center"
-	                },
-	                textBaseline: {
-	                  detail: 'textBaseline',
-	                  "default": "middle"
-	                }
-	              }
-	            }
-	          }
-	        },
-	        line: {
-	          detail: '两个节点连线配置',
-	          propertys: {
-	            isTree: {
-	              detail: '是否树结构的连线',
-	              documentation: '非树结构启用该配置可能会有意想不到的惊喜，慎用',
-	              "default": false
-	            },
-	            inflectionRadius: {
-	              detail: '树状连线的拐点圆角半径',
-	              "default": 0
-	            },
-	            shapeType: {
-	              detail: '连线的图形样式 brokenLine or bezier',
-	              "default": 'bezier'
-	            },
-	            lineWidth: {
-	              detail: '线宽',
-	              "default": 1
-	            },
-	            strokeStyle: {
-	              detail: '连线的颜色',
-	              "default": '#e5e5e5'
-	            },
-	            lineType: {
-	              detail: '连线样式（虚线等）',
-	              "default": 'solid'
-	            },
-	            arrow: {
-	              detail: '是否有箭头',
-	              "default": true
-	            }
-	          }
-	        },
-	        layout: {
-	          detail: '采用的布局引擎,比如dagre',
-	          "default": "dagre"
-	        },
-	        layoutOpts: {
-	          detail: '布局引擎对应的配置,dagre详见dagre的官方wiki',
-	          propertys: {}
-	        },
-	        status: {
-	          detail: '一些开关配置',
-	          propertys: {
-	            transform: {
-	              detail: "是否启动拖拽缩放整个画布",
-	              propertys: {
-	                fitView: {
-	                  detail: "自动缩放",
-	                  "default": '' //autoZoom
-
-	                },
-	                enabled: {
-	                  detail: "是否开启",
-	                  "default": true
-	                },
-	                scale: {
-	                  detail: "缩放值",
-	                  "default": 1
-	                },
-	                scaleOrigin: {
-	                  detail: "缩放原点",
-	                  "default": {
-	                    x: 0,
-	                    y: 0
-	                  }
-	                }
-	              }
-	            }
-	          }
-	        }
-	      };
-	    }
-	  }]);
-
-	  function Relation(opt, app) {
-	    var _this;
-
-	    (0, _classCallCheck2["default"])(this, Relation);
-	    _this = (0, _possibleConstructorReturn2["default"])(this, (0, _getPrototypeOf2["default"])(Relation).call(this, opt, app));
-	    _this.type = "relation";
-
-	    _.extend(true, (0, _assertThisInitialized2["default"])(_this), (0, tools.getDefaultProps)(Relation.defaultProps()), opt);
-
-	    if (_this.layout === 'dagre') {
-	      var dagreOpts = {
-	        graph: {
-	          rankdir: 'TB',
-	          nodesep: 10,
-	          ranksep: 10,
-	          edgesep: 10,
-	          acyclicer: "greedy"
-	        },
-	        node: {},
-	        edge: {
-	          labelpos: 'c' //labeloffset: 0
-
-	        }
-	      };
-
-	      _.extend(true, dagreOpts, _this.layoutOpts);
-
-	      _.extend(true, _this.layoutOpts, dagreOpts);
-
-	      if (!_this.rankdir) {
-	        _this.rankdir = _this.layoutOpts.graph.rankdir;
-	      } else {
-	        //如果有设置this.randdir 则已经 ta 为准
-	        _this.layoutOpts.graph.rankdir = _this.rankdir;
-	      }
-	    }
-	    _this.domContainer = app.canvax.domView;
-	    _this.induce = null;
-
-	    _this.init();
-
-	    return _this;
-	  }
-
-	  (0, _createClass2["default"])(Relation, [{
-	    key: "init",
-	    value: function init() {
-	      this._initInduce();
-
-	      this.nodesSp = new _canvax["default"].Display.Sprite({
-	        id: "nodesSp"
-	      });
-	      this.nodesContentSp = new _canvax["default"].Display.Sprite({
-	        id: "nodesContentSp"
-	      });
-	      this.edgesSp = new _canvax["default"].Display.Sprite({
-	        id: "edgesSp"
-	      });
-	      this.arrowsSp = new _canvax["default"].Display.Sprite({
-	        id: "arrowsSp"
-	      });
-	      this.labelsSp = new _canvax["default"].Display.Sprite({
-	        id: "labelsSp"
-	      });
-	      this.graphsSp = new _canvax["default"].Display.Sprite({
-	        id: "graphsSp"
-	      }); //这个view和induce是一一对应的，在induce上面执行拖拽和滚轮缩放，操作的目标元素就是graphsView
-
-	      this.graphsView = new _canvax["default"].Display.Sprite({
-	        id: "graphsView"
-	      });
-	      this.graphsSp.addChild(this.edgesSp);
-	      this.graphsSp.addChild(this.nodesSp);
-	      this.graphsSp.addChild(this.nodesContentSp);
-	      this.graphsSp.addChild(this.arrowsSp);
-	      this.graphsSp.addChild(this.labelsSp);
-	      this.graphsView.addChild(this.graphsSp);
-	      this.sprite.addChild(this.graphsView);
-	      this.zoom = new _zoom["default"]();
-	    }
-	  }, {
-	    key: "_initInduce",
-	    value: function _initInduce() {
-	      var me = this;
-	      this.induce = new Rect({
-	        id: "induce",
-	        context: {
-	          width: 0,
-	          height: 0,
-	          fillStyle: "#000000",
-	          globalAlpha: 0
-	        }
-	      });
-	      this.sprite.addChild(this.induce);
-	      var _mosedownIng = false;
-	      var _preCursor = me.app.canvax.domView.style.cursor; //滚轮缩放相关
-
-	      var _wheelHandleTimeLen = 32; //16*2
-
-	      var _wheelHandleTimeer = null;
-	      var _deltaY = 0;
-	      this.induce.on(event.types.get(), function (e) {
-	        if (me.status.transform.enabled) {
-	          e.preventDefault();
-	          var point = e.target.localToGlobal(e.point, me.sprite);
-
-	          if (e.type == "mousedown") {
-	            me.induce.toFront();
-	            _mosedownIng = true;
-	            me.app.canvax.domView.style.cursor = "move";
-	            me.zoom.mouseMoveTo(point);
-	          }
-
-	          if (e.type == "mouseup" || e.type == "mouseout") {
-	            me.induce.toBack();
-	            _mosedownIng = false;
-	            me.app.canvax.domView.style.cursor = _preCursor;
-	          }
-
-	          if (e.type == "mousemove") {
-	            if (_mosedownIng) {
-	              var _me$zoom$move = me.zoom.move(point),
-	                  x = _me$zoom$move.x,
-	                  y = _me$zoom$move.y;
-
-	              me.graphsView.context.x = x;
-	              me.graphsView.context.y = y;
-	            }
-	          }
-
-	          if (e.type == "wheel") {
-	            if (Math.abs(e.deltaY) > Math.abs(_deltaY)) {
-	              _deltaY = e.deltaY;
-	            }
-
-	            if (!_wheelHandleTimeer) {
-	              _wheelHandleTimeer = setTimeout(function () {
-	                var _me$zoom$wheel = me.zoom.wheel(e, point),
-	                    scale = _me$zoom$wheel.scale,
-	                    x = _me$zoom$wheel.x,
-	                    y = _me$zoom$wheel.y;
-
-	                me.graphsView.context.x = x;
-	                me.graphsView.context.y = y;
-	                me.graphsView.context.scaleX = scale;
-	                me.graphsView.context.scaleY = scale;
-	                me.status.transform.scale = scale;
-	                _wheelHandleTimeer = null;
-	                _deltaY = 0;
-	              }, _wheelHandleTimeLen);
-	            }
-	          }
-	        }
-	      });
-	    } //全局画布
-
-	  }, {
-	    key: "scale",
-	    value: function scale(_scale, globalScaleOrigin) {}
-	  }, {
-	    key: "draw",
-	    value: function draw(opt) {
-	      !opt && (opt = {});
-
-	      _.extend(true, this, opt);
-
-	      this.data = opt.data || this._initData();
-
-	      this._layoutData();
-
-	      this.widget();
-	      this.sprite.context.x = this.origin.x;
-	      this.sprite.context.y = this.origin.y;
-
-	      var _offsetLeft = (this.width - this.data.size.width) / 2;
-
-	      if (_offsetLeft < 0) {
-	        _offsetLeft = 0;
-	      }
-
-	      var _offsetTop = (this.height - this.data.size.height) / 2;
-
-	      if (_offsetTop < 0) {
-	        _offsetTop = 0;
-	      }
-	      this.graphsSp.context.x = _offsetLeft;
-	      this.graphsSp.context.y = _offsetTop;
-	    } //如果dataTrigger.origin 有传入， 则已经这个origin为参考点做重新布局
-
-	  }, {
-	    key: "resetData",
-	    value: function resetData(data, dataTrigger) {
-	      var me = this;
-	      this._preData = this.data; //如果data是外界定义好的nodes，edges的格式，直接用外界的
-
-	      this.data = data.nodes && data.edges ? data : this._initData();
-
-	      this._layoutData();
-
-	      _.each(this._preData.nodes, function (preNode) {
-	        if (!_.find(me.data.nodes, function (node) {
-	          return preNode.key == node.key;
-	        })) {
-	          me._destroy(preNode);
-	        }
-	      });
-
-	      _.each(this._preData.edges, function (preEdge) {
-	        if (!_.find(me.data.edges, function (edge) {
-	          return preEdge.key.join('_') == edge.key.join('_');
-	        })) {
-	          me._destroy(preEdge);
-	        }
-	      });
-
-	      this.widget(); //钉住某个node为参考点（不移动）
-
-	      if (dataTrigger && dataTrigger.origin) {
-	        var preOriginNode = _.find(this._preData.nodes, function (node) {
-	          return node.key == dataTrigger.origin;
-	        });
-
-	        var originNode = _.find(this.data.nodes, function (node) {
-	          return node.key == dataTrigger.origin;
-	        });
-
-	        if (preOriginNode && originNode) {
-	          var offsetPos = {
-	            x: preOriginNode.x - originNode.x,
-	            y: preOriginNode.y - originNode.y
-	          };
-
-	          var _this$zoom$offset = this.zoom.offset(offsetPos),
-	              x = _this$zoom$offset.x,
-	              y = _this$zoom$offset.y;
-
-	          me.graphsView.context.x = x;
-	          me.graphsView.context.y = y;
-	        }
-	      }
-	    }
-	  }, {
-	    key: "_destroy",
-	    value: function _destroy(item) {
-	      item.boxElement && item.boxElement.destroy();
-
-	      if (item.contentElement.destroy) {
-	        item.contentElement.destroy();
-	      } else {
-	        //否则就可定是个dom
-	        this.domContainer.removeChild(item.contentElement);
-	      }
-
-	      item.pathElement && item.pathElement.destroy();
-	      item.labelElement && item.labelElement.destroy();
-	      item.arrowElement && item.arrowElement.destroy();
-	    }
-	  }, {
-	    key: "_initData",
-	    value: function _initData() {
-	      var data$1 = {
-	        nodes: [//{ type,key,content,ctype,width,height,x,y }
-	        ],
-	        edges: [//{ type,key[],content,ctype,width,height,x,y }
-	        ],
-	        size: {
-	          width: 0,
-	          height: 0
-	        }
-	      };
-	      var originData = this.app._data;
-
-	      if ((0, data.checkDataIsJson)(originData, this.field, this.childrenField)) {
-	        this.jsonData = (0, data.jsonToArrayForRelation)(originData, this, this.childrenField);
-	        this.dataFrame = this.app.dataFrame = (0, _dataFrame["default"])(this.jsonData);
-	      } else {
-	        if (this.layout == "tree") {
-	          //源数据就是图表标准数据，只需要转换成json的Children格式
-	          //app.dataFrame.jsonOrg ==> [{name: key:} ...] 不是children的树结构
-	          //tree layout算法需要children格式的数据，蛋疼
-	          this.jsonData = (0, data.arrayToTreeJsonForRelation)(this.app.dataFrame.jsonOrg, this);
-	        }
-	      }
-	      var _nodeMap = {};
-
-	      for (var i = 0; i < this.dataFrame.length; i++) {
-	        var rowData = this.dataFrame.getRowDataAt(i);
-
-	        var fields = _.flatten([(rowData[this.field] + "").split(",")]);
-
-	        var content = this._getContent(rowData);
-
-	        var node = {
-	          type: "relation",
-	          iNode: i,
-	          rowData: rowData,
-	          key: fields.length == 1 ? fields[0] : fields,
-	          content: content,
-	          ctype: this._checkHtml(content) ? 'html' : 'canvas',
-	          //下面三个属性在_setElementAndSize中设置
-	          contentElement: null,
-	          //外面传的layout数据可能没有element，widget的时候要检测下
-	          width: null,
-	          height: null,
-	          //这个在layout的时候设置
-	          x: null,
-	          y: null,
-	          shapeType: null,
-	          //如果是edge，要填写这两节点
-	          source: null,
-	          target: null
-	        };
-
-	        _.extend(node, this._getElementAndSize(node));
-
-	        if (fields.length == 1) {
-	          // isNode
-	          node.shapeType = this.getProp(this.node.shapeType, node);
-	          data$1.nodes.push(node);
-	          Object.assign(node, this.layoutOpts.node);
-	          _nodeMap[node.key] = node;
-	        } else {
-	          // isEdge
-	          node.shapeType = this.getProp(this.line.shapeType, node); //node.labeloffset = 0;
-	          //node.labelpos = 'l';
-	          //额外的会有minlen weight labelpos labeloffset 四个属性可以配置
-
-	          Object.assign(node, this.layoutOpts.edge);
-	          data$1.edges.push(node);
-	        }
-	      }
-
-	      _.each(data$1.edges, function (edge) {
-	        var keys = edge.key;
-	        edge.source = _nodeMap[keys[0]];
-	        edge.target = _nodeMap[keys[1]];
-	      });
-
-	      return data$1;
-	    }
-	  }, {
-	    key: "_layoutData",
-	    value: function _layoutData() {
-	      if (this.layout == "dagre") {
-	        this._dagreLayout(this.data);
-	      } else if (this.layout == "tree") {
-	        this._treeLayout(this.data);
-	      } else if (_.isFunction(this.layout)) {
-	        //layout需要设置好data中nodes的xy， 以及edges的points，和 size的width，height
-	        this.layout(this.data);
-	      }
-	    }
-	  }, {
-	    key: "_dagreLayout",
-	    value: function _dagreLayout(data) {
-	      //https://github.com/dagrejs/dagre/wiki
-	      var layout = _global["default"].layout.dagre;
-	      var g = new layout.graphlib.Graph();
-	      g.setGraph(this.layoutOpts.graph);
-	      g.setDefaultEdgeLabel(function () {
-	        //其实我到现在都还没搞明白setDefaultEdgeLabel的作用
-	        return {};
-	      });
-
-	      _.each(data.nodes, function (node) {
-	        g.setNode(node.key, node);
-	      });
-
-	      _.each(data.edges, function (edge) {
-	        //后面的参数直接把edge对象传入进去的话，setEdge会吧point 和 x y 等信息写回edge
-	        g.setEdge.apply(g, (0, _toConsumableArray2["default"])(edge.key).concat([edge])); //g.setEdge(edge.key[0],edge.key[1]);
-	      });
-
-	      layout.layout(g);
-	      data.size.width = g.graph().width;
-	      data.size.height = g.graph().height; //this.g = g;
-
-	      return data;
-	    } //TODO: 待实现，目前其实用dagre可以直接实现tree，但是如果可以用更加轻便的tree也可以尝试下
-
-	  }, {
-	    key: "_treeLayout",
-	    value: function _treeLayout() {// let tree = global.layout.tree().separation(function(a, b) {
-	      //     //设置横向节点之间的间距
-	      //     let totalWidth = a.width + b.width;
-	      //     return (totalWidth/2) + 10;
-	      // });
-	      // let nodes = tree.nodes( this.jsonData[0] ).reverse();
-	      // let links = tree.links(nodes);
-	    }
-	  }, {
-	    key: "widget",
-	    value: function widget() {
-	      var me = this;
-	      /*
-	      me.g.edges().forEach( e => {
-	          let edge = me.g.edge(e);
-	          console.log( edge )
-	      } );
-	      */
-
-	      _.each(this.data.edges, function (edge) {
-	        var key = edge.key.join('_');
-
-	        if (me.line.isTree && edge.points.length == 3) {
-	          //严格树状图的话（三个点），就转化成4个点的，有两个拐点
-	          me._setTreePoints(edge);
-	        }
-
-	        var path = me._getPathStr(edge, me.line.inflectionRadius);
-
-	        var lineWidth = me.getProp(me.line.lineWidth, edge);
-	        var strokeStyle = me.getProp(me.line.strokeStyle, edge);
-	        var edgeId = 'edge_' + key;
-
-	        var _path = me.edgesSp.getChildById(edgeId);
-
-	        if (_path) {
-	          _path.context.path = path;
-	          _path.context.lineWidth = lineWidth;
-	          _path.context.strokeStyle = strokeStyle;
-	        } else {
-	          _path = new Path({
-	            id: edgeId,
-	            context: {
-	              path: path,
-	              lineWidth: lineWidth,
-	              strokeStyle: strokeStyle
-	            }
-	          });
-	          me.edgesSp.addChild(_path);
-	        }
-	        edge.pathElement = _path;
-	        var arrowControl = edge.points.slice(-2, -1)[0];
-
-	        if (me.line.shapeType == "bezier") {
-	          if (me.rankdir == "TB" || me.rankdir == "BT") {
-	            arrowControl.x += (edge.source.x - edge.target.x) / 20;
-	          }
-
-	          if (me.rankdir == "LR" || me.rankdir == "RL") {
-	            arrowControl.y += (edge.source.y - edge.target.y) / 20;
-	          }
-	        }
-	        // let _circle = new Circle({
-	        //     context : {
-	        //         r : 2,
-	        //         x : edge.x,
-	        //         y : edge.y,
-	        //         fillStyle: "red"
-	        //     }
-	        // })
-	        //me.labelsSp.addChild( _circle );
-
-	        var edgeLabelId = 'label_' + key;
-	        var textAlign = me.getProp(me.node.content.textAlign, edge);
-	        var textBaseline = me.getProp(me.node.content.textBaseline, edge);
-
-	        var _edgeLabel = me.labelsSp.getChildById(edgeLabelId);
-
-	        if (_edgeLabel) {
-	          _edgeLabel.resetText(edge.content);
-
-	          _edgeLabel.context.x = edge.x;
-	          _edgeLabel.context.y = edge.y;
-	          _edgeLabel.context.fontSize = 12;
-	          _edgeLabel.context.fillStyle = "#ccc";
-	          _edgeLabel.context.textAlign = textAlign;
-	          _edgeLabel.context.textBaseline = textBaseline;
-	        } else {
-	          _edgeLabel = new _canvax["default"].Display.Text(edge.content, {
-	            id: edgeLabelId,
-	            context: {
-	              x: edge.x,
-	              y: edge.y,
-	              fontSize: 12,
-	              fillStyle: "#ccc",
-	              //me.getProp(me.node.content.fontColor, edge),
-	              textAlign: textAlign,
-	              textBaseline: textBaseline
-	            }
-	          });
-	          me.labelsSp.addChild(_edgeLabel);
-	        }
-
-	        edge.labelElement = _edgeLabel;
-
-	        if (me.line.arrow) {
-	          var arrowId = "arrow_" + key;
-
-	          var _arrow = me.arrowsSp.getChildById(arrowId);
-
-	          if (_arrow) {
-	            //arrow 只监听了x y 才会重绘，，，暂时只能这样处理,手动的赋值control.x control.y
-	            //而不是直接把 arrowControl 赋值给 control
-	            _arrow.context.control.x = arrowControl.x;
-	            _arrow.context.control.y = arrowControl.y;
-	            _arrow.context.point = edge.points.slice(-1)[0];
-	            _arrow.context.strokeStyle = strokeStyle; // _.extend(true, _arrow, {
-	            //     control: arrowControl,
-	            //     point: edge.points.slice(-1)[0],
-	            //     strokeStyle: strokeStyle
-	            // } );
-	          } else {
-	            _arrow = new Arrow({
-	              id: arrowId,
-	              context: {
-	                control: arrowControl,
-	                point: edge.points.slice(-1)[0],
-	                strokeStyle: strokeStyle //fillStyle: strokeStyle
-
-	              }
-	            });
-	            me.arrowsSp.addChild(_arrow);
-	          }
-
-	          edge.arrowElement = _arrow;
-	        }
-	      });
-
-	      _.each(this.data.nodes, function (node) {
-	        var nodeId = "node_" + node.key;
-	        var context = {
-	          x: node.x - node.width / 2,
-	          y: node.y - node.height / 2,
-	          width: node.width,
-	          height: node.height,
-	          lineWidth: 1,
-	          fillStyle: me.getProp(me.node.fillStyle, node),
-	          strokeStyle: me.getProp(me.node.strokeStyle, node),
-	          radius: _.flatten([me.getProp(me.node.radius, node)])
-	        };
-
-	        var _boxShape = me.nodesSp.getChildById(nodeId);
-
-	        if (_boxShape) {
-	          _.extend(_boxShape.context, context);
-	        } else {
-	          _boxShape = new Rect({
-	            id: nodeId,
-	            context: context
-	          });
-	          me.nodesSp.addChild(_boxShape);
-
-	          _boxShape.on(event.types.get(), function (e) {
-	            e.eventInfo = {
-	              trigger: me.node,
-	              nodes: [this.nodeData]
-	            };
-	            me.app.fire(e.type, e);
-	          });
-	        }
-	        _boxShape.nodeData = node;
-	        node.boxElement = _boxShape;
-
-	        _boxShape.on("transform", function () {
-	          if (node.ctype == "canvas") {
-	            node.contentElement.context.x = node.x;
-	            node.contentElement.context.y = node.y;
-	          } else if (node.ctype == "html") {
-	            var devicePixelRatio = typeof window !== 'undefined' ? window.devicePixelRatio : 1;
-	            node.contentElement.style.transform = "matrix(" + _boxShape.worldTransform.clone().scale(1 / devicePixelRatio, 1 / devicePixelRatio).toArray().join() + ")";
-	            node.contentElement.style.transformOrigin = "left top"; //修改为左上角为旋转中心点来和canvas同步
-
-	            node.contentElement.style.marginLeft = me.getProp(me.node.padding, node) * me.status.transform.scale + "px";
-	            node.contentElement.style.marginTop = me.getProp(me.node.padding, node) * me.status.transform.scale + "px";
-	            node.contentElement.style.visibility = "visible";
-	          }
-	        });
-	      });
-
-	      this.induce.context.width = this.width;
-	      this.induce.context.height = this.height;
-	    }
-	  }, {
-	    key: "_setTreePoints",
-	    value: function _setTreePoints(edge) {
-	      var points = edge.points;
-
-	      if (this.rankdir == "TB" || this.rankdir == "BT") {
-	        points[0] = {
-	          x: edge.source.x,
-	          y: edge.source.y + (this.rankdir == "BT" ? -1 : 1) * edge.source.height / 2
-	        };
-	        points.splice(1, 0, {
-	          x: edge.source.x,
-	          y: points.slice(-2, -1)[0].y
-	        });
-	      }
-
-	      if (this.rankdir == "LR" || this.rankdir == "RL") {
-	        points[0] = {
-	          x: edge.source.x + (this.rankdir == "RL" ? -1 : 1) * edge.source.width / 2,
-	          y: edge.source.y
-	        };
-	        points.splice(1, 0, {
-	          x: points.slice(-2, -1)[0].x,
-	          y: edge.source.y
-	        });
-	      }
-
-	      edge.points = points;
-	    }
-	    /**
-	     * 
-	     * @param {shapeType,points} edge 
-	     * @param {number} inflectionRadius 拐点的圆角半径
-	     */
-
-	  }, {
-	    key: "_getPathStr",
-	    value: function _getPathStr(edge, inflectionRadius) {
-	      var points = edge.points;
-	      var head = points[0];
-	      var tail = points.slice(-1)[0];
-	      var str = "M" + head.x + " " + head.y;
-
-	      if (edge.shapeType == "bezier") {
-	        if (points.length == 3) {
-	          str += ",Q" + points[1].x + " " + points[1].y + " " + tail.x + " " + tail.y;
-	        }
-
-	        if (points.length == 4) {
-	          str += ",C" + points[1].x + " " + points[1].y + " " + points[2].x + " " + points[2].y + " " + tail.x + " " + tail.y;
-	        }
-	      }
-
-	      if (edge.shapeType == "brokenLine") {
-	        _.each(points, function (point, i) {
-	          if (i) {
-	            if (inflectionRadius && i < points.length - 1) {
-	              //圆角连线
-	              var prePoint = points[i - 1];
-	              var nextPoint = points[i + 1]; //要从这个点到上个点的半径距离，已point为控制点，绘制nextPoint的半径距离
-
-	              var radius = inflectionRadius; //radius要做次二次校验，取radius 以及 point 和prePoint距离以及和 nextPoint 的最小值
-	              //let _disPre = Math.abs(Math.sqrt( (prePoint.x - point.x)*(prePoint.x - point.x) + (prePoint.y - point.y)*(prePoint.y - point.y) ));
-	              //let _disNext = Math.abs(Math.sqrt( (nextPoint.x - point.x)*(nextPoint.x - point.x) + (nextPoint.y - point.y)*(nextPoint.y - point.y) ));
-
-	              var _disPre = Math.max(Math.abs(prePoint.x - point.x) / 2, Math.abs(prePoint.y - point.y) / 2);
-
-	              var _disNext = Math.max(Math.abs(nextPoint.x - point.x) / 2, Math.abs(nextPoint.y - point.y) / 2);
-
-	              radius = _.min([radius, _disPre, _disNext]); //console.log(Math.atan2( point.y - prePoint.y , point.x - prePoint.x ),Math.atan2( nextPoint.y - point.y , nextPoint.x - point.x ))
-
-	              if (point.x == prePoint.x && point.y == prePoint.y || point.x == nextPoint.x && point.y == nextPoint.y || Math.atan2(point.y - prePoint.y, point.x - prePoint.x) == Math.atan2(nextPoint.y - point.y, nextPoint.x - point.x)) {
-	                //如果中间的这个点 ， 和前后的点在一个直线上面，就略过
-	                return;
-	              } else {
-	                var getPointOf = function getPointOf(p) {
-	                  var _atan2 = Math.atan2(p.y - point.y, p.x - point.x);
-
-	                  return {
-	                    x: point.x + radius * Math.cos(_atan2),
-	                    y: point.y + radius * Math.sin(_atan2)
-	                  };
-	                };
-	                var bezierBegin = getPointOf(prePoint);
-	                var bezierEnd = getPointOf(nextPoint);
-	                str += ",L" + bezierBegin.x + " " + bezierBegin.y + ",Q" + point.x + " " + point.y + " " + bezierEnd.x + " " + bezierEnd.y;
-	              }
-	            } else {
-	              //直角连线
-	              str += ",L" + point.x + " " + point.y;
-	            }
-	          }
-	        });
-	      }
-
-	      return str;
-	    }
-	    /**
-	     * 字符串是否含有html标签的检测
-	     */
-
-	  }, {
-	    key: "_checkHtml",
-	    value: function _checkHtml(str) {
-	      var reg = /<[^>]+>/g;
-	      return reg.test(str);
-	    }
-	  }, {
-	    key: "_getContent",
-	    value: function _getContent(rowData) {
-	      var me = this;
-
-	      var _c; //this.node.content;
-
-
-	      if (this._isField(this.node.content.field)) {
-	        _c = rowData[this.node.content.field];
-	      }
-
-	      if (me.node.content.format && _.isFunction(me.node.content.format)) {
-	        _c = me.node.content.format.apply(this, [_c, rowData]);
-	      }
-	      return _c;
-	    }
-	  }, {
-	    key: "_isField",
-	    value: function _isField(str) {
-	      return ~this.dataFrame.fields.indexOf(str);
-	    }
-	  }, {
-	    key: "_getElementAndSize",
-	    value: function _getElementAndSize(node) {
-	      var me = this;
-	      var contentType = node.ctype;
-
-	      if (me._isField(contentType)) {
-	        contentType = node.rowData[contentType];
-	      }
-	      !contentType && (contentType = 'canvas');
-
-	      if (contentType == 'canvas') {
-	        return me._getEleAndsetCanvasSize(node);
-	      }
-
-	      if (contentType == 'html') {
-	        return me._getEleAndsetHtmlSize(node);
-	      }
-	    }
-	  }, {
-	    key: "_getEleAndsetCanvasSize",
-	    value: function _getEleAndsetCanvasSize(node) {
-	      var me = this;
-	      var content = node.content;
-	      var width = node.rowData.width,
-	          height = node.rowData.height; //let sprite = new Canvax.Display.Sprite({});
-
-	      var context = {
-	        fillStyle: me.getProp(me.node.content.fontColor, node),
-	        textAlign: me.getProp(me.node.content.textAlign, node),
-	        textBaseline: me.getProp(me.node.content.textBaseline, node)
-	      }; //console.log(node.key);
-
-	      var contentLabelId = "content_label_" + node.key;
-
-	      var _contentLabel = me.nodesContentSp.getChildById(contentLabelId);
-
-	      if (_contentLabel) {
-	        _contentLabel.resetText(content);
-
-	        _.extend(_contentLabel.context, context);
-	      } else {
-	        //先创建text，根据 text 来计算node需要的width和height
-	        _contentLabel = new _canvax["default"].Display.Text(content, {
-	          id: contentLabelId,
-	          context: context
-	        });
-
-	        if (!_.isArray(node.key)) {
-	          me.nodesContentSp.addChild(_contentLabel);
-	        }
-	      }
-
-	      if (!width) {
-	        width = _contentLabel.getTextWidth() + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
-	      }
-
-	      if (!height) {
-	        height = _contentLabel.getTextHeight() + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
-	      }
-	      return {
-	        contentElement: _contentLabel,
-	        width: width,
-	        height: height
-	      };
-	    }
-	  }, {
-	    key: "_getEleAndsetHtmlSize",
-	    value: function _getEleAndsetHtmlSize(node) {
-	      var me = this;
-	      var content = node.content;
-	      var width = node.rowData.width,
-	          height = node.rowData.height;
-
-	      var _dom = document.createElement("div");
-
-	      _dom.className = "chartx_relation_node";
-	      _dom.style.cssText += "; position:absolute;visibility:hidden;";
-	      _dom.style.cssText += "; color:" + me.getProp(me.node.content.fontColor, node) + ";";
-	      _dom.style.cssText += "; text-align:" + me.getProp(me.node.content.textAlign, node) + ";";
-	      _dom.style.cssText += "; vertical-align:" + me.getProp(me.node.content.textBaseline, node) + ";";
-	      _dom.innerHTML = content;
-	      this.domContainer.appendChild(_dom);
-
-	      if (!width) {
-	        width = _dom.offsetWidth + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
-	      }
-
-	      if (!height) {
-	        height = _dom.offsetHeight + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
-	      }
-	      return {
-	        contentElement: _dom,
-	        width: width,
-	        height: height
-	      };
-	    }
-	  }, {
-	    key: "getNodesAt",
-	    value: function getNodesAt() {}
-	  }, {
-	    key: "getProp",
-	    value: function getProp(prop, nodeData) {
-	      var _prop = prop;
-
-	      if (this._isField(prop)) {
-	        _prop = nodeData.rowData[prop];
-	      } else {
-	        if (_.isArray(prop)) {
-	          _prop = prop[nodeData.iNode];
-	        }
-
-	        if (_.isFunction(prop)) {
-	          _prop = prop.apply(this, [nodeData]);
-	        }
-	      }
-	      return _prop;
-	    }
-	  }]);
-	  return Relation;
-	}(_index["default"]);
-
-	_index["default"].registerComponent(Relation, 'graphs', 'relation');
-
-	var _default = Relation;
-	exports["default"] = _default;
-	});
-
-	unwrapExports(relation);
-
-	var interopRequireWildcard = createCommonjsModule(function (module) {
-	function _getRequireWildcardCache() {
-	  if (typeof WeakMap !== "function") return null;
-	  var cache = new WeakMap();
-
-	  _getRequireWildcardCache = function _getRequireWildcardCache() {
-	    return cache;
-	  };
-
-	  return cache;
-	}
-
-	function _interopRequireWildcard(obj) {
-	  if (obj && obj.__esModule) {
-	    return obj;
-	  }
-
-	  if (obj === null || _typeof_1$1(obj) !== "object" && typeof obj !== "function") {
-	    return {
-	      "default": obj
-	    };
-	  }
-
-	  var cache = _getRequireWildcardCache();
-
-	  if (cache && cache.has(obj)) {
-	    return cache.get(obj);
-	  }
-
-	  var newObj = {};
-	  var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor;
-
-	  for (var key in obj) {
-	    if (Object.prototype.hasOwnProperty.call(obj, key)) {
-	      var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null;
-
-	      if (desc && (desc.get || desc.set)) {
-	        Object.defineProperty(newObj, key, desc);
-	      } else {
-	        newObj[key] = obj[key];
-	      }
-	    }
-	  }
-
-	  newObj["default"] = obj;
-
-	  if (cache) {
-	    cache.set(obj, newObj);
-	  }
-
-	  return newObj;
-	}
-
-	module.exports = _interopRequireWildcard;
-	});
-
-	unwrapExports(interopRequireWildcard);
-
-	var force = createCommonjsModule(function (module, exports) {
-
-
-
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	exports.forceCenter = center;
-	exports.forceCollide = collide;
-	exports.forceLink = link;
-	exports.forceManyBody = manyBody;
-	exports.forceRadial = radial;
-	exports.forceSimulation = simulation;
-	exports.forceX = x$2;
-	exports.forceY = y$2;
-
-	var _typeof2 = interopRequireDefault(_typeof_1$1);
-
-	function center(x, y) {
-	  var nodes;
-	  if (x == null) x = 0;
-	  if (y == null) y = 0;
-
-	  function force() {
-	    var i,
-	        n = nodes.length,
-	        node,
-	        sx = 0,
-	        sy = 0;
-
-	    for (i = 0; i < n; ++i) {
-	      node = nodes[i], sx += node.x, sy += node.y;
-	    }
-
-	    for (sx = sx / n - x, sy = sy / n - y, i = 0; i < n; ++i) {
-	      node = nodes[i], node.x -= sx, node.y -= sy;
-	    }
-	  }
-
-	  force.initialize = function (_) {
-	    nodes = _;
-	  };
-
-	  force.x = function (_) {
-	    return arguments.length ? (x = +_, force) : x;
-	  };
-
-	  force.y = function (_) {
-	    return arguments.length ? (y = +_, force) : y;
-	  };
-
-	  return force;
-	}
-
-	function tree_add(d) {
-	  var x = +this._x.call(null, d),
-	      y = +this._y.call(null, d);
-	  return add(this.cover(x, y), x, y, d);
-	}
-
-	function add(tree, x, y, d) {
-	  if (isNaN(x) || isNaN(y)) return tree; // ignore invalid points
-
-	  var parent,
-	      node = tree._root,
-	      leaf = {
-	    data: d
-	  },
-	      x0 = tree._x0,
-	      y0 = tree._y0,
-	      x1 = tree._x1,
-	      y1 = tree._y1,
-	      xm,
-	      ym,
-	      xp,
-	      yp,
-	      right,
-	      bottom,
-	      i,
-	      j; // If the tree is empty, initialize the root as a leaf.
-
-	  if (!node) return tree._root = leaf, tree; // Find the existing leaf for the new point, or add it.
-
-	  while (node.length) {
-	    if (right = x >= (xm = (x0 + x1) / 2)) x0 = xm;else x1 = xm;
-	    if (bottom = y >= (ym = (y0 + y1) / 2)) y0 = ym;else y1 = ym;
-	    if (parent = node, !(node = node[i = bottom << 1 | right])) return parent[i] = leaf, tree;
-	  } // Is the new point is exactly coincident with the existing point?
-
-
-	  xp = +tree._x.call(null, node.data);
-	  yp = +tree._y.call(null, node.data);
-	  if (x === xp && y === yp) return leaf.next = node, parent ? parent[i] = leaf : tree._root = leaf, tree; // Otherwise, split the leaf node until the old and new point are separated.
-
-	  do {
-	    parent = parent ? parent[i] = new Array(4) : tree._root = new Array(4);
-	    if (right = x >= (xm = (x0 + x1) / 2)) x0 = xm;else x1 = xm;
-	    if (bottom = y >= (ym = (y0 + y1) / 2)) y0 = ym;else y1 = ym;
-	  } while ((i = bottom << 1 | right) === (j = (yp >= ym) << 1 | xp >= xm));
-
-	  return parent[j] = node, parent[i] = leaf, tree;
-	}
-
-	function addAll(data) {
-	  var d,
-	      i,
-	      n = data.length,
-	      x,
-	      y,
-	      xz = new Array(n),
-	      yz = new Array(n),
-	      x0 = Infinity,
-	      y0 = Infinity,
-	      x1 = -Infinity,
-	      y1 = -Infinity; // Compute the points and their extent.
-
-	  for (i = 0; i < n; ++i) {
-	    if (isNaN(x = +this._x.call(null, d = data[i])) || isNaN(y = +this._y.call(null, d))) continue;
-	    xz[i] = x;
-	    yz[i] = y;
-	    if (x < x0) x0 = x;
-	    if (x > x1) x1 = x;
-	    if (y < y0) y0 = y;
-	    if (y > y1) y1 = y;
-	  } // If there were no (valid) points, abort.
-
-
-	  if (x0 > x1 || y0 > y1) return this; // Expand the tree to cover the new points.
-
-	  this.cover(x0, y0).cover(x1, y1); // Add the new points.
-
-	  for (i = 0; i < n; ++i) {
-	    add(this, xz[i], yz[i], data[i]);
-	  }
-
-	  return this;
-	}
-
-	function tree_cover(x, y) {
-	  if (isNaN(x = +x) || isNaN(y = +y)) return this; // ignore invalid points
-
-	  var x0 = this._x0,
-	      y0 = this._y0,
-	      x1 = this._x1,
-	      y1 = this._y1; // If the quadtree has no extent, initialize them.
-	  // Integer extent are necessary so that if we later double the extent,
-	  // the existing quadrant boundaries don’t change due to floating point error!
-
-	  if (isNaN(x0)) {
-	    x1 = (x0 = Math.floor(x)) + 1;
-	    y1 = (y0 = Math.floor(y)) + 1;
-	  } // Otherwise, double repeatedly to cover.
-	  else {
-	      var z = x1 - x0,
-	          node = this._root,
-	          parent,
-	          i;
-
-	      while (x0 > x || x >= x1 || y0 > y || y >= y1) {
-	        i = (y < y0) << 1 | x < x0;
-	        parent = new Array(4), parent[i] = node, node = parent, z *= 2;
-
-	        switch (i) {
-	          case 0:
-	            x1 = x0 + z, y1 = y0 + z;
-	            break;
-
-	          case 1:
-	            x0 = x1 - z, y1 = y0 + z;
-	            break;
-
-	          case 2:
-	            x1 = x0 + z, y0 = y1 - z;
-	            break;
-
-	          case 3:
-	            x0 = x1 - z, y0 = y1 - z;
-	            break;
-	        }
-	      }
-
-	      if (this._root && this._root.length) this._root = node;
-	    }
-
-	  this._x0 = x0;
-	  this._y0 = y0;
-	  this._x1 = x1;
-	  this._y1 = y1;
-	  return this;
-	}
-
-	function tree_data() {
-	  var data = [];
-	  this.visit(function (node) {
-	    if (!node.length) do {
-	      data.push(node.data);
-	    } while (node = node.next);
-	  });
-	  return data;
-	}
-
-	function tree_extent(_) {
-	  return arguments.length ? this.cover(+_[0][0], +_[0][1]).cover(+_[1][0], +_[1][1]) : isNaN(this._x0) ? undefined : [[this._x0, this._y0], [this._x1, this._y1]];
-	}
-
-	function Quad(node, x0, y0, x1, y1) {
-	  this.node = node;
-	  this.x0 = x0;
-	  this.y0 = y0;
-	  this.x1 = x1;
-	  this.y1 = y1;
-	}
-
-	function tree_find(x, y, radius) {
-	  var data,
-	      x0 = this._x0,
-	      y0 = this._y0,
-	      x1,
-	      y1,
-	      x2,
-	      y2,
-	      x3 = this._x1,
-	      y3 = this._y1,
-	      quads = [],
-	      node = this._root,
-	      q,
-	      i;
-	  if (node) quads.push(new Quad(node, x0, y0, x3, y3));
-	  if (radius == null) radius = Infinity;else {
-	    x0 = x - radius, y0 = y - radius;
-	    x3 = x + radius, y3 = y + radius;
-	    radius *= radius;
-	  }
-
-	  while (q = quads.pop()) {
-	    // Stop searching if this quadrant can’t contain a closer node.
-	    if (!(node = q.node) || (x1 = q.x0) > x3 || (y1 = q.y0) > y3 || (x2 = q.x1) < x0 || (y2 = q.y1) < y0) continue; // Bisect the current quadrant.
-
-	    if (node.length) {
-	      var xm = (x1 + x2) / 2,
-	          ym = (y1 + y2) / 2;
-	      quads.push(new Quad(node[3], xm, ym, x2, y2), new Quad(node[2], x1, ym, xm, y2), new Quad(node[1], xm, y1, x2, ym), new Quad(node[0], x1, y1, xm, ym)); // Visit the closest quadrant first.
-
-	      if (i = (y >= ym) << 1 | x >= xm) {
-	        q = quads[quads.length - 1];
-	        quads[quads.length - 1] = quads[quads.length - 1 - i];
-	        quads[quads.length - 1 - i] = q;
-	      }
-	    } // Visit this point. (Visiting coincident points isn’t necessary!)
-	    else {
-	        var dx = x - +this._x.call(null, node.data),
-	            dy = y - +this._y.call(null, node.data),
-	            d2 = dx * dx + dy * dy;
-
-	        if (d2 < radius) {
-	          var d = Math.sqrt(radius = d2);
-	          x0 = x - d, y0 = y - d;
-	          x3 = x + d, y3 = y + d;
-	          data = node.data;
-	        }
-	      }
-	  }
-
-	  return data;
-	}
-
-	function tree_remove(d) {
-	  if (isNaN(x = +this._x.call(null, d)) || isNaN(y = +this._y.call(null, d))) return this; // ignore invalid points
-
-	  var parent,
-	      node = this._root,
-	      retainer,
-	      previous,
-	      next,
-	      x0 = this._x0,
-	      y0 = this._y0,
-	      x1 = this._x1,
-	      y1 = this._y1,
-	      x,
-	      y,
-	      xm,
-	      ym,
-	      right,
-	      bottom,
-	      i,
-	      j; // If the tree is empty, initialize the root as a leaf.
-
-	  if (!node) return this; // Find the leaf node for the point.
-	  // While descending, also retain the deepest parent with a non-removed sibling.
-
-	  if (node.length) while (true) {
-	    if (right = x >= (xm = (x0 + x1) / 2)) x0 = xm;else x1 = xm;
-	    if (bottom = y >= (ym = (y0 + y1) / 2)) y0 = ym;else y1 = ym;
-	    if (!(parent = node, node = node[i = bottom << 1 | right])) return this;
-	    if (!node.length) break;
-	    if (parent[i + 1 & 3] || parent[i + 2 & 3] || parent[i + 3 & 3]) retainer = parent, j = i;
-	  } // Find the point to remove.
-
-	  while (node.data !== d) {
-	    if (!(previous = node, node = node.next)) return this;
-	  }
-
-	  if (next = node.next) delete node.next; // If there are multiple coincident points, remove just the point.
-
-	  if (previous) return next ? previous.next = next : delete previous.next, this; // If this is the root point, remove it.
-
-	  if (!parent) return this._root = next, this; // Remove this leaf.
-
-	  next ? parent[i] = next : delete parent[i]; // If the parent now contains exactly one leaf, collapse superfluous parents.
-
-	  if ((node = parent[0] || parent[1] || parent[2] || parent[3]) && node === (parent[3] || parent[2] || parent[1] || parent[0]) && !node.length) {
-	    if (retainer) retainer[j] = node;else this._root = node;
-	  }
-
-	  return this;
-	}
-
-	function removeAll(data) {
-	  for (var i = 0, n = data.length; i < n; ++i) {
-	    this.remove(data[i]);
-	  }
-
-	  return this;
-	}
-
-	function tree_root() {
-	  return this._root;
-	}
-
-	function tree_size() {
-	  var size = 0;
-	  this.visit(function (node) {
-	    if (!node.length) do {
-	      ++size;
-	    } while (node = node.next);
-	  });
-	  return size;
-	}
-
-	function tree_visit(callback) {
-	  var quads = [],
-	      q,
-	      node = this._root,
-	      child,
-	      x0,
-	      y0,
-	      x1,
-	      y1;
-	  if (node) quads.push(new Quad(node, this._x0, this._y0, this._x1, this._y1));
-
-	  while (q = quads.pop()) {
-	    if (!callback(node = q.node, x0 = q.x0, y0 = q.y0, x1 = q.x1, y1 = q.y1) && node.length) {
-	      var xm = (x0 + x1) / 2,
-	          ym = (y0 + y1) / 2;
-	      if (child = node[3]) quads.push(new Quad(child, xm, ym, x1, y1));
-	      if (child = node[2]) quads.push(new Quad(child, x0, ym, xm, y1));
-	      if (child = node[1]) quads.push(new Quad(child, xm, y0, x1, ym));
-	      if (child = node[0]) quads.push(new Quad(child, x0, y0, xm, ym));
-	    }
-	  }
-
-	  return this;
-	}
-
-	function tree_visitAfter(callback) {
-	  var quads = [],
-	      next = [],
-	      q;
-	  if (this._root) quads.push(new Quad(this._root, this._x0, this._y0, this._x1, this._y1));
-
-	  while (q = quads.pop()) {
-	    var node = q.node;
-
-	    if (node.length) {
-	      var child,
-	          x0 = q.x0,
-	          y0 = q.y0,
-	          x1 = q.x1,
-	          y1 = q.y1,
-	          xm = (x0 + x1) / 2,
-	          ym = (y0 + y1) / 2;
-	      if (child = node[0]) quads.push(new Quad(child, x0, y0, xm, ym));
-	      if (child = node[1]) quads.push(new Quad(child, xm, y0, x1, ym));
-	      if (child = node[2]) quads.push(new Quad(child, x0, ym, xm, y1));
-	      if (child = node[3]) quads.push(new Quad(child, xm, ym, x1, y1));
-	    }
-
-	    next.push(q);
-	  }
-
-	  while (q = next.pop()) {
-	    callback(q.node, q.x0, q.y0, q.x1, q.y1);
-	  }
-
-	  return this;
-	}
-
-	function defaultX(d) {
-	  return d[0];
-	}
-
-	function tree_x(_) {
-	  return arguments.length ? (this._x = _, this) : this._x;
-	}
-
-	function defaultY(d) {
-	  return d[1];
-	}
-
-	function tree_y(_) {
-	  return arguments.length ? (this._y = _, this) : this._y;
-	}
-
-	function quadtree(nodes, x, y) {
-	  var tree = new Quadtree(x == null ? defaultX : x, y == null ? defaultY : y, NaN, NaN, NaN, NaN);
-	  return nodes == null ? tree : tree.addAll(nodes);
-	}
-
-	function Quadtree(x, y, x0, y0, x1, y1) {
-	  this._x = x;
-	  this._y = y;
-	  this._x0 = x0;
-	  this._y0 = y0;
-	  this._x1 = x1;
-	  this._y1 = y1;
-	  this._root = undefined;
-	}
-
-	function leaf_copy(leaf) {
-	  var copy = {
-	    data: leaf.data
-	  },
-	      next = copy;
-
-	  while (leaf = leaf.next) {
-	    next = next.next = {
-	      data: leaf.data
-	    };
-	  }
-
-	  return copy;
-	}
-
-	var treeProto = quadtree.prototype = Quadtree.prototype;
-
-	treeProto.copy = function () {
-	  var copy = new Quadtree(this._x, this._y, this._x0, this._y0, this._x1, this._y1),
-	      node = this._root,
-	      nodes,
-	      child;
-	  if (!node) return copy;
-	  if (!node.length) return copy._root = leaf_copy(node), copy;
-	  nodes = [{
-	    source: node,
-	    target: copy._root = new Array(4)
-	  }];
-
-	  while (node = nodes.pop()) {
-	    for (var i = 0; i < 4; ++i) {
-	      if (child = node.source[i]) {
-	        if (child.length) nodes.push({
-	          source: child,
-	          target: node.target[i] = new Array(4)
-	        });else node.target[i] = leaf_copy(child);
-	      }
-	    }
-	  }
-
-	  return copy;
-	};
-
-	treeProto.add = tree_add;
-	treeProto.addAll = addAll;
-	treeProto.cover = tree_cover;
-	treeProto.data = tree_data;
-	treeProto.extent = tree_extent;
-	treeProto.find = tree_find;
-	treeProto.remove = tree_remove;
-	treeProto.removeAll = removeAll;
-	treeProto.root = tree_root;
-	treeProto.size = tree_size;
-	treeProto.visit = tree_visit;
-	treeProto.visitAfter = tree_visitAfter;
-	treeProto.x = tree_x;
-	treeProto.y = tree_y;
-
-	function constant(x) {
-	  return function () {
-	    return x;
-	  };
-	}
-
-	function jiggle() {
-	  return (Math.random() - 0.5) * 1e-6;
-	}
-
-	function x(d) {
-	  return d.x + d.vx;
-	}
-
-	function y(d) {
-	  return d.y + d.vy;
-	}
-
-	function collide(radius) {
-	  var nodes,
-	      radii,
-	      strength = 1,
-	      iterations = 1;
-	  if (typeof radius !== "function") radius = constant(radius == null ? 1 : +radius);
-
-	  function force() {
-	    var i,
-	        n = nodes.length,
-	        tree,
-	        node,
-	        xi,
-	        yi,
-	        ri,
-	        ri2;
-
-	    for (var k = 0; k < iterations; ++k) {
-	      tree = quadtree(nodes, x, y).visitAfter(prepare);
-
-	      for (i = 0; i < n; ++i) {
-	        node = nodes[i];
-	        ri = radii[node.index], ri2 = ri * ri;
-	        xi = node.x + node.vx;
-	        yi = node.y + node.vy;
-	        tree.visit(apply);
-	      }
-	    }
-
-	    function apply(quad, x0, y0, x1, y1) {
-	      var data = quad.data,
-	          rj = quad.r,
-	          r = ri + rj;
-
-	      if (data) {
-	        if (data.index > node.index) {
-	          var x = xi - data.x - data.vx,
-	              y = yi - data.y - data.vy,
-	              l = x * x + y * y;
-
-	          if (l < r * r) {
-	            if (x === 0) x = jiggle(), l += x * x;
-	            if (y === 0) y = jiggle(), l += y * y;
-	            l = (r - (l = Math.sqrt(l))) / l * strength;
-	            node.vx += (x *= l) * (r = (rj *= rj) / (ri2 + rj));
-	            node.vy += (y *= l) * r;
-	            data.vx -= x * (r = 1 - r);
-	            data.vy -= y * r;
-	          }
-	        }
-
-	        return;
-	      }
-
-	      return x0 > xi + r || x1 < xi - r || y0 > yi + r || y1 < yi - r;
-	    }
-	  }
-
-	  function prepare(quad) {
-	    if (quad.data) return quad.r = radii[quad.data.index];
-
-	    for (var i = quad.r = 0; i < 4; ++i) {
-	      if (quad[i] && quad[i].r > quad.r) {
-	        quad.r = quad[i].r;
-	      }
-	    }
-	  }
-
-	  function initialize() {
-	    if (!nodes) return;
-	    var i,
-	        n = nodes.length,
-	        node;
-	    radii = new Array(n);
-
-	    for (i = 0; i < n; ++i) {
-	      node = nodes[i], radii[node.index] = +radius(node, i, nodes);
-	    }
-	  }
-
-	  force.initialize = function (_) {
-	    nodes = _;
-	    initialize();
-	  };
-
-	  force.iterations = function (_) {
-	    return arguments.length ? (iterations = +_, force) : iterations;
-	  };
-
-	  force.strength = function (_) {
-	    return arguments.length ? (strength = +_, force) : strength;
-	  };
-
-	  force.radius = function (_) {
-	    return arguments.length ? (radius = typeof _ === "function" ? _ : constant(+_), initialize(), force) : radius;
-	  };
-
-	  return force;
-	}
-
-	function index(d) {
-	  return d.index;
-	}
-
-	function find(nodeById, nodeId) {
-	  var node = nodeById.get(nodeId);
-	  if (!node) throw new Error("node not found: " + nodeId);
-	  return node;
-	}
-
-	function link(links) {
-	  var id = index,
-	      strength = defaultStrength,
-	      strengths,
-	      distance = constant(30),
-	      distances,
-	      nodes,
-	      count,
-	      bias,
-	      iterations = 1;
-	  if (links == null) links = [];
-
-	  function defaultStrength(link) {
-	    return 1 / Math.min(count[link.source.index], count[link.target.index]);
-	  }
-
-	  function force(alpha) {
-	    for (var k = 0, n = links.length; k < iterations; ++k) {
-	      for (var i = 0, link, source, target, x, y, l, b; i < n; ++i) {
-	        link = links[i], source = link.source, target = link.target;
-	        x = target.x + target.vx - source.x - source.vx || jiggle();
-	        y = target.y + target.vy - source.y - source.vy || jiggle();
-	        l = Math.sqrt(x * x + y * y);
-	        l = (l - distances[i]) / l * alpha * strengths[i];
-	        x *= l, y *= l;
-	        target.vx -= x * (b = bias[i]);
-	        target.vy -= y * b;
-	        source.vx += x * (b = 1 - b);
-	        source.vy += y * b;
-	      }
-	    }
-	  }
-
-	  function initialize() {
-	    if (!nodes) return;
-	    var i,
-	        n = nodes.length,
-	        m = links.length,
-	        nodeById = new Map(nodes.map(function (d, i) {
-	      return [id(d, i, nodes), d];
-	    })),
-	        link;
-
-	    for (i = 0, count = new Array(n); i < m; ++i) {
-	      link = links[i], link.index = i;
-	      if ((0, _typeof2["default"])(link.source) !== "object") link.source = find(nodeById, link.source);
-	      if ((0, _typeof2["default"])(link.target) !== "object") link.target = find(nodeById, link.target);
-	      count[link.source.index] = (count[link.source.index] || 0) + 1;
-	      count[link.target.index] = (count[link.target.index] || 0) + 1;
-	    }
-
-	    for (i = 0, bias = new Array(m); i < m; ++i) {
-	      link = links[i], bias[i] = count[link.source.index] / (count[link.source.index] + count[link.target.index]);
-	    }
-
-	    strengths = new Array(m), initializeStrength();
-	    distances = new Array(m), initializeDistance();
-	  }
-
-	  function initializeStrength() {
-	    if (!nodes) return;
-
-	    for (var i = 0, n = links.length; i < n; ++i) {
-	      strengths[i] = +strength(links[i], i, links);
-	    }
-	  }
-
-	  function initializeDistance() {
-	    if (!nodes) return;
-
-	    for (var i = 0, n = links.length; i < n; ++i) {
-	      distances[i] = +distance(links[i], i, links);
-	    }
-	  }
-
-	  force.initialize = function (_) {
-	    nodes = _;
-	    initialize();
-	  };
-
-	  force.links = function (_) {
-	    return arguments.length ? (links = _, initialize(), force) : links;
-	  };
-
-	  force.id = function (_) {
-	    return arguments.length ? (id = _, force) : id;
-	  };
-
-	  force.iterations = function (_) {
-	    return arguments.length ? (iterations = +_, force) : iterations;
-	  };
-
-	  force.strength = function (_) {
-	    return arguments.length ? (strength = typeof _ === "function" ? _ : constant(+_), initializeStrength(), force) : strength;
-	  };
-
-	  force.distance = function (_) {
-	    return arguments.length ? (distance = typeof _ === "function" ? _ : constant(+_), initializeDistance(), force) : distance;
-	  };
-
-	  return force;
-	}
-
-	var noop = {
-	  value: function value() {}
-	};
-
-	function dispatch() {
-	  for (var i = 0, n = arguments.length, _ = {}, t; i < n; ++i) {
-	    if (!(t = arguments[i] + "") || t in _ || /[\s.]/.test(t)) throw new Error("illegal type: " + t);
-	    _[t] = [];
-	  }
-
-	  return new Dispatch(_);
-	}
-
-	function Dispatch(_) {
-	  this._ = _;
-	}
-
-	function parseTypenames(typenames, types) {
-	  return typenames.trim().split(/^|\s+/).map(function (t) {
-	    var name = "",
-	        i = t.indexOf(".");
-	    if (i >= 0) name = t.slice(i + 1), t = t.slice(0, i);
-	    if (t && !types.hasOwnProperty(t)) throw new Error("unknown type: " + t);
-	    return {
-	      type: t,
-	      name: name
-	    };
-	  });
-	}
-
-	Dispatch.prototype = dispatch.prototype = {
-	  constructor: Dispatch,
-	  on: function on(typename, callback) {
-	    var _ = this._,
-	        T = parseTypenames(typename + "", _),
-	        t,
-	        i = -1,
-	        n = T.length; // If no callback was specified, return the callback of the given type and name.
-
-	    if (arguments.length < 2) {
-	      while (++i < n) {
-	        if ((t = (typename = T[i]).type) && (t = get(_[t], typename.name))) return t;
-	      }
-
-	      return;
-	    } // If a type was specified, set the callback for the given type and name.
-	    // Otherwise, if a null callback was specified, remove callbacks of the given name.
-
-
-	    if (callback != null && typeof callback !== "function") throw new Error("invalid callback: " + callback);
-
-	    while (++i < n) {
-	      if (t = (typename = T[i]).type) _[t] = set(_[t], typename.name, callback);else if (callback == null) for (t in _) {
-	        _[t] = set(_[t], typename.name, null);
-	      }
-	    }
-
-	    return this;
-	  },
-	  copy: function copy() {
-	    var copy = {},
-	        _ = this._;
-
-	    for (var t in _) {
-	      copy[t] = _[t].slice();
-	    }
-
-	    return new Dispatch(copy);
-	  },
-	  call: function call(type, that) {
-	    if ((n = arguments.length - 2) > 0) for (var args = new Array(n), i = 0, n, t; i < n; ++i) {
-	      args[i] = arguments[i + 2];
-	    }
-	    if (!this._.hasOwnProperty(type)) throw new Error("unknown type: " + type);
-
-	    for (t = this._[type], i = 0, n = t.length; i < n; ++i) {
-	      t[i].value.apply(that, args);
-	    }
-	  },
-	  apply: function apply(type, that, args) {
-	    if (!this._.hasOwnProperty(type)) throw new Error("unknown type: " + type);
-
-	    for (var t = this._[type], i = 0, n = t.length; i < n; ++i) {
-	      t[i].value.apply(that, args);
-	    }
-	  }
-	};
-
-	function get(type, name) {
-	  for (var i = 0, n = type.length, c; i < n; ++i) {
-	    if ((c = type[i]).name === name) {
-	      return c.value;
-	    }
-	  }
-	}
-
-	function set(type, name, callback) {
-	  for (var i = 0, n = type.length; i < n; ++i) {
-	    if (type[i].name === name) {
-	      type[i] = noop, type = type.slice(0, i).concat(type.slice(i + 1));
-	      break;
-	    }
-	  }
-
-	  if (callback != null) type.push({
-	    name: name,
-	    value: callback
-	  });
-	  return type;
-	}
-
-	var frame = 0,
-	    // is an animation frame pending?
-	timeout = 0,
-	    // is a timeout pending?
-	interval = 0,
-	    // are any timers active?
-	pokeDelay = 1000,
-	    // how frequently we check for clock skew
-	taskHead,
-	    taskTail,
-	    clockLast = 0,
-	    clockNow = 0,
-	    clockSkew = 0,
-	    clock = (typeof performance === "undefined" ? "undefined" : (0, _typeof2["default"])(performance)) === "object" && performance.now ? performance : Date,
-	    setFrame = (typeof window === "undefined" ? "undefined" : (0, _typeof2["default"])(window)) === "object" && window.requestAnimationFrame ? window.requestAnimationFrame.bind(window) : function (f) {
-	  setTimeout(f, 17);
-	};
-
-	function now() {
-	  return clockNow || (setFrame(clearNow), clockNow = clock.now() + clockSkew);
-	}
-
-	function clearNow() {
-	  clockNow = 0;
-	}
-
-	function Timer() {
-	  this._call = this._time = this._next = null;
-	}
-
-	Timer.prototype = timer.prototype = {
-	  constructor: Timer,
-	  restart: function restart(callback, delay, time) {
-	    if (typeof callback !== "function") throw new TypeError("callback is not a function");
-	    time = (time == null ? now() : +time) + (delay == null ? 0 : +delay);
-
-	    if (!this._next && taskTail !== this) {
-	      if (taskTail) taskTail._next = this;else taskHead = this;
-	      taskTail = this;
-	    }
-
-	    this._call = callback;
-	    this._time = time;
-	    sleep();
-	  },
-	  stop: function stop() {
-	    if (this._call) {
-	      this._call = null;
-	      this._time = Infinity;
-	      sleep();
-	    }
-	  }
-	};
-
-	function timer(callback, delay, time) {
-	  var t = new Timer();
-	  t.restart(callback, delay, time);
-	  return t;
-	}
-
-	function timerFlush() {
-	  now(); // Get the current time, if not already set.
-
-	  ++frame; // Pretend we’ve set an alarm, if we haven’t already.
-
-	  var t = taskHead,
-	      e;
-
-	  while (t) {
-	    if ((e = clockNow - t._time) >= 0) t._call.call(null, e);
-	    t = t._next;
-	  }
-
-	  --frame;
-	}
-
-	function wake() {
-	  clockNow = (clockLast = clock.now()) + clockSkew;
-	  frame = timeout = 0;
-
-	  try {
-	    timerFlush();
-	  } finally {
-	    frame = 0;
-	    nap();
-	    clockNow = 0;
-	  }
-	}
-
-	function poke() {
-	  var now = clock.now(),
-	      delay = now - clockLast;
-	  if (delay > pokeDelay) clockSkew -= delay, clockLast = now;
-	}
-
-	function nap() {
-	  var t0,
-	      t1 = taskHead,
-	      t2,
-	      time = Infinity;
-
-	  while (t1) {
-	    if (t1._call) {
-	      if (time > t1._time) time = t1._time;
-	      t0 = t1, t1 = t1._next;
-	    } else {
-	      t2 = t1._next, t1._next = null;
-	      t1 = t0 ? t0._next = t2 : taskHead = t2;
-	    }
-	  }
-
-	  taskTail = t0;
-	  sleep(time);
-	}
-
-	function sleep(time) {
-	  if (frame) return; // Soonest alarm already set, or will be.
-
-	  if (timeout) timeout = clearTimeout(timeout);
-	  var delay = time - clockNow; // Strictly less than if we recomputed clockNow.
-
-	  if (delay > 24) {
-	    if (time < Infinity) timeout = setTimeout(wake, time - clock.now() - clockSkew);
-	    if (interval) interval = clearInterval(interval);
-	  } else {
-	    if (!interval) clockLast = clock.now(), interval = setInterval(poke, pokeDelay);
-	    frame = 1, setFrame(wake);
-	  }
-	}
-
-	function x$1(d) {
-	  return d.x;
-	}
-
-	function y$1(d) {
-	  return d.y;
-	}
-
-	var initialRadius = 10,
-	    initialAngle = Math.PI * (3 - Math.sqrt(5));
-
-	function simulation(_nodes) {
-	  var simulation,
-	      _alpha = 1,
-	      _alphaMin = 0.001,
-	      _alphaDecay = 1 - Math.pow(_alphaMin, 1 / 300),
-	      _alphaTarget = 0,
-	      _velocityDecay = 0.6,
-	      forces = new Map(),
-	      stepper = timer(step),
-	      event = dispatch("tick", "end");
-
-	  if (_nodes == null) _nodes = [];
-
-	  function step() {
-	    tick();
-	    event.call("tick", simulation);
-
-	    if (_alpha < _alphaMin) {
-	      stepper.stop();
-	      event.call("end", simulation);
-	    }
-	  }
-
-	  function tick(iterations) {
-	    var i,
-	        n = _nodes.length,
-	        node;
-	    if (iterations === undefined) iterations = 1;
-
-	    for (var k = 0; k < iterations; ++k) {
-	      _alpha += (_alphaTarget - _alpha) * _alphaDecay;
-	      forces.forEach(function (force) {
-	        force(_alpha);
-	      });
-
-	      for (i = 0; i < n; ++i) {
-	        node = _nodes[i];
-	        if (node.fx == null) node.x += node.vx *= _velocityDecay;else node.x = node.fx, node.vx = 0;
-	        if (node.fy == null) node.y += node.vy *= _velocityDecay;else node.y = node.fy, node.vy = 0;
-	      }
-	    }
-
-	    return simulation;
-	  }
-
-	  function initializeNodes() {
-	    for (var i = 0, n = _nodes.length, node; i < n; ++i) {
-	      node = _nodes[i], node.index = i;
-	      if (node.fx != null) node.x = node.fx;
-	      if (node.fy != null) node.y = node.fy;
-
-	      if (isNaN(node.x) || isNaN(node.y)) {
-	        var radius = initialRadius * Math.sqrt(i),
-	            angle = i * initialAngle;
-	        node.x = radius * Math.cos(angle);
-	        node.y = radius * Math.sin(angle);
-	      }
-
-	      if (isNaN(node.vx) || isNaN(node.vy)) {
-	        node.vx = node.vy = 0;
-	      }
-	    }
-	  }
-
-	  function initializeForce(force) {
-	    if (force.initialize) force.initialize(_nodes);
-	    return force;
-	  }
-
-	  initializeNodes();
-	  return simulation = {
-	    tick: tick,
-	    restart: function restart() {
-	      return stepper.restart(step), simulation;
-	    },
-	    stop: function stop() {
-	      return stepper.stop(), simulation;
-	    },
-	    nodes: function nodes(_) {
-	      return arguments.length ? (_nodes = _, initializeNodes(), forces.forEach(initializeForce), simulation) : _nodes;
-	    },
-	    alpha: function alpha(_) {
-	      return arguments.length ? (_alpha = +_, simulation) : _alpha;
-	    },
-	    alphaMin: function alphaMin(_) {
-	      return arguments.length ? (_alphaMin = +_, simulation) : _alphaMin;
-	    },
-	    alphaDecay: function alphaDecay(_) {
-	      return arguments.length ? (_alphaDecay = +_, simulation) : +_alphaDecay;
-	    },
-	    alphaTarget: function alphaTarget(_) {
-	      return arguments.length ? (_alphaTarget = +_, simulation) : _alphaTarget;
-	    },
-	    velocityDecay: function velocityDecay(_) {
-	      return arguments.length ? (_velocityDecay = 1 - _, simulation) : 1 - _velocityDecay;
-	    },
-	    force: function force(name, _) {
-	      return arguments.length > 1 ? (_ == null ? forces["delete"](name) : forces.set(name, initializeForce(_)), simulation) : forces.get(name);
-	    },
-	    find: function find(x, y, radius) {
-	      var i = 0,
-	          n = _nodes.length,
-	          dx,
-	          dy,
-	          d2,
-	          node,
-	          closest;
-	      if (radius == null) radius = Infinity;else radius *= radius;
-
-	      for (i = 0; i < n; ++i) {
-	        node = _nodes[i];
-	        dx = x - node.x;
-	        dy = y - node.y;
-	        d2 = dx * dx + dy * dy;
-	        if (d2 < radius) closest = node, radius = d2;
-	      }
-
-	      return closest;
-	    },
-	    on: function on(name, _) {
-	      return arguments.length > 1 ? (event.on(name, _), simulation) : event.on(name);
-	    }
-	  };
-	}
-
-	function manyBody() {
-	  var nodes,
-	      node,
-	      alpha,
-	      strength = constant(-30),
-	      strengths,
-	      distanceMin2 = 1,
-	      distanceMax2 = Infinity,
-	      theta2 = 0.81;
-
-	  function force(_) {
-	    var i,
-	        n = nodes.length,
-	        tree = quadtree(nodes, x$1, y$1).visitAfter(accumulate);
-
-	    for (alpha = _, i = 0; i < n; ++i) {
-	      node = nodes[i], tree.visit(apply);
-	    }
-	  }
-
-	  function initialize() {
-	    if (!nodes) return;
-	    var i,
-	        n = nodes.length,
-	        node;
-	    strengths = new Array(n);
-
-	    for (i = 0; i < n; ++i) {
-	      node = nodes[i], strengths[node.index] = +strength(node, i, nodes);
-	    }
-	  }
-
-	  function accumulate(quad) {
-	    var strength = 0,
-	        q,
-	        c,
-	        weight = 0,
-	        x,
-	        y,
-	        i; // For internal nodes, accumulate forces from child quadrants.
-
-	    if (quad.length) {
-	      for (x = y = i = 0; i < 4; ++i) {
-	        if ((q = quad[i]) && (c = Math.abs(q.value))) {
-	          strength += q.value, weight += c, x += c * q.x, y += c * q.y;
-	        }
-	      }
-
-	      quad.x = x / weight;
-	      quad.y = y / weight;
-	    } // For leaf nodes, accumulate forces from coincident quadrants.
-	    else {
-	        q = quad;
-	        q.x = q.data.x;
-	        q.y = q.data.y;
-
-	        do {
-	          strength += strengths[q.data.index];
-	        } while (q = q.next);
-	      }
-
-	    quad.value = strength;
-	  }
-
-	  function apply(quad, x1, _, x2) {
-	    if (!quad.value) return true;
-	    var x = quad.x - node.x,
-	        y = quad.y - node.y,
-	        w = x2 - x1,
-	        l = x * x + y * y; // Apply the Barnes-Hut approximation if possible.
-	    // Limit forces for very close nodes; randomize direction if coincident.
-
-	    if (w * w / theta2 < l) {
-	      if (l < distanceMax2) {
-	        if (x === 0) x = jiggle(), l += x * x;
-	        if (y === 0) y = jiggle(), l += y * y;
-	        if (l < distanceMin2) l = Math.sqrt(distanceMin2 * l);
-	        node.vx += x * quad.value * alpha / l;
-	        node.vy += y * quad.value * alpha / l;
-	      }
-
-	      return true;
-	    } // Otherwise, process points directly.
-	    else if (quad.length || l >= distanceMax2) return; // Limit forces for very close nodes; randomize direction if coincident.
-
-
-	    if (quad.data !== node || quad.next) {
-	      if (x === 0) x = jiggle(), l += x * x;
-	      if (y === 0) y = jiggle(), l += y * y;
-	      if (l < distanceMin2) l = Math.sqrt(distanceMin2 * l);
-	    }
-
-	    do {
-	      if (quad.data !== node) {
-	        w = strengths[quad.data.index] * alpha / l;
-	        node.vx += x * w;
-	        node.vy += y * w;
-	      }
-	    } while (quad = quad.next);
-	  }
-
-	  force.initialize = function (_) {
-	    nodes = _;
-	    initialize();
-	  };
-
-	  force.strength = function (_) {
-	    return arguments.length ? (strength = typeof _ === "function" ? _ : constant(+_), initialize(), force) : strength;
-	  };
-
-	  force.distanceMin = function (_) {
-	    return arguments.length ? (distanceMin2 = _ * _, force) : Math.sqrt(distanceMin2);
-	  };
-
-	  force.distanceMax = function (_) {
-	    return arguments.length ? (distanceMax2 = _ * _, force) : Math.sqrt(distanceMax2);
-	  };
-
-	  force.theta = function (_) {
-	    return arguments.length ? (theta2 = _ * _, force) : Math.sqrt(theta2);
-	  };
-
-	  return force;
-	}
-
-	function radial(radius, x, y) {
-	  var nodes,
-	      strength = constant(0.1),
-	      strengths,
-	      radiuses;
-	  if (typeof radius !== "function") radius = constant(+radius);
-	  if (x == null) x = 0;
-	  if (y == null) y = 0;
-
-	  function force(alpha) {
-	    for (var i = 0, n = nodes.length; i < n; ++i) {
-	      var node = nodes[i],
-	          dx = node.x - x || 1e-6,
-	          dy = node.y - y || 1e-6,
-	          r = Math.sqrt(dx * dx + dy * dy),
-	          k = (radiuses[i] - r) * strengths[i] * alpha / r;
-	      node.vx += dx * k;
-	      node.vy += dy * k;
-	    }
-	  }
-
-	  function initialize() {
-	    if (!nodes) return;
-	    var i,
-	        n = nodes.length;
-	    strengths = new Array(n);
-	    radiuses = new Array(n);
-
-	    for (i = 0; i < n; ++i) {
-	      radiuses[i] = +radius(nodes[i], i, nodes);
-	      strengths[i] = isNaN(radiuses[i]) ? 0 : +strength(nodes[i], i, nodes);
-	    }
-	  }
-
-	  force.initialize = function (_) {
-	    nodes = _, initialize();
-	  };
-
-	  force.strength = function (_) {
-	    return arguments.length ? (strength = typeof _ === "function" ? _ : constant(+_), initialize(), force) : strength;
-	  };
-
-	  force.radius = function (_) {
-	    return arguments.length ? (radius = typeof _ === "function" ? _ : constant(+_), initialize(), force) : radius;
-	  };
-
-	  force.x = function (_) {
-	    return arguments.length ? (x = +_, force) : x;
-	  };
-
-	  force.y = function (_) {
-	    return arguments.length ? (y = +_, force) : y;
-	  };
-
-	  return force;
-	}
-
-	function x$2(x) {
-	  var strength = constant(0.1),
-	      nodes,
-	      strengths,
-	      xz;
-	  if (typeof x !== "function") x = constant(x == null ? 0 : +x);
-
-	  function force(alpha) {
-	    for (var i = 0, n = nodes.length, node; i < n; ++i) {
-	      node = nodes[i], node.vx += (xz[i] - node.x) * strengths[i] * alpha;
-	    }
-	  }
-
-	  function initialize() {
-	    if (!nodes) return;
-	    var i,
-	        n = nodes.length;
-	    strengths = new Array(n);
-	    xz = new Array(n);
-
-	    for (i = 0; i < n; ++i) {
-	      strengths[i] = isNaN(xz[i] = +x(nodes[i], i, nodes)) ? 0 : +strength(nodes[i], i, nodes);
-	    }
-	  }
-
-	  force.initialize = function (_) {
-	    nodes = _;
-	    initialize();
-	  };
-
-	  force.strength = function (_) {
-	    return arguments.length ? (strength = typeof _ === "function" ? _ : constant(+_), initialize(), force) : strength;
-	  };
-
-	  force.x = function (_) {
-	    return arguments.length ? (x = typeof _ === "function" ? _ : constant(+_), initialize(), force) : x;
-	  };
-
-	  return force;
-	}
-
-	function y$2(y) {
-	  var strength = constant(0.1),
-	      nodes,
-	      strengths,
-	      yz;
-	  if (typeof y !== "function") y = constant(y == null ? 0 : +y);
-
-	  function force(alpha) {
-	    for (var i = 0, n = nodes.length, node; i < n; ++i) {
-	      node = nodes[i], node.vy += (yz[i] - node.y) * strengths[i] * alpha;
-	    }
-	  }
-
-	  function initialize() {
-	    if (!nodes) return;
-	    var i,
-	        n = nodes.length;
-	    strengths = new Array(n);
-	    yz = new Array(n);
-
-	    for (i = 0; i < n; ++i) {
-	      strengths[i] = isNaN(yz[i] = +y(nodes[i], i, nodes)) ? 0 : +strength(nodes[i], i, nodes);
-	    }
-	  }
-
-	  force.initialize = function (_) {
-	    nodes = _;
-	    initialize();
-	  };
-
-	  force.strength = function (_) {
-	    return arguments.length ? (strength = typeof _ === "function" ? _ : constant(+_), initialize(), force) : strength;
-	  };
-
-	  force.y = function (_) {
-	    return arguments.length ? (y = typeof _ === "function" ? _ : constant(+_), initialize(), force) : y;
-	  };
-
-	  return force;
-	}
-	});
-
-	unwrapExports(force);
-	var force_1 = force.forceCenter;
-	var force_2 = force.forceCollide;
-	var force_3 = force.forceLink;
-	var force_4 = force.forceManyBody;
-	var force_5 = force.forceRadial;
-	var force_6 = force.forceSimulation;
-	var force_7 = force.forceX;
-	var force_8 = force.forceY;
-
-	var force_1$1 = createCommonjsModule(function (module, exports) {
-
-
-
-
-
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	exports["default"] = void 0;
-
-	var _classCallCheck2 = interopRequireDefault(classCallCheck$1);
-
-	var _possibleConstructorReturn2 = interopRequireDefault(possibleConstructorReturn$1);
-
-	var _getPrototypeOf2 = interopRequireDefault(getPrototypeOf$1);
-
-	var _assertThisInitialized2 = interopRequireDefault(assertThisInitialized$1);
-
-	var _createClass2 = interopRequireDefault(createClass$1);
-
-	var _inherits2 = interopRequireDefault(inherits$1);
-
-	var _canvax = interopRequireDefault(Canvax);
-
-	var _index = interopRequireDefault(graphs);
-
-	var force$1 = interopRequireWildcard(force);
-
-
-
-	var _ = _canvax["default"]._;
-	var Circle = _canvax["default"].Shapes.Circle;
-	var Text = _canvax["default"].Display.Text;
-	var Line = _canvax["default"].Shapes.Line;
-
-	var Force =
-	/*#__PURE__*/
-	function (_GraphsBase) {
-	  (0, _inherits2["default"])(Force, _GraphsBase);
-	  (0, _createClass2["default"])(Force, null, [{
-	    key: "defaultProps",
-	    value: function defaultProps() {
-	      return {
-	        keyField: {
-	          detail: 'key字段',
-	          "default": 'key'
-	        },
-	        valueField: {
-	          detail: 'value字段',
-	          "default": 'value'
-	        },
-	        node: {
-	          detail: '单个节点的配置',
-	          propertys: {
-	            shapeType: {
-	              detail: '节点图形',
-	              "default": 'circle'
-	            },
-	            maxWidth: {
-	              detail: '节点最大的width',
-	              "default": 200
-	            },
-	            width: {
-	              detail: '内容的width',
-	              "default": null
-	            },
-	            height: {
-	              detail: '内容的height',
-	              "default": null
-	            },
-	            radius: {
-	              detail: '圆角角度',
-	              "default": 6
-	            },
-	            fillStyle: {
-	              detail: '节点背景色',
-	              "default": '#acdf7d'
-	            },
-	            strokeStyle: {
-	              detail: '描边颜色',
-	              "default": '#e5e5e5'
-	            },
-	            padding: {
-	              detail: 'node节点容器到内容的边距',
-	              "default": 10
-	            },
-	            content: {
-	              detail: '节点内容配置',
-	              propertys: {
-	                field: {
-	                  detail: '内容字段',
-	                  documentation: '默认content字段',
-	                  "default": 'content'
-	                },
-	                fontColor: {
-	                  detail: '内容文本颜色',
-	                  "default": '#666'
-	                },
-	                format: {
-	                  detail: '内容格式化处理函数',
-	                  "default": null
-	                },
-	                textAlign: {
-	                  detail: "textAlign",
-	                  "default": "center"
-	                },
-	                textBaseline: {
-	                  detail: 'textBaseline',
-	                  "default": "middle"
-	                }
-	              }
-	            }
-	          }
-	        },
-	        line: {
-	          detail: '两个节点连线配置',
-	          propertys: {
-	            lineWidth: {
-	              detail: '线宽',
-	              "default": 1
-	            },
-	            strokeStyle: {
-	              detail: '连线的颜色',
-	              "default": '#e5e5e5'
-	            },
-	            lineType: {
-	              detail: '连线样式（虚线等）',
-	              "default": 'solid'
-	            },
-	            arrow: {
-	              detail: '是否有箭头',
-	              "default": true
-	            }
-	          }
-	        },
-	        status: {
-	          detail: '一些开关配置',
-	          propertys: {
-	            transform: {
-	              detail: "是否启动拖拽缩放整个画布",
-	              propertys: {
-	                fitView: {
-	                  detail: "自动缩放",
-	                  "default": '' //autoZoom
-
-	                },
-	                enabled: {
-	                  detail: "是否开启",
-	                  "default": true
-	                },
-	                scale: {
-	                  detail: "缩放值",
-	                  "default": 1
-	                },
-	                scaleOrigin: {
-	                  detail: "缩放原点",
-	                  "default": {
-	                    x: 0,
-	                    y: 0
-	                  }
-	                }
-	              }
-	            }
-	          }
-	        }
-	      };
-	    }
-	  }]);
-
-	  function Force(opt, app) {
-	    var _this;
-
-	    (0, _classCallCheck2["default"])(this, Force);
-	    _this = (0, _possibleConstructorReturn2["default"])(this, (0, _getPrototypeOf2["default"])(Force).call(this, opt, app));
-	    _this.type = "force";
-
-	    _.extend(true, (0, _assertThisInitialized2["default"])(_this), (0, tools.getDefaultProps)(Force.defaultProps()), opt);
-
-	    _this.domContainer = app.canvax.domView;
-
-	    _this.init();
-
-	    return _this;
-	  }
-
-	  (0, _createClass2["default"])(Force, [{
-	    key: "init",
-	    value: function init() {
-	      this.nodesSp = new _canvax["default"].Display.Sprite({
-	        id: "nodesSp"
-	      });
-	      this.edgesSp = new _canvax["default"].Display.Sprite({
-	        id: "edgesSp"
-	      });
-	      this.graphsSp = new _canvax["default"].Display.Sprite({
-	        id: "graphsSp"
-	      });
-	      this.graphsSp.addChild(this.edgesSp);
-	      this.graphsSp.addChild(this.nodesSp);
-	      this.sprite.addChild(this.graphsSp);
-	    }
-	  }, {
-	    key: "draw",
-	    value: function draw(opt) {
-	      !opt && (opt = {});
-
-	      _.extend(true, this, opt);
-
-	      this.data = opt.data || this._initData();
-	      this.widget();
-	    }
-	  }, {
-	    key: "_initData",
-	    value: function _initData() {
-	      //和关系图那边保持data格式的统一
-	      var data = {
-	        nodes: [//{ type,key,content,ctype,width,height,x,y }
-	        ],
-	        edges: [//{ type,key[],content,ctype,width,height,x,y }
-	        ],
-	        size: {
-	          width: this.app.width,
-	          height: this.app.height
-	        }
-	      };
-	      var _nodeMap = {};
-
-	      for (var i = 0; i < this.dataFrame.length; i++) {
-	        var rowData = this.dataFrame.getRowDataAt(i);
-
-	        var fields = _.flatten([(rowData[this.keyField] + "").split(",")]);
-
-	        var content = this._getContent(rowData);
-
-	        var key = fields.length == 1 ? fields[0] : fields;
-	        var element = new _canvax["default"].Display.Sprite({
-	          id: "nodeSp_" + key
-	        });
-	        this.graphsSp.addChild(element);
-	        var node = {
-	          type: "force",
-	          iNode: i,
-	          rowData: rowData,
-	          key: key,
-	          content: content,
-	          ctype: this._checkHtml(content) ? 'html' : 'canvas',
-	          //下面三个属性在_setElementAndSize中设置
-	          element: element,
-	          //外面传的layout数据可能没有element，widget的时候要检测下
-	          width: null,
-	          height: null,
-	          radius: 1,
-	          //默认为1
-	          //这个在layout的时候设置
-	          x: null,
-	          y: null,
-	          shapeType: null,
-	          //如果是edge，要填写这两节点
-	          source: null,
-	          target: null
-	        }; //_.extend(node, this._getElementAndSize(node));
-
-	        if (fields.length == 1) {
-	          node.shapeType = this.getProp(this.node.shapeType, node);
-	          data.nodes.push(node);
-	          _nodeMap[node.key] = node;
-	        } else {
-	          node.shapeType = "line";
-	          data.edges.push(node);
-	        }
-	      }
-
-	      _.each(data.edges, function (edge) {
-	        var keys = edge.key;
-	        edge.source = _nodeMap[keys[0]];
-	        edge.target = _nodeMap[keys[1]];
-	      });
-
-	      return data;
-	    }
-	  }, {
-	    key: "widget",
-	    value: function widget() {
-	      var _this2 = this;
-
-	      var me = this;
-	      var keyField = this.keyField;
-	      var valField = this.valueField;
-	      var links = this.data.edges.map(function (d) {
-	        //source: "Napoleon", target: "Myriel", value: 1
-	        return {
-	          source: d.source[keyField],
-	          target: d.target[keyField],
-	          value: d.rowData[valField],
-	          nodeData: d
-	        };
-	      });
-	      var nodes = this.data.nodes.map(function (d) {
-	        var node = Object.create(d);
-	        node.id = d.key;
-	        node.nodeData = d;
-	        return node;
-	      });
-	      var _this$data$size = this.data.size,
-	          width = _this$data$size.width,
-	          height = _this$data$size.height;
-	      var simulation = force$1.forceSimulation(nodes).force("link", force$1.forceLink(links).id(function (d) {
-	        return d.id;
-	      })).force("charge", force$1.forceManyBody()).force("center", force$1.forceCenter(width / 2, height / 2)).force("x", force$1.forceX(width / 2).strength(0.045)).force("y", force$1.forceY(height / 2).strength(0.045));
-	      nodes.forEach(function (node) {
-	        var fillStyle = me.getProp(me.node.fillStyle, node.nodeData);
-	        var strokeStyle = me.getProp(me.node.strokeStyle, node.nodeData); //let radius = _.flatten([me.getProp(me.node.radius, node)]);
-
-	        var _node = new Circle({
-	          context: {
-	            r: 8,
-	            fillStyle: fillStyle,
-	            strokeStyle: strokeStyle
-	          }
-	        });
-
-	        node.nodeData.element.addChild(_node);
-
-	        var _label = new Text(node.nodeData.rowData.label, {
-	          context: {
-	            fontSize: 11,
-	            fillStyle: "#bfa08b",
-	            textBaseline: "middle",
-	            textAlign: "center",
-	            globalAlpha: 0.7
-	          }
-	        });
-
-	        node.nodeData.element.addChild(_label);
-	      });
-	      links.forEach(function (link) {
-	        var lineWidth = me.getProp(me.line.lineWidth, link.nodeData);
-	        var strokeStyle = me.getProp(me.line.strokeStyle, link.nodeData);
-
-	        var _line = new Line({
-	          context: {
-	            lineWidth: lineWidth,
-	            strokeStyle: strokeStyle,
-	            start: {
-	              x: 0,
-	              y: 0
-	            },
-	            end: {
-	              x: 0,
-	              y: 0
-	            },
-	            globalAlpha: 0.4
-	          }
-	        });
-
-	        _this2.edgesSp.addChild(_line);
-
-	        link.line = _line;
-	      });
-	      simulation.on("tick", function () {
-	        if (simulation.alpha() <= 0.05) {
-	          simulation.stop();
-	          return;
-	        }
-	        nodes.forEach(function (node) {
-	          var elemCtx = node.nodeData.element.context;
-
-	          if (elemCtx) {
-	            elemCtx.x = node.x;
-	            elemCtx.y = node.y;
-	          }
-	        });
-	        links.forEach(function (link) {
-	          var lineCtx = link.line.context;
-
-	          if (lineCtx) {
-	            lineCtx.start.x = link.source.x;
-	            lineCtx.start.y = link.source.y;
-	            lineCtx.end.x = link.target.x;
-	            lineCtx.end.y = link.target.y;
-	          }
-	        });
-	      });
-	    }
-	    /**
-	     * 字符串是否含有html标签的检测
-	     */
-
-	  }, {
-	    key: "_checkHtml",
-	    value: function _checkHtml(str) {
-	      var reg = /<[^>]+>/g;
-	      return reg.test(str);
-	    }
-	  }, {
-	    key: "_getContent",
-	    value: function _getContent(rowData) {
-	      var me = this;
-
-	      var _c; //this.node.content;
-
-
-	      if (this._isField(this.node.content.field)) {
-	        _c = rowData[this.node.content.field];
-	      }
-
-	      if (me.node.content.format && _.isFunction(me.node.content.format)) {
-	        _c = me.node.content.format.apply(this, [_c, rowData]);
-	      }
-	      return _c;
-	    }
-	  }, {
-	    key: "_isField",
-	    value: function _isField(str) {
-	      return ~this.dataFrame.fields.indexOf(str);
-	    }
-	  }, {
-	    key: "getNodesAt",
-	    value: function getNodesAt() {}
-	  }, {
-	    key: "getProp",
-	    value: function getProp(prop, nodeData) {
-	      var _prop = prop;
-
-	      if (this._isField(prop) && nodeData.rowData) {
-	        _prop = nodeData.rowData[prop];
-	      } else {
-	        if (_.isArray(prop)) {
-	          _prop = prop[nodeData.iNode];
-	        }
-
-	        if (_.isFunction(prop)) {
-	          _prop = prop.apply(this, [nodeData]);
-	        }
-	      }
-	      return _prop;
-	    }
-	  }]);
-	  return Force;
-	}(_index["default"]);
-
-	_index["default"].registerComponent(Force, 'graphs', 'force');
-
-	var _default = Force;
-	exports["default"] = _default;
-	});
-
-	unwrapExports(force_1$1);
-
 	var dagre = createCommonjsModule(function (module, exports) {
 
 
@@ -44577,6 +41653,2932 @@ var chartx = (function () {
 	});
 
 	unwrapExports(dagre$1);
+
+	var relation = createCommonjsModule(function (module, exports) {
+
+
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports["default"] = void 0;
+
+	var _toConsumableArray2 = interopRequireDefault(toConsumableArray);
+
+	var _classCallCheck2 = interopRequireDefault(classCallCheck$1);
+
+	var _possibleConstructorReturn2 = interopRequireDefault(possibleConstructorReturn$1);
+
+	var _getPrototypeOf2 = interopRequireDefault(getPrototypeOf$1);
+
+	var _assertThisInitialized2 = interopRequireDefault(assertThisInitialized$1);
+
+	var _createClass2 = interopRequireDefault(createClass$1);
+
+	var _inherits2 = interopRequireDefault(inherits$1);
+
+	var _canvax = interopRequireDefault(Canvax);
+
+	var _index = interopRequireDefault(graphs);
+
+	var _global = interopRequireDefault(global$1);
+
+	var _dataFrame = interopRequireDefault(dataFrame);
+
+
+
+
+
+	var _zoom = interopRequireDefault(zoom);
+
+	var _index2 = interopRequireDefault(dagre$1);
+
+	var _ = _canvax["default"]._,
+	    event = _canvax["default"].event;
+	var Rect = _canvax["default"].Shapes.Rect;
+	var Path = _canvax["default"].Shapes.Path;
+	var Circle = _canvax["default"].Shapes.Circle;
+	var Arrow = _canvax["default"].Shapes.Arrow;
+	/**
+	 * 关系图中 包括了  配置，数据，和布局数据，
+	 * 默认用配置和数据可以完成绘图， 但是如果有布局数据，就绘图玩额外调用一次绘图，把布局数据传入修正布局效果
+	 */
+
+	var Relation =
+	/*#__PURE__*/
+	function (_GraphsBase) {
+	  (0, _inherits2["default"])(Relation, _GraphsBase);
+	  (0, _createClass2["default"])(Relation, null, [{
+	    key: "defaultProps",
+	    value: function defaultProps() {
+	      return {
+	        field: {
+	          detail: 'key字段设置',
+	          documentation: '',
+	          "default": null
+	        },
+	        childrenField: {
+	          detail: '树结构数据的关联字段',
+	          documentation: '如果是树结构的关联数据，不是行列式，那么就通过这个字段来建立父子关系',
+	          "default": 'children'
+	        },
+	        //rankdir: "TB",
+	        //align: "DR",
+	        //nodesep: 0,//同级node之间的距离
+	        //edgesep: 0,
+	        //ranksep: 0, //排与排之间的距离
+	        rankdir: {
+	          detail: '布局方向',
+	          "default": null
+	        },
+	        node: {
+	          detail: '单个节点的配置',
+	          propertys: {
+	            shapeType: {
+	              detail: '节点图形，目前只支持rect',
+	              "default": 'rect'
+	            },
+	            maxWidth: {
+	              detail: '节点最大的width',
+	              "default": 200
+	            },
+	            width: {
+	              detail: '内容的width',
+	              "default": null
+	            },
+	            height: {
+	              detail: '内容的height',
+	              "default": null
+	            },
+	            radius: {
+	              detail: '圆角角度',
+	              "default": 6
+	            },
+	            fillStyle: {
+	              detail: '节点背景色',
+	              "default": '#ffffff'
+	            },
+	            strokeStyle: {
+	              detail: '描边颜色',
+	              "default": '#e5e5e5'
+	            },
+	            padding: {
+	              detail: 'node节点容器到内容的边距',
+	              "default": 10
+	            },
+	            content: {
+	              detail: '节点内容配置',
+	              propertys: {
+	                field: {
+	                  detail: '内容字段',
+	                  documentation: '默认content字段',
+	                  "default": 'content'
+	                },
+	                fontColor: {
+	                  detail: '内容文本颜色',
+	                  "default": '#666'
+	                },
+	                format: {
+	                  detail: '内容格式化处理函数',
+	                  "default": null
+	                },
+	                textAlign: {
+	                  detail: "textAlign",
+	                  "default": "center"
+	                },
+	                textBaseline: {
+	                  detail: 'textBaseline',
+	                  "default": "middle"
+	                }
+	              }
+	            }
+	          }
+	        },
+	        line: {
+	          detail: '两个节点连线配置',
+	          propertys: {
+	            isTree: {
+	              detail: '是否树结构的连线',
+	              documentation: '非树结构启用该配置可能会有意想不到的惊喜，慎用',
+	              "default": false
+	            },
+	            inflectionRadius: {
+	              detail: '树状连线的拐点圆角半径',
+	              "default": 0
+	            },
+	            shapeType: {
+	              detail: '连线的图形样式 brokenLine or bezier',
+	              "default": 'bezier'
+	            },
+	            lineWidth: {
+	              detail: '线宽',
+	              "default": 1
+	            },
+	            strokeStyle: {
+	              detail: '连线的颜色',
+	              "default": '#e5e5e5'
+	            },
+	            lineType: {
+	              detail: '连线样式（虚线等）',
+	              "default": 'solid'
+	            },
+	            arrow: {
+	              detail: '是否有箭头',
+	              "default": true
+	            }
+	          }
+	        },
+	        layout: {
+	          detail: '采用的布局引擎,比如dagre',
+	          "default": "dagre"
+	        },
+	        layoutOpts: {
+	          detail: '布局引擎对应的配置,dagre详见dagre的官方wiki',
+	          propertys: {}
+	        },
+	        status: {
+	          detail: '一些开关配置',
+	          propertys: {
+	            transform: {
+	              detail: "是否启动拖拽缩放整个画布",
+	              propertys: {
+	                fitView: {
+	                  detail: "自动缩放",
+	                  "default": '' //autoZoom
+
+	                },
+	                enabled: {
+	                  detail: "是否开启",
+	                  "default": true
+	                },
+	                scale: {
+	                  detail: "缩放值",
+	                  "default": 1
+	                },
+	                scaleOrigin: {
+	                  detail: "缩放原点",
+	                  "default": {
+	                    x: 0,
+	                    y: 0
+	                  }
+	                }
+	              }
+	            }
+	          }
+	        }
+	      };
+	    }
+	  }]);
+
+	  function Relation(opt, app) {
+	    var _this;
+
+	    (0, _classCallCheck2["default"])(this, Relation);
+	    _this = (0, _possibleConstructorReturn2["default"])(this, (0, _getPrototypeOf2["default"])(Relation).call(this, opt, app));
+	    _this.type = "relation";
+
+	    _.extend(true, (0, _assertThisInitialized2["default"])(_this), (0, tools.getDefaultProps)(Relation.defaultProps()), opt);
+
+	    if (_this.layout === 'dagre') {
+	      var dagreOpts = {
+	        graph: {
+	          rankdir: 'TB',
+	          nodesep: 10,
+	          ranksep: 10,
+	          edgesep: 10,
+	          acyclicer: "greedy"
+	        },
+	        node: {},
+	        edge: {
+	          labelpos: 'c' //labeloffset: 0
+
+	        }
+	      };
+
+	      _.extend(true, dagreOpts, _this.layoutOpts);
+
+	      _.extend(true, _this.layoutOpts, dagreOpts);
+
+	      if (!_this.rankdir) {
+	        _this.rankdir = _this.layoutOpts.graph.rankdir;
+	      } else {
+	        //如果有设置this.randdir 则已经 ta 为准
+	        _this.layoutOpts.graph.rankdir = _this.rankdir;
+	      }
+	    }
+	    _this.domContainer = app.canvax.domView;
+	    _this.induce = null;
+
+	    _this.init();
+
+	    return _this;
+	  }
+
+	  (0, _createClass2["default"])(Relation, [{
+	    key: "init",
+	    value: function init() {
+	      this._initInduce();
+
+	      this.nodesSp = new _canvax["default"].Display.Sprite({
+	        id: "nodesSp"
+	      });
+	      this.nodesContentSp = new _canvax["default"].Display.Sprite({
+	        id: "nodesContentSp"
+	      });
+	      this.edgesSp = new _canvax["default"].Display.Sprite({
+	        id: "edgesSp"
+	      });
+	      this.arrowsSp = new _canvax["default"].Display.Sprite({
+	        id: "arrowsSp"
+	      });
+	      this.labelsSp = new _canvax["default"].Display.Sprite({
+	        id: "labelsSp"
+	      });
+	      this.graphsSp = new _canvax["default"].Display.Sprite({
+	        id: "graphsSp"
+	      }); //这个view和induce是一一对应的，在induce上面执行拖拽和滚轮缩放，操作的目标元素就是graphsView
+
+	      this.graphsView = new _canvax["default"].Display.Sprite({
+	        id: "graphsView"
+	      });
+	      this.graphsSp.addChild(this.edgesSp);
+	      this.graphsSp.addChild(this.nodesSp);
+	      this.graphsSp.addChild(this.nodesContentSp);
+	      this.graphsSp.addChild(this.arrowsSp);
+	      this.graphsSp.addChild(this.labelsSp);
+	      this.graphsView.addChild(this.graphsSp);
+	      this.sprite.addChild(this.graphsView);
+	      this.zoom = new _zoom["default"]();
+	    }
+	  }, {
+	    key: "_initInduce",
+	    value: function _initInduce() {
+	      var me = this;
+	      this.induce = new Rect({
+	        id: "induce",
+	        context: {
+	          width: 0,
+	          height: 0,
+	          fillStyle: "#000000",
+	          globalAlpha: 0
+	        }
+	      });
+	      this.sprite.addChild(this.induce);
+	      var _mosedownIng = false;
+	      var _preCursor = me.app.canvax.domView.style.cursor; //滚轮缩放相关
+
+	      var _wheelHandleTimeLen = 32; //16*2
+
+	      var _wheelHandleTimeer = null;
+	      var _deltaY = 0;
+	      this.induce.on(event.types.get(), function (e) {
+	        if (me.status.transform.enabled) {
+	          e.preventDefault();
+	          var point = e.target.localToGlobal(e.point, me.sprite);
+
+	          if (e.type == "mousedown") {
+	            me.induce.toFront();
+	            _mosedownIng = true;
+	            me.app.canvax.domView.style.cursor = "move";
+	            me.zoom.mouseMoveTo(point);
+	          }
+
+	          if (e.type == "mouseup" || e.type == "mouseout") {
+	            me.induce.toBack();
+	            _mosedownIng = false;
+	            me.app.canvax.domView.style.cursor = _preCursor;
+	          }
+
+	          if (e.type == "mousemove") {
+	            if (_mosedownIng) {
+	              var _me$zoom$move = me.zoom.move(point),
+	                  x = _me$zoom$move.x,
+	                  y = _me$zoom$move.y;
+
+	              me.graphsView.context.x = x;
+	              me.graphsView.context.y = y;
+	            }
+	          }
+
+	          if (e.type == "wheel") {
+	            if (Math.abs(e.deltaY) > Math.abs(_deltaY)) {
+	              _deltaY = e.deltaY;
+	            }
+
+	            if (!_wheelHandleTimeer) {
+	              _wheelHandleTimeer = setTimeout(function () {
+	                var _me$zoom$wheel = me.zoom.wheel(e, point),
+	                    scale = _me$zoom$wheel.scale,
+	                    x = _me$zoom$wheel.x,
+	                    y = _me$zoom$wheel.y;
+
+	                me.graphsView.context.x = x;
+	                me.graphsView.context.y = y;
+	                me.graphsView.context.scaleX = scale;
+	                me.graphsView.context.scaleY = scale;
+	                me.status.transform.scale = scale;
+	                _wheelHandleTimeer = null;
+	                _deltaY = 0;
+	              }, _wheelHandleTimeLen);
+	            }
+	          }
+	        }
+	      });
+	    } //全局画布
+
+	  }, {
+	    key: "scale",
+	    value: function scale(_scale, globalScaleOrigin) {}
+	  }, {
+	    key: "draw",
+	    value: function draw(opt) {
+	      !opt && (opt = {});
+
+	      _.extend(true, this, opt);
+
+	      this.data = opt.data || this._initData();
+
+	      this._layoutData();
+
+	      this.widget();
+	      this.sprite.context.x = this.origin.x;
+	      this.sprite.context.y = this.origin.y;
+
+	      var _offsetLeft = (this.width - this.data.size.width) / 2;
+
+	      if (_offsetLeft < 0) {
+	        _offsetLeft = 0;
+	      }
+
+	      var _offsetTop = (this.height - this.data.size.height) / 2;
+
+	      if (_offsetTop < 0) {
+	        _offsetTop = 0;
+	      }
+	      this.graphsSp.context.x = _offsetLeft;
+	      this.graphsSp.context.y = _offsetTop;
+	    } //如果dataTrigger.origin 有传入， 则已经这个origin为参考点做重新布局
+
+	  }, {
+	    key: "resetData",
+	    value: function resetData(data, dataTrigger) {
+	      var me = this;
+	      this._preData = this.data; //如果data是外界定义好的nodes，edges的格式，直接用外界的
+
+	      this.data = data.nodes && data.edges ? data : this._initData();
+
+	      this._layoutData();
+
+	      _.each(this._preData.nodes, function (preNode) {
+	        if (!_.find(me.data.nodes, function (node) {
+	          return preNode.key == node.key;
+	        })) {
+	          me._destroy(preNode);
+	        }
+	      });
+
+	      _.each(this._preData.edges, function (preEdge) {
+	        if (!_.find(me.data.edges, function (edge) {
+	          return preEdge.key.join('_') == edge.key.join('_');
+	        })) {
+	          me._destroy(preEdge);
+	        }
+	      });
+
+	      this.widget(); //钉住某个node为参考点（不移动）
+
+	      if (dataTrigger && dataTrigger.origin) {
+	        var preOriginNode = _.find(this._preData.nodes, function (node) {
+	          return node.key == dataTrigger.origin;
+	        });
+
+	        var originNode = _.find(this.data.nodes, function (node) {
+	          return node.key == dataTrigger.origin;
+	        });
+
+	        if (preOriginNode && originNode) {
+	          var offsetPos = {
+	            x: preOriginNode.x - originNode.x,
+	            y: preOriginNode.y - originNode.y
+	          };
+
+	          var _this$zoom$offset = this.zoom.offset(offsetPos),
+	              x = _this$zoom$offset.x,
+	              y = _this$zoom$offset.y;
+
+	          me.graphsView.context.x = x;
+	          me.graphsView.context.y = y;
+	        }
+	      }
+	    }
+	  }, {
+	    key: "_destroy",
+	    value: function _destroy(item) {
+	      item.boxElement && item.boxElement.destroy();
+
+	      if (item.contentElement.destroy) {
+	        item.contentElement.destroy();
+	      } else {
+	        //否则就可定是个dom
+	        this.domContainer.removeChild(item.contentElement);
+	      }
+
+	      item.pathElement && item.pathElement.destroy();
+	      item.labelElement && item.labelElement.destroy();
+	      item.arrowElement && item.arrowElement.destroy();
+	    }
+	  }, {
+	    key: "_initData",
+	    value: function _initData() {
+	      var data$1 = {
+	        nodes: [//{ type,key,content,ctype,width,height,x,y }
+	        ],
+	        edges: [//{ type,key[],content,ctype,width,height,x,y }
+	        ],
+	        size: {
+	          width: 0,
+	          height: 0
+	        }
+	      };
+	      var originData = this.app._data;
+
+	      if ((0, data.checkDataIsJson)(originData, this.field, this.childrenField)) {
+	        this.jsonData = (0, data.jsonToArrayForRelation)(originData, this, this.childrenField);
+	        this.dataFrame = this.app.dataFrame = (0, _dataFrame["default"])(this.jsonData);
+	      } else {
+	        if (this.layout == "tree") {
+	          //源数据就是图表标准数据，只需要转换成json的Children格式
+	          //app.dataFrame.jsonOrg ==> [{name: key:} ...] 不是children的树结构
+	          //tree layout算法需要children格式的数据，蛋疼
+	          this.jsonData = (0, data.arrayToTreeJsonForRelation)(this.app.dataFrame.jsonOrg, this);
+	        }
+	      }
+	      var _nodeMap = {};
+
+	      for (var i = 0; i < this.dataFrame.length; i++) {
+	        var rowData = this.dataFrame.getRowDataAt(i);
+
+	        var fields = _.flatten([(rowData[this.field] + "").split(",")]);
+
+	        var content = this._getContent(rowData);
+
+	        var node = {
+	          type: "relation",
+	          iNode: i,
+	          rowData: rowData,
+	          key: fields.length == 1 ? fields[0] : fields,
+	          content: content,
+	          ctype: this._checkHtml(content) ? 'html' : 'canvas',
+	          //下面三个属性在_setElementAndSize中设置
+	          contentElement: null,
+	          //外面传的layout数据可能没有element，widget的时候要检测下
+	          width: null,
+	          height: null,
+	          //这个在layout的时候设置
+	          x: null,
+	          y: null,
+	          shapeType: null,
+	          //如果是edge，要填写这两节点
+	          source: null,
+	          target: null
+	        };
+
+	        _.extend(node, this._getElementAndSize(node));
+
+	        if (fields.length == 1) {
+	          // isNode
+	          node.shapeType = this.getProp(this.node.shapeType, node);
+	          data$1.nodes.push(node);
+	          Object.assign(node, this.layoutOpts.node);
+	          _nodeMap[node.key] = node;
+	        } else {
+	          // isEdge
+	          node.shapeType = this.getProp(this.line.shapeType, node); //node.labeloffset = 0;
+	          //node.labelpos = 'l';
+	          //额外的会有minlen weight labelpos labeloffset 四个属性可以配置
+
+	          Object.assign(node, this.layoutOpts.edge);
+	          data$1.edges.push(node);
+	        }
+	      }
+
+	      _.each(data$1.edges, function (edge) {
+	        var keys = edge.key;
+	        edge.source = _nodeMap[keys[0]];
+	        edge.target = _nodeMap[keys[1]];
+	      });
+
+	      return data$1;
+	    }
+	  }, {
+	    key: "_layoutData",
+	    value: function _layoutData() {
+	      if (this.layout == "dagre") {
+	        this._dagreLayout(this.data);
+	      } else if (this.layout == "tree") {
+	        this._treeLayout(this.data);
+	      } else if (_.isFunction(this.layout)) {
+	        //layout需要设置好data中nodes的xy， 以及edges的points，和 size的width，height
+	        this.layout(this.data);
+	      }
+	    }
+	  }, {
+	    key: "_dagreLayout",
+	    value: function _dagreLayout(data) {
+	      //https://github.com/dagrejs/dagre/wiki
+	      var layout = _global["default"].layout.dagre || _index2["default"];
+	      var g = new layout.graphlib.Graph();
+	      g.setGraph(this.layoutOpts.graph);
+	      g.setDefaultEdgeLabel(function () {
+	        //其实我到现在都还没搞明白setDefaultEdgeLabel的作用
+	        return {};
+	      });
+
+	      _.each(data.nodes, function (node) {
+	        g.setNode(node.key, node);
+	      });
+
+	      _.each(data.edges, function (edge) {
+	        //后面的参数直接把edge对象传入进去的话，setEdge会吧point 和 x y 等信息写回edge
+	        g.setEdge.apply(g, (0, _toConsumableArray2["default"])(edge.key).concat([edge])); //g.setEdge(edge.key[0],edge.key[1]);
+	      });
+
+	      layout.layout(g);
+	      data.size.width = g.graph().width;
+	      data.size.height = g.graph().height; //this.g = g;
+
+	      return data;
+	    } //TODO: 待实现，目前其实用dagre可以直接实现tree，但是如果可以用更加轻便的tree也可以尝试下
+
+	  }, {
+	    key: "_treeLayout",
+	    value: function _treeLayout() {// let tree = global.layout.tree().separation(function(a, b) {
+	      //     //设置横向节点之间的间距
+	      //     let totalWidth = a.width + b.width;
+	      //     return (totalWidth/2) + 10;
+	      // });
+	      // let nodes = tree.nodes( this.jsonData[0] ).reverse();
+	      // let links = tree.links(nodes);
+	    }
+	  }, {
+	    key: "widget",
+	    value: function widget() {
+	      var me = this;
+	      /*
+	      me.g.edges().forEach( e => {
+	          let edge = me.g.edge(e);
+	          console.log( edge )
+	      } );
+	      */
+
+	      _.each(this.data.edges, function (edge) {
+	        var key = edge.key.join('_');
+
+	        if (me.line.isTree && edge.points.length == 3) {
+	          //严格树状图的话（三个点），就转化成4个点的，有两个拐点
+	          me._setTreePoints(edge);
+	        }
+
+	        var path = me._getPathStr(edge, me.line.inflectionRadius);
+
+	        var lineWidth = me.getProp(me.line.lineWidth, edge);
+	        var strokeStyle = me.getProp(me.line.strokeStyle, edge);
+	        var edgeId = 'edge_' + key;
+
+	        var _path = me.edgesSp.getChildById(edgeId);
+
+	        if (_path) {
+	          _path.context.path = path;
+	          _path.context.lineWidth = lineWidth;
+	          _path.context.strokeStyle = strokeStyle;
+	        } else {
+	          _path = new Path({
+	            id: edgeId,
+	            context: {
+	              path: path,
+	              lineWidth: lineWidth,
+	              strokeStyle: strokeStyle
+	            }
+	          });
+	          me.edgesSp.addChild(_path);
+	        }
+	        edge.pathElement = _path;
+	        var arrowControl = edge.points.slice(-2, -1)[0];
+
+	        if (me.line.shapeType == "bezier") {
+	          if (me.rankdir == "TB" || me.rankdir == "BT") {
+	            arrowControl.x += (edge.source.x - edge.target.x) / 20;
+	          }
+
+	          if (me.rankdir == "LR" || me.rankdir == "RL") {
+	            arrowControl.y += (edge.source.y - edge.target.y) / 20;
+	          }
+	        }
+	        // let _circle = new Circle({
+	        //     context : {
+	        //         r : 2,
+	        //         x : edge.x,
+	        //         y : edge.y,
+	        //         fillStyle: "red"
+	        //     }
+	        // })
+	        //me.labelsSp.addChild( _circle );
+
+	        var edgeLabelId = 'label_' + key;
+	        var textAlign = me.getProp(me.node.content.textAlign, edge);
+	        var textBaseline = me.getProp(me.node.content.textBaseline, edge);
+
+	        var _edgeLabel = me.labelsSp.getChildById(edgeLabelId);
+
+	        if (_edgeLabel) {
+	          _edgeLabel.resetText(edge.content);
+
+	          _edgeLabel.context.x = edge.x;
+	          _edgeLabel.context.y = edge.y;
+	          _edgeLabel.context.fontSize = 12;
+	          _edgeLabel.context.fillStyle = "#ccc";
+	          _edgeLabel.context.textAlign = textAlign;
+	          _edgeLabel.context.textBaseline = textBaseline;
+	        } else {
+	          _edgeLabel = new _canvax["default"].Display.Text(edge.content, {
+	            id: edgeLabelId,
+	            context: {
+	              x: edge.x,
+	              y: edge.y,
+	              fontSize: 12,
+	              fillStyle: "#ccc",
+	              //me.getProp(me.node.content.fontColor, edge),
+	              textAlign: textAlign,
+	              textBaseline: textBaseline
+	            }
+	          });
+	          me.labelsSp.addChild(_edgeLabel);
+	        }
+
+	        edge.labelElement = _edgeLabel;
+
+	        if (me.line.arrow) {
+	          var arrowId = "arrow_" + key;
+
+	          var _arrow = me.arrowsSp.getChildById(arrowId);
+
+	          if (_arrow) {
+	            //arrow 只监听了x y 才会重绘，，，暂时只能这样处理,手动的赋值control.x control.y
+	            //而不是直接把 arrowControl 赋值给 control
+	            _arrow.context.control.x = arrowControl.x;
+	            _arrow.context.control.y = arrowControl.y;
+	            _arrow.context.point = edge.points.slice(-1)[0];
+	            _arrow.context.strokeStyle = strokeStyle; // _.extend(true, _arrow, {
+	            //     control: arrowControl,
+	            //     point: edge.points.slice(-1)[0],
+	            //     strokeStyle: strokeStyle
+	            // } );
+	          } else {
+	            _arrow = new Arrow({
+	              id: arrowId,
+	              context: {
+	                control: arrowControl,
+	                point: edge.points.slice(-1)[0],
+	                strokeStyle: strokeStyle //fillStyle: strokeStyle
+
+	              }
+	            });
+	            me.arrowsSp.addChild(_arrow);
+	          }
+
+	          edge.arrowElement = _arrow;
+	        }
+	      });
+
+	      _.each(this.data.nodes, function (node) {
+	        var nodeId = "node_" + node.key;
+	        var context = {
+	          x: node.x - node.width / 2,
+	          y: node.y - node.height / 2,
+	          width: node.width,
+	          height: node.height,
+	          lineWidth: 1,
+	          fillStyle: me.getProp(me.node.fillStyle, node),
+	          strokeStyle: me.getProp(me.node.strokeStyle, node),
+	          radius: _.flatten([me.getProp(me.node.radius, node)])
+	        };
+
+	        var _boxShape = me.nodesSp.getChildById(nodeId);
+
+	        if (_boxShape) {
+	          _.extend(_boxShape.context, context);
+	        } else {
+	          _boxShape = new Rect({
+	            id: nodeId,
+	            context: context
+	          });
+	          me.nodesSp.addChild(_boxShape);
+
+	          _boxShape.on(event.types.get(), function (e) {
+	            e.eventInfo = {
+	              trigger: me.node,
+	              nodes: [this.nodeData]
+	            };
+	            me.app.fire(e.type, e);
+	          });
+	        }
+	        _boxShape.nodeData = node;
+	        node.boxElement = _boxShape;
+
+	        _boxShape.on("transform", function () {
+	          if (node.ctype == "canvas") {
+	            node.contentElement.context.x = node.x;
+	            node.contentElement.context.y = node.y;
+	          } else if (node.ctype == "html") {
+	            var devicePixelRatio = typeof window !== 'undefined' ? window.devicePixelRatio : 1;
+	            node.contentElement.style.transform = "matrix(" + _boxShape.worldTransform.clone().scale(1 / devicePixelRatio, 1 / devicePixelRatio).toArray().join() + ")";
+	            node.contentElement.style.transformOrigin = "left top"; //修改为左上角为旋转中心点来和canvas同步
+
+	            node.contentElement.style.marginLeft = me.getProp(me.node.padding, node) * me.status.transform.scale + "px";
+	            node.contentElement.style.marginTop = me.getProp(me.node.padding, node) * me.status.transform.scale + "px";
+	            node.contentElement.style.visibility = "visible";
+	          }
+	        });
+	      });
+
+	      this.induce.context.width = this.width;
+	      this.induce.context.height = this.height;
+	    }
+	  }, {
+	    key: "_setTreePoints",
+	    value: function _setTreePoints(edge) {
+	      var points = edge.points;
+
+	      if (this.rankdir == "TB" || this.rankdir == "BT") {
+	        points[0] = {
+	          x: edge.source.x,
+	          y: edge.source.y + (this.rankdir == "BT" ? -1 : 1) * edge.source.height / 2
+	        };
+	        points.splice(1, 0, {
+	          x: edge.source.x,
+	          y: points.slice(-2, -1)[0].y
+	        });
+	      }
+
+	      if (this.rankdir == "LR" || this.rankdir == "RL") {
+	        points[0] = {
+	          x: edge.source.x + (this.rankdir == "RL" ? -1 : 1) * edge.source.width / 2,
+	          y: edge.source.y
+	        };
+	        points.splice(1, 0, {
+	          x: points.slice(-2, -1)[0].x,
+	          y: edge.source.y
+	        });
+	      }
+
+	      edge.points = points;
+	    }
+	    /**
+	     * 
+	     * @param {shapeType,points} edge 
+	     * @param {number} inflectionRadius 拐点的圆角半径
+	     */
+
+	  }, {
+	    key: "_getPathStr",
+	    value: function _getPathStr(edge, inflectionRadius) {
+	      var points = edge.points;
+	      var head = points[0];
+	      var tail = points.slice(-1)[0];
+	      var str = "M" + head.x + " " + head.y;
+
+	      if (edge.shapeType == "bezier") {
+	        if (points.length == 3) {
+	          str += ",Q" + points[1].x + " " + points[1].y + " " + tail.x + " " + tail.y;
+	        }
+
+	        if (points.length == 4) {
+	          str += ",C" + points[1].x + " " + points[1].y + " " + points[2].x + " " + points[2].y + " " + tail.x + " " + tail.y;
+	        }
+	      }
+
+	      if (edge.shapeType == "brokenLine") {
+	        _.each(points, function (point, i) {
+	          if (i) {
+	            if (inflectionRadius && i < points.length - 1) {
+	              //圆角连线
+	              var prePoint = points[i - 1];
+	              var nextPoint = points[i + 1]; //要从这个点到上个点的半径距离，已point为控制点，绘制nextPoint的半径距离
+
+	              var radius = inflectionRadius; //radius要做次二次校验，取radius 以及 point 和prePoint距离以及和 nextPoint 的最小值
+	              //let _disPre = Math.abs(Math.sqrt( (prePoint.x - point.x)*(prePoint.x - point.x) + (prePoint.y - point.y)*(prePoint.y - point.y) ));
+	              //let _disNext = Math.abs(Math.sqrt( (nextPoint.x - point.x)*(nextPoint.x - point.x) + (nextPoint.y - point.y)*(nextPoint.y - point.y) ));
+
+	              var _disPre = Math.max(Math.abs(prePoint.x - point.x) / 2, Math.abs(prePoint.y - point.y) / 2);
+
+	              var _disNext = Math.max(Math.abs(nextPoint.x - point.x) / 2, Math.abs(nextPoint.y - point.y) / 2);
+
+	              radius = _.min([radius, _disPre, _disNext]); //console.log(Math.atan2( point.y - prePoint.y , point.x - prePoint.x ),Math.atan2( nextPoint.y - point.y , nextPoint.x - point.x ))
+
+	              if (point.x == prePoint.x && point.y == prePoint.y || point.x == nextPoint.x && point.y == nextPoint.y || Math.atan2(point.y - prePoint.y, point.x - prePoint.x) == Math.atan2(nextPoint.y - point.y, nextPoint.x - point.x)) {
+	                //如果中间的这个点 ， 和前后的点在一个直线上面，就略过
+	                return;
+	              } else {
+	                var getPointOf = function getPointOf(p) {
+	                  var _atan2 = Math.atan2(p.y - point.y, p.x - point.x);
+
+	                  return {
+	                    x: point.x + radius * Math.cos(_atan2),
+	                    y: point.y + radius * Math.sin(_atan2)
+	                  };
+	                };
+	                var bezierBegin = getPointOf(prePoint);
+	                var bezierEnd = getPointOf(nextPoint);
+	                str += ",L" + bezierBegin.x + " " + bezierBegin.y + ",Q" + point.x + " " + point.y + " " + bezierEnd.x + " " + bezierEnd.y;
+	              }
+	            } else {
+	              //直角连线
+	              str += ",L" + point.x + " " + point.y;
+	            }
+	          }
+	        });
+	      }
+
+	      return str;
+	    }
+	    /**
+	     * 字符串是否含有html标签的检测
+	     */
+
+	  }, {
+	    key: "_checkHtml",
+	    value: function _checkHtml(str) {
+	      var reg = /<[^>]+>/g;
+	      return reg.test(str);
+	    }
+	  }, {
+	    key: "_getContent",
+	    value: function _getContent(rowData) {
+	      var me = this;
+
+	      var _c; //this.node.content;
+
+
+	      if (this._isField(this.node.content.field)) {
+	        _c = rowData[this.node.content.field];
+	      }
+
+	      if (me.node.content.format && _.isFunction(me.node.content.format)) {
+	        _c = me.node.content.format.apply(this, [_c, rowData]);
+	      }
+	      return _c;
+	    }
+	  }, {
+	    key: "_isField",
+	    value: function _isField(str) {
+	      return ~this.dataFrame.fields.indexOf(str);
+	    }
+	  }, {
+	    key: "_getElementAndSize",
+	    value: function _getElementAndSize(node) {
+	      var me = this;
+	      var contentType = node.ctype;
+
+	      if (me._isField(contentType)) {
+	        contentType = node.rowData[contentType];
+	      }
+	      !contentType && (contentType = 'canvas');
+
+	      if (contentType == 'canvas') {
+	        return me._getEleAndsetCanvasSize(node);
+	      }
+
+	      if (contentType == 'html') {
+	        return me._getEleAndsetHtmlSize(node);
+	      }
+	    }
+	  }, {
+	    key: "_getEleAndsetCanvasSize",
+	    value: function _getEleAndsetCanvasSize(node) {
+	      var me = this;
+	      var content = node.content;
+	      var width = node.rowData.width,
+	          height = node.rowData.height; //let sprite = new Canvax.Display.Sprite({});
+
+	      var context = {
+	        fillStyle: me.getProp(me.node.content.fontColor, node),
+	        textAlign: me.getProp(me.node.content.textAlign, node),
+	        textBaseline: me.getProp(me.node.content.textBaseline, node)
+	      }; //console.log(node.key);
+
+	      var contentLabelId = "content_label_" + node.key;
+
+	      var _contentLabel = me.nodesContentSp.getChildById(contentLabelId);
+
+	      if (_contentLabel) {
+	        _contentLabel.resetText(content);
+
+	        _.extend(_contentLabel.context, context);
+	      } else {
+	        //先创建text，根据 text 来计算node需要的width和height
+	        _contentLabel = new _canvax["default"].Display.Text(content, {
+	          id: contentLabelId,
+	          context: context
+	        });
+
+	        if (!_.isArray(node.key)) {
+	          me.nodesContentSp.addChild(_contentLabel);
+	        }
+	      }
+
+	      if (!width) {
+	        width = _contentLabel.getTextWidth() + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
+	      }
+
+	      if (!height) {
+	        height = _contentLabel.getTextHeight() + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
+	      }
+	      return {
+	        contentElement: _contentLabel,
+	        width: width,
+	        height: height
+	      };
+	    }
+	  }, {
+	    key: "_getEleAndsetHtmlSize",
+	    value: function _getEleAndsetHtmlSize(node) {
+	      var me = this;
+	      var content = node.content;
+	      var width = node.rowData.width,
+	          height = node.rowData.height;
+
+	      var _dom = document.createElement("div");
+
+	      _dom.className = "chartx_relation_node";
+	      _dom.style.cssText += "; position:absolute;visibility:hidden;";
+	      _dom.style.cssText += "; color:" + me.getProp(me.node.content.fontColor, node) + ";";
+	      _dom.style.cssText += "; text-align:" + me.getProp(me.node.content.textAlign, node) + ";";
+	      _dom.style.cssText += "; vertical-align:" + me.getProp(me.node.content.textBaseline, node) + ";";
+	      _dom.innerHTML = content;
+	      this.domContainer.appendChild(_dom);
+
+	      if (!width) {
+	        width = _dom.offsetWidth + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
+	      }
+
+	      if (!height) {
+	        height = _dom.offsetHeight + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
+	      }
+	      return {
+	        contentElement: _dom,
+	        width: width,
+	        height: height
+	      };
+	    }
+	  }, {
+	    key: "getNodesAt",
+	    value: function getNodesAt() {}
+	  }, {
+	    key: "getProp",
+	    value: function getProp(prop, nodeData) {
+	      var _prop = prop;
+
+	      if (this._isField(prop)) {
+	        _prop = nodeData.rowData[prop];
+	      } else {
+	        if (_.isArray(prop)) {
+	          _prop = prop[nodeData.iNode];
+	        }
+
+	        if (_.isFunction(prop)) {
+	          _prop = prop.apply(this, [nodeData]);
+	        }
+	      }
+	      return _prop;
+	    }
+	  }]);
+	  return Relation;
+	}(_index["default"]);
+
+	_index["default"].registerComponent(Relation, 'graphs', 'relation');
+
+	var _default = Relation;
+	exports["default"] = _default;
+	});
+
+	unwrapExports(relation);
+
+	var interopRequireWildcard = createCommonjsModule(function (module) {
+	function _getRequireWildcardCache() {
+	  if (typeof WeakMap !== "function") return null;
+	  var cache = new WeakMap();
+
+	  _getRequireWildcardCache = function _getRequireWildcardCache() {
+	    return cache;
+	  };
+
+	  return cache;
+	}
+
+	function _interopRequireWildcard(obj) {
+	  if (obj && obj.__esModule) {
+	    return obj;
+	  }
+
+	  if (obj === null || _typeof_1$1(obj) !== "object" && typeof obj !== "function") {
+	    return {
+	      "default": obj
+	    };
+	  }
+
+	  var cache = _getRequireWildcardCache();
+
+	  if (cache && cache.has(obj)) {
+	    return cache.get(obj);
+	  }
+
+	  var newObj = {};
+	  var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor;
+
+	  for (var key in obj) {
+	    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+	      var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null;
+
+	      if (desc && (desc.get || desc.set)) {
+	        Object.defineProperty(newObj, key, desc);
+	      } else {
+	        newObj[key] = obj[key];
+	      }
+	    }
+	  }
+
+	  newObj["default"] = obj;
+
+	  if (cache) {
+	    cache.set(obj, newObj);
+	  }
+
+	  return newObj;
+	}
+
+	module.exports = _interopRequireWildcard;
+	});
+
+	unwrapExports(interopRequireWildcard);
+
+	var force = createCommonjsModule(function (module, exports) {
+
+
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.forceCenter = center;
+	exports.forceCollide = collide;
+	exports.forceLink = link;
+	exports.forceManyBody = manyBody;
+	exports.forceRadial = radial;
+	exports.forceSimulation = simulation;
+	exports.forceX = x$2;
+	exports.forceY = y$2;
+
+	var _typeof2 = interopRequireDefault(_typeof_1$1);
+
+	function center(x, y) {
+	  var nodes;
+	  if (x == null) x = 0;
+	  if (y == null) y = 0;
+
+	  function force() {
+	    var i,
+	        n = nodes.length,
+	        node,
+	        sx = 0,
+	        sy = 0;
+
+	    for (i = 0; i < n; ++i) {
+	      node = nodes[i], sx += node.x, sy += node.y;
+	    }
+
+	    for (sx = sx / n - x, sy = sy / n - y, i = 0; i < n; ++i) {
+	      node = nodes[i], node.x -= sx, node.y -= sy;
+	    }
+	  }
+
+	  force.initialize = function (_) {
+	    nodes = _;
+	  };
+
+	  force.x = function (_) {
+	    return arguments.length ? (x = +_, force) : x;
+	  };
+
+	  force.y = function (_) {
+	    return arguments.length ? (y = +_, force) : y;
+	  };
+
+	  return force;
+	}
+
+	function tree_add(d) {
+	  var x = +this._x.call(null, d),
+	      y = +this._y.call(null, d);
+	  return add(this.cover(x, y), x, y, d);
+	}
+
+	function add(tree, x, y, d) {
+	  if (isNaN(x) || isNaN(y)) return tree; // ignore invalid points
+
+	  var parent,
+	      node = tree._root,
+	      leaf = {
+	    data: d
+	  },
+	      x0 = tree._x0,
+	      y0 = tree._y0,
+	      x1 = tree._x1,
+	      y1 = tree._y1,
+	      xm,
+	      ym,
+	      xp,
+	      yp,
+	      right,
+	      bottom,
+	      i,
+	      j; // If the tree is empty, initialize the root as a leaf.
+
+	  if (!node) return tree._root = leaf, tree; // Find the existing leaf for the new point, or add it.
+
+	  while (node.length) {
+	    if (right = x >= (xm = (x0 + x1) / 2)) x0 = xm;else x1 = xm;
+	    if (bottom = y >= (ym = (y0 + y1) / 2)) y0 = ym;else y1 = ym;
+	    if (parent = node, !(node = node[i = bottom << 1 | right])) return parent[i] = leaf, tree;
+	  } // Is the new point is exactly coincident with the existing point?
+
+
+	  xp = +tree._x.call(null, node.data);
+	  yp = +tree._y.call(null, node.data);
+	  if (x === xp && y === yp) return leaf.next = node, parent ? parent[i] = leaf : tree._root = leaf, tree; // Otherwise, split the leaf node until the old and new point are separated.
+
+	  do {
+	    parent = parent ? parent[i] = new Array(4) : tree._root = new Array(4);
+	    if (right = x >= (xm = (x0 + x1) / 2)) x0 = xm;else x1 = xm;
+	    if (bottom = y >= (ym = (y0 + y1) / 2)) y0 = ym;else y1 = ym;
+	  } while ((i = bottom << 1 | right) === (j = (yp >= ym) << 1 | xp >= xm));
+
+	  return parent[j] = node, parent[i] = leaf, tree;
+	}
+
+	function addAll(data) {
+	  var d,
+	      i,
+	      n = data.length,
+	      x,
+	      y,
+	      xz = new Array(n),
+	      yz = new Array(n),
+	      x0 = Infinity,
+	      y0 = Infinity,
+	      x1 = -Infinity,
+	      y1 = -Infinity; // Compute the points and their extent.
+
+	  for (i = 0; i < n; ++i) {
+	    if (isNaN(x = +this._x.call(null, d = data[i])) || isNaN(y = +this._y.call(null, d))) continue;
+	    xz[i] = x;
+	    yz[i] = y;
+	    if (x < x0) x0 = x;
+	    if (x > x1) x1 = x;
+	    if (y < y0) y0 = y;
+	    if (y > y1) y1 = y;
+	  } // If there were no (valid) points, abort.
+
+
+	  if (x0 > x1 || y0 > y1) return this; // Expand the tree to cover the new points.
+
+	  this.cover(x0, y0).cover(x1, y1); // Add the new points.
+
+	  for (i = 0; i < n; ++i) {
+	    add(this, xz[i], yz[i], data[i]);
+	  }
+
+	  return this;
+	}
+
+	function tree_cover(x, y) {
+	  if (isNaN(x = +x) || isNaN(y = +y)) return this; // ignore invalid points
+
+	  var x0 = this._x0,
+	      y0 = this._y0,
+	      x1 = this._x1,
+	      y1 = this._y1; // If the quadtree has no extent, initialize them.
+	  // Integer extent are necessary so that if we later double the extent,
+	  // the existing quadrant boundaries don’t change due to floating point error!
+
+	  if (isNaN(x0)) {
+	    x1 = (x0 = Math.floor(x)) + 1;
+	    y1 = (y0 = Math.floor(y)) + 1;
+	  } // Otherwise, double repeatedly to cover.
+	  else {
+	      var z = x1 - x0,
+	          node = this._root,
+	          parent,
+	          i;
+
+	      while (x0 > x || x >= x1 || y0 > y || y >= y1) {
+	        i = (y < y0) << 1 | x < x0;
+	        parent = new Array(4), parent[i] = node, node = parent, z *= 2;
+
+	        switch (i) {
+	          case 0:
+	            x1 = x0 + z, y1 = y0 + z;
+	            break;
+
+	          case 1:
+	            x0 = x1 - z, y1 = y0 + z;
+	            break;
+
+	          case 2:
+	            x1 = x0 + z, y0 = y1 - z;
+	            break;
+
+	          case 3:
+	            x0 = x1 - z, y0 = y1 - z;
+	            break;
+	        }
+	      }
+
+	      if (this._root && this._root.length) this._root = node;
+	    }
+
+	  this._x0 = x0;
+	  this._y0 = y0;
+	  this._x1 = x1;
+	  this._y1 = y1;
+	  return this;
+	}
+
+	function tree_data() {
+	  var data = [];
+	  this.visit(function (node) {
+	    if (!node.length) do {
+	      data.push(node.data);
+	    } while (node = node.next);
+	  });
+	  return data;
+	}
+
+	function tree_extent(_) {
+	  return arguments.length ? this.cover(+_[0][0], +_[0][1]).cover(+_[1][0], +_[1][1]) : isNaN(this._x0) ? undefined : [[this._x0, this._y0], [this._x1, this._y1]];
+	}
+
+	function Quad(node, x0, y0, x1, y1) {
+	  this.node = node;
+	  this.x0 = x0;
+	  this.y0 = y0;
+	  this.x1 = x1;
+	  this.y1 = y1;
+	}
+
+	function tree_find(x, y, radius) {
+	  var data,
+	      x0 = this._x0,
+	      y0 = this._y0,
+	      x1,
+	      y1,
+	      x2,
+	      y2,
+	      x3 = this._x1,
+	      y3 = this._y1,
+	      quads = [],
+	      node = this._root,
+	      q,
+	      i;
+	  if (node) quads.push(new Quad(node, x0, y0, x3, y3));
+	  if (radius == null) radius = Infinity;else {
+	    x0 = x - radius, y0 = y - radius;
+	    x3 = x + radius, y3 = y + radius;
+	    radius *= radius;
+	  }
+
+	  while (q = quads.pop()) {
+	    // Stop searching if this quadrant can’t contain a closer node.
+	    if (!(node = q.node) || (x1 = q.x0) > x3 || (y1 = q.y0) > y3 || (x2 = q.x1) < x0 || (y2 = q.y1) < y0) continue; // Bisect the current quadrant.
+
+	    if (node.length) {
+	      var xm = (x1 + x2) / 2,
+	          ym = (y1 + y2) / 2;
+	      quads.push(new Quad(node[3], xm, ym, x2, y2), new Quad(node[2], x1, ym, xm, y2), new Quad(node[1], xm, y1, x2, ym), new Quad(node[0], x1, y1, xm, ym)); // Visit the closest quadrant first.
+
+	      if (i = (y >= ym) << 1 | x >= xm) {
+	        q = quads[quads.length - 1];
+	        quads[quads.length - 1] = quads[quads.length - 1 - i];
+	        quads[quads.length - 1 - i] = q;
+	      }
+	    } // Visit this point. (Visiting coincident points isn’t necessary!)
+	    else {
+	        var dx = x - +this._x.call(null, node.data),
+	            dy = y - +this._y.call(null, node.data),
+	            d2 = dx * dx + dy * dy;
+
+	        if (d2 < radius) {
+	          var d = Math.sqrt(radius = d2);
+	          x0 = x - d, y0 = y - d;
+	          x3 = x + d, y3 = y + d;
+	          data = node.data;
+	        }
+	      }
+	  }
+
+	  return data;
+	}
+
+	function tree_remove(d) {
+	  if (isNaN(x = +this._x.call(null, d)) || isNaN(y = +this._y.call(null, d))) return this; // ignore invalid points
+
+	  var parent,
+	      node = this._root,
+	      retainer,
+	      previous,
+	      next,
+	      x0 = this._x0,
+	      y0 = this._y0,
+	      x1 = this._x1,
+	      y1 = this._y1,
+	      x,
+	      y,
+	      xm,
+	      ym,
+	      right,
+	      bottom,
+	      i,
+	      j; // If the tree is empty, initialize the root as a leaf.
+
+	  if (!node) return this; // Find the leaf node for the point.
+	  // While descending, also retain the deepest parent with a non-removed sibling.
+
+	  if (node.length) while (true) {
+	    if (right = x >= (xm = (x0 + x1) / 2)) x0 = xm;else x1 = xm;
+	    if (bottom = y >= (ym = (y0 + y1) / 2)) y0 = ym;else y1 = ym;
+	    if (!(parent = node, node = node[i = bottom << 1 | right])) return this;
+	    if (!node.length) break;
+	    if (parent[i + 1 & 3] || parent[i + 2 & 3] || parent[i + 3 & 3]) retainer = parent, j = i;
+	  } // Find the point to remove.
+
+	  while (node.data !== d) {
+	    if (!(previous = node, node = node.next)) return this;
+	  }
+
+	  if (next = node.next) delete node.next; // If there are multiple coincident points, remove just the point.
+
+	  if (previous) return next ? previous.next = next : delete previous.next, this; // If this is the root point, remove it.
+
+	  if (!parent) return this._root = next, this; // Remove this leaf.
+
+	  next ? parent[i] = next : delete parent[i]; // If the parent now contains exactly one leaf, collapse superfluous parents.
+
+	  if ((node = parent[0] || parent[1] || parent[2] || parent[3]) && node === (parent[3] || parent[2] || parent[1] || parent[0]) && !node.length) {
+	    if (retainer) retainer[j] = node;else this._root = node;
+	  }
+
+	  return this;
+	}
+
+	function removeAll(data) {
+	  for (var i = 0, n = data.length; i < n; ++i) {
+	    this.remove(data[i]);
+	  }
+
+	  return this;
+	}
+
+	function tree_root() {
+	  return this._root;
+	}
+
+	function tree_size() {
+	  var size = 0;
+	  this.visit(function (node) {
+	    if (!node.length) do {
+	      ++size;
+	    } while (node = node.next);
+	  });
+	  return size;
+	}
+
+	function tree_visit(callback) {
+	  var quads = [],
+	      q,
+	      node = this._root,
+	      child,
+	      x0,
+	      y0,
+	      x1,
+	      y1;
+	  if (node) quads.push(new Quad(node, this._x0, this._y0, this._x1, this._y1));
+
+	  while (q = quads.pop()) {
+	    if (!callback(node = q.node, x0 = q.x0, y0 = q.y0, x1 = q.x1, y1 = q.y1) && node.length) {
+	      var xm = (x0 + x1) / 2,
+	          ym = (y0 + y1) / 2;
+	      if (child = node[3]) quads.push(new Quad(child, xm, ym, x1, y1));
+	      if (child = node[2]) quads.push(new Quad(child, x0, ym, xm, y1));
+	      if (child = node[1]) quads.push(new Quad(child, xm, y0, x1, ym));
+	      if (child = node[0]) quads.push(new Quad(child, x0, y0, xm, ym));
+	    }
+	  }
+
+	  return this;
+	}
+
+	function tree_visitAfter(callback) {
+	  var quads = [],
+	      next = [],
+	      q;
+	  if (this._root) quads.push(new Quad(this._root, this._x0, this._y0, this._x1, this._y1));
+
+	  while (q = quads.pop()) {
+	    var node = q.node;
+
+	    if (node.length) {
+	      var child,
+	          x0 = q.x0,
+	          y0 = q.y0,
+	          x1 = q.x1,
+	          y1 = q.y1,
+	          xm = (x0 + x1) / 2,
+	          ym = (y0 + y1) / 2;
+	      if (child = node[0]) quads.push(new Quad(child, x0, y0, xm, ym));
+	      if (child = node[1]) quads.push(new Quad(child, xm, y0, x1, ym));
+	      if (child = node[2]) quads.push(new Quad(child, x0, ym, xm, y1));
+	      if (child = node[3]) quads.push(new Quad(child, xm, ym, x1, y1));
+	    }
+
+	    next.push(q);
+	  }
+
+	  while (q = next.pop()) {
+	    callback(q.node, q.x0, q.y0, q.x1, q.y1);
+	  }
+
+	  return this;
+	}
+
+	function defaultX(d) {
+	  return d[0];
+	}
+
+	function tree_x(_) {
+	  return arguments.length ? (this._x = _, this) : this._x;
+	}
+
+	function defaultY(d) {
+	  return d[1];
+	}
+
+	function tree_y(_) {
+	  return arguments.length ? (this._y = _, this) : this._y;
+	}
+
+	function quadtree(nodes, x, y) {
+	  var tree = new Quadtree(x == null ? defaultX : x, y == null ? defaultY : y, NaN, NaN, NaN, NaN);
+	  return nodes == null ? tree : tree.addAll(nodes);
+	}
+
+	function Quadtree(x, y, x0, y0, x1, y1) {
+	  this._x = x;
+	  this._y = y;
+	  this._x0 = x0;
+	  this._y0 = y0;
+	  this._x1 = x1;
+	  this._y1 = y1;
+	  this._root = undefined;
+	}
+
+	function leaf_copy(leaf) {
+	  var copy = {
+	    data: leaf.data
+	  },
+	      next = copy;
+
+	  while (leaf = leaf.next) {
+	    next = next.next = {
+	      data: leaf.data
+	    };
+	  }
+
+	  return copy;
+	}
+
+	var treeProto = quadtree.prototype = Quadtree.prototype;
+
+	treeProto.copy = function () {
+	  var copy = new Quadtree(this._x, this._y, this._x0, this._y0, this._x1, this._y1),
+	      node = this._root,
+	      nodes,
+	      child;
+	  if (!node) return copy;
+	  if (!node.length) return copy._root = leaf_copy(node), copy;
+	  nodes = [{
+	    source: node,
+	    target: copy._root = new Array(4)
+	  }];
+
+	  while (node = nodes.pop()) {
+	    for (var i = 0; i < 4; ++i) {
+	      if (child = node.source[i]) {
+	        if (child.length) nodes.push({
+	          source: child,
+	          target: node.target[i] = new Array(4)
+	        });else node.target[i] = leaf_copy(child);
+	      }
+	    }
+	  }
+
+	  return copy;
+	};
+
+	treeProto.add = tree_add;
+	treeProto.addAll = addAll;
+	treeProto.cover = tree_cover;
+	treeProto.data = tree_data;
+	treeProto.extent = tree_extent;
+	treeProto.find = tree_find;
+	treeProto.remove = tree_remove;
+	treeProto.removeAll = removeAll;
+	treeProto.root = tree_root;
+	treeProto.size = tree_size;
+	treeProto.visit = tree_visit;
+	treeProto.visitAfter = tree_visitAfter;
+	treeProto.x = tree_x;
+	treeProto.y = tree_y;
+
+	function constant(x) {
+	  return function () {
+	    return x;
+	  };
+	}
+
+	function jiggle() {
+	  return (Math.random() - 0.5) * 1e-6;
+	}
+
+	function x(d) {
+	  return d.x + d.vx;
+	}
+
+	function y(d) {
+	  return d.y + d.vy;
+	}
+
+	function collide(radius) {
+	  var nodes,
+	      radii,
+	      strength = 1,
+	      iterations = 1;
+	  if (typeof radius !== "function") radius = constant(radius == null ? 1 : +radius);
+
+	  function force() {
+	    var i,
+	        n = nodes.length,
+	        tree,
+	        node,
+	        xi,
+	        yi,
+	        ri,
+	        ri2;
+
+	    for (var k = 0; k < iterations; ++k) {
+	      tree = quadtree(nodes, x, y).visitAfter(prepare);
+
+	      for (i = 0; i < n; ++i) {
+	        node = nodes[i];
+	        ri = radii[node.index], ri2 = ri * ri;
+	        xi = node.x + node.vx;
+	        yi = node.y + node.vy;
+	        tree.visit(apply);
+	      }
+	    }
+
+	    function apply(quad, x0, y0, x1, y1) {
+	      var data = quad.data,
+	          rj = quad.r,
+	          r = ri + rj;
+
+	      if (data) {
+	        if (data.index > node.index) {
+	          var x = xi - data.x - data.vx,
+	              y = yi - data.y - data.vy,
+	              l = x * x + y * y;
+
+	          if (l < r * r) {
+	            if (x === 0) x = jiggle(), l += x * x;
+	            if (y === 0) y = jiggle(), l += y * y;
+	            l = (r - (l = Math.sqrt(l))) / l * strength;
+	            node.vx += (x *= l) * (r = (rj *= rj) / (ri2 + rj));
+	            node.vy += (y *= l) * r;
+	            data.vx -= x * (r = 1 - r);
+	            data.vy -= y * r;
+	          }
+	        }
+
+	        return;
+	      }
+
+	      return x0 > xi + r || x1 < xi - r || y0 > yi + r || y1 < yi - r;
+	    }
+	  }
+
+	  function prepare(quad) {
+	    if (quad.data) return quad.r = radii[quad.data.index];
+
+	    for (var i = quad.r = 0; i < 4; ++i) {
+	      if (quad[i] && quad[i].r > quad.r) {
+	        quad.r = quad[i].r;
+	      }
+	    }
+	  }
+
+	  function initialize() {
+	    if (!nodes) return;
+	    var i,
+	        n = nodes.length,
+	        node;
+	    radii = new Array(n);
+
+	    for (i = 0; i < n; ++i) {
+	      node = nodes[i], radii[node.index] = +radius(node, i, nodes);
+	    }
+	  }
+
+	  force.initialize = function (_) {
+	    nodes = _;
+	    initialize();
+	  };
+
+	  force.iterations = function (_) {
+	    return arguments.length ? (iterations = +_, force) : iterations;
+	  };
+
+	  force.strength = function (_) {
+	    return arguments.length ? (strength = +_, force) : strength;
+	  };
+
+	  force.radius = function (_) {
+	    return arguments.length ? (radius = typeof _ === "function" ? _ : constant(+_), initialize(), force) : radius;
+	  };
+
+	  return force;
+	}
+
+	function index(d) {
+	  return d.index;
+	}
+
+	function find(nodeById, nodeId) {
+	  var node = nodeById.get(nodeId);
+	  if (!node) throw new Error("node not found: " + nodeId);
+	  return node;
+	}
+
+	function link(links) {
+	  var id = index,
+	      strength = defaultStrength,
+	      strengths,
+	      distance = constant(30),
+	      distances,
+	      nodes,
+	      count,
+	      bias,
+	      iterations = 1;
+	  if (links == null) links = [];
+
+	  function defaultStrength(link) {
+	    return 1 / Math.min(count[link.source.index], count[link.target.index]);
+	  }
+
+	  function force(alpha) {
+	    for (var k = 0, n = links.length; k < iterations; ++k) {
+	      for (var i = 0, link, source, target, x, y, l, b; i < n; ++i) {
+	        link = links[i], source = link.source, target = link.target;
+	        x = target.x + target.vx - source.x - source.vx || jiggle();
+	        y = target.y + target.vy - source.y - source.vy || jiggle();
+	        l = Math.sqrt(x * x + y * y);
+	        l = (l - distances[i]) / l * alpha * strengths[i];
+	        x *= l, y *= l;
+	        target.vx -= x * (b = bias[i]);
+	        target.vy -= y * b;
+	        source.vx += x * (b = 1 - b);
+	        source.vy += y * b;
+	      }
+	    }
+	  }
+
+	  function initialize() {
+	    if (!nodes) return;
+	    var i,
+	        n = nodes.length,
+	        m = links.length,
+	        nodeById = new Map(nodes.map(function (d, i) {
+	      return [id(d, i, nodes), d];
+	    })),
+	        link;
+
+	    for (i = 0, count = new Array(n); i < m; ++i) {
+	      link = links[i], link.index = i;
+	      if ((0, _typeof2["default"])(link.source) !== "object") link.source = find(nodeById, link.source);
+	      if ((0, _typeof2["default"])(link.target) !== "object") link.target = find(nodeById, link.target);
+	      count[link.source.index] = (count[link.source.index] || 0) + 1;
+	      count[link.target.index] = (count[link.target.index] || 0) + 1;
+	    }
+
+	    for (i = 0, bias = new Array(m); i < m; ++i) {
+	      link = links[i], bias[i] = count[link.source.index] / (count[link.source.index] + count[link.target.index]);
+	    }
+
+	    strengths = new Array(m), initializeStrength();
+	    distances = new Array(m), initializeDistance();
+	  }
+
+	  function initializeStrength() {
+	    if (!nodes) return;
+
+	    for (var i = 0, n = links.length; i < n; ++i) {
+	      strengths[i] = +strength(links[i], i, links);
+	    }
+	  }
+
+	  function initializeDistance() {
+	    if (!nodes) return;
+
+	    for (var i = 0, n = links.length; i < n; ++i) {
+	      distances[i] = +distance(links[i], i, links);
+	    }
+	  }
+
+	  force.initialize = function (_) {
+	    nodes = _;
+	    initialize();
+	  };
+
+	  force.links = function (_) {
+	    return arguments.length ? (links = _, initialize(), force) : links;
+	  };
+
+	  force.id = function (_) {
+	    return arguments.length ? (id = _, force) : id;
+	  };
+
+	  force.iterations = function (_) {
+	    return arguments.length ? (iterations = +_, force) : iterations;
+	  };
+
+	  force.strength = function (_) {
+	    return arguments.length ? (strength = typeof _ === "function" ? _ : constant(+_), initializeStrength(), force) : strength;
+	  };
+
+	  force.distance = function (_) {
+	    return arguments.length ? (distance = typeof _ === "function" ? _ : constant(+_), initializeDistance(), force) : distance;
+	  };
+
+	  return force;
+	}
+
+	var noop = {
+	  value: function value() {}
+	};
+
+	function dispatch() {
+	  for (var i = 0, n = arguments.length, _ = {}, t; i < n; ++i) {
+	    if (!(t = arguments[i] + "") || t in _ || /[\s.]/.test(t)) throw new Error("illegal type: " + t);
+	    _[t] = [];
+	  }
+
+	  return new Dispatch(_);
+	}
+
+	function Dispatch(_) {
+	  this._ = _;
+	}
+
+	function parseTypenames(typenames, types) {
+	  return typenames.trim().split(/^|\s+/).map(function (t) {
+	    var name = "",
+	        i = t.indexOf(".");
+	    if (i >= 0) name = t.slice(i + 1), t = t.slice(0, i);
+	    if (t && !types.hasOwnProperty(t)) throw new Error("unknown type: " + t);
+	    return {
+	      type: t,
+	      name: name
+	    };
+	  });
+	}
+
+	Dispatch.prototype = dispatch.prototype = {
+	  constructor: Dispatch,
+	  on: function on(typename, callback) {
+	    var _ = this._,
+	        T = parseTypenames(typename + "", _),
+	        t,
+	        i = -1,
+	        n = T.length; // If no callback was specified, return the callback of the given type and name.
+
+	    if (arguments.length < 2) {
+	      while (++i < n) {
+	        if ((t = (typename = T[i]).type) && (t = get(_[t], typename.name))) return t;
+	      }
+
+	      return;
+	    } // If a type was specified, set the callback for the given type and name.
+	    // Otherwise, if a null callback was specified, remove callbacks of the given name.
+
+
+	    if (callback != null && typeof callback !== "function") throw new Error("invalid callback: " + callback);
+
+	    while (++i < n) {
+	      if (t = (typename = T[i]).type) _[t] = set(_[t], typename.name, callback);else if (callback == null) for (t in _) {
+	        _[t] = set(_[t], typename.name, null);
+	      }
+	    }
+
+	    return this;
+	  },
+	  copy: function copy() {
+	    var copy = {},
+	        _ = this._;
+
+	    for (var t in _) {
+	      copy[t] = _[t].slice();
+	    }
+
+	    return new Dispatch(copy);
+	  },
+	  call: function call(type, that) {
+	    if ((n = arguments.length - 2) > 0) for (var args = new Array(n), i = 0, n, t; i < n; ++i) {
+	      args[i] = arguments[i + 2];
+	    }
+	    if (!this._.hasOwnProperty(type)) throw new Error("unknown type: " + type);
+
+	    for (t = this._[type], i = 0, n = t.length; i < n; ++i) {
+	      t[i].value.apply(that, args);
+	    }
+	  },
+	  apply: function apply(type, that, args) {
+	    if (!this._.hasOwnProperty(type)) throw new Error("unknown type: " + type);
+
+	    for (var t = this._[type], i = 0, n = t.length; i < n; ++i) {
+	      t[i].value.apply(that, args);
+	    }
+	  }
+	};
+
+	function get(type, name) {
+	  for (var i = 0, n = type.length, c; i < n; ++i) {
+	    if ((c = type[i]).name === name) {
+	      return c.value;
+	    }
+	  }
+	}
+
+	function set(type, name, callback) {
+	  for (var i = 0, n = type.length; i < n; ++i) {
+	    if (type[i].name === name) {
+	      type[i] = noop, type = type.slice(0, i).concat(type.slice(i + 1));
+	      break;
+	    }
+	  }
+
+	  if (callback != null) type.push({
+	    name: name,
+	    value: callback
+	  });
+	  return type;
+	}
+
+	var frame = 0,
+	    // is an animation frame pending?
+	timeout = 0,
+	    // is a timeout pending?
+	interval = 0,
+	    // are any timers active?
+	pokeDelay = 1000,
+	    // how frequently we check for clock skew
+	taskHead,
+	    taskTail,
+	    clockLast = 0,
+	    clockNow = 0,
+	    clockSkew = 0,
+	    clock = (typeof performance === "undefined" ? "undefined" : (0, _typeof2["default"])(performance)) === "object" && performance.now ? performance : Date,
+	    setFrame = (typeof window === "undefined" ? "undefined" : (0, _typeof2["default"])(window)) === "object" && window.requestAnimationFrame ? window.requestAnimationFrame.bind(window) : function (f) {
+	  setTimeout(f, 17);
+	};
+
+	function now() {
+	  return clockNow || (setFrame(clearNow), clockNow = clock.now() + clockSkew);
+	}
+
+	function clearNow() {
+	  clockNow = 0;
+	}
+
+	function Timer() {
+	  this._call = this._time = this._next = null;
+	}
+
+	Timer.prototype = timer.prototype = {
+	  constructor: Timer,
+	  restart: function restart(callback, delay, time) {
+	    if (typeof callback !== "function") throw new TypeError("callback is not a function");
+	    time = (time == null ? now() : +time) + (delay == null ? 0 : +delay);
+
+	    if (!this._next && taskTail !== this) {
+	      if (taskTail) taskTail._next = this;else taskHead = this;
+	      taskTail = this;
+	    }
+
+	    this._call = callback;
+	    this._time = time;
+	    sleep();
+	  },
+	  stop: function stop() {
+	    if (this._call) {
+	      this._call = null;
+	      this._time = Infinity;
+	      sleep();
+	    }
+	  }
+	};
+
+	function timer(callback, delay, time) {
+	  var t = new Timer();
+	  t.restart(callback, delay, time);
+	  return t;
+	}
+
+	function timerFlush() {
+	  now(); // Get the current time, if not already set.
+
+	  ++frame; // Pretend we’ve set an alarm, if we haven’t already.
+
+	  var t = taskHead,
+	      e;
+
+	  while (t) {
+	    if ((e = clockNow - t._time) >= 0) t._call.call(null, e);
+	    t = t._next;
+	  }
+
+	  --frame;
+	}
+
+	function wake() {
+	  clockNow = (clockLast = clock.now()) + clockSkew;
+	  frame = timeout = 0;
+
+	  try {
+	    timerFlush();
+	  } finally {
+	    frame = 0;
+	    nap();
+	    clockNow = 0;
+	  }
+	}
+
+	function poke() {
+	  var now = clock.now(),
+	      delay = now - clockLast;
+	  if (delay > pokeDelay) clockSkew -= delay, clockLast = now;
+	}
+
+	function nap() {
+	  var t0,
+	      t1 = taskHead,
+	      t2,
+	      time = Infinity;
+
+	  while (t1) {
+	    if (t1._call) {
+	      if (time > t1._time) time = t1._time;
+	      t0 = t1, t1 = t1._next;
+	    } else {
+	      t2 = t1._next, t1._next = null;
+	      t1 = t0 ? t0._next = t2 : taskHead = t2;
+	    }
+	  }
+
+	  taskTail = t0;
+	  sleep(time);
+	}
+
+	function sleep(time) {
+	  if (frame) return; // Soonest alarm already set, or will be.
+
+	  if (timeout) timeout = clearTimeout(timeout);
+	  var delay = time - clockNow; // Strictly less than if we recomputed clockNow.
+
+	  if (delay > 24) {
+	    if (time < Infinity) timeout = setTimeout(wake, time - clock.now() - clockSkew);
+	    if (interval) interval = clearInterval(interval);
+	  } else {
+	    if (!interval) clockLast = clock.now(), interval = setInterval(poke, pokeDelay);
+	    frame = 1, setFrame(wake);
+	  }
+	}
+
+	function x$1(d) {
+	  return d.x;
+	}
+
+	function y$1(d) {
+	  return d.y;
+	}
+
+	var initialRadius = 10,
+	    initialAngle = Math.PI * (3 - Math.sqrt(5));
+
+	function simulation(_nodes) {
+	  var simulation,
+	      _alpha = 1,
+	      _alphaMin = 0.001,
+	      _alphaDecay = 1 - Math.pow(_alphaMin, 1 / 300),
+	      _alphaTarget = 0,
+	      _velocityDecay = 0.6,
+	      forces = new Map(),
+	      stepper = timer(step),
+	      event = dispatch("tick", "end");
+
+	  if (_nodes == null) _nodes = [];
+
+	  function step() {
+	    tick();
+	    event.call("tick", simulation);
+
+	    if (_alpha < _alphaMin) {
+	      stepper.stop();
+	      event.call("end", simulation);
+	    }
+	  }
+
+	  function tick(iterations) {
+	    var i,
+	        n = _nodes.length,
+	        node;
+	    if (iterations === undefined) iterations = 1;
+
+	    for (var k = 0; k < iterations; ++k) {
+	      _alpha += (_alphaTarget - _alpha) * _alphaDecay;
+	      forces.forEach(function (force) {
+	        force(_alpha);
+	      });
+
+	      for (i = 0; i < n; ++i) {
+	        node = _nodes[i];
+	        if (node.fx == null) node.x += node.vx *= _velocityDecay;else node.x = node.fx, node.vx = 0;
+	        if (node.fy == null) node.y += node.vy *= _velocityDecay;else node.y = node.fy, node.vy = 0;
+	      }
+	    }
+
+	    return simulation;
+	  }
+
+	  function initializeNodes() {
+	    for (var i = 0, n = _nodes.length, node; i < n; ++i) {
+	      node = _nodes[i], node.index = i;
+	      if (node.fx != null) node.x = node.fx;
+	      if (node.fy != null) node.y = node.fy;
+
+	      if (isNaN(node.x) || isNaN(node.y)) {
+	        var radius = initialRadius * Math.sqrt(i),
+	            angle = i * initialAngle;
+	        node.x = radius * Math.cos(angle);
+	        node.y = radius * Math.sin(angle);
+	      }
+
+	      if (isNaN(node.vx) || isNaN(node.vy)) {
+	        node.vx = node.vy = 0;
+	      }
+	    }
+	  }
+
+	  function initializeForce(force) {
+	    if (force.initialize) force.initialize(_nodes);
+	    return force;
+	  }
+
+	  initializeNodes();
+	  return simulation = {
+	    tick: tick,
+	    restart: function restart() {
+	      return stepper.restart(step), simulation;
+	    },
+	    stop: function stop() {
+	      return stepper.stop(), simulation;
+	    },
+	    nodes: function nodes(_) {
+	      return arguments.length ? (_nodes = _, initializeNodes(), forces.forEach(initializeForce), simulation) : _nodes;
+	    },
+	    alpha: function alpha(_) {
+	      return arguments.length ? (_alpha = +_, simulation) : _alpha;
+	    },
+	    alphaMin: function alphaMin(_) {
+	      return arguments.length ? (_alphaMin = +_, simulation) : _alphaMin;
+	    },
+	    alphaDecay: function alphaDecay(_) {
+	      return arguments.length ? (_alphaDecay = +_, simulation) : +_alphaDecay;
+	    },
+	    alphaTarget: function alphaTarget(_) {
+	      return arguments.length ? (_alphaTarget = +_, simulation) : _alphaTarget;
+	    },
+	    velocityDecay: function velocityDecay(_) {
+	      return arguments.length ? (_velocityDecay = 1 - _, simulation) : 1 - _velocityDecay;
+	    },
+	    force: function force(name, _) {
+	      return arguments.length > 1 ? (_ == null ? forces["delete"](name) : forces.set(name, initializeForce(_)), simulation) : forces.get(name);
+	    },
+	    find: function find(x, y, radius) {
+	      var i = 0,
+	          n = _nodes.length,
+	          dx,
+	          dy,
+	          d2,
+	          node,
+	          closest;
+	      if (radius == null) radius = Infinity;else radius *= radius;
+
+	      for (i = 0; i < n; ++i) {
+	        node = _nodes[i];
+	        dx = x - node.x;
+	        dy = y - node.y;
+	        d2 = dx * dx + dy * dy;
+	        if (d2 < radius) closest = node, radius = d2;
+	      }
+
+	      return closest;
+	    },
+	    on: function on(name, _) {
+	      return arguments.length > 1 ? (event.on(name, _), simulation) : event.on(name);
+	    }
+	  };
+	}
+
+	function manyBody() {
+	  var nodes,
+	      node,
+	      alpha,
+	      strength = constant(-30),
+	      strengths,
+	      distanceMin2 = 1,
+	      distanceMax2 = Infinity,
+	      theta2 = 0.81;
+
+	  function force(_) {
+	    var i,
+	        n = nodes.length,
+	        tree = quadtree(nodes, x$1, y$1).visitAfter(accumulate);
+
+	    for (alpha = _, i = 0; i < n; ++i) {
+	      node = nodes[i], tree.visit(apply);
+	    }
+	  }
+
+	  function initialize() {
+	    if (!nodes) return;
+	    var i,
+	        n = nodes.length,
+	        node;
+	    strengths = new Array(n);
+
+	    for (i = 0; i < n; ++i) {
+	      node = nodes[i], strengths[node.index] = +strength(node, i, nodes);
+	    }
+	  }
+
+	  function accumulate(quad) {
+	    var strength = 0,
+	        q,
+	        c,
+	        weight = 0,
+	        x,
+	        y,
+	        i; // For internal nodes, accumulate forces from child quadrants.
+
+	    if (quad.length) {
+	      for (x = y = i = 0; i < 4; ++i) {
+	        if ((q = quad[i]) && (c = Math.abs(q.value))) {
+	          strength += q.value, weight += c, x += c * q.x, y += c * q.y;
+	        }
+	      }
+
+	      quad.x = x / weight;
+	      quad.y = y / weight;
+	    } // For leaf nodes, accumulate forces from coincident quadrants.
+	    else {
+	        q = quad;
+	        q.x = q.data.x;
+	        q.y = q.data.y;
+
+	        do {
+	          strength += strengths[q.data.index];
+	        } while (q = q.next);
+	      }
+
+	    quad.value = strength;
+	  }
+
+	  function apply(quad, x1, _, x2) {
+	    if (!quad.value) return true;
+	    var x = quad.x - node.x,
+	        y = quad.y - node.y,
+	        w = x2 - x1,
+	        l = x * x + y * y; // Apply the Barnes-Hut approximation if possible.
+	    // Limit forces for very close nodes; randomize direction if coincident.
+
+	    if (w * w / theta2 < l) {
+	      if (l < distanceMax2) {
+	        if (x === 0) x = jiggle(), l += x * x;
+	        if (y === 0) y = jiggle(), l += y * y;
+	        if (l < distanceMin2) l = Math.sqrt(distanceMin2 * l);
+	        node.vx += x * quad.value * alpha / l;
+	        node.vy += y * quad.value * alpha / l;
+	      }
+
+	      return true;
+	    } // Otherwise, process points directly.
+	    else if (quad.length || l >= distanceMax2) return; // Limit forces for very close nodes; randomize direction if coincident.
+
+
+	    if (quad.data !== node || quad.next) {
+	      if (x === 0) x = jiggle(), l += x * x;
+	      if (y === 0) y = jiggle(), l += y * y;
+	      if (l < distanceMin2) l = Math.sqrt(distanceMin2 * l);
+	    }
+
+	    do {
+	      if (quad.data !== node) {
+	        w = strengths[quad.data.index] * alpha / l;
+	        node.vx += x * w;
+	        node.vy += y * w;
+	      }
+	    } while (quad = quad.next);
+	  }
+
+	  force.initialize = function (_) {
+	    nodes = _;
+	    initialize();
+	  };
+
+	  force.strength = function (_) {
+	    return arguments.length ? (strength = typeof _ === "function" ? _ : constant(+_), initialize(), force) : strength;
+	  };
+
+	  force.distanceMin = function (_) {
+	    return arguments.length ? (distanceMin2 = _ * _, force) : Math.sqrt(distanceMin2);
+	  };
+
+	  force.distanceMax = function (_) {
+	    return arguments.length ? (distanceMax2 = _ * _, force) : Math.sqrt(distanceMax2);
+	  };
+
+	  force.theta = function (_) {
+	    return arguments.length ? (theta2 = _ * _, force) : Math.sqrt(theta2);
+	  };
+
+	  return force;
+	}
+
+	function radial(radius, x, y) {
+	  var nodes,
+	      strength = constant(0.1),
+	      strengths,
+	      radiuses;
+	  if (typeof radius !== "function") radius = constant(+radius);
+	  if (x == null) x = 0;
+	  if (y == null) y = 0;
+
+	  function force(alpha) {
+	    for (var i = 0, n = nodes.length; i < n; ++i) {
+	      var node = nodes[i],
+	          dx = node.x - x || 1e-6,
+	          dy = node.y - y || 1e-6,
+	          r = Math.sqrt(dx * dx + dy * dy),
+	          k = (radiuses[i] - r) * strengths[i] * alpha / r;
+	      node.vx += dx * k;
+	      node.vy += dy * k;
+	    }
+	  }
+
+	  function initialize() {
+	    if (!nodes) return;
+	    var i,
+	        n = nodes.length;
+	    strengths = new Array(n);
+	    radiuses = new Array(n);
+
+	    for (i = 0; i < n; ++i) {
+	      radiuses[i] = +radius(nodes[i], i, nodes);
+	      strengths[i] = isNaN(radiuses[i]) ? 0 : +strength(nodes[i], i, nodes);
+	    }
+	  }
+
+	  force.initialize = function (_) {
+	    nodes = _, initialize();
+	  };
+
+	  force.strength = function (_) {
+	    return arguments.length ? (strength = typeof _ === "function" ? _ : constant(+_), initialize(), force) : strength;
+	  };
+
+	  force.radius = function (_) {
+	    return arguments.length ? (radius = typeof _ === "function" ? _ : constant(+_), initialize(), force) : radius;
+	  };
+
+	  force.x = function (_) {
+	    return arguments.length ? (x = +_, force) : x;
+	  };
+
+	  force.y = function (_) {
+	    return arguments.length ? (y = +_, force) : y;
+	  };
+
+	  return force;
+	}
+
+	function x$2(x) {
+	  var strength = constant(0.1),
+	      nodes,
+	      strengths,
+	      xz;
+	  if (typeof x !== "function") x = constant(x == null ? 0 : +x);
+
+	  function force(alpha) {
+	    for (var i = 0, n = nodes.length, node; i < n; ++i) {
+	      node = nodes[i], node.vx += (xz[i] - node.x) * strengths[i] * alpha;
+	    }
+	  }
+
+	  function initialize() {
+	    if (!nodes) return;
+	    var i,
+	        n = nodes.length;
+	    strengths = new Array(n);
+	    xz = new Array(n);
+
+	    for (i = 0; i < n; ++i) {
+	      strengths[i] = isNaN(xz[i] = +x(nodes[i], i, nodes)) ? 0 : +strength(nodes[i], i, nodes);
+	    }
+	  }
+
+	  force.initialize = function (_) {
+	    nodes = _;
+	    initialize();
+	  };
+
+	  force.strength = function (_) {
+	    return arguments.length ? (strength = typeof _ === "function" ? _ : constant(+_), initialize(), force) : strength;
+	  };
+
+	  force.x = function (_) {
+	    return arguments.length ? (x = typeof _ === "function" ? _ : constant(+_), initialize(), force) : x;
+	  };
+
+	  return force;
+	}
+
+	function y$2(y) {
+	  var strength = constant(0.1),
+	      nodes,
+	      strengths,
+	      yz;
+	  if (typeof y !== "function") y = constant(y == null ? 0 : +y);
+
+	  function force(alpha) {
+	    for (var i = 0, n = nodes.length, node; i < n; ++i) {
+	      node = nodes[i], node.vy += (yz[i] - node.y) * strengths[i] * alpha;
+	    }
+	  }
+
+	  function initialize() {
+	    if (!nodes) return;
+	    var i,
+	        n = nodes.length;
+	    strengths = new Array(n);
+	    yz = new Array(n);
+
+	    for (i = 0; i < n; ++i) {
+	      strengths[i] = isNaN(yz[i] = +y(nodes[i], i, nodes)) ? 0 : +strength(nodes[i], i, nodes);
+	    }
+	  }
+
+	  force.initialize = function (_) {
+	    nodes = _;
+	    initialize();
+	  };
+
+	  force.strength = function (_) {
+	    return arguments.length ? (strength = typeof _ === "function" ? _ : constant(+_), initialize(), force) : strength;
+	  };
+
+	  force.y = function (_) {
+	    return arguments.length ? (y = typeof _ === "function" ? _ : constant(+_), initialize(), force) : y;
+	  };
+
+	  return force;
+	}
+	});
+
+	unwrapExports(force);
+	var force_1 = force.forceCenter;
+	var force_2 = force.forceCollide;
+	var force_3 = force.forceLink;
+	var force_4 = force.forceManyBody;
+	var force_5 = force.forceRadial;
+	var force_6 = force.forceSimulation;
+	var force_7 = force.forceX;
+	var force_8 = force.forceY;
+
+	var force_1$1 = createCommonjsModule(function (module, exports) {
+
+
+
+
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports["default"] = void 0;
+
+	var _classCallCheck2 = interopRequireDefault(classCallCheck$1);
+
+	var _possibleConstructorReturn2 = interopRequireDefault(possibleConstructorReturn$1);
+
+	var _getPrototypeOf2 = interopRequireDefault(getPrototypeOf$1);
+
+	var _assertThisInitialized2 = interopRequireDefault(assertThisInitialized$1);
+
+	var _createClass2 = interopRequireDefault(createClass$1);
+
+	var _inherits2 = interopRequireDefault(inherits$1);
+
+	var _canvax = interopRequireDefault(Canvax);
+
+	var _index = interopRequireDefault(graphs);
+
+	var force$1 = interopRequireWildcard(force);
+
+
+
+	var _ = _canvax["default"]._;
+	var Circle = _canvax["default"].Shapes.Circle;
+	var Text = _canvax["default"].Display.Text;
+	var Line = _canvax["default"].Shapes.Line;
+
+	var Force =
+	/*#__PURE__*/
+	function (_GraphsBase) {
+	  (0, _inherits2["default"])(Force, _GraphsBase);
+	  (0, _createClass2["default"])(Force, null, [{
+	    key: "defaultProps",
+	    value: function defaultProps() {
+	      return {
+	        keyField: {
+	          detail: 'key字段',
+	          "default": 'key'
+	        },
+	        valueField: {
+	          detail: 'value字段',
+	          "default": 'value'
+	        },
+	        node: {
+	          detail: '单个节点的配置',
+	          propertys: {
+	            shapeType: {
+	              detail: '节点图形',
+	              "default": 'circle'
+	            },
+	            maxWidth: {
+	              detail: '节点最大的width',
+	              "default": 200
+	            },
+	            width: {
+	              detail: '内容的width',
+	              "default": null
+	            },
+	            height: {
+	              detail: '内容的height',
+	              "default": null
+	            },
+	            radius: {
+	              detail: '圆角角度',
+	              "default": 6
+	            },
+	            fillStyle: {
+	              detail: '节点背景色',
+	              "default": '#acdf7d'
+	            },
+	            strokeStyle: {
+	              detail: '描边颜色',
+	              "default": '#e5e5e5'
+	            },
+	            padding: {
+	              detail: 'node节点容器到内容的边距',
+	              "default": 10
+	            },
+	            content: {
+	              detail: '节点内容配置',
+	              propertys: {
+	                field: {
+	                  detail: '内容字段',
+	                  documentation: '默认content字段',
+	                  "default": 'content'
+	                },
+	                fontColor: {
+	                  detail: '内容文本颜色',
+	                  "default": '#666'
+	                },
+	                format: {
+	                  detail: '内容格式化处理函数',
+	                  "default": null
+	                },
+	                textAlign: {
+	                  detail: "textAlign",
+	                  "default": "center"
+	                },
+	                textBaseline: {
+	                  detail: 'textBaseline',
+	                  "default": "middle"
+	                }
+	              }
+	            }
+	          }
+	        },
+	        line: {
+	          detail: '两个节点连线配置',
+	          propertys: {
+	            lineWidth: {
+	              detail: '线宽',
+	              "default": 1
+	            },
+	            strokeStyle: {
+	              detail: '连线的颜色',
+	              "default": '#e5e5e5'
+	            },
+	            lineType: {
+	              detail: '连线样式（虚线等）',
+	              "default": 'solid'
+	            },
+	            arrow: {
+	              detail: '是否有箭头',
+	              "default": true
+	            }
+	          }
+	        },
+	        status: {
+	          detail: '一些开关配置',
+	          propertys: {
+	            transform: {
+	              detail: "是否启动拖拽缩放整个画布",
+	              propertys: {
+	                fitView: {
+	                  detail: "自动缩放",
+	                  "default": '' //autoZoom
+
+	                },
+	                enabled: {
+	                  detail: "是否开启",
+	                  "default": true
+	                },
+	                scale: {
+	                  detail: "缩放值",
+	                  "default": 1
+	                },
+	                scaleOrigin: {
+	                  detail: "缩放原点",
+	                  "default": {
+	                    x: 0,
+	                    y: 0
+	                  }
+	                }
+	              }
+	            }
+	          }
+	        }
+	      };
+	    }
+	  }]);
+
+	  function Force(opt, app) {
+	    var _this;
+
+	    (0, _classCallCheck2["default"])(this, Force);
+	    _this = (0, _possibleConstructorReturn2["default"])(this, (0, _getPrototypeOf2["default"])(Force).call(this, opt, app));
+	    _this.type = "force";
+
+	    _.extend(true, (0, _assertThisInitialized2["default"])(_this), (0, tools.getDefaultProps)(Force.defaultProps()), opt);
+
+	    _this.domContainer = app.canvax.domView;
+
+	    _this.init();
+
+	    return _this;
+	  }
+
+	  (0, _createClass2["default"])(Force, [{
+	    key: "init",
+	    value: function init() {
+	      this.nodesSp = new _canvax["default"].Display.Sprite({
+	        id: "nodesSp"
+	      });
+	      this.edgesSp = new _canvax["default"].Display.Sprite({
+	        id: "edgesSp"
+	      });
+	      this.graphsSp = new _canvax["default"].Display.Sprite({
+	        id: "graphsSp"
+	      });
+	      this.graphsSp.addChild(this.edgesSp);
+	      this.graphsSp.addChild(this.nodesSp);
+	      this.sprite.addChild(this.graphsSp);
+	    }
+	  }, {
+	    key: "draw",
+	    value: function draw(opt) {
+	      !opt && (opt = {});
+
+	      _.extend(true, this, opt);
+
+	      this.data = opt.data || this._initData();
+	      this.widget();
+	    }
+	  }, {
+	    key: "_initData",
+	    value: function _initData() {
+	      //和关系图那边保持data格式的统一
+	      var data = {
+	        nodes: [//{ type,key,content,ctype,width,height,x,y }
+	        ],
+	        edges: [//{ type,key[],content,ctype,width,height,x,y }
+	        ],
+	        size: {
+	          width: this.app.width,
+	          height: this.app.height
+	        }
+	      };
+	      var _nodeMap = {};
+
+	      for (var i = 0; i < this.dataFrame.length; i++) {
+	        var rowData = this.dataFrame.getRowDataAt(i);
+
+	        var fields = _.flatten([(rowData[this.keyField] + "").split(",")]);
+
+	        var content = this._getContent(rowData);
+
+	        var key = fields.length == 1 ? fields[0] : fields;
+	        var element = new _canvax["default"].Display.Sprite({
+	          id: "nodeSp_" + key
+	        });
+	        this.graphsSp.addChild(element);
+	        var node = {
+	          type: "force",
+	          iNode: i,
+	          rowData: rowData,
+	          key: key,
+	          content: content,
+	          ctype: this._checkHtml(content) ? 'html' : 'canvas',
+	          //下面三个属性在_setElementAndSize中设置
+	          element: element,
+	          //外面传的layout数据可能没有element，widget的时候要检测下
+	          width: null,
+	          height: null,
+	          radius: 1,
+	          //默认为1
+	          //这个在layout的时候设置
+	          x: null,
+	          y: null,
+	          shapeType: null,
+	          //如果是edge，要填写这两节点
+	          source: null,
+	          target: null
+	        }; //_.extend(node, this._getElementAndSize(node));
+
+	        if (fields.length == 1) {
+	          node.shapeType = this.getProp(this.node.shapeType, node);
+	          data.nodes.push(node);
+	          _nodeMap[node.key] = node;
+	        } else {
+	          node.shapeType = "line";
+	          data.edges.push(node);
+	        }
+	      }
+
+	      _.each(data.edges, function (edge) {
+	        var keys = edge.key;
+	        edge.source = _nodeMap[keys[0]];
+	        edge.target = _nodeMap[keys[1]];
+	      });
+
+	      return data;
+	    }
+	  }, {
+	    key: "widget",
+	    value: function widget() {
+	      var _this2 = this;
+
+	      var me = this;
+	      var keyField = this.keyField;
+	      var valField = this.valueField;
+	      var links = this.data.edges.map(function (d) {
+	        //source: "Napoleon", target: "Myriel", value: 1
+	        return {
+	          source: d.source[keyField],
+	          target: d.target[keyField],
+	          value: d.rowData[valField],
+	          nodeData: d
+	        };
+	      });
+	      var nodes = this.data.nodes.map(function (d) {
+	        var node = Object.create(d);
+	        node.id = d.key;
+	        node.nodeData = d;
+	        return node;
+	      });
+	      var _this$data$size = this.data.size,
+	          width = _this$data$size.width,
+	          height = _this$data$size.height;
+	      var simulation = force$1.forceSimulation(nodes).force("link", force$1.forceLink(links).id(function (d) {
+	        return d.id;
+	      })).force("charge", force$1.forceManyBody()).force("center", force$1.forceCenter(width / 2, height / 2)).force("x", force$1.forceX(width / 2).strength(0.045)).force("y", force$1.forceY(height / 2).strength(0.045));
+	      nodes.forEach(function (node) {
+	        var fillStyle = me.getProp(me.node.fillStyle, node.nodeData);
+	        var strokeStyle = me.getProp(me.node.strokeStyle, node.nodeData); //let radius = _.flatten([me.getProp(me.node.radius, node)]);
+
+	        var _node = new Circle({
+	          context: {
+	            r: 8,
+	            fillStyle: fillStyle,
+	            strokeStyle: strokeStyle
+	          }
+	        });
+
+	        node.nodeData.element.addChild(_node);
+
+	        var _label = new Text(node.nodeData.rowData.label, {
+	          context: {
+	            fontSize: 11,
+	            fillStyle: "#bfa08b",
+	            textBaseline: "middle",
+	            textAlign: "center",
+	            globalAlpha: 0.7
+	          }
+	        });
+
+	        node.nodeData.element.addChild(_label);
+	      });
+	      links.forEach(function (link) {
+	        var lineWidth = me.getProp(me.line.lineWidth, link.nodeData);
+	        var strokeStyle = me.getProp(me.line.strokeStyle, link.nodeData);
+
+	        var _line = new Line({
+	          context: {
+	            lineWidth: lineWidth,
+	            strokeStyle: strokeStyle,
+	            start: {
+	              x: 0,
+	              y: 0
+	            },
+	            end: {
+	              x: 0,
+	              y: 0
+	            },
+	            globalAlpha: 0.4
+	          }
+	        });
+
+	        _this2.edgesSp.addChild(_line);
+
+	        link.line = _line;
+	      });
+	      simulation.on("tick", function () {
+	        if (simulation.alpha() <= 0.05) {
+	          simulation.stop();
+	          return;
+	        }
+	        nodes.forEach(function (node) {
+	          var elemCtx = node.nodeData.element.context;
+
+	          if (elemCtx) {
+	            elemCtx.x = node.x;
+	            elemCtx.y = node.y;
+	          }
+	        });
+	        links.forEach(function (link) {
+	          var lineCtx = link.line.context;
+
+	          if (lineCtx) {
+	            lineCtx.start.x = link.source.x;
+	            lineCtx.start.y = link.source.y;
+	            lineCtx.end.x = link.target.x;
+	            lineCtx.end.y = link.target.y;
+	          }
+	        });
+	      });
+	    }
+	    /**
+	     * 字符串是否含有html标签的检测
+	     */
+
+	  }, {
+	    key: "_checkHtml",
+	    value: function _checkHtml(str) {
+	      var reg = /<[^>]+>/g;
+	      return reg.test(str);
+	    }
+	  }, {
+	    key: "_getContent",
+	    value: function _getContent(rowData) {
+	      var me = this;
+
+	      var _c; //this.node.content;
+
+
+	      if (this._isField(this.node.content.field)) {
+	        _c = rowData[this.node.content.field];
+	      }
+
+	      if (me.node.content.format && _.isFunction(me.node.content.format)) {
+	        _c = me.node.content.format.apply(this, [_c, rowData]);
+	      }
+	      return _c;
+	    }
+	  }, {
+	    key: "_isField",
+	    value: function _isField(str) {
+	      return ~this.dataFrame.fields.indexOf(str);
+	    }
+	  }, {
+	    key: "getNodesAt",
+	    value: function getNodesAt() {}
+	  }, {
+	    key: "getProp",
+	    value: function getProp(prop, nodeData) {
+	      var _prop = prop;
+
+	      if (this._isField(prop) && nodeData.rowData) {
+	        _prop = nodeData.rowData[prop];
+	      } else {
+	        if (_.isArray(prop)) {
+	          _prop = prop[nodeData.iNode];
+	        }
+
+	        if (_.isFunction(prop)) {
+	          _prop = prop.apply(this, [nodeData]);
+	        }
+	      }
+	      return _prop;
+	    }
+	  }]);
+	  return Force;
+	}(_index["default"]);
+
+	_index["default"].registerComponent(Force, 'graphs', 'force');
+
+	var _default = Force;
+	exports["default"] = _default;
+	});
+
+	unwrapExports(force_1$1);
 
 	var tree = createCommonjsModule(function (module, exports) {
 
