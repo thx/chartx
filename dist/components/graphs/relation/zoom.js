@@ -5,14 +5,16 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports["default"] = _default;
 
+/**
+ * @fileOverview zoom controller
+ * @author litao.lt@alibaba-in.com
+ * @version 1.0
+ */
 function _default() {
   var mouse = {
     x: 0,
-    //鼠标在画布坐标系内的x，可以理解为全局的缩放原点x
     y: 0,
-    //鼠标在画布坐标系内的y，可以理解为全局的缩放原点y
     rx: 0,
-    //真实坐标系中的坐标值
     ry: 0
   };
   var scale = 1;
@@ -54,6 +56,12 @@ function _default() {
     };
   };
 
+  var offset = function offset(pos) {
+    mouse.x += pos.x;
+    mouse.y += pos.y;
+    return move(mouse);
+  };
+
   var wheel = function wheel(e, point) {
     mouseMoveTo(point);
     wx = mouse.rx; //set world origin
@@ -77,14 +85,13 @@ function _default() {
     };
   };
 
-  var drag = function drag(point) {
+  var move = function move(point) {
     var _mouseMoveTo = mouseMoveTo(point),
         xx = _mouseMoveTo.xx,
         yy = _mouseMoveTo.yy;
 
     wx -= mouse.rx - xx;
-    wy -= mouse.ry - yy; // wx wy 变了，重新计算rx ry
-
+    wy -= mouse.ry - yy;
     mouse.rx = zoomedX_INV(mouse.x);
     mouse.ry = zoomedY_INV(mouse.y);
     return {
@@ -92,8 +99,7 @@ function _default() {
       x: zoomedX(),
       y: zoomedY()
     };
-  }; //计算point通过zoom计算后的偏移位置新 point
-
+  };
 
   var getZoomedPoint = function getZoomedPoint() {
     var point = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {
@@ -107,7 +113,8 @@ function _default() {
   };
 
   this.wheel = wheel;
-  this.drag = drag;
+  this.move = move;
   this.mouseMoveTo = mouseMoveTo;
+  this.offset = offset;
   this.getZoomedPoint = getZoomedPoint;
 }

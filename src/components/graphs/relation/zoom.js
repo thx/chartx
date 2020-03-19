@@ -1,10 +1,14 @@
+/**
+ * @fileOverview zoom controller
+ * @author litao.lt@alibaba-in.com
+ * @version 1.0
+ */
+
 export default function(){
 
     let mouse = {
-        x : 0, //鼠标在画布坐标系内的x，可以理解为全局的缩放原点x
-        y : 0, //鼠标在画布坐标系内的y，可以理解为全局的缩放原点y
-        rx: 0, //真实坐标系中的坐标值
-        ry: 0
+        x: 0, y: 0,
+        rx: 0, ry: 0
     };
   
     let scale = 1;
@@ -39,6 +43,12 @@ export default function(){
         return {xx,yy}
     }
 
+    let offset = ( pos ) => {
+        mouse.x += pos.x;
+        mouse.y += pos.y;
+        return move( mouse );
+    }
+
     let wheel = ( e, point ) => {
         
         mouseMoveTo(point);
@@ -62,14 +72,10 @@ export default function(){
         };
     }
 
-    let drag = ( point ) => {
-
+    let move = ( point ) => {
         let {xx,yy} = mouseMoveTo( point );
-
         wx -= mouse.rx - xx; 
         wy -= mouse.ry - yy;
-
-        // wx wy 变了，重新计算rx ry
         mouse.rx = zoomedX_INV(mouse.x);
         mouse.ry = zoomedY_INV(mouse.y);
 
@@ -81,7 +87,6 @@ export default function(){
 
     }
 
-    //计算point通过zoom计算后的偏移位置新 point
     let getZoomedPoint = ( point={x:0,y:0} ) => {
         return {
             x: zoomedX( point.x ),
@@ -90,7 +95,8 @@ export default function(){
     }
 
     this.wheel = wheel;
-    this.drag = drag;
+    this.move = move;
     this.mouseMoveTo = mouseMoveTo;
+    this.offset = offset;
     this.getZoomedPoint= getZoomedPoint;
 }

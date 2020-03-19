@@ -28447,14 +28447,16 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports["default"] = _default;
 
+/**
+ * @fileOverview zoom controller
+ * @author litao.lt@alibaba-in.com
+ * @version 1.0
+ */
 function _default() {
   var mouse = {
     x: 0,
-    //鼠标在画布坐标系内的x，可以理解为全局的缩放原点x
     y: 0,
-    //鼠标在画布坐标系内的y，可以理解为全局的缩放原点y
     rx: 0,
-    //真实坐标系中的坐标值
     ry: 0
   };
   var scale = 1;
@@ -28496,6 +28498,12 @@ function _default() {
     };
   };
 
+  var offset = function offset(pos) {
+    mouse.x += pos.x;
+    mouse.y += pos.y;
+    return move(mouse);
+  };
+
   var wheel = function wheel(e, point) {
     mouseMoveTo(point);
     wx = mouse.rx; //set world origin
@@ -28517,14 +28525,13 @@ function _default() {
     };
   };
 
-  var drag = function drag(point) {
+  var move = function move(point) {
     var _mouseMoveTo = mouseMoveTo(point),
         xx = _mouseMoveTo.xx,
         yy = _mouseMoveTo.yy;
 
     wx -= mouse.rx - xx;
-    wy -= mouse.ry - yy; // wx wy 变了，重新计算rx ry
-
+    wy -= mouse.ry - yy;
     mouse.rx = zoomedX_INV(mouse.x);
     mouse.ry = zoomedY_INV(mouse.y);
     return {
@@ -28532,8 +28539,7 @@ function _default() {
       x: zoomedX(),
       y: zoomedY()
     };
-  }; //计算point通过zoom计算后的偏移位置新 point
-
+  };
 
   var getZoomedPoint = function getZoomedPoint() {
     var point = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {
@@ -28547,8 +28553,9 @@ function _default() {
   };
 
   this.wheel = wheel;
-  this.drag = drag;
+  this.move = move;
   this.mouseMoveTo = mouseMoveTo;
+  this.offset = offset;
   this.getZoomedPoint = getZoomedPoint;
 }
 });
@@ -28788,8 +28795,9 @@ function (_GraphsBase) {
           acyclicer: "greedy"
         },
         node: {},
-        edge: {//labelpos: 'c',
-          //labeloffset: 0
+        edge: {
+          labelpos: 'c' //labeloffset: 0
+
         }
       };
 
@@ -28820,8 +28828,17 @@ function (_GraphsBase) {
       this.nodesSp = new _canvax["default"].Display.Sprite({
         id: "nodesSp"
       });
+      this.nodesContentSp = new _canvax["default"].Display.Sprite({
+        id: "nodesContentSp"
+      });
       this.edgesSp = new _canvax["default"].Display.Sprite({
         id: "edgesSp"
+      });
+      this.arrowsSp = new _canvax["default"].Display.Sprite({
+        id: "arrowsSp"
+      });
+      this.labelsSp = new _canvax["default"].Display.Sprite({
+        id: "labelsSp"
       });
       this.graphsSp = new _canvax["default"].Display.Sprite({
         id: "graphsSp"
@@ -28832,6 +28849,9 @@ function (_GraphsBase) {
       });
       this.graphsSp.addChild(this.edgesSp);
       this.graphsSp.addChild(this.nodesSp);
+      this.graphsSp.addChild(this.nodesContentSp);
+      this.graphsSp.addChild(this.arrowsSp);
+      this.graphsSp.addChild(this.labelsSp);
       this.graphsView.addChild(this.graphsSp);
       this.sprite.addChild(this.graphsView);
       this.zoom = new _zoom["default"]();
@@ -28877,9 +28897,9 @@ function (_GraphsBase) {
 
           if (e.type == "mousemove") {
             if (_mosedownIng) {
-              var _me$zoom$drag = me.zoom.drag(point),
-                  x = _me$zoom$drag.x,
-                  y = _me$zoom$drag.y;
+              var _me$zoom$move = me.zoom.move(point),
+                  x = _me$zoom$move.x,
+                  y = _me$zoom$move.y;
 
               me.graphsView.context.x = x;
               me.graphsView.context.y = y;
@@ -28936,6 +28956,75 @@ function (_GraphsBase) {
         _offsetLet = 0;
       }
       this.graphsSp.context.x = _offsetLet;
+    } //如果dataTrigger.origin 有传入， 则已经这个origin为参考点做重新布局
+
+  }, {
+    key: "resetData",
+    value: function resetData(data, dataTrigger) {
+      var me = this;
+      this._preData = this.data; //如果data是外界定义好的nodes，edges的格式，直接用外界的
+
+      this.data = data.nodes && data.edges ? data : this._initData();
+
+      this._layoutData();
+
+      _.each(this._preData.nodes, function (preNode) {
+        if (!_.find(me.data.nodes, function (node) {
+          return preNode.key == node.key;
+        })) {
+          me._destroy(preNode);
+        }
+      });
+
+      _.each(this._preData.edges, function (preEdge) {
+        if (!_.find(me.data.edges, function (edge) {
+          return preEdge.key.join('_') == edge.key.join('_');
+        })) {
+          me._destroy(preEdge);
+        }
+      });
+
+      this.widget(); //钉住某个node为参考点（不移动）
+
+      if (dataTrigger && dataTrigger.origin) {
+        var preOriginNode = _.find(this._preData.nodes, function (node) {
+          return node.key == dataTrigger.origin;
+        });
+
+        var originNode = _.find(this.data.nodes, function (node) {
+          return node.key == dataTrigger.origin;
+        });
+
+        if (preOriginNode && originNode) {
+          var offsetPos = {
+            x: preOriginNode.x - originNode.x,
+            y: preOriginNode.y - originNode.y
+          };
+
+          var _this$zoom$offset = this.zoom.offset(offsetPos),
+              x = _this$zoom$offset.x,
+              y = _this$zoom$offset.y;
+
+          me.graphsView.context.x = x;
+          me.graphsView.context.y = y;
+        }
+      }
+    }
+  }, {
+    key: "_destroy",
+    value: function _destroy(item) {
+      item.boxElement && item.boxElement.destroy();
+
+      if (item.contentElement.destroy) {
+        item.contentElement.destroy();
+      } else {
+        //否则就可定是个dom
+        this.domContainer.removeChild(item.contentElement);
+      }
+
+      item.pathElement && item.pathElement.destroy();
+      item.labelElement && item.labelElement.destroy();
+      item.arrowElement && item.arrowElement.destroy();
     }
   }, {
     key: "_initData",
@@ -28980,7 +29069,7 @@ function (_GraphsBase) {
           content: content,
           ctype: this._checkHtml(content) ? 'html' : 'canvas',
           //下面三个属性在_setElementAndSize中设置
-          element: null,
+          contentElement: null,
           //外面传的layout数据可能没有element，widget的时候要检测下
           width: null,
           height: null,
@@ -29082,25 +29171,37 @@ function (_GraphsBase) {
       */
 
       _.each(this.data.edges, function (edge) {
+        var key = edge.key.join('_');
+
         if (me.line.isTree && edge.points.length == 3) {
           //严格树状图的话（三个点），就转化成4个点的，有两个拐点
           me._setTreePoints(edge);
         }
+
+        var path = me._getPathStr(edge, me.line.inflectionRadius);
+
         var lineWidth = me.getProp(me.line.lineWidth, edge);
         var strokeStyle = me.getProp(me.line.strokeStyle, edge);
+        var edgeId = 'edge_' + key;
 
-        if (edge.content == "中国湖北") {
-          debugger;
+        var _path = me.edgesSp.getChildById(edgeId);
+
+        if (_path) {
+          _path.context.path = path;
+          _path.context.lineWidth = lineWidth;
+          _path.context.strokeStyle = strokeStyle;
+        } else {
+          _path = new Path({
+            id: edgeId,
+            context: {
+              path: path,
+              lineWidth: lineWidth,
+              strokeStyle: strokeStyle
+            }
+          });
+          me.edgesSp.addChild(_path);
         }
-
-        var _bl = new Path({
-          context: {
-            path: me._getPathStr(edge, me.line.inflectionRadius),
-            lineWidth: lineWidth,
-            strokeStyle: strokeStyle
-          }
-        });
-
+        edge.pathElement = _path;
         var arrowControl = edge.points.slice(-2, -1)[0];
 
         if (me.line.shapeType == "bezier") {
@@ -29112,90 +29213,131 @@ function (_GraphsBase) {
             arrowControl.y += (edge.source.y - edge.target.y) / 20;
           }
         }
-        me.edgesSp.addChild(_bl); // edge的xy 就是 可以用来显示label的位置
+        // let _circle = new Circle({
+        //     context : {
+        //         r : 2,
+        //         x : edge.x,
+        //         y : edge.y,
+        //         fillStyle: "red"
+        //     }
+        // })
+        //me.labelsSp.addChild( _circle );
 
-        var _circle = new Circle({
-          context: {
-            r: 2,
-            x: edge.x,
-            y: edge.y,
-            fillStyle: "red"
-          }
-        });
+        var edgeLabelId = 'label_' + key;
+        var textAlign = me.getProp(me.node.content.textAlign, edge);
+        var textBaseline = me.getProp(me.node.content.textBaseline, edge);
 
-        var _edgeText = new _canvax["default"].Display.Text(edge.content, {
-          context: {
-            x: edge.x,
-            y: edge.y,
-            fontSize: 12,
-            fillStyle: "#ccc",
-            //me.getProp(me.node.content.fontColor, edge),
-            textAlign: me.getProp(me.node.content.textAlign, edge),
-            textBaseline: me.getProp(me.node.content.textBaseline, edge)
-          }
-        });
+        var _edgeLabel = me.labelsSp.getChildById(edgeLabelId);
 
-        me.edgesSp.addChild(_circle);
-        me.edgesSp.addChild(_edgeText);
+        if (_edgeLabel) {
+          _edgeLabel.resetText(edge.content);
 
-        if (me.line.arrow) {
-          var _arrow = new Arrow({
+          _edgeLabel.context.x = edge.x;
+          _edgeLabel.context.y = edge.y;
+          _edgeLabel.context.fontSize = 12;
+          _edgeLabel.context.fillStyle = "#ccc";
+          _edgeLabel.context.textAlign = textAlign;
+          _edgeLabel.context.textBaseline = textBaseline;
+        } else {
+          _edgeLabel = new _canvax["default"].Display.Text(edge.content, {
+            id: edgeLabelId,
             context: {
-              control: arrowControl,
-              point: edge.points.slice(-1)[0],
-              strokeStyle: strokeStyle //fillStyle: strokeStyle
-
+              x: edge.x,
+              y: edge.y,
+              fontSize: 12,
+              fillStyle: "#ccc",
+              //me.getProp(me.node.content.fontColor, edge),
+              textAlign: textAlign,
+              textBaseline: textBaseline
             }
           });
+          me.labelsSp.addChild(_edgeLabel);
+        }
 
-          me.edgesSp.addChild(_arrow);
+        edge.labelElement = _edgeLabel;
+
+        if (me.line.arrow) {
+          var arrowId = "arrow_" + key;
+
+          var _arrow = me.arrowsSp.getChildById(arrowId);
+
+          if (_arrow) {
+            //arrow 只监听了x y 才会重绘，，，暂时只能这样处理,手动的赋值control.x control.y
+            //而不是直接把 arrowControl 赋值给 control
+            _arrow.context.control.x = arrowControl.x;
+            _arrow.context.control.y = arrowControl.y;
+            _arrow.context.point = edge.points.slice(-1)[0];
+            _arrow.context.strokeStyle = strokeStyle; // _.extend(true, _arrow, {
+            //     control: arrowControl,
+            //     point: edge.points.slice(-1)[0],
+            //     strokeStyle: strokeStyle
+            // } );
+          } else {
+            _arrow = new Arrow({
+              id: arrowId,
+              context: {
+                control: arrowControl,
+                point: edge.points.slice(-1)[0],
+                strokeStyle: strokeStyle //fillStyle: strokeStyle
+
+              }
+            });
+            me.arrowsSp.addChild(_arrow);
+          }
+
+          edge.arrowElement = _arrow;
         }
       });
 
       _.each(this.data.nodes, function (node) {
-        var _boxShape = new Rect({
-          context: {
-            x: node.x - node.width / 2,
-            y: node.y - node.height / 2,
-            width: node.width,
-            height: node.height,
-            lineWidth: 1,
-            fillStyle: me.getProp(me.node.fillStyle, node),
-            strokeStyle: me.getProp(me.node.strokeStyle, node),
-            radius: _.flatten([me.getProp(me.node.radius, node)])
-          }
-        });
+        var nodeId = "node_" + node.key;
+        var context = {
+          x: node.x - node.width / 2,
+          y: node.y - node.height / 2,
+          width: node.width,
+          height: node.height,
+          lineWidth: 1,
+          fillStyle: me.getProp(me.node.fillStyle, node),
+          strokeStyle: me.getProp(me.node.strokeStyle, node),
+          radius: _.flatten([me.getProp(me.node.radius, node)])
+        };
 
-        _boxShape.nodeData = node;
-        me.nodesSp.addChild(_boxShape);
+        var _boxShape = me.nodesSp.getChildById(nodeId);
 
-        _boxShape.on(event.types.get(), function (e) {
-          e.eventInfo = {
-            trigger: me.node,
-            nodes: [this.nodeData]
-          };
-          me.app.fire(e.type, e);
-        });
+        if (_boxShape) {
+          _.extend(_boxShape.context, context);
+        } else {
+          _boxShape = new Rect({
+            id: nodeId,
+            context: context
+          });
+          me.nodesSp.addChild(_boxShape);
 
-        if (node.ctype == "canvas") {
-          node.element.context.x = node.x - node.width / 2;
-          node.element.context.y = node.y - node.height / 2;
-          me.nodesSp.addChild(node.element);
-        }
-
-        if (node.ctype == "html") {
-          //html的话，要等 _boxShape 被添加进舞台，拥有了世界矩阵后才能被显示出来和移动位置
-          //而且要监听 _boxShape 的任何形变跟随
-          _boxShape.on("transform", function () {
-            var devicePixelRatio = typeof window !== 'undefined' ? window.devicePixelRatio : 1;
-            node.element.style.transform = "matrix(" + _boxShape.worldTransform.clone().scale(1 / devicePixelRatio, 1 / devicePixelRatio).toArray().join() + ")";
-            node.element.style.transformOrigin = "left top"; //修改为左上角为旋转中心点来和canvas同步
-
-            node.element.style.marginLeft = me.getProp(me.node.padding, node) * me.status.transform.scale + "px";
-            node.element.style.marginTop = me.getProp(me.node.padding, node) * me.status.transform.scale + "px";
-            node.element.style.visibility = "visible";
+          _boxShape.on(event.types.get(), function (e) {
+            e.eventInfo = {
+              trigger: me.node,
+              nodes: [this.nodeData]
+            };
+            me.app.fire(e.type, e);
           });
         }
+        _boxShape.nodeData = node;
+        node.boxElement = _boxShape;
+
+        _boxShape.on("transform", function () {
+          if (node.ctype == "canvas") {
+            node.contentElement.context.x = node.x;
+            node.contentElement.context.y = node.y;
+          } else if (node.ctype == "html") {
+            var devicePixelRatio = typeof window !== 'undefined' ? window.devicePixelRatio : 1;
+            node.contentElement.style.transform = "matrix(" + _boxShape.worldTransform.clone().scale(1 / devicePixelRatio, 1 / devicePixelRatio).toArray().join() + ")";
+            node.contentElement.style.transformOrigin = "left top"; //修改为左上角为旋转中心点来和canvas同步
+
+            node.contentElement.style.marginLeft = me.getProp(me.node.padding, node) * me.status.transform.scale + "px";
+            node.contentElement.style.marginTop = me.getProp(me.node.padding, node) * me.status.transform.scale + "px";
+            node.contentElement.style.visibility = "visible";
+          }
+        });
       });
 
       this.induce.context.width = this.width;
@@ -29355,31 +29497,43 @@ function (_GraphsBase) {
       var me = this;
       var content = node.content;
       var width = node.rowData.width,
-          height = node.rowData.height;
-      var sprite = new _canvax["default"].Display.Sprite({}); //先创建text，根据 text 来计算node需要的width和height
+          height = node.rowData.height; //let sprite = new Canvax.Display.Sprite({});
 
-      var label = new _canvax["default"].Display.Text(content, {
-        context: {
-          fillStyle: me.getProp(me.node.content.fontColor, node),
-          textAlign: me.getProp(me.node.content.textAlign, node),
-          textBaseline: me.getProp(me.node.content.textBaseline, node)
+      var context = {
+        fillStyle: me.getProp(me.node.content.fontColor, node),
+        textAlign: me.getProp(me.node.content.textAlign, node),
+        textBaseline: me.getProp(me.node.content.textBaseline, node)
+      }; //console.log(node.key);
+
+      var contentLabelId = "content_label_" + node.key;
+
+      var _contentLabel = me.nodesContentSp.getChildById(contentLabelId);
+
+      if (_contentLabel) {
+        _contentLabel.resetText(content);
+
+        _.extend(_contentLabel.context, context);
+      } else {
+        //先创建text，根据 text 来计算node需要的width和height
+        _contentLabel = new _canvax["default"].Display.Text(content, {
+          id: contentLabelId,
+          context: context
+        });
+
+        if (!_.isArray(node.key)) {
+          me.nodesContentSp.addChild(_contentLabel);
         }
-      });
+      }
 
       if (!width) {
-        width = label.getTextWidth() + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
+        width = _contentLabel.getTextWidth() + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
       }
 
       if (!height) {
-        height = label.getTextHeight() + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
+        height = _contentLabel.getTextHeight() + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
       }
-      sprite.addChild(label);
-      sprite.context.width = parseInt(width);
-      sprite.context.height = parseInt(height);
-      label.context.x = parseInt(width / 2);
-      label.context.y = parseInt(height / 2);
       return {
-        element: sprite,
+        contentElement: _contentLabel,
         width: width,
         height: height
       };
@@ -29410,7 +29564,7 @@ function (_GraphsBase) {
         height = _dom.offsetHeight + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
       }
       return {
-        element: _dom,
+        contentElement: _dom,
         width: width,
         height: height
       };
@@ -48510,7 +48664,7 @@ if (projectTheme && projectTheme.length) {
 }
 
 var chartx = {
-  version: '1.1.2',
+  version: '1.1.3',
   options: {}
 };
 
