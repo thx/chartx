@@ -606,6 +606,7 @@ class Relation extends GraphsBase {
             let path = me._getPathStr(edge, me.line.inflectionRadius);
             let lineWidth = me.getProp( me.line.lineWidth, edge );
             let strokeStyle = me.getProp( me.line.strokeStyle, edge );
+            let lineType = me.getProp( me.line.lineType, edge );
 
             let edgeId = 'edge_'+key;
             let _path = me.edgesSp.getChildById( edgeId );
@@ -613,18 +614,28 @@ class Relation extends GraphsBase {
                 _path.context.path = path;
                 _path.context.lineWidth = lineWidth;
                 _path.context.strokeStyle = strokeStyle;
+                _path.context.lineType = lineType;
             } else {
                 _path = new Path({
                     id : edgeId,
                     context: {
-                        path: path,
-                        lineWidth: lineWidth,
-                        strokeStyle: strokeStyle
+                        path,
+                        lineWidth,
+                        strokeStyle,
+                        lineType
                     }
+                });
+                _path.on(event.types.get(), function (e) {
+                    e.eventInfo = {
+                        trigger: me.line,
+                        nodes: [ this.nodeData ]
+                    };
+                    me.app.fire(e.type, e);
                 });
                 me.edgesSp.addChild(_path);
             };
             edge.pathElement = _path;
+            _path.nodeData = edge; //edge也是一个node数据
 
             let arrowControl = edge.points.slice(-2, -1)[0];
             if( me.line.shapeType == "bezier" ){
@@ -677,9 +688,17 @@ class Relation extends GraphsBase {
                         textBaseline
                     }
                 });
+                _edgeLabel.on(event.types.get(), function (e) {
+                    e.eventInfo = {
+                        trigger: me.line,
+                        nodes: [ this.nodeData ]
+                    };
+                    me.app.fire(e.type, e);
+                });
                 me.labelsSp.addChild( _edgeLabel );
             }
             edge.labelElement = _edgeLabel
+            _edgeLabel.nodeData = edge;
             
             if( me.line.arrow ){
                 let arrowId = "arrow_"+key;

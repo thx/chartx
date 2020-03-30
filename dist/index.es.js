@@ -42301,6 +42301,7 @@ function (_GraphsBase) {
 
         var lineWidth = me.getProp(me.line.lineWidth, edge);
         var strokeStyle = me.getProp(me.line.strokeStyle, edge);
+        var lineType = me.getProp(me.line.lineType, edge);
         var edgeId = 'edge_' + key;
 
         var _path = me.edgesSp.getChildById(edgeId);
@@ -42309,18 +42310,31 @@ function (_GraphsBase) {
           _path.context.path = path;
           _path.context.lineWidth = lineWidth;
           _path.context.strokeStyle = strokeStyle;
+          _path.context.lineType = lineType;
         } else {
           _path = new Path({
             id: edgeId,
             context: {
               path: path,
               lineWidth: lineWidth,
-              strokeStyle: strokeStyle
+              strokeStyle: strokeStyle,
+              lineType: lineType
             }
           });
+
+          _path.on(event.types.get(), function (e) {
+            e.eventInfo = {
+              trigger: me.line,
+              nodes: [this.nodeData]
+            };
+            me.app.fire(e.type, e);
+          });
+
           me.edgesSp.addChild(_path);
         }
         edge.pathElement = _path;
+        _path.nodeData = edge; //edge也是一个node数据
+
         var arrowControl = edge.points.slice(-2, -1)[0];
 
         if (me.line.shapeType == "bezier") {
@@ -42373,10 +42387,20 @@ function (_GraphsBase) {
               textBaseline: textBaseline
             }
           });
+
+          _edgeLabel.on(event.types.get(), function (e) {
+            e.eventInfo = {
+              trigger: me.line,
+              nodes: [this.nodeData]
+            };
+            me.app.fire(e.type, e);
+          });
+
           me.labelsSp.addChild(_edgeLabel);
         }
 
         edge.labelElement = _edgeLabel;
+        _edgeLabel.nodeData = edge;
 
         if (me.line.arrow) {
           var arrowId = "arrow_" + key;
@@ -48695,7 +48719,7 @@ if (projectTheme && projectTheme.length) {
 }
 
 var chartx = {
-  version: '1.1.3',
+  version: '1.1.6',
   options: {}
 };
 
