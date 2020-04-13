@@ -42691,16 +42691,22 @@ function (_GraphsBase) {
       var content = node.content;
       var width = node.rowData.width,
           height = node.rowData.height;
+      var contentLabelClass = "__content_label_" + node.key;
 
-      var _dom = document.createElement("div");
+      var _dom = this.domContainer.getElementsByClassName(contentLabelClass);
 
-      _dom.className = "chartx_relation_node";
-      _dom.style.cssText += "; position:absolute;visibility:hidden;";
+      if (!_dom.length) {
+        _dom = document.createElement("div");
+        _dom.className = "chartx_relation_node " + contentLabelClass;
+        _dom.style.cssText += "; position:absolute;visibility:hidden;";
+        this.domContainer.appendChild(_dom);
+      } else {
+        _dom = _dom[0];
+      }
       _dom.style.cssText += "; color:" + me.getProp(me.node.content.fontColor, node) + ";";
       _dom.style.cssText += "; text-align:" + me.getProp(me.node.content.textAlign, node) + ";";
       _dom.style.cssText += "; vertical-align:" + me.getProp(me.node.content.textBaseline, node) + ";";
       _dom.innerHTML = content;
-      this.domContainer.appendChild(_dom);
 
       if (!width) {
         width = _dom.offsetWidth + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
@@ -48719,7 +48725,7 @@ if (projectTheme && projectTheme.length) {
 }
 
 var chartx = {
-  version: '1.1.6',
+  version: '1.1.7',
   options: {}
 };
 
