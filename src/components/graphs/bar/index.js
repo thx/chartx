@@ -427,7 +427,6 @@ class BarGraphs extends GraphsBase
                 //bar的group
                 let groupH = null;
                 
-
                 if (i == 0) {
                     //横向的分组
                     if (h <= preDataLen - 1) {

@@ -389,7 +389,6 @@ function (_event$Dispatcher) {
       ;
 
       function _update(list) {
-        debugger;
         me._bline.context.pointList = _.clone(list);
         me._bline.context.strokeStyle = me._getLineStrokeStyle(list);
         me._area.context.path = me._fillLine(me._bline);

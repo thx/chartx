@@ -9,6 +9,7 @@ const uglify = require('gulp-uglify');
 const pipeline = require('readable-stream').pipeline;
 const rename = require('gulp-rename');
 const replace = require('gulp-string-replace');
+const strip = require('@rollup/plugin-strip');
 const fs = require('fs-extra');
 const eslint = require('gulp-eslint');
 
@@ -94,7 +95,10 @@ let getRollupOpts = ()=>{
         input: './dist/index.js',
         plugins: [
             resolve({ mainFields:['module', 'main'], browser: true }), 
-            commonjs()
+            commonjs(),
+            strip({
+                debugger: true
+            })
         ]
     };
     

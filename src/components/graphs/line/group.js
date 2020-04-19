@@ -320,7 +320,7 @@ export default class LineGraphsGroup extends event.Dispatcher
         };
 
         function _update( list ){
-            debugger
+            
             me._bline.context.pointList = _.clone( list );
             me._bline.context.strokeStyle = me._getLineStrokeStyle( list );
 

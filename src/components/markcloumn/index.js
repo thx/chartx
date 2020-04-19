@@ -15,8 +15,8 @@ class markCloumn extends Component
                 detail: 'x的value值',
                 default: null
             },
-            x : {
-                detail: 'x的像素值',
+            xPixel : {
+                detail: 'x方向的具体像素值',
                 default: null
             },
             markTo : {
@@ -156,8 +156,8 @@ class markCloumn extends Component
         if( this.xVal != null ){
             xNode = _xAxis.getNodeInfoOfVal( this.xVal )
         };
-        if( this.x != null ){
-            xNode = _xAxis.getNodeInfoOfPos( this.x )
+        if( this.xPixel != null ){
+            xNode = _xAxis.getNodeInfoOfX( this.xPixel )
         };
 
         if( !xNode ){

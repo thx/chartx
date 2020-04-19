@@ -7839,7 +7839,6 @@ var _default = {
       var codeWithoutVariables = code.slice(0, range[0]) + code.slice(range[1]);
       return this._eval(codeWithoutVariables, 'options', 'variables', variables);
     } catch (e) {
-      console.log('parse error');
       return {};
     }
   }
@@ -16622,7 +16621,6 @@ function (_event$Dispatcher) {
       }
 
       function _update(list) {
-        debugger;
         me._bline.context.pointList = _.clone(list);
         me._bline.context.strokeStyle = me._getLineStrokeStyle(list);
         me._area.context.path = me._fillLine(me._bline);
@@ -19296,7 +19294,6 @@ function (_event$Dispatcher) {
   }, {
     key: "unselectOf",
     value: function unselectOf(node) {
-      debugger;
       var sec = this.sectors[node.iNode];
 
       if (!node.selected || !node.selectEnabled) {
@@ -25262,7 +25259,6 @@ function scaleSolution(solution, width, height, padding) {
       yRange = bounds.yRange;
 
   if (xRange.max == xRange.min || yRange.max == yRange.min) {
-    console.log("not scaling solution: zero size detected");
     return solution;
   }
 
@@ -25896,9 +25892,7 @@ function computeTextCentres(circles, areas) {
     var centre = computeTextCentre(interior, exterior);
     ret[area] = centre;
 
-    if (centre.disjoint && areas[i].size > 0) {
-      console.log("WARNING: area " + area + " not represented on screen");
-    }
+    if (centre.disjoint && areas[i].size > 0) ;
   }
 
   return ret;
@@ -28305,7 +28299,6 @@ function jsonToArrayForRelation(data, options, _childrenField) {
   var label = options.node && options.node.content && options.node.content.field;
 
   if (!checkDataIsJson(data, key, childrenKey)) {
-    console.error('该数据不能正确绘制，请提供数组对象形式的数据！');
     return result;
   }
   var childrens = [];
@@ -32068,7 +32061,6 @@ var _typeof2 = interopRequireDefault(_typeof_1$1);
         try {
           return fn();
         } finally {
-          console.log(name + " time: " + (_.now() - start) + "ms");
         }
       }
 
@@ -46340,6 +46332,10 @@ function (_Component) {
           "default": 0,
           documentation: '可能是个function，均值计算就是个function'
         },
+        yPixel: {
+          detail: '组件指定的具体y像素值',
+          "default": 0
+        },
         line: {
           detail: '线的配置',
           propertys: {
@@ -46366,7 +46362,7 @@ function (_Component) {
             },
             fontColor: {
               detail: '文本字体颜色',
-              "default": '#999999'
+              "default": '#666'
             },
             fontSize: {
               detail: '文本字体大小',
@@ -46523,9 +46519,13 @@ function (_Component) {
       me._line = line;
 
       if (me.label.enabled) {
+        var txtCtx = {
+          fillStyle: me.label.fontColor,
+          fontSize: me.label.fontSize
+        };
         var txt = new Text(me._getLabel(), {
           //文字
-          context: me.label
+          context: txtCtx
         });
         this._txt = txt;
         me.sprite.addChild(txt);
@@ -46594,6 +46594,11 @@ function (_Component) {
   }, {
     key: "_getYPos",
     value: function _getYPos() {
+      if (this._opt.yPixel) {
+        //如果用户有指定的具体像素位置，则直接使用该值
+        return -this._opt.yPixel;
+      }
+
       return -this._yAxis.getPosOfVal(this._getYVal());
     }
   }, {
@@ -48274,8 +48279,8 @@ function (_Component) {
           detail: 'x的value值',
           "default": null
         },
-        x: {
-          detail: 'x的像素值',
+        xPixel: {
+          detail: 'x方向的具体像素值',
           "default": null
         },
         markTo: {
@@ -48433,8 +48438,8 @@ function (_Component) {
         xNode = _xAxis.getNodeInfoOfVal(this.xVal);
       }
 
-      if (this.x != null) {
-        xNode = _xAxis.getNodeInfoOfPos(this.x);
+      if (this.xPixel != null) {
+        xNode = _xAxis.getNodeInfoOfX(this.xPixel);
       }
 
       if (!xNode) {
@@ -48725,7 +48730,7 @@ if (projectTheme && projectTheme.length) {
 }
 
 var chartx = {
-  version: '1.1.7',
+  version: '1.1.8',
   options: {}
 };
 

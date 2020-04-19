@@ -227,7 +227,6 @@ export default class Pie extends event.Dispatcher
 
     unselectOf ( node ) 
     {
-        debugger
         let sec = this.sectors[ node.iNode ];
         if (!node.selected || !node.selectEnabled) {
             return

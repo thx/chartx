@@ -47,6 +47,10 @@ function (_Component) {
           "default": 0,
           documentation: '可能是个function，均值计算就是个function'
         },
+        yPixel: {
+          detail: '组件指定的具体y像素值',
+          "default": 0
+        },
         line: {
           detail: '线的配置',
           propertys: {
@@ -73,7 +77,7 @@ function (_Component) {
             },
             fontColor: {
               detail: '文本字体颜色',
-              "default": '#999999'
+              "default": '#666'
             },
             fontSize: {
               detail: '文本字体大小',
@@ -245,9 +249,13 @@ function (_Component) {
       me._line = line;
 
       if (me.label.enabled) {
+        var txtCtx = {
+          fillStyle: me.label.fontColor,
+          fontSize: me.label.fontSize
+        };
         var txt = new Text(me._getLabel(), {
           //文字
-          context: me.label
+          context: txtCtx
         });
         this._txt = txt;
         me.sprite.addChild(txt);
@@ -324,6 +332,11 @@ function (_Component) {
   }, {
     key: "_getYPos",
     value: function _getYPos() {
+      if (this._opt.yPixel) {
+        //如果用户有指定的具体像素位置，则直接使用该值
+        return -this._opt.yPixel;
+      }
+
       return -this._yAxis.getPosOfVal(this._getYVal());
       ;
     }

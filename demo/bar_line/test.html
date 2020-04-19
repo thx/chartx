@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
+<title>xChart demo -- bar</title>
+
+<script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
+<script type="text/javascript" src="../../dist/index.iife.js"></script>
+<!-- codemirror -->
+<script type="text/javascript" src="../../lib/codemirror/codemirror.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/active-line.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/javascript.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/matchbrackets.js"></script>
+<link rel="stylesheet" href="../../lib/codemirror/codemirror.css">
+<link rel="stylesheet" href="../../lib/codemirror/zenburn.css">
+<link rel="stylesheet" href="../../lib/codemirror/docs.css">
+<!-- codemirror end -->
+<!--bootstrap-->
+<script type="text/javascript" src="../../lib/bootstrap/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap-theme.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/docs.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap.min.css">
+<!--bootstrap end-->
+<script type="text/javascript" src="../../lib/demo.js"></script>
+<link rel="stylesheet" href="../../lib/demo.css">
+</head>
+<body >
+
+<table>
+    <tr>
+        <td id="td-vl">
+            <form><textarea id="code" name="code">
+
+//chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
+//第一行是表头。
+var data = [
+    {"spu_name":"特革还光点叫省平眼际治土率头内年口光","spu_id":34011,"brand_new_uv":34401,"brand_old_uv":2169,"spu_pay_brand_new_ratio":1000,"spu_pay_brand_old_ratio":0.9699186533513957,"random":0.6067360365770711},
+    {"spu_name":"经需部总步习而量听九作候上重热照厂律准么厂争最江克习","spu_id":667,"brand_new_uv":2582,"brand_old_uv":48343,"spu_pay_brand_new_ratio":2000,"spu_pay_brand_old_ratio":0.9849888436794555,"random":0.6543171851650271},
+    {"spu_name":"该里规又空认会回意两图各器现学期时所多通光况对多它","spu_id":40179,"brand_new_uv":52579,"brand_old_uv":40054,"spu_pay_brand_new_ratio":8000,"spu_pay_brand_old_ratio":0.8553113316117374,"random":0.7553390253153973},
+    {"spu_name":"回院验七育要通至相众些价华领地指般起度化成条参看联","spu_id":16143,"brand_new_uv":41881,"brand_old_uv":29855,"spu_pay_brand_new_ratio":10000,"spu_pay_brand_old_ratio":0.7345755823817098,"random":0.2356198255676436},
+    {"spu_name":"强价于之开集称里多真身史思等计前面反法条学选气到声","spu_id":1796,"brand_new_uv":36427,"brand_old_uv":19458,"spu_pay_brand_new_ratio":30000,"spu_pay_brand_old_ratio":0.8235064482350776,"random":0.6557536548124818},
+    {"spu_name":"放术百车也物与身型白上适理持史重参们的对色己火太","spu_id":45171,"brand_new_uv":6868,"brand_old_uv":55193,"spu_pay_brand_new_ratio":20000,"spu_pay_brand_old_ratio":0.9586061672214125,"random":0.7902005099535165},
+    {"spu_name":"话场委新引车名则价反安确有果没本结口方较持决","spu_id":42295,"brand_new_uv":39676,"brand_old_uv":35271,"spu_pay_brand_new_ratio":15000,"spu_pay_brand_old_ratio":0.8039705771371486,"random":0.520491708381394},
+    {"spu_name":"各内步参走满等风办非且引世持新将阶王细图切","spu_id":43625,"brand_new_uv":8359,"brand_old_uv":37686,"spu_pay_brand_new_ratio":40000,"spu_pay_brand_old_ratio":0.4150643612878978,"random":0.1637835980399851},
+    {"spu_name":"系导机做无切风界个委率一各正总须业易酸和群即专联自过却","spu_id":20333,"brand_new_uv":33115,"brand_old_uv":12831,"spu_pay_brand_new_ratio":19000,"spu_pay_brand_old_ratio":0.10585161492817642,"random":0.875563061315872},
+    {"spu_name":"1特革还光点叫省平眼际治土率头内年口光","spu_id":30144,"brand_new_uv":542,"brand_old_uv":30148,"spu_pay_brand_new_ratio":3000,"spu_pay_brand_old_ratio":0.3415182480594483,"random":0.046909782008675904}
+];
+
+var options = {
+    coord: {
+        type: "rect",
+        xAxis: {
+            field: "spu_name",
+            label: {
+                rotation: 0,
+                format: function (val) {
+                    return val
+                }
+            }
+        },
+        yAxis: [{
+            label: {
+                format: function (val) {
+                    var str = val;
+                    var _val = Number(val);
+                    if (Math.abs(_val) >= 10000) {
+                        str = (_val / 10000).toFixed(2) + "万"
+                    }
+                    if (Math.abs(_val) >= 100000000) {
+                        str = (_val / 100000000).toFixed(3) + "亿"
+                    }
+                    return str;
+                }
+            }
+        }]
+    },
+    graphs: [
+        {
+            type: "bar",
+            field: [
+                ["brand_new_uv", "brand_old_uv"]
+            ],
+            node: {
+                width: 20,
+                fillStyle: ["rgba(80, 158, 255, 1)", "rgba(80, 158, 255, 0.3)"]
+            },
+            label: {
+                enabled: false
+            }
+        },
+        {
+            type: "line",
+            field: ["spu_pay_brand_new_ratio"],
+            area: {
+                alpha: [0.1, 0]
+            },
+            icon: {
+                corner: true
+            },
+            node: {
+                visible: false
+            },
+            line: {
+                strokeStyle: ["#6759FF"]
+            },
+            label: {
+                format: function (val) {
+                    return (val * 100).toFixed(1) + '%';
+                },
+                enabled: false
+            }
+        },
+
+    ],
+    tips: {
+        pointer: "region"
+    },
+    markLine: [
+        {
+            //markTo: "spu_pay_brand_new_ratio",
+            yPixel: 100,
+            label: {
+                enabled: true,
+                format: function (yVal) {
+                    return 'UV 均值 ：' + parseInt(yVal)
+                },
+                fontColor: '#ccc',  //内部还是fillStyle
+                fontSize: 14
+            },
+            line: {
+                strokeStyle: ['#6759FF'] 
+            }
+        }
+    ]
+};
+
+window.bar = chartx.create("canvasTest" , data , options)
+
+            </textarea></form>
+        </td>
+        <td style="padding:0 10px;" id="td-vr">
+            <div id="chartdemo-r">
+            <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
+                <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
+
+                <h4>柱状图（bar chart）</h4>
+                <p>
+                    联系人：@释剑
+                </p>
+            </div>
+            <div  class="test-c">
+                <div id="canvasTest" style='width:100%;height:300px;position:relative;'></div>
+            </div>
+
+            </div>
+        </td>
+    </tr>
+</table>
+
+    
+</body> 
+</html>
+
+
