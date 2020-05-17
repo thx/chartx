@@ -152,13 +152,17 @@ export default function( dataOrg, opt ){
 
             //如果之前是有数据的情况，一些当前状态恢复到dataFrame里去 begin
             if( preLen !== 0 ){
-                _.extend( true, dataFrame.range, preRange );
-                if( dataFrame.range.end > dataFrame.length-1 ){
-                    dataFrame.range.end = dataFrame.length-1
-                };
-                if( dataFrame.range.start > dataFrame.length-1 || dataFrame.range.start > dataFrame.range.end ){
-                    dataFrame.range.start = 0;
-                };
+                if( opt && opt.dataZoom && opt.dataZoom.range ){
+                    //如果有配置过dataZoom.range， 那么就要回复最近一次的range
+                    _.extend( true, dataFrame.range, preRange );
+                    if( dataFrame.range.end > dataFrame.length-1 ){
+                        dataFrame.range.end = dataFrame.length-1
+                    };
+                    if( dataFrame.range.start > dataFrame.length-1 || dataFrame.range.start > dataFrame.range.end ){
+                        dataFrame.range.start = 0;
+                    };
+                }
+
                 //一些当前状态恢复到dataFrame里去 end  
             } else {
                 //如果之前是没有数据的，那么就不用管了

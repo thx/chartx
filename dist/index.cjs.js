@@ -8488,15 +8488,19 @@ function _default(dataOrg, opt) {
       dataFrame.data = _getDataAndSetDataLen(); //如果之前是有数据的情况，一些当前状态恢复到dataFrame里去 begin
 
       if (preLen !== 0) {
-        Canvax._.extend(true, dataFrame.range, preRange);
+        if (opt && opt.dataZoom && opt.dataZoom.range) {
+          //如果有配置过dataZoom.range， 那么就要回复最近一次的range
+          Canvax._.extend(true, dataFrame.range, preRange);
 
-        if (dataFrame.range.end > dataFrame.length - 1) {
-          dataFrame.range.end = dataFrame.length - 1;
-        }
+          if (dataFrame.range.end > dataFrame.length - 1) {
+            dataFrame.range.end = dataFrame.length - 1;
+          }
 
-        if (dataFrame.range.start > dataFrame.length - 1 || dataFrame.range.start > dataFrame.range.end) {
-          dataFrame.range.start = 0;
-        }
+          if (dataFrame.range.start > dataFrame.length - 1 || dataFrame.range.start > dataFrame.range.end) {
+            dataFrame.range.start = 0;
+          }
+        } //一些当前状态恢复到dataFrame里去 end  
+
       }
     } else {
       //就算没有dataOrg，但是data还是要重新构建一边的，因为可能dataFrame上面的其他状态被外界改变了
@@ -8800,7 +8804,8 @@ function (_event$Dispatcher) {
         _.each(comps, function (comp) {
           if ( //没有type的coord和没有field(or keyField)的graphs，都无效，不要创建该组件
           //关系图中是keyField
-          compName == "coord" && !comp.type || compName == "graphs" && !comp.field && !comp.keyField) return;
+          compName == "coord" && !comp.type || compName == "graphs" && !comp.field && !comp.keyField && !comp.adcode && !comp.geoJson && !comp.geoJsonUrl //地图的话只要有个adcode就可以了
+          ) return;
           var compModule = me.componentModules.get(compName, comp.type);
 
           if (compModule) {
@@ -9063,7 +9068,9 @@ function (_event$Dispatcher) {
       this.setCoord_Graphs_Sp();
       this.components = []; //组件清空
 
-      this.canvax.domView.innerHTML = "";
+      this.canvax.domView.innerHTML = ""; //清空事件的当前状态
+
+      this.canvax.event.curPointsTarget.length = 0;
     }
     /**
      * 容器的尺寸改变重新绘制
@@ -9448,7 +9455,9 @@ function (_event$Dispatcher) {
         _.each(this.getComponents({
           name: 'graphs'
         }), function (_g) {
-          nodes = nodes.concat(_g.getNodesAt(iNode, e));
+          if (_g.getNodesAt) {
+            nodes = nodes.concat(_g.getNodesAt(iNode, e));
+          }
         });
 
         e.eventInfo.nodes = nodes;
@@ -11774,21 +11783,20 @@ function (_Axis) {
               context: textContext
             });
 
-            _node.addChild(_node._txt);
+            _node.addChild(_node._txt); // TODO 后续x轴的动画要换成真实的动画效果，从画布外面移进来
+            // if (me.animation && !opt.resize) {
+            //     _node._txt.context.y += 20;
+            //     _node._txt.context.globalAlpha = 0;
+            //     _node._txt.animate( {
+            //         y: textContext.y,
+            //         globalAlpha: 1
+            //     }, {
+            //         duration: 500,
+            //         delay: delay,
+            //         id: _node._txt.id
+            //     });
+            // };
 
-            if (me.animation && !opt.resize) {
-              _node._txt.context.y += 20;
-              _node._txt.context.globalAlpha = 0;
-
-              _node._txt.animate({
-                y: textContext.y,
-                globalAlpha: 1
-              }, {
-                duration: 500,
-                delay: delay,
-                id: _node._txt.id
-              });
-            }
           }
 
           me.rulesSprite.addChild(_node);
@@ -44625,6 +44633,1077 @@ exports["default"] = _default;
 
 unwrapExports(force_1$1);
 
+var projection = createCommonjsModule(function (module, exports) {
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports["default"] = void 0;
+var filterNum = 0; //间隔多少个点绘制
+
+function getBbox(json, specialArea) {
+  if (!json.srcSize) {
+    parseSrcSize(json, specialArea);
+  }
+  return json.srcSize;
+}
+
+function parseSrcSize(json) {
+  var specialArea = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [];
+  convertorParse.xmin = 360;
+  convertorParse.xmax = -360;
+  convertorParse.ymin = 180;
+  convertorParse.ymax = -180;
+  var shapes = json.features;
+  var geometries;
+  var shape;
+
+  for (var i = 0, len = shapes.length; i < len; i++) {
+    shape = shapes[i];
+
+    if (shape.properties.name && specialArea.indexOf(shape.properties.name) > -1 || shape.properties.adcode && specialArea.indexOf(shape.properties.adcode) > -1) {
+      continue;
+    }
+
+    switch (shape.type) {
+      case 'Feature':
+        convertorParse[shape.geometry.type](shape.geometry.coordinates);
+        break;
+
+      case 'GeometryCollection':
+        geometries = shape.geometries;
+
+        for (var j = 0, len2 = geometries.length; j < len2; j++) {
+          convertorParse[geometries[j].type](geometries[j].coordinates);
+        }
+
+        break;
+    }
+  }
+
+  json.srcSize = {
+    left: convertorParse.xmin.toFixed(4) * 1,
+    top: convertorParse.ymin.toFixed(4) * 1,
+    width: (convertorParse.xmax - convertorParse.xmin).toFixed(4) * 1,
+    height: (convertorParse.ymax - convertorParse.ymin).toFixed(4) * 1
+  };
+  return json;
+}
+
+var convertor = {
+  //调整俄罗斯东部到地图右侧与俄罗斯相连
+  formatPoint: function formatPoint(p) {
+    return [(p[0] < -168.5 && p[1] > 63.8 ? p[0] + 360 : p[0]) + 168.5, 90 - p[1]];
+  },
+  makePoint: function makePoint(p) {
+    var self = this;
+    var point = self.formatPoint(p); // for cp
+
+    if (self._bbox.xmin > p[0]) {
+      self._bbox.xmin = p[0];
+    }
+
+    if (self._bbox.xmax < p[0]) {
+      self._bbox.xmax = p[0];
+    }
+
+    if (self._bbox.ymin > p[1]) {
+      self._bbox.ymin = p[1];
+    }
+
+    if (self._bbox.ymax < p[1]) {
+      self._bbox.ymax = p[1];
+    }
+
+    var x = (point[0] - convertor.offset.x) * convertor.scale.x + convertor.offset.left;
+    var y = (point[1] - convertor.offset.y) * convertor.scale.y + convertor.offset.top;
+    return [x, y];
+  },
+  Point: function Point(coordinates) {
+    coordinates = this.makePoint(coordinates);
+    return coordinates.join(',');
+  },
+  LineString: function LineString(coordinates) {
+    var str = '';
+    var point;
+
+    for (var i = 0, len = coordinates.length; i < len; i++) {
+      if (i % (filterNum + 1) && len > filterNum) continue;
+      point = convertor.makePoint(coordinates[i]);
+
+      if (i === 0) {
+        str = 'M' + point.join(',');
+      } else {
+        str = str + 'L' + point.join(',');
+      }
+    }
+
+    return str;
+  },
+  Polygon: function Polygon(coordinates) {
+    var str = '';
+
+    for (var i = 0, len = coordinates.length; i < len; i++) {
+      str = str + convertor.LineString(coordinates[i]) + 'z';
+    }
+
+    return str;
+  },
+  MultiPoint: function MultiPoint(coordinates) {
+    var arr = [];
+
+    for (var i = 0, len = coordinates.length; i < len; i++) {
+      arr.push(convertor.Point(coordinates[i]));
+    }
+
+    return arr;
+  },
+  MultiLineString: function MultiLineString(coordinates) {
+    var str = '';
+
+    for (var i = 0, len = coordinates.length; i < len; i++) {
+      str += convertor.LineString(coordinates[i]);
+    }
+
+    return str;
+  },
+  MultiPolygon: function MultiPolygon(coordinates) {
+    var str = '';
+
+    for (var i = 0, len = coordinates.length; i < len; i++) {
+      str += convertor.Polygon(coordinates[i]);
+    }
+
+    return str;
+  }
+};
+var convertorParse = {
+  formatPoint: convertor.formatPoint,
+  makePoint: function makePoint(p) {
+    var self = this;
+    var point = self.formatPoint(p);
+    var x = point[0];
+    var y = point[1];
+
+    if (self.xmin > x) {
+      self.xmin = x;
+    }
+
+    if (self.xmax < x) {
+      self.xmax = x;
+    }
+
+    if (self.ymin > y) {
+      self.ymin = y;
+    }
+
+    if (self.ymax < y) {
+      self.ymax = y;
+    }
+  },
+  Point: function Point(coordinates) {
+    this.makePoint(coordinates);
+  },
+  LineString: function LineString(coordinates) {
+    for (var i = 0, len = coordinates.length; i < len; i++) {
+      if (i % (filterNum + 1) && len > filterNum) continue;
+      this.makePoint(coordinates[i]);
+    }
+  },
+  Polygon: function Polygon(coordinates) {
+    for (var i = 0, len = coordinates.length; i < len; i++) {
+      this.LineString(coordinates[i]);
+    }
+  },
+  MultiPoint: function MultiPoint(coordinates) {
+    for (var i = 0, len = coordinates.length; i < len; i++) {
+      this.Point(coordinates[i]);
+    }
+  },
+  MultiLineString: function MultiLineString(coordinates) {
+    for (var i = 0, len = coordinates.length; i < len; i++) {
+      this.LineString(coordinates[i]);
+    }
+  },
+  MultiPolygon: function MultiPolygon(coordinates) {
+
+    for (var i = 0, len = coordinates.length; i < len; i++) {
+      this.Polygon(coordinates[i]);
+    }
+  }
+};
+
+function geoJson2Path(json, transform) {
+  var specialArea = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
+  convertor.scale = null;
+  convertor.offset = null;
+
+  if (!json.srcSize) {
+    parseSrcSize(json, specialArea);
+  }
+
+  transform.offset = {
+    x: json.srcSize.left,
+    y: json.srcSize.top,
+    left: transform.OffsetLeft || 0,
+    top: transform.OffsetTop || 0
+  };
+  convertor.scale = transform.scale;
+  convertor.offset = transform.offset;
+  var shapes = json.features;
+  var geometries;
+  var pathArray = [];
+  var val;
+  var shape;
+
+  for (var i = 0, len = shapes.length; i < len; i++) {
+    shape = shapes[i];
+
+    if (shape.properties.name && specialArea.indexOf(shape.properties.name) > -1 || shape.properties.adcode && specialArea.indexOf(shape.properties.adcode) > -1) {
+      // 忽略specialArea
+      continue;
+    }
+
+    if (shape.type == 'Feature') {
+      pushApath(shape.geometry, shape);
+    } else if (shape.type == 'GeometryCollection') {
+      geometries = shape.geometries;
+
+      for (var j = 0, len2 = geometries.length; j < len2; j++) {
+        val = geometries[j];
+        pushApath(val, val);
+      }
+    }
+  }
+
+  var shapeType;
+  var shapeCoordinates;
+  var str;
+
+  function pushApath(gm, shape) {
+    shapeType = gm.type;
+    shapeCoordinates = gm.coordinates;
+    convertor._bbox = {
+      xmin: 360,
+      xmax: -360,
+      ymin: 180,
+      ymax: -180
+    };
+    str = convertor[shapeType](shapeCoordinates);
+    pathArray.push({
+      // type: shapeType,
+      path: str,
+      cp: shape.properties.cp ? convertor.makePoint(shape.properties.cp) : convertor.makePoint([(convertor._bbox.xmin + convertor._bbox.xmax) / 2, (convertor._bbox.ymin + convertor._bbox.ymax) / 2]),
+      properties: shape.properties,
+      adcode: shape.properties.adcode
+    });
+  }
+
+  return pathArray;
+}
+/**
+ * 平面坐标转经纬度
+ * @param {Array} p
+ */
+
+
+function pos2geo(obj, p) {
+  var x;
+  var y;
+
+  if (p instanceof Array) {
+    x = p[0] * 1;
+    y = p[1] * 1;
+  } else {
+    x = p.x * 1;
+    y = p.y * 1;
+  }
+
+  x = x / obj.scale.x + obj.offset.x - 168.5;
+  x = x > 180 ? x - 360 : x;
+  y = 90 - (y / obj.scale.y + obj.offset.y);
+  return [x, y];
+}
+/**
+ * 经纬度转平面坐标
+ * @param {Array | Object} p
+ */
+
+
+function geo2pos(obj, p) {
+  convertor.offset = obj.offset;
+  convertor.scale = obj.scale;
+
+  if (p instanceof Array) {
+    return convertor.makePoint([p[0] * 1, p[1] * 1]);
+  } else {
+    return convertor.makePoint([p.x * 1, p.y * 1]);
+  }
+}
+
+var _default = {
+  getBbox: getBbox,
+  geoJson2Path: geoJson2Path,
+  pos2geo: pos2geo,
+  geo2pos: geo2pos
+};
+exports["default"] = _default;
+});
+
+unwrapExports(projection);
+
+var trans = createCommonjsModule(function (module, exports) {
+
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports["default"] = _default;
+
+
+
+var _projection = interopRequireDefault(projection);
+
+var rate = 0.75;
+/**
+ * 
+ * @param {Object} geoData 
+ * @param {Object} graphBBox 绘制在什么位置{x,y,width,height} 
+ */
+
+function _default(geoData, graphBBox) {
+  var specialArea = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+  //先过一遍解码，么有编码的数据会直接返回
+  geoData.json = decode(geoData.json);
+
+  var data = _getProjectionData(geoData, graphBBox, specialArea);
+
+  return data;
+}
+
+var _getProjectionData = function _getProjectionData(geoData, graphBBox, specialArea) {
+  var province = [];
+
+  var bbox = geoData.bbox || _projection["default"].getBbox(geoData.json, specialArea);
+
+  var transform = _getTransform(bbox, graphBBox, rate);
+
+  var lastTransform = geoData.lastTransform || {
+    scale: {}
+  };
+  var pathArray;
+
+  if (transform.left != lastTransform.left || transform.top != lastTransform.top || transform.scale.x != lastTransform.scale.x || transform.scale.y != lastTransform.scale.y) {
+    //发生过变化，需要重新生成pathArray
+    pathArray = _projection["default"].geoJson2Path(geoData.json, transform, specialArea);
+    lastTransform = Canvax._.clone(transform);
+  } else {
+    transform = geoData.transform;
+    pathArray = geoData.pathArray;
+  }
+
+  geoData.bbox = bbox;
+  geoData.transform = transform;
+  geoData.lastTransform = lastTransform;
+  geoData.pathArray = pathArray;
+  var position = [transform.left, transform.top];
+
+  for (var i = 0, l = pathArray.length; i < l; i++) {
+    province.push(_getSingleProvince(geoData, pathArray[i], position, bbox));
+  }
+  return province;
+};
+
+var _getTransform = function _getTransform(bbox, graphBBox, rate) {
+  var width = graphBBox.width,
+      height = graphBBox.height;
+  var mapWidth = bbox.width;
+  var mapHeight = bbox.height; //var minScale;
+
+  var xScale = width / rate / mapWidth;
+  var yScale = height / mapHeight;
+
+  if (xScale > yScale) {
+    //minScale = yScale;
+    xScale = yScale * rate;
+    width = mapWidth * xScale;
+  } else {
+    yScale = xScale;
+    xScale = yScale * rate;
+    height = mapHeight * yScale;
+  }
+
+  return {
+    left: 0,
+    top: 0,
+    width: width,
+    height: height,
+    baseScale: 1,
+    scale: {
+      x: xScale,
+      y: yScale
+    }
+  };
+};
+
+var _getSingleProvince = function _getSingleProvince(geoData, path, position, bbox) {
+  var textPosition;
+  var name = path.properties.name;
+  var textFixed = [0, 0];
+
+  if (path.cp) {
+    textPosition = [path.cp[0] + textFixed[0], path.cp[1] + textFixed[1]];
+  } else {
+    textPosition = geo2pos(geoData, [bbox.left + bbox.width / 2, bbox.top + bbox.height / 2]);
+    textPosition[0] += textFixed[0];
+    textPosition[1] += textFixed[1];
+  }
+
+  path.name = name;
+  path.position = position;
+  path.textX = textPosition[0];
+  path.textY = textPosition[1];
+  return path;
+};
+/**
+ * 经纬度转平面坐标
+ * @param {Object} p
+ */
+
+
+var geo2pos = function geo2pos(geoData, p) {
+  if (!geoData.transform) {
+    return null;
+  }
+  return _projection["default"].geo2pos(geoData.transform, p);
+}; //geoJson有的加过密，比如百度图表库的geoJson
+
+
+var decode = function decode(geoData) {
+  if (!geoData.UTF8Encoding) {
+    return geoData;
+  }
+
+  var features = geoData.features;
+
+  for (var f = 0; f < features.length; f++) {
+    var feature = features[f];
+    var coordinates = feature.geometry.coordinates;
+    var encodeOffsets = feature.geometry.encodeOffsets;
+
+    for (var c = 0; c < coordinates.length; c++) {
+      var coordinate = coordinates[c];
+
+      if (feature.geometry.type === 'Polygon') {
+        coordinates[c] = decodePolygon(coordinate, encodeOffsets[c]);
+      } else if (feature.geometry.type === 'MultiPolygon') {
+        for (var c2 = 0; c2 < coordinate.length; c2++) {
+          var polygon = coordinate[c2];
+          coordinate[c2] = decodePolygon(polygon, encodeOffsets[c][c2]);
+        }
+      }
+    }
+  } // Has been decoded
+
+
+  geoData.UTF8Encoding = false;
+  return geoData;
+};
+
+var decodePolygon = function decodePolygon(coordinate, encodeOffsets) {
+  var result = [];
+  var prevX = encodeOffsets[0];
+  var prevY = encodeOffsets[1];
+
+  for (var i = 0; i < coordinate.length; i += 2) {
+    var x = coordinate.charCodeAt(i) - 64;
+    var y = coordinate.charCodeAt(i + 1) - 64; // ZigZag decoding
+
+    x = x >> 1 ^ -(x & 1);
+    y = y >> 1 ^ -(y & 1); // Delta deocding
+
+    x += prevX;
+    y += prevY;
+    prevX = x;
+    prevY = y; // Dequantize
+
+    result.push([x / 1024, y / 1024]);
+  }
+
+  return result;
+};
+});
+
+unwrapExports(trans);
+
+var map = createCommonjsModule(function (module, exports) {
+
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports["default"] = void 0;
+
+var _classCallCheck2 = interopRequireDefault(classCallCheck$1);
+
+var _possibleConstructorReturn2 = interopRequireDefault(possibleConstructorReturn$1);
+
+var _getPrototypeOf2 = interopRequireDefault(getPrototypeOf$1);
+
+var _assertThisInitialized2 = interopRequireDefault(assertThisInitialized$1);
+
+var _createClass2 = interopRequireDefault(createClass$1);
+
+var _inherits2 = interopRequireDefault(inherits$1);
+
+var _canvax = interopRequireDefault(Canvax);
+
+var _index = interopRequireDefault(graphs);
+
+var _trans = interopRequireDefault(trans);
+
+
+
+
+
+var _ = _canvax["default"]._,
+    event = _canvax["default"].event;
+var Text = _canvax["default"].Display.Text;
+var Path = _canvax["default"].Shapes.Path;
+var Rect = _canvax["default"].Shapes.Rect;
+
+var Map =
+/*#__PURE__*/
+function (_GraphsBase) {
+  (0, _inherits2["default"])(Map, _GraphsBase);
+  (0, _createClass2["default"])(Map, null, [{
+    key: "defaultProps",
+    value: function defaultProps() {
+      return {
+        field: {
+          detail: '数据中的adcode字段',
+          "default": 'adcode',
+          documentation: '数据中的adcode字段，用来对应上地图中的某个区块的adcode，从而找到这个区块对应的这一条数据'
+        },
+        valueField: {
+          detail: '数据中的值字段',
+          "default": 'value',
+          documentation: '作为field字段的补充，通过field字段找到数据后，用来从数据中取值'
+        },
+        mapAdcode: {
+          detail: '当前绘制的地图adcode',
+          "default": null
+        },
+        adcodeUrlTempl: {
+          detail: 'adcode的url模板',
+          "default": 'http://geo.datav.aliyun.com/areas_v2/bound/{adcode}_full.json',
+          documentation: '如果是是配置的adcode，那么和他对应的url模板'
+        },
+        geoJson: {
+          detail: '要绘制的geoJson数据',
+          "default": null
+        },
+        geoJsonUrl: {
+          detail: '要绘制的geoJson的url',
+          "default": null
+        },
+        geoJsonFilter: {
+          detail: 'geoJson的二次过滤处理',
+          "default": function _default(json) {
+            return json;
+          }
+        },
+        specialArea: {
+          detail: '要排除掉不绘制的数据集合，可以是adcode，也可以是name',
+          "default": []
+        },
+        themeColor: {
+          detail: '主题色',
+          "default": "#6E7586",
+          documentation: '默认的主题色彩，所有的有数据的area都是在这个颜色的基础上做透明度变化，同时也是默认的hover色'
+        },
+        node: {
+          detail: '单个元素图形配置',
+          propertys: {
+            drawBegin: {
+              detail: '开始绘制的钩子函数',
+              "default": function _default() {}
+            },
+            drawEnd: {
+              detail: '开始绘制的钩子函数',
+              "default": function _default() {}
+            },
+            fillStyle: {
+              detail: '单个区块背景色',
+              "default": null //'#fff' //从themeColor获取默认 , 默认为空就会没有颜色的区块不会有事件点击
+
+            },
+            fillAlpha: {
+              detail: '单个区块透明度',
+              "default": 0.9
+            },
+            maxFillAlpha: {
+              detail: '单个区块最大透明度',
+              "default": 1
+            },
+            minFillAlpha: {
+              detail: '单个区块最小透明度',
+              "default": 0.4
+            },
+            strokeStyle: {
+              detail: '单个区块描边颜色',
+              "default": "#ccc"
+            },
+            strokeAlpha: {
+              detail: '单个区块描边透明度',
+              "default": 1
+            },
+            lineWidth: {
+              detail: '单个区块描边线宽',
+              "default": 1
+            },
+            lineType: {
+              detail: '区块描边样式',
+              "default": 'solid'
+            },
+            focus: {
+              detail: "单个区块hover态设置",
+              propertys: {
+                enabled: {
+                  detail: '是否开启',
+                  "default": true
+                },
+                fillStyle: {
+                  detail: 'hover态单个区块背景色',
+                  "default": null //从themeColor获取默认
+
+                },
+                fillAlpha: {
+                  detail: 'hover态单个区块透明度',
+                  "default": 1
+                },
+                strokeStyle: {
+                  detail: 'hover态单个区块描边颜色',
+                  "default": null //默认获取themeColor
+
+                },
+                strokeAlpha: {
+                  detail: 'hover态单个区块描边透明度',
+                  "default": null //默认获取themeColor
+
+                },
+                lineWidth: {
+                  detail: 'hover态单个区块描边线宽',
+                  "default": null
+                },
+                lineType: {
+                  detail: 'hover态区块描边样式',
+                  "default": null
+                }
+              }
+            },
+            select: {
+              detail: "单个区块选中态设置",
+              propertys: {
+                enabled: {
+                  detail: '是否开启',
+                  "default": false
+                },
+                fillStyle: {
+                  detail: '选中态单个区块背景色',
+                  "default": null //从themeColor获取默认
+
+                },
+                fillAlpha: {
+                  detail: '选中态单个区块透明度',
+                  "default": 1
+                },
+                strokeStyle: {
+                  detail: '选中态单个区块描边颜色',
+                  "default": null
+                },
+                strokeAlpha: {
+                  detail: '选中态单个区块描边颜色',
+                  "default": null
+                },
+                lineWidth: {
+                  detail: '选中态单个区块描边线宽',
+                  "default": null
+                },
+                lineType: {
+                  detail: '选中态区块描边样式',
+                  "default": null
+                }
+              }
+            }
+          }
+        },
+        label: {
+          detail: '文本配置',
+          propertys: {
+            enabled: {
+              detail: '是否开启文本',
+              "default": true
+            },
+            textAlign: {
+              detail: '文本布局位置(left,center,right)',
+              "default": 'center'
+            },
+            textBaseline: {
+              detail: '文本基线对齐方式',
+              "default": 'middle'
+            },
+            format: {
+              detail: '文本格式化处理函数',
+              "default": null
+            },
+            fontSize: {
+              detail: '文本字体大小',
+              "default": 12
+            },
+            fontColor: {
+              detail: '文本颜色',
+              "default": '#666',
+              documentation: 'align为center的时候的颜色，align为其他属性时候取node的颜色'
+            }
+          }
+        }
+      };
+    }
+  }]);
+
+  function Map(opt, app) {
+    var _this;
+
+    (0, _classCallCheck2["default"])(this, Map);
+    _this = (0, _possibleConstructorReturn2["default"])(this, (0, _getPrototypeOf2["default"])(Map).call(this, opt, app));
+    _this.type = "map";
+    _this.maxValue = 0;
+    _this.dataOrg = []; //this.dataFrame.getFieldData( this.field )
+
+    _this.data = []; //layoutData list , default is empty Array
+
+    _.extend(true, (0, _assertThisInitialized2["default"])(_this), (0, tools.getDefaultProps)(Map.defaultProps()), opt);
+
+    _this.init();
+
+    return _this;
+  }
+
+  (0, _createClass2["default"])(Map, [{
+    key: "init",
+    value: function init() {
+      this._pathsp = new _canvax["default"].Display.Sprite({
+        id: "nodePathSp"
+      });
+      this._textsp = new _canvax["default"].Display.Sprite({
+        id: "textsp"
+      });
+      this._marksp = new _canvax["default"].Display.Sprite({
+        id: "markSp"
+      });
+
+      this._initInduce();
+
+      this.sprite.addChild(this._pathsp);
+      this.sprite.addChild(this._textsp);
+      this.sprite.addChild(this._marksp);
+    }
+  }, {
+    key: "_initInduce",
+    value: function _initInduce() {
+      var me = this;
+      this._include = new Rect({
+        context: {
+          x: this.app.padding.left,
+          y: this.app.padding.top,
+          width: this.width,
+          height: this.height,
+          fillStyle: "rgba(0,0,0,0)"
+        }
+      });
+
+      this._include.on(event.types.get(), function (e) {
+        e.eventInfo = {
+          trigger: me,
+          nodes: []
+        };
+        me.app.fire(e.type, e);
+      });
+
+      this.sprite.addChild(this._include);
+    }
+  }, {
+    key: "draw",
+    value: function draw(opt) {
+      var _this2 = this;
+
+      !opt && (opt = {}); //第二个data参数去掉，直接trimgraphs获取最新的data
+
+      _.extend(true, this, opt);
+
+      var values = this.dataFrame.getFieldData(this.valueField);
+      this.maxValue = _.max(values);
+      this.minValue = _.min(values);
+      this.getGeoData().then(function (geoData) {
+        if (geoData) {
+          var graphBBox = {
+            x: _this2.app.padding.left,
+            y: _this2.app.padding.top,
+            width: _this2.width,
+            height: _this2.height
+          };
+
+          _this2._widget(geoData, graphBBox);
+        }
+      });
+      this._include.context.width = this.width;
+      this._include.context.height = this.height;
+    }
+  }, {
+    key: "_widget",
+    value: function _widget(geoData, graphBBox) {
+      var _this3 = this;
+
+      var elements = [];
+      var geoGraphs = (0, _trans["default"])(geoData, graphBBox, this.specialArea);
+      geoGraphs.forEach(function (geoGraph) {
+        var rowData = _this3.dataFrame.getRowDataOf({
+          adcode: geoGraph.adcode
+        });
+
+        if (rowData.length) {
+          geoGraph.rowData = rowData[0];
+        }
+
+        var fillStyle = _this3._getProp(_this3.node, "fillStyle", geoGraph);
+
+        var fillAlpha = _this3._getProp(_this3.node, "fillAlpha", geoGraph);
+
+        var strokeStyle = _this3._getProp(_this3.node, "strokeStyle", geoGraph);
+
+        var strokeAlpha = _this3._getProp(_this3.node, "strokeAlpha", geoGraph);
+
+        geoGraph.color = fillStyle;
+        var pathCtx = {
+          x: graphBBox.x + (graphBBox.width - geoData.transform.width) / 2,
+          y: graphBBox.y + (graphBBox.height - geoData.transform.height) / 2,
+          path: geoGraph.path,
+          lineWidth: _this3.node.lineWidth,
+          fillStyle: fillStyle,
+          fillAlpha: fillAlpha,
+          strokeStyle: strokeStyle,
+          strokeAlpha: strokeAlpha,
+          lineType: _this3.node.lineType
+        };
+        var nodePath = new Path({
+          id: 'path_' + geoGraph.adcode,
+          context: pathCtx
+        });
+        nodePath.nodeData = geoGraph;
+        nodePath.geoData = geoData;
+        geoGraph.nodeElement = nodePath;
+
+        _this3.node.drawBegin.bind(_this3)(geoGraph);
+
+        _this3._pathsp.addChild(nodePath); // if( geoGraph.name == "浙江省" ){
+        //     //test    
+        //     let nodePathBox = nodePath.getBound();
+        //     let globalPos = nodePath.localToGlobal( nodePathBox );
+        //     nodePathBox.x = globalPos.x;
+        //     nodePathBox.y = globalPos.y;
+        //     this._pathsp.addChild( new Rect({
+        //         context: {
+        //             ...nodePathBox,
+        //             lineWidth:1,
+        //             strokeStyle:"red"
+        //         }
+        //     }) )
+        // }
+
+
+        _this3.node.drawEnd.bind(_this3)(geoGraph); //drawEnd中可能把这个node销毁了
+
+
+        nodePath.context && elements.push(nodePath);
+        var me = _this3; //有些区块在外面会告诉你( drawBegin or drawEnd ) 会在geoGraph中标注上告诉你不用监听事件
+        //因为有些时候某些比较小的区块，比如深圳 上海，等，周边的区块没数据的时候，如果也检测事件，那么这些小区块会难以选中
+
+        if (fillStyle && _this3.node.fillAlpha && !geoGraph.pointerEventsNone && nodePath.context) {
+          nodePath.context.cursor = 'pointer';
+          nodePath.on(event.types.get(), function (e) {
+            e.eventInfo = {
+              //iNode : this.iNode,
+              trigger: me.node,
+              nodes: [this.nodeData]
+            };
+
+            if (e.type == 'mouseover') {
+              me.focusAt(this.nodeData.adcode);
+            }
+
+            if (e.type == 'mouseout') {
+              !this.nodeData.selected && me.unfocusAt(this.nodeData.adcode);
+            }
+            me.app.fire(e.type, e);
+          });
+        }
+      });
+      return elements;
+    }
+  }, {
+    key: "focusAt",
+    value: function focusAt(adcode) {
+      var _path = this._pathsp.getChildById('path_' + adcode);
+
+      var geoGraph = _path.nodeData;
+
+      if (_path) {
+        var _path$context = _path.context,
+            fillStyle = _path$context.fillStyle,
+            fillAlpha = _path$context.fillAlpha,
+            strokeStyle = _path$context.strokeStyle,
+            strokeAlpha = _path$context.strokeAlpha;
+        _path._default = {
+          fillStyle: fillStyle,
+          fillAlpha: fillAlpha,
+          strokeStyle: strokeStyle,
+          strokeAlpha: strokeAlpha
+        };
+        var focusFillStyle = this._getProp(this.node.focus, "fillStyle", geoGraph) || fillStyle;
+        var focusFillAlpha = this._getProp(this.node.focus, "fillAlpha", geoGraph) || fillAlpha;
+        var focusStrokeStyle = this._getProp(this.node.focus, "strokeStyle", geoGraph) || strokeStyle;
+        var focusStrokeAlpha = this._getProp(this.node.focus, "strokeAlpha", geoGraph) || strokeAlpha;
+        _path.context.fillStyle = focusFillStyle;
+        _path.context.fillAlpha = focusFillAlpha;
+        _path.context.strokeStyle = focusStrokeStyle;
+        _path.context.strokeAlpha = focusStrokeAlpha;
+      }
+    }
+  }, {
+    key: "unfocusAt",
+    value: function unfocusAt(adcode) {
+      var _path = this._pathsp.getChildById('path_' + adcode);
+
+      if (_path) {
+        var _path$_default = _path._default,
+            fillStyle = _path$_default.fillStyle,
+            fillAlpha = _path$_default.fillAlpha,
+            strokeStyle = _path$_default.strokeStyle,
+            strokeAlpha = _path$_default.strokeAlpha;
+        _path.context.fillStyle = fillStyle;
+        _path.context.fillAlpha = fillAlpha;
+        _path.context.strokeStyle = strokeStyle;
+        _path.context.strokeAlpha = strokeAlpha;
+      }
+    }
+  }, {
+    key: "drawChildren",
+    value: function drawChildren(adcode) {
+      var _this4 = this;
+
+      return new Promise(function (resolve) {
+        _this4.getGeoData({
+          mapAdcode: adcode
+        }).then(function (geoData) {
+          if (geoData) {
+            var _path = _this4._pathsp.getChildById('path_' + adcode);
+
+            var pathBBox = _path.getBound();
+
+            var globalPos = _path.localToGlobal(pathBBox);
+
+            pathBBox.x = globalPos.x;
+            pathBBox.y = globalPos.y;
+            resolve(_this4._widget(geoData, pathBBox));
+          }
+        });
+      });
+    }
+  }, {
+    key: "getGeoData",
+    value: function getGeoData() {
+      var _this5 = this;
+
+      var opt = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this;
+      return new Promise(function (resolve, reject) {
+        if (opt.mapAdcode !== null || opt.geoJsonUrl) {
+          var url = opt.geoJsonUrl || _this5.adcodeUrlTempl.replace(new RegExp('\\{adcode\\}', 'gm'), opt.mapAdcode);
+
+          if (!_this5.app.__geoDataMap) _this5.app.__geoDataMap = {};
+
+          if (_this5.app.__geoDataMap[url]) {
+            resolve(_this5.app.__geoDataMap[url]);
+          } else {
+            fetch(url).then(function (data) {
+              if (data.ok) {
+                data.json().then(function (d) {
+                  var _d = _this5.geoJsonFilter(d);
+
+                  _this5.app.__geoDataMap[url] = {
+                    json: _d || d
+                  };
+                  resolve(_this5.app.__geoDataMap[url]);
+                });
+              } else {
+                resolve(null);
+              }
+            })["catch"](function (error) {
+              reject(error);
+            });
+          }
+        } else if (opt.geoJson) {
+          resolve({
+            json: opt.geoJson
+          });
+        }
+      });
+    }
+  }, {
+    key: "_getProp",
+    value: function _getProp(propPath, type, nodeData) {
+      var configValue = propPath[type];
+      var value;
+
+      if (_.isFunction(configValue)) {
+        value = configValue.apply(this, [nodeData, this.dataFrame]);
+      } else {
+        value = configValue;
+      }
+
+      if (type == "fillStyle") {
+        var rowData = nodeData.rowData;
+
+        if (rowData) {
+          if (rowData[type] !== undefined) {
+            value = rowData[type];
+          } else {
+            var val = rowData[this.valueField];
+
+            if (!isNaN(val) && val != '') {
+              var alpha = (val - this.minValue) / (this.maxValue - this.minValue) * (this.node.fillAlpha - this.node.minFillAlpha) + this.node.minFillAlpha;
+              value = (0, color.colorRgba)(this.themeColor, parseFloat(alpha.toFixed(2)));
+            }
+          }
+        }
+      }
+
+      return value;
+    }
+  }]);
+  return Map;
+}(_index["default"]);
+
+_index["default"].registerComponent(Map, 'graphs', 'map');
+
+var _default2 = Map;
+exports["default"] = _default2;
+});
+
+unwrapExports(map);
+
 var tree = createCommonjsModule(function (module, exports) {
 
 
@@ -46854,9 +47933,9 @@ function (_Component) {
       if (!this.enabled) return;
       if (!this._tipDom) return;
 
-      var x = this._checkX(e.x + this.offsetX);
+      var x = this._checkX(e.clientX + this.offsetX);
 
-      var y = this._checkY(e.y + this.offsetY);
+      var y = this._checkY(e.clientY + this.offsetY);
 
       this._tipDom.style.cssText += ";visibility:visible;left:" + x + "px;top:" + y + "px;-webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;";
 
@@ -48714,6 +49793,8 @@ var _global = interopRequireDefault(global$1);
 
 
 
+
+
 //2d图表元类
 //-----------------------------------------------
 //坐标系
@@ -48732,7 +49813,7 @@ if (projectTheme && projectTheme.length) {
 }
 
 var chartx = {
-  version: '1.1.8',
+  version: '1.1.9',
   options: {}
 };
 

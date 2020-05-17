@@ -82,7 +82,7 @@ class Chart extends event.Dispatcher
                 if( //没有type的coord和没有field(or keyField)的graphs，都无效，不要创建该组件
                     //关系图中是keyField
                     (compName == "coord" && !comp.type ) || 
-                    (compName == "graphs" && !comp.field && !comp.keyField  )
+                    (compName == "graphs" && !comp.field && !comp.keyField && !comp.adcode && !comp.geoJson && !comp.geoJsonUrl  ) //地图的话只要有个adcode就可以了
                 ) return; 
                 let compModule = me.componentModules.get(compName, comp.type);
                 if( compModule ){
@@ -325,6 +325,9 @@ class Chart extends event.Dispatcher
 
         this.components = []; //组件清空
         this.canvax.domView.innerHTML = "";
+
+        //清空事件的当前状态
+        this.canvax.event.curPointsTarget.length = 0;
         
     }
 
@@ -672,7 +675,9 @@ class Chart extends event.Dispatcher
             let iNode = e.eventInfo.iNode;
             
             _.each( this.getComponents({name:'graphs'}), function( _g ){
-                nodes = nodes.concat( _g.getNodesAt( iNode, e ) );
+                if( _g.getNodesAt ){
+                    nodes = nodes.concat( _g.getNodesAt( iNode, e ) );
+                }
             } );
             e.eventInfo.nodes = nodes;
         };

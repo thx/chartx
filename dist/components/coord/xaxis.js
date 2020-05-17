@@ -448,23 +448,20 @@ function (_Axis) {
               context: textContext
             });
 
-            _node.addChild(_node._txt);
+            _node.addChild(_node._txt); // TODO 后续x轴的动画要换成真实的动画效果，从画布外面移进来
+            // if (me.animation && !opt.resize) {
+            //     _node._txt.context.y += 20;
+            //     _node._txt.context.globalAlpha = 0;
+            //     _node._txt.animate( {
+            //         y: textContext.y,
+            //         globalAlpha: 1
+            //     }, {
+            //         duration: 500,
+            //         delay: delay,
+            //         id: _node._txt.id
+            //     });
+            // };
 
-            if (me.animation && !opt.resize) {
-              _node._txt.context.y += 20;
-              _node._txt.context.globalAlpha = 0;
-
-              _node._txt.animate({
-                y: textContext.y,
-                globalAlpha: 1
-              }, {
-                duration: 500,
-                delay: delay,
-                id: _node._txt.id
-              });
-            }
-
-            ;
           }
 
           me.rulesSprite.addChild(_node);

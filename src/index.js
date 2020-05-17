@@ -25,6 +25,7 @@ import "./components/graphs/sankey/index"
 import "./components/graphs/progress/index"
 import "./components/graphs/relation/index"
 import "./components/graphs/force/index"
+import "./components/graphs/map/index"
  
 
 //-----------------------------------------------

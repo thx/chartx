@@ -114,6 +114,7 @@ export default class xAxis extends Axis
     //配置和数据变化
     resetData( dataFrame )
     {
+        
         this._setField(dataFrame.field)
         this.resetDataOrg( dataFrame.org );
 
@@ -359,8 +360,8 @@ export default class xAxis extends Axis
                 });
 
 
-                 //新建line
-                 if( me.tickLine.enabled ){
+                //新建line
+                if( me.tickLine.enabled ){
                     _node._tickLine = new Line({
                         id: "xAxis_tickline_" + visibleInd,
                         context: tickLineContext
@@ -375,21 +376,21 @@ export default class xAxis extends Axis
                         context: textContext
                     });
                     _node.addChild( _node._txt );
-                    if (me.animation && !opt.resize) {
-                        _node._txt.context.y += 20;
-                        _node._txt.context.globalAlpha = 0;
-                        _node._txt.animate( {
-                            y: textContext.y,
-                            globalAlpha: 1
-                        }, {
-                            duration: 500,
-                            delay: delay,
-                            id: _node._txt.id
-                        });
-                    };
-                }
 
-               
+                    // TODO 后续x轴的动画要换成真实的动画效果，从画布外面移进来
+                    // if (me.animation && !opt.resize) {
+                    //     _node._txt.context.y += 20;
+                    //     _node._txt.context.globalAlpha = 0;
+                    //     _node._txt.animate( {
+                    //         y: textContext.y,
+                    //         globalAlpha: 1
+                    //     }, {
+                    //         duration: 500,
+                    //         delay: delay,
+                    //         id: _node._txt.id
+                    //     });
+                    // };
+                }
 
                 me.rulesSprite.addChild( _node );
             };

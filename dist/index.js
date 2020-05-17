@@ -43,6 +43,8 @@ require("./components/graphs/relation/index");
 
 require("./components/graphs/force/index");
 
+require("./components/graphs/map/index");
+
 require("./layout/dagre/index");
 
 require("./layout/tree/index");
@@ -89,7 +91,7 @@ if (projectTheme && projectTheme.length) {
 ; //皮肤设定end -----------------
 
 var chartx = {
-  version: '1.1.8',
+  version: '1.1.9',
   options: {}
 };
 

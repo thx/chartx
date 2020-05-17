@@ -97,7 +97,7 @@ let getRollupOpts = ()=>{
             resolve({ mainFields:['module', 'main'], browser: true }), 
             commonjs(),
             strip({
-                debugger: true
+                debugger: false
             })
         ]
     };

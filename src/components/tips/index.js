@@ -177,8 +177,8 @@ class Tips extends Component {
         if (!this.enabled) return;
         if (!this._tipDom) return;
 
-        let x = this._checkX( e.x + this.offsetX);
-        let y = this._checkY( e.y + this.offsetY);
+        let x = this._checkX( e.clientX + this.offsetX);
+        let y = this._checkY( e.clientY + this.offsetY);
 
         this._tipDom.style.cssText += ";visibility:visible;left:" + x + "px;top:" + y + "px;-webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;";
 

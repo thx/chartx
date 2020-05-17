@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
+<title>funnel</title>
+
+<script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
+<script type="text/javascript" src="../../dist/index.iife.js"></script>
+<!-- codemirror -->
+<script type="text/javascript" src="../../lib/codemirror/codemirror.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/active-line.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/javascript.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/matchbrackets.js"></script>
+<link rel="stylesheet" href="../../lib/codemirror/codemirror.css">
+<link rel="stylesheet" href="../../lib/codemirror/zenburn.css">
+<link rel="stylesheet" href="../../lib/codemirror/docs.css">
+<!-- codemirror end -->
+<!--bootstrap-->
+<script type="text/javascript" src="../../lib/bootstrap/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap-theme.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/docs.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap.min.css">
+<!--bootstrap end-->
+<script type="text/javascript" src="../../lib/demo.js"></script>
+<link rel="stylesheet" href="../../lib/demo.css">
+
+<style>
+    .suggest-content {
+
+    }
+</style>
+
+</head>
+<body >
+
+<table>
+    <tr>
+        <td id="td-vl">
+            <form><textarea id="code" name="code">
+//chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组
+
+var data = [
+    {adcode: 440300, pv: 522}, //深圳 
+    {adcode: 330300, pv: 324}, //温州
+    {adcode: 310000, pv: 231}, //上海 
+    {adcode: 330100, pv: 421}, //杭州
+    {adcode: 110000, pv: 421}, //北京
+    {adcode: 500000, pv: 333},  //重庆
+    {adcode: 430100, pv: 181}
+]
+
+var adcodeMap = [
+    {adcode:440300, parentAdcode: 440000},
+    {adcode:330300, parentAdcode: 330000},
+    {adcode:310000, parentAdcode: 100000},
+    {adcode:330100, parentAdcode: 330000},
+    {adcode:110000, parentAdcode: 100000},
+    {adcode:500000, parentAdcode: 100000},
+    {adcode:430100, parentAdcode: 430000}
+]
+
+var drillAdCodes = [ 100000 ];
+
+var options = {
+    graphs : {
+        type: 'map',
+        themeColor: "#6178e7",
+        field: 'adcode',
+        valueField: 'pv',
+        mapAdcode: drillAdCodes.slice(-1)[0], //中国
+        //geoJson: "http://geo.datav.aliyun.com/areas_v2/bound/100000_full.json",
+        //geoJsonFilter: function( geoJson ){
+        //    return
+        //    for( var i=0,l= geoJson.features.length; i<l; i++ ){
+        //        if( geoJson.features[i].properties.adcode == '460000' ){
+        //            geoJson.features[i].geometry.coordinates.length = 3;
+        //            //geoJson.features.splice(i,1);
+        //            //i--,l--;
+        //        }
+        //    }  
+        //},
+        //specialArea: [  ], //100000'  和上面的geoJsonFilter 注释掉的部分 处理效果一样的
+        ondblclick: function(e){
+            //返回上一层
+            if( drillAdCodes.length == 1 ){
+                //已经是最上层了
+                return;
+            }
+            drillAdCodes.pop();
+            options.graphs.mapAdcode = drillAdCodes.slice(-1)[0];
+            this.app.reset( options, data ); //这里要重新获取最新数据
+        },
+        node: {
+            fillStyle: "#f4f6f6",
+            strokeStyle: "#eff0f1",
+            drawEnd: function( geoGraph ){
+            
+                var me = this;
+                var adcodes = this.app.dataFrame.getDataOrg( this.field );
+                if( adcodes.length ){
+                    adcodes = adcodes[0][0];
+                };
+                
+                if( adcodes.indexOf( geoGraph.adcode*1 ) > -1 ){
+                    //数据里面有这个城市
+                    //debugger
+
+                } else {
+                    //数据里面没有这个城市
+                    if(geoGraph.properties.parent && geoGraph.properties.parent.adcode != this.mapAdcode){
+                        ////二次绘制的时候，，直接销毁
+                        geoGraph.nodeElement.destroy();
+                        return;
+                    }
+                    geoGraph.pointerEventsNone = true;
+                    
+                };
+                
+                var provinces = [];
+                for( var i=0,l=adcodes.length; i<l; i++ ){
+                    for( var a=0,al=adcodeMap.length; a<al; a++ ){
+                        if( adcodeMap[a].adcode == adcodes[i] ){
+                            if( provinces.indexOf( adcodeMap[a].parentAdcode ) == -1 && adcodeMap[a].parentAdcode != this.mapAdcode ){
+                                provinces.push( adcodeMap[a].parentAdcode );
+                            };
+                            break;
+                        }
+                    }
+                }
+                for( var i=0,l=provinces.length; i<l ;i++ ){
+                    if(  geoGraph.adcode == provinces[i] ){
+                        if( drillAdCodes.length == 1 ){
+                            setTimeout( function(){
+                                me.drawChildren( geoGraph.adcode ).then( function( elements ){
+                                    for( var i = 0,l=elements.length; i<l; i++){
+                                        //elements[i].context.strokeStyle = '#eff0f1';
+                                        //elements[i].context.strokeStyle = '#eff0f1';
+                                        elements[i].context.lineType = 'dashed';
+                                    }
+                                } );
+                            } , 100*i);
+                        }
+                    }
+                }
+                
+            },
+            ondblclick: function(e , nodeData){
+                console.log( nodeData.adcode )
+                //下钻
+                drillAdCodes.push( nodeData.adcode );
+                options.graphs.mapAdcode = nodeData.adcode;
+                debugger
+                this.app.reset( options, data ); //这里其实应该是要获取到下钻后的新数据
+            }
+        },
+        label: {
+            enabled: true
+        }
+    },
+    tips : {
+        content: function(e){
+            if( !e.nodes.length ) return;
+        
+            var nodeData = e.nodes[0];
+            if( nodeData.rowData ){
+                var suggest = `<div style="max-width:320px;white-space:pre-wrap;margin-top:10px;">重庆在商家供给落后的同时，订单占比更加明显落后于竞对</div>
+                <div style="max-width:320px;white-space:pre-wrap;margin-top:10px;">重庆北培在商家供给与订单份额方面落后的差距进一步加大</div>
+                <div style="max-width:320px;white-space:pre-wrap;margin-top:10px;">川湘菜品类在补充流量的同时，还需要在低价区间适当补充商家供给</div>
+                `
+                var name = nodeData.name+"诊断建议";
+                var str = "<div class='suggest-tips'>"
+                    str += "<div style='padding:10px;border-bottom:1px solid #e6e6e6'>"   
+                    str += "<span style='background:" + nodeData.color + ";margin-right:4px;margin-top:6px;float:left;width:8px;height:8px;border-radius:4px;overflow:hidden;font-size:0;'></span>";
+                    str += "<span style='margin-right:5px;font-size:14px;'>"+name+"</span>";
+                    str += "</div>";
+
+                    str += "<div class='suggest-content' style='padding:0 10px 10px; max-width: 400px;'>"+ suggest +"</div>"
+
+                return str+"</div>"
+            } else {
+                return;
+            }
+        }
+    }
+};
+
+window.chart = chartx.create("canvasTest" , data , options);
+
+
+</textarea></form>
+
+        </td>
+        <td style="padding:0 10px;" id="td-vr">
+            <div id="chartdemo-r">
+            <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
+                <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
+
+                <h4>funnel</h4>
+                <p>
+                    联系人：@释剑
+                </p>
+            </div>
+            <div  class="test-c">
+                <div id="canvasTest" style='width:700px;height:700px;position:relative;'></div>
+            </div>
+
+            </div>
+        </td>
+    </tr>
+</table>
+
+    
+</body> 
+</html>
+
+

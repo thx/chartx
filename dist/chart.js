@@ -113,7 +113,8 @@ function (_event$Dispatcher) {
         _.each(comps, function (comp) {
           if ( //没有type的coord和没有field(or keyField)的graphs，都无效，不要创建该组件
           //关系图中是keyField
-          compName == "coord" && !comp.type || compName == "graphs" && !comp.field && !comp.keyField) return;
+          compName == "coord" && !comp.type || compName == "graphs" && !comp.field && !comp.keyField && !comp.adcode && !comp.geoJson && !comp.geoJsonUrl //地图的话只要有个adcode就可以了
+          ) return;
           var compModule = me.componentModules.get(compName, comp.type);
 
           if (compModule) {
@@ -412,7 +413,9 @@ function (_event$Dispatcher) {
       this.setCoord_Graphs_Sp();
       this.components = []; //组件清空
 
-      this.canvax.domView.innerHTML = "";
+      this.canvax.domView.innerHTML = ""; //清空事件的当前状态
+
+      this.canvax.event.curPointsTarget.length = 0;
     }
     /**
      * 容器的尺寸改变重新绘制
@@ -838,7 +841,9 @@ function (_event$Dispatcher) {
         _.each(this.getComponents({
           name: 'graphs'
         }), function (_g) {
-          nodes = nodes.concat(_g.getNodesAt(iNode, e));
+          if (_g.getNodesAt) {
+            nodes = nodes.concat(_g.getNodesAt(iNode, e));
+          }
         });
 
         e.eventInfo.nodes = nodes;
