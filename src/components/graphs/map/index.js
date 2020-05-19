@@ -28,7 +28,7 @@ class Map extends GraphsBase {
             },
             adcodeUrlTempl: {
                 detail: 'adcode的url模板',
-                default: 'http://geo.datav.aliyun.com/areas_v2/bound/{adcode}_full.json',
+                default: '//geo.datav.aliyun.com/areas_v2/bound/{adcode}_full.json', //http://datav.aliyun.com/tools/atlas/#&lat=43.29320031385282&lng=104.32617187499999&zoom=4
                 documentation: '如果是是配置的adcode，那么和他对应的url模板'
             },
             geoJson: {
@@ -46,11 +46,6 @@ class Map extends GraphsBase {
             specialArea: {
                 detail: '要排除掉不绘制的数据集合，可以是adcode，也可以是name',
                 default: []
-            },
-            themeColor: {
-                detail: '主题色',
-                default: "#6E7586",
-                documentation: '默认的主题色彩，所有的有数据的area都是在这个颜色的基础上做透明度变化，同时也是默认的hover色'
             },
 
             node: {
@@ -73,6 +68,11 @@ class Map extends GraphsBase {
                     fillAlpha: {
                         detail : '单个区块透明度',
                         default: 0.9
+                    },
+
+                    maxFillStyle: {
+                        detail: '单个区块数据最大对应的颜色',
+                        default: null
                     },
 
                     maxFillAlpha: {
@@ -215,6 +215,10 @@ class Map extends GraphsBase {
         this.data = []; //layoutData list , default is empty Array
 
         _.extend(true, this, getDefaultProps(Map.defaultProps()), opt);
+        
+        if( !this.node.maxFillStyle ){
+            this.node.maxFillStyle = this.app.getTheme(0);
+        };
 
         this.init();
     }
@@ -485,7 +489,7 @@ class Map extends GraphsBase {
                     var val = rowData[ this.valueField ];
                     if ( !isNaN(val) && val != '' ) {
                         let alpha = ((val - this.minValue) / (this.maxValue - this.minValue)) * (this.node.fillAlpha - this.node.minFillAlpha) + this.node.minFillAlpha;
-                        value = colorRgba(this.themeColor, parseFloat(alpha.toFixed(2)));
+                        value = colorRgba(this.node.maxFillStyle, parseFloat(alpha.toFixed(2)));
                     }
                 }
             }

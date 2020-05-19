@@ -23484,6 +23484,8 @@ var _index = interopRequireDefault(graphs);
 
 
 
+
+
 var _ = _canvax["default"]._,
     event = _canvax["default"].event;
 var Text = _canvax["default"].Display.Text;
@@ -23524,6 +23526,117 @@ function (_GraphsBase) {
               detail: '高',
               "default": 0,
               documentation: '漏斗单元高，如果options没有设定， 就会被自动计算为 this.height/dataOrg.length'
+            },
+            drawEnd: {
+              detail: '单个节点绘制完毕处理函数',
+              "default": function _default() {}
+            },
+            fillStyle: {
+              detail: '单个区块背景色',
+              "default": null //'#fff' //从themeColor获取默认 , 默认为空就会没有颜色的区块不会有事件点击
+
+            },
+            fillAlpha: {
+              detail: '单个区块透明度',
+              "default": 1
+            },
+            maxFillStyle: {
+              detail: '单个区块数值最大的颜色值',
+              "default": null
+            },
+            maxFillAlpha: {
+              detail: '单个区块最大透明度',
+              "default": 1
+            },
+            minFillAlpha: {
+              detail: '单个区块最小透明度',
+              "default": 0.5
+            },
+            strokeStyle: {
+              detail: '单个区块描边颜色',
+              "default": null
+            },
+            strokeAlpha: {
+              detail: '单个区块描边透明度',
+              "default": 1
+            },
+            lineWidth: {
+              detail: '单个区块描边线宽',
+              "default": 0
+            },
+            lineType: {
+              detail: '区块描边样式',
+              "default": 'solid'
+            },
+            focus: {
+              detail: "单个区块hover态设置",
+              propertys: {
+                enabled: {
+                  detail: '是否开启',
+                  "default": true
+                },
+                fillStyle: {
+                  detail: 'hover态单个区块背景色',
+                  "default": null //从themeColor获取默认
+
+                },
+                fillAlpha: {
+                  detail: 'hover态单个区块透明度',
+                  "default": 0.95
+                },
+                strokeStyle: {
+                  detail: 'hover态单个区块描边颜色',
+                  "default": null //默认获取themeColor
+
+                },
+                strokeAlpha: {
+                  detail: 'hover态单个区块描边透明度',
+                  "default": null //默认获取themeColor
+
+                },
+                lineWidth: {
+                  detail: 'hover态单个区块描边线宽',
+                  "default": null
+                },
+                lineType: {
+                  detail: 'hover态区块描边样式',
+                  "default": null
+                }
+              }
+            },
+            select: {
+              detail: "单个区块选中态设置",
+              propertys: {
+                enabled: {
+                  detail: '是否开启',
+                  "default": false
+                },
+                fillStyle: {
+                  detail: '选中态单个区块背景色',
+                  "default": null //从themeColor获取默认
+
+                },
+                fillAlpha: {
+                  detail: '选中态单个区块透明度',
+                  "default": 1
+                },
+                strokeStyle: {
+                  detail: '选中态单个区块描边颜色',
+                  "default": null
+                },
+                strokeAlpha: {
+                  detail: '选中态单个区块描边颜色',
+                  "default": null
+                },
+                lineWidth: {
+                  detail: '选中态单个区块描边线宽',
+                  "default": null
+                },
+                lineType: {
+                  detail: '选中态区块描边样式',
+                  "default": null
+                }
+              }
             }
           }
         },
@@ -23573,8 +23686,8 @@ function (_GraphsBase) {
 
     _this.data = []; //layoutData list , default is empty Array
 
-    _this._maxVal = null;
-    _this._minVal = null;
+    _this.maxValue = null;
+    _this.minValue = null;
 
     _.extend(true, (0, _assertThisInitialized2["default"])(_this), (0, tools.getDefaultProps)(FunnelGraphs.defaultProps()), opt);
 
@@ -23585,15 +23698,28 @@ function (_GraphsBase) {
 
   (0, _createClass2["default"])(FunnelGraphs, [{
     key: "init",
-    value: function init() {}
+    value: function init() {
+      if (!this.node.maxFillStyle) {
+        this.node.maxFillStyle = this.app.getTheme(0);
+      }
+
+      this._nodesp = new _canvax["default"].Display.Sprite({
+        id: "nodeSp"
+      });
+      this._textsp = new _canvax["default"].Display.Sprite({
+        id: "textsp"
+      });
+      this.sprite.addChild(this._nodesp);
+      this.sprite.addChild(this._textsp);
+    }
   }, {
     key: "_computerAttr",
     value: function _computerAttr() {
       if (this.field) {
         this.dataOrg = this.dataFrame.getFieldData(this.field);
       }
-      this._maxVal = _.max(this.dataOrg);
-      this._minVal = _.min(this.dataOrg); //计算一些基础属性，比如maxNodeWidth等， 加入外面没有设置
+      this.maxValue = _.max(this.dataOrg);
+      this.minValue = _.min(this.dataOrg); //计算一些基础属性，比如maxNodeWidth等， 加入外面没有设置
 
       if (!this.maxNodeWidth) {
         this.maxNodeWidth = this.width * 0.7;
@@ -23636,8 +23762,8 @@ function (_GraphsBase) {
           rowData: me.dataFrame.getRowDataAt(i),
           value: num,
           width: me._getNodeWidth(num),
-          color: me.app.getTheme(i),
-          //默认从皮肤中获取
+          color: '',
+          //me.app.getTheme(i),//默认从皮肤中获取
           cursor: "pointer",
           //下面得都在layoutData的循环中计算
           label: '',
@@ -23645,6 +23771,7 @@ function (_GraphsBase) {
           iNode: -1,
           points: []
         };
+        ld.color = me._getProp(me.node, 'fillStyle', ld);
         layoutData.push(ld);
       });
 
@@ -23676,7 +23803,7 @@ function (_GraphsBase) {
   }, {
     key: "_getNodeWidth",
     value: function _getNodeWidth(num) {
-      var width = this.minNodeWidth + (this.maxNodeWidth - this.minNodeWidth) / (this._maxVal - this.minVal) * (num - this.minVal);
+      var width = this.minNodeWidth + (this.maxNodeWidth - this.minNodeWidth) / (this.maxValue - this.minVal) * (num - this.minVal);
       return parseInt(width);
     }
   }, {
@@ -23723,15 +23850,36 @@ function (_GraphsBase) {
       var me = this;
 
       _.each(this.data, function (ld) {
+        //let fillStyle   = this._getProp(this.node, "fillStyle", geoGraph);
+        var fillAlpha = me._getProp(me.node, "fillAlpha", ld);
+
+        var strokeStyle = me._getProp(me.node, "strokeStyle", ld);
+
+        var strokeAlpha = me._getProp(me.node, "strokeAlpha", ld);
+
+        var lineWidth = me._getProp(me.node, "lineWidth", ld);
+
+        var lineType = me._getProp(me.node, "lineType", ld);
+
         var _polygon = new Polygon({
+          id: "funel_item_" + ld.iNode,
+          hoverClone: false,
           context: {
             pointList: ld.points,
             fillStyle: ld.color,
-            cursor: ld.cursor
+            cursor: ld.cursor,
+            fillAlpha: fillAlpha,
+            strokeStyle: strokeStyle,
+            strokeAlpha: strokeAlpha,
+            lineWidth: lineWidth,
+            lineType: lineType
           }
         });
 
-        me.sprite.addChild(_polygon);
+        ld.nodeElement = _polygon;
+
+        me._nodesp.addChild(_polygon);
+
         _polygon.nodeData = ld;
 
         _polygon.on(event.types.get(), function (e) {
@@ -23739,7 +23887,15 @@ function (_GraphsBase) {
             trigger: me.node,
             title: me.field,
             nodes: [this.nodeData]
-          }; //fire到root上面去的是为了让root去处理tips
+          };
+
+          if (e.type == 'mouseover') {
+            me.focusAt(this.nodeData.iNode);
+          }
+
+          if (e.type == 'mouseout') {
+            !this.nodeData.selected && me.unfocusAt(this.nodeData.iNode);
+          }
 
           me.app.fire(e.type, e);
         });
@@ -23761,6 +23917,7 @@ function (_GraphsBase) {
           textPoint.x += 15;
           textAlign = "left";
         }
+        ld.textPoint = textPoint;
 
         var _text = new Text(ld.label, {
           context: {
@@ -23773,8 +23930,98 @@ function (_GraphsBase) {
           }
         });
 
-        me.sprite.addChild(_text);
+        me._textsp.addChild(_text);
+
+        me.node.drawEnd(ld);
       });
+    }
+  }, {
+    key: "focusAt",
+    value: function focusAt(iNode) {
+      var _el = this._nodesp.getChildById('funel_item_' + iNode);
+
+      var nodeData = _el.nodeData;
+
+      if (_el) {
+        var _el$context = _el.context,
+            fillStyle = _el$context.fillStyle,
+            fillAlpha = _el$context.fillAlpha,
+            strokeStyle = _el$context.strokeStyle,
+            strokeAlpha = _el$context.strokeAlpha;
+        _el._default = {
+          fillStyle: fillStyle,
+          fillAlpha: fillAlpha,
+          strokeStyle: strokeStyle,
+          strokeAlpha: strokeAlpha
+        };
+        var focusFillStyle = this._getProp(this.node.focus, "fillStyle", nodeData) || fillStyle;
+        var focusFillAlpha = this._getProp(this.node.focus, "fillAlpha", nodeData) || fillAlpha;
+        var focusStrokeStyle = this._getProp(this.node.focus, "strokeStyle", nodeData) || strokeStyle;
+        var focusStrokeAlpha = this._getProp(this.node.focus, "strokeAlpha", nodeData) || strokeAlpha;
+
+        var focusLineWidth = this._getProp(this.node.focus, "lineWidth", nodeData);
+
+        var focusLineType = this._getProp(this.node.focus, "lineType", nodeData);
+
+        _el.context.fillStyle = focusFillStyle;
+        _el.context.fillAlpha = focusFillAlpha;
+        _el.context.strokeStyle = focusStrokeStyle;
+        _el.context.strokeAlpha = focusStrokeAlpha;
+        _el.context.lineWidth = focusLineWidth;
+        _el.context.lineType = focusLineType;
+      }
+    }
+  }, {
+    key: "unfocusAt",
+    value: function unfocusAt(iNode) {
+      var _el = this._nodesp.getChildById('funel_item_' + iNode);
+
+      if (_el) {
+        var _el$_default = _el._default,
+            fillStyle = _el$_default.fillStyle,
+            fillAlpha = _el$_default.fillAlpha,
+            strokeStyle = _el$_default.strokeStyle,
+            strokeAlpha = _el$_default.strokeAlpha,
+            lineType = _el$_default.lineType,
+            lineWidth = _el$_default.lineWidth;
+        _el.context.fillStyle = fillStyle;
+        _el.context.fillAlpha = fillAlpha;
+        _el.context.strokeStyle = strokeStyle;
+        _el.context.strokeAlpha = strokeAlpha;
+        _el.context.lineWidth = lineWidth;
+        _el.context.lineType = lineType;
+      }
+    }
+  }, {
+    key: "_getProp",
+    value: function _getProp(propPath, type, nodeData) {
+      var configValue = propPath[type];
+      var value;
+
+      if (_.isFunction(configValue)) {
+        value = configValue.apply(this, [nodeData, this.dataFrame]);
+      } else {
+        value = configValue;
+      }
+
+      if (type == "fillStyle") {
+        var rowData = nodeData.rowData;
+
+        if (rowData) {
+          if (rowData[type] !== undefined) {
+            value = rowData[type];
+          } else {
+            var val = rowData[this.field];
+
+            if (!isNaN(val) && val != '') {
+              var alpha = (val - this.minValue) / (this.maxValue - this.minValue) * (this.node.fillAlpha - this.node.minFillAlpha) + this.node.minFillAlpha;
+              value = (0, color.colorRgba)(this.node.maxFillStyle, parseFloat(alpha.toFixed(2)));
+            }
+          }
+        }
+      }
+
+      return value;
     }
   }]);
   return FunnelGraphs;
@@ -45198,7 +45445,8 @@ function (_GraphsBase) {
         },
         adcodeUrlTempl: {
           detail: 'adcode的url模板',
-          "default": 'http://geo.datav.aliyun.com/areas_v2/bound/{adcode}_full.json',
+          "default": '//geo.datav.aliyun.com/areas_v2/bound/{adcode}_full.json',
+          //http://datav.aliyun.com/tools/atlas/#&lat=43.29320031385282&lng=104.32617187499999&zoom=4
           documentation: '如果是是配置的adcode，那么和他对应的url模板'
         },
         geoJson: {
@@ -45219,11 +45467,6 @@ function (_GraphsBase) {
           detail: '要排除掉不绘制的数据集合，可以是adcode，也可以是name',
           "default": []
         },
-        themeColor: {
-          detail: '主题色',
-          "default": "#6E7586",
-          documentation: '默认的主题色彩，所有的有数据的area都是在这个颜色的基础上做透明度变化，同时也是默认的hover色'
-        },
         node: {
           detail: '单个元素图形配置',
           propertys: {
@@ -45243,6 +45486,10 @@ function (_GraphsBase) {
             fillAlpha: {
               detail: '单个区块透明度',
               "default": 0.9
+            },
+            maxFillStyle: {
+              detail: '单个区块数据最大对应的颜色',
+              "default": null
             },
             maxFillAlpha: {
               detail: '单个区块最大透明度',
@@ -45386,6 +45633,10 @@ function (_GraphsBase) {
     _this.data = []; //layoutData list , default is empty Array
 
     _.extend(true, (0, _assertThisInitialized2["default"])(_this), (0, tools.getDefaultProps)(Map.defaultProps()), opt);
+
+    if (!_this.node.maxFillStyle) {
+      _this.node.maxFillStyle = _this.app.getTheme(0);
+    }
 
     _this.init();
 
@@ -45684,7 +45935,7 @@ function (_GraphsBase) {
 
             if (!isNaN(val) && val != '') {
               var alpha = (val - this.minValue) / (this.maxValue - this.minValue) * (this.node.fillAlpha - this.node.minFillAlpha) + this.node.minFillAlpha;
-              value = (0, color.colorRgba)(this.themeColor, parseFloat(alpha.toFixed(2)));
+              value = (0, color.colorRgba)(this.node.maxFillStyle, parseFloat(alpha.toFixed(2)));
             }
           }
         }
@@ -49813,7 +50064,7 @@ if (projectTheme && projectTheme.length) {
 }
 
 var chartx = {
-  version: '1.1.9',
+  version: '1.1.10',
   options: {}
 };
 

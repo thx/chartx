@@ -59,7 +59,8 @@ function (_GraphsBase) {
         },
         adcodeUrlTempl: {
           detail: 'adcode的url模板',
-          "default": 'http://geo.datav.aliyun.com/areas_v2/bound/{adcode}_full.json',
+          "default": '//geo.datav.aliyun.com/areas_v2/bound/{adcode}_full.json',
+          //http://datav.aliyun.com/tools/atlas/#&lat=43.29320031385282&lng=104.32617187499999&zoom=4
           documentation: '如果是是配置的adcode，那么和他对应的url模板'
         },
         geoJson: {
@@ -80,11 +81,6 @@ function (_GraphsBase) {
           detail: '要排除掉不绘制的数据集合，可以是adcode，也可以是name',
           "default": []
         },
-        themeColor: {
-          detail: '主题色',
-          "default": "#6E7586",
-          documentation: '默认的主题色彩，所有的有数据的area都是在这个颜色的基础上做透明度变化，同时也是默认的hover色'
-        },
         node: {
           detail: '单个元素图形配置',
           propertys: {
@@ -104,6 +100,10 @@ function (_GraphsBase) {
             fillAlpha: {
               detail: '单个区块透明度',
               "default": 0.9
+            },
+            maxFillStyle: {
+              detail: '单个区块数据最大对应的颜色',
+              "default": null
             },
             maxFillAlpha: {
               detail: '单个区块最大透明度',
@@ -247,6 +247,12 @@ function (_GraphsBase) {
     _this.data = []; //layoutData list , default is empty Array
 
     _.extend(true, (0, _assertThisInitialized2["default"])(_this), (0, _tools.getDefaultProps)(Map.defaultProps()), opt);
+
+    if (!_this.node.maxFillStyle) {
+      _this.node.maxFillStyle = _this.app.getTheme(0);
+    }
+
+    ;
 
     _this.init();
 
@@ -553,7 +559,7 @@ function (_GraphsBase) {
 
             if (!isNaN(val) && val != '') {
               var alpha = (val - this.minValue) / (this.maxValue - this.minValue) * (this.node.fillAlpha - this.node.minFillAlpha) + this.node.minFillAlpha;
-              value = (0, _color.colorRgba)(this.themeColor, parseFloat(alpha.toFixed(2)));
+              value = (0, _color.colorRgba)(this.node.maxFillStyle, parseFloat(alpha.toFixed(2)));
             }
           }
         }

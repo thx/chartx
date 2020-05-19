@@ -1,6 +1,7 @@
 import Canvax from "canvax"
 import GraphsBase from "../index"
 import {numAddSymbol,getDefaultProps} from "../../../utils/tools"
+import { colorRgba } from "../../../utils/color"
 
 let {_,event} = Canvax;
 let Text = Canvax.Display.Text;
@@ -37,6 +38,119 @@ class FunnelGraphs extends GraphsBase
                         detail: '高',
                         default: 0,
                         documentation : '漏斗单元高，如果options没有设定， 就会被自动计算为 this.height/dataOrg.length'
+                    },
+
+                    drawEnd: {
+                        detail: '单个节点绘制完毕处理函数',
+                        default: function(){}
+                    },
+
+                    fillStyle: {
+                        detail: '单个区块背景色',
+                        default: null//'#fff' //从themeColor获取默认 , 默认为空就会没有颜色的区块不会有事件点击
+                    },
+                    fillAlpha: {
+                        detail : '单个区块透明度',
+                        default: 1
+                    },
+                    maxFillStyle: {
+                        detail: '单个区块数值最大的颜色值',
+                        default: null
+                    },
+                    maxFillAlpha: {
+                        detail: '单个区块最大透明度',
+                        default: 1
+                    },
+                    minFillAlpha: {
+                        detail: '单个区块最小透明度',
+                        default: 0.5
+                    },
+                    
+                    strokeStyle: {
+                        detail: '单个区块描边颜色',
+                        default: null
+                    },
+                    strokeAlpha: {
+                        detail: '单个区块描边透明度',
+                        default: 1
+                    },
+
+                    lineWidth: {
+                        detail: '单个区块描边线宽',
+                        default: 0
+                    },
+                    lineType: {
+                        detail: '区块描边样式',
+                        default: 'solid'
+                    },
+
+                    focus: {
+                        detail: "单个区块hover态设置",
+                        propertys: {
+                            enabled: {
+                                detail: '是否开启',
+                                default: true
+                            },
+                            fillStyle: {
+                                detail: 'hover态单个区块背景色',
+                                default: null //从themeColor获取默认
+                            },
+                            fillAlpha: {
+                                detail: 'hover态单个区块透明度',
+                                default: 0.95
+                            },
+                            strokeStyle: {
+                                detail: 'hover态单个区块描边颜色',
+                                default: null //默认获取themeColor
+                            },
+                            strokeAlpha: {
+                                detail: 'hover态单个区块描边透明度',
+                                default: null //默认获取themeColor
+                            },
+                            lineWidth: {
+                                detail: 'hover态单个区块描边线宽',
+                                default: null
+                            },
+                            lineType: {
+                                detail: 'hover态区块描边样式',
+                                default: null
+                            }
+
+                        }
+                    },
+
+                    select: {
+                        detail: "单个区块选中态设置",
+                        propertys: {
+                            enabled: {
+                                detail: '是否开启',
+                                default: false
+                            },
+                            fillStyle: {
+                                detail: '选中态单个区块背景色',
+                                default: null //从themeColor获取默认
+                            },
+                            fillAlpha: {
+                                detail: '选中态单个区块透明度',
+                                default: 1
+                            },
+                            strokeStyle: {
+                                detail: '选中态单个区块描边颜色',
+                                default: null
+                            },
+                            strokeAlpha: {
+                                detail: '选中态单个区块描边颜色',
+                                default: null
+                            },
+                            lineWidth: {
+                                detail: '选中态单个区块描边线宽',
+                                default: null
+                            },
+                            lineType: {
+                                detail: '选中态区块描边样式',
+                                default: null
+                            }
+                        }
                     }
                 }
             },
@@ -83,8 +197,8 @@ class FunnelGraphs extends GraphsBase
         this.dataOrg = []; //this.dataFrame.getFieldData( this.field )
         this.data  = []; //layoutData list , default is empty Array
 
-        this._maxVal = null;
-        this._minVal = null;
+        this.maxValue = null;
+        this.minValue = null;
 
         _.extend( true, this , getDefaultProps( FunnelGraphs.defaultProps() ), opt );
 
@@ -93,6 +207,19 @@ class FunnelGraphs extends GraphsBase
 
     init()
     {
+
+        if( !this.node.maxFillStyle ){
+            this.node.maxFillStyle = this.app.getTheme(0);
+        }
+
+        this._nodesp = new Canvax.Display.Sprite({
+            id: "nodeSp"
+        });
+        this._textsp = new Canvax.Display.Sprite({
+            id: "textsp"
+        });
+        this.sprite.addChild(this._nodesp);
+        this.sprite.addChild(this._textsp);
         
     }
 
@@ -101,8 +228,8 @@ class FunnelGraphs extends GraphsBase
         if( this.field ){
             this.dataOrg = this.dataFrame.getFieldData( this.field );
         };
-        this._maxVal = _.max( this.dataOrg );
-        this._minVal = _.min( this.dataOrg );
+        this.maxValue = _.max( this.dataOrg );
+        this.minValue = _.min( this.dataOrg );
         
         //计算一些基础属性，比如maxNodeWidth等， 加入外面没有设置
         if( !this.maxNodeWidth ){
@@ -153,16 +280,20 @@ class FunnelGraphs extends GraphsBase
                 rowData : me.dataFrame.getRowDataAt(i),
                 value   : num,
                 width   : me._getNodeWidth( num ),
-                color   : me.app.getTheme(i),//默认从皮肤中获取
+                color   : '', //me.app.getTheme(i),//默认从皮肤中获取
                 cursor  : "pointer",
                
                 //下面得都在layoutData的循环中计算
-                label    : '',
+                label   : '',
                 middlePoint : null,
                 iNode   : -1,
                 points  : []
             };
+
+            ld.color = me._getProp( me.node , 'fillStyle', ld )
+
             layoutData.push( ld );
+
         } );
 
         if( this.sort ){
@@ -192,7 +323,7 @@ class FunnelGraphs extends GraphsBase
 
     _getNodeWidth( num )
     {
-        let width = this.minNodeWidth + ( (this.maxNodeWidth-this.minNodeWidth) / (this._maxVal-this.minVal) * (num-this.minVal) );
+        let width = this.minNodeWidth + ( (this.maxNodeWidth-this.minNodeWidth) / (this.maxValue-this.minVal) * (num-this.minVal) );
         return parseInt( width );
     }
 
@@ -231,21 +362,42 @@ class FunnelGraphs extends GraphsBase
     {
         let me = this;
         _.each( this.data , function( ld ){
+
+            //let fillStyle   = this._getProp(this.node, "fillStyle", geoGraph);
+            let fillAlpha   = me._getProp(me.node, "fillAlpha"  , ld);
+            let strokeStyle = me._getProp(me.node, "strokeStyle", ld);
+            let strokeAlpha = me._getProp(me.node, "strokeAlpha", ld);
+            let lineWidth   = me._getProp(me.node, "lineWidth"  , ld);
+            let lineType     = me._getProp(me.node, "lineType"  , ld);
+
             let _polygon = new Polygon({
+                id: "funel_item_"+ld.iNode,
+                hoverClone: false,
                 context : {
                     pointList : ld.points,
                     fillStyle : ld.color,
-                    cursor : ld.cursor
+                    cursor    : ld.cursor,
+                    fillAlpha,strokeStyle,strokeAlpha,lineWidth,lineType
                 }
             });
-            me.sprite.addChild( _polygon );
+            
+            ld.nodeElement = _polygon;
+
+            me._nodesp.addChild( _polygon );
             _polygon.nodeData = ld;
             _polygon.on( event.types.get() , function(e) {
                 
                 e.eventInfo = {
-                    trigger: me.node,
-                    title : me.field,
-                    nodes : [ this.nodeData ]
+                    trigger : me.node,
+                    title   : me.field,
+                    nodes   : [ this.nodeData ]
+                };
+
+                if ( e.type == 'mouseover' ) {
+                    me.focusAt( this.nodeData.iNode );
+                };
+                if ( e.type == 'mouseout' ) {
+                    !this.nodeData.selected && me.unfocusAt( this.nodeData.iNode );
                 };
 
                 //fire到root上面去的是为了让root去处理tips
@@ -268,6 +420,8 @@ class FunnelGraphs extends GraphsBase
                 textAlign = "left";
             };
 
+            ld.textPoint = textPoint;
+
             let _text = new Text( ld.label , {
                 context : {
                     x : textPoint.x,
@@ -279,8 +433,80 @@ class FunnelGraphs extends GraphsBase
                 }
             } );
 
-            me.sprite.addChild( _text );
+            me._textsp.addChild( _text );
+            me.node.drawEnd( ld );
         } );
+    }
+
+    focusAt( iNode ){
+        let _el = this._nodesp.getChildById( 'funel_item_' + iNode );
+        let nodeData = _el.nodeData;
+        
+        if( _el ){
+
+            let {fillStyle,fillAlpha,strokeStyle,strokeAlpha} = _el.context;
+            _el._default = {
+                fillStyle,fillAlpha,strokeStyle,strokeAlpha
+            };
+
+            let focusFillStyle   = this._getProp(this.node.focus, "fillStyle", nodeData) || fillStyle;
+            let focusFillAlpha   = this._getProp(this.node.focus, "fillAlpha", nodeData) || fillAlpha;
+            let focusStrokeStyle = this._getProp(this.node.focus, "strokeStyle", nodeData) || strokeStyle;
+            let focusStrokeAlpha = this._getProp(this.node.focus, "strokeAlpha", nodeData) || strokeAlpha;
+            let focusLineWidth   = this._getProp(this.node.focus, "lineWidth"  , nodeData);
+            let focusLineType    = this._getProp(this.node.focus, "lineType"  , nodeData);
+
+            _el.context.fillStyle   = focusFillStyle;
+            _el.context.fillAlpha   = focusFillAlpha;
+            _el.context.strokeStyle = focusStrokeStyle;
+            _el.context.strokeAlpha = focusStrokeAlpha;
+            _el.context.lineWidth   = focusLineWidth;
+            _el.context.lineType    = focusLineType;
+
+        }
+    }
+    unfocusAt( iNode ){
+        let _el = this._nodesp.getChildById( 'funel_item_' + iNode );
+        if( _el ){
+
+            let {fillStyle,fillAlpha,strokeStyle,strokeAlpha,lineType,lineWidth} = _el._default;
+            _el.context.fillStyle   = fillStyle;
+            _el.context.fillAlpha   = fillAlpha;
+            _el.context.strokeStyle = strokeStyle;
+            _el.context.strokeAlpha = strokeAlpha;
+            _el.context.lineWidth   = lineWidth;
+            _el.context.lineType    = lineType;
+
+        }
+    }
+
+    _getProp( propPath, type, nodeData) {
+
+        var configValue = propPath[ type ];
+        var value;
+        
+        if ( _.isFunction( configValue ) ) {
+            value = configValue.apply(this, [nodeData, this.dataFrame]);
+        } else {
+            value = configValue;
+        };
+
+        if ( type == "fillStyle" ) {
+            var rowData = nodeData.rowData;
+            if ( rowData ) {
+                if ( rowData[type] !== undefined ) {
+                    value = rowData[type];
+                } else {
+                    var val = rowData[ this.field ];
+                    if ( !isNaN(val) && val != '' ) {
+                        let alpha = ((val - this.minValue) / (this.maxValue - this.minValue)) * (this.node.fillAlpha - this.node.minFillAlpha) + this.node.minFillAlpha;
+                        value = colorRgba(this.node.maxFillStyle, parseFloat(alpha.toFixed(2)));
+                    }
+                }
+            }
+        }
+
+        return value;
     }
 
 

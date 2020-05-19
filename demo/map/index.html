@@ -65,10 +65,11 @@ var drillAdCodes = [ 100000 ];
 var options = {
     graphs : {
         type: 'map',
-        themeColor: "#6178e7",
+        //themeColor: "#6178e7",
         field: 'adcode',
         valueField: 'pv',
         mapAdcode: drillAdCodes.slice(-1)[0], //中国
+        adcodeUrlTempl: "http://geo.datav.aliyun.com/areas_v2/bound/{adcode}_full.json",
         //geoJson: "http://geo.datav.aliyun.com/areas_v2/bound/100000_full.json",
         //geoJsonFilter: function( geoJson ){
         //    return
@@ -92,6 +93,7 @@ var options = {
             this.app.reset( options, data ); //这里要重新获取最新数据
         },
         node: {
+            maxFillStyle: "#6178e7",
             fillStyle: "#f4f6f6",
             strokeStyle: "#eff0f1",
             drawEnd: function( geoGraph ){

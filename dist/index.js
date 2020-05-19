@@ -91,7 +91,7 @@ if (projectTheme && projectTheme.length) {
 ; //皮肤设定end -----------------
 
 var chartx = {
-  version: '1.1.9',
+  version: '1.1.10',
   options: {}
 };
 
