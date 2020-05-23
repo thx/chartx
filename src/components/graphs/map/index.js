@@ -51,7 +51,6 @@ class Map extends GraphsBase {
             node: {
                 detail: '单个元素图形配置',
                 propertys: {
-
                     drawBegin: {
                         detail: '开始绘制的钩子函数',
                         default: function(){}
@@ -124,11 +123,11 @@ class Map extends GraphsBase {
                             },
                             strokeAlpha: {
                                 detail: 'hover态单个区块描边透明度',
-                                default: null //默认获取themeColor
+                                default: 1 //默认获取themeColor
                             },
                             lineWidth: {
                                 detail: 'hover态单个区块描边线宽',
-                                default: null
+                                default: 1
                             },
                             lineType: {
                                 detail: 'hover态区块描边样式',
@@ -159,11 +158,11 @@ class Map extends GraphsBase {
                             },
                             strokeAlpha: {
                                 detail: '选中态单个区块描边颜色',
-                                default: null
+                                default: 1
                             },
                             lineWidth: {
                                 detail: '选中态单个区块描边线宽',
-                                default: null
+                                default: 1
                             },
                             lineType: {
                                 detail: '选中态区块描边样式',
@@ -294,38 +293,39 @@ class Map extends GraphsBase {
         let elements = [];
 
         let geoGraphs = trans(geoData, graphBBox, this.specialArea );
-        geoGraphs.forEach(geoGraph => {
+        geoGraphs.forEach(nodeData => {
 
-            let rowData = this.dataFrame.getRowDataOf({ adcode: geoGraph.adcode });
+            let rowData = this.dataFrame.getRowDataOf({ adcode: nodeData.adcode });
             if (rowData.length) {
-                geoGraph.rowData = rowData[0];
+                nodeData.rowData = rowData[0];
             };
 
-            let fillStyle   = this._getProp(this.node, "fillStyle", geoGraph);
-            let fillAlpha   = this._getProp(this.node, "fillAlpha", geoGraph);
-            let strokeStyle = this._getProp(this.node, "strokeStyle", geoGraph);
-            let strokeAlpha = this._getProp(this.node, "strokeAlpha", geoGraph);
-            
-            geoGraph.color = fillStyle;
+            // let fillStyle   = this._getProp(this.node, "fillStyle"  , nodeData);
+            // let fillAlpha   = this._getProp(this.node, "fillAlpha"  , nodeData);
+            // let strokeStyle = this._getProp(this.node, "strokeStyle", nodeData);
+            // let strokeAlpha = this._getProp(this.node, "strokeAlpha", nodeData);
+            // let lineWidth   = this._getProp(this.node, "lineWidth"  , nodeData);
+            // let lineType    = this._getProp(this.node, "lineType"   , nodeData);
 
             let pathCtx = {
-                x : graphBBox.x + (graphBBox.width-geoData.transform.width)/2,
-                y : graphBBox.y + (graphBBox.height-geoData.transform.height)/2,
-                path      : geoGraph.path,
-                lineWidth : this.node.lineWidth,
-                fillStyle , fillAlpha, strokeStyle,strokeAlpha,
-                lineType  : this.node.lineType
+                x    : graphBBox.x + (graphBBox.width-geoData.transform.width)/2,
+                y    : graphBBox.y + (graphBBox.height-geoData.transform.height)/2,
+                path : nodeData.path
             };
-
             let nodePath = new Path({
-                id: 'path_' + geoGraph.adcode,
+                id: 'path_' + nodeData.adcode,
+                hoverClone: false,
                 context: pathCtx
             });
-            nodePath.nodeData = geoGraph;
+            nodePath.nodeData = nodeData;
             nodePath.geoData = geoData;
-            geoGraph.nodeElement = nodePath;
+            nodeData.nodeElement = nodePath;
 
-            this.node.drawBegin.bind(this)(geoGraph);
+            this._setNodeStyle( nodePath );
+
+            nodeData.color = nodePath.context.fillStyle;
+
+            this.node.drawBegin.bind(this)(nodeData);
 
             this._pathsp.addChild(nodePath);
 
@@ -344,7 +344,7 @@ class Map extends GraphsBase {
             //     }) )
             // }
         
-            this.node.drawEnd.bind(this)(geoGraph);
+            this.node.drawEnd.bind(this)(nodeData);
 
             //drawEnd中可能把这个node销毁了
             nodePath.context && elements.push( nodePath );
@@ -352,7 +352,7 @@ class Map extends GraphsBase {
             let me = this;
             //有些区块在外面会告诉你( drawBegin or drawEnd ) 会在geoGraph中标注上告诉你不用监听事件
             //因为有些时候某些比较小的区块，比如深圳 上海，等，周边的区块没数据的时候，如果也检测事件，那么这些小区块会难以选中
-            if( fillStyle && this.node.fillAlpha && !geoGraph.pointerEventsNone && nodePath.context ){
+            if( (nodePath.context && nodePath.context.fillStyle) && this.node.fillAlpha && !nodeData.pointerEventsNone && nodePath.context ){
                 nodePath.context.cursor = 'pointer';
                 nodePath.on(event.types.get(), function (e) {
                     e.eventInfo = {
@@ -365,7 +365,7 @@ class Map extends GraphsBase {
                         me.focusAt( this.nodeData.adcode );
                     };
                     if ( e.type == 'mouseout' ) {
-                        !this.nodeData.selected && me.unfocusAt( this.nodeData.adcode );
+                        me.unfocusAt( this.nodeData.adcode );
                     };
     
                     me.app.fire(e.type, e);
@@ -374,42 +374,81 @@ class Map extends GraphsBase {
         });
 
         return elements;
-        
     }
 
-    focusAt( adcode ){
-        let _path = this._pathsp.getChildById( 'path_' + adcode );
-        let geoGraph = _path.nodeData;
+    _setNodeStyle( _path, type ){
+        let nodeData = _path.nodeData;
         
         if( _path ){
 
-            let {fillStyle,fillAlpha,strokeStyle,strokeAlpha} = _path.context;
+            let {fillStyle,fillAlpha,strokeStyle,strokeAlpha,lineWidth,lineType} = _path.context;
             _path._default = {
-                fillStyle,fillAlpha,strokeStyle,strokeAlpha
+                fillStyle,fillAlpha,strokeStyle,strokeAlpha,lineWidth,lineType
             };
 
-            let focusFillStyle   = this._getProp(this.node.focus, "fillStyle", geoGraph) || fillStyle;
-            let focusFillAlpha   = this._getProp(this.node.focus, "fillAlpha", geoGraph) || fillAlpha;
-            let focusStrokeStyle = this._getProp(this.node.focus, "strokeStyle", geoGraph) || strokeStyle;
-            let focusStrokeAlpha = this._getProp(this.node.focus, "strokeAlpha", geoGraph) || strokeAlpha;
+            var _propPath = this.node[type];
+            if( !type ){
+                _propPath = this.node;
+            }
 
-            _path.context.fillStyle   = focusFillStyle;
-            _path.context.fillAlpha   = focusFillAlpha;
-            _path.context.strokeStyle = focusStrokeStyle;
-            _path.context.strokeAlpha = focusStrokeAlpha;
+            let _fillStyle   = this._getProp(_propPath, "fillStyle", nodeData)   || fillStyle;
+            let _fillAlpha   = this._getProp(_propPath, "fillAlpha", nodeData)   || fillAlpha;
+            let _strokeStyle = this._getProp(_propPath, "strokeStyle", nodeData) || strokeStyle;
+            let _strokeAlpha = this._getProp(_propPath, "strokeAlpha", nodeData) || strokeAlpha;
+            let _lineWidth   = this._getProp(_propPath, "lineWidth", nodeData)   || lineWidth;
+            let _lineType    = this._getProp(_propPath, "lineType", nodeData)    || lineType;
+
+            _path.context.fillStyle   = _fillStyle;
+            _path.context.fillAlpha   = _fillAlpha;
+            _path.context.strokeStyle = _strokeStyle;
+            _path.context.strokeAlpha = _strokeAlpha;
+            _path.context.lineWidth   = _lineWidth;
+            _path.context.lineType   = _lineType;
 
         }
     }
-    unfocusAt( adcode ){
+
+    focusAt( adcode ){
+        if( !this.node.focus.enabled ) return;
+
         let _path = this._pathsp.getChildById( 'path_' + adcode );
-        if( _path ){
+        let nodeData = _path.nodeData;
+        if( !nodeData.selected ){ //已经选中的不能换成focus状态，_selected权重最高
+            this._setNodeStyle(_path,'focus');
+            nodeData.focused = true;
+        }
+    }
+    unfocusAt( adcode ){
+        
+        if( !this.node.focus.enabled ) return;
+        let _path = this._pathsp.getChildById( 'path_' + adcode );
+        let nodeData = _path.nodeData;
+        
+        if( !nodeData.selected ){ //已经选中的不能换成focus状态，_selected权重最高
+            this._setNodeStyle( _path );
+            nodeData.focused = false;
+        }
 
-            let {fillStyle,fillAlpha,strokeStyle,strokeAlpha} = _path._default;
-            _path.context.fillStyle   = fillStyle;
-            _path.context.fillAlpha   = fillAlpha;
-            _path.context.strokeStyle = strokeStyle;
-            _path.context.strokeAlpha = strokeAlpha;
+    }
 
+    selectAt( adcode ){
+        if( !this.node.select.enabled ) return;
+        let _path = this._pathsp.getChildById( 'path_' + adcode );
+        let nodeData = _path.nodeData;
+
+        this._setNodeStyle( _path, 'select' );
+        nodeData.selected = true;
+        console.log( "select:true" )
+    }
+    unselectAt( adcode ){
+        if( !this.node.select.enabled ) return;
+        let _path = this._pathsp.getChildById( 'path_' + adcode );
+        let geoGraph = _path.nodeData;
+        this._setNodeStyle( _path );
+        geoGraph.selected = false;
+        console.log( "select:false" )
+        if( geoGraph.focused ){
+            this.focusAt( adcode );
         }
     }
 

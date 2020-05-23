@@ -154,6 +154,19 @@ var options = {
                 options.graphs.mapAdcode = nodeData.adcode;
                 debugger
                 this.app.reset( options, data ); //这里其实应该是要获取到下钻后的新数据
+            },
+            onclick: function(e, nodeData){
+                debugger
+                if( nodeData.selected ){
+                    this.unselectAt( nodeData.adcode );
+                } else {
+                    this.selectAt( nodeData.adcode );
+                }
+                
+            },
+            select: {
+                enabled: true,
+                fillStyle: 'red'
             }
         },
         label: {

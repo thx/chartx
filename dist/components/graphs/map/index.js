@@ -152,12 +152,12 @@ function (_GraphsBase) {
                 },
                 strokeAlpha: {
                   detail: 'hover态单个区块描边透明度',
-                  "default": null //默认获取themeColor
+                  "default": 1 //默认获取themeColor
 
                 },
                 lineWidth: {
                   detail: 'hover态单个区块描边线宽',
-                  "default": null
+                  "default": 1
                 },
                 lineType: {
                   detail: 'hover态区块描边样式',
@@ -187,11 +187,11 @@ function (_GraphsBase) {
                 },
                 strokeAlpha: {
                   detail: '选中态单个区块描边颜色',
-                  "default": null
+                  "default": 1
                 },
                 lineWidth: {
                   detail: '选中态单个区块描边线宽',
-                  "default": null
+                  "default": 1
                 },
                 lineType: {
                   detail: '选中态区块描边样式',
@@ -336,46 +336,41 @@ function (_GraphsBase) {
 
       var elements = [];
       var geoGraphs = (0, _trans["default"])(geoData, graphBBox, this.specialArea);
-      geoGraphs.forEach(function (geoGraph) {
+      geoGraphs.forEach(function (nodeData) {
         var rowData = _this3.dataFrame.getRowDataOf({
-          adcode: geoGraph.adcode
+          adcode: nodeData.adcode
         });
 
         if (rowData.length) {
-          geoGraph.rowData = rowData[0];
+          nodeData.rowData = rowData[0];
         }
 
-        ;
+        ; // let fillStyle   = this._getProp(this.node, "fillStyle"  , nodeData);
+        // let fillAlpha   = this._getProp(this.node, "fillAlpha"  , nodeData);
+        // let strokeStyle = this._getProp(this.node, "strokeStyle", nodeData);
+        // let strokeAlpha = this._getProp(this.node, "strokeAlpha", nodeData);
+        // let lineWidth   = this._getProp(this.node, "lineWidth"  , nodeData);
+        // let lineType    = this._getProp(this.node, "lineType"   , nodeData);
 
-        var fillStyle = _this3._getProp(_this3.node, "fillStyle", geoGraph);
-
-        var fillAlpha = _this3._getProp(_this3.node, "fillAlpha", geoGraph);
-
-        var strokeStyle = _this3._getProp(_this3.node, "strokeStyle", geoGraph);
-
-        var strokeAlpha = _this3._getProp(_this3.node, "strokeAlpha", geoGraph);
-
-        geoGraph.color = fillStyle;
         var pathCtx = {
           x: graphBBox.x + (graphBBox.width - geoData.transform.width) / 2,
           y: graphBBox.y + (graphBBox.height - geoData.transform.height) / 2,
-          path: geoGraph.path,
-          lineWidth: _this3.node.lineWidth,
-          fillStyle: fillStyle,
-          fillAlpha: fillAlpha,
-          strokeStyle: strokeStyle,
-          strokeAlpha: strokeAlpha,
-          lineType: _this3.node.lineType
+          path: nodeData.path
         };
         var nodePath = new Path({
-          id: 'path_' + geoGraph.adcode,
+          id: 'path_' + nodeData.adcode,
+          hoverClone: false,
           context: pathCtx
         });
-        nodePath.nodeData = geoGraph;
+        nodePath.nodeData = nodeData;
         nodePath.geoData = geoData;
-        geoGraph.nodeElement = nodePath;
+        nodeData.nodeElement = nodePath;
 
-        _this3.node.drawBegin.bind(_this3)(geoGraph);
+        _this3._setNodeStyle(nodePath);
+
+        nodeData.color = nodePath.context.fillStyle;
+
+        _this3.node.drawBegin.bind(_this3)(nodeData);
 
         _this3._pathsp.addChild(nodePath); // if( geoGraph.name == "浙江省" ){
         //     //test    
@@ -393,14 +388,14 @@ function (_GraphsBase) {
         // }
 
 
-        _this3.node.drawEnd.bind(_this3)(geoGraph); //drawEnd中可能把这个node销毁了
+        _this3.node.drawEnd.bind(_this3)(nodeData); //drawEnd中可能把这个node销毁了
 
 
         nodePath.context && elements.push(nodePath);
         var me = _this3; //有些区块在外面会告诉你( drawBegin or drawEnd ) 会在geoGraph中标注上告诉你不用监听事件
         //因为有些时候某些比较小的区块，比如深圳 上海，等，周边的区块没数据的时候，如果也检测事件，那么这些小区块会难以选中
 
-        if (fillStyle && _this3.node.fillAlpha && !geoGraph.pointerEventsNone && nodePath.context) {
+        if (nodePath.context && nodePath.context.fillStyle && _this3.node.fillAlpha && !nodeData.pointerEventsNone && nodePath.context) {
           nodePath.context.cursor = 'pointer';
           nodePath.on(event.types.get(), function (e) {
             e.eventInfo = {
@@ -416,7 +411,7 @@ function (_GraphsBase) {
             ;
 
             if (e.type == 'mouseout') {
-              !this.nodeData.selected && me.unfocusAt(this.nodeData.adcode);
+              me.unfocusAt(this.nodeData.adcode);
             }
 
             ;
@@ -429,49 +424,114 @@ function (_GraphsBase) {
       return elements;
     }
   }, {
-    key: "focusAt",
-    value: function focusAt(adcode) {
-      var _path = this._pathsp.getChildById('path_' + adcode);
-
-      var geoGraph = _path.nodeData;
+    key: "_setNodeStyle",
+    value: function _setNodeStyle(_path, type) {
+      var nodeData = _path.nodeData;
 
       if (_path) {
         var _path$context = _path.context,
             fillStyle = _path$context.fillStyle,
             fillAlpha = _path$context.fillAlpha,
             strokeStyle = _path$context.strokeStyle,
-            strokeAlpha = _path$context.strokeAlpha;
+            strokeAlpha = _path$context.strokeAlpha,
+            lineWidth = _path$context.lineWidth,
+            lineType = _path$context.lineType;
         _path._default = {
           fillStyle: fillStyle,
           fillAlpha: fillAlpha,
           strokeStyle: strokeStyle,
-          strokeAlpha: strokeAlpha
+          strokeAlpha: strokeAlpha,
+          lineWidth: lineWidth,
+          lineType: lineType
         };
-        var focusFillStyle = this._getProp(this.node.focus, "fillStyle", geoGraph) || fillStyle;
-        var focusFillAlpha = this._getProp(this.node.focus, "fillAlpha", geoGraph) || fillAlpha;
-        var focusStrokeStyle = this._getProp(this.node.focus, "strokeStyle", geoGraph) || strokeStyle;
-        var focusStrokeAlpha = this._getProp(this.node.focus, "strokeAlpha", geoGraph) || strokeAlpha;
-        _path.context.fillStyle = focusFillStyle;
-        _path.context.fillAlpha = focusFillAlpha;
-        _path.context.strokeStyle = focusStrokeStyle;
-        _path.context.strokeAlpha = focusStrokeAlpha;
+        var _propPath = this.node[type];
+
+        if (!type) {
+          _propPath = this.node;
+        }
+
+        var _fillStyle = this._getProp(_propPath, "fillStyle", nodeData) || fillStyle;
+
+        var _fillAlpha = this._getProp(_propPath, "fillAlpha", nodeData) || fillAlpha;
+
+        var _strokeStyle = this._getProp(_propPath, "strokeStyle", nodeData) || strokeStyle;
+
+        var _strokeAlpha = this._getProp(_propPath, "strokeAlpha", nodeData) || strokeAlpha;
+
+        var _lineWidth = this._getProp(_propPath, "lineWidth", nodeData) || lineWidth;
+
+        var _lineType = this._getProp(_propPath, "lineType", nodeData) || lineType;
+
+        _path.context.fillStyle = _fillStyle;
+        _path.context.fillAlpha = _fillAlpha;
+        _path.context.strokeStyle = _strokeStyle;
+        _path.context.strokeAlpha = _strokeAlpha;
+        _path.context.lineWidth = _lineWidth;
+        _path.context.lineType = _lineType;
+      }
+    }
+  }, {
+    key: "focusAt",
+    value: function focusAt(adcode) {
+      if (!this.node.focus.enabled) return;
+
+      var _path = this._pathsp.getChildById('path_' + adcode);
+
+      var nodeData = _path.nodeData;
+
+      if (!nodeData.selected) {
+        //已经选中的不能换成focus状态，_selected权重最高
+        this._setNodeStyle(_path, 'focus');
+
+        nodeData.focused = true;
       }
     }
   }, {
     key: "unfocusAt",
     value: function unfocusAt(adcode) {
+      if (!this.node.focus.enabled) return;
+
       var _path = this._pathsp.getChildById('path_' + adcode);
 
-      if (_path) {
-        var _path$_default = _path._default,
-            fillStyle = _path$_default.fillStyle,
-            fillAlpha = _path$_default.fillAlpha,
-            strokeStyle = _path$_default.strokeStyle,
-            strokeAlpha = _path$_default.strokeAlpha;
-        _path.context.fillStyle = fillStyle;
-        _path.context.fillAlpha = fillAlpha;
-        _path.context.strokeStyle = strokeStyle;
-        _path.context.strokeAlpha = strokeAlpha;
+      var nodeData = _path.nodeData;
+
+      if (!nodeData.selected) {
+        //已经选中的不能换成focus状态，_selected权重最高
+        this._setNodeStyle(_path);
+
+        nodeData.focused = false;
+      }
+    }
+  }, {
+    key: "selectAt",
+    value: function selectAt(adcode) {
+      if (!this.node.select.enabled) return;
+
+      var _path = this._pathsp.getChildById('path_' + adcode);
+
+      var nodeData = _path.nodeData;
+
+      this._setNodeStyle(_path, 'select');
+
+      nodeData.selected = true;
+      console.log("select:true");
+    }
+  }, {
+    key: "unselectAt",
+    value: function unselectAt(adcode) {
+      if (!this.node.select.enabled) return;
+
+      var _path = this._pathsp.getChildById('path_' + adcode);
+
+      var geoGraph = _path.nodeData;
+
+      this._setNodeStyle(_path);
+
+      geoGraph.selected = false;
+      console.log("select:false");
+
+      if (geoGraph.focused) {
+        this.focusAt(adcode);
       }
     }
   }, {

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1"
+    />
+    <title>xChart demo -- bar</title>
+
+    <script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
+    <script type="text/javascript" src="../../dist/index.iife.js"></script>
+    <!-- codemirror -->
+    <script type="text/javascript" src="../../lib/codemirror/codemirror.js"></script>
+    <script type="text/javascript" src="../../lib/codemirror/active-line.js"></script>
+    <script type="text/javascript" src="../../lib/codemirror/javascript.js"></script>
+    <script type="text/javascript" src="../../lib/codemirror/matchbrackets.js"></script>
+    <link rel="stylesheet" href="../../lib/codemirror/codemirror.css">
+    <link rel="stylesheet" href="../../lib/codemirror/zenburn.css">
+    <link rel="stylesheet" href="../../lib/codemirror/docs.css">
+    <!-- codemirror end -->
+    <!--bootstrap-->
+    <script type="text/javascript" src="../../lib/bootstrap/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="../../lib/bootstrap/css/docs.min.css">
+    <link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap.min.css">
+    <!--bootstrap end-->
+    <script type="text/javascript" src="../../lib/demo.js"></script>
+    <link rel="stylesheet" href="../../lib/demo.css">
+</head>
+
+<body>
+
+    <table>
+        <tr>
+            <td id="td-vl">
+                <form>
+                    <textarea id="code" name="code">
+                var data =  [{"101_消耗_lastWeek_gap": -0.003082777269244552,"101_消耗_yesterday_gap": -0.055184402082908535,"3_消耗_lastWeek_gap": 0.02887026197785958,"102_消耗_lastWeek_gap": 0.025147762134004825,"2_消耗_yesterday_gap": 0.0050572909198223215,"1_消耗_lastWeek_gap": 0.11768569745384116,"102_消耗_yesterday_gap": -0.061627542949844405,"_compareType": "dmp","1_消耗": 16012154.101840012,"2_消耗": 2745331.55081,"3_消耗_yesterday_gap": -0.07042785794487583,"101_消耗": 119656300.51927991,"2_消耗_lastWeek_gap": 0.1764100157062387,"102_消耗": 237116006.0915698,"3_消耗": 118811558.02970003,"1_消耗_yesterday_gap": -0.030554880495070602},{"_compareType": "dmp_周同比","1_消耗": 14326168.92058001,"2_消耗": 2333651.97011,"101_消耗": 120026314.91460986,"102_消耗": 231299345.1773,"3_消耗": 115477686.95472},{"_compareType": "dmp_日环比","1_消耗": 16516823.675400011,"2_消耗": 2731517.472300001,"101_消耗": 126645136.66272037,"102_消耗": 252688582.56663013,"3_消耗": 127813165.49249002}]
+                
+                var options = {"coord":{"type":"rect","xAxis":{"field":"_comareType"}},"graphs":[{"label":{"enabled":true,"position":"center","fontColor":"#000"},"type":"bar","field":[["2_消耗","3_消耗","1_消耗"]],"select":{"enabled":true,"fillStyle":"red"},"node":{"width":40}}],"tips":{}}
+
+                debugger
+                window.bar = chartx.create("canvasTest" , data , options)
+            
+
+            </textarea>
+                </form>
+            </td>
+            <td style="padding:0 10px;" id="td-vr">
+                <div id="chartdemo-r">
+                    <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
+                        <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
+
+                        <h4>柱状图（bar chart）</h4>
+                        <p>
+                            联系人：@释剑
+                        </p>
+                    </div>
+                    <div class="test-c">
+                        <div id="canvasTest" style='background:#fafafa;width:600px;height:400px;position:relative;'></div>
+                    </div>
+
+                </div>
+            </td>
+        </tr>
+    </table>
+
+
+</body>
+
+</html>
