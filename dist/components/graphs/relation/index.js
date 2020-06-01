@@ -33,7 +33,7 @@ var _tools = require("../../../utils/tools");
 
 var _data = require("./data");
 
-var _zoom = _interopRequireDefault(require("./zoom"));
+var _zoom = _interopRequireDefault(require("../../../utils/zoom"));
 
 var _index2 = _interopRequireDefault(require("../../../layout/dagre/index"));
 

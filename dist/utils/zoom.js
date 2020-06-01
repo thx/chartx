@@ -11,13 +11,16 @@ exports["default"] = _default;
  * @version 1.0
  */
 function _default() {
+  var opt = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
   var mouse = {
     x: 0,
     y: 0,
     rx: 0,
     ry: 0
   };
-  var scale = 1;
+  var scale = opt.scale || 1;
+  var scaleMin = opt.scaleMin || 1;
+  var scaleMax = opt.scaleMax || 8;
   var wx = 0;
   var wy = 0;
   var sx = 0;
@@ -72,9 +75,9 @@ function _default() {
     sy = mouse.y; //判断上下滚动来设置scale的逻辑
 
     if (e.deltaY < 0) {
-      scale = Math.min(5, scale * 1.1); //zoom in
+      scale = Math.min(scaleMax, scale * 1.1); //zoom in
     } else {
-      scale = Math.max(0.1, scale * (1 / 1.1)); // zoom out is inverse of zoom in
+      scale = Math.max(scaleMin, scale * (1 / 1.1)); // zoom out is inverse of zoom in
     }
 
     ;

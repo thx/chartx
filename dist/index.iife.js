@@ -7842,6 +7842,7 @@ var chartx = (function () {
 	      var codeWithoutVariables = code.slice(0, range[0]) + code.slice(range[1]);
 	      return this._eval(codeWithoutVariables, 'options', 'variables', variables);
 	    } catch (e) {
+	      console.log('parse error');
 	      return {};
 	    }
 	  }
@@ -16194,16 +16195,72 @@ var chartx = (function () {
 
 	unwrapExports(bar);
 
+	function _arrayWithHoles(arr) {
+	  if (Array.isArray(arr)) return arr;
+	}
+
+	var arrayWithHoles = _arrayWithHoles;
+
+	function _iterableToArrayLimit(arr, i) {
+	  if (!(Symbol.iterator in Object(arr) || Object.prototype.toString.call(arr) === "[object Arguments]")) {
+	    return;
+	  }
+
+	  var _arr = [];
+	  var _n = true;
+	  var _d = false;
+	  var _e = undefined;
+
+	  try {
+	    for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
+	      _arr.push(_s.value);
+
+	      if (i && _arr.length === i) break;
+	    }
+	  } catch (err) {
+	    _d = true;
+	    _e = err;
+	  } finally {
+	    try {
+	      if (!_n && _i["return"] != null) _i["return"]();
+	    } finally {
+	      if (_d) throw _e;
+	    }
+	  }
+
+	  return _arr;
+	}
+
+	var iterableToArrayLimit = _iterableToArrayLimit;
+
+	function _nonIterableRest() {
+	  throw new TypeError("Invalid attempt to destructure non-iterable instance");
+	}
+
+	var nonIterableRest = _nonIterableRest;
+
+	function _slicedToArray(arr, i) {
+	  return arrayWithHoles(arr) || iterableToArrayLimit(arr, i) || nonIterableRest();
+	}
+
+	var slicedToArray = _slicedToArray;
+
 	var color = createCommonjsModule(function (module, exports) {
+
+
 
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
 	exports.colorRgb = colorRgb;
 	exports.colorRgba = colorRgba;
-	exports.hexTorgb = hexTorgb;
-	exports.hexTostring = hexTostring;
-	exports.rgbTohex = rgbTohex;
+	exports.hex2rgb = hex2rgb;
+	exports.hex2string = hex2string;
+	exports.rgb2hex = rgb2hex;
+	exports.rgba2rgb = rgba2rgb;
+
+	var _slicedToArray2 = interopRequireDefault(slicedToArray);
+
 	//十六进制颜色值的正则表达式 
 	var reg = /^#([0-9a-fA-f]{3}|[0-9a-fA-f]{6})$/;
 	/*16进制颜色转为RGB格式*/
@@ -16239,7 +16296,7 @@ var chartx = (function () {
 	  return colorRgb(hex).replace(')', ',' + a + ')').replace('RGB', 'RGBA');
 	}
 
-	function hexTorgb(hex, out) {
+	function hex2rgb(hex, out) {
 	  //hex可能是“#ff0000” 也可能是 0xff0000
 	  if (hex.replace) {
 	    hex = parseInt(hex.replace("#", "0X"), 16);
@@ -16251,23 +16308,43 @@ var chartx = (function () {
 	  return out;
 	}
 
-	function hexTostring(hex) {
+	function hex2string(hex) {
 	  hex = hex.toString(16);
 	  hex = '000000'.substr(0, 6 - hex.length) + hex;
 	  return "#".concat(hex);
 	}
 
-	function rgbTohex(rgb) {
+	function rgb2hex(rgb) {
 	  return (rgb[0] * 255 << 16) + (rgb[1] * 255 << 8) + rgb[2] * 255;
+	}
+
+	function rgba2rgb(RGBA_color) {
+	  var background_color = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : "#ffffff";
+
+	  var _RGBA_color$match = RGBA_color.match(/[\d\.]+/g),
+	      _RGBA_color$match2 = (0, _slicedToArray2["default"])(_RGBA_color$match, 4),
+	      r = _RGBA_color$match2[0],
+	      g = _RGBA_color$match2[1],
+	      b = _RGBA_color$match2[2],
+	      a = _RGBA_color$match2[3];
+
+	  var _colorRgb$match = colorRgb(background_color).match(/[\d\.]+/g),
+	      _colorRgb$match2 = (0, _slicedToArray2["default"])(_colorRgb$match, 3),
+	      br = _colorRgb$match2[0],
+	      bg = _colorRgb$match2[1],
+	      bb = _colorRgb$match2[2];
+
+	  return "RGB(" + [(1 - a) * br + a * r, (1 - a) * bg + a * g, (1 - a) * bb + a * b].join(',') + ")";
 	}
 	});
 
 	unwrapExports(color);
 	var color_1 = color.colorRgb;
 	var color_2 = color.colorRgba;
-	var color_3 = color.hexTorgb;
-	var color_4 = color.hexTostring;
-	var color_5 = color.rgbTohex;
+	var color_3 = color.hex2rgb;
+	var color_4 = color.hex2string;
+	var color_5 = color.rgb2hex;
+	var color_6 = color.rgba2rgb;
 
 	var group = createCommonjsModule(function (module, exports) {
 
@@ -25517,6 +25594,7 @@ var chartx = (function () {
 	      yRange = bounds.yRange;
 
 	  if (xRange.max == xRange.min || yRange.max == yRange.min) {
+	    console.log("not scaling solution: zero size detected");
 	    return solution;
 	  }
 
@@ -26150,7 +26228,9 @@ var chartx = (function () {
 	    var centre = computeTextCentre(interior, exterior);
 	    ret[area] = centre;
 
-	    if (centre.disjoint && areas[i].size > 0) ;
+	    if (centre.disjoint && areas[i].size > 0) {
+	      console.log("WARNING: area " + area + " not represented on screen");
+	    }
 	  }
 
 	  return ret;
@@ -28557,6 +28637,7 @@ var chartx = (function () {
 	  var label = options.node && options.node.content && options.node.content.field;
 
 	  if (!checkDataIsJson(data, key, childrenKey)) {
+	    console.error('该数据不能正确绘制，请提供数组对象形式的数据！');
 	    return result;
 	  }
 	  var childrens = [];
@@ -28702,13 +28783,16 @@ var chartx = (function () {
 	 * @version 1.0
 	 */
 	function _default() {
+	  var opt = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 	  var mouse = {
 	    x: 0,
 	    y: 0,
 	    rx: 0,
 	    ry: 0
 	  };
-	  var scale = 1;
+	  var scale = opt.scale || 1;
+	  var scaleMin = opt.scaleMin || 1;
+	  var scaleMax = opt.scaleMax || 8;
 	  var wx = 0;
 	  var wy = 0;
 	  var sx = 0;
@@ -28763,9 +28847,9 @@ var chartx = (function () {
 	    sy = mouse.y; //判断上下滚动来设置scale的逻辑
 
 	    if (e.deltaY < 0) {
-	      scale = Math.min(5, scale * 1.1); //zoom in
+	      scale = Math.min(scaleMax, scale * 1.1); //zoom in
 	    } else {
-	      scale = Math.max(0.1, scale * (1 / 1.1)); // zoom out is inverse of zoom in
+	      scale = Math.max(scaleMin, scale * (1 / 1.1)); // zoom out is inverse of zoom in
 	    }
 	    return {
 	      scale: scale,
@@ -32319,6 +32403,7 @@ var chartx = (function () {
 	        try {
 	          return fn();
 	        } finally {
+	          console.log(name + " time: " + (_.now() - start) + "ms");
 	        }
 	      }
 
@@ -45416,6 +45501,8 @@ var chartx = (function () {
 
 
 
+	var _zoom = interopRequireDefault(zoom);
+
 	var _ = _canvax["default"]._,
 	    event = _canvax["default"].event;
 	var Text = _canvax["default"].Display.Text;
@@ -45617,6 +45704,44 @@ var chartx = (function () {
 	              documentation: 'align为center的时候的颜色，align为其他属性时候取node的颜色'
 	            }
 	          }
+	        },
+	        status: {
+	          detail: '一些开关配置',
+	          propertys: {
+	            transform: {
+	              detail: "是否启动拖拽缩放整个画布",
+	              propertys: {
+	                fitView: {
+	                  detail: "自动缩放",
+	                  "default": '' //autoZoom
+
+	                },
+	                enabled: {
+	                  detail: "是否开启",
+	                  "default": true
+	                },
+	                scale: {
+	                  detail: "缩放值",
+	                  "default": 1
+	                },
+	                scaleMin: {
+	                  detail: "缩放最小值",
+	                  "default": 1
+	                },
+	                scaleMax: {
+	                  detail: "缩放最大值",
+	                  "default": 10
+	                },
+	                scaleOrigin: {
+	                  detail: "缩放原点",
+	                  "default": {
+	                    x: 0,
+	                    y: 0
+	                  }
+	                }
+	              }
+	            }
+	          }
 	        }
 	      };
 	    }
@@ -45656,12 +45781,86 @@ var chartx = (function () {
 	      this._marksp = new _canvax["default"].Display.Sprite({
 	        id: "markSp"
 	      });
+	      this.mapGraphs = new _canvax["default"].Display.Sprite({
+	        id: "mapGraphs"
+	      });
 
 	      this._initInduce();
 
-	      this.sprite.addChild(this._pathsp);
-	      this.sprite.addChild(this._textsp);
-	      this.sprite.addChild(this._marksp);
+	      this.mapGraphs.addChild(this._pathsp);
+	      this.mapGraphs.addChild(this._textsp);
+	      this.mapGraphs.addChild(this._marksp);
+	      this.sprite.addChild(this.mapGraphs);
+
+	      this._initZoom();
+	    }
+	  }, {
+	    key: "_initZoom",
+	    value: function _initZoom() {
+	      this.zoom = new _zoom["default"]({
+	        scale: this.status.transform.scale,
+	        scaleMin: this.status.transform.statusMin,
+	        scaleMax: this.status.transform.statusMax
+	      });
+	      var me = this;
+	      var _mosedownIng = false;
+	      var _preCursor = me.app.canvax.domView.style.cursor; //滚轮缩放相关
+
+	      var _wheelHandleTimeLen = 32; //16 * 2
+
+	      var _wheelHandleTimeer = null;
+	      var _deltaY = 0;
+	      this.sprite.on(event.types.get(), function (e) {
+	        if (me.status.transform.enabled) {
+	          e.preventDefault();
+	          var point = e.target.localToGlobal(e.point, me.sprite);
+
+	          if (e.type == "mousedown") {
+	            _mosedownIng = true;
+	            me.app.canvax.domView.style.cursor = "move";
+	            me.zoom.mouseMoveTo(point);
+	          }
+
+	          if (e.type == "mouseup" || e.type == "mouseout") {
+	            _mosedownIng = false;
+	            me.app.canvax.domView.style.cursor = _preCursor;
+	          }
+
+	          if (e.type == "mousemove") {
+	            if (_mosedownIng) {
+	              var _me$zoom$move = me.zoom.move(point),
+	                  x = _me$zoom$move.x,
+	                  y = _me$zoom$move.y;
+
+	              me.mapGraphs.context.x = x;
+	              me.mapGraphs.context.y = y;
+	            }
+	          }
+
+	          if (e.type == "wheel") {
+	            if (Math.abs(e.deltaY) > Math.abs(_deltaY)) {
+	              _deltaY = e.deltaY;
+	            }
+
+	            if (!_wheelHandleTimeer) {
+	              _wheelHandleTimeer = setTimeout(function () {
+	                var _me$zoom$wheel = me.zoom.wheel(e, point),
+	                    scale = _me$zoom$wheel.scale,
+	                    x = _me$zoom$wheel.x,
+	                    y = _me$zoom$wheel.y;
+
+	                me.mapGraphs.context.x = x;
+	                me.mapGraphs.context.y = y;
+	                me.mapGraphs.context.scaleX = scale;
+	                me.mapGraphs.context.scaleY = scale;
+	                me.status.transform.scale = scale;
+	                _wheelHandleTimeer = null;
+	                _deltaY = 0;
+	              }, _wheelHandleTimeLen);
+	            }
+	          }
+	        }
+	      });
 	    }
 	  }, {
 	    key: "_initInduce",
@@ -45891,6 +46090,7 @@ var chartx = (function () {
 	      this._setNodeStyle(_path, 'select');
 
 	      nodeData.selected = true;
+	      console.log("select:true");
 	    }
 	  }, {
 	    key: "unselectAt",
@@ -45904,6 +46104,7 @@ var chartx = (function () {
 	      this._setNodeStyle(_path);
 
 	      geoGraph.selected = false;
+	      console.log("select:false");
 
 	      if (geoGraph.focused) {
 	        this.focusAt(adcode);
@@ -45995,6 +46196,7 @@ var chartx = (function () {
 	            if (!isNaN(val) && val != '') {
 	              var alpha = (val - this.minValue) / (this.maxValue - this.minValue) * (this.node.fillAlpha - this.node.minFillAlpha) + this.node.minFillAlpha;
 	              value = (0, color.colorRgba)(this.node.maxFillStyle, parseFloat(alpha.toFixed(2)));
+	              value = (0, color.rgba2rgb)(value);
 	            }
 	          }
 	        }
@@ -48247,7 +48449,7 @@ var chartx = (function () {
 
 	      var y = this._checkY(e.clientY + this.offsetY);
 
-	      this._tipDom.style.cssText += ";visibility:visible;left:" + x + "px;top:" + y + "px;-webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;";
+	      this._tipDom.style.cssText += ";visibility:visible;left:" + x + "px;top:" + y + "px;";
 
 	      if (this.positionOfPoint == "left") {
 	        this._tipDom.style.left = this._checkX(e.x - this.offsetX - this._tipDom.offsetWidth) + "px";
@@ -48265,7 +48467,8 @@ var chartx = (function () {
 	      this._tipDom.style.cssText += "; border-radius:" + this.borderRadius + "px;background:" + this.fillStyle + ";border:1px solid " + this.strokeStyle + ";visibility:hidden;position:fixed;enabled:inline-block;*enabled:inline;*zoom:1;padding:6px;color:" + this.fontColor + ";line-height:1.5";
 	      this._tipDom.style.cssText += "; box-shadow:1px 1px 3px " + this.strokeStyle + ";";
 	      this._tipDom.style.cssText += "; border:none;white-space:nowrap;word-wrap:normal;";
-	      this._tipDom.style.cssText += "; text-align:left;";
+	      this._tipDom.style.cssText += "; text-align:left;pointer-events:none;";
+	      this._tipDom.style.cssText += "; -webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;";
 	      this.tipDomContainer.appendChild(this._tipDom);
 	    }
 	  }, {
@@ -50123,7 +50326,7 @@ var chartx = (function () {
 	}
 
 	var chartx = {
-	  version: '1.1.10',
+	  version: '1.1.13',
 	  options: {}
 	};
 

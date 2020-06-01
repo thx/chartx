@@ -29,6 +29,8 @@ var _tools = require("../../../utils/tools");
 
 var _color = require("../../../utils/color");
 
+var _zoom = _interopRequireDefault(require("../../../utils/zoom"));
+
 var _ = _canvax["default"]._,
     event = _canvax["default"].event;
 var Text = _canvax["default"].Display.Text;
@@ -230,6 +232,44 @@ function (_GraphsBase) {
               documentation: 'align为center的时候的颜色，align为其他属性时候取node的颜色'
             }
           }
+        },
+        status: {
+          detail: '一些开关配置',
+          propertys: {
+            transform: {
+              detail: "是否启动拖拽缩放整个画布",
+              propertys: {
+                fitView: {
+                  detail: "自动缩放",
+                  "default": '' //autoZoom
+
+                },
+                enabled: {
+                  detail: "是否开启",
+                  "default": true
+                },
+                scale: {
+                  detail: "缩放值",
+                  "default": 1
+                },
+                scaleMin: {
+                  detail: "缩放最小值",
+                  "default": 1
+                },
+                scaleMax: {
+                  detail: "缩放最大值",
+                  "default": 10
+                },
+                scaleOrigin: {
+                  detail: "缩放原点",
+                  "default": {
+                    x: 0,
+                    y: 0
+                  }
+                }
+              }
+            }
+          }
         }
       };
     }
@@ -271,12 +311,100 @@ function (_GraphsBase) {
       this._marksp = new _canvax["default"].Display.Sprite({
         id: "markSp"
       });
+      this.mapGraphs = new _canvax["default"].Display.Sprite({
+        id: "mapGraphs"
+      });
 
       this._initInduce();
 
-      this.sprite.addChild(this._pathsp);
-      this.sprite.addChild(this._textsp);
-      this.sprite.addChild(this._marksp);
+      this.mapGraphs.addChild(this._pathsp);
+      this.mapGraphs.addChild(this._textsp);
+      this.mapGraphs.addChild(this._marksp);
+      this.sprite.addChild(this.mapGraphs);
+
+      this._initZoom();
+    }
+  }, {
+    key: "_initZoom",
+    value: function _initZoom() {
+      this.zoom = new _zoom["default"]({
+        scale: this.status.transform.scale,
+        scaleMin: this.status.transform.statusMin,
+        scaleMax: this.status.transform.statusMax
+      });
+      var me = this;
+      var _mosedownIng = false;
+      var _preCursor = me.app.canvax.domView.style.cursor; //滚轮缩放相关
+
+      var _wheelHandleTimeLen = 32; //16 * 2
+
+      var _wheelHandleTimeer = null;
+      var _deltaY = 0;
+      this.sprite.on(event.types.get(), function (e) {
+        if (me.status.transform.enabled) {
+          e.preventDefault();
+          var point = e.target.localToGlobal(e.point, me.sprite);
+
+          if (e.type == "mousedown") {
+            _mosedownIng = true;
+            me.app.canvax.domView.style.cursor = "move";
+            me.zoom.mouseMoveTo(point);
+          }
+
+          ;
+
+          if (e.type == "mouseup" || e.type == "mouseout") {
+            _mosedownIng = false;
+            me.app.canvax.domView.style.cursor = _preCursor;
+          }
+
+          ;
+
+          if (e.type == "mousemove") {
+            if (_mosedownIng) {
+              var _me$zoom$move = me.zoom.move(point),
+                  x = _me$zoom$move.x,
+                  y = _me$zoom$move.y;
+
+              me.mapGraphs.context.x = x;
+              me.mapGraphs.context.y = y;
+            }
+          }
+
+          ;
+
+          if (e.type == "wheel") {
+            if (Math.abs(e.deltaY) > Math.abs(_deltaY)) {
+              _deltaY = e.deltaY;
+            }
+
+            ;
+
+            if (!_wheelHandleTimeer) {
+              _wheelHandleTimeer = setTimeout(function () {
+                var _me$zoom$wheel = me.zoom.wheel(e, point),
+                    scale = _me$zoom$wheel.scale,
+                    x = _me$zoom$wheel.x,
+                    y = _me$zoom$wheel.y;
+
+                me.mapGraphs.context.x = x;
+                me.mapGraphs.context.y = y;
+                me.mapGraphs.context.scaleX = scale;
+                me.mapGraphs.context.scaleY = scale;
+                me.status.transform.scale = scale;
+                _wheelHandleTimeer = null;
+                _deltaY = 0;
+              }, _wheelHandleTimeLen);
+            }
+
+            ;
+          }
+
+          ;
+        }
+
+        ;
+      });
     }
   }, {
     key: "_initInduce",
@@ -620,6 +748,7 @@ function (_GraphsBase) {
             if (!isNaN(val) && val != '') {
               var alpha = (val - this.minValue) / (this.maxValue - this.minValue) * (this.node.fillAlpha - this.node.minFillAlpha) + this.node.minFillAlpha;
               value = (0, _color.colorRgba)(this.node.maxFillStyle, parseFloat(alpha.toFixed(2)));
+              value = (0, _color.rgba2rgb)(value);
             }
           }
         }

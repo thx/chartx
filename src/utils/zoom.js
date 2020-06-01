@@ -4,18 +4,20 @@
  * @version 1.0
  */
 
-export default function(){
+export default function( opt = {} ){
 
     let mouse = {
         x: 0, y: 0,
         rx: 0, ry: 0
     };
   
-    let scale = 1;
-    let wx    = 0;
-    let wy    = 0;
-    let sx    = 0;
-    let sy    = 0;
+    let scale    = opt.scale    || 1;
+    let scaleMin = opt.scaleMin || 1;
+    let scaleMax = opt.scaleMax || 8;
+    let wx       = 0;
+    let wy       = 0;
+    let sx       = 0;
+    let sy       = 0;
 
     let zoomedX = (x=0) => { 
         return Math.floor((x - wx) * scale + sx);
@@ -60,9 +62,9 @@ export default function(){
 
         //判断上下滚动来设置scale的逻辑
         if (e.deltaY < 0) {
-            scale = Math.min(5, scale * 1.1); //zoom in
+            scale = Math.min( scaleMax , scale * 1.1); //zoom in
         } else {
-            scale = Math.max(0.1, scale * (1 / 1.1)); // zoom out is inverse of zoom in
+            scale = Math.max( scaleMin , scale * (1 / 1.1)); // zoom out is inverse of zoom in
         };
 
         return {

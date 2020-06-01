@@ -180,7 +180,7 @@ class Tips extends Component {
         let x = this._checkX( e.clientX + this.offsetX);
         let y = this._checkY( e.clientY + this.offsetY);
 
-        this._tipDom.style.cssText += ";visibility:visible;left:" + x + "px;top:" + y + "px;-webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;";
+        this._tipDom.style.cssText += ";visibility:visible;left:" + x + "px;top:" + y + "px;";
 
         if (this.positionOfPoint == "left") {
             this._tipDom.style.left = this._checkX( e.x - this.offsetX - this._tipDom.offsetWidth ) + "px";
@@ -196,7 +196,8 @@ class Tips extends Component {
         this._tipDom.style.cssText += "; border-radius:" + this.borderRadius + "px;background:" + this.fillStyle + ";border:1px solid " + this.strokeStyle + ";visibility:hidden;position:fixed;enabled:inline-block;*enabled:inline;*zoom:1;padding:6px;color:" + this.fontColor + ";line-height:1.5"
         this._tipDom.style.cssText += "; box-shadow:1px 1px 3px " + this.strokeStyle + ";"
         this._tipDom.style.cssText += "; border:none;white-space:nowrap;word-wrap:normal;"
-        this._tipDom.style.cssText += "; text-align:left;"
+        this._tipDom.style.cssText += "; text-align:left;pointer-events:none;"
+        this._tipDom.style.cssText += "; -webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;"
         this.tipDomContainer.appendChild(this._tipDom);
     }
 

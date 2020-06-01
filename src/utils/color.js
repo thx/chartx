@@ -27,7 +27,7 @@ export function colorRgba(hex , a){
     return colorRgb( hex ).replace(')', ','+a+')').replace('RGB', 'RGBA');
 };
 
-export function hexTorgb(hex, out){
+export function hex2rgb(hex, out){
 	//hex可能是“#ff0000” 也可能是 0xff0000
 	if( hex.replace ){
         hex = parseInt( hex.replace("#" , "0X") , 16 );
@@ -42,13 +42,25 @@ export function hexTorgb(hex, out){
     return out;
 }
 
-export function hexTostring(hex){
+export function hex2string(hex){
      hex = hex.toString(16);
      hex = '000000'.substr(0, 6 - hex.length) + hex;
 
      return `#${hex}`;
 }
 
-export function rgbTohex(rgb){
+export function rgb2hex(rgb){
 	return (((rgb[0] * 255) << 16) + ((rgb[1] * 255) << 8) + (rgb[2] * 255));
+}
+
+export function rgba2rgb( RGBA_color , background_color = "#ffffff" ){
+    let [r,g,b,a] = RGBA_color.match(/[\d\.]+/g);
+
+    let [br,bg,bb] = colorRgb( background_color ).match(/[\d\.]+/g);
+
+    return "RGB(" + [
+        (1 - a) * br + a * r,
+        (1 - a) * bg + a * g,
+        (1 - a) * bb + a * b
+    ].join(',') + ")";
 }
