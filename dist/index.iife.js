@@ -7842,7 +7842,6 @@ var chartx = (function () {
 	      var codeWithoutVariables = code.slice(0, range[0]) + code.slice(range[1]);
 	      return this._eval(codeWithoutVariables, 'options', 'variables', variables);
 	    } catch (e) {
-	      console.log('parse error');
 	      return {};
 	    }
 	  }
@@ -9072,7 +9071,9 @@ var chartx = (function () {
 
 	      this.canvax.domView.innerHTML = ""; //清空事件的当前状态
 
-	      this.canvax.event.curPointsTarget = [];
+	      if (this.canvax.event) {
+	        this.canvax.event.curPointsTarget = [];
+	      }
 	    }
 	    /**
 	     * 容器的尺寸改变重新绘制
@@ -16255,9 +16256,9 @@ var chartx = (function () {
 	exports.colorRgb = colorRgb;
 	exports.colorRgba = colorRgba;
 	exports.hex2rgb = hex2rgb;
-	exports.hex2string = hex2string;
 	exports.rgb2hex = rgb2hex;
 	exports.rgba2rgb = rgba2rgb;
+	exports.gradient = gradient;
 
 	var _slicedToArray2 = interopRequireDefault(slicedToArray);
 
@@ -16297,25 +16298,21 @@ var chartx = (function () {
 	}
 
 	function hex2rgb(hex, out) {
-	  //hex可能是“#ff0000” 也可能是 0xff0000
-	  if (hex.replace) {
-	    hex = parseInt(hex.replace("#", "0X"), 16);
-	  }
-	  out = out || [];
-	  out[0] = (hex >> 16 & 0xFF) / 255;
-	  out[1] = (hex >> 8 & 0xFF) / 255;
-	  out[2] = (hex & 0xFF) / 255;
-	  return out;
-	}
+	  var rgb = [];
 
-	function hex2string(hex) {
-	  hex = hex.toString(16);
-	  hex = '000000'.substr(0, 6 - hex.length) + hex;
-	  return "#".concat(hex);
+	  for (var i = 1; i < 7; i += 2) {
+	    rgb.push(parseInt("0x" + hex.slice(i, i + 2)));
+	  }
+
+	  return rgb;
 	}
 
 	function rgb2hex(rgb) {
-	  return (rgb[0] * 255 << 16) + (rgb[1] * 255 << 8) + rgb[2] * 255;
+	  var r = rgb[0];
+	  var g = rgb[1];
+	  var b = rgb[2];
+	  var hex = (r << 16 | g << 8 | b).toString(16);
+	  return "#" + new Array(Math.abs(hex.length - 7)).join("0") + hex;
 	}
 
 	function rgba2rgb(RGBA_color) {
@@ -16335,6 +16332,26 @@ var chartx = (function () {
 	      bb = _colorRgb$match2[2];
 
 	  return "RGB(" + [(1 - a) * br + a * r, (1 - a) * bg + a * g, (1 - a) * bb + a * b].join(',') + ")";
+	} // 计算渐变过渡色
+
+
+	function gradient(startColor, endColor) {
+	  var step = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 100;
+	  // 将 hex 转换为rgb
+	  var sColor = hex2rgb(startColor);
+	  var eColor = hex2rgb(endColor); // 计算R\G\B每一步的差值
+
+	  var rStep = (eColor[0] - sColor[0]) / step;
+	  var gStep = (eColor[1] - sColor[1]) / step;
+	  var bStep = (eColor[2] - sColor[2]) / step;
+	  var gradientColorArr = [];
+
+	  for (var i = 0; i < step; i++) {
+	    // 计算每一步的hex值
+	    gradientColorArr.push(rgb2hex([parseInt(rStep * i + sColor[0]), parseInt(gStep * i + sColor[1]), parseInt(bStep * i + sColor[2])]));
+	  }
+
+	  return gradientColorArr;
 	}
 	});
 
@@ -16342,9 +16359,9 @@ var chartx = (function () {
 	var color_1 = color.colorRgb;
 	var color_2 = color.colorRgba;
 	var color_3 = color.hex2rgb;
-	var color_4 = color.hex2string;
-	var color_5 = color.rgb2hex;
-	var color_6 = color.rgba2rgb;
+	var color_4 = color.rgb2hex;
+	var color_5 = color.rgba2rgb;
+	var color_6 = color.gradient;
 
 	var group = createCommonjsModule(function (module, exports) {
 
@@ -23585,21 +23602,26 @@ var chartx = (function () {
 	          detail: '排序规则',
 	          "default": null
 	        },
-	        maxNodeWidth: {
-	          detail: '最大的元素宽',
-	          "default": null
-	        },
-	        minNodeWidth: {
-	          detail: '最小的元素宽',
-	          "default": 0
-	        },
-	        minVal: {
-	          detail: '漏斗的塔尖',
-	          "default": 0
-	        },
 	        node: {
 	          detail: '单个元素图形配置',
 	          propertys: {
+	            margin: {
+	              detail: 'node节点之间的间距',
+	              "default": 2
+	            },
+	            maxWidth: {
+	              detail: '最大的元素宽',
+	              "default": null
+	            },
+	            minWidth: {
+	              detail: '最小的元素宽',
+	              "default": null
+	            },
+	            spireWidth: {
+	              detail: '漏斗的塔尖的宽度，默认等于minWidth',
+	              documentation: '如果想要实现全三角的效果，可以设置为0',
+	              "default": null
+	            },
 	            height: {
 	              detail: '高',
 	              "default": 0,
@@ -23799,12 +23821,24 @@ var chartx = (function () {
 	      this.maxValue = _.max(this.dataOrg);
 	      this.minValue = _.min(this.dataOrg); //计算一些基础属性，比如maxNodeWidth等， 加入外面没有设置
 
-	      if (!this.maxNodeWidth) {
-	        this.maxNodeWidth = this.width * 0.7;
+	      if (this.node.maxWidth == null) {
+	        this.node.maxWidth = parseInt(this.width * 1);
+	      }
+
+	      if (this.node.minWidth == null) {
+	        if (this.maxValue == this.minValue) {
+	          this.node.minWidth = this.node.maxValue;
+	        } else {
+	          this.node.minWidth = parseInt(this.node.maxWidth * 1 / this.dataOrg.length);
+	        }
+	      }
+
+	      if (this.node.spireWidth == null) {
+	        this.node.spireWidth = this.node.minWidth;
 	      }
 
 	      if (!this.node.height) {
-	        this.node.height = this.height / this.dataOrg.length;
+	        this.node.height = parseInt(this.height / this.dataOrg.length);
 	      }
 	    }
 	  }, {
@@ -23881,8 +23915,12 @@ var chartx = (function () {
 	  }, {
 	    key: "_getNodeWidth",
 	    value: function _getNodeWidth(num) {
-	      var width = this.minNodeWidth + (this.maxNodeWidth - this.minNodeWidth) / (this.maxValue - this.minVal) * (num - this.minVal);
-	      return parseInt(width);
+	      var width = this.node.maxWidth;
+
+	      if (this.maxValue != this.minValue) {
+	        width = parseInt(this.node.minWidth + (this.node.maxWidth - this.node.minWidth) / (this.maxValue - this.minValue) * (num - this.minValue));
+	      }
+	      return width;
 	    }
 	  }, {
 	    key: "_getPoints",
@@ -23895,22 +23933,30 @@ var chartx = (function () {
 	        points.push([-layoutData.width / 2, topY]); //左上
 
 	        points.push([layoutData.width / 2, topY]); //右上
+	        //let bottomWidth = this.node.minWidth;
+	        //if( nextLayoutData ){
 
-	        var bottomWidth = this.minNodeWidth;
+	        var bottomWidth = nextLayoutData ? nextLayoutData.width : layoutData.width; //};
 
-	        if (nextLayoutData) {
-	          bottomWidth = nextLayoutData.width;
+	        if (!nextLayoutData && this.node.spireWidth != null && this.maxValue != this.minValue) {
+	          //说明最后一个节点
+	          bottomWidth = Math.min(this.node.spireWidth, bottomWidth);
 	        }
+
 	        points.push([bottomWidth / 2, bottomY]); //右下
 
 	        points.push([-bottomWidth / 2, bottomY]); //左下
 	      } else {
 	        //正金字塔结构的话，是从最上面一个 data 的 top 取min开始
-	        var topWidth = this.minNodeWidth;
+	        //let topWidth = this.node.minWidth;
+	        //if( preLayoutData ){
+	        var topWidth = preLayoutData ? preLayoutData.width : layoutData.width; //};
 
-	        if (preLayoutData) {
-	          topWidth = preLayoutData.width;
+	        if (!preLayoutData && this.node.spireWidth != null && this.maxValue != this.minValue) {
+	          //说明最后一个节点
+	          topWidth = Math.min(this.node.spireWidth, topWidth);
 	        }
+
 	        points.push([-topWidth / 2, topY]); //左上
 
 	        points.push([topWidth / 2, topY]); //右上
@@ -24093,6 +24139,11 @@ var chartx = (function () {
 
 	            if (!isNaN(val) && val != '') {
 	              var alpha = (val - this.minValue) / (this.maxValue - this.minValue) * (this.node.fillAlpha - this.node.minFillAlpha) + this.node.minFillAlpha;
+
+	              if (isNaN(alpha)) {
+	                //所有的数值都相同的时候，alpha会是NaN
+	                alpha = 1;
+	              }
 	              value = (0, color.colorRgba)(this.node.maxFillStyle, parseFloat(alpha.toFixed(2)));
 	            }
 	          }
@@ -25594,7 +25645,6 @@ var chartx = (function () {
 	      yRange = bounds.yRange;
 
 	  if (xRange.max == xRange.min || yRange.max == yRange.min) {
-	    console.log("not scaling solution: zero size detected");
 	    return solution;
 	  }
 
@@ -26228,9 +26278,7 @@ var chartx = (function () {
 	    var centre = computeTextCentre(interior, exterior);
 	    ret[area] = centre;
 
-	    if (centre.disjoint && areas[i].size > 0) {
-	      console.log("WARNING: area " + area + " not represented on screen");
-	    }
+	    if (centre.disjoint && areas[i].size > 0) ;
 	  }
 
 	  return ret;
@@ -28637,7 +28685,6 @@ var chartx = (function () {
 	  var label = options.node && options.node.content && options.node.content.field;
 
 	  if (!checkDataIsJson(data, key, childrenKey)) {
-	    console.error('该数据不能正确绘制，请提供数组对象形式的数据！');
 	    return result;
 	  }
 	  var childrens = [];
@@ -32403,7 +32450,6 @@ var chartx = (function () {
 	        try {
 	          return fn();
 	        } finally {
-	          console.log(name + " time: " + (_.now() - start) + "ms");
 	        }
 	      }
 
@@ -45573,7 +45619,7 @@ var chartx = (function () {
 	            },
 	            fillAlpha: {
 	              detail: '单个区块透明度',
-	              "default": 0.9
+	              "default": 1
 	            },
 	            maxFillStyle: {
 	              detail: '单个区块数据最大对应的颜色',
@@ -45586,6 +45632,16 @@ var chartx = (function () {
 	            minFillAlpha: {
 	              detail: '单个区块最小透明度',
 	              "default": 0.4
+	            },
+	            beginFillStyle: {
+	              detail: '区域颜色的起始色',
+	              documentation: '设置区域颜色的另外一个方案，两个颜色确定一个区间的结束色',
+	              "default": null
+	            },
+	            endFillStyle: {
+	              detail: '区域颜色的结束色',
+	              documentation: '设置区域颜色的另外一个方案，两个颜色确定一个区间的结束色',
+	              "default": null
 	            },
 	            strokeStyle: {
 	              detail: '单个区块描边颜色',
@@ -45762,6 +45818,10 @@ var chartx = (function () {
 
 	    if (!_this.node.maxFillStyle) {
 	      _this.node.maxFillStyle = _this.app.getTheme(0);
+	    }
+
+	    if (_this.node.beginFillStyle && _this.node.endFillStyle) {
+	      _this._gradientColors = (0, color.gradient)(_this.node.endFillStyle, _this.node.beginFillStyle);
 	    }
 
 	    _this.init();
@@ -46090,7 +46150,6 @@ var chartx = (function () {
 	      this._setNodeStyle(_path, 'select');
 
 	      nodeData.selected = true;
-	      console.log("select:true");
 	    }
 	  }, {
 	    key: "unselectAt",
@@ -46104,7 +46163,6 @@ var chartx = (function () {
 	      this._setNodeStyle(_path);
 
 	      geoGraph.selected = false;
-	      console.log("select:false");
 
 	      if (geoGraph.focused) {
 	        this.focusAt(adcode);
@@ -46194,9 +46252,15 @@ var chartx = (function () {
 	            var val = rowData[this.valueField];
 
 	            if (!isNaN(val) && val != '') {
-	              var alpha = (val - this.minValue) / (this.maxValue - this.minValue) * (this.node.fillAlpha - this.node.minFillAlpha) + this.node.minFillAlpha;
-	              value = (0, color.colorRgba)(this.node.maxFillStyle, parseFloat(alpha.toFixed(2)));
-	              value = (0, color.rgba2rgb)(value);
+	              //let alpha = ((val - this.minValue) / (this.maxValue - this.minValue)) * (this.node.fillAlpha - this.node.minFillAlpha) + this.node.minFillAlpha;
+	              var alpha = this.node.minFillAlpha + (this.node.fillAlpha - this.node.minFillAlpha) / (this.maxValue - this.minValue) * (val - this.minValue); //console.log( alpha );
+
+	              if (this._gradientColors) {
+	                return this._gradientColors[100 - parseInt(alpha * 100)];
+	              } else {
+	                value = (0, color.colorRgba)(this.node.maxFillStyle, parseFloat(alpha.toFixed(2)));
+	                value = (0, color.rgba2rgb)(value);
+	              }
 	            }
 	          }
 	        }
@@ -49878,7 +49942,7 @@ var chartx = (function () {
 	          "default": null
 	        },
 	        markTo: {
-	          detail: '标准哪个目标字段',
+	          detail: '标准哪个目标字段，主要用作折线图',
 	          documentation: '如果设置了这个字段，那么line的起点将是这个graphs上的node节点',
 	          "default": null
 	        },
@@ -50326,7 +50390,7 @@ var chartx = (function () {
 	}
 
 	var chartx = {
-	  version: '1.1.13',
+	  version: '1.1.16',
 	  options: {}
 	};
 

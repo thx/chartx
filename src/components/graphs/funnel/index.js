@@ -19,21 +19,29 @@ class FunnelGraphs extends GraphsBase
                 detail : '排序规则',
                 default: null
             },
-            maxNodeWidth: {
-                detail: '最大的元素宽',
-                default: null
-            },
-            minNodeWidth: {
-                detail: '最小的元素宽',
-                default: 0
-            },
-            minVal : {
-                detail: '漏斗的塔尖',
-                default: 0
-            },
+            
             node : {
                 detail: '单个元素图形配置',
                 propertys : {
+                    margin: {
+                        detail: 'node节点之间的间距',
+                        default: 2
+                    },
+                    maxWidth: {
+                        detail: '最大的元素宽',
+                        default: null
+                    },
+                    minWidth: {
+                        detail: '最小的元素宽',
+                        default: null
+                    },
+
+                    spireWidth : {
+                        detail: '漏斗的塔尖的宽度，默认等于minWidth',
+                        documentation: '如果想要实现全三角的效果，可以设置为0',
+                        default: null
+                    },
+
                     height: {
                         detail: '高',
                         default: 0,
@@ -232,12 +240,22 @@ class FunnelGraphs extends GraphsBase
         this.minValue = _.min( this.dataOrg );
         
         //计算一些基础属性，比如maxNodeWidth等， 加入外面没有设置
-        if( !this.maxNodeWidth ){
-            this.maxNodeWidth = this.width * 0.7;
+        if( this.node.maxWidth == null ){
+            this.node.maxWidth = parseInt( this.width * 1 );
+        };
+        if( this.node.minWidth == null ){
+            if( this.maxValue == this.minValue ){
+                this.node.minWidth = this.node.maxValue;
+            } else {
+                this.node.minWidth = parseInt( this.node.maxWidth * 1/this.dataOrg.length );
+            }  
+        };
+        if( this.node.spireWidth == null ){
+            this.node.spireWidth = this.node.minWidth;
         };
 
         if( !this.node.height ){
-            this.node.height = this.height / this.dataOrg.length;
+            this.node.height = parseInt( this.height / this.dataOrg.length );
         };
 
     }
@@ -323,8 +341,11 @@ class FunnelGraphs extends GraphsBase
 
     _getNodeWidth( num )
     {
-        let width = this.minNodeWidth + ( (this.maxNodeWidth-this.minNodeWidth) / (this.maxValue-this.minVal) * (num-this.minVal) );
-        return parseInt( width );
+        let width = this.node.maxWidth;
+        if( this.maxValue != this.minValue ){
+            width = parseInt( this.node.minWidth + ((this.node.maxWidth-this.node.minWidth) / (this.maxValue-this.minValue)) * (num-this.minValue)  );
+        };
+        return width;
     }
 
     _getPoints( layoutData , nextLayoutData , preLayoutData )
@@ -337,18 +358,30 @@ class FunnelGraphs extends GraphsBase
             points.push( [ -layoutData.width/2, topY] ); //左上
             points.push( [ layoutData.width/2, topY] ); //右上
 
-            let bottomWidth = this.minNodeWidth;
-            if( nextLayoutData ){
-                bottomWidth = nextLayoutData.width;
-            };
+            //let bottomWidth = this.node.minWidth;
+            //if( nextLayoutData ){
+               let bottomWidth = nextLayoutData ? nextLayoutData.width : layoutData.width;
+            //};
+
+            if( !nextLayoutData && this.node.spireWidth != null && this.maxValue != this.minValue ){
+                //说明最后一个节点
+                bottomWidth = Math.min( this.node.spireWidth,  bottomWidth);
+            }
+
             points.push( [ bottomWidth/2, bottomY] ); //右下
             points.push( [ -bottomWidth/2, bottomY] ); //左下
         } else {
             //正金字塔结构的话，是从最上面一个 data 的 top 取min开始
-            let topWidth = this.minNodeWidth;
-            if( preLayoutData ){
-                topWidth = preLayoutData.width;
-            };
+            //let topWidth = this.node.minWidth;
+            //if( preLayoutData ){
+               let topWidth = preLayoutData ? preLayoutData.width : layoutData.width;
+            //};
+
+            if( !preLayoutData && this.node.spireWidth != null && this.maxValue != this.minValue ){
+                //说明最后一个节点
+                topWidth = Math.min( this.node.spireWidth,  topWidth);
+            }
+
             points.push( [ -topWidth/2, topY] ); //左上
             points.push( [ topWidth/2, topY] ); //右上
             points.push( [ layoutData.width/2, bottomY] ); //右下
@@ -368,7 +401,7 @@ class FunnelGraphs extends GraphsBase
             let strokeStyle = me._getProp(me.node, "strokeStyle", ld);
             let strokeAlpha = me._getProp(me.node, "strokeAlpha", ld);
             let lineWidth   = me._getProp(me.node, "lineWidth"  , ld);
-            let lineType     = me._getProp(me.node, "lineType"  , ld);
+            let lineType    = me._getProp(me.node, "lineType"  , ld);
 
             let _polygon = new Polygon({
                 id: "funel_item_"+ld.iNode,
@@ -500,6 +533,10 @@ class FunnelGraphs extends GraphsBase
                     var val = rowData[ this.field ];
                     if ( !isNaN(val) && val != '' ) {
                         let alpha = ((val - this.minValue) / (this.maxValue - this.minValue)) * (this.node.fillAlpha - this.node.minFillAlpha) + this.node.minFillAlpha;
+                        if( isNaN(alpha) ){
+                            //所有的数值都相同的时候，alpha会是NaN
+                            alpha = 1;
+                        };
                         value = colorRgba(this.node.maxFillStyle, parseFloat(alpha.toFixed(2)));
                     }
                 }

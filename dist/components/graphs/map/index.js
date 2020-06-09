@@ -101,7 +101,7 @@ function (_GraphsBase) {
             },
             fillAlpha: {
               detail: '单个区块透明度',
-              "default": 0.9
+              "default": 1
             },
             maxFillStyle: {
               detail: '单个区块数据最大对应的颜色',
@@ -114,6 +114,16 @@ function (_GraphsBase) {
             minFillAlpha: {
               detail: '单个区块最小透明度',
               "default": 0.4
+            },
+            beginFillStyle: {
+              detail: '区域颜色的起始色',
+              documentation: '设置区域颜色的另外一个方案，两个颜色确定一个区间的结束色',
+              "default": null
+            },
+            endFillStyle: {
+              detail: '区域颜色的结束色',
+              documentation: '设置区域颜色的另外一个方案，两个颜色确定一个区间的结束色',
+              "default": null
             },
             strokeStyle: {
               detail: '单个区块描边颜色',
@@ -290,6 +300,12 @@ function (_GraphsBase) {
 
     if (!_this.node.maxFillStyle) {
       _this.node.maxFillStyle = _this.app.getTheme(0);
+    }
+
+    ;
+
+    if (_this.node.beginFillStyle && _this.node.endFillStyle) {
+      _this._gradientColors = (0, _color.gradient)(_this.node.endFillStyle, _this.node.beginFillStyle);
     }
 
     ;
@@ -746,9 +762,15 @@ function (_GraphsBase) {
             var val = rowData[this.valueField];
 
             if (!isNaN(val) && val != '') {
-              var alpha = (val - this.minValue) / (this.maxValue - this.minValue) * (this.node.fillAlpha - this.node.minFillAlpha) + this.node.minFillAlpha;
-              value = (0, _color.colorRgba)(this.node.maxFillStyle, parseFloat(alpha.toFixed(2)));
-              value = (0, _color.rgba2rgb)(value);
+              //let alpha = ((val - this.minValue) / (this.maxValue - this.minValue)) * (this.node.fillAlpha - this.node.minFillAlpha) + this.node.minFillAlpha;
+              var alpha = this.node.minFillAlpha + (this.node.fillAlpha - this.node.minFillAlpha) / (this.maxValue - this.minValue) * (val - this.minValue); //console.log( alpha );
+
+              if (this._gradientColors) {
+                return this._gradientColors[100 - parseInt(alpha * 100)];
+              } else {
+                value = (0, _color.colorRgba)(this.node.maxFillStyle, parseFloat(alpha.toFixed(2)));
+                value = (0, _color.rgba2rgb)(value);
+              }
             }
           }
         }

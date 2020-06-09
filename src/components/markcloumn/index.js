@@ -20,7 +20,7 @@ class markCloumn extends Component
                 default: null
             },
             markTo : {
-                detail : '标准哪个目标字段',
+                detail : '标准哪个目标字段，主要用作折线图',
                 documentation: '如果设置了这个字段，那么line的起点将是这个graphs上的node节点',
                 default : null
             },

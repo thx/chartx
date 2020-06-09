@@ -32,12 +32,13 @@
         <td id="td-vl">
             <form><textarea id="code" name="code">
 //chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组
+
 var data= [
-    ["name"    , "val", "pv"],
-    ["曝光次数" , 800  , 122 ],
-    ["曝光人数" , 600  , 132 ],
-    ["阿里用户" , 400  , 321 ],
-    ["B类用户"  , 200   , 192 ]  
+["name"    , "val", "pv"],
+["曝光次数" , 100  , 122 ],
+["曝光人数" , 100 , 132 ],
+["阿里用户" , 100   , 321 ],
+["B类用户"  , 100   , 192 ]  
 ];
 
 var options = {
@@ -45,8 +46,8 @@ var options = {
         {
             type : "funnel",
             field : "val",
-            minNodeWidth: 80,
             node: {
+                minWidth: 100,
                 maxFillStyle: "#6178e7",
                 focus: {
                     lineWidth: 1,

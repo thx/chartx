@@ -415,7 +415,9 @@ function (_event$Dispatcher) {
 
       this.canvax.domView.innerHTML = ""; //清空事件的当前状态
 
-      this.canvax.event.curPointsTarget = [];
+      if (this.canvax.event) {
+        this.canvax.event.curPointsTarget = [];
+      }
     }
     /**
      * 容器的尺寸改变重新绘制

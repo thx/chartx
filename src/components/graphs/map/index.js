@@ -2,7 +2,7 @@ import Canvax from "canvax"
 import GraphsBase from "../index"
 import trans from "./trans"
 import { getDefaultProps } from "../../../utils/tools"
-import { colorRgba,rgba2rgb } from "../../../utils/color"
+import { colorRgba,rgba2rgb,gradient } from "../../../utils/color"
 import Zoom from "../../../utils/zoom"
 
 let { _, event } = Canvax;
@@ -67,14 +67,13 @@ class Map extends GraphsBase {
                     },
                     fillAlpha: {
                         detail : '单个区块透明度',
-                        default: 0.9
+                        default: 1
                     },
 
                     maxFillStyle: {
                         detail: '单个区块数据最大对应的颜色',
                         default: null
                     },
-
                     maxFillAlpha: {
                         detail: '单个区块最大透明度',
                         default: 1
@@ -83,6 +82,20 @@ class Map extends GraphsBase {
                         detail: '单个区块最小透明度',
                         default: 0.4
                     },
+
+
+                    beginFillStyle: {
+                        detail: '区域颜色的起始色',
+                        documentation:'设置区域颜色的另外一个方案，两个颜色确定一个区间的结束色',
+                        default: null
+                    },
+                    endFillStyle: {
+                        detail: '区域颜色的结束色',
+                        documentation: '设置区域颜色的另外一个方案，两个颜色确定一个区间的结束色',
+                        default: null
+                    },
+
+
 
                     strokeStyle: {
                         detail: '单个区块描边颜色',
@@ -254,6 +267,9 @@ class Map extends GraphsBase {
         
         if( !this.node.maxFillStyle ){
             this.node.maxFillStyle = this.app.getTheme(0);
+        };
+        if( this.node.beginFillStyle && this.node.endFillStyle ){
+            this._gradientColors = gradient( this.node.endFillStyle , this.node.beginFillStyle );
         };
 
         this.init();
@@ -640,9 +656,16 @@ class Map extends GraphsBase {
                 } else {
                     var val = rowData[ this.valueField ];
                     if ( !isNaN(val) && val != '' ) {
-                        let alpha = ((val - this.minValue) / (this.maxValue - this.minValue)) * (this.node.fillAlpha - this.node.minFillAlpha) + this.node.minFillAlpha;
-                        value =  colorRgba(this.node.maxFillStyle, parseFloat(alpha.toFixed(2)));
-                        value = rgba2rgb( value );
+                        //let alpha = ((val - this.minValue) / (this.maxValue - this.minValue)) * (this.node.fillAlpha - this.node.minFillAlpha) + this.node.minFillAlpha;
+                        let alpha = this.node.minFillAlpha + ( (this.node.fillAlpha - this.node.minFillAlpha)/(this.maxValue - this.minValue) ) * (val - this.minValue)
+                        //console.log( alpha );
+
+                        if( this._gradientColors ){
+                            return this._gradientColors[ 100 - parseInt(alpha*100) ];
+                        } else {
+                            value =  colorRgba(this.node.maxFillStyle, parseFloat(alpha.toFixed(2)));
+                            value = rgba2rgb( value );
+                        }
                     }
                 }
             }

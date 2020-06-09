@@ -28,29 +28,19 @@ export function colorRgba(hex , a){
 };
 
 export function hex2rgb(hex, out){
-	//hex可能是“#ff0000” 也可能是 0xff0000
-	if( hex.replace ){
-        hex = parseInt( hex.replace("#" , "0X") , 16 );
-    };
-
-    out = out || [];
-
-    out[0] = ((hex >> 16) & 0xFF) / 255;
-    out[1] = ((hex >> 8) & 0xFF) / 255;
-    out[2] = (hex & 0xFF) / 255;
-
-    return out;
-}
-
-export function hex2string(hex){
-     hex = hex.toString(16);
-     hex = '000000'.substr(0, 6 - hex.length) + hex;
-
-     return `#${hex}`;
+	var rgb = [];
+    for(var i=1; i<7; i+=2){
+        rgb.push(parseInt("0x" + hex.slice(i,i+2)));
+    }
+    return rgb;
 }
 
 export function rgb2hex(rgb){
-	return (((rgb[0] * 255) << 16) + ((rgb[1] * 255) << 8) + (rgb[2] * 255));
+    let r = rgb[0];
+    let g = rgb[1];
+    let b = rgb[2];
+	let hex = ((r<<16) | (g<<8) | b).toString(16);
+    return "#" + new Array(Math.abs(hex.length-7)).join("0") + hex;
 }
 
 export function rgba2rgb( RGBA_color , background_color = "#ffffff" ){
@@ -64,3 +54,27 @@ export function rgba2rgb( RGBA_color , background_color = "#ffffff" ){
         (1 - a) * bb + a * b
     ].join(',') + ")";
 }
+
+
+// 计算渐变过渡色
+export function gradient (startColor,endColor,step=100){
+    // 将 hex 转换为rgb
+    let sColor = hex2rgb(startColor);
+    let eColor = hex2rgb(endColor);
+
+    // 计算R\G\B每一步的差值
+    let rStep = (eColor[0] - sColor[0]) / step;
+    let gStep = (eColor[1] - sColor[1]) / step;
+    let bStep = (eColor[2] - sColor[2]) / step;
+
+    var gradientColorArr = [];
+    for(var i=0;i<step;i++){
+      // 计算每一步的hex值
+      gradientColorArr.push(rgb2hex( [
+          parseInt(rStep*i+sColor[0]),
+          parseInt(gStep*i+sColor[1]),
+          parseInt(bStep*i+sColor[2]) 
+      ]));
+    }
+    return gradientColorArr;
+  }

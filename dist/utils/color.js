@@ -8,9 +8,9 @@ Object.defineProperty(exports, "__esModule", {
 exports.colorRgb = colorRgb;
 exports.colorRgba = colorRgba;
 exports.hex2rgb = hex2rgb;
-exports.hex2string = hex2string;
 exports.rgb2hex = rgb2hex;
 exports.rgba2rgb = rgba2rgb;
+exports.gradient = gradient;
 
 var _slicedToArray2 = _interopRequireDefault(require("@babel/runtime/helpers/slicedToArray"));
 
@@ -54,27 +54,21 @@ function colorRgba(hex, a) {
 ;
 
 function hex2rgb(hex, out) {
-  //hex可能是“#ff0000” 也可能是 0xff0000
-  if (hex.replace) {
-    hex = parseInt(hex.replace("#", "0X"), 16);
+  var rgb = [];
+
+  for (var i = 1; i < 7; i += 2) {
+    rgb.push(parseInt("0x" + hex.slice(i, i + 2)));
   }
 
-  ;
-  out = out || [];
-  out[0] = (hex >> 16 & 0xFF) / 255;
-  out[1] = (hex >> 8 & 0xFF) / 255;
-  out[2] = (hex & 0xFF) / 255;
-  return out;
-}
-
-function hex2string(hex) {
-  hex = hex.toString(16);
-  hex = '000000'.substr(0, 6 - hex.length) + hex;
-  return "#".concat(hex);
+  return rgb;
 }
 
 function rgb2hex(rgb) {
-  return (rgb[0] * 255 << 16) + (rgb[1] * 255 << 8) + rgb[2] * 255;
+  var r = rgb[0];
+  var g = rgb[1];
+  var b = rgb[2];
+  var hex = (r << 16 | g << 8 | b).toString(16);
+  return "#" + new Array(Math.abs(hex.length - 7)).join("0") + hex;
 }
 
 function rgba2rgb(RGBA_color) {
@@ -94,4 +88,24 @@ function rgba2rgb(RGBA_color) {
       bb = _colorRgb$match2[2];
 
   return "RGB(" + [(1 - a) * br + a * r, (1 - a) * bg + a * g, (1 - a) * bb + a * b].join(',') + ")";
+} // 计算渐变过渡色
+
+
+function gradient(startColor, endColor) {
+  var step = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 100;
+  // 将 hex 转换为rgb
+  var sColor = hex2rgb(startColor);
+  var eColor = hex2rgb(endColor); // 计算R\G\B每一步的差值
+
+  var rStep = (eColor[0] - sColor[0]) / step;
+  var gStep = (eColor[1] - sColor[1]) / step;
+  var bStep = (eColor[2] - sColor[2]) / step;
+  var gradientColorArr = [];
+
+  for (var i = 0; i < step; i++) {
+    // 计算每一步的hex值
+    gradientColorArr.push(rgb2hex([parseInt(rStep * i + sColor[0]), parseInt(gStep * i + sColor[1]), parseInt(bStep * i + sColor[2])]));
+  }
+
+  return gradientColorArr;
 }
