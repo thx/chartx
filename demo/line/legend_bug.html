@@ -3,8 +3,8 @@
 
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1"
-    />
+    <meta name="viewport"
+        content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
     <title>xChart demo -- bar</title>
 
     <script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
@@ -33,85 +33,38 @@
     <table>
         <tr>
             <td id="td-vl">
-                <form>
-                    <textarea id="code" name="code">
+                <form><textarea id="code" name="code">
 
-var data = [
-    ["percent"   ,"self","compete"],
-    ["2017-03-21",1011  ,11],
-    ["2017-03-22",2011  ,32],
-    ["2017-03-23",3011  ,15]
-];
-var data2 = [
-    ["percent"   ,"self","compete"],
-    ["2017-03-21",1011  ,11],
-    ["2017-03-22",2011  ,32],
-    ["2017-03-23",3011  ,15],
-    ["2017-03-24",3511  ,25]
-];
-var data1 = [
-    ["percent"   ,"self","compete"],
-    ["2017-03-21",1011  ,11],
-    ["2017-03-22",2011  ,32],
-    ["2017-03-23",3011  ,15],
-    ["2017-03-24",3511  ,25],
-    ["2017-03-25",3011  ,15],
-    ["2017-03-26",3311  ,35]
-];
+
+                var data = [
+                    {"6层消耗_消耗":954551.3142799996,"7层消耗_消耗":523612.00345,"4层消耗_消耗":635447.93332,"9层消耗_消耗":468133.43755000003,"2层消耗_消耗":958110.27432,"5层消耗_消耗":736008.72408,"8层消耗_消耗":471368.65464,"10层消耗_消耗":74376.46860000001,"1层消耗(最高)_消耗":1229995.88566,"3层消耗_消耗":955743.8192599999,"ds":"20200713"}
+                ];
                 
-var options = {
-    coord: {
-        type: "rect",
-        //horizontal: true,
-        xAxis: {
-            field: "percent",
-            enabled: false,
-            title: "Title"
-        },
-        yAxis: {
-            title: {
-                text: "yAxis Title"
-            }
-        }
-    },
-    graphs: [
-        {
-            type: "bar",
-            field: "self"
-        }
-    ],
-    datazoom: {
-        range : { start:0, end:2 }
-    }
-}
+                
+                // 图表配置定义
+                var options = {"coord":{"type":"rect","xAxis":{"field":"ds"}},"graphs":[{"type":"line","field":["无消耗_消耗","1层消耗(最高)_消耗","2层消耗_消耗","3层消耗_消耗","4层消耗_消耗","5层消耗_消耗","6层消耗_消耗","7层消耗_消耗","8层消耗_消耗","9层消耗_消耗","10层消耗_消耗"]}],"tips":{"pointer":"line"},"legend":{"position":"bottom"}}
+                
 
-window.bar = chartx.create("canvasTest" , data , options)
-            
-setTimeout(function(){
-    bar.resetData( data1 )
-    setTimeout(function(){
-        bar.resetData( data2 )
-        
-    } , 1000)
-} , 1000)
-                       
-            
 
-            </textarea>
-                </form>
+
+    chartx.create("canvasTest" , data , options)
+
+
+            </textarea></form>
             </td>
             <td style="padding:0 10px;" id="td-vr">
                 <div id="chartdemo-r">
-                    <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
+                    <div class="bs-callout bs-callout-warning" style="margin-top:10px;"
+                        id="callout-navs-anchor-disabled">
                         <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
 
-                        <h4>柱状图（bar chart）</h4>
+                        <h4>折线图（bar chart）</h4>
                         <p>
                             联系人：@释剑
                         </p>
                     </div>
                     <div class="test-c">
-                        <div id="canvasTest" style='background:#fafafa;width:600px;height:400px;position:relative;'></div>
+                        <div id="canvasTest" style='width:600px;height:300px;position:relative;'></div>
                     </div>
 
                 </div>
