@@ -297,17 +297,33 @@ function (_GraphsBase) {
           var val = rowData[p];
 
           if (p == me.keyField) {
-            if (!_.isArray(val)) {
+            if (_.isString(val)) {
               val = val.split(/[,|]/);
             }
 
             ;
             obj.sets = val;
             obj.nodeId = val.join();
-          } else if (p == me.valueField) {
+
+            if (!me.label.field) {
+              //如果没有设置label的field
+              //那么就默认获取keyField
+              obj.label = val.join();
+            }
+
+            ;
+          }
+
+          ;
+
+          if (p == me.valueField) {
             obj.size = val;
             obj.value = val;
-          } else if (p == me.label.field) {
+          }
+
+          ;
+
+          if (p == me.label.field) {
             obj.label = val;
           }
 

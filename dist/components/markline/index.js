@@ -169,7 +169,10 @@ function (_Component) {
       var y;
 
       if (opt.y !== undefined && opt.y !== null) {
+        //兼容老的配置，有些地方已经使用了y，都要改统一成yVal
         y = Number(opt.y);
+      } else if (opt.yVal !== undefined && opt.yVal !== null) {
+        y = Number(opt.yVal);
       } else {
         //如果没有配置这个y的属性，就 自动计算出来均值
         //但是均值是自动计算的，比如datazoom在draging的时候

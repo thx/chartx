@@ -25971,15 +25971,25 @@ var chartx = (function () {
 	          var val = rowData[p];
 
 	          if (p == me.keyField) {
-	            if (!_.isArray(val)) {
+	            if (_.isString(val)) {
 	              val = val.split(/[,|]/);
 	            }
 	            obj.sets = val;
 	            obj.nodeId = val.join();
-	          } else if (p == me.valueField) {
+
+	            if (!me.label.field) {
+	              //如果没有设置label的field
+	              //那么就默认获取keyField
+	              obj.label = val.join();
+	            }
+	          }
+
+	          if (p == me.valueField) {
 	            obj.size = val;
 	            obj.value = val;
-	          } else if (p == me.label.field) {
+	          }
+
+	          if (p == me.label.field) {
 	            obj.label = val;
 	          }
 	        }
@@ -48104,7 +48114,10 @@ var chartx = (function () {
 	      var y;
 
 	      if (opt.y !== undefined && opt.y !== null) {
+	        //兼容老的配置，有些地方已经使用了y，都要改统一成yVal
 	        y = Number(opt.y);
+	      } else if (opt.yVal !== undefined && opt.yVal !== null) {
+	        y = Number(opt.yVal);
 	      } else {
 	        //如果没有配置这个y的属性，就 自动计算出来均值
 	        //但是均值是自动计算的，比如datazoom在draging的时候
@@ -50390,7 +50403,7 @@ var chartx = (function () {
 	}
 
 	var chartx = {
-	  version: '1.1.16',
+	  version: '1.1.17',
 	  options: {}
 	};
 
