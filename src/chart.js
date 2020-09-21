@@ -590,7 +590,7 @@ class Chart extends event.Dispatcher
     show( field , trigger )
     {
         let me = this;
-
+        
         let _coord = this.getComponent({name:'coord'});
         _coord && _coord.show( field, trigger );
         _.each( this.getComponents({name:'graphs'}), function( _g ){

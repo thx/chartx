@@ -172,10 +172,11 @@ class LineGraphs extends GraphsBase
     {
         let me = this;
         
+        //过渡优化，有field的状态变化，可能就y轴的数据区间都有了变化，这里的优化就成了bug，所有的field都需要绘制一次
         //这个field不再这个graphs里面的，不相关
-        if( _.indexOf( _.flatten( [me.field] ), field ) == -1 ){
-            return;
-        };
+        // if( _.indexOf( _.flatten( [me.field] ), field ) == -1 ){
+        //     return;
+        // };
 
         this.data = this._trimGraphs();
         this._setGroupsForYfield( this.data , field );
@@ -187,16 +188,15 @@ class LineGraphs extends GraphsBase
 
     hide( field )
     {
+        
         let me = this;
         let i = me.getGroupIndex( field );
-
-        if( !this.groups.length || i < 0 ){
+        if( i > -1 ){
+            this.groups.splice(i, 1)[0].destroy();
             return;
         };
 
-        this.groups.splice(i, 1)[0].destroy();
         this.data = this._trimGraphs();
-
         _.each(this.groups, function(g) {
             g.resetData( me.data[ g.field ].data );
         });
