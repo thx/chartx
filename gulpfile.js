@@ -209,6 +209,5 @@ let copyToCdn = ()=> {
     } )
 }
 
-//把mmvis从 node_models 里面copy到本地
 exports.default = gulp.series(cleanHandle, babelSrc, versionHandle, rollupDist, watchSrc);
 exports.cdn = gulp.series( copyToCdn )

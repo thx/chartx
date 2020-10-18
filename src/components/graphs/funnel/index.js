@@ -233,6 +233,7 @@ class FunnelGraphs extends GraphsBase
 
     _computerAttr()
     {
+        debugger
         if( this.field ){
             this.dataOrg = this.dataFrame.getFieldData( this.field );
         };
@@ -247,7 +248,8 @@ class FunnelGraphs extends GraphsBase
             if( this.maxValue == this.minValue ){
                 this.node.minWidth = this.node.maxValue;
             } else {
-                this.node.minWidth = parseInt( this.node.maxWidth * 1/this.dataOrg.length );
+                this.node.minWidth = parseInt( this.node.maxWidth * ( this.minValue/this.maxValue ) );
+                //this.node.minWidth = parseInt( this.node.maxWidth * 1/this.dataOrg.length );
             }  
         };
         if( this.node.spireWidth == null ){

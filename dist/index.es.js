@@ -23813,6 +23813,7 @@ function (_GraphsBase) {
   }, {
     key: "_computerAttr",
     value: function _computerAttr() {
+
       if (this.field) {
         this.dataOrg = this.dataFrame.getFieldData(this.field);
       }
@@ -23827,7 +23828,7 @@ function (_GraphsBase) {
         if (this.maxValue == this.minValue) {
           this.node.minWidth = this.node.maxValue;
         } else {
-          this.node.minWidth = parseInt(this.node.maxWidth * 1 / this.dataOrg.length);
+          this.node.minWidth = parseInt(this.node.maxWidth * (this.minValue / this.maxValue)); //this.node.minWidth = parseInt( this.node.maxWidth * 1/this.dataOrg.length );
         }
       }
 
