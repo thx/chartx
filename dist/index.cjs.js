@@ -9304,7 +9304,9 @@ function (_event$Dispatcher) {
             return d.name == item.name;
           })) return;
 
-          var legendItem = _.extend(true, {}, item);
+          var legendItem = _.extend(true, {
+            enabled: true
+          }, item);
 
           legendItem.color = item.fillStyle || item.color || item.style;
           data.push(legendItem);
@@ -23769,6 +23771,14 @@ function (_GraphsBase) {
               detail: '文本颜色',
               "default": '#ffffff',
               documentation: 'align为center的时候的颜色，align为其他属性时候取node的颜色'
+            },
+            strokeStyle: {
+              detail: '文本描边色',
+              "default": '#fff'
+            },
+            lineWidth: {
+              detail: '文本描边宽',
+              "default": 0
             }
           }
         }
@@ -23815,7 +23825,6 @@ function (_GraphsBase) {
   }, {
     key: "_computerAttr",
     value: function _computerAttr() {
-
       if (this.field) {
         this.dataOrg = this.dataFrame.getFieldData(this.field);
       }
@@ -24050,6 +24059,8 @@ function (_GraphsBase) {
             y: textPoint.y,
             fontSize: me.label.fontSize,
             fillStyle: me.label.textAlign == "center" ? me.label.fontColor : ld.color,
+            strokeStyle: me.label.strokeStyle,
+            lineWidth: me.label.lineWidth,
             textAlign: textAlign,
             textBaseline: me.label.textBaseline
           }
@@ -46812,7 +46823,7 @@ function (_Component) {
       }
 
       if (this.position == "bottom") {
-        y = app.height - app.padding.bottom - height / 2; //TODO:这样的设置到了中线了
+        y = app.height - app.padding.bottom - height + this.icon.height / 2; //TODO:这样的设置到了中线了
       }
       var layoutWidth, layoutHeight; //然后把app的padding扩展开来
 
@@ -50404,7 +50415,7 @@ if (projectTheme && projectTheme.length) {
 }
 
 var chartx = {
-  version: '1.1.19',
+  version: '1.1.21',
   options: {}
 };
 

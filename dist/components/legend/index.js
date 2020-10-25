@@ -216,7 +216,7 @@ function (_Component) {
       ;
 
       if (this.position == "bottom") {
-        y = app.height - app.padding.bottom - height / 2; //TODO:这样的设置到了中线了
+        y = app.height - app.padding.bottom - height + this.icon.height / 2; //TODO:这样的设置到了中线了
       }
 
       ;

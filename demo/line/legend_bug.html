@@ -42,7 +42,32 @@
                 
                 
                 // 图表配置定义
-                var options = {"coord":{"type":"rect","xAxis":{"field":"ds"}},"graphs":[{"type":"line","field":["无消耗_消耗","1层消耗(最高)_消耗","2层消耗_消耗","3层消耗_消耗","4层消耗_消耗","5层消耗_消耗","6层消耗_消耗","7层消耗_消耗","8层消耗_消耗","9层消耗_消耗","10层消耗_消耗"]}],"tips":{"pointer":"line"},"legend":{"position":"bottom"}}
+                var options = {
+                    "coord":{
+                        "type":"rect",
+                        "xAxis":{"field":"ds"}
+                    },
+                    "graphs":[
+                         {
+                            "type":"line",
+                            field: "无消耗_消耗",
+                            line : {
+                                strokeStyle: 'red'
+                            }
+                         },
+                         {
+                             "type":"line",
+                             "field":
+                             ["1层消耗(最高)_消耗","2层消耗_消耗","3层消耗_消耗","4层消耗_消耗","5层消耗_消耗","6层消耗_消耗","7层消耗_消耗","8层消耗_消耗","9层消耗_消耗","10层消耗_消耗"]
+                        }
+                    ],
+                    "tips":{
+                        "pointer":"line"
+                    },
+                    "legend":{
+                        "position":"bottom"
+                    }
+                }
                 
 
 

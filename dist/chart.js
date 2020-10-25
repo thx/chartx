@@ -671,7 +671,9 @@ function (_event$Dispatcher) {
             return d.name == item.name;
           })) return;
 
-          var legendItem = _.extend(true, {}, item);
+          var legendItem = _.extend(true, {
+            enabled: true
+          }, item);
 
           legendItem.color = item.fillStyle || item.color || item.style;
           data.push(legendItem);

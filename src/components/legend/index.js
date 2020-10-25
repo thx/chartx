@@ -147,6 +147,7 @@ class Legend extends Component
     }
 
     _getLegendData( opt ){
+        
         let legendData = opt.data;
         if( legendData ){
             _.each( legendData, function( item, i ){
@@ -173,9 +174,8 @@ class Legend extends Component
             x = app.width - app.padding.right - width;
         };
         if( this.position == "bottom" ){
-            y = app.height - app.padding.bottom - height/2; //TODO:这样的设置到了中线了
+            y = app.height - app.padding.bottom - height + (this.icon.height / 2); //TODO:这样的设置到了中线了
         };
-
 
         let layoutWidth,layoutHeight;
 
@@ -220,8 +220,6 @@ class Legend extends Component
                 this.pos.x = _coord.getSizeAndOrigin().origin.x + this.icon.radius;
             };
         };
-        
-        
         this.setPosition();
     }
 

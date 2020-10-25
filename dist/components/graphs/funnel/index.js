@@ -215,6 +215,14 @@ function (_GraphsBase) {
               detail: '文本颜色',
               "default": '#ffffff',
               documentation: 'align为center的时候的颜色，align为其他属性时候取node的颜色'
+            },
+            strokeStyle: {
+              detail: '文本描边色',
+              "default": '#fff'
+            },
+            lineWidth: {
+              detail: '文本描边宽',
+              "default": 0
             }
           }
         }
@@ -261,8 +269,6 @@ function (_GraphsBase) {
   }, {
     key: "_computerAttr",
     value: function _computerAttr() {
-      debugger;
-
       if (this.field) {
         this.dataOrg = this.dataFrame.getFieldData(this.field);
       }
@@ -519,6 +525,8 @@ function (_GraphsBase) {
             y: textPoint.y,
             fontSize: me.label.fontSize,
             fillStyle: me.label.textAlign == "center" ? me.label.fontColor : ld.color,
+            strokeStyle: me.label.strokeStyle,
+            lineWidth: me.label.lineWidth,
             textAlign: textAlign,
             textBaseline: me.label.textBaseline
           }

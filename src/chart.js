@@ -549,7 +549,9 @@ class Chart extends event.Dispatcher
                     return d.name == item.name
                 } ) ) return;
 
-                let legendItem = _.extend(true, {}, item);
+                let legendItem = _.extend(true, {
+                    enabled: true
+                }, item);
                 legendItem.color = item.fillStyle || item.color || item.style;
 
                 data.push( legendItem )
