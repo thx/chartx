@@ -193,7 +193,7 @@ class LineGraphs extends GraphsBase
         let i = me.getGroupIndex( field );
         if( i > -1 ){
             this.groups.splice(i, 1)[0].destroy();
-            return;
+            //return; //这里不能直接return，和上面的show一样，同样的属于过渡优化，因为这个时候y轴的值域可能变了， 其他的graphs需要重新绘制
         };
 
         this.data = this._trimGraphs();

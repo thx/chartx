@@ -321,11 +321,15 @@ export default class LineGraphsGroup extends event.Dispatcher
 
         function _update( list ){
             
-            me._bline.context.pointList = _.clone( list );
-            me._bline.context.strokeStyle = me._getLineStrokeStyle( list );
-
-            me._area.context.path = me._fillLine(me._bline);
-            me._area.context.fillStyle = me._getFillStyle();
+            if( me._bline.context ){
+                me._bline.context.pointList = _.clone( list );
+                me._bline.context.strokeStyle = me._getLineStrokeStyle( list );
+            }
+            
+            if( me._area.context ){
+                me._area.context.path = me._fillLine(me._bline);
+                me._area.context.fillStyle = me._getFillStyle();
+            }
 
             let iNode=0;
             _.each( list, function( point, i ){

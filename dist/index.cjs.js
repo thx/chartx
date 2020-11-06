@@ -16727,10 +16727,16 @@ function (_event$Dispatcher) {
       }
 
       function _update(list) {
-        me._bline.context.pointList = _.clone(list);
-        me._bline.context.strokeStyle = me._getLineStrokeStyle(list);
-        me._area.context.path = me._fillLine(me._bline);
-        me._area.context.fillStyle = me._getFillStyle();
+        if (me._bline.context) {
+          me._bline.context.pointList = _.clone(list);
+          me._bline.context.strokeStyle = me._getLineStrokeStyle(list);
+        }
+
+        if (me._area.context) {
+          me._area.context.path = me._fillLine(me._bline);
+          me._area.context.fillStyle = me._getFillStyle();
+        }
+
         var iNode = 0;
 
         _.each(list, function (point, i) {
@@ -17547,8 +17553,7 @@ function (_GraphsBase) {
       var i = me.getGroupIndex(field);
 
       if (i > -1) {
-        this.groups.splice(i, 1)[0].destroy();
-        return;
+        this.groups.splice(i, 1)[0].destroy(); //return; //这里不能直接return，和上面的show一样，同样的属于过渡优化，因为这个时候y轴的值域可能变了， 其他的graphs需要重新绘制
       }
       this.data = this._trimGraphs();
 
@@ -50415,7 +50420,7 @@ if (projectTheme && projectTheme.length) {
 }
 
 var chartx = {
-  version: '1.1.21',
+  version: '1.1.23',
   options: {}
 };
 
