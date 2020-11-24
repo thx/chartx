@@ -40,7 +40,7 @@ var data = [
     { key: "1"       , label: '中国'    },
     { key: "2"       , label: '湖南'    },
     { key: "3"       , label: '湖北'    },
-    { key: "4"       , label: '浙江'    },
+    { key: "4"       , label: '<div style="width:50px;height:30px;background:blue;color:white;">浙江</div>'    },
     { key: "5"       , label: '长沙'    },
     { key: "6"       , label: '杭州'    },
     { key: "7"       , label: '闲林'    },
@@ -69,6 +69,12 @@ var options = {
         type     : "relation",
         field    : "key",
         node : {
+            shapeType: function( node ){
+                if(node.rowData.key == 4){
+                    return 'diamond'
+                };
+                return 'rect';
+            },
             content : {
                 field : "label",
                 type : "ctype"

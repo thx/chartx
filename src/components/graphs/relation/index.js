@@ -8,10 +8,11 @@ import Zoom from "../../../utils/zoom"
 import Dagre from "../../../layout/dagre/index"
 
 let { _, event } = Canvax;
-let Rect = Canvax.Shapes.Rect;
-let Path = Canvax.Shapes.Path;
-let Circle = Canvax.Shapes.Circle;
-let Arrow = Canvax.Shapes.Arrow;
+let Rect    = Canvax.Shapes.Rect;
+let Diamond = Canvax.Shapes.Diamond;
+let Path    = Canvax.Shapes.Path;
+let Circle  = Canvax.Shapes.Circle;
+let Arrow   = Canvax.Shapes.Arrow;
 
  
 /**
@@ -46,7 +47,7 @@ class Relation extends GraphsBase {
                 detail: '单个节点的配置',
                 propertys: {
                     shapeType: {
-                        detail: '节点图形，目前只支持rect',
+                        detail: '节点图形，支持rect,diamond',
                         default: 'rect'
                     },
                     maxWidth: {
@@ -62,19 +63,27 @@ class Relation extends GraphsBase {
                         default: null
                     },
                     radius: {
-                        detail: '圆角角度',
+                        detail: '圆角角度，对rect生效',
                         default: 6
+                    },
+                    includedAngle: {
+                        detail: 'shapeType为diamond(菱形)的时候生效,x方向的夹角',
+                        default: 60
                     },
                     fillStyle: {
                         detail: '节点背景色',
                         default: '#ffffff'
+                    },
+                    lineWidth: {
+                        detail: '描边宽度',
+                        default: 1
                     },
                     strokeStyle: {
                         detail: '描边颜色',
                         default: '#e5e5e5'
                     },
                     padding: {
-                        detail: 'node节点容器到内容的边距',
+                        detail: 'node节点容器到内容的边距,节点内容是canvas的时候生效，dom节点不生效，需要自己在dom中控制',
                         default: 10
                     },
                     content: {
@@ -500,11 +509,40 @@ class Relation extends GraphsBase {
                 target : null
             };
             
+            //计算和设置node的尺寸
             _.extend(node, this._getElementAndSize(node));
 
             if (fields.length == 1) {
                 // isNode
                 node.shapeType = this.getProp( this.node.shapeType, node );
+
+                if( node.shapeType == 'diamond' ){
+                    //因为node的尺寸前面计算出来的是矩形的尺寸，如果是菱形的话，这里就是指内接矩形的尺寸，
+                    //需要换算成外接矩形的尺寸
+                    let innerRect = { //内接矩形
+                        width: node.width,
+                        height: node.height
+                    };
+                    let includedAngle = this.node.includedAngle/2;
+                    let includeRad    = includedAngle * Math.PI / 180
+
+                    let newWidthDiff  = innerRect.height / Math.tan( includeRad );
+                    let newHeightDiff = innerRect.width  * Math.tan( includeRad );
+
+                    //在内接矩形基础上扩展出来的外界矩形
+                    let newWidth      = innerRect.width  + newWidthDiff;
+                    let newHeight     = innerRect.height + newHeightDiff;
+
+                    //把新的菱形的外界边界回写
+                    node._innerRect   = {
+                        width  : node.width,
+                        height : node.height 
+                    };
+                    node.width        = newWidth;
+                    node.height       = newHeight;
+                    
+                };
+
                 data.nodes.push(node);
                 Object.assign(node, this.layoutOpts.node);
                 _nodeMap[ node.key ] = node;
@@ -737,23 +775,41 @@ class Relation extends GraphsBase {
 
         _.each(this.data.nodes, function (node) {
             
+            let shape = Rect;
+
             let nodeId = "node_"+node.key;
+            let lineWidth = me.getProp(me.node.lineWidth, node);
+            let fillStyle = me.getProp(me.node.fillStyle, node);
+            let strokeStyle = me.getProp(me.node.strokeStyle, node);
+            let radius = _.flatten([me.getProp(me.node.radius, node)]);
+
             let context = {
                 x: node.x - node.width / 2,
                 y: node.y - node.height / 2,
                 width: node.width,
                 height: node.height,
-                lineWidth: 1,
-                fillStyle: me.getProp(me.node.fillStyle, node),
-                strokeStyle: me.getProp(me.node.strokeStyle, node),
-                radius: _.flatten([me.getProp(me.node.radius, node)])
+                lineWidth,
+                fillStyle,
+                strokeStyle,
+                radius
+            };
+            if( node.shapeType == 'diamond' ){
+                shape = Diamond;
+                context = {
+                    x: node.x,
+                    y: node.y,
+                    innerRect : node._innerRect,
+                    lineWidth,
+                    fillStyle,
+                    strokeStyle
+                }
             };
             
             let _boxShape = me.nodesSp.getChildById( nodeId );
             if( _boxShape ){
                 _.extend( _boxShape.context, context );
             } else {
-                _boxShape = new Rect({
+                _boxShape = new shape({
                     id: nodeId,
                     context
                 });
@@ -776,12 +832,17 @@ class Relation extends GraphsBase {
                     node.contentElement.context.y = node.y;
                 } else if (node.ctype == "html") {
                     let devicePixelRatio = typeof (window) !== 'undefined' ? window.devicePixelRatio : 1;
-                    node.contentElement.style.transform = "matrix(" + _boxShape.worldTransform.clone().scale(1 / devicePixelRatio, 1 / devicePixelRatio).toArray().join() + ")";
+                    let contentMatrix = _boxShape.worldTransform.clone();
+                    contentMatrix = contentMatrix.scale(1 / devicePixelRatio, 1 / devicePixelRatio);
+                    if( node.shapeType == 'diamond' ){
+                        contentMatrix = contentMatrix.translate( -node._innerRect.width/2, -node._innerRect.height/2 )
+                    };
+                    node.contentElement.style.transform = "matrix(" + contentMatrix.toArray().join() + ")";
                     node.contentElement.style.transformOrigin = "left top"; //修改为左上角为旋转中心点来和canvas同步
-                    node.contentElement.style.marginLeft = me.getProp(me.node.padding, node) * me.status.transform.scale + "px";
-                    node.contentElement.style.marginTop = me.getProp(me.node.padding, node) * me.status.transform.scale + "px";
+                    //node.contentElement.style.marginLeft = me.getProp(me.node.padding, node) * me.status.transform.scale + "px";
+                    //node.contentElement.style.marginTop = me.getProp(me.node.padding, node) * me.status.transform.scale + "px";
                     node.contentElement.style.visibility = "visible";
-                }
+                };
             });
         });
 
@@ -996,14 +1057,15 @@ class Relation extends GraphsBase {
         _dom.style.cssText += "; color:" + me.getProp(me.node.content.fontColor, node) + ";";
         _dom.style.cssText += "; text-align:" + me.getProp(me.node.content.textAlign, node) + ";";
         _dom.style.cssText += "; vertical-align:" + me.getProp(me.node.content.textBaseline, node) + ";";
+        //_dom.style.cssText += "; padding:"+me.getProp(me.node.padding, node)+"px;";
 
         _dom.innerHTML = content;
 
         if (!width) {
-            width = _dom.offsetWidth + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
+            width = _dom.offsetWidth;// + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
         };
         if (!height) {
-            height = _dom.offsetHeight + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
+            height = _dom.offsetHeight;// + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
         };
 
         return {

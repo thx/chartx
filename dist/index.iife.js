@@ -59,6 +59,8 @@ var chartx = (function () {
 
 	var _typeof_1 = createCommonjsModule$1(function (module) {
 	function _typeof(obj) {
+	  "@babel/helpers - typeof";
+
 	  if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
 	    module.exports = _typeof = function _typeof(obj) {
 	      return typeof obj;
@@ -3212,7 +3214,7 @@ var chartx = (function () {
 	var TRANSFORM_PROPS = ["x", "y", "scaleX", "scaleY", "rotation", "scaleOrigin", "rotateOrigin"]; //所有和样式相关的属性
 	//appha 有 自己的 处理方式
 
-	var STYLE_PROPS = ["lineWidth", "strokeAlpha", "strokeStyle", "fillStyle", "fillAlpha", "globalAlpha"];
+	var STYLE_PROPS = ["lineWidth", "strokeAlpha", "strokeStyle", "fillStyle", "fillAlpha", "globalAlpha", "shadowOffsetX", "shadowOffsetY", "shadowColor", "shadowBlur"];
 
 	/**
 	 * 线段包含判断
@@ -4502,6 +4504,10 @@ var chartx = (function () {
 	        var fill = data.hasFill() && data.fillAlpha && !isClip;
 	        var line = data.hasLine() && data.strokeAlpha && !isClip;
 	        ctx.lineWidth = data.lineWidth;
+	        ctx.shadowColor = data.shadowColor;
+	        ctx.shadowBlur = data.shadowBlur;
+	        ctx.shadowOffsetX = data.shadowOffsetX;
+	        ctx.shadowOffsetY = data.shadowOffsetY;
 
 	        if (data.type === SHAPES.POLY) {
 	          //只第一次需要beginPath()
@@ -4517,6 +4523,12 @@ var chartx = (function () {
 	          if (line) {
 	            ctx.globalAlpha = data.strokeAlpha * globalAlpha;
 	            ctx.strokeStyle = strokeStyle;
+
+	            if (fill && data.shadowBlur) {
+	              //如果有fill的时候也有shadow， 那么在描边的时候不需要阴影
+	              //因为fill的时候已经画过了
+	              ctx.shadowBlur = 0;
+	            }
 	            ctx.stroke();
 	          }
 	        } else if (data.type === SHAPES.RECT) {
@@ -4535,6 +4547,12 @@ var chartx = (function () {
 	          if (line) {
 	            ctx.globalAlpha = data.strokeAlpha * globalAlpha;
 	            ctx.strokeStyle = strokeStyle;
+
+	            if (fill && data.shadowBlur) {
+	              //如果有fill的时候也有shadow， 那么在描边的时候不需要阴影
+	              //因为fill的时候已经画过了
+	              ctx.shadowBlur = 0;
+	            }
 	            ctx.strokeRect(shape.x, shape.y, shape.width, shape.height);
 	          }
 	        } else if (data.type === SHAPES.CIRC) {
@@ -4552,6 +4570,12 @@ var chartx = (function () {
 	          if (line) {
 	            ctx.globalAlpha = data.strokeAlpha * globalAlpha;
 	            ctx.strokeStyle = strokeStyle;
+
+	            if (fill && data.shadowBlur) {
+	              //如果有fill的时候也有shadow， 那么在描边的时候不需要阴影
+	              //因为fill的时候已经画过了
+	              ctx.shadowBlur = 0;
+	            }
 	            ctx.stroke();
 	          }
 	        } else if (data.type === SHAPES.ELIP) {
@@ -4589,6 +4613,12 @@ var chartx = (function () {
 	          if (line) {
 	            ctx.globalAlpha = data.strokeAlpha * globalAlpha;
 	            ctx.strokeStyle = strokeStyle;
+
+	            if (fill && data.shadowBlur) {
+	              //如果有fill的时候也有shadow， 那么在描边的时候不需要阴影
+	              //因为fill的时候已经画过了
+	              ctx.shadowBlur = 0;
+	            }
 	            ctx.stroke();
 	          }
 	        }
@@ -4992,7 +5022,7 @@ var chartx = (function () {
 	var GraphicsData =
 	/*#__PURE__*/
 	function () {
-	  function GraphicsData(lineWidth, strokeStyle, strokeAlpha, fillStyle, fillAlpha, shape) {
+	  function GraphicsData(lineWidth, strokeStyle, strokeAlpha, fillStyle, fillAlpha, shadowOffsetX, shadowOffsetY, shadowBlur, shadowColor, shape) {
 	    classCallCheck(this, GraphicsData);
 
 	    this.lineWidth = lineWidth;
@@ -5000,6 +5030,10 @@ var chartx = (function () {
 	    this.strokeAlpha = strokeAlpha;
 	    this.fillStyle = fillStyle;
 	    this.fillAlpha = fillAlpha;
+	    this.shadowOffsetX = shadowOffsetX;
+	    this.shadowOffsetY = shadowOffsetY;
+	    this.shadowBlur = shadowBlur;
+	    this.shadowColor = shadowColor;
 	    this.shape = shape;
 	    this.type = shape.type;
 	    this.holes = []; //这两个可以被后续修改， 具有一票否决权
@@ -5012,7 +5046,7 @@ var chartx = (function () {
 	  createClass(GraphicsData, [{
 	    key: "clone",
 	    value: function clone() {
-	      var cloneGraphicsData = new GraphicsData(this.lineWidth, this.strokeStyle, this.strokeAlpha, this.fillStyle, this.fillAlpha, this.shape);
+	      var cloneGraphicsData = new GraphicsData(this.lineWidth, this.strokeStyle, this.strokeAlpha, this.fillStyle, this.fillAlpha, this.shadowOffsetX, this.shadowOffsetY, this.shadowBlur, this.shadowColor, this.shape);
 	      cloneGraphicsData.fill = this.fill;
 	      cloneGraphicsData.line = this.line;
 	      return cloneGraphicsData;
@@ -5038,6 +5072,14 @@ var chartx = (function () {
 	        this.fillStyle = style.fillStyle;
 	        this.fillAlpha = style.fillAlpha;
 	      }
+
+	      this.shadowOffsetX = style.shadowOffsetX; //阴影向右偏移量
+
+	      this.shadowOffsetY = style.shadowOffsetY; //阴影向下偏移量
+
+	      this.shadowBlur = style.shadowBlur; //阴影模糊效果
+
+	      this.shadowColor = style.shadowColor; //阴影颜色
 	    }
 	  }, {
 	    key: "hasFill",
@@ -5615,7 +5657,15 @@ var chartx = (function () {
 	    this.strokeStyle = null;
 	    this.strokeAlpha = 1;
 	    this.fillStyle = null;
-	    this.fillAlpha = 1; //比如path m 0 0 l 0 0 m 1 1 l 1 1
+	    this.fillAlpha = 1;
+	    this.shadowOffsetX = 0; //阴影向右偏移量
+
+	    this.shadowOffsetY = 0; //阴影向下偏移量
+
+	    this.shadowBlur = 0; //阴影模糊效果
+
+	    this.shadowColor = 'black'; //阴影颜色
+	    //比如path m 0 0 l 0 0 m 1 1 l 1 1
 	    //就会有两条graphicsData数据产生
 
 	    this.graphicsData = [];
@@ -5646,6 +5696,14 @@ var chartx = (function () {
 	      this.strokeAlpha = model.strokeAlpha * model.globalAlpha;
 	      this.fillStyle = model.fillStyle;
 	      this.fillAlpha = model.fillAlpha * model.globalAlpha;
+	      this.shadowOffsetX = model.shadowOffsetX; //阴影向右偏移量
+
+	      this.shadowOffsetY = model.shadowOffsetY; //阴影向下偏移量
+
+	      this.shadowBlur = model.shadowBlur; //阴影模糊效果
+
+	      this.shadowColor = model.shadowColor; //阴影颜色
+
 	      var g = this; //一般都是先设置好style的，所以 ， 当后面再次设置新的style的时候
 	      //会把所有的data都修改
 	      //TODO: 后面需要修改, 能精准的确定是修改 graphicsData 中的哪个data
@@ -5912,7 +5970,11 @@ var chartx = (function () {
 
 
 	      this.beginPath();
-	      var data = new GraphicsData(this.lineWidth, this.strokeStyle, this.strokeAlpha, this.fillStyle, this.fillAlpha, shape);
+	      var data = new GraphicsData(this.lineWidth, this.strokeStyle, this.strokeAlpha, this.fillStyle, this.fillAlpha, this.shadowOffsetX, //阴影向右偏移量
+	      this.shadowOffsetY, //阴影向下偏移量
+	      this.shadowBlur, //阴影模糊效果
+	      this.shadowColor, //阴影颜色
+	      shape);
 	      this.graphicsData.push(data);
 
 	      if (data.type === SHAPES.POLY) {
@@ -6100,7 +6162,15 @@ var chartx = (function () {
 	      lineType: opt.context.lineType || "solid",
 	      //context2d里没有，自定义线条的type，默认为实线
 	      lineDash: opt.context.lineDash || [6, 3],
-	      lineWidth: opt.context.lineWidth || null
+	      lineWidth: opt.context.lineWidth || null,
+	      shadowOffsetX: opt.context.shadowOffsetX || 0,
+	      //阴影向右偏移量
+	      shadowOffsetY: opt.context.shadowOffsetY || 0,
+	      //阴影向下偏移量
+	      shadowBlur: opt.context.shadowBlur || 0,
+	      //阴影模糊效果
+	      shadowColor: opt.context.shadowColor || "#000000" //阴影颜色
+
 	    };
 
 	    var _context = _.extend(true, styleContext, opt.context);
@@ -6163,7 +6233,6 @@ var chartx = (function () {
 	      if (_.indexOf(STYLE_PROPS, name) > -1) {
 	        this.graphics.setStyle(this.context);
 	      }
-
 	      this.watch(name, value, preValue);
 	    }
 	  }, {
@@ -7694,13 +7763,13 @@ var chartx = (function () {
 	  return Sector;
 	}(Shape);
 
-	var Line$1 =
+	var Arrow =
 	/*#__PURE__*/
 	function (_Shape) {
-	  inherits(Line, _Shape);
+	  inherits(Arrow, _Shape);
 
-	  function Line(opt) {
-	    classCallCheck(this, Line);
+	  function Arrow(opt) {
+	    classCallCheck(this, Arrow);
 
 	    var _context = _.extend(true, {
 	      control: {
@@ -7728,10 +7797,10 @@ var chartx = (function () {
 
 	    opt.context = _context;
 	    opt.type = "arrow";
-	    return possibleConstructorReturn(this, getPrototypeOf(Line).call(this, opt));
+	    return possibleConstructorReturn(this, getPrototypeOf(Arrow).call(this, opt));
 	  }
 
-	  createClass(Line, [{
+	  createClass(Arrow, [{
 	    key: "watch",
 	    value: function watch(name, value, preValue) {
 	      //并不清楚是start.x 还是end.x， 当然，这并不重要
@@ -7769,11 +7838,67 @@ var chartx = (function () {
 	    }
 	  }]);
 
-	  return Line;
+	  return Arrow;
+	}(Shape);
+
+	var Diamond =
+	/*#__PURE__*/
+	function (_Shape) {
+	  inherits(Diamond, _Shape);
+
+	  function Diamond(opt) {
+	    classCallCheck(this, Diamond);
+
+	    var _context = _.extend(true, {
+	      innerRect: {
+	        //菱形的内接矩形
+	        width: 0,
+	        height: 0
+	      },
+	      includedAngle: 60 //菱形x方向的夹角
+
+	    }, opt.context);
+
+	    opt.context = _context;
+	    opt.type = "diamond";
+	    return possibleConstructorReturn(this, getPrototypeOf(Diamond).call(this, opt));
+	  }
+
+	  createClass(Diamond, [{
+	    key: "watch",
+	    value: function watch(name, value, preValue) {
+	      //并不清楚是start.x 还是end.x， 当然，这并不重要
+	      if (['includedAngle'].indexOf(name) > -1) {
+	        this.graphics.clear();
+	      }
+	    }
+	  }, {
+	    key: "draw",
+	    value: function draw(graphics) {
+	      var model = this.context.$model;
+	      var innerRect = model.innerRect;
+	      var includedAngle = model.includedAngle / 2;
+	      var includeRad = includedAngle * Math.PI / 180;
+	      var newWidthDiff = innerRect.height / Math.tan(includeRad);
+	      var newHeightDiff = innerRect.width * Math.tan(includeRad); //在内接矩形基础上扩展出来的外界矩形
+
+	      var newWidth = innerRect.width + newWidthDiff;
+	      var newHeight = innerRect.height + newHeightDiff;
+	      graphics.moveTo(0, newHeight / 2);
+	      graphics.lineTo(newWidth / 2, 0);
+	      graphics.lineTo(0, -newHeight / 2);
+	      graphics.lineTo(-newWidth / 2, 0);
+	      graphics.lineTo(0, newHeight / 2);
+	      graphics.closePath();
+	      return this;
+	    }
+	  }]);
+
+	  return Diamond;
 	}(Shape);
 
 	var Canvax = {
-	  version: "2.0.67",
+	  version: "2.0.69",
 	  _: _,
 	  $: $,
 	  event: event,
@@ -7800,7 +7925,8 @@ var chartx = (function () {
 	  Polygon: Polygon$1,
 	  Rect: Rect,
 	  Sector: Sector,
-	  Arrow: Line$1
+	  Arrow: Arrow,
+	  Diamond: Diamond
 	};
 	Canvax.AnimationFrame = AnimationFrame;
 	Canvax.utils = Utils;
@@ -42102,6 +42228,7 @@ var chartx = (function () {
 	var _ = _canvax["default"]._,
 	    event = _canvax["default"].event;
 	var Rect = _canvax["default"].Shapes.Rect;
+	var Diamond = _canvax["default"].Shapes.Diamond;
 	var Path = _canvax["default"].Shapes.Path;
 	var Circle = _canvax["default"].Shapes.Circle;
 	var Arrow = _canvax["default"].Shapes.Arrow;
@@ -42141,7 +42268,7 @@ var chartx = (function () {
 	          detail: '单个节点的配置',
 	          propertys: {
 	            shapeType: {
-	              detail: '节点图形，目前只支持rect',
+	              detail: '节点图形，支持rect,diamond',
 	              "default": 'rect'
 	            },
 	            maxWidth: {
@@ -42157,19 +42284,27 @@ var chartx = (function () {
 	              "default": null
 	            },
 	            radius: {
-	              detail: '圆角角度',
+	              detail: '圆角角度，对rect生效',
 	              "default": 6
+	            },
+	            includedAngle: {
+	              detail: 'shapeType为diamond(菱形)的时候生效,x方向的夹角',
+	              "default": 60
 	            },
 	            fillStyle: {
 	              detail: '节点背景色',
 	              "default": '#ffffff'
+	            },
+	            lineWidth: {
+	              detail: '描边宽度',
+	              "default": 1
 	            },
 	            strokeStyle: {
 	              detail: '描边颜色',
 	              "default": '#e5e5e5'
 	            },
 	            padding: {
-	              detail: 'node节点容器到内容的边距',
+	              detail: 'node节点容器到内容的边距,节点内容是canvas的时候生效，dom节点不生效，需要自己在dom中控制',
 	              "default": 10
 	            },
 	            content: {
@@ -42608,13 +42743,37 @@ var chartx = (function () {
 	          //如果是edge，要填写这两节点
 	          source: null,
 	          target: null
-	        };
+	        }; //计算和设置node的尺寸
 
 	        _.extend(node, this._getElementAndSize(node));
 
 	        if (fields.length == 1) {
 	          // isNode
 	          node.shapeType = this.getProp(this.node.shapeType, node);
+
+	          if (node.shapeType == 'diamond') {
+	            //因为node的尺寸前面计算出来的是矩形的尺寸，如果是菱形的话，这里就是指内接矩形的尺寸，
+	            //需要换算成外接矩形的尺寸
+	            var innerRect = {
+	              //内接矩形
+	              width: node.width,
+	              height: node.height
+	            };
+	            var includedAngle = this.node.includedAngle / 2;
+	            var includeRad = includedAngle * Math.PI / 180;
+	            var newWidthDiff = innerRect.height / Math.tan(includeRad);
+	            var newHeightDiff = innerRect.width * Math.tan(includeRad); //在内接矩形基础上扩展出来的外界矩形
+
+	            var newWidth = innerRect.width + newWidthDiff;
+	            var newHeight = innerRect.height + newHeightDiff; //把新的菱形的外界边界回写
+
+	            node._innerRect = {
+	              width: node.width,
+	              height: node.height
+	            };
+	            node.width = newWidth;
+	            node.height = newHeight;
+	          }
 	          data$1.nodes.push(node);
 	          Object.assign(node, this.layoutOpts.node);
 	          _nodeMap[node.key] = node;
@@ -42845,24 +43004,43 @@ var chartx = (function () {
 	      });
 
 	      _.each(this.data.nodes, function (node) {
+	        var shape = Rect;
 	        var nodeId = "node_" + node.key;
+	        var lineWidth = me.getProp(me.node.lineWidth, node);
+	        var fillStyle = me.getProp(me.node.fillStyle, node);
+	        var strokeStyle = me.getProp(me.node.strokeStyle, node);
+
+	        var radius = _.flatten([me.getProp(me.node.radius, node)]);
+
 	        var context = {
 	          x: node.x - node.width / 2,
 	          y: node.y - node.height / 2,
 	          width: node.width,
 	          height: node.height,
-	          lineWidth: 1,
-	          fillStyle: me.getProp(me.node.fillStyle, node),
-	          strokeStyle: me.getProp(me.node.strokeStyle, node),
-	          radius: _.flatten([me.getProp(me.node.radius, node)])
+	          lineWidth: lineWidth,
+	          fillStyle: fillStyle,
+	          strokeStyle: strokeStyle,
+	          radius: radius
 	        };
+
+	        if (node.shapeType == 'diamond') {
+	          shape = Diamond;
+	          context = {
+	            x: node.x,
+	            y: node.y,
+	            innerRect: node._innerRect,
+	            lineWidth: lineWidth,
+	            fillStyle: fillStyle,
+	            strokeStyle: strokeStyle
+	          };
+	        }
 
 	        var _boxShape = me.nodesSp.getChildById(nodeId);
 
 	        if (_boxShape) {
 	          _.extend(_boxShape.context, context);
 	        } else {
-	          _boxShape = new Rect({
+	          _boxShape = new shape({
 	            id: nodeId,
 	            context: context
 	          });
@@ -42885,11 +43063,19 @@ var chartx = (function () {
 	            node.contentElement.context.y = node.y;
 	          } else if (node.ctype == "html") {
 	            var devicePixelRatio = typeof window !== 'undefined' ? window.devicePixelRatio : 1;
-	            node.contentElement.style.transform = "matrix(" + _boxShape.worldTransform.clone().scale(1 / devicePixelRatio, 1 / devicePixelRatio).toArray().join() + ")";
-	            node.contentElement.style.transformOrigin = "left top"; //修改为左上角为旋转中心点来和canvas同步
 
-	            node.contentElement.style.marginLeft = me.getProp(me.node.padding, node) * me.status.transform.scale + "px";
-	            node.contentElement.style.marginTop = me.getProp(me.node.padding, node) * me.status.transform.scale + "px";
+	            var contentMatrix = _boxShape.worldTransform.clone();
+
+	            contentMatrix = contentMatrix.scale(1 / devicePixelRatio, 1 / devicePixelRatio);
+
+	            if (node.shapeType == 'diamond') {
+	              contentMatrix = contentMatrix.translate(-node._innerRect.width / 2, -node._innerRect.height / 2);
+	            }
+	            node.contentElement.style.transform = "matrix(" + contentMatrix.toArray().join() + ")";
+	            node.contentElement.style.transformOrigin = "left top"; //修改为左上角为旋转中心点来和canvas同步
+	            //node.contentElement.style.marginLeft = me.getProp(me.node.padding, node) * me.status.transform.scale + "px";
+	            //node.contentElement.style.marginTop = me.getProp(me.node.padding, node) * me.status.transform.scale + "px";
+
 	            node.contentElement.style.visibility = "visible";
 	          }
 	        });
@@ -43114,15 +43300,16 @@ var chartx = (function () {
 	      }
 	      _dom.style.cssText += "; color:" + me.getProp(me.node.content.fontColor, node) + ";";
 	      _dom.style.cssText += "; text-align:" + me.getProp(me.node.content.textAlign, node) + ";";
-	      _dom.style.cssText += "; vertical-align:" + me.getProp(me.node.content.textBaseline, node) + ";";
+	      _dom.style.cssText += "; vertical-align:" + me.getProp(me.node.content.textBaseline, node) + ";"; //_dom.style.cssText += "; padding:"+me.getProp(me.node.padding, node)+"px;";
+
 	      _dom.innerHTML = content;
 
 	      if (!width) {
-	        width = _dom.offsetWidth + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
+	        width = _dom.offsetWidth; // + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
 	      }
 
 	      if (!height) {
-	        height = _dom.offsetHeight + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
+	        height = _dom.offsetHeight; // + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
 	      }
 	      return {
 	        contentElement: _dom,
