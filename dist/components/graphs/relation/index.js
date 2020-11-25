@@ -87,6 +87,10 @@ function (_GraphsBase) {
               detail: '节点最大的width',
               "default": 200
             },
+            cursor: {
+              detail: '节点的鼠标样式',
+              "default": 'pointer'
+            },
             width: {
               detail: '内容的width',
               "default": null
@@ -115,8 +119,117 @@ function (_GraphsBase) {
               detail: '描边颜色',
               "default": '#e5e5e5'
             },
+            shadow: {
+              detail: '阴影设置',
+              propertys: {
+                shadowOffsetX: {
+                  detail: 'x偏移量',
+                  "default": 0
+                },
+                shadowOffsetY: {
+                  detail: 'y偏移量',
+                  "default": 0
+                },
+                shadowBlur: {
+                  detail: '阴影模糊值',
+                  "default": 0
+                },
+                shadowColor: {
+                  detail: '阴影颜色',
+                  "default": '#000000'
+                }
+              }
+            },
+            select: {
+              detail: '选中效果',
+              propertys: {
+                enabled: {
+                  detail: '是否开启选中',
+                  "default": false
+                },
+                triggerEventType: {
+                  detail: '触发事件',
+                  "default": 'click'
+                },
+                shadow: {
+                  detail: '选中效果的阴影设置',
+                  propertys: {
+                    shadowOffsetX: {
+                      detail: 'x偏移量',
+                      "default": 0
+                    },
+                    shadowOffsetY: {
+                      detail: 'y偏移量',
+                      "default": 0
+                    },
+                    shadowBlur: {
+                      detail: '阴影模糊值',
+                      "default": 0
+                    },
+                    shadowColor: {
+                      detail: '阴影颜色',
+                      "default": '#000000'
+                    }
+                  }
+                },
+                fillStyle: {
+                  detail: 'hover节点背景色',
+                  "default": '#ffffff'
+                },
+                lineWidth: {
+                  detail: 'hover描边宽度',
+                  "default": 1
+                },
+                strokeStyle: {
+                  detail: 'hover描边颜色',
+                  "default": '#e5e5e5'
+                }
+              }
+            },
+            focus: {
+              detail: 'hover效果',
+              propertys: {
+                enabled: {
+                  detail: '是否开启hover效果',
+                  "default": false
+                },
+                shadow: {
+                  detail: '选中效果的阴影设置',
+                  propertys: {
+                    shadowOffsetX: {
+                      detail: 'x偏移量',
+                      "default": 0
+                    },
+                    shadowOffsetY: {
+                      detail: 'y偏移量',
+                      "default": 0
+                    },
+                    shadowBlur: {
+                      detail: '阴影模糊值',
+                      "default": 0
+                    },
+                    shadowColor: {
+                      detail: '阴影颜色',
+                      "default": '#000000'
+                    }
+                  }
+                },
+                fillStyle: {
+                  detail: 'hover节点背景色',
+                  "default": '#ffffff'
+                },
+                lineWidth: {
+                  detail: 'hover描边宽度',
+                  "default": 1
+                },
+                strokeStyle: {
+                  detail: 'hover描边颜色',
+                  "default": '#e5e5e5'
+                }
+              }
+            },
             padding: {
-              detail: 'node节点容器到内容的边距,节点内容是canvas的时候生效，dom节点不生效，需要自己在dom中控制',
+              detail: 'node节点容器到内容的边距,节点内容是canvas的时候生效，dom节点不生效',
               "default": 10
             },
             content: {
@@ -235,6 +348,10 @@ function (_GraphsBase) {
                     x: 0,
                     y: 0
                   }
+                },
+                wheelAction: {
+                  detail: "滚轮触屏滑动触发的行为，可选有scale和offset，默认offset",
+                  "default": "offset"
                 }
               }
             }
@@ -352,7 +469,7 @@ function (_GraphsBase) {
       this.induce.on(event.types.get(), function (e) {
         if (me.status.transform.enabled) {
           e.preventDefault();
-          var point = e.target.localToGlobal(e.point, me.sprite);
+          var point = e.target.localToGlobal(e.point, me.sprite); //鼠标拖拽移动
 
           if (e.type == "mousedown") {
             me.induce.toFront();
@@ -382,9 +499,11 @@ function (_GraphsBase) {
             }
           }
 
-          ;
+          ; //滚轮缩放
 
           if (e.type == "wheel") {
+            console.log(_deltaY, e.deltaY);
+
             if (Math.abs(e.deltaY) > Math.abs(_deltaY)) {
               _deltaY = e.deltaY;
             }
@@ -393,16 +512,34 @@ function (_GraphsBase) {
 
             if (!_wheelHandleTimeer) {
               _wheelHandleTimeer = setTimeout(function () {
-                var _me$zoom$wheel = me.zoom.wheel(e, point),
-                    scale = _me$zoom$wheel.scale,
-                    x = _me$zoom$wheel.x,
-                    y = _me$zoom$wheel.y;
+                if (me.status.transform.wheelAction == 'offset') {
+                  //移动的话用offset,偏移多少像素
+                  var _me$zoom$offset = me.zoom.offset({
+                    x: -e.deltaX,
+                    y: -e.deltaY
+                  }),
+                      _x = _me$zoom$offset.x,
+                      _y = _me$zoom$offset.y; //me.zoom.move( {x:zx, y:zy} );
 
-                me.graphsView.context.x = x;
-                me.graphsView.context.y = y;
-                me.graphsView.context.scaleX = scale;
-                me.graphsView.context.scaleY = scale;
-                me.status.transform.scale = scale;
+
+                  me.graphsView.context.x = _x;
+                  me.graphsView.context.y = _y;
+                }
+
+                if (me.status.transform.wheelAction == 'scale') {
+                  // 缩放         
+                  var _me$zoom$wheel = me.zoom.wheel(e, point),
+                      scale = _me$zoom$wheel.scale,
+                      _x2 = _me$zoom$wheel.x,
+                      _y2 = _me$zoom$wheel.y;
+
+                  me.graphsView.context.x = _x2;
+                  me.graphsView.context.y = _y2;
+                  me.graphsView.context.scaleX = scale;
+                  me.graphsView.context.scaleY = scale;
+                  me.status.transform.scale = scale;
+                }
+
                 _wheelHandleTimeer = null;
                 _deltaY = 0;
               }, _wheelHandleTimeLen);
@@ -512,7 +649,7 @@ function (_GraphsBase) {
   }, {
     key: "_destroy",
     value: function _destroy(item) {
-      item.boxElement && item.boxElement.destroy();
+      item.shapeElement && item.shapeElement.destroy();
 
       if (item.contentElement.destroy) {
         item.contentElement.destroy();
@@ -584,7 +721,9 @@ function (_GraphsBase) {
           shapeType: null,
           //如果是edge，要填写这两节点
           source: null,
-          target: null
+          target: null,
+          focused: false,
+          selected: false
         }; //计算和设置node的尺寸
 
         _.extend(node, this._getElementAndSize(node));
@@ -855,6 +994,7 @@ function (_GraphsBase) {
             me.arrowsSp.addChild(_arrow);
           }
 
+          ;
           edge.arrowElement = _arrow;
         }
 
@@ -864,21 +1004,32 @@ function (_GraphsBase) {
       _.each(this.data.nodes, function (node) {
         var shape = Rect;
         var nodeId = "node_" + node.key;
-        var lineWidth = me.getProp(me.node.lineWidth, node);
-        var fillStyle = me.getProp(me.node.fillStyle, node);
-        var strokeStyle = me.getProp(me.node.strokeStyle, node);
+        var cursor = me.node.cursor;
 
-        var radius = _.flatten([me.getProp(me.node.radius, node)]);
+        var _me$_getNodeStyle = me._getNodeStyle(node),
+            lineWidth = _me$_getNodeStyle.lineWidth,
+            fillStyle = _me$_getNodeStyle.fillStyle,
+            strokeStyle = _me$_getNodeStyle.strokeStyle,
+            radius = _me$_getNodeStyle.radius,
+            shadowOffsetX = _me$_getNodeStyle.shadowOffsetX,
+            shadowOffsetY = _me$_getNodeStyle.shadowOffsetY,
+            shadowBlur = _me$_getNodeStyle.shadowBlur,
+            shadowColor = _me$_getNodeStyle.shadowColor;
 
         var context = {
           x: node.x - node.width / 2,
           y: node.y - node.height / 2,
           width: node.width,
           height: node.height,
+          cursor: cursor,
           lineWidth: lineWidth,
           fillStyle: fillStyle,
           strokeStyle: strokeStyle,
-          radius: radius
+          radius: radius,
+          shadowOffsetX: shadowOffsetX,
+          shadowOffsetY: shadowOffsetY,
+          shadowBlur: shadowBlur,
+          shadowColor: shadowColor
         };
 
         if (node.shapeType == 'diamond') {
@@ -886,10 +1037,15 @@ function (_GraphsBase) {
           context = {
             x: node.x,
             y: node.y,
+            cursor: cursor,
             innerRect: node._innerRect,
             lineWidth: lineWidth,
             fillStyle: fillStyle,
-            strokeStyle: strokeStyle
+            strokeStyle: strokeStyle,
+            shadowOffsetX: shadowOffsetX,
+            shadowOffsetY: shadowOffsetY,
+            shadowBlur: shadowBlur,
+            shadowColor: shadowColor
           };
         }
 
@@ -902,6 +1058,7 @@ function (_GraphsBase) {
         } else {
           _boxShape = new shape({
             id: nodeId,
+            hoverClone: false,
             context: context
           });
           me.nodesSp.addChild(_boxShape);
@@ -911,13 +1068,38 @@ function (_GraphsBase) {
               trigger: me.node,
               nodes: [this.nodeData]
             };
+
+            if (me.node.focus.enabled) {
+              if (e.type == "mouseover") {
+                me.focusAt(this.nodeData);
+              }
+
+              if (e.type == "mouseout") {
+                me.unfocusAt(this.nodeData);
+              }
+            }
+
+            ;
+
+            if (me.node.select.enabled && e.type == me.node.select.triggerEventType) {
+              //如果开启了图表的选中交互
+              //TODO:这里不能
+              if (this.nodeData.selected) {
+                //说明已经选中了
+                me.unselectAt(this.nodeData);
+              } else {
+                me.selectAt(this.nodeData);
+              }
+            }
+
+            ;
             me.app.fire(e.type, e);
           });
         }
 
         ;
         _boxShape.nodeData = node;
-        node.boxElement = _boxShape;
+        node.shapeElement = _boxShape;
 
         _boxShape.on("transform", function () {
           if (node.ctype == "canvas") {
@@ -926,19 +1108,21 @@ function (_GraphsBase) {
           } else if (node.ctype == "html") {
             var devicePixelRatio = typeof window !== 'undefined' ? window.devicePixelRatio : 1;
 
-            var contentMatrix = _boxShape.worldTransform.clone();
+            var contentMatrix = _boxShape.worldTransform.clone(); //if( node.shapeType == 'diamond' ){
+            //    contentMatrix = contentMatrix.translate( -node._innerRect.width/2, -node._innerRect.height/2 )
+            //};
+
 
             contentMatrix = contentMatrix.scale(1 / devicePixelRatio, 1 / devicePixelRatio);
-
-            if (node.shapeType == 'diamond') {
-              contentMatrix = contentMatrix.translate(-node._innerRect.width / 2, -node._innerRect.height / 2);
-            }
-
-            ;
             node.contentElement.style.transform = "matrix(" + contentMatrix.toArray().join() + ")";
             node.contentElement.style.transformOrigin = "left top"; //修改为左上角为旋转中心点来和canvas同步
-            //node.contentElement.style.marginLeft = me.getProp(me.node.padding, node) * me.status.transform.scale + "px";
+
+            if (node.shapeType == 'diamond') {
+              node.contentElement.style.left = -(node._innerRect.width / 2) * me.status.transform.scale + "px";
+              node.contentElement.style.top = -(node._innerRect.height / 2) * me.status.transform.scale + "px";
+            } //node.contentElement.style.marginLeft = me.getProp(me.node.padding, node) * me.status.transform.scale + "px";
             //node.contentElement.style.marginTop = me.getProp(me.node.padding, node) * me.status.transform.scale + "px";
+
 
             node.contentElement.style.visibility = "visible";
           }
@@ -949,6 +1133,132 @@ function (_GraphsBase) {
 
       this.induce.context.width = this.width;
       this.induce.context.height = this.height;
+    }
+  }, {
+    key: "_getNodeStyle",
+    value: function _getNodeStyle(nodeData, targetPath) {
+      var me = this;
+
+      var radius = _.flatten([me.getProp(me.node.radius, nodeData)]);
+
+      var target = me.node;
+
+      if (targetPath == 'select') {
+        target = me.node.select;
+      }
+
+      if (targetPath == 'focus') {
+        target = me.node.focus;
+      }
+
+      var lineWidth = me.getProp(target.lineWidth, nodeData);
+      var fillStyle = me.getProp(target.fillStyle, nodeData);
+      var strokeStyle = me.getProp(target.strokeStyle, nodeData);
+      var shadowOffsetX = me.getProp(target.shadow.shadowOffsetX, nodeData);
+      var shadowOffsetY = me.getProp(target.shadow.shadowOffsetY, nodeData);
+      var shadowBlur = me.getProp(target.shadow.shadowBlur, nodeData);
+      var shadowColor = me.getProp(target.shadow.shadowColor, nodeData);
+      return {
+        lineWidth: lineWidth,
+        fillStyle: fillStyle,
+        strokeStyle: strokeStyle,
+        radius: radius,
+        shadowOffsetX: shadowOffsetX,
+        shadowOffsetY: shadowOffsetY,
+        shadowBlur: shadowBlur,
+        shadowColor: shadowColor
+      };
+    }
+  }, {
+    key: "_setNodeStyle",
+    value: function _setNodeStyle(nodeData, targetPath) {
+      var _this$_getNodeStyle = this._getNodeStyle(nodeData, targetPath),
+          lineWidth = _this$_getNodeStyle.lineWidth,
+          fillStyle = _this$_getNodeStyle.fillStyle,
+          strokeStyle = _this$_getNodeStyle.strokeStyle,
+          shadowOffsetX = _this$_getNodeStyle.shadowOffsetX,
+          shadowOffsetY = _this$_getNodeStyle.shadowOffsetY,
+          shadowBlur = _this$_getNodeStyle.shadowBlur,
+          shadowColor = _this$_getNodeStyle.shadowColor;
+
+      if (nodeData.shapeElement && nodeData.shapeElement.context) {
+        var ctx = nodeData.shapeElement.context;
+        ctx.lineWidth = lineWidth;
+        ctx.fillStyle = fillStyle;
+        ctx.strokeStyle = strokeStyle;
+        ctx.shadowOffsetX = shadowOffsetX;
+        ctx.shadowOffsetY = shadowOffsetY;
+        ctx.shadowBlur = shadowBlur;
+        ctx.shadowColor = shadowColor;
+      }
+    }
+  }, {
+    key: "focusAt",
+    value: function focusAt(key) {
+      var nodeData = this.getNodeDataAt(key);
+
+      if (nodeData) {
+        !nodeData.selected && this._setNodeStyle(nodeData, 'focus');
+        nodeData.focused = true;
+      }
+    }
+  }, {
+    key: "unfocusAt",
+    value: function unfocusAt(key) {
+      var nodeData = this.getNodeDataAt(key);
+
+      if (nodeData) {
+        !nodeData.selected && this._setNodeStyle(nodeData);
+        nodeData.focused = false;
+      }
+    }
+  }, {
+    key: "selectAt",
+    value: function selectAt(key) {
+      var nodeData = this.getNodeDataAt(key);
+
+      if (nodeData) {
+        this._setNodeStyle(nodeData, 'select');
+
+        nodeData.selected = true;
+      }
+    }
+  }, {
+    key: "unselectAt",
+    value: function unselectAt(key) {
+      var nodeData = this.getNodeDataAt(key);
+
+      if (nodeData) {
+        nodeData.focused ? this._setNodeStyle(nodeData, 'focus') : this._setNodeStyle(nodeData);
+        nodeData.selected = false;
+      }
+    }
+  }, {
+    key: "getNodeDataAt",
+    value: function getNodeDataAt(key) {
+      if (key.type && key.type == "relation") {
+        return key;
+      }
+
+      ;
+
+      if (typeof key == 'string') {
+        var keys = key.split(',');
+
+        if (keys.length == 1) {
+          return this.data.nodes.find(function (item) {
+            return item.key == key;
+          });
+        }
+
+        if (keys.length == 2) {
+          return this.data.edges.find(function (item) {
+            return item.key.join() == keys.join();
+          });
+        }
+      }
+
+      ;
     }
   }, {
     key: "_setTreePoints",

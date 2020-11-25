@@ -14,8 +14,10 @@ export default function( opt = {} ){
     let scale    = opt.scale    || 1;
     let scaleMin = opt.scaleMin || 1;
     let scaleMax = opt.scaleMax || 8;
+    //世界坐标
     let wx       = 0;
     let wy       = 0;
+    //舞台坐标
     let sx       = 0;
     let sy       = 0;
 

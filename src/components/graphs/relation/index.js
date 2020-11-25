@@ -54,6 +54,10 @@ class Relation extends GraphsBase {
                         detail: '节点最大的width',
                         default: 200
                     },
+                    cursor: {
+                        detail: '节点的鼠标样式',
+                        default: 'pointer'
+                    },
                     width: {
                         detail: '内容的width',
                         default: null
@@ -82,8 +86,118 @@ class Relation extends GraphsBase {
                         detail: '描边颜色',
                         default: '#e5e5e5'
                     },
+                    shadow: {
+                        detail: '阴影设置',
+                        propertys: {
+                            shadowOffsetX: {
+                                detail: 'x偏移量',
+                                default: 0
+                            },
+                            shadowOffsetY: {
+                                detail: 'y偏移量',
+                                default: 0
+                            },
+                            shadowBlur: {
+                                detail: '阴影模糊值',
+                                default: 0
+                            },
+                            shadowColor: {
+                                detail: '阴影颜色',
+                                default: '#000000'
+                            }
+                        }
+                    },
+                    select: {
+                        detail: '选中效果',
+                        propertys: {
+                            enabled: {
+                                detail: '是否开启选中',
+                                default: false
+                            },
+                            triggerEventType: {
+                                detail: '触发事件',
+                                default:'click'
+                            },
+                            shadow: {
+                                detail: '选中效果的阴影设置',
+                                propertys: {
+                                    shadowOffsetX: {
+                                        detail: 'x偏移量',
+                                        default: 0
+                                    },
+                                    shadowOffsetY: {
+                                        detail: 'y偏移量',
+                                        default: 0
+                                    },
+                                    shadowBlur: {
+                                        detail: '阴影模糊值',
+                                        default: 0
+                                    },
+                                    shadowColor: {
+                                        detail: '阴影颜色',
+                                        default: '#000000'
+                                    }
+                                }
+                            },
+                            fillStyle: {
+                                detail: 'hover节点背景色',
+                                default: '#ffffff'
+                            },
+                            lineWidth: {
+                                detail: 'hover描边宽度',
+                                default: 1
+                            },
+                            strokeStyle: {
+                                detail: 'hover描边颜色',
+                                default: '#e5e5e5'
+                            }
+                        }
+                    },
+                    focus: {
+                        detail: 'hover效果',
+                        propertys: {
+                            enabled: {
+                                detail: '是否开启hover效果',
+                                default: false
+                            },
+                            shadow: {
+                                detail: '选中效果的阴影设置',
+                                propertys: {
+                                    shadowOffsetX: {
+                                        detail: 'x偏移量',
+                                        default: 0
+                                    },
+                                    shadowOffsetY: {
+                                        detail: 'y偏移量',
+                                        default: 0
+                                    },
+                                    shadowBlur: {
+                                        detail: '阴影模糊值',
+                                        default: 0
+                                    },
+                                    shadowColor: {
+                                        detail: '阴影颜色',
+                                        default: '#000000'
+                                    }
+                                }
+                            },
+                            fillStyle: {
+                                detail: 'hover节点背景色',
+                                default: '#ffffff'
+                            },
+                            lineWidth: {
+                                detail: 'hover描边宽度',
+                                default: 1
+                            },
+                            strokeStyle: {
+                                detail: 'hover描边颜色',
+                                default: '#e5e5e5'
+                            }
+                        }
+                    },
+
                     padding: {
-                        detail: 'node节点容器到内容的边距,节点内容是canvas的时候生效，dom节点不生效，需要自己在dom中控制',
+                        detail: 'node节点容器到内容的边距,节点内容是canvas的时候生效，dom节点不生效',
                         default: 10
                     },
                     content: {
@@ -203,6 +317,10 @@ class Relation extends GraphsBase {
                                 default: {
                                     x: 0, y: 0
                                 }
+                            },
+                            wheelAction: {
+                                detail: "滚轮触屏滑动触发的行为，可选有scale和offset，默认offset",
+                                default: "offset"
                             }
                         }
                     }
@@ -319,6 +437,7 @@ class Relation extends GraphsBase {
                 e.preventDefault();
                 let point = e.target.localToGlobal(e.point, me.sprite);
 
+                //鼠标拖拽移动
                 if (e.type == "mousedown") {
                     me.induce.toFront();
                     _mosedownIng = true;
@@ -337,28 +456,40 @@ class Relation extends GraphsBase {
                         me.graphsView.context.y = y;
                     }
                 };
+
+                //滚轮缩放
                 if (e.type == "wheel") {
+                    console.log( _deltaY, e.deltaY )
                     if (Math.abs(e.deltaY) > Math.abs(_deltaY)) {
                         _deltaY = e.deltaY;
                     };
-                    
                     if (!_wheelHandleTimeer) {
                         _wheelHandleTimeer = setTimeout(function () {
-
-                            let {scale,x,y} = me.zoom.wheel( e, point );
-                        
-                            me.graphsView.context.x = x;
-                            me.graphsView.context.y = y;
-                            me.graphsView.context.scaleX = scale;
-                            me.graphsView.context.scaleY = scale;
-                            me.status.transform.scale = scale;
-
+ 
+                            if( me.status.transform.wheelAction == 'offset' ){
+                                //移动的话用offset,偏移多少像素
+                                let {x,y} = me.zoom.offset( {x:-e.deltaX, y:-e.deltaY} ); //me.zoom.move( {x:zx, y:zy} );
+                                me.graphsView.context.x = x;
+                                me.graphsView.context.y = y;
+                            } 
+                            if( me.status.transform.wheelAction == 'scale' ){
+                                // 缩放         
+                                let {scale,x,y} = me.zoom.wheel( e, point );
+                                me.graphsView.context.x = x;
+                                me.graphsView.context.y = y;
+                                me.graphsView.context.scaleX = scale;
+                                me.graphsView.context.scaleY = scale;
+                                me.status.transform.scale = scale;
+                            } 
+                            
                             _wheelHandleTimeer = null;
                             _deltaY = 0;
 
                         }, _wheelHandleTimeLen);
                     };
                 };
+
+
             };
 
         });
@@ -439,7 +570,7 @@ class Relation extends GraphsBase {
     }
 
     _destroy( item ){
-        item.boxElement && item.boxElement.destroy();
+        item.shapeElement && item.shapeElement.destroy();
         if(item.contentElement.destroy){
             item.contentElement.destroy()
         } else {
@@ -506,7 +637,11 @@ class Relation extends GraphsBase {
 
                 //如果是edge，要填写这两节点
                 source : null,
-                target : null
+                target : null,
+
+                focused    : false,
+                selected   : false
+                
             };
             
             //计算和设置node的尺寸
@@ -758,14 +893,14 @@ class Relation extends GraphsBase {
                     _arrow = new Arrow({
                         id: arrowId,
                         context: {
-                            control: arrowControl,
-                            point: edge.points.slice(-1)[0],
-                            strokeStyle: strokeStyle
+                            control     : arrowControl,
+                            point       : edge.points.slice(-1)[0],
+                            strokeStyle : strokeStyle
                             //fillStyle: strokeStyle
                         }
                     });
                     me.arrowsSp.addChild(_arrow);
-                }
+                };
 
                 edge.arrowElement = _arrow;
                 
@@ -778,30 +913,34 @@ class Relation extends GraphsBase {
             let shape = Rect;
 
             let nodeId = "node_"+node.key;
-            let lineWidth = me.getProp(me.node.lineWidth, node);
-            let fillStyle = me.getProp(me.node.fillStyle, node);
-            let strokeStyle = me.getProp(me.node.strokeStyle, node);
-            let radius = _.flatten([me.getProp(me.node.radius, node)]);
+
+            let cursor = me.node.cursor;
+
+            let { lineWidth,fillStyle,strokeStyle,radius,shadowOffsetX,shadowOffsetY,shadowBlur,shadowColor } = me._getNodeStyle( node );   
 
             let context = {
                 x: node.x - node.width / 2,
                 y: node.y - node.height / 2,
                 width: node.width,
                 height: node.height,
+                cursor,
                 lineWidth,
                 fillStyle,
                 strokeStyle,
-                radius
+                radius,
+                shadowOffsetX,shadowOffsetY,shadowBlur,shadowColor
             };
             if( node.shapeType == 'diamond' ){
                 shape = Diamond;
                 context = {
                     x: node.x,
                     y: node.y,
+                    cursor,
                     innerRect : node._innerRect,
                     lineWidth,
                     fillStyle,
-                    strokeStyle
+                    strokeStyle,
+                    shadowOffsetX,shadowOffsetY,shadowBlur,shadowColor
                 }
             };
             
@@ -811,6 +950,7 @@ class Relation extends GraphsBase {
             } else {
                 _boxShape = new shape({
                     id: nodeId,
+                    hoverClone: false,
                     context
                 });
                 me.nodesSp.addChild(_boxShape);
@@ -819,12 +959,33 @@ class Relation extends GraphsBase {
                         trigger: me.node,
                         nodes: [this.nodeData]
                     };
+
+                    if( me.node.focus.enabled ){
+                        if( e.type == "mouseover" ){
+                            me.focusAt( this.nodeData );
+                        }
+                        if( e.type == "mouseout" ){
+                            me.unfocusAt( this.nodeData );
+                        }
+                    };
+            
+                    if( me.node.select.enabled && e.type == me.node.select.triggerEventType ){
+                        //如果开启了图表的选中交互
+                        //TODO:这里不能
+                        if( this.nodeData.selected ){
+                            //说明已经选中了
+                            me.unselectAt( this.nodeData );
+                        } else {
+                            me.selectAt( this.nodeData );
+                        }
+                    };
+
                     me.app.fire(e.type, e);
                 });
             };
         
             _boxShape.nodeData = node;
-            node.boxElement = _boxShape;
+            node.shapeElement = _boxShape;
 
             _boxShape.on("transform", function () {
                 if (node.ctype == "canvas") {
@@ -833,12 +994,17 @@ class Relation extends GraphsBase {
                 } else if (node.ctype == "html") {
                     let devicePixelRatio = typeof (window) !== 'undefined' ? window.devicePixelRatio : 1;
                     let contentMatrix = _boxShape.worldTransform.clone();
+                    //if( node.shapeType == 'diamond' ){
+                    //    contentMatrix = contentMatrix.translate( -node._innerRect.width/2, -node._innerRect.height/2 )
+                    //};
                     contentMatrix = contentMatrix.scale(1 / devicePixelRatio, 1 / devicePixelRatio);
-                    if( node.shapeType == 'diamond' ){
-                        contentMatrix = contentMatrix.translate( -node._innerRect.width/2, -node._innerRect.height/2 )
-                    };
+                    
                     node.contentElement.style.transform = "matrix(" + contentMatrix.toArray().join() + ")";
                     node.contentElement.style.transformOrigin = "left top"; //修改为左上角为旋转中心点来和canvas同步
+                    if( node.shapeType == 'diamond' ){
+                        node.contentElement.style.left = -(node._innerRect.width/2) * me.status.transform.scale + "px";
+                        node.contentElement.style.top = -(node._innerRect.height/2) * me.status.transform.scale + "px";
+                    }
                     //node.contentElement.style.marginLeft = me.getProp(me.node.padding, node) * me.status.transform.scale + "px";
                     //node.contentElement.style.marginTop = me.getProp(me.node.padding, node) * me.status.transform.scale + "px";
                     node.contentElement.style.visibility = "visible";
@@ -849,6 +1015,91 @@ class Relation extends GraphsBase {
         this.induce.context.width = this.width;
         this.induce.context.height = this.height;
 
+    }
+
+    _getNodeStyle( nodeData , targetPath){
+        let me = this;
+
+        let radius = _.flatten([me.getProp(me.node.radius, nodeData)]);
+
+        let target = me.node;
+        if( targetPath == 'select' ){
+            target = me.node.select;
+        }
+        if( targetPath == 'focus' ){
+            target = me.node.focus;
+        }
+
+        let lineWidth     = me.getProp(target.lineWidth, nodeData);
+        let fillStyle     = me.getProp(target.fillStyle, nodeData);
+        let strokeStyle   = me.getProp(target.strokeStyle, nodeData);
+        let shadowOffsetX = me.getProp(target.shadow.shadowOffsetX, nodeData);
+        let shadowOffsetY = me.getProp(target.shadow.shadowOffsetY, nodeData);
+        let shadowBlur    = me.getProp(target.shadow.shadowBlur, nodeData);
+        let shadowColor   = me.getProp(target.shadow.shadowColor, nodeData);
+
+        return {
+            lineWidth,fillStyle,strokeStyle,radius,shadowOffsetX,shadowOffsetY,shadowBlur,shadowColor
+        };
+    }
+
+    _setNodeStyle( nodeData , targetPath ){
+        let { lineWidth,fillStyle,strokeStyle,shadowOffsetX,shadowOffsetY,shadowBlur,shadowColor } = this._getNodeStyle( nodeData, targetPath ); 
+        if(nodeData.shapeElement && nodeData.shapeElement.context){
+            let ctx = nodeData.shapeElement.context;
+            ctx.lineWidth     = lineWidth;
+            ctx.fillStyle     = fillStyle;
+            ctx.strokeStyle   = strokeStyle;
+            ctx.shadowOffsetX = shadowOffsetX;
+            ctx.shadowOffsetY = shadowOffsetY;
+            ctx.shadowBlur    = shadowBlur;
+            ctx.shadowColor   = shadowColor;
+        }
+    }
+
+
+    focusAt( key ){
+        let nodeData = this.getNodeDataAt( key );
+        if( nodeData ){
+            !nodeData.selected && this._setNodeStyle( nodeData, 'focus' );
+            nodeData.focused = true;
+        }
+    }
+    unfocusAt( key ){
+        let nodeData = this.getNodeDataAt( key );
+        if( nodeData ){
+            !nodeData.selected && this._setNodeStyle( nodeData );
+            nodeData.focused = false;
+        }
+    }
+    selectAt( key ){
+        let nodeData = this.getNodeDataAt( key );
+        if( nodeData ){
+            this._setNodeStyle( nodeData, 'select' );
+            nodeData.selected = true;
+        }
+    }
+    unselectAt( key ){
+        let nodeData = this.getNodeDataAt( key );
+        if( nodeData ){
+            nodeData.focused ? this._setNodeStyle( nodeData, 'focus' ) : this._setNodeStyle( nodeData );
+            nodeData.selected = false;
+        }
+    }
+
+    getNodeDataAt( key ){
+        if( key.type && key.type == "relation" ){
+            return key
+        };
+        if( typeof key == 'string' ){
+            let keys = key.split(',');
+            if( keys.length == 1 ){
+                return this.data.nodes.find( item => item.key == key )
+            }
+            if( keys.length == 2 ){
+                return this.data.edges.find( item => item.key.join() == keys.join() )
+            }
+        };
     }
 
     _setTreePoints( edge ){

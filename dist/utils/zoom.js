@@ -20,9 +20,11 @@ function _default() {
   };
   var scale = opt.scale || 1;
   var scaleMin = opt.scaleMin || 1;
-  var scaleMax = opt.scaleMax || 8;
+  var scaleMax = opt.scaleMax || 8; //世界坐标
+
   var wx = 0;
-  var wy = 0;
+  var wy = 0; //舞台坐标
+
   var sx = 0;
   var sy = 0;
 
