@@ -42337,6 +42337,10 @@ var chartx = (function () {
 	                  detail: '是否开启选中',
 	                  "default": false
 	                },
+	                list: {
+	                  detail: '选中的node.key的集合,外部传入可以选中',
+	                  "default": []
+	                },
 	                triggerEventType: {
 	                  detail: '触发事件',
 	                  "default": 'click'
@@ -43234,6 +43238,10 @@ var chartx = (function () {
 	        _boxShape.nodeData = node;
 	        node.shapeElement = _boxShape;
 
+	        if (me.node.select.list.indexOf(node.key) > -1) {
+	          me.selectAt(node);
+	        }
+
 	        _boxShape.on("transform", function () {
 	          if (node.ctype == "canvas") {
 	            node.contentElement.context.x = node.x;
@@ -43352,7 +43360,20 @@ var chartx = (function () {
 	        this._setNodeStyle(nodeData, 'select');
 
 	        nodeData.selected = true;
+
+	        if (this.node.select.list.indexOf(nodeData.key) == -1) {
+	          this.node.select.list.push(nodeData.key);
+	        }
 	      }
+	    }
+	  }, {
+	    key: "selectAll",
+	    value: function selectAll() {
+	      var _this2 = this;
+
+	      this.data.nodes.forEach(function (nodeData) {
+	        _this2.selectAt(nodeData);
+	      });
 	    }
 	  }, {
 	    key: "unselectAt",
@@ -43362,7 +43383,21 @@ var chartx = (function () {
 	      if (nodeData) {
 	        nodeData.focused ? this._setNodeStyle(nodeData, 'focus') : this._setNodeStyle(nodeData);
 	        nodeData.selected = false;
+	        var selectedKeyInd = this.node.select.list.indexOf(nodeData.key);
+
+	        if (selectedKeyInd > -1) {
+	          this.node.select.list.splice(selectedKeyInd, 1);
+	        }
 	      }
+	    }
+	  }, {
+	    key: "unselectAll",
+	    value: function unselectAll() {
+	      var _this3 = this;
+
+	      this.data.nodes.forEach(function (nodeData) {
+	        _this3.unselectAt(nodeData);
+	      });
 	    }
 	  }, {
 	    key: "getNodeDataAt",
