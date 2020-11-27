@@ -93,6 +93,14 @@ export default class PlanetGroup
                             triggerEventType: {
                                 detail: '触发事件',
                                 default:'click'
+                            },
+                            onbefore: {
+                                detail: '执行select处理函数的前处理函数，返回false则取消执行select',
+                                default: null
+                            },
+                            onend: {
+                                detail: '执行select处理函数的后处理函数',
+                                default: null
                             }
                         }
                     }
@@ -545,11 +553,16 @@ export default class PlanetGroup
                     if( me.node.select.enabled && e.type == me.node.select.triggerEventType ){
                         //如果开启了图表的选中交互
                         //TODO:这里不能
-                        if( this.nodeData.selected ){
-                            //说明已经选中了
-                            me.unselectAt( this.nodeData );
-                        } else {
-                            me.selectAt( this.nodeData );
+                        let onbefore = me.node.select.onbefore;
+                        let onend    = me.node.select.onend;
+                        if( !onbefore || ( typeof onbefore == 'function' && onbefore.apply(me, [this.nodeData]) !== false ) ){
+                            if( this.nodeData.selected ){
+                                //说明已经选中了
+                                me.unselectAt( this.nodeData );
+                            } else {
+                                me.selectAt( this.nodeData );
+                            }
+                            onend && typeof onend == 'function' && onend.apply( me, [this.nodeData] );
                         }
                     };
 

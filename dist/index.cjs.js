@@ -22024,6 +22024,14 @@ function () {
                 triggerEventType: {
                   detail: '触发事件',
                   "default": 'click'
+                },
+                onbefore: {
+                  detail: '执行select处理函数的前处理函数，返回false则取消执行select',
+                  "default": null
+                },
+                onend: {
+                  detail: '执行select处理函数的后处理函数',
+                  "default": null
                 }
               }
             }
@@ -22480,11 +22488,18 @@ function () {
             if (me.node.select.enabled && e.type == me.node.select.triggerEventType) {
               //如果开启了图表的选中交互
               //TODO:这里不能
-              if (this.nodeData.selected) {
-                //说明已经选中了
-                me.unselectAt(this.nodeData);
-              } else {
-                me.selectAt(this.nodeData);
+              var onbefore = me.node.select.onbefore;
+              var onend = me.node.select.onend;
+
+              if (!onbefore || typeof onbefore == 'function' && onbefore.apply(me, [this.nodeData]) !== false) {
+                if (this.nodeData.selected) {
+                  //说明已经选中了
+                  me.unselectAt(this.nodeData);
+                } else {
+                  me.selectAt(this.nodeData);
+                }
+
+                onend && typeof onend == 'function' && onend.apply(me, [this.nodeData]);
               }
             }
 
@@ -42376,6 +42391,14 @@ function (_GraphsBase) {
                 strokeStyle: {
                   detail: 'hover描边颜色',
                   "default": '#e5e5e5'
+                },
+                onbefore: {
+                  detail: '执行select处理函数的前处理函数，返回false则取消执行select',
+                  "default": null
+                },
+                onend: {
+                  detail: '执行select处理函数的后处理函数',
+                  "default": null
                 }
               }
             },
@@ -43224,11 +43247,18 @@ function (_GraphsBase) {
             if (me.node.select.enabled && e.type == me.node.select.triggerEventType) {
               //如果开启了图表的选中交互
               //TODO:这里不能
-              if (this.nodeData.selected) {
-                //说明已经选中了
-                me.unselectAt(this.nodeData);
-              } else {
-                me.selectAt(this.nodeData);
+              var onbefore = me.node.select.onbefore;
+              var onend = me.node.select.onend;
+
+              if (!onbefore || typeof onbefore == 'function' && onbefore.apply(me, [this.nodeData]) !== false) {
+                if (this.nodeData.selected) {
+                  //说明已经选中了
+                  me.unselectAt(this.nodeData);
+                } else {
+                  me.selectAt(this.nodeData);
+                }
+
+                onend && typeof onend == 'function' && onend.apply(me, [this.nodeData]);
               }
             }
             me.app.fire(e.type, e);
@@ -50945,7 +50975,7 @@ if (projectTheme && projectTheme.length) {
 }
 
 var chartx = {
-  version: '1.1.25',
+  version: '1.1.27',
   options: {}
 };
 
