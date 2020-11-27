@@ -7897,7 +7897,7 @@ function (_Shape) {
 }(Shape);
 
 var Canvax = {
-  version: "2.0.69",
+  version: "2.0.70",
   _: _,
   $: $,
   event: event,
