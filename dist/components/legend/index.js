@@ -93,7 +93,7 @@ function (_Component) {
             },
             fillStyle: {
               detail: '图标颜色，一般会从data里面取，这里是默认色',
-              "default": '#999'
+              "default": null
             }
           }
         },
@@ -288,13 +288,24 @@ function (_Component) {
 
       _.each(this.data, function (obj, i) {
         if (isOver) return;
+        var fillStyle = !obj.enabled ? "#ccc" : obj.color || "#999";
+
+        if (me.icon.fillStyle) {
+          var _fillStyle = me._getProp(me.icon.fillStyle, obj);
+
+          if (_fillStyle) {
+            fillStyle = _fillStyle;
+          }
+        }
+
+        ;
 
         var _icon = new Circle({
           id: "legend_field_icon_" + i,
           context: {
             x: 0,
             y: me.icon.height / 3,
-            fillStyle: !obj.enabled ? "#ccc" : obj.color || "#999",
+            fillStyle: fillStyle,
             r: me.icon.radius,
             cursor: "pointer"
           }
@@ -449,6 +460,24 @@ function (_Component) {
           fillStyle: data.color
         }]
       };
+    }
+  }, {
+    key: "_getProp",
+    value: function _getProp(prop, nodeData) {
+      var _prop = prop;
+
+      if (_.isArray(prop)) {
+        _prop = prop[nodeData.ind];
+      }
+
+      ;
+
+      if (_.isFunction(prop)) {
+        _prop = prop.apply(this, [nodeData]);
+      }
+
+      ;
+      return _prop;
     }
   }]);
   return Legend;

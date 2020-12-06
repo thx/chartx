@@ -99,6 +99,13 @@
                             format:function( label ){
                                 return variables.fieldFormat( label );
                             }
+                        },
+                        icon: {
+                            fillStyle: function( node ){
+                                if( node.field == 'ad_over' ){
+                                    return 'red'
+                                }
+                            }
                         }
                     },
                     tips: {

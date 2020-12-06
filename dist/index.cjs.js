@@ -7967,6 +7967,7 @@ var _default = {
       var codeWithoutVariables = code.slice(0, range[0]) + code.slice(range[1]);
       return this._eval(codeWithoutVariables, 'options', 'variables', variables);
     } catch (e) {
+      console.log('parse error');
       return {};
     }
   }
@@ -25803,6 +25804,7 @@ function scaleSolution(solution, width, height, padding) {
       yRange = bounds.yRange;
 
   if (xRange.max == xRange.min || yRange.max == yRange.min) {
+    console.log("not scaling solution: zero size detected");
     return solution;
   }
 
@@ -26446,7 +26448,9 @@ function computeTextCentres(circles, areas) {
     var centre = computeTextCentre(interior, exterior);
     ret[area] = centre;
 
-    if (centre.disjoint && areas[i].size > 0) ;
+    if (centre.disjoint && areas[i].size > 0) {
+      console.log("WARNING: area " + area + " not represented on screen");
+    }
   }
 
   return ret;
@@ -28853,6 +28857,7 @@ function jsonToArrayForRelation(data, options, _childrenField) {
   var label = options.node && options.node.content && options.node.content.field;
 
   if (!checkDataIsJson(data, key, childrenKey)) {
+    console.error('该数据不能正确绘制，请提供数组对象形式的数据！');
     return result;
   }
   var childrens = [];
@@ -32620,6 +32625,7 @@ var _typeof2 = interopRequireDefault(_typeof_1$1);
         try {
           return fn();
         } finally {
+          console.log(name + " time: " + (_.now() - start) + "ms");
         }
       }
 
@@ -42708,6 +42714,7 @@ function (_GraphsBase) {
           }
 
           if (e.type == "wheel") {
+            console.log(_deltaY, e.deltaY);
 
             if (Math.abs(e.deltaY) > Math.abs(_deltaY)) {
               _deltaY = e.deltaY;
@@ -46732,6 +46739,7 @@ function (_GraphsBase) {
       this._setNodeStyle(_path, 'select');
 
       nodeData.selected = true;
+      console.log("select:true");
     }
   }, {
     key: "unselectAt",
@@ -46745,6 +46753,7 @@ function (_GraphsBase) {
       this._setNodeStyle(_path);
 
       geoGraph.selected = false;
+      console.log("select:false");
 
       if (geoGraph.focused) {
         this.focusAt(adcode);
@@ -47268,7 +47277,7 @@ function (_Component) {
             },
             fillStyle: {
               detail: '图标颜色，一般会从data里面取，这里是默认色',
-              "default": '#999'
+              "default": null
             }
           }
         },
@@ -47443,13 +47452,22 @@ function (_Component) {
 
       _.each(this.data, function (obj, i) {
         if (isOver) return;
+        var fillStyle = !obj.enabled ? "#ccc" : obj.color || "#999";
+
+        if (me.icon.fillStyle) {
+          var _fillStyle = me._getProp(me.icon.fillStyle, obj);
+
+          if (_fillStyle) {
+            fillStyle = _fillStyle;
+          }
+        }
 
         var _icon = new Circle({
           id: "legend_field_icon_" + i,
           context: {
             x: 0,
             y: me.icon.height / 3,
-            fillStyle: !obj.enabled ? "#ccc" : obj.color || "#999",
+            fillStyle: fillStyle,
             r: me.icon.radius,
             cursor: "pointer"
           }
@@ -47580,6 +47598,20 @@ function (_Component) {
           fillStyle: data.color
         }]
       };
+    }
+  }, {
+    key: "_getProp",
+    value: function _getProp(prop, nodeData) {
+      var _prop = prop;
+
+      if (_.isArray(prop)) {
+        _prop = prop[nodeData.ind];
+      }
+
+      if (_.isFunction(prop)) {
+        _prop = prop.apply(this, [nodeData]);
+      }
+      return _prop;
     }
   }]);
   return Legend;
@@ -50975,7 +51007,7 @@ if (projectTheme && projectTheme.length) {
 }
 
 var chartx = {
-  version: '1.1.27',
+  version: '1.1.29',
   options: {}
 };
 

@@ -64,7 +64,7 @@ class Legend extends Component
                     },
                     fillStyle : {
                         detail : '图标颜色，一般会从data里面取，这里是默认色',
-                        default: '#999'
+                        default: null
                     } 
                 }
             },
@@ -241,13 +241,21 @@ class Legend extends Component
         _.each( this.data , function( obj , i ){
 
             if( isOver ) return;
+
+            let fillStyle = !obj.enabled ? "#ccc" : (obj.color || "#999");
+            if( me.icon.fillStyle ){
+                let _fillStyle = me._getProp( me.icon.fillStyle, obj );
+                if( _fillStyle ){
+                    fillStyle = _fillStyle;
+                }
+            };
             
             let _icon = new Circle({
                 id : "legend_field_icon_"+i,
                 context : {
                     x     : 0,
                     y     : me.icon.height/3 ,
-                    fillStyle : !obj.enabled ? "#ccc" : (obj.color || "#999"),
+                    fillStyle : fillStyle,
                     r : me.icon.radius,
                     cursor: "pointer"
                 }
@@ -386,6 +394,18 @@ class Legend extends Component
                 }
             ]
         };
+    }
+
+    _getProp( prop, nodeData )
+    {
+        let _prop = prop;
+        if( _.isArray( prop ) ){
+            _prop = prop[ nodeData.ind ]
+        };
+        if( _.isFunction( prop ) ){
+            _prop = prop.apply( this, [nodeData] );
+        };
+        return _prop;
     }
 }
 
