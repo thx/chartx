@@ -104,8 +104,7 @@ var options = {
             },
             content : {
                 field : "label",
-                type : "ctype",
-                oninited: function(){
+                init: function(){
                     return new Promise( resolve => {
                         setTimeout( function(){
                             resolve( {} )
@@ -120,7 +119,7 @@ var options = {
                     debugger
                 },
                 onend: function(node){
-debugger
+                    debugger
                 },
                 shadow: {
                     shadowBlur: 10

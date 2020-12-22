@@ -236,7 +236,7 @@ class Relation extends GraphsBase {
                                 detail: 'textBaseline',
                                 default: "middle"
                             },
-                            oninited: {
+                            init: {
                                 detail: '内容节点的初始化完成回调',
                                 documentation: '在节点内容配置为需要异步完成的时候，比如节点内容配置为一个magix的view',
                                 default: null
@@ -1043,7 +1043,7 @@ class Relation extends GraphsBase {
                                 nodes: [ this.nodeData ]
                             };
                             me.app.fire(e.type, e);
-                            
+
                         });
                         me.labelsSp.addChild( _edgeIcon );
                     }
@@ -1486,8 +1486,8 @@ class Relation extends GraphsBase {
             };
 
             let inited;
-            if( this.node.content.oninited && typeof this.node.content.oninited === 'function' ){
-                inited = this.node.content.oninited(node, _contentLabel);
+            if( this.node.content.init && typeof this.node.content.init === 'function' ){
+                inited = this.node.content.init(node, _contentLabel);
             };
 
             if( inited && typeof inited.then == 'function' ){
@@ -1550,8 +1550,8 @@ class Relation extends GraphsBase {
             _dom.innerHTML = content;
 
             let inited;
-            if( this.node.content.oninited && typeof this.node.content.oninited === 'function' ){
-                inited = this.node.content.oninited(node, _dom);
+            if( this.node.content.init && typeof this.node.content.init === 'function' ){
+                inited = this.node.content.init(node, _dom);
             };
 
             if( inited && typeof inited.then == 'function' ){

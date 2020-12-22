@@ -42473,7 +42473,7 @@ var chartx = (function () {
 	                  detail: 'textBaseline',
 	                  "default": "middle"
 	                },
-	                oninited: {
+	                init: {
 	                  detail: '内容节点的初始化完成回调',
 	                  documentation: '在节点内容配置为需要异步完成的时候，比如节点内容配置为一个magix的view',
 	                  "default": null
@@ -43816,8 +43816,8 @@ var chartx = (function () {
 	        }
 	        var inited;
 
-	        if (_this7.node.content.oninited && typeof _this7.node.content.oninited === 'function') {
-	          inited = _this7.node.content.oninited(node, _contentLabel);
+	        if (_this7.node.content.init && typeof _this7.node.content.init === 'function') {
+	          inited = _this7.node.content.init(node, _contentLabel);
 	        }
 
 	        if (inited && typeof inited.then == 'function') {
@@ -43881,8 +43881,8 @@ var chartx = (function () {
 	        _dom.innerHTML = content;
 	        var inited;
 
-	        if (_this8.node.content.oninited && typeof _this8.node.content.oninited === 'function') {
-	          inited = _this8.node.content.oninited(node, _dom);
+	        if (_this8.node.content.init && typeof _this8.node.content.init === 'function') {
+	          inited = _this8.node.content.init(node, _dom);
 	        }
 
 	        if (inited && typeof inited.then == 'function') {
@@ -51230,7 +51230,7 @@ var chartx = (function () {
 	}
 
 	var chartx = {
-	  version: '1.1.30',
+	  version: '1.1.31',
 	  options: {}
 	};
 

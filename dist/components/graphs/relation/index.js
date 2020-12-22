@@ -268,7 +268,7 @@ function (_GraphsBase) {
                   detail: 'textBaseline',
                   "default": "middle"
                 },
-                oninited: {
+                init: {
                   detail: '内容节点的初始化完成回调',
                   documentation: '在节点内容配置为需要异步完成的时候，比如节点内容配置为一个magix的view',
                   "default": null
@@ -1715,8 +1715,8 @@ function (_GraphsBase) {
         ;
         var inited;
 
-        if (_this7.node.content.oninited && typeof _this7.node.content.oninited === 'function') {
-          inited = _this7.node.content.oninited(node, _contentLabel);
+        if (_this7.node.content.init && typeof _this7.node.content.init === 'function') {
+          inited = _this7.node.content.init(node, _contentLabel);
         }
 
         ;
@@ -1792,8 +1792,8 @@ function (_GraphsBase) {
         _dom.innerHTML = content;
         var inited;
 
-        if (_this8.node.content.oninited && typeof _this8.node.content.oninited === 'function') {
-          inited = _this8.node.content.oninited(node, _dom);
+        if (_this8.node.content.init && typeof _this8.node.content.init === 'function') {
+          inited = _this8.node.content.init(node, _dom);
         }
 
         ;
