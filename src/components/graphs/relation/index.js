@@ -235,6 +235,11 @@ class Relation extends GraphsBase {
                             textBaseline: {
                                 detail: 'textBaseline',
                                 default: "middle"
+                            },
+                            oninited: {
+                                detail: '内容节点的初始化完成回调',
+                                documentation: '在节点内容配置为需要异步完成的时候，比如节点内容配置为一个magix的view',
+                                default: null
                             }
                         }
                     }
@@ -275,6 +280,10 @@ class Relation extends GraphsBase {
                     edgeLabel: {
                         detail: '连线上面的label配置',
                         propertys: {
+                            enabled: {
+                                detail: '是否开启label设置',
+                                default: true
+                            },
                             fontColor: {
                                 detail: '文本颜色',
                                 default: '#ccc'
@@ -283,13 +292,54 @@ class Relation extends GraphsBase {
                                 detail: '文本大小',
                                 default: 12
                             },
-                            offsetX: {
-                                detail: 'x方向偏移量',
-                                default:0
+                            // offsetX: {
+                            //     detail: 'x方向偏移量',
+                            //     default:0
+                            // },
+                            // offsetY: {
+                            //     detail: 'y方向偏移量',
+                            //     default:0
+                            // },
+                            offset: {
+                                detail: 'label的位置，函数，参数是整个edge对象',
+                                default: null
+                            }
+                        }
+                    },
+                    icon: {
+                        detail: '连线上面的操作icon',
+                        propertys: {
+                            enabled: {
+                                detail: '是否开启线上的icon设置',
+                                default: true
                             },
-                            offsetY: {
-                                detail: 'y方向偏移量',
-                                default:0
+                            charCode: {
+                                detail: 'iconfont上面对应的unicode中&#x后面的字符',
+                                default: null
+                            },
+                            lineWidth: {
+                                detail: 'icon描边线宽',
+                                default: 0
+                            },
+                            strokeStyle: {
+                                detail: 'icon的描边颜色',
+                                default: '#e5e5e5'
+                            },
+                            fontColor: {
+                                detail: 'icon的颜色',
+                                default: '#e5e5e5'
+                            },
+                            fontFamily: {
+                                detail: 'font-face的font-family设置',
+                                default: 'iconfont'
+                            },
+                            fontSize : {
+                                detail: 'icon的字体大小',
+                                default: 16
+                            },
+                            offset: {
+                                detail: 'icon的位置，函数，参数是整个edge对象',
+                                default: null
                             }
                         }
                     }
@@ -518,26 +568,30 @@ class Relation extends GraphsBase {
         !opt && (opt = {});
         _.extend(true, this, opt);
 
-        this.data = opt.data || this._initData();
+        this._initData( opt.data ).then( data => {
 
-        this._layoutData();
+            this.data = data;
 
-        this.widget();
+            this._layoutData();
 
-        this.sprite.context.x = this.origin.x;
-        this.sprite.context.y = this.origin.y;
+            this.widget();
 
-        let _offsetLeft = (this.width - this.data.size.width) / 2;
-        if (_offsetLeft < 0) {
-            _offsetLeft = 0;
-        };
-        let _offsetTop = (this.height - this.data.size.height) / 2;
-        if (_offsetTop < 0) {
-            _offsetTop = 0;
-        };
-        
-        this.graphsSp.context.x = _offsetLeft;
-        this.graphsSp.context.y = _offsetTop;
+            this.sprite.context.x = this.origin.x;
+            this.sprite.context.y = this.origin.y;
+
+            let _offsetLeft = (this.width - this.data.size.width) / 2;
+            if (_offsetLeft < 0) {
+                _offsetLeft = 0;
+            };
+            let _offsetTop = (this.height - this.data.size.height) / 2;
+            if (_offsetTop < 0) {
+                _offsetTop = 0;
+            };
+            
+            this.graphsSp.context.x = _offsetLeft;
+            this.graphsSp.context.y = _offsetTop;
+
+        } );
 
     }
 
@@ -546,40 +600,44 @@ class Relation extends GraphsBase {
 
         let me = this;
         this._preData = this.data;
-        //如果data是外界定义好的nodes，edges的格式，直接用外界的
-        this.data = (data.nodes && data.edges) ? data : this._initData();
 
-        this._layoutData();
+        this._initData( data ).then( _data => {
 
-        _.each( this._preData.nodes, function( preNode ){
-            if( !_.find( me.data.nodes, function( node ){ return preNode.key == node.key } ) ){
-                me._destroy( preNode );
-            }
-        } );
-        _.each( this._preData.edges, function( preEdge ){
-            if( !_.find( me.data.edges, function( edge ){ return preEdge.key.join('_') == edge.key.join('_') } ) ){
-                me._destroy( preEdge );
-            }
-        } );
+            this.data = _data;
+        
+            this._layoutData();
 
-        this.widget();
+            _.each( this._preData.nodes, function( preNode ){
+                if( !_.find( me.data.nodes, function( node ){ return preNode.key == node.key } ) ){
+                    me._destroy( preNode );
+                }
+            } );
+            _.each( this._preData.edges, function( preEdge ){
+                if( !_.find( me.data.edges, function( edge ){ return preEdge.key.join('_') == edge.key.join('_') } ) ){
+                    me._destroy( preEdge );
+                }
+            } );
 
-        //钉住某个node为参考点（不移动）
-        if( dataTrigger && dataTrigger.origin ){
-            let preOriginNode = _.find( this._preData.nodes, (node) => { return node.key == dataTrigger.origin } );
-            let originNode = _.find( this.data.nodes, (node) => { return node.key == dataTrigger.origin } );
-            
-            if( preOriginNode && originNode ){
-                let offsetPos = { 
-                    x: preOriginNode.x-originNode.x, 
-                    y: preOriginNode.y-originNode.y
+            this.widget();
+
+            //钉住某个node为参考点（不移动）
+            if( dataTrigger && dataTrigger.origin ){
+                let preOriginNode = _.find( this._preData.nodes, (node) => { return node.key == dataTrigger.origin } );
+                let originNode = _.find( this.data.nodes, (node) => { return node.key == dataTrigger.origin } );
+                
+                if( preOriginNode && originNode ){
+                    let offsetPos = { 
+                        x: preOriginNode.x-originNode.x, 
+                        y: preOriginNode.y-originNode.y
+                    };
+                    let { x, y } = this.zoom.offset( offsetPos );
+                    me.graphsView.context.x = x;
+                    me.graphsView.context.y = y;
                 };
-                let { x, y } = this.zoom.offset( offsetPos );
-                me.graphsView.context.x = x;
-                me.graphsView.context.y = y;
+
             };
 
-        }
+        } );
     }
 
     _destroy( item ){
@@ -597,122 +655,147 @@ class Relation extends GraphsBase {
         item.arrowElement && item.arrowElement.destroy();
     }
 
-    _initData() {
-        let data = {
-            nodes: [
-                //{ type,key,content,ctype,width,height,x,y }
-            ],
-            edges: [
-                //{ type,key[],content,ctype,width,height,x,y }
-            ],
-            size: {
-                width: 0,
-                height: 0
-            }
-        };
+    _initData( _data ) {
+        return new Promise( resolve => {
 
-        let originData = this.app._data;
-        if ( checkDataIsJson(originData, this.field, this.childrenField) ) {
-            this.jsonData = jsonToArrayForRelation(originData, this, this.childrenField);
-            this.dataFrame = this.app.dataFrame = dataFrame( this.jsonData );
-        } else {
-            if( this.layout == "tree" ){
-                //源数据就是图表标准数据，只需要转换成json的Children格式
-                //app.dataFrame.jsonOrg ==> [{name: key:} ...] 不是children的树结构
-                //tree layout算法需要children格式的数据，蛋疼
-                this.jsonData = arrayToTreeJsonForRelation(this.app.dataFrame.jsonOrg, this);
+            if( _data && _data.nodes && _data.edges ){
+                resolve( _data );
+                return;
             };
-        };
 
-        let _nodeMap = {};
-        for (let i = 0; i < this.dataFrame.length; i++) {
-            let rowData = this.dataFrame.getRowDataAt(i);
-            let fields = _.flatten([(rowData[this.field] + "").split(",")]);
-            let content = this._getContent(rowData);
-
-            let node = {
-                type: "relation",
-                iNode: i,
-                rowData: rowData,
-                key: fields.length == 1 ? fields[0] : fields,
-                content: content,
-                ctype: this._checkHtml(content) ? 'html' : 'canvas',
-
-                //下面三个属性在_setElementAndSize中设置
-                contentElement: null, //外面传的layout数据可能没有element，widget的时候要检测下
-                width: null,
-                height: null,
-
-                //这个在layout的时候设置
-                x: null,
-                y: null,
-                shapeType: null,
-
-                //如果是edge，要填写这两节点
-                source : null,
-                target : null,
-
-                focused    : false,
-                selected   : false
-                
+            let data = {
+                nodes: [
+                    //{ type,key,content,ctype,width,height,x,y }
+                ],
+                edges: [
+                    //{ type,key[],content,ctype,width,height,x,y }
+                ],
+                size: {
+                    width: 0,
+                    height: 0
+                }
             };
-            
-            //计算和设置node的尺寸
-            _.extend(node, this._getElementAndSize(node));
 
-            if (fields.length == 1) {
-                // isNode
-                node.shapeType = this.getProp( this.node.shapeType, node );
+            let originData = this.app._data;
+            if ( checkDataIsJson(originData, this.field, this.childrenField) ) {
+                this.jsonData = jsonToArrayForRelation(originData, this, this.childrenField);
+                this.dataFrame = this.app.dataFrame = dataFrame( this.jsonData );
+            } else {
+                if( this.layout == "tree" ){
+                    //源数据就是图表标准数据，只需要转换成json的Children格式
+                    //app.dataFrame.jsonOrg ==> [{name: key:} ...] 不是children的树结构
+                    //tree layout算法需要children格式的数据，蛋疼
+                    this.jsonData = arrayToTreeJsonForRelation(this.app.dataFrame.jsonOrg, this);
+                };
+            };
 
-                if( node.shapeType == 'diamond' ){
-                    //因为node的尺寸前面计算出来的是矩形的尺寸，如果是菱形的话，这里就是指内接矩形的尺寸，
-                    //需要换算成外接矩形的尺寸
-                    let innerRect = { //内接矩形
-                        width: node.width,
-                        height: node.height
-                    };
-                    let includedAngle = this.node.includedAngle/2;
-                    let includeRad    = includedAngle * Math.PI / 180
+            let _nodeMap = {};
+            let initNum  = 0;
+            this.graphsSp.context.visible = false;
 
-                    let newWidthDiff  = innerRect.height / Math.tan( includeRad );
-                    let newHeightDiff = innerRect.width  * Math.tan( includeRad );
+            for (let i = 0; i < this.dataFrame.length; i++) {
+                let rowData = this.dataFrame.getRowDataAt(i);
+                let fields = _.flatten([(rowData[this.field] + "").split(",")]);
+                let content = this._getContent(rowData);
 
-                    //在内接矩形基础上扩展出来的外界矩形
-                    let newWidth      = innerRect.width  + newWidthDiff;
-                    let newHeight     = innerRect.height + newHeightDiff;
+                let node = {
+                    type: "relation",
+                    iNode: i,
+                    rowData: rowData,
+                    key: fields.length == 1 ? fields[0] : fields,
+                    content: content,
+                    _contentInited: false,
+                    ctype: this._checkHtml(content) ? 'html' : 'canvas',
 
-                    //把新的菱形的外界边界回写
-                    node._innerRect   = {
-                        width  : node.width,
-                        height : node.height 
-                    };
-                    node.width        = newWidth;
-                    node.height       = newHeight;
+                    //下面三个属性在_setElementAndSize中设置
+                    contentElement: null, //外面传的layout数据可能没有element，widget的时候要检测下
+                    width: null,
+                    height: null,
+
+                    //这个在layout的时候设置
+                    x: null,
+                    y: null,
+                    shapeType: null,
+
+                    //如果是edge，要填写这两节点
+                    source : null,
+                    target : null,
+
+                    focused : false,
+                    selected : false
                     
                 };
+                
+                //计算和设置node的尺寸
+                this._initContentAndGetSize(node).then( opt => {
 
-                data.nodes.push(node);
-                Object.assign(node, this.layoutOpts.node);
-                _nodeMap[ node.key ] = node;
-            } else {
-                // isEdge
-                node.shapeType = this.getProp( this.line.shapeType, node );
-                //node.labeloffset = 0;
-                //node.labelpos = 'l';
-                //额外的会有minlen weight labelpos labeloffset 四个属性可以配置
-                Object.assign(node, this.layoutOpts.edge);
-                data.edges.push(node);
+                    _.extend(node, opt);
+
+                    if (fields.length == 1) {
+                        // isNode
+                        node.shapeType = this.getProp( this.node.shapeType, node );
+
+                        if( node.shapeType == 'diamond' ){
+                            //因为node的尺寸前面计算出来的是矩形的尺寸，如果是菱形的话，这里就是指内接矩形的尺寸，
+                            //需要换算成外接矩形的尺寸
+                            let innerRect = { //内接矩形
+                                width: node.width,
+                                height: node.height
+                            };
+                            let includedAngle = this.node.includedAngle/2;
+                            let includeRad    = includedAngle * Math.PI / 180
+
+                            let newWidthDiff  = innerRect.height / Math.tan( includeRad );
+                            let newHeightDiff = innerRect.width  * Math.tan( includeRad );
+
+                            //在内接矩形基础上扩展出来的外界矩形
+                            let newWidth      = innerRect.width  + newWidthDiff;
+                            let newHeight     = innerRect.height + newHeightDiff;
+
+                            //把新的菱形的外界边界回写
+                            node._innerRect   = {
+                                width  : node.width,
+                                height : node.height 
+                            };
+                            node.width        = newWidth;
+                            node.height       = newHeight;
+                            
+                        };
+
+                        data.nodes.push(node);
+                        Object.assign(node, this.layoutOpts.node);
+                        _nodeMap[ node.key ] = node;
+                    } else {
+                        // isEdge
+                        node.shapeType = this.getProp( this.line.shapeType, node );
+                        //node.labeloffset = 0;
+                        //node.labelpos = 'l';
+                        //额外的会有minlen weight labelpos labeloffset 四个属性可以配置
+                        Object.assign(node, this.layoutOpts.edge);
+                        data.edges.push(node);
+                    };
+
+                    node._contentInited = true;
+                    initNum ++
+
+                    if( initNum == this.dataFrame.length ){
+                        //all is inited
+                        //然后给edge填写source 和 target
+                        _.each( data.edges, function( edge ){
+                            let keys = edge.key;
+                            edge.source = _nodeMap[ keys[0] ];
+                            edge.target = _nodeMap[ keys[1] ];
+                        } );
+
+                        this.graphsSp.context.visible = true;
+                        resolve( data );
+                    };
+
+                } );
+
             };
-        };
 
-        //然后给edge填写source 和 target
-        _.each( data.edges, function( edge ){
-            let keys = edge.key;
-            edge.source = _nodeMap[ keys[0] ];
-            edge.target = _nodeMap[ keys[1] ];
         } );
-
-        return data;
     }
 
     _layoutData(){
@@ -735,8 +818,7 @@ class Relation extends GraphsBase {
         g.setGraph( this.layoutOpts.graph );
         g.setDefaultEdgeLabel(function () {
             //其实我到现在都还没搞明白setDefaultEdgeLabel的作用
-            return {
-            };
+            return {};
         });
 
         _.each(data.nodes, function (node) {
@@ -782,6 +864,8 @@ class Relation extends GraphsBase {
 
         _.each(this.data.edges, function ( edge ) {
 
+            console.log(edge.points)
+
             let key = edge.key.join('_');
             
             if( me.line.isTree && edge.points.length == 3 ){
@@ -789,13 +873,13 @@ class Relation extends GraphsBase {
                 me._setTreePoints( edge );
             };
 
-            let path = me._getPathStr(edge, me.line.inflectionRadius);
-            let lineWidth = me.getProp( me.line.lineWidth, edge );
+            let path        = me._getPathStr(edge, me.line.inflectionRadius);
+            let lineWidth   = me.getProp( me.line.lineWidth, edge );
             let strokeStyle = me.getProp( me.line.strokeStyle, edge );
-            let lineType = me.getProp( me.line.lineType, edge );
+            let lineType    = me.getProp( me.line.lineType, edge );
 
             let edgeId = 'edge_'+key;
-            let _path = me.edgesSp.getChildById( edgeId );
+            let _path  = me.edgesSp.getChildById( edgeId );
             if( _path ){
                 _path.context.path = path;
                 _path.context.lineWidth = lineWidth;
@@ -845,46 +929,130 @@ class Relation extends GraphsBase {
             //me.labelsSp.addChild( _circle );
 
             
-            let edgeLabelId = 'label_'+key;
-            let textAlign = me.getProp(me.node.content.textAlign, edge);
-            let textBaseline = me.getProp(me.node.content.textBaseline, edge);
-            let fontSize = me.getProp( me.line.edgeLabel.fontSize, edge );
-            let fontColor = me.getProp( me.line.edgeLabel.fontColor, edge );
-            let offsetX = me.getProp( me.line.edgeLabel.offsetX, edge );
-            let offsetY = me.getProp( me.line.edgeLabel.offsetY, edge );
-
-            let _edgeLabel = me.labelsSp.getChildById(edgeLabelId);
-            if( _edgeLabel ){
-                _edgeLabel.resetText( edge.content );
-                _edgeLabel.context.x = edge.x + offsetX;
-                _edgeLabel.context.y = edge.y + offsetY;
-                _edgeLabel.context.fontSize = fontSize;
-                _edgeLabel.context.fillStyle = fontColor;
-                _edgeLabel.context.textAlign = textAlign;
-                _edgeLabel.context.textBaseline = textBaseline;
-            } else {
-                _edgeLabel = new Canvax.Display.Text(edge.content, {
-                    id: edgeLabelId,
-                    context: {
-                        x: edge.x + offsetX,
-                        y: edge.y + offsetY,
-                        fontSize: fontSize,
-                        fillStyle: fontColor,
-                        textAlign,
-                        textBaseline
+            let edgeLabelId  = 'label_'+key;
+            let enabled      = me.getProp( me.line.edgeLabel.enabled, edge);
+            if( enabled ){
+                let textAlign    = me.getProp( me.node.content.textAlign    , edge);
+                let textBaseline = me.getProp( me.node.content.textBaseline , edge);
+                let fontSize     = me.getProp( me.line.edgeLabel.fontSize   , edge );
+                let fontColor    = me.getProp( me.line.edgeLabel.fontColor  , edge );
+                // let offsetX      = me.getProp( me.line.edgeLabel.offsetX    , edge );
+                // let offsetY      = me.getProp( me.line.edgeLabel.offsetY    , edge );
+                let offset       = me.getProp( me.line.icon.offset  , edge );
+                if( !offset ) {  //default 使用edge.x edge.y 也就是edge label的位置
+                    offset = {
+                        x: edge.x,
+                        y: edge.y
                     }
-                });
-                _edgeLabel.on(event.types.get(), function (e) {
-                    e.eventInfo = {
-                        trigger: me.line,
-                        nodes: [ this.nodeData ]
+                };
+
+                let _edgeLabel = me.labelsSp.getChildById(edgeLabelId);
+                if( _edgeLabel ){
+                    _edgeLabel.resetText( edge.content );
+                    _edgeLabel.context.x = offset.x;
+                    _edgeLabel.context.y = offset.y;
+                    _edgeLabel.context.fontSize = fontSize;
+                    _edgeLabel.context.fillStyle = fontColor;
+                    _edgeLabel.context.textAlign = textAlign;
+                    _edgeLabel.context.textBaseline = textBaseline;
+                } else {
+                    _edgeLabel = new Canvax.Display.Text( edge.content, {
+                        id: edgeLabelId,
+                        context: {
+                            x: offset.x,
+                            y: offset.y,
+                            fontSize: fontSize,
+                            fillStyle: fontColor,
+                            textAlign,
+                            textBaseline
+                        }
+                    });
+                    _edgeLabel.on(event.types.get(), function (e) {
+                        e.eventInfo = {
+                            trigger: me.line,
+                            nodes: [ this.nodeData ]
+                        };
+                        me.app.fire(e.type, e);
+                    });
+                    me.labelsSp.addChild( _edgeLabel );
+                }
+                edge.labelElement = _edgeLabel
+                _edgeLabel.nodeData = edge;
+            };
+
+            let edgeIconEnabled  = me.getProp( me.line.icon.enabled, edge);
+            if( edgeIconEnabled ){
+                let edgeIconId   = 'edge_item_'+key;
+                let charCode     = String.fromCharCode(parseInt( me.getProp( me.line.icon.charCode, edge ) , 16));
+               
+                if( charCode ){
+                    let lineWidth    = me.getProp( me.line.icon.lineWidth   , edge );
+                    let strokeStyle  = me.getProp( me.line.icon.strokeStyle , edge );
+                    let fontFamily   = me.getProp( me.line.icon.fontFamily  , edge );
+                    let fontSize     = me.getProp( me.line.icon.fontSize    , edge );
+                    let fontColor    = me.getProp( me.line.icon.fontColor   , edge );
+                    let textAlign    = 'center';
+                    let textBaseline = 'middle';
+    
+                    let offset       = me.getProp( me.line.icon.offset  , edge );
+                    if( !offset ) {  //default 使用edge.x edge.y 也就是edge label的位置
+                        offset = {
+                            x: edge.x,
+                            y: edge.y
+                        }
                     };
-                    me.app.fire(e.type, e);
-                });
-                me.labelsSp.addChild( _edgeLabel );
-            }
-            edge.labelElement = _edgeLabel
-            _edgeLabel.nodeData = edge;
+
+                    let _edgeIcon = me.labelsSp.getChildById(edgeIconId);
+                    if( _edgeIcon ){
+
+                        _edgeIcon.resetText( charCode );
+                        _edgeIcon.context.x            = offset.x;
+                        _edgeIcon.context.y            = offset.y;
+                        _edgeIcon.context.fontSize     = fontSize;
+                        _edgeIcon.context.fillStyle    = fontColor;
+                        _edgeIcon.context.textAlign    = textAlign;
+                        _edgeIcon.context.textBaseline = textBaseline;
+                        _edgeIcon.context.fontFamily   = fontFamily;
+                        _edgeIcon.context.lineWidth    = lineWidth;
+                        _edgeIcon.context.strokeStyle  = strokeStyle;
+
+                    } else {
+                        _edgeIcon = new Canvax.Display.Text( charCode, {
+                            id: edgeIconId,
+                            context: {
+                                x         : offset.x,
+                                y         : offset.y,
+                                fillStyle : fontColor,
+                                cursor    : 'pointer',
+                                fontSize,
+                                textAlign,
+                                textBaseline,
+                                fontFamily,
+                                lineWidth,
+                                strokeStyle
+                            }
+                        });
+                        _edgeIcon.on(event.types.get(), function (e) {
+                            
+                            let trigger = me.line;
+                            if( me.line.icon[ 'on'+e.type ] ){
+                                trigger = me.line.icon;
+                            };
+                            e.eventInfo = {
+                                trigger,
+                                nodes: [ this.nodeData ]
+                            };
+                            me.app.fire(e.type, e);
+                            
+                        });
+                        me.labelsSp.addChild( _edgeIcon );
+                    }
+                    edge.edgeIconElement = _edgeIcon
+                    _edgeIcon.nodeData = edge;
+
+                }
+            };
+
             
             if( me.line.arrow ){
                 let arrowId = "arrow_"+key;
@@ -1267,7 +1435,7 @@ class Relation extends GraphsBase {
         return ~this.dataFrame.fields.indexOf(str)
     }
 
-    _getElementAndSize(node) {
+    _initContentAndGetSize(node) {
         let me = this;
         let contentType = node.ctype;
 
@@ -1288,82 +1456,132 @@ class Relation extends GraphsBase {
     
     _getEleAndsetCanvasSize(node) {
         let me = this;
-        let content = node.content;
-        let width = node.rowData.width, height = node.rowData.height;
+        return new Promise(resolve => {
+            
+            let content = node.content;
+            let width = node.rowData.width, height = node.rowData.height;
 
-        //let sprite = new Canvax.Display.Sprite({});
+            //let sprite = new Canvax.Display.Sprite({});
 
-        let context = {
-            fillStyle: me.getProp(me.node.content.fontColor, node),
-            textAlign: me.getProp(me.node.content.textAlign, node),
-            textBaseline: me.getProp(me.node.content.textBaseline, node)
-        };
-        //console.log(node.key);
-        let contentLabelId = "content_label_"+node.key;
-        let _contentLabel = me.nodesContentSp.getChildById( contentLabelId );
-        if( _contentLabel ){
-            _contentLabel.resetText( content );
-            _.extend( _contentLabel.context, context );
-        } else {
-            //先创建text，根据 text 来计算node需要的width和height
-            _contentLabel = new Canvax.Display.Text(content, {
-                id: contentLabelId,
-                context
-            });
-            if( !_.isArray( node.key ) ){
-                me.nodesContentSp.addChild( _contentLabel );
+            let context = {
+                fillStyle: me.getProp(me.node.content.fontColor, node),
+                textAlign: me.getProp(me.node.content.textAlign, node),
+                textBaseline: me.getProp(me.node.content.textBaseline, node)
             };
-        }
-        
+            //console.log(node.key);
+            let contentLabelId = "content_label_"+node.key;
+            let _contentLabel = me.nodesContentSp.getChildById( contentLabelId );
+            if( _contentLabel ){
+                _contentLabel.resetText( content );
+                _.extend( _contentLabel.context, context );
+            } else {
+                //先创建text，根据 text 来计算node需要的width和height
+                _contentLabel = new Canvax.Display.Text(content, {
+                    id: contentLabelId,
+                    context
+                });
+                if( !_.isArray( node.key ) ){
+                    me.nodesContentSp.addChild( _contentLabel );
+                };
+            };
 
-        if ( !width ) {
-            width = _contentLabel.getTextWidth() + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
-        };
-        if ( !height ) {
-            height = _contentLabel.getTextHeight() + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
-        };
+            let inited;
+            if( this.node.content.oninited && typeof this.node.content.oninited === 'function' ){
+                inited = this.node.content.oninited(node, _contentLabel);
+            };
 
-        return {
-            contentElement: _contentLabel,
-            width: width,
-            height: height
-        };
+            if( inited && typeof inited.then == 'function' ){
+                inited.then( ()=> {
+                    if ( !width ) {
+                        width = _contentLabel.getTextWidth() + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
+                    };
+                    if ( !height ) {
+                        height = _contentLabel.getTextHeight() + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
+                    };
+                    resolve( {
+                        contentElement : _contentLabel,
+                        width          : width,
+                        height         : height
+                    });
+                } )
+            } else {
+                if ( !width ) {
+                    width = _contentLabel.getTextWidth() + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
+                };
+                if ( !height ) {
+                    height = _contentLabel.getTextHeight() + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
+                };
+    
+                resolve( {
+                    contentElement : _contentLabel,
+                    width          : width,
+                    height         : height
+                });
+            }
+
+
+
+            
+        });
 
     }
     _getEleAndsetHtmlSize(node) {
         let me = this;
-        let content = node.content;
-        let width = node.rowData.width, height = node.rowData.height;
+        return new Promise( resolve => {
 
-        let contentLabelClass = "__content_label_"+node.key;
-        let _dom = this.domContainer.getElementsByClassName( contentLabelClass );
-        if( !_dom.length ){
-            _dom = document.createElement("div");
-            _dom.className = "chartx_relation_node "+contentLabelClass;
-            _dom.style.cssText += "; position:absolute;visibility:hidden;"
-            this.domContainer.appendChild(_dom);
-        } else {
-            _dom = _dom[0]
-        };
-        _dom.style.cssText += "; color:" + me.getProp(me.node.content.fontColor, node) + ";";
-        _dom.style.cssText += "; text-align:" + me.getProp(me.node.content.textAlign, node) + ";";
-        _dom.style.cssText += "; vertical-align:" + me.getProp(me.node.content.textBaseline, node) + ";";
-        //_dom.style.cssText += "; padding:"+me.getProp(me.node.padding, node)+"px;";
+            let content = node.content;
+            let width = node.rowData.width, height = node.rowData.height;
 
-        _dom.innerHTML = content;
+            let contentLabelClass = "__content_label_"+node.key;
+            let _dom = this.domContainer.getElementsByClassName( contentLabelClass );
+            if( !_dom.length ){
+                _dom = document.createElement("div");
+                _dom.className = "chartx_relation_node "+contentLabelClass;
+                _dom.style.cssText += "; position:absolute;visibility:hidden;"
+                this.domContainer.appendChild(_dom);
+            } else {
+                _dom = _dom[0]
+            };
+            _dom.style.cssText += "; color:" + me.getProp(me.node.content.fontColor, node) + ";";
+            _dom.style.cssText += "; text-align:" + me.getProp(me.node.content.textAlign, node) + ";";
+            _dom.style.cssText += "; vertical-align:" + me.getProp(me.node.content.textBaseline, node) + ";";
+            //_dom.style.cssText += "; padding:"+me.getProp(me.node.padding, node)+"px;";
 
-        if (!width) {
-            width = _dom.offsetWidth;// + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
-        };
-        if (!height) {
-            height = _dom.offsetHeight;// + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
-        };
+            _dom.innerHTML = content;
 
-        return {
-            contentElement: _dom,
-            width: width,
-            height: height
-        };
+            let inited;
+            if( this.node.content.oninited && typeof this.node.content.oninited === 'function' ){
+                inited = this.node.content.oninited(node, _dom);
+            };
+
+            if( inited && typeof inited.then == 'function' ){
+                inited.then( ( opt ) => {
+                    if (!width) {
+                        width = _dom.offsetWidth; // + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
+                    };
+                    if (!height) {
+                        height = _dom.offsetHeight; // + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
+                    };
+                    resolve({
+                        contentElement : _dom,
+                        width          : width,
+                        height         : height
+                    });
+                } );
+            } else {
+                if (!width) {
+                    width = _dom.offsetWidth; // + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
+                };
+                if (!height) {
+                    height = _dom.offsetHeight; // + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
+                };
+                resolve({
+                    contentElement : _dom,
+                    width          : width,
+                    height         : height
+                })
+            };
+        } );
 
     }
 

@@ -31,7 +31,7 @@ var _dataFrame = _interopRequireDefault(require("../../../core/dataFrame"));
 
 var _tools = require("../../../utils/tools");
 
-var _data = require("./data");
+var _data2 = require("./data");
 
 var _zoom = _interopRequireDefault(require("../../../utils/zoom"));
 
@@ -267,6 +267,11 @@ function (_GraphsBase) {
                 textBaseline: {
                   detail: 'textBaseline',
                   "default": "middle"
+                },
+                oninited: {
+                  detail: '内容节点的初始化完成回调',
+                  documentation: '在节点内容配置为需要异步完成的时候，比如节点内容配置为一个magix的view',
+                  "default": null
                 }
               }
             }
@@ -307,6 +312,10 @@ function (_GraphsBase) {
             edgeLabel: {
               detail: '连线上面的label配置',
               propertys: {
+                enabled: {
+                  detail: '是否开启label设置',
+                  "default": true
+                },
                 fontColor: {
                   detail: '文本颜色',
                   "default": '#ccc'
@@ -315,13 +324,54 @@ function (_GraphsBase) {
                   detail: '文本大小',
                   "default": 12
                 },
-                offsetX: {
-                  detail: 'x方向偏移量',
+                // offsetX: {
+                //     detail: 'x方向偏移量',
+                //     default:0
+                // },
+                // offsetY: {
+                //     detail: 'y方向偏移量',
+                //     default:0
+                // },
+                offset: {
+                  detail: 'label的位置，函数，参数是整个edge对象',
+                  "default": null
+                }
+              }
+            },
+            icon: {
+              detail: '连线上面的操作icon',
+              propertys: {
+                enabled: {
+                  detail: '是否开启线上的icon设置',
+                  "default": true
+                },
+                charCode: {
+                  detail: 'iconfont上面对应的unicode中&#x后面的字符',
+                  "default": null
+                },
+                lineWidth: {
+                  detail: 'icon描边线宽',
                   "default": 0
                 },
-                offsetY: {
-                  detail: 'y方向偏移量',
-                  "default": 0
+                strokeStyle: {
+                  detail: 'icon的描边颜色',
+                  "default": '#e5e5e5'
+                },
+                fontColor: {
+                  detail: 'icon的颜色',
+                  "default": '#e5e5e5'
+                },
+                fontFamily: {
+                  detail: 'font-face的font-family设置',
+                  "default": 'iconfont'
+                },
+                fontSize: {
+                  detail: 'icon的字体大小',
+                  "default": 16
+                },
+                offset: {
+                  detail: 'icon的位置，函数，参数是整个edge对象',
+                  "default": null
                 }
               }
             }
@@ -573,90 +623,102 @@ function (_GraphsBase) {
   }, {
     key: "draw",
     value: function draw(opt) {
+      var _this2 = this;
+
       !opt && (opt = {});
 
       _.extend(true, this, opt);
 
-      this.data = opt.data || this._initData();
+      this._initData(opt.data).then(function (data) {
+        _this2.data = data;
 
-      this._layoutData();
+        _this2._layoutData();
 
-      this.widget();
-      this.sprite.context.x = this.origin.x;
-      this.sprite.context.y = this.origin.y;
+        _this2.widget();
 
-      var _offsetLeft = (this.width - this.data.size.width) / 2;
+        _this2.sprite.context.x = _this2.origin.x;
+        _this2.sprite.context.y = _this2.origin.y;
 
-      if (_offsetLeft < 0) {
-        _offsetLeft = 0;
-      }
+        var _offsetLeft = (_this2.width - _this2.data.size.width) / 2;
 
-      ;
+        if (_offsetLeft < 0) {
+          _offsetLeft = 0;
+        }
 
-      var _offsetTop = (this.height - this.data.size.height) / 2;
+        ;
 
-      if (_offsetTop < 0) {
-        _offsetTop = 0;
-      }
+        var _offsetTop = (_this2.height - _this2.data.size.height) / 2;
 
-      ;
-      this.graphsSp.context.x = _offsetLeft;
-      this.graphsSp.context.y = _offsetTop;
+        if (_offsetTop < 0) {
+          _offsetTop = 0;
+        }
+
+        ;
+        _this2.graphsSp.context.x = _offsetLeft;
+        _this2.graphsSp.context.y = _offsetTop;
+      });
     } //如果dataTrigger.origin 有传入， 则已经这个origin为参考点做重新布局
 
   }, {
     key: "resetData",
     value: function resetData(data, dataTrigger) {
+      var _this3 = this;
+
       var me = this;
-      this._preData = this.data; //如果data是外界定义好的nodes，edges的格式，直接用外界的
+      this._preData = this.data;
 
-      this.data = data.nodes && data.edges ? data : this._initData();
+      this._initData(data).then(function (_data) {
+        _this3.data = _data;
 
-      this._layoutData();
+        _this3._layoutData();
 
-      _.each(this._preData.nodes, function (preNode) {
-        if (!_.find(me.data.nodes, function (node) {
-          return preNode.key == node.key;
-        })) {
-          me._destroy(preNode);
-        }
-      });
-
-      _.each(this._preData.edges, function (preEdge) {
-        if (!_.find(me.data.edges, function (edge) {
-          return preEdge.key.join('_') == edge.key.join('_');
-        })) {
-          me._destroy(preEdge);
-        }
-      });
-
-      this.widget(); //钉住某个node为参考点（不移动）
-
-      if (dataTrigger && dataTrigger.origin) {
-        var preOriginNode = _.find(this._preData.nodes, function (node) {
-          return node.key == dataTrigger.origin;
+        _.each(_this3._preData.nodes, function (preNode) {
+          if (!_.find(me.data.nodes, function (node) {
+            return preNode.key == node.key;
+          })) {
+            me._destroy(preNode);
+          }
         });
 
-        var originNode = _.find(this.data.nodes, function (node) {
-          return node.key == dataTrigger.origin;
+        _.each(_this3._preData.edges, function (preEdge) {
+          if (!_.find(me.data.edges, function (edge) {
+            return preEdge.key.join('_') == edge.key.join('_');
+          })) {
+            me._destroy(preEdge);
+          }
         });
 
-        if (preOriginNode && originNode) {
-          var offsetPos = {
-            x: preOriginNode.x - originNode.x,
-            y: preOriginNode.y - originNode.y
-          };
+        _this3.widget(); //钉住某个node为参考点（不移动）
 
-          var _this$zoom$offset = this.zoom.offset(offsetPos),
-              x = _this$zoom$offset.x,
-              y = _this$zoom$offset.y;
 
-          me.graphsView.context.x = x;
-          me.graphsView.context.y = y;
+        if (dataTrigger && dataTrigger.origin) {
+          var preOriginNode = _.find(_this3._preData.nodes, function (node) {
+            return node.key == dataTrigger.origin;
+          });
+
+          var originNode = _.find(_this3.data.nodes, function (node) {
+            return node.key == dataTrigger.origin;
+          });
+
+          if (preOriginNode && originNode) {
+            var offsetPos = {
+              x: preOriginNode.x - originNode.x,
+              y: preOriginNode.y - originNode.y
+            };
+
+            var _this3$zoom$offset = _this3.zoom.offset(offsetPos),
+                x = _this3$zoom$offset.x,
+                y = _this3$zoom$offset.y;
+
+            me.graphsView.context.x = x;
+            me.graphsView.context.y = y;
+          }
+
+          ;
         }
 
         ;
-      }
+      });
     }
   }, {
     key: "_destroy",
@@ -678,122 +740,150 @@ function (_GraphsBase) {
     }
   }, {
     key: "_initData",
-    value: function _initData() {
-      var data = {
-        nodes: [//{ type,key,content,ctype,width,height,x,y }
-        ],
-        edges: [//{ type,key[],content,ctype,width,height,x,y }
-        ],
-        size: {
-          width: 0,
-          height: 0
-        }
-      };
-      var originData = this.app._data;
+    value: function _initData(_data) {
+      var _this4 = this;
 
-      if ((0, _data.checkDataIsJson)(originData, this.field, this.childrenField)) {
-        this.jsonData = (0, _data.jsonToArrayForRelation)(originData, this, this.childrenField);
-        this.dataFrame = this.app.dataFrame = (0, _dataFrame["default"])(this.jsonData);
-      } else {
-        if (this.layout == "tree") {
-          //源数据就是图表标准数据，只需要转换成json的Children格式
-          //app.dataFrame.jsonOrg ==> [{name: key:} ...] 不是children的树结构
-          //tree layout算法需要children格式的数据，蛋疼
-          this.jsonData = (0, _data.arrayToTreeJsonForRelation)(this.app.dataFrame.jsonOrg, this);
+      return new Promise(function (resolve) {
+        if (_data && _data.nodes && _data.edges) {
+          resolve(_data);
+          return;
         }
 
         ;
-      }
+        var data = {
+          nodes: [//{ type,key,content,ctype,width,height,x,y }
+          ],
+          edges: [//{ type,key[],content,ctype,width,height,x,y }
+          ],
+          size: {
+            width: 0,
+            height: 0
+          }
+        };
+        var originData = _this4.app._data;
 
-      ;
-      var _nodeMap = {};
-
-      for (var i = 0; i < this.dataFrame.length; i++) {
-        var rowData = this.dataFrame.getRowDataAt(i);
-
-        var fields = _.flatten([(rowData[this.field] + "").split(",")]);
-
-        var content = this._getContent(rowData);
-
-        var node = {
-          type: "relation",
-          iNode: i,
-          rowData: rowData,
-          key: fields.length == 1 ? fields[0] : fields,
-          content: content,
-          ctype: this._checkHtml(content) ? 'html' : 'canvas',
-          //下面三个属性在_setElementAndSize中设置
-          contentElement: null,
-          //外面传的layout数据可能没有element，widget的时候要检测下
-          width: null,
-          height: null,
-          //这个在layout的时候设置
-          x: null,
-          y: null,
-          shapeType: null,
-          //如果是edge，要填写这两节点
-          source: null,
-          target: null,
-          focused: false,
-          selected: false
-        }; //计算和设置node的尺寸
-
-        _.extend(node, this._getElementAndSize(node));
-
-        if (fields.length == 1) {
-          // isNode
-          node.shapeType = this.getProp(this.node.shapeType, node);
-
-          if (node.shapeType == 'diamond') {
-            //因为node的尺寸前面计算出来的是矩形的尺寸，如果是菱形的话，这里就是指内接矩形的尺寸，
-            //需要换算成外接矩形的尺寸
-            var innerRect = {
-              //内接矩形
-              width: node.width,
-              height: node.height
-            };
-            var includedAngle = this.node.includedAngle / 2;
-            var includeRad = includedAngle * Math.PI / 180;
-            var newWidthDiff = innerRect.height / Math.tan(includeRad);
-            var newHeightDiff = innerRect.width * Math.tan(includeRad); //在内接矩形基础上扩展出来的外界矩形
-
-            var newWidth = innerRect.width + newWidthDiff;
-            var newHeight = innerRect.height + newHeightDiff; //把新的菱形的外界边界回写
-
-            node._innerRect = {
-              width: node.width,
-              height: node.height
-            };
-            node.width = newWidth;
-            node.height = newHeight;
+        if ((0, _data2.checkDataIsJson)(originData, _this4.field, _this4.childrenField)) {
+          _this4.jsonData = (0, _data2.jsonToArrayForRelation)(originData, _this4, _this4.childrenField);
+          _this4.dataFrame = _this4.app.dataFrame = (0, _dataFrame["default"])(_this4.jsonData);
+        } else {
+          if (_this4.layout == "tree") {
+            //源数据就是图表标准数据，只需要转换成json的Children格式
+            //app.dataFrame.jsonOrg ==> [{name: key:} ...] 不是children的树结构
+            //tree layout算法需要children格式的数据，蛋疼
+            _this4.jsonData = (0, _data2.arrayToTreeJsonForRelation)(_this4.app.dataFrame.jsonOrg, _this4);
           }
 
           ;
-          data.nodes.push(node);
-          Object.assign(node, this.layoutOpts.node);
-          _nodeMap[node.key] = node;
-        } else {
-          // isEdge
-          node.shapeType = this.getProp(this.line.shapeType, node); //node.labeloffset = 0;
-          //node.labelpos = 'l';
-          //额外的会有minlen weight labelpos labeloffset 四个属性可以配置
-
-          Object.assign(node, this.layoutOpts.edge);
-          data.edges.push(node);
         }
 
         ;
-      }
+        var _nodeMap = {};
+        var initNum = 0;
+        _this4.graphsSp.context.visible = false;
 
-      ; //然后给edge填写source 和 target
+        var _loop = function _loop(i) {
+          var rowData = _this4.dataFrame.getRowDataAt(i);
 
-      _.each(data.edges, function (edge) {
-        var keys = edge.key;
-        edge.source = _nodeMap[keys[0]];
-        edge.target = _nodeMap[keys[1]];
+          var fields = _.flatten([(rowData[_this4.field] + "").split(",")]);
+
+          var content = _this4._getContent(rowData);
+
+          var node = {
+            type: "relation",
+            iNode: i,
+            rowData: rowData,
+            key: fields.length == 1 ? fields[0] : fields,
+            content: content,
+            _contentInited: false,
+            ctype: _this4._checkHtml(content) ? 'html' : 'canvas',
+            //下面三个属性在_setElementAndSize中设置
+            contentElement: null,
+            //外面传的layout数据可能没有element，widget的时候要检测下
+            width: null,
+            height: null,
+            //这个在layout的时候设置
+            x: null,
+            y: null,
+            shapeType: null,
+            //如果是edge，要填写这两节点
+            source: null,
+            target: null,
+            focused: false,
+            selected: false
+          }; //计算和设置node的尺寸
+
+          _this4._initContentAndGetSize(node).then(function (opt) {
+            _.extend(node, opt);
+
+            if (fields.length == 1) {
+              // isNode
+              node.shapeType = _this4.getProp(_this4.node.shapeType, node);
+
+              if (node.shapeType == 'diamond') {
+                //因为node的尺寸前面计算出来的是矩形的尺寸，如果是菱形的话，这里就是指内接矩形的尺寸，
+                //需要换算成外接矩形的尺寸
+                var innerRect = {
+                  //内接矩形
+                  width: node.width,
+                  height: node.height
+                };
+                var includedAngle = _this4.node.includedAngle / 2;
+                var includeRad = includedAngle * Math.PI / 180;
+                var newWidthDiff = innerRect.height / Math.tan(includeRad);
+                var newHeightDiff = innerRect.width * Math.tan(includeRad); //在内接矩形基础上扩展出来的外界矩形
+
+                var newWidth = innerRect.width + newWidthDiff;
+                var newHeight = innerRect.height + newHeightDiff; //把新的菱形的外界边界回写
+
+                node._innerRect = {
+                  width: node.width,
+                  height: node.height
+                };
+                node.width = newWidth;
+                node.height = newHeight;
+              }
+
+              ;
+              data.nodes.push(node);
+              Object.assign(node, _this4.layoutOpts.node);
+              _nodeMap[node.key] = node;
+            } else {
+              // isEdge
+              node.shapeType = _this4.getProp(_this4.line.shapeType, node); //node.labeloffset = 0;
+              //node.labelpos = 'l';
+              //额外的会有minlen weight labelpos labeloffset 四个属性可以配置
+
+              Object.assign(node, _this4.layoutOpts.edge);
+              data.edges.push(node);
+            }
+
+            ;
+            node._contentInited = true;
+            initNum++;
+
+            if (initNum == _this4.dataFrame.length) {
+              //all is inited
+              //然后给edge填写source 和 target
+              _.each(data.edges, function (edge) {
+                var keys = edge.key;
+                edge.source = _nodeMap[keys[0]];
+                edge.target = _nodeMap[keys[1]];
+              });
+
+              _this4.graphsSp.context.visible = true;
+              resolve(data);
+            }
+
+            ;
+          });
+        };
+
+        for (var i = 0; i < _this4.dataFrame.length; i++) {
+          _loop(i);
+        }
+
+        ;
       });
-
-      return data;
     }
   }, {
     key: "_layoutData",
@@ -859,6 +949,7 @@ function (_GraphsBase) {
       */
 
       _.each(this.data.edges, function (edge) {
+        console.log(edge.points);
         var key = edge.key.join('_');
 
         if (me.line.isTree && edge.points.length == 3) {
@@ -932,50 +1023,154 @@ function (_GraphsBase) {
         //me.labelsSp.addChild( _circle );
 
         var edgeLabelId = 'label_' + key;
-        var textAlign = me.getProp(me.node.content.textAlign, edge);
-        var textBaseline = me.getProp(me.node.content.textBaseline, edge);
-        var fontSize = me.getProp(me.line.edgeLabel.fontSize, edge);
-        var fontColor = me.getProp(me.line.edgeLabel.fontColor, edge);
-        var offsetX = me.getProp(me.line.edgeLabel.offsetX, edge);
-        var offsetY = me.getProp(me.line.edgeLabel.offsetY, edge);
+        var enabled = me.getProp(me.line.edgeLabel.enabled, edge);
 
-        var _edgeLabel = me.labelsSp.getChildById(edgeLabelId);
+        if (enabled) {
+          var textAlign = me.getProp(me.node.content.textAlign, edge);
+          var textBaseline = me.getProp(me.node.content.textBaseline, edge);
+          var fontSize = me.getProp(me.line.edgeLabel.fontSize, edge);
+          var fontColor = me.getProp(me.line.edgeLabel.fontColor, edge); // let offsetX      = me.getProp( me.line.edgeLabel.offsetX    , edge );
+          // let offsetY      = me.getProp( me.line.edgeLabel.offsetY    , edge );
 
-        if (_edgeLabel) {
-          _edgeLabel.resetText(edge.content);
+          var offset = me.getProp(me.line.icon.offset, edge);
 
-          _edgeLabel.context.x = edge.x + offsetX;
-          _edgeLabel.context.y = edge.y + offsetY;
-          _edgeLabel.context.fontSize = fontSize;
-          _edgeLabel.context.fillStyle = fontColor;
-          _edgeLabel.context.textAlign = textAlign;
-          _edgeLabel.context.textBaseline = textBaseline;
-        } else {
-          _edgeLabel = new _canvax["default"].Display.Text(edge.content, {
-            id: edgeLabelId,
-            context: {
-              x: edge.x + offsetX,
-              y: edge.y + offsetY,
-              fontSize: fontSize,
-              fillStyle: fontColor,
-              textAlign: textAlign,
-              textBaseline: textBaseline
-            }
-          });
-
-          _edgeLabel.on(event.types.get(), function (e) {
-            e.eventInfo = {
-              trigger: me.line,
-              nodes: [this.nodeData]
+          if (!offset) {
+            //default 使用edge.x edge.y 也就是edge label的位置
+            offset = {
+              x: edge.x,
+              y: edge.y
             };
-            me.app.fire(e.type, e);
-          });
+          }
 
-          me.labelsSp.addChild(_edgeLabel);
+          ;
+
+          var _edgeLabel = me.labelsSp.getChildById(edgeLabelId);
+
+          if (_edgeLabel) {
+            _edgeLabel.resetText(edge.content);
+
+            _edgeLabel.context.x = offset.x;
+            _edgeLabel.context.y = offset.y;
+            _edgeLabel.context.fontSize = fontSize;
+            _edgeLabel.context.fillStyle = fontColor;
+            _edgeLabel.context.textAlign = textAlign;
+            _edgeLabel.context.textBaseline = textBaseline;
+          } else {
+            _edgeLabel = new _canvax["default"].Display.Text(edge.content, {
+              id: edgeLabelId,
+              context: {
+                x: offset.x,
+                y: offset.y,
+                fontSize: fontSize,
+                fillStyle: fontColor,
+                textAlign: textAlign,
+                textBaseline: textBaseline
+              }
+            });
+
+            _edgeLabel.on(event.types.get(), function (e) {
+              e.eventInfo = {
+                trigger: me.line,
+                nodes: [this.nodeData]
+              };
+              me.app.fire(e.type, e);
+            });
+
+            me.labelsSp.addChild(_edgeLabel);
+          }
+
+          edge.labelElement = _edgeLabel;
+          _edgeLabel.nodeData = edge;
         }
 
-        edge.labelElement = _edgeLabel;
-        _edgeLabel.nodeData = edge;
+        ;
+        var edgeIconEnabled = me.getProp(me.line.icon.enabled, edge);
+
+        if (edgeIconEnabled) {
+          var edgeIconId = 'edge_item_' + key;
+          var charCode = String.fromCharCode(parseInt(me.getProp(me.line.icon.charCode, edge), 16));
+
+          if (charCode) {
+            var _lineWidth = me.getProp(me.line.icon.lineWidth, edge);
+
+            var _strokeStyle = me.getProp(me.line.icon.strokeStyle, edge);
+
+            var fontFamily = me.getProp(me.line.icon.fontFamily, edge);
+
+            var _fontSize = me.getProp(me.line.icon.fontSize, edge);
+
+            var _fontColor = me.getProp(me.line.icon.fontColor, edge);
+
+            var _textAlign = 'center';
+            var _textBaseline = 'middle';
+
+            var _offset = me.getProp(me.line.icon.offset, edge);
+
+            if (!_offset) {
+              //default 使用edge.x edge.y 也就是edge label的位置
+              _offset = {
+                x: edge.x,
+                y: edge.y
+              };
+            }
+
+            ;
+
+            var _edgeIcon = me.labelsSp.getChildById(edgeIconId);
+
+            if (_edgeIcon) {
+              _edgeIcon.resetText(charCode);
+
+              _edgeIcon.context.x = _offset.x;
+              _edgeIcon.context.y = _offset.y;
+              _edgeIcon.context.fontSize = _fontSize;
+              _edgeIcon.context.fillStyle = _fontColor;
+              _edgeIcon.context.textAlign = _textAlign;
+              _edgeIcon.context.textBaseline = _textBaseline;
+              _edgeIcon.context.fontFamily = fontFamily;
+              _edgeIcon.context.lineWidth = _lineWidth;
+              _edgeIcon.context.strokeStyle = _strokeStyle;
+            } else {
+              _edgeIcon = new _canvax["default"].Display.Text(charCode, {
+                id: edgeIconId,
+                context: {
+                  x: _offset.x,
+                  y: _offset.y,
+                  fillStyle: _fontColor,
+                  cursor: 'pointer',
+                  fontSize: _fontSize,
+                  textAlign: _textAlign,
+                  textBaseline: _textBaseline,
+                  fontFamily: fontFamily,
+                  lineWidth: _lineWidth,
+                  strokeStyle: _strokeStyle
+                }
+              });
+
+              _edgeIcon.on(event.types.get(), function (e) {
+                var trigger = me.line;
+
+                if (me.line.icon['on' + e.type]) {
+                  trigger = me.line.icon;
+                }
+
+                ;
+                e.eventInfo = {
+                  trigger: trigger,
+                  nodes: [this.nodeData]
+                };
+                me.app.fire(e.type, e);
+              });
+
+              me.labelsSp.addChild(_edgeIcon);
+            }
+
+            edge.edgeIconElement = _edgeIcon;
+            _edgeIcon.nodeData = edge;
+          }
+        }
+
+        ;
 
         if (me.line.arrow) {
           var arrowId = "arrow_" + key;
@@ -1255,10 +1450,10 @@ function (_GraphsBase) {
   }, {
     key: "selectAll",
     value: function selectAll() {
-      var _this2 = this;
+      var _this5 = this;
 
       this.data.nodes.forEach(function (nodeData) {
-        _this2.selectAt(nodeData);
+        _this5.selectAt(nodeData);
       });
     }
   }, {
@@ -1279,10 +1474,10 @@ function (_GraphsBase) {
   }, {
     key: "unselectAll",
     value: function unselectAll() {
-      var _this3 = this;
+      var _this6 = this;
 
       this.data.nodes.forEach(function (nodeData) {
-        _this3.unselectAt(nodeData);
+        _this6.unselectAt(nodeData);
       });
     }
   }, {
@@ -1454,8 +1649,8 @@ function (_GraphsBase) {
       return ~this.dataFrame.fields.indexOf(str);
     }
   }, {
-    key: "_getElementAndSize",
-    value: function _getElementAndSize(node) {
+    key: "_initContentAndGetSize",
+    value: function _initContentAndGetSize(node) {
       var me = this;
       var contentType = node.ctype;
 
@@ -1481,99 +1676,168 @@ function (_GraphsBase) {
   }, {
     key: "_getEleAndsetCanvasSize",
     value: function _getEleAndsetCanvasSize(node) {
+      var _this7 = this;
+
       var me = this;
-      var content = node.content;
-      var width = node.rowData.width,
-          height = node.rowData.height; //let sprite = new Canvax.Display.Sprite({});
+      return new Promise(function (resolve) {
+        var content = node.content;
+        var width = node.rowData.width,
+            height = node.rowData.height; //let sprite = new Canvax.Display.Sprite({});
 
-      var context = {
-        fillStyle: me.getProp(me.node.content.fontColor, node),
-        textAlign: me.getProp(me.node.content.textAlign, node),
-        textBaseline: me.getProp(me.node.content.textBaseline, node)
-      }; //console.log(node.key);
+        var context = {
+          fillStyle: me.getProp(me.node.content.fontColor, node),
+          textAlign: me.getProp(me.node.content.textAlign, node),
+          textBaseline: me.getProp(me.node.content.textBaseline, node)
+        }; //console.log(node.key);
 
-      var contentLabelId = "content_label_" + node.key;
+        var contentLabelId = "content_label_" + node.key;
 
-      var _contentLabel = me.nodesContentSp.getChildById(contentLabelId);
+        var _contentLabel = me.nodesContentSp.getChildById(contentLabelId);
 
-      if (_contentLabel) {
-        _contentLabel.resetText(content);
+        if (_contentLabel) {
+          _contentLabel.resetText(content);
 
-        _.extend(_contentLabel.context, context);
-      } else {
-        //先创建text，根据 text 来计算node需要的width和height
-        _contentLabel = new _canvax["default"].Display.Text(content, {
-          id: contentLabelId,
-          context: context
-        });
+          _.extend(_contentLabel.context, context);
+        } else {
+          //先创建text，根据 text 来计算node需要的width和height
+          _contentLabel = new _canvax["default"].Display.Text(content, {
+            id: contentLabelId,
+            context: context
+          });
 
-        if (!_.isArray(node.key)) {
-          me.nodesContentSp.addChild(_contentLabel);
+          if (!_.isArray(node.key)) {
+            me.nodesContentSp.addChild(_contentLabel);
+          }
+
+          ;
         }
 
         ;
-      }
+        var inited;
 
-      if (!width) {
-        width = _contentLabel.getTextWidth() + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
-      }
+        if (_this7.node.content.oninited && typeof _this7.node.content.oninited === 'function') {
+          inited = _this7.node.content.oninited(node, _contentLabel);
+        }
 
-      ;
+        ;
 
-      if (!height) {
-        height = _contentLabel.getTextHeight() + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
-      }
+        if (inited && typeof inited.then == 'function') {
+          inited.then(function () {
+            if (!width) {
+              width = _contentLabel.getTextWidth() + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
+            }
 
-      ;
-      return {
-        contentElement: _contentLabel,
-        width: width,
-        height: height
-      };
+            ;
+
+            if (!height) {
+              height = _contentLabel.getTextHeight() + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
+            }
+
+            ;
+            resolve({
+              contentElement: _contentLabel,
+              width: width,
+              height: height
+            });
+          });
+        } else {
+          if (!width) {
+            width = _contentLabel.getTextWidth() + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
+          }
+
+          ;
+
+          if (!height) {
+            height = _contentLabel.getTextHeight() + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
+          }
+
+          ;
+          resolve({
+            contentElement: _contentLabel,
+            width: width,
+            height: height
+          });
+        }
+      });
     }
   }, {
     key: "_getEleAndsetHtmlSize",
     value: function _getEleAndsetHtmlSize(node) {
+      var _this8 = this;
+
       var me = this;
-      var content = node.content;
-      var width = node.rowData.width,
-          height = node.rowData.height;
-      var contentLabelClass = "__content_label_" + node.key;
+      return new Promise(function (resolve) {
+        var content = node.content;
+        var width = node.rowData.width,
+            height = node.rowData.height;
+        var contentLabelClass = "__content_label_" + node.key;
 
-      var _dom = this.domContainer.getElementsByClassName(contentLabelClass);
+        var _dom = _this8.domContainer.getElementsByClassName(contentLabelClass);
 
-      if (!_dom.length) {
-        _dom = document.createElement("div");
-        _dom.className = "chartx_relation_node " + contentLabelClass;
-        _dom.style.cssText += "; position:absolute;visibility:hidden;";
-        this.domContainer.appendChild(_dom);
-      } else {
-        _dom = _dom[0];
-      }
+        if (!_dom.length) {
+          _dom = document.createElement("div");
+          _dom.className = "chartx_relation_node " + contentLabelClass;
+          _dom.style.cssText += "; position:absolute;visibility:hidden;";
 
-      ;
-      _dom.style.cssText += "; color:" + me.getProp(me.node.content.fontColor, node) + ";";
-      _dom.style.cssText += "; text-align:" + me.getProp(me.node.content.textAlign, node) + ";";
-      _dom.style.cssText += "; vertical-align:" + me.getProp(me.node.content.textBaseline, node) + ";"; //_dom.style.cssText += "; padding:"+me.getProp(me.node.padding, node)+"px;";
+          _this8.domContainer.appendChild(_dom);
+        } else {
+          _dom = _dom[0];
+        }
 
-      _dom.innerHTML = content;
+        ;
+        _dom.style.cssText += "; color:" + me.getProp(me.node.content.fontColor, node) + ";";
+        _dom.style.cssText += "; text-align:" + me.getProp(me.node.content.textAlign, node) + ";";
+        _dom.style.cssText += "; vertical-align:" + me.getProp(me.node.content.textBaseline, node) + ";"; //_dom.style.cssText += "; padding:"+me.getProp(me.node.padding, node)+"px;";
 
-      if (!width) {
-        width = _dom.offsetWidth; // + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
-      }
+        _dom.innerHTML = content;
+        var inited;
 
-      ;
+        if (_this8.node.content.oninited && typeof _this8.node.content.oninited === 'function') {
+          inited = _this8.node.content.oninited(node, _dom);
+        }
 
-      if (!height) {
-        height = _dom.offsetHeight; // + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
-      }
+        ;
 
-      ;
-      return {
-        contentElement: _dom,
-        width: width,
-        height: height
-      };
+        if (inited && typeof inited.then == 'function') {
+          inited.then(function (opt) {
+            if (!width) {
+              width = _dom.offsetWidth; // + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
+            }
+
+            ;
+
+            if (!height) {
+              height = _dom.offsetHeight; // + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
+            }
+
+            ;
+            resolve({
+              contentElement: _dom,
+              width: width,
+              height: height
+            });
+          });
+        } else {
+          if (!width) {
+            width = _dom.offsetWidth; // + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
+          }
+
+          ;
+
+          if (!height) {
+            height = _dom.offsetHeight; // + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
+          }
+
+          ;
+          resolve({
+            contentElement: _dom,
+            width: width,
+            height: height
+          });
+        }
+
+        ;
+      });
     }
   }, {
     key: "getNodesAt",
