@@ -274,8 +274,21 @@ class Relation extends GraphsBase {
                         default: 'solid'
                     },
                     arrow: {
-                        detail: '是否有箭头',
-                        default:true
+                        detail: '连线箭头配置',
+                        propertys: {
+                            enabled: {
+                                detail  :'是否开启arrow设置',
+                                default : true
+                            },
+                            offsetX: {
+                                detail  :'x方向偏移',
+                                default : 0
+                            },
+                            offsetY: {
+                                detail  : 'y方向偏移',
+                                default : 0
+                            }
+                        }
                     },
                     edgeLabel: {
                         detail: '连线上面的label配置',
@@ -568,6 +581,7 @@ class Relation extends GraphsBase {
         !opt && (opt = {});
         _.extend(true, this, opt);
 
+        
         this._initData( opt.data ).then( data => {
 
             this.data = data;
@@ -590,6 +604,8 @@ class Relation extends GraphsBase {
             
             this.graphsSp.context.x = _offsetLeft;
             this.graphsSp.context.y = _offsetTop;
+
+            this.fire("complete");
 
         } );
 
@@ -637,6 +653,8 @@ class Relation extends GraphsBase {
 
             };
 
+            this.fire("complete");
+
         } );
     }
 
@@ -650,9 +668,10 @@ class Relation extends GraphsBase {
         };
 
         //下面的几个是销毁edge上面的元素
-        item.pathElement && item.pathElement.destroy();
-        item.labelElement && item.labelElement.destroy();
-        item.arrowElement && item.arrowElement.destroy();
+        item.pathElement     && item.pathElement.destroy();
+        item.labelElement    && item.labelElement.destroy();
+        item.arrowElement    && item.arrowElement.destroy();
+        item.edgeIconElement && item.edgeIconElement.destroy()
     }
 
     _initData( _data ) {
@@ -691,7 +710,8 @@ class Relation extends GraphsBase {
 
             let _nodeMap = {};
             let initNum  = 0;
-            this.graphsSp.context.visible = false;
+            //this.graphsSp.context.visible = false;
+            //this.domContainer.style.visibility = 'hidden';
 
             for (let i = 0; i < this.dataFrame.length; i++) {
                 let rowData = this.dataFrame.getRowDataAt(i);
@@ -787,7 +807,8 @@ class Relation extends GraphsBase {
                             edge.target = _nodeMap[ keys[1] ];
                         } );
 
-                        this.graphsSp.context.visible = true;
+                        //this.graphsSp.context.visible = true;
+                        //this.domContainer.style.visibility = 'visible';
                         resolve( data );
                     };
 
@@ -1054,17 +1075,22 @@ class Relation extends GraphsBase {
             };
 
             
-            if( me.line.arrow ){
+            if( me.line.arrow.enabled ){
                 let arrowId = "arrow_"+key;
                 
                 let _arrow = me.arrowsSp.getChildById(arrowId);
                 if( _arrow ){
                     //arrow 只监听了x y 才会重绘，，，暂时只能这样处理,手动的赋值control.x control.y
                     //而不是直接把 arrowControl 赋值给 control
+
+                    _arrow.context.x = me.line.arrow.offsetX;
+                    _arrow.context.y = me.line.arrow.offsetY;
+                    _arrow.context.fillStyle = strokeStyle;
                     _arrow.context.control.x = arrowControl.x;
                     _arrow.context.control.y = arrowControl.y;
                     _arrow.context.point = edge.points.slice(-1)[0];
                     _arrow.context.strokeStyle = strokeStyle;
+                    _arrow.context.fillStyle = strokeStyle;
                     // _.extend(true, _arrow, {
                     //     control: arrowControl,
                     //     point: edge.points.slice(-1)[0],
@@ -1074,10 +1100,12 @@ class Relation extends GraphsBase {
                     _arrow = new Arrow({
                         id: arrowId,
                         context: {
+                            x: me.line.arrow.offsetX,
+                            y: me.line.arrow.offsetY,
                             control     : arrowControl,
                             point       : edge.points.slice(-1)[0],
-                            strokeStyle : strokeStyle
-                            //fillStyle: strokeStyle
+                            strokeStyle : strokeStyle,
+                            fillStyle   : strokeStyle
                         }
                     });
                     me.arrowsSp.addChild(_arrow);
@@ -1176,6 +1204,10 @@ class Relation extends GraphsBase {
 
             if( me.node.select.list.indexOf( node.key ) > -1 ){
                 me.selectAt( node );
+            };
+
+            if (node.ctype == "canvas") {
+                node.contentElement.context.visible = true;
             };
 
             _boxShape.on("transform", function () {
@@ -1472,14 +1504,16 @@ class Relation extends GraphsBase {
             let contentLabelId = "content_label_"+node.key;
             let _contentLabel = me.nodesContentSp.getChildById( contentLabelId );
             if( _contentLabel ){
+                //已经存在的label
                 _contentLabel.resetText( content );
                 _.extend( _contentLabel.context, context );
             } else {
-                //先创建text，根据 text 来计算node需要的width和height
+                //新创建text，根据 text 来计算node需要的width和height
                 _contentLabel = new Canvax.Display.Text(content, {
                     id: contentLabelId,
                     context
                 });
+                _contentLabel.context.visible = false;
                 if( !_.isArray( node.key ) ){
                     me.nodesContentSp.addChild( _contentLabel );
                 };

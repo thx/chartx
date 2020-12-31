@@ -18561,6 +18561,8 @@ var chartx = (function () {
 	      } else {
 	        this.fire("complete");
 	      }
+
+	      this.inited = true;
 	      return this;
 	    }
 	  }, {
@@ -42511,8 +42513,21 @@ var chartx = (function () {
 	              "default": 'solid'
 	            },
 	            arrow: {
-	              detail: '是否有箭头',
-	              "default": true
+	              detail: '连线箭头配置',
+	              propertys: {
+	                enabled: {
+	                  detail: '是否开启arrow设置',
+	                  "default": true
+	                },
+	                offsetX: {
+	                  detail: 'x方向偏移',
+	                  "default": 0
+	                },
+	                offsetY: {
+	                  detail: 'y方向偏移',
+	                  "default": 0
+	                }
+	              }
 	            },
 	            edgeLabel: {
 	              detail: '连线上面的label配置',
@@ -42838,6 +42853,8 @@ var chartx = (function () {
 	        }
 	        _this2.graphsSp.context.x = _offsetLeft;
 	        _this2.graphsSp.context.y = _offsetTop;
+
+	        _this2.fire("complete");
 	      });
 	    } //如果dataTrigger.origin 有传入， 则已经这个origin为参考点做重新布局
 
@@ -42896,6 +42913,8 @@ var chartx = (function () {
 	            me.graphsView.context.y = y;
 	          }
 	        }
+
+	        _this3.fire("complete");
 	      });
 	    }
 	  }, {
@@ -42913,6 +42932,7 @@ var chartx = (function () {
 	      item.pathElement && item.pathElement.destroy();
 	      item.labelElement && item.labelElement.destroy();
 	      item.arrowElement && item.arrowElement.destroy();
+	      item.edgeIconElement && item.edgeIconElement.destroy();
 	    }
 	  }, {
 	    key: "_initData",
@@ -42948,8 +42968,8 @@ var chartx = (function () {
 	          }
 	        }
 	        var _nodeMap = {};
-	        var initNum = 0;
-	        _this4.graphsSp.context.visible = false;
+	        var initNum = 0; //this.graphsSp.context.visible = false;
+	        //this.domContainer.style.visibility = 'hidden';
 
 	        var _loop = function _loop(i) {
 	          var rowData = _this4.dataFrame.getRowDataAt(i);
@@ -43034,9 +43054,10 @@ var chartx = (function () {
 	                var keys = edge.key;
 	                edge.source = _nodeMap[keys[0]];
 	                edge.target = _nodeMap[keys[1]];
-	              });
+	              }); //this.graphsSp.context.visible = true;
+	              //this.domContainer.style.visibility = 'visible';
 
-	              _this4.graphsSp.context.visible = true;
+
 	              resolve(data$1);
 	            }
 	          });
@@ -43315,7 +43336,7 @@ var chartx = (function () {
 	          }
 	        }
 
-	        if (me.line.arrow) {
+	        if (me.line.arrow.enabled) {
 	          var arrowId = "arrow_" + key;
 
 	          var _arrow = me.arrowsSp.getChildById(arrowId);
@@ -43323,10 +43344,14 @@ var chartx = (function () {
 	          if (_arrow) {
 	            //arrow 只监听了x y 才会重绘，，，暂时只能这样处理,手动的赋值control.x control.y
 	            //而不是直接把 arrowControl 赋值给 control
+	            _arrow.context.x = me.line.arrow.offsetX;
+	            _arrow.context.y = me.line.arrow.offsetY;
+	            _arrow.context.fillStyle = strokeStyle;
 	            _arrow.context.control.x = arrowControl.x;
 	            _arrow.context.control.y = arrowControl.y;
 	            _arrow.context.point = edge.points.slice(-1)[0];
-	            _arrow.context.strokeStyle = strokeStyle; // _.extend(true, _arrow, {
+	            _arrow.context.strokeStyle = strokeStyle;
+	            _arrow.context.fillStyle = strokeStyle; // _.extend(true, _arrow, {
 	            //     control: arrowControl,
 	            //     point: edge.points.slice(-1)[0],
 	            //     strokeStyle: strokeStyle
@@ -43335,10 +43360,12 @@ var chartx = (function () {
 	            _arrow = new Arrow({
 	              id: arrowId,
 	              context: {
+	                x: me.line.arrow.offsetX,
+	                y: me.line.arrow.offsetY,
 	                control: arrowControl,
 	                point: edge.points.slice(-1)[0],
-	                strokeStyle: strokeStyle //fillStyle: strokeStyle
-
+	                strokeStyle: strokeStyle,
+	                fillStyle: strokeStyle
 	              }
 	            });
 	            me.arrowsSp.addChild(_arrow);
@@ -43448,6 +43475,10 @@ var chartx = (function () {
 
 	        if (me.node.select.list.indexOf(node.key) > -1) {
 	          me.selectAt(node);
+	        }
+
+	        if (node.ctype == "canvas") {
+	          node.contentElement.context.visible = true;
 	        }
 
 	        _boxShape.on("transform", function () {
@@ -43800,15 +43831,17 @@ var chartx = (function () {
 	        var _contentLabel = me.nodesContentSp.getChildById(contentLabelId);
 
 	        if (_contentLabel) {
+	          //已经存在的label
 	          _contentLabel.resetText(content);
 
 	          _.extend(_contentLabel.context, context);
 	        } else {
-	          //先创建text，根据 text 来计算node需要的width和height
+	          //新创建text，根据 text 来计算node需要的width和height
 	          _contentLabel = new _canvax["default"].Display.Text(content, {
 	            id: contentLabelId,
 	            context: context
 	          });
+	          _contentLabel.context.visible = false;
 
 	          if (!_.isArray(node.key)) {
 	            me.nodesContentSp.addChild(_contentLabel);
@@ -51139,6 +51172,423 @@ var chartx = (function () {
 
 	unwrapExports(markcloumn);
 
+	var relation_backline = createCommonjsModule(function (module, exports) {
+
+
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports["default"] = void 0;
+
+	var _classCallCheck2 = interopRequireDefault(classCallCheck$1);
+
+	var _possibleConstructorReturn2 = interopRequireDefault(possibleConstructorReturn$1);
+
+	var _getPrototypeOf2 = interopRequireDefault(getPrototypeOf$1);
+
+	var _assertThisInitialized2 = interopRequireDefault(assertThisInitialized$1);
+
+	var _createClass2 = interopRequireDefault(createClass$1);
+
+	var _inherits2 = interopRequireDefault(inherits$1);
+
+	var _component = interopRequireDefault(component);
+
+	var _canvax = interopRequireDefault(Canvax);
+
+
+
+	var _ = _canvax["default"]._,
+	    event = _canvax["default"].event;
+	var BrokenLine = _canvax["default"].Shapes.BrokenLine;
+	var Arrow = _canvax["default"].Shapes.Arrow;
+	var Text = _canvax["default"].Display.Text;
+
+	var relationBackLine =
+	/*#__PURE__*/
+	function (_Component) {
+	  (0, _inherits2["default"])(relationBackLine, _Component);
+	  (0, _createClass2["default"])(relationBackLine, null, [{
+	    key: "defaultProps",
+	    value: function defaultProps() {
+	      return {
+	        key: {
+	          detail: '和relation的line保持一致，用逗号分割',
+	          "default": null
+	        },
+	        line: {
+	          detail: '线的配置',
+	          propertys: {
+	            enabled: {
+	              detail: '是否开启',
+	              "default": true
+	            },
+	            pointList: {
+	              detail: '回链线的points',
+	              "default": null
+	            },
+	            lineWidth: {
+	              detail: '线宽',
+	              "default": 1
+	            },
+	            strokeStyle: {
+	              detail: '线的颜色',
+	              "default": '#e5e5e5'
+	            },
+	            lineType: {
+	              detail: '线的样式，虚线(dashed)实线(solid)',
+	              "default": 'solid'
+	            },
+	            dissY: {
+	              detail: '拐点和起始节点的距离',
+	              "default": null
+	            }
+	          }
+	        },
+	        icon: {
+	          detail: 'line上面的icon',
+	          propertys: {
+	            enabled: {
+	              detail: '是否开启线上的icon设置',
+	              "default": true
+	            },
+	            charCode: {
+	              detail: 'iconfont上面对应的unicode中&#x后面的字符',
+	              "default": null
+	            },
+	            lineWidth: {
+	              detail: 'icon描边线宽',
+	              "default": 0
+	            },
+	            strokeStyle: {
+	              detail: 'icon的描边颜色',
+	              "default": '#e5e5e5'
+	            },
+	            fontColor: {
+	              detail: 'icon的颜色',
+	              "default": '#e5e5e5'
+	            },
+	            fontFamily: {
+	              detail: 'font-face的font-family设置',
+	              "default": 'iconfont'
+	            },
+	            fontSize: {
+	              detail: 'icon的字体大小',
+	              "default": 16
+	            },
+	            offset: {
+	              detail: 'icon的位置，函数，参数是整个edge对象',
+	              "default": null
+	            }
+	          }
+	        }
+	      };
+	    }
+	  }]);
+
+	  function relationBackLine(opt, app) {
+	    var _this;
+
+	    (0, _classCallCheck2["default"])(this, relationBackLine);
+	    _this = (0, _possibleConstructorReturn2["default"])(this, (0, _getPrototypeOf2["default"])(relationBackLine).call(this, opt, app));
+	    _this.name = "relation_backline";
+
+	    _.extend(true, (0, _assertThisInitialized2["default"])(_this), (0, tools.getDefaultProps)(relationBackLine.defaultProps()), opt);
+
+	    _this.pointList = null;
+	    _this.sprite = new _canvax["default"].Display.Sprite();
+	    _this._line = null;
+	    _this._arrow = null;
+	    _this._label = null;
+	    _this._icon = null;
+	    return _this;
+	  }
+
+	  (0, _createClass2["default"])(relationBackLine, [{
+	    key: "draw",
+	    value: function draw(opt) {
+	      !opt && (opt = {});
+	      this.width = opt.width;
+	      this.height = opt.height;
+	      this.origin = opt.origin;
+
+	      this._widget();
+	    }
+	  }, {
+	    key: "reset",
+	    value: function reset(opt) {
+	      opt && _.extend(true, this, opt);
+
+	      this._widget();
+	    }
+	  }, {
+	    key: "_widget",
+	    value: function _widget() {
+	      var _this2 = this;
+
+	      var _graphs = this.app.getGraphs();
+
+	      if (_graphs.length) {
+	        var _graph = _graphs[0];
+
+	        _graph.on('complete', function () {
+	          _this2._setPoints(_graph);
+
+	          _this2._drawLine();
+
+	          _this2._drawArrow();
+
+	          _this2._drawIcon();
+
+	          _graph.graphsSp.addChild(_this2.sprite);
+	        });
+	      }
+	    }
+	  }, {
+	    key: "_setPoints",
+	    value: function _setPoints(_graph) {
+	      if (!this.line.pointList) {
+	        var key = this.key;
+
+	        var beginNode = _graph.data.nodes.find(function (_g) {
+	          return _g.key == key.split(',')[0];
+	        });
+
+	        var beginNodeBBox = {
+	          x: beginNode.x - beginNode.width / 2,
+	          y: beginNode.y - beginNode.height / 2,
+	          width: beginNode.width,
+	          height: beginNode.height
+	        };
+
+	        var endNode = _graph.data.nodes.find(function (_g) {
+	          return _g.key == key.split(',')[1];
+	        });
+
+	        var endNodeBBox = {
+	          x: endNode.x - endNode.width / 2,
+	          y: endNode.y - endNode.height / 2,
+	          width: endNode.width,
+	          height: endNode.height
+	        };
+	        var fristPoint = [beginNodeBBox.x + beginNodeBBox.width, beginNodeBBox.y + beginNodeBBox.height / 2];
+	        var secondPoint = [beginNodeBBox.x + beginNodeBBox.width + 20, beginNodeBBox.y + beginNodeBBox.height / 2];
+	        var endPoint;
+	        var isAbove = secondPoint[1] < endNodeBBox.y + endNodeBBox.height / 2;
+
+	        if (isAbove) {
+	          //连接endNode上面的点
+	          endPoint = [endNodeBBox.x + endNodeBBox.width / 2, endNodeBBox.y];
+	        } else {
+	          //连接endNode下面的点
+	          endPoint = [endNodeBBox.x + endNodeBBox.width / 2, endNodeBBox.y + endNodeBBox.height];
+	        }
+	        var dissY;
+
+	        if (this.line.dissY == null) {
+	          if (isAbove) {
+	            //在上面的话，像下是最近的路径，优先检测向下的连线
+	            var diss = beginNode.y + beginNode.height - endNode.y;
+
+	            if (diss > 20) {
+	              //距离足够，可以往下连接
+	              dissY = beginNode.height / 2 + diss / 2;
+	            } else {
+	              //距离不够就往上走，肯定够
+	              dissY = Math.min(beginNode.y - 20, endNode.y - 20) - secondPoint[1];
+	            }
+	          } else {
+	            //起始点再目标点的下面
+	            var _diss = beginNode.y - (endNode.y + endNode.height);
+
+	            if (_diss > 20) {
+	              //向上探测，间距足够的话
+	              dissY = -(beginNode.height / 2 + _diss / 2);
+	            } else {
+	              //向上空间不够， 只能向下了， 海阔天空
+	              dissY = Math.max(beginNode.y + beginNode.height + 20, endNode.y + endNode.height + 20) - secondPoint[1];
+	            }
+	          }
+	        } else {
+	          dissY = this.line.dissY;
+	        }
+	        var thirdPoint, secondLastPoint;
+	        thirdPoint = [secondPoint[0], secondPoint[1] + dissY];
+	        secondLastPoint = [endPoint[0], secondPoint[1] + dissY];
+	        this.pointList = [fristPoint, secondPoint, thirdPoint, secondLastPoint, endPoint];
+	      } else {
+	        this.pointList = this.line.pointList;
+	      }
+	    }
+	  }, {
+	    key: "_drawLine",
+	    value: function _drawLine() {
+	      var me = this;
+	      if (!me.line.enabled) return;
+	      var lineOpt = {
+	        pointList: this.pointList,
+	        lineWidth: this.line.lineWidth,
+	        strokeStyle: this.line.strokeStyle,
+	        lineType: this.line.lineType
+	      };
+
+	      if (this._line) {
+	        _.extend(this._line.context, lineOpt);
+	      } else {
+	        this._line = new BrokenLine({
+	          context: lineOpt
+	        });
+	        this.sprite.addChild(this._line);
+	      }
+	    }
+	  }, {
+	    key: "_drawArrow",
+	    value: function _drawArrow() {
+	      var pointsList = this.pointList;
+	      var offsetY = 2;
+	      var endPoint = pointsList[pointsList.length - 1];
+	      var secondLastPoint = pointsList[pointsList.length - 2];
+
+	      if (secondLastPoint[1] < endPoint[1]) {
+	        offsetY = -2;
+	      }
+
+	      var strokeStyle = this.line.strokeStyle;
+	      var ctx = {
+	        y: offsetY,
+	        control: {
+	          x: secondLastPoint[0],
+	          y: secondLastPoint[1]
+	        },
+	        point: {
+	          x: endPoint[0],
+	          y: endPoint[1]
+	        },
+	        strokeStyle: strokeStyle,
+	        fillStyle: strokeStyle
+	      };
+
+	      if (this._arrow) {
+	        _.extend(true, this._arrow.context, ctx); // this._line.context.y = ctx.y;
+	        // this._line.context.control.x = ctx.control.x;
+	        // this._line.context.control.y = ctx.control.y;
+	        // this._line.context.point.x = ctx.point.x;
+	        // this._line.context.point.y = ctx.point.y;
+	        // this._line.context.strokeStyle = ctx.strokeStyle;
+	        // this._line.context.fillStyle = ctx.fillStyle;
+
+	      } else {
+	        this._arrow = new Arrow({
+	          context: ctx
+	        });
+	        this.sprite.addChild(this._arrow);
+	      }
+	    }
+	  }, {
+	    key: "_drawIcon",
+	    value: function _drawIcon() {
+	      var me = this;
+
+	      if (this.icon.enabled) {
+	        var charCode = String.fromCharCode(parseInt(this._getProp(this.icon.charCode, this), 16));
+
+	        if (charCode) {
+	          var secondPoint = this.pointList[1];
+
+	          var lineWidth = this._getProp(this.icon.lineWidth, this);
+
+	          var strokeStyle = this._getProp(this.icon.strokeStyle, this);
+
+	          var fontFamily = this._getProp(this.icon.fontFamily, this);
+
+	          var fontSize = this._getProp(this.icon.fontSize, this);
+
+	          var fontColor = this._getProp(this.icon.fontColor, this);
+
+	          var textAlign = 'center';
+	          var textBaseline = 'middle';
+
+	          var offset = this._getProp(this.icon.offset, this);
+
+	          if (!offset) {
+	            //default 使用edge.x edge.y 也就是edge label的位置
+	            offset = {
+	              x: secondPoint[0],
+	              y: secondPoint[1]
+	            };
+	          }
+
+	          if (this._icon) {
+	            this._icon.resetText(charCode);
+
+	            this._icon.context.x = offset.x;
+	            this._icon.context.y = offset.y;
+	            this._icon.context.fontSize = fontSize;
+	            this._icon.context.fillStyle = fontColor;
+	            this._icon.context.textAlign = textAlign;
+	            this._icon.context.textBaseline = textBaseline;
+	            this._icon.context.fontFamily = fontFamily;
+	            this._icon.context.lineWidth = lineWidth;
+	            this._icon.context.strokeStyle = strokeStyle;
+	          } else {
+	            this._icon = new _canvax["default"].Display.Text(charCode, {
+	              context: {
+	                x: offset.x,
+	                y: offset.y,
+	                fillStyle: fontColor,
+	                cursor: 'pointer',
+	                fontSize: fontSize,
+	                textAlign: textAlign,
+	                textBaseline: textBaseline,
+	                fontFamily: fontFamily,
+	                lineWidth: lineWidth,
+	                strokeStyle: strokeStyle
+	              }
+	            });
+
+	            this._icon.on(event.types.get(), function (e) {
+	              var trigger = me.line;
+
+	              if (me.icon['on' + e.type]) {
+	                trigger = me.icon;
+	              }
+	              e.eventInfo = {
+	                trigger: trigger,
+	                nodes: [{
+	                  name: me.key
+	                }]
+	              };
+	              me.app.fire(e.type, e);
+	            });
+
+	            me.sprite.addChild(this._icon);
+	          }
+	        }
+	      }
+	    }
+	  }, {
+	    key: "_getProp",
+	    value: function _getProp(prop, nodeData) {
+	      var _prop = prop;
+
+	      if (_.isFunction(prop)) {
+	        _prop = prop.apply(this, [nodeData]);
+	      }
+	      return _prop;
+	    }
+	  }]);
+	  return relationBackLine;
+	}(_component["default"]);
+
+	_component["default"].registerComponent(relationBackLine, 'relation_backline');
+
+	var _default = relationBackLine;
+	exports["default"] = _default;
+	});
+
+	unwrapExports(relation_backline);
+
 	var dist = createCommonjsModule(function (module, exports) {
 
 
@@ -51149,6 +51599,8 @@ var chartx = (function () {
 	exports["default"] = void 0;
 
 	var _global = interopRequireDefault(global$1);
+
+
 
 
 
@@ -51230,7 +51682,7 @@ var chartx = (function () {
 	}
 
 	var chartx = {
-	  version: '1.1.31',
+	  version: '1.1.32',
 	  options: {}
 	};
 

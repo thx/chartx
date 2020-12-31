@@ -310,11 +310,14 @@ class ScatGraphs extends GraphsBase
             this.fire("complete");
         };
 
+        //inited 和 complete还不同，complete 是需要等动画结束
+        this.inited = true;
         return this;
     }
 
     resetData( dataFrame )
     {
+        debugger
         this.dataFrame = dataFrame;
         this.data = this._trimGraphs();
         this._widget();

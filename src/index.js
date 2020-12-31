@@ -46,6 +46,7 @@ import "./components/watermark/index"
 import "./components/cross/index"
 import "./components/lineschedu/index"
 import "./components/markcloumn/index"
+import "./components/relation_backline/index"
 
 //皮肤设定begin ---------------
 //如果数据库中有项目皮肤

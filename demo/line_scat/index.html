@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
+<title>xChart demo -- bar</title>
+
+<script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
+<script type="text/javascript" src="../../dist/index.iife.js"></script>
+<!-- codemirror -->
+<script type="text/javascript" src="../../lib/codemirror/codemirror.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/active-line.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/javascript.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/matchbrackets.js"></script>
+<link rel="stylesheet" href="../../lib/codemirror/codemirror.css">
+<link rel="stylesheet" href="../../lib/codemirror/zenburn.css">
+<link rel="stylesheet" href="../../lib/codemirror/docs.css">
+<!-- codemirror end -->
+<!--bootstrap-->
+<script type="text/javascript" src="../../lib/bootstrap/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap-theme.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/docs.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap.min.css">
+<!--bootstrap end-->
+<script type="text/javascript" src="../../lib/demo.js"></script>
+<link rel="stylesheet" href="../../lib/demo.css">
+</head>
+<body >
+
+<table>
+    <tr>
+        <td id="td-vl">
+            <form><textarea id="code" name="code">
+
+//chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
+//第一行是表头。
+var data = [
+    {"campaignId":91419210,"coordinate":"","hasAd":1,"adgroupId":2318552710,"itemId":631904735531,"overDevelopTime":0,"itemPrice":79.8,"itemTitle":"汽车镀膜剂车漆镀晶液全车纳米水晶喷雾正品渡膜手度镀金喷剂打蜡","overSaleNum":1,"itemIcon":"//img.alicdn.com/imgextra/i3/3663529519/O1CN01Nh4o7O2KBknNiy2OG_!!2-item_pic.png","day":29,"click":6279,"click1":null,"lucency":1},
+    {"campaignId":null,"coordinate":null,"hasAd":null,"adgroupId":null,"itemId":null,"overDevelopTime":null,"itemPrice":null,"itemTitle":null,"overSaleNum":null,"itemIcon":null,"day":0,"click":null,"click1":13,"lucency":0},
+    {"campaignId":null,"coordinate":null,"hasAd":null,"adgroupId":null,"itemId":null,"overDevelopTime":null,"itemPrice":null,"itemTitle":null,"overSaleNum":null,"itemIcon":null,"day":1,"click":null,"click1":149,"lucency":0},
+    {"campaignId":null,"coordinate":null,"hasAd":null,"adgroupId":null,"itemId":null,"overDevelopTime":null,"itemPrice":null,"itemTitle":null,"overSaleNum":null,"itemIcon":null,"day":2,"click":null,"click1":115,"lucency":0},
+    {"campaignId":null,"coordinate":null,"hasAd":null,"adgroupId":null,"itemId":null,"overDevelopTime":null,"itemPrice":null,"itemTitle":null,"overSaleNum":null,"itemIcon":null,"day":3,"click":null,"click1":83,"lucency":0},
+    {"campaignId":null,"coordinate":null,"hasAd":null,"adgroupId":null,"itemId":null,"overDevelopTime":null,"itemPrice":null,"itemTitle":null,"overSaleNum":null,"itemIcon":null,"day":4,"click":null,"click1":68,"lucency":0},
+    {"campaignId":null,"coordinate":null,"hasAd":null,"adgroupId":null,"itemId":null,"overDevelopTime":null,"itemPrice":null,"itemTitle":null,"overSaleNum":null,"itemIcon":null,"day":5,"click":null,"click1":81,"lucency":0},
+    {"campaignId":null,"coordinate":null,"hasAd":null,"adgroupId":null,"itemId":null,"overDevelopTime":null,"itemPrice":null,"itemTitle":null,"overSaleNum":null,"itemIcon":null,"day":6,"click":null,"click1":109,"lucency":0},
+    {"campaignId":null,"coordinate":null,"hasAd":null,"adgroupId":null,"itemId":null,"overDevelopTime":null,"itemPrice":null,"itemTitle":null,"overSaleNum":null,"itemIcon":null,"day":7,"click":null,"click1":138,"lucency":0},
+    {"campaignId":null,"coordinate":null,"hasAd":null,"adgroupId":null,"itemId":null,"overDevelopTime":null,"itemPrice":null,"itemTitle":null,"overSaleNum":null,"itemIcon":null,"day":8,"click":null,"click1":110,"lucency":0},
+    {"campaignId":null,"coordinate":null,"hasAd":null,"adgroupId":null,"itemId":null,"overDevelopTime":null,"itemPrice":null,"itemTitle":null,"overSaleNum":null,"itemIcon":null,"day":9,"click":null,"click1":115,"lucency":0},
+    {"campaignId":null,"coordinate":null,"hasAd":null,"adgroupId":null,"itemId":null,"overDevelopTime":null,"itemPrice":null,"itemTitle":null,"overSaleNum":null,"itemIcon":null,"day":10,"click":null,"click1":162,"lucency":0},
+    {"campaignId":null,"coordinate":null,"hasAd":null,"adgroupId":null,"itemId":null,"overDevelopTime":null,"itemPrice":null,"itemTitle":null,"overSaleNum":null,"itemIcon":null,"day":11,"click":null,"click1":167,"lucency":0},
+    {"campaignId":null,"coordinate":null,"hasAd":null,"adgroupId":null,"itemId":null,"overDevelopTime":null,"itemPrice":null,"itemTitle":null,"overSaleNum":null,"itemIcon":null,"day":12,"click":null,"click1":142,"lucency":0},
+    {"campaignId":null,"coordinate":null,"hasAd":null,"adgroupId":null,"itemId":null,"overDevelopTime":null,"itemPrice":null,"itemTitle":null,"overSaleNum":null,"itemIcon":null,"day":13,"click":null,"click1":133,"lucency":0},
+    {"campaignId":null,"coordinate":null,"hasAd":null,"adgroupId":null,"itemId":null,"overDevelopTime":null,"itemPrice":null,"itemTitle":null,"overSaleNum":null,"itemIcon":null,"day":14,"click":null,"click1":132,"lucency":0},
+    {"campaignId":null,"coordinate":null,"hasAd":null,"adgroupId":null,"itemId":null,"overDevelopTime":null,"itemPrice":null,"itemTitle":null,"overSaleNum":null,"itemIcon":null,"day":15,"click":null,"click1":211,"lucency":0},
+    {"campaignId":null,"coordinate":null,"hasAd":null,"adgroupId":null,"itemId":null,"overDevelopTime":null,"itemPrice":null,"itemTitle":null,"overSaleNum":null,"itemIcon":null,"day":16,"click":null,"click1":230,"lucency":0},
+    {"campaignId":null,"coordinate":null,"hasAd":null,"adgroupId":null,"itemId":null,"overDevelopTime":null,"itemPrice":null,"itemTitle":null,"overSaleNum":null,"itemIcon":null,"day":17,"click":null,"click1":214,"lucency":0},
+    {"campaignId":null,"coordinate":null,"hasAd":null,"adgroupId":null,"itemId":null,"overDevelopTime":null,"itemPrice":null,"itemTitle":null,"overSaleNum":null,"itemIcon":null,"day":18,"click":null,"click1":215,"lucency":0},
+    {"campaignId":null,"coordinate":null,"hasAd":null,"adgroupId":null,"itemId":null,"overDevelopTime":null,"itemPrice":null,"itemTitle":null,"overSaleNum":null,"itemIcon":null,"day":19,"click":null,"click1":202,"lucency":0},
+    {"campaignId":null,"coordinate":null,"hasAd":null,"adgroupId":null,"itemId":null,"overDevelopTime":null,"itemPrice":null,"itemTitle":null,"overSaleNum":null,"itemIcon":null,"day":20,"click":null,"click1":208,"lucency":0},
+    {"campaignId":null,"coordinate":null,"hasAd":null,"adgroupId":null,"itemId":null,"overDevelopTime":null,"itemPrice":null,"itemTitle":null,"overSaleNum":null,"itemIcon":null,"day":21,"click":null,"click1":293,"lucency":0},
+    {"campaignId":null,"coordinate":null,"hasAd":null,"adgroupId":null,"itemId":null,"overDevelopTime":null,"itemPrice":null,"itemTitle":null,"overSaleNum":null,"itemIcon":null,"day":22,"click":null,"click1":348,"lucency":0},
+    {"campaignId":null,"coordinate":null,"hasAd":null,"adgroupId":null,"itemId":null,"overDevelopTime":null,"itemPrice":null,"itemTitle":null,"overSaleNum":null,"itemIcon":null,"day":23,"click":null,"click1":436,"lucency":0},
+    {"campaignId":null,"coordinate":null,"hasAd":null,"adgroupId":null,"itemId":null,"overDevelopTime":null,"itemPrice":null,"itemTitle":null,"overSaleNum":null,"itemIcon":null,"day":24,"click":null,"click1":409,"lucency":0},
+    {"campaignId":null,"coordinate":null,"hasAd":null,"adgroupId":null,"itemId":null,"overDevelopTime":null,"itemPrice":null,"itemTitle":null,"overSaleNum":null,"itemIcon":null,"day":25,"click":null,"click1":618,"lucency":0},
+    {"campaignId":null,"coordinate":null,"hasAd":null,"adgroupId":null,"itemId":null,"overDevelopTime":null,"itemPrice":null,"itemTitle":null,"overSaleNum":null,"itemIcon":null,"day":26,"click":null,"click1":523,"lucency":0},
+    {"campaignId":null,"coordinate":null,"hasAd":null,"adgroupId":null,"itemId":null,"overDevelopTime":null,"itemPrice":null,"itemTitle":null,"overSaleNum":null,"itemIcon":null,"day":27,"click":null,"click1":596,"lucency":0},
+    {"campaignId":null,"coordinate":null,"hasAd":null,"adgroupId":null,"itemId":null,"overDevelopTime":null,"itemPrice":null,"itemTitle":null,"overSaleNum":null,"itemIcon":null,"day":28,"click":null,"click1":574,"lucency":0},
+    {"campaignId":null,"coordinate":null,"hasAd":null,"adgroupId":null,"itemId":null,"overDevelopTime":null,"itemPrice":null,"itemTitle":null,"overSaleNum":null,"itemIcon":null,"day":29,"click":null,"click1":1053,"lucency":0},
+    {"campaignId":null,"coordinate":null,"hasAd":null,"adgroupId":null,"itemId":null,"overDevelopTime":null,"itemPrice":null,"itemTitle":null,"overSaleNum":null,"itemIcon":null,"day":30,"click":null,"click1":749,"lucency":0},
+    {"campaignId":null,"coordinate":null,"hasAd":null,"adgroupId":null,"itemId":null,"overDevelopTime":null,"itemPrice":null,"itemTitle":null,"overSaleNum":null,"itemIcon":null,"day":31,"click":null,"click1":1102,"lucency":0},
+    {"campaignId":null,"coordinate":null,"hasAd":null,"adgroupId":null,"itemId":null,"overDevelopTime":null,"itemPrice":null,"itemTitle":null,"overSaleNum":null,"itemIcon":null,"day":32,"click":null,"click1":771,"lucency":0},
+    {"campaignId":null,"coordinate":null,"hasAd":null,"adgroupId":null,"itemId":null,"overDevelopTime":null,"itemPrice":null,"itemTitle":null,"overSaleNum":null,"itemIcon":null,"day":33,"click":null,"click1":897,"lucency":0},
+    {"campaignId":null,"coordinate":null,"hasAd":null,"adgroupId":null,"itemId":null,"overDevelopTime":null,"itemPrice":null,"itemTitle":null,"overSaleNum":null,"itemIcon":null,"day":34,"click":null,"click1":832,"lucency":0},
+    {"campaignId":null,"coordinate":null,"hasAd":null,"adgroupId":null,"itemId":null,"overDevelopTime":null,"itemPrice":null,"itemTitle":null,"overSaleNum":null,"itemIcon":null,"day":35,"click":null,"click1":807,"lucency":0},
+    {"campaignId":null,"coordinate":null,"hasAd":null,"adgroupId":null,"itemId":null,"overDevelopTime":null,"itemPrice":null,"itemTitle":null,"overSaleNum":null,"itemIcon":null,"day":36,"click":null,"click1":685,"lucency":0},
+    {"campaignId":null,"coordinate":null,"hasAd":null,"adgroupId":null,"itemId":null,"overDevelopTime":null,"itemPrice":null,"itemTitle":null,"overSaleNum":null,"itemIcon":null,"day":37,"click":null,"click1":620,"lucency":0},
+    {"campaignId":null,"coordinate":null,"hasAd":null,"adgroupId":null,"itemId":null,"overDevelopTime":null,"itemPrice":null,"itemTitle":null,"overSaleNum":null,"itemIcon":null,"day":38,"click":null,"click1":673,"lucency":0},
+    {"campaignId":null,"coordinate":null,"hasAd":null,"adgroupId":null,"itemId":null,"overDevelopTime":null,"itemPrice":null,"itemTitle":null,"overSaleNum":null,"itemIcon":null,"day":39,"click":null,"click1":670,"lucency":0},
+    {"campaignId":null,"coordinate":null,"hasAd":null,"adgroupId":null,"itemId":null,"overDevelopTime":null,"itemPrice":null,"itemTitle":null,"overSaleNum":null,"itemIcon":null,"day":40,"click":null,"click1":723,"lucency":0},
+    {"campaignId":null,"coordinate":null,"hasAd":null,"adgroupId":null,"itemId":null,"overDevelopTime":null,"itemPrice":null,"itemTitle":null,"overSaleNum":null,"itemIcon":null,"day":41,"click":null,"click1":810,"lucency":0},
+    {"campaignId":null,"coordinate":null,"hasAd":null,"adgroupId":null,"itemId":null,"overDevelopTime":null,"itemPrice":null,"itemTitle":null,"overSaleNum":null,"itemIcon":null,"day":42,"click":null,"click1":1070,"lucency":0},
+    {"campaignId":null,"coordinate":null,"hasAd":null,"adgroupId":null,"itemId":null,"overDevelopTime":null,"itemPrice":null,"itemTitle":null,"overSaleNum":null,"itemIcon":null,"day":43,"click":null,"click1":1757,"lucency":0},
+    {"campaignId":null,"coordinate":null,"hasAd":null,"adgroupId":null,"itemId":null,"overDevelopTime":null,"itemPrice":null,"itemTitle":null,"overSaleNum":null,"itemIcon":null,"day":44,"click":null,"click1":979,"lucency":0},
+    {"campaignId":null,"coordinate":null,"hasAd":null,"adgroupId":null,"itemId":null,"overDevelopTime":null,"itemPrice":null,"itemTitle":null,"overSaleNum":null,"itemIcon":null,"day":45,"click":null,"click1":901,"lucency":0},
+    {"campaignId":null,"coordinate":null,"hasAd":null,"adgroupId":null,"itemId":null,"overDevelopTime":null,"itemPrice":null,"itemTitle":null,"overSaleNum":null,"itemIcon":null,"day":46,"click":null,"click1":1465,"lucency":0},
+    {"campaignId":null,"coordinate":null,"hasAd":null,"adgroupId":null,"itemId":null,"overDevelopTime":null,"itemPrice":null,"itemTitle":null,"overSaleNum":null,"itemIcon":null,"day":47,"click":null,"click1":1676,"lucency":0},
+    {"campaignId":null,"coordinate":null,"hasAd":null,"adgroupId":null,"itemId":null,"overDevelopTime":null,"itemPrice":null,"itemTitle":null,"overSaleNum":null,"itemIcon":null,"day":48,"click":null,"click1":1819,"lucency":0},
+    {"campaignId":null,"coordinate":null,"hasAd":null,"adgroupId":null,"itemId":null,"overDevelopTime":null,"itemPrice":null,"itemTitle":null,"overSaleNum":null,"itemIcon":null,"day":49,"click":null,"click1":1592,"lucency":0},
+    {"campaignId":null,"coordinate":null,"hasAd":null,"adgroupId":null,"itemId":null,"overDevelopTime":null,"itemPrice":null,"itemTitle":null,"overSaleNum":null,"itemIcon":null,"day":50,"click":null,"click1":992,"lucency":0},
+    {"campaignId":null,"coordinate":null,"hasAd":null,"adgroupId":null,"itemId":null,"overDevelopTime":null,"itemPrice":null,"itemTitle":null,"overSaleNum":null,"itemIcon":null,"day":51,"click":null,"click1":1197,"lucency":0},
+    {"campaignId":null,"coordinate":null,"hasAd":null,"adgroupId":null,"itemId":null,"overDevelopTime":null,"itemPrice":null,"itemTitle":null,"overSaleNum":null,"itemIcon":null,"day":52,"click":null,"click1":1402,"lucency":0},
+    {"campaignId":null,"coordinate":null,"hasAd":null,"adgroupId":null,"itemId":null,"overDevelopTime":null,"itemPrice":null,"itemTitle":null,"overSaleNum":null,"itemIcon":null,"day":53,"click":null,"click1":1352,"lucency":0},
+    {"campaignId":null,"coordinate":null,"hasAd":null,"adgroupId":null,"itemId":null,"overDevelopTime":null,"itemPrice":null,"itemTitle":null,"overSaleNum":null,"itemIcon":null,"day":54,"click":null,"click1":1531,"lucency":0},
+    {"campaignId":null,"coordinate":null,"hasAd":null,"adgroupId":null,"itemId":null,"overDevelopTime":null,"itemPrice":null,"itemTitle":null,"overSaleNum":null,"itemIcon":null,"day":55,"click":null,"click1":1797,"lucency":0},
+    {"campaignId":null,"coordinate":null,"hasAd":null,"adgroupId":null,"itemId":null,"overDevelopTime":null,"itemPrice":null,"itemTitle":null,"overSaleNum":null,"itemIcon":null,"day":56,"click":null,"click1":3438,"lucency":0},
+    {"campaignId":null,"coordinate":null,"hasAd":null,"adgroupId":null,"itemId":null,"overDevelopTime":null,"itemPrice":null,"itemTitle":null,"overSaleNum":null,"itemIcon":null,"day":57,"click":null,"click1":3056,"lucency":0},
+    {"campaignId":null,"coordinate":null,"hasAd":null,"adgroupId":null,"itemId":null,"overDevelopTime":null,"itemPrice":null,"itemTitle":null,"overSaleNum":null,"itemIcon":null,"day":58,"click":null,"click1":1156,"lucency":0},
+    {"campaignId":null,"coordinate":null,"hasAd":null,"adgroupId":null,"itemId":null,"overDevelopTime":null,"itemPrice":null,"itemTitle":null,"overSaleNum":null,"itemIcon":null,"day":59,"click":null,"click1":1156,"lucency":0}
+];
+
+var options = { "coord": { "type": "rect", "xAxis": { "field": "day", "layoutType": "proportion", "label": { "enabled": true } }, "yAxis": { "align": "left", "middleWeight": 1592, "middleWeightPos": 0.8 }, "grid": { "fill": { "yDimension": { "splitVals": [1592], "enabled": true, "fillStyle": ["#ffffff", "#458AEC "], "alpha": 0.08 } } } }, "graphs": [{ "type": "scat", "field": "click", "node": {} }, { "type": "line", "field": "click1", "node": { "enabled": false }, "line": { "strokeStyle": { "lineargradient": [{ "position": 0, "color": "#FFE14C" }, { "position": 1, "color": "#F77E7E" }] } }, "area": { "enabled": false } }], "tips": { "pointer": "line" }, "markcloumn": [{ "id": "cloumn1", "xVal": 56, "markTo": "click1", "line": { "lineWidth": 1, "strokeStyle": "#999", "endY": "auto", "lineType": "dashed" } }] };
+
+window.chart = chartx.create("canvasTest" , data , options)
+
+setTimeout( function(){
+    chart.resetData( data )
+} , 1000)
+
+            </textarea></form>
+        </td>
+        <td style="padding:0 10px;" id="td-vr">
+            <div id="chartdemo-r">
+            <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
+                <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
+
+                <h4>柱状图（bar chart）</h4>
+                <p>
+                    联系人：@释剑
+                </p>
+            </div>
+            <div  class="test-c">
+                <div id="canvasTest" style='width:100%;height:300px;position:relative;'></div>
+            </div>
+
+            </div>
+        </td>
+    </tr>
+</table>
+
+    
+</body> 
+</html>
+
+

@@ -306,8 +306,21 @@ function (_GraphsBase) {
               "default": 'solid'
             },
             arrow: {
-              detail: '是否有箭头',
-              "default": true
+              detail: '连线箭头配置',
+              propertys: {
+                enabled: {
+                  detail: '是否开启arrow设置',
+                  "default": true
+                },
+                offsetX: {
+                  detail: 'x方向偏移',
+                  "default": 0
+                },
+                offsetY: {
+                  detail: 'y方向偏移',
+                  "default": 0
+                }
+              }
             },
             edgeLabel: {
               detail: '连线上面的label配置',
@@ -656,6 +669,8 @@ function (_GraphsBase) {
         ;
         _this2.graphsSp.context.x = _offsetLeft;
         _this2.graphsSp.context.y = _offsetTop;
+
+        _this2.fire("complete");
       });
     } //如果dataTrigger.origin 有传入， 则已经这个origin为参考点做重新布局
 
@@ -718,6 +733,8 @@ function (_GraphsBase) {
         }
 
         ;
+
+        _this3.fire("complete");
       });
     }
   }, {
@@ -737,6 +754,7 @@ function (_GraphsBase) {
       item.pathElement && item.pathElement.destroy();
       item.labelElement && item.labelElement.destroy();
       item.arrowElement && item.arrowElement.destroy();
+      item.edgeIconElement && item.edgeIconElement.destroy();
     }
   }, {
     key: "_initData",
@@ -778,8 +796,8 @@ function (_GraphsBase) {
 
         ;
         var _nodeMap = {};
-        var initNum = 0;
-        _this4.graphsSp.context.visible = false;
+        var initNum = 0; //this.graphsSp.context.visible = false;
+        //this.domContainer.style.visibility = 'hidden';
 
         var _loop = function _loop(i) {
           var rowData = _this4.dataFrame.getRowDataAt(i);
@@ -868,9 +886,10 @@ function (_GraphsBase) {
                 var keys = edge.key;
                 edge.source = _nodeMap[keys[0]];
                 edge.target = _nodeMap[keys[1]];
-              });
+              }); //this.graphsSp.context.visible = true;
+              //this.domContainer.style.visibility = 'visible';
 
-              _this4.graphsSp.context.visible = true;
+
               resolve(data);
             }
 
@@ -1172,7 +1191,7 @@ function (_GraphsBase) {
 
         ;
 
-        if (me.line.arrow) {
+        if (me.line.arrow.enabled) {
           var arrowId = "arrow_" + key;
 
           var _arrow = me.arrowsSp.getChildById(arrowId);
@@ -1180,10 +1199,14 @@ function (_GraphsBase) {
           if (_arrow) {
             //arrow 只监听了x y 才会重绘，，，暂时只能这样处理,手动的赋值control.x control.y
             //而不是直接把 arrowControl 赋值给 control
+            _arrow.context.x = me.line.arrow.offsetX;
+            _arrow.context.y = me.line.arrow.offsetY;
+            _arrow.context.fillStyle = strokeStyle;
             _arrow.context.control.x = arrowControl.x;
             _arrow.context.control.y = arrowControl.y;
             _arrow.context.point = edge.points.slice(-1)[0];
-            _arrow.context.strokeStyle = strokeStyle; // _.extend(true, _arrow, {
+            _arrow.context.strokeStyle = strokeStyle;
+            _arrow.context.fillStyle = strokeStyle; // _.extend(true, _arrow, {
             //     control: arrowControl,
             //     point: edge.points.slice(-1)[0],
             //     strokeStyle: strokeStyle
@@ -1192,10 +1215,12 @@ function (_GraphsBase) {
             _arrow = new Arrow({
               id: arrowId,
               context: {
+                x: me.line.arrow.offsetX,
+                y: me.line.arrow.offsetY,
                 control: arrowControl,
                 point: edge.points.slice(-1)[0],
-                strokeStyle: strokeStyle //fillStyle: strokeStyle
-
+                strokeStyle: strokeStyle,
+                fillStyle: strokeStyle
               }
             });
             me.arrowsSp.addChild(_arrow);
@@ -1317,6 +1342,12 @@ function (_GraphsBase) {
 
         if (me.node.select.list.indexOf(node.key) > -1) {
           me.selectAt(node);
+        }
+
+        ;
+
+        if (node.ctype == "canvas") {
+          node.contentElement.context.visible = true;
         }
 
         ;
@@ -1695,15 +1726,17 @@ function (_GraphsBase) {
         var _contentLabel = me.nodesContentSp.getChildById(contentLabelId);
 
         if (_contentLabel) {
+          //已经存在的label
           _contentLabel.resetText(content);
 
           _.extend(_contentLabel.context, context);
         } else {
-          //先创建text，根据 text 来计算node需要的width和height
+          //新创建text，根据 text 来计算node需要的width和height
           _contentLabel = new _canvax["default"].Display.Text(content, {
             id: contentLabelId,
             context: context
           });
+          _contentLabel.context.visible = false;
 
           if (!_.isArray(node.key)) {
             me.nodesContentSp.addChild(_contentLabel);
