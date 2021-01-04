@@ -51388,25 +51388,25 @@ function (_Component) {
         if (this.line.dissY == null) {
           if (isAbove) {
             //在上面的话，像下是最近的路径，优先检测向下的连线
-            var diss = beginNode.y + beginNode.height - endNode.y;
+            var diss = beginNodeBBox.y + beginNodeBBox.height - endNodeBBox.y;
 
-            if (diss > 20) {
+            if (Math.abs(diss) > 20) {
               //距离足够，可以往下连接
-              dissY = beginNode.height / 2 + diss / 2;
+              dissY = beginNodeBBox.height / 2 + diss / 2;
             } else {
               //距离不够就往上走，肯定够
-              dissY = Math.min(beginNode.y - 20, endNode.y - 20) - secondPoint[1];
+              dissY = Math.min(beginNodeBBox.y - 20, endNodeBBox.y - 20) - secondPoint[1];
             }
           } else {
             //起始点再目标点的下面
-            var _diss = beginNode.y - (endNode.y + endNode.height);
+            var _diss = beginNodeBBox.y - (endNodeBBox.y + endNodeBBox.height);
 
             if (_diss > 20) {
               //向上探测，间距足够的话
-              dissY = -(beginNode.height / 2 + _diss / 2);
+              dissY = -(beginNodeBBox.height / 2 + _diss / 2);
             } else {
               //向上空间不够， 只能向下了， 海阔天空
-              dissY = Math.max(beginNode.y + beginNode.height + 20, endNode.y + endNode.height + 20) - secondPoint[1];
+              dissY = Math.max(beginNodeBBox.y + beginNodeBBox.height + 20, endNodeBBox.y + endNodeBBox.height + 20) - secondPoint[1];
             }
           }
         } else {
@@ -51681,7 +51681,7 @@ if (projectTheme && projectTheme.length) {
 }
 
 var chartx = {
-  version: '1.1.32',
+  version: '1.1.33',
   options: {}
 };
 
