@@ -346,7 +346,6 @@ function (_GraphsBase) {
   }, {
     key: "resetData",
     value: function resetData(dataFrame) {
-      debugger;
       this.dataFrame = dataFrame;
       this.data = this._trimGraphs();
 

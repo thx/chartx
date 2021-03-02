@@ -473,9 +473,10 @@ function (_event$Dispatcher) {
     key: "resetData",
     value: function resetData(data, trigger) {
       var me = this;
-      this._data = data;
+      data && (this._data = data); //注意，resetData不能为null，必须是 数组格式
+
       var preDataLenth = this.dataFrame.org.length;
-      this.dataFrame.resetData(data);
+      this.dataFrame.resetData(this._data);
       var graphsList = this.getComponents({
         name: 'graphs'
       });
@@ -845,7 +846,7 @@ function (_event$Dispatcher) {
         _.each(this.getComponents({
           name: 'graphs'
         }), function (_g) {
-          if (_g.getNodesAt) {
+          if (_g.getNodesAt && iNode !== undefined) {
             nodes = nodes.concat(_g.getNodesAt(iNode, e));
           }
         });

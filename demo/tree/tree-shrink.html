@@ -25,15 +25,16 @@
 <script type="text/javascript" src="../../lib/demo.js"></script>
 <link rel="stylesheet" href="../../lib/demo.css">
 <style>
-    @font-face {
-       font-family: 'iconfont';  /* project id 308 */
-       src: url('http://at.alicdn.com/t/font_308_g5p4byrm2rm.eot');
-       src: url('http://at.alicdn.com/t/font_308_g5p4byrm2rm.eot?#iefix') format('embedded-opentype'),
-       url('http://at.alicdn.com/t/font_308_g5p4byrm2rm.woff2') format('woff2'),
-       url('http://at.alicdn.com/t/font_308_g5p4byrm2rm.woff') format('woff'),
-       url('http://at.alicdn.com/t/font_308_g5p4byrm2rm.ttf') format('truetype'),
-       url('http://at.alicdn.com/t/font_308_g5p4byrm2rm.svg#iconfont') format('svg');
-   }
+@font-face {
+  font-family: 'iconfont';  /* project id 1300960 */
+  src: url('http://at.alicdn.com/t/font_1300960_i8qitq28j4a.eot');
+  src: url('http://at.alicdn.com/t/font_1300960_i8qitq28j4a.eot?#iefix') format('embedded-opentype'),
+  url('http://at.alicdn.com/t/font_1300960_i8qitq28j4a.woff2') format('woff2'),
+  url('http://at.alicdn.com/t/font_1300960_i8qitq28j4a.woff') format('woff'),
+  url('http://at.alicdn.com/t/font_1300960_i8qitq28j4a.ttf') format('truetype'),
+  url('http://at.alicdn.com/t/font_1300960_i8qitq28j4a.svg#iconfont') format('svg');
+}
+   
    .iconfont {
        font-family: "iconfont";
        line-height: 1;
@@ -51,9 +52,8 @@
 </style>
 </head>
 <body >
-
-
-<i class="iconfont">&#xe8ff;</i>
+    
+<i class="iconfont">&#xe906;</i>
 <table>
     <tr>
         <td id="td-vl">
@@ -63,7 +63,7 @@
 //第一行是表头。
 
 var data = [
-    { key: "100"     , label: '<div onclick="alert(1)" style="cursor:pointer;width:50px;height:50px;background:red;">一线城市</div>'},
+    { key: 100     , label: '<div onclick="alert(1)" style="cursor:pointer;width:50px;height:50px;background:red;">一线城市</div>'},
     { key: "1"       , label: '中国'    },
     { key: "2"       , label: '湖南'    },
     { key: "3"       , label: '湖北'    },
@@ -93,37 +93,9 @@ var data = [
     //{ key: "3,11"  , label: '湖北武汉' },
 ];
 
-
-var data1 = [
-    { key: "1"       , label: '中国'    },
-    { key: "2"       , label: '湖南'    },
-    { key: "3"       , label: '湖北'    },
-    { key: "4"       , label: '<div style="width:50px;height:30px;background:blue;color:white;">浙江</div>'    },
-    { key: "5"       , label: '长沙'    },
-    { key: "6"       , label: '杭州'    },
-    //{ key: "666"       , label: '金华'    },
-    { key: "66"       , label: '宁波'    },
-    { key: "7"       , label: '闲林'    },
-    { key: "8"       , label: '北京'    },
-    { key: "9"      , label: '娄底'    },
-    //{ key: "10"      , label: '<div style="width:50px;height:50px;background:red;">上海</div>' },
-
-
-    { key: "1,2"   , label: '中国湖南' },
-    { key: "1,3"   , label: '中国湖北' },
-    { key: "1,4"   , label: '中国浙江' },
-    { key: "2,5"   , label: '湖南长沙' },
-    { key: "4,66"   , label: '浙江宁波' },
-    //{ key: "4,666"   , label: '浙江金华' },
-    { key: "4,6"   , label: '浙江杭州' },
-    { key: "6,7"   , label: '杭州闲林' },
-    { key: "1,8"   , label: '中国北京' },
-    { key: "2,9"   , label: '湖南娄底' },
-];
-
 var options = {
     graphs : {
-        type     : "relation",
+        type     : "tree",
         field    : "key",
         node : {
             shapeType: function( node ){
@@ -138,7 +110,7 @@ var options = {
                     return new Promise( resolve => {
                         setTimeout( function(){
                             resolve( {} )
-                        } , 1500)
+                        } , 50)
                     } )
                 }
             },
@@ -160,6 +132,13 @@ var options = {
                 shadow: {
                     shadowBlur: 5
                 }
+            },
+            shrink: {
+                enabled: true,
+                openCharCode: 'e906',
+                closeCharCode: 'e907',
+                fontColor:"#667894",
+                fontSize: 12
             }
         },
         line : {
@@ -183,7 +162,8 @@ var options = {
             arrow: {
                 offsetX: -2,
                 offsetY: 0
-            }
+            },
+            cursor: 'pointer'
         },
     
         layout      : "dagre",
@@ -204,30 +184,17 @@ var options = {
 
             }
            
-        },
-        //如果完全可视化编辑器编辑出来的布局，就不需要layout算法，编辑器会保存一份layout数据
-        //layoutData : null,
+        }
       
     },
-    relation_backline : [{
-        key: '7,4',
-        icon: {
-            charCode: 'e6f8',
-            onclick: function(){
-                debugger
-            }
-        }
-    }],
     tips    : {}
 };
 
-window.chart = chartx.create("canvasTest" , data , options);
+setTimeout( function(){
+    //保证css文件加载好了， 有 iconfont了
+    window.bar = chartx.create("canvasTest" , data , options)
+} , 100)
 
-setTimeout(function(){
-    chart.resetData( data1 , {
-        origin: 4
-    });
-} , 2000)
 
             </textarea></form>
         </td>
@@ -242,7 +209,7 @@ setTimeout(function(){
                 </p>
             </div>
             <div  class="test-c">
-                <div id="canvasTest" style='border:1px solid red;width:800px;height:800px;position:relative;'></div>
+                <div id="canvasTest" style='width:800px;height:800px;position:relative;'></div>
             </div>
 
             </div>

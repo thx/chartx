@@ -387,7 +387,8 @@ function (_GraphsBase) {
                   "default": null
                 }
               }
-            }
+            },
+            cursor: 'default'
           }
         },
         layout: {
@@ -569,8 +570,8 @@ function (_GraphsBase) {
                   x = _me$zoom$move.x,
                   y = _me$zoom$move.y;
 
-              me.graphsView.context.x = x;
-              me.graphsView.context.y = y;
+              me.graphsView.context.x = parseInt(x);
+              me.graphsView.context.y = parseInt(y);
             }
           }
 
@@ -628,11 +629,7 @@ function (_GraphsBase) {
 
         ;
       });
-    } //全局画布
-
-  }, {
-    key: "scale",
-    value: function scale(_scale, globalScaleOrigin) {}
+    }
   }, {
     key: "draw",
     value: function draw(opt) {
@@ -649,8 +646,10 @@ function (_GraphsBase) {
 
         _this2.widget();
 
-        _this2.sprite.context.x = _this2.origin.x;
-        _this2.sprite.context.y = _this2.origin.y;
+        _this2.induce.context.width = _this2.width;
+        _this2.induce.context.height = _this2.height;
+        _this2.sprite.context.x = parseInt(_this2.origin.x);
+        _this2.sprite.context.y = parseInt(_this2.origin.y);
 
         var _offsetLeft = (_this2.width - _this2.data.size.width) / 2;
 
@@ -667,74 +666,92 @@ function (_GraphsBase) {
         }
 
         ;
-        _this2.graphsSp.context.x = _offsetLeft;
-        _this2.graphsSp.context.y = _offsetTop;
+        _this2.graphsSp.context.x = parseInt(_offsetLeft);
+        _this2.graphsSp.context.y = parseInt(_offsetTop);
 
         _this2.fire("complete");
       });
     } //如果dataTrigger.origin 有传入， 则已经这个origin为参考点做重新布局
+    //TODO， 如果这个图的options中有配置 一个 符合 关系图的数据{nodes, edges, size}
+    //那么这个时候的resetData还不能满足，因为resetData的第一个个参数是dataFrame， 而options.data其实已经算是配置了，
+    //后面遇到这个情况再调整吧
 
   }, {
     key: "resetData",
-    value: function resetData(data, dataTrigger) {
+    value: function resetData(dataFrame, dataTrigger) {
       var _this3 = this;
+
+      this._resetData(dataFrame, dataTrigger).then(function () {
+        _this3.fire("complete");
+      });
+    }
+  }, {
+    key: "_resetData",
+    value: function _resetData(data, dataTrigger) {
+      var _this4 = this;
 
       var me = this;
       this._preData = this.data;
+      return new Promise(function (resolve) {
+        _this4._initData(data).then(function (_data) {
+          _this4.data = _data;
 
-      this._initData(data).then(function (_data) {
-        _this3.data = _data;
+          _this4._layoutData();
 
-        _this3._layoutData();
+          _.each(_this4._preData.nodes, function (preNode) {
+            var nodeData = _.find(me.data.nodes, function (node) {
+              return preNode.key == node.key;
+            });
 
-        _.each(_this3._preData.nodes, function (preNode) {
-          if (!_.find(me.data.nodes, function (node) {
-            return preNode.key == node.key;
-          })) {
-            me._destroy(preNode);
-          }
-        });
-
-        _.each(_this3._preData.edges, function (preEdge) {
-          if (!_.find(me.data.edges, function (edge) {
-            return preEdge.key.join('_') == edge.key.join('_');
-          })) {
-            me._destroy(preEdge);
-          }
-        });
-
-        _this3.widget(); //钉住某个node为参考点（不移动）
-
-
-        if (dataTrigger && dataTrigger.origin) {
-          var preOriginNode = _.find(_this3._preData.nodes, function (node) {
-            return node.key == dataTrigger.origin;
+            if (!nodeData) {
+              me._destroy(preNode);
+            } else {
+              //如果找到了，要从前面
+              nodeData.focused = preNode.focused;
+              nodeData.selected = preNode.selected;
+            }
           });
 
-          var originNode = _.find(_this3.data.nodes, function (node) {
-            return node.key == dataTrigger.origin;
+          _.each(_this4._preData.edges, function (preEdge) {
+            if (!_.find(me.data.edges, function (edge) {
+              return preEdge.key.join('_') == edge.key.join('_');
+            })) {
+              me._destroy(preEdge);
+            }
           });
 
-          if (preOriginNode && originNode) {
-            var offsetPos = {
-              x: preOriginNode.x - originNode.x,
-              y: preOriginNode.y - originNode.y
-            };
+          _this4.widget(); //钉住某个node为参考点（不移动)
 
-            var _this3$zoom$offset = _this3.zoom.offset(offsetPos),
-                x = _this3$zoom$offset.x,
-                y = _this3$zoom$offset.y;
 
-            me.graphsView.context.x = x;
-            me.graphsView.context.y = y;
+          if (dataTrigger && dataTrigger.origin) {
+            var preOriginNode = _.find(_this4._preData.nodes, function (node) {
+              return node.key == dataTrigger.origin;
+            });
+
+            var originNode = _.find(_this4.data.nodes, function (node) {
+              return node.key == dataTrigger.origin;
+            });
+
+            if (preOriginNode && originNode) {
+              var offsetPos = {
+                x: parseInt(preOriginNode.x) - parseInt(originNode.x),
+                y: parseInt(preOriginNode.y) - parseInt(originNode.y)
+              };
+
+              var _this4$zoom$offset = _this4.zoom.offset(offsetPos),
+                  x = _this4$zoom$offset.x,
+                  y = _this4$zoom$offset.y;
+
+              me.graphsView.context.x = parseInt(x);
+              me.graphsView.context.y = parseInt(y);
+            }
+
+            ;
           }
 
           ;
-        }
-
-        ;
-
-        _this3.fire("complete");
+          resolve();
+        });
       });
     }
   }, {
@@ -757,151 +774,170 @@ function (_GraphsBase) {
       item.edgeIconElement && item.edgeIconElement.destroy();
     }
   }, {
+    key: "_getDefNode",
+    value: function _getDefNode() {
+      var node = {
+        type: "relation",
+        iNode: 0,
+        rowData: null,
+        key: "",
+        content: '',
+        _contentInited: false,
+        ctype: 'canvas',
+        //下面三个属性在_setElementAndSize中设置
+        contentElement: null,
+        //外面传的layout数据可能没有element，widget的时候要检测下
+        width: null,
+        height: null,
+        //这个在layout的时候设置
+        x: null,
+        y: null,
+        shapeType: null,
+        //如果是edge，要填写这两节点
+        source: null,
+        target: null,
+        focused: false,
+        selected: false
+      };
+      return node;
+    } //$data如果用户设置了符合data的数据格式数据{nodes, edges, size}，那就直接返回
+
+  }, {
     key: "_initData",
-    value: function _initData(_data) {
-      var _this4 = this;
+    value: function _initData($data) {
+      var _this5 = this;
 
       return new Promise(function (resolve) {
-        if (_data && _data.nodes && _data.edges) {
-          resolve(_data);
+        if ($data && $data.nodes && $data.edges) {
+          resolve($data);
           return;
         }
 
         ;
         var data = {
-          nodes: [//{ type,key,content,ctype,width,height,x,y }
-          ],
-          edges: [//{ type,key[],content,ctype,width,height,x,y }
-          ],
+          //{ type,key,content,ctype,width,height,x,y }
+          nodes: [],
+          //{ type,key[],content,ctype,width,height,x,y }
+          edges: [],
           size: {
             width: 0,
             height: 0
           }
         };
-        var originData = _this4.app._data;
+        var originData = _this5.app._data;
 
-        if ((0, _data2.checkDataIsJson)(originData, _this4.field, _this4.childrenField)) {
-          _this4.jsonData = (0, _data2.jsonToArrayForRelation)(originData, _this4, _this4.childrenField);
-          _this4.dataFrame = _this4.app.dataFrame = (0, _dataFrame["default"])(_this4.jsonData);
+        if ((0, _data2.checkDataIsJson)(originData, _this5.field, _this5.childrenField)) {
+          _this5.jsonData = (0, _data2.jsonToArrayForRelation)(originData, _this5, _this5.childrenField);
+          _this5.dataFrame = _this5.app.dataFrame = (0, _dataFrame["default"])(_this5.jsonData);
         } else {
-          if (_this4.layout == "tree") {
+          if (_this5.layout == "tree") {
             //源数据就是图表标准数据，只需要转换成json的Children格式
             //app.dataFrame.jsonOrg ==> [{name: key:} ...] 不是children的树结构
-            //tree layout算法需要children格式的数据，蛋疼
-            _this4.jsonData = (0, _data2.arrayToTreeJsonForRelation)(_this4.app.dataFrame.jsonOrg, _this4);
+            _this5.jsonData = (0, _data2.arrayToTreeJsonForRelation)(_this5.app.dataFrame.jsonOrg, _this5);
           }
 
           ;
         }
 
         ;
-        var _nodeMap = {};
-        var initNum = 0; //this.graphsSp.context.visible = false;
-        //this.domContainer.style.visibility = 'hidden';
 
-        var _loop = function _loop(i) {
-          var rowData = _this4.dataFrame.getRowDataAt(i);
+        for (var i = 0; i < _this5.dataFrame.length; i++) {
+          var rowData = _this5.dataFrame.getRowDataAt(i);
 
-          var fields = _.flatten([(rowData[_this4.field] + "").split(",")]);
+          var fields = _.flatten([(rowData[_this5.field] + "").split(",")]);
 
-          var content = _this4._getContent(rowData);
+          var content = _this5._getContent(rowData);
 
-          var node = {
-            type: "relation",
+          var node = _this5._getDefNode();
+
+          Object.assign(node, {
             iNode: i,
             rowData: rowData,
             key: fields.length == 1 ? fields[0] : fields,
             content: content,
-            _contentInited: false,
-            ctype: _this4._checkHtml(content) ? 'html' : 'canvas',
-            //下面三个属性在_setElementAndSize中设置
-            contentElement: null,
-            //外面传的layout数据可能没有element，widget的时候要检测下
-            width: null,
-            height: null,
-            //这个在layout的时候设置
-            x: null,
-            y: null,
-            shapeType: null,
-            //如果是edge，要填写这两节点
-            source: null,
-            target: null,
-            focused: false,
-            selected: false
-          }; //计算和设置node的尺寸
+            ctype: _this5._checkHtml(content) ? 'html' : 'canvas'
+          });
 
-          _this4._initContentAndGetSize(node).then(function (opt) {
-            _.extend(node, opt);
+          if (fields.length == 1) {
+            //isNode
+            node.shapeType = _this5.getProp(_this5.node.shapeType, node);
+            Object.assign(node, _this5.layoutOpts.node);
+            data.nodes.push(node);
+          } else {
+            // isEdge
+            node.shapeType = _this5.getProp(_this5.line.shapeType, node);
+            Object.assign(node, _this5.layoutOpts.edge);
+            data.edges.push(node);
+          }
 
-            if (fields.length == 1) {
-              // isNode
-              node.shapeType = _this4.getProp(_this4.node.shapeType, node);
+          ;
+        }
 
-              if (node.shapeType == 'diamond') {
-                //因为node的尺寸前面计算出来的是矩形的尺寸，如果是菱形的话，这里就是指内接矩形的尺寸，
-                //需要换算成外接矩形的尺寸
-                var innerRect = {
-                  //内接矩形
-                  width: node.width,
-                  height: node.height
-                };
-                var includedAngle = _this4.node.includedAngle / 2;
-                var includeRad = includedAngle * Math.PI / 180;
-                var newWidthDiff = innerRect.height / Math.tan(includeRad);
-                var newHeightDiff = innerRect.width * Math.tan(includeRad); //在内接矩形基础上扩展出来的外界矩形
+        ;
 
-                var newWidth = innerRect.width + newWidthDiff;
-                var newHeight = innerRect.height + newHeightDiff; //把新的菱形的外界边界回写
+        _this5._initAllDataSize(data).then(function (data) {
+          resolve(data);
+        });
+      });
+    }
+  }, {
+    key: "_initAllDataSize",
+    value: function _initAllDataSize(data) {
+      var _this6 = this;
 
-                node._innerRect = {
-                  width: node.width,
-                  height: node.height
-                };
-                node.width = newWidth;
-                node.height = newHeight;
-              }
+      return new Promise(function (resolve) {
+        var _nodeMap = {};
+        var initNum = 0;
+        data.nodes.concat(data.edges).forEach(function (node) {
+          _nodeMap[node.key] = node; //计算和设置node的尺寸
 
-              ;
-              data.nodes.push(node);
-              Object.assign(node, _this4.layoutOpts.node);
-              _nodeMap[node.key] = node;
-            } else {
-              // isEdge
-              node.shapeType = _this4.getProp(_this4.line.shapeType, node); //node.labeloffset = 0;
-              //node.labelpos = 'l';
-              //额外的会有minlen weight labelpos labeloffset 四个属性可以配置
+          _this6._initContentAndGetSize(node).then(function (opt) {
+            _.extend(node, opt); //如果是菱形，还需要重新调整新的尺寸
 
-              Object.assign(node, _this4.layoutOpts.edge);
-              data.edges.push(node);
+
+            if (node.shapeType == 'diamond') {
+              //因为node的尺寸前面计算出来的是矩形的尺寸，如果是菱形的话，这里就是指内接矩形的尺寸，
+              //需要换算成外接矩形的尺寸
+              var innerRect = {
+                //内接矩形
+                width: node.width,
+                height: node.height
+              };
+              var includedAngle = _this6.node.includedAngle / 2;
+              var includeRad = includedAngle * Math.PI / 180;
+              var newWidthDiff = innerRect.height / Math.tan(includeRad);
+              var newHeightDiff = innerRect.width * Math.tan(includeRad); //在内接矩形基础上扩展出来的外界矩形
+
+              var newWidth = innerRect.width + newWidthDiff;
+              var newHeight = innerRect.height + newHeightDiff; //把新的菱形的外界边界回写
+
+              node._innerRect = {
+                width: node.width,
+                height: node.height
+              };
+              node.width = newWidth;
+              node.height = newHeight;
             }
 
             ;
             node._contentInited = true;
-            initNum++;
+            initNum++; //如果所有的node的size都初始化完毕
 
-            if (initNum == _this4.dataFrame.length) {
+            if (initNum == data.nodes.length + data.edges.length) {
               //all is inited
               //然后给edge填写source 和 target
               _.each(data.edges, function (edge) {
                 var keys = edge.key;
                 edge.source = _nodeMap[keys[0]];
                 edge.target = _nodeMap[keys[1]];
-              }); //this.graphsSp.context.visible = true;
-              //this.domContainer.style.visibility = 'visible';
-
+              });
 
               resolve(data);
             }
 
             ;
           });
-        };
-
-        for (var i = 0; i < _this4.dataFrame.length; i++) {
-          _loop(i);
-        }
-
-        ;
+        });
       });
     }
   }, {
@@ -959,13 +995,20 @@ function (_GraphsBase) {
   }, {
     key: "widget",
     value: function widget() {
-      var me = this;
       /*
       me.g.edges().forEach( e => {
           let edge = me.g.edge(e);
           console.log( edge )
       } );
       */
+      this._drawEdges();
+
+      this._drawNodes();
+    }
+  }, {
+    key: "_drawEdges",
+    value: function _drawEdges() {
+      var me = this;
 
       _.each(this.data.edges, function (edge) {
         console.log(edge.points);
@@ -983,6 +1026,7 @@ function (_GraphsBase) {
         var lineWidth = me.getProp(me.line.lineWidth, edge);
         var strokeStyle = me.getProp(me.line.strokeStyle, edge);
         var lineType = me.getProp(me.line.lineType, edge);
+        var cursor = me.getProp(me.line.cursor, edge);
         var edgeId = 'edge_' + key;
 
         var _path = me.edgesSp.getChildById(edgeId);
@@ -999,7 +1043,8 @@ function (_GraphsBase) {
               path: path,
               lineWidth: lineWidth,
               strokeStyle: strokeStyle,
-              lineType: lineType
+              lineType: lineType,
+              cursor: cursor
             }
           });
 
@@ -1232,158 +1277,162 @@ function (_GraphsBase) {
 
         ;
       });
+    }
+  }, {
+    key: "_drawNodes",
+    value: function _drawNodes() {
+      var me = this;
 
       _.each(this.data.nodes, function (node) {
-        var shape = Rect;
-        var nodeId = "node_" + node.key;
-        var cursor = me.node.cursor;
+        me._drawNode(node);
+      });
+    }
+  }, {
+    key: "_drawNode",
+    value: function _drawNode(node) {
+      var me = this;
+      var shape = Rect;
+      var nodeId = "node_" + node.key;
+      var cursor = me.node.cursor;
 
-        var _me$_getNodeStyle = me._getNodeStyle(node),
-            lineWidth = _me$_getNodeStyle.lineWidth,
-            fillStyle = _me$_getNodeStyle.fillStyle,
-            strokeStyle = _me$_getNodeStyle.strokeStyle,
-            radius = _me$_getNodeStyle.radius,
-            shadowOffsetX = _me$_getNodeStyle.shadowOffsetX,
-            shadowOffsetY = _me$_getNodeStyle.shadowOffsetY,
-            shadowBlur = _me$_getNodeStyle.shadowBlur,
-            shadowColor = _me$_getNodeStyle.shadowColor;
+      var _me$_getNodeStyle = me._getNodeStyle(node),
+          lineWidth = _me$_getNodeStyle.lineWidth,
+          fillStyle = _me$_getNodeStyle.fillStyle,
+          strokeStyle = _me$_getNodeStyle.strokeStyle,
+          radius = _me$_getNodeStyle.radius,
+          shadowOffsetX = _me$_getNodeStyle.shadowOffsetX,
+          shadowOffsetY = _me$_getNodeStyle.shadowOffsetY,
+          shadowBlur = _me$_getNodeStyle.shadowBlur,
+          shadowColor = _me$_getNodeStyle.shadowColor;
 
-        var context = {
-          x: node.x - node.width / 2,
-          y: node.y - node.height / 2,
-          width: node.width,
-          height: node.height,
+      var context = {
+        x: parseInt(node.x) - parseInt(node.width / 2),
+        y: parseInt(node.y) - parseInt(node.height / 2),
+        width: node.width,
+        height: node.height,
+        cursor: cursor,
+        lineWidth: lineWidth,
+        fillStyle: fillStyle,
+        strokeStyle: strokeStyle,
+        radius: radius,
+        shadowOffsetX: shadowOffsetX,
+        shadowOffsetY: shadowOffsetY,
+        shadowBlur: shadowBlur,
+        shadowColor: shadowColor
+      };
+
+      if (node.shapeType == 'diamond') {
+        shape = Diamond;
+        context = {
+          x: parseInt(node.x),
+          y: parseInt(node.y),
           cursor: cursor,
+          innerRect: node._innerRect,
           lineWidth: lineWidth,
           fillStyle: fillStyle,
           strokeStyle: strokeStyle,
-          radius: radius,
           shadowOffsetX: shadowOffsetX,
           shadowOffsetY: shadowOffsetY,
           shadowBlur: shadowBlur,
           shadowColor: shadowColor
         };
+      }
 
-        if (node.shapeType == 'diamond') {
-          shape = Diamond;
-          context = {
-            x: node.x,
-            y: node.y,
-            cursor: cursor,
-            innerRect: node._innerRect,
-            lineWidth: lineWidth,
-            fillStyle: fillStyle,
-            strokeStyle: strokeStyle,
-            shadowOffsetX: shadowOffsetX,
-            shadowOffsetY: shadowOffsetY,
-            shadowBlur: shadowBlur,
-            shadowColor: shadowColor
+      ;
+
+      var _boxShape = me.nodesSp.getChildById(nodeId);
+
+      if (_boxShape) {
+        _.extend(_boxShape.context, context);
+      } else {
+        _boxShape = new shape({
+          id: nodeId,
+          hoverClone: false,
+          context: context
+        });
+        me.nodesSp.addChild(_boxShape);
+
+        _boxShape.on(event.types.get(), function (e) {
+          e.eventInfo = {
+            trigger: me.node,
+            nodes: [this.nodeData]
           };
-        }
 
-        ;
-
-        var _boxShape = me.nodesSp.getChildById(nodeId);
-
-        if (_boxShape) {
-          _.extend(_boxShape.context, context);
-        } else {
-          _boxShape = new shape({
-            id: nodeId,
-            hoverClone: false,
-            context: context
-          });
-          me.nodesSp.addChild(_boxShape);
-
-          _boxShape.on(event.types.get(), function (e) {
-            e.eventInfo = {
-              trigger: me.node,
-              nodes: [this.nodeData]
-            };
-
-            if (me.node.focus.enabled) {
-              if (e.type == "mouseover") {
-                me.focusAt(this.nodeData);
-              }
-
-              if (e.type == "mouseout") {
-                me.unfocusAt(this.nodeData);
-              }
+          if (me.node.focus.enabled) {
+            if (e.type == "mouseover") {
+              me.focusAt(this.nodeData);
             }
 
-            ;
-
-            if (me.node.select.enabled && e.type == me.node.select.triggerEventType) {
-              //如果开启了图表的选中交互
-              //TODO:这里不能
-              var onbefore = me.node.select.onbefore;
-              var onend = me.node.select.onend;
-
-              if (!onbefore || typeof onbefore == 'function' && onbefore.apply(me, [this.nodeData]) !== false) {
-                if (this.nodeData.selected) {
-                  //说明已经选中了
-                  me.unselectAt(this.nodeData);
-                } else {
-                  me.selectAt(this.nodeData);
-                }
-
-                onend && typeof onend == 'function' && onend.apply(me, [this.nodeData]);
-              }
+            if (e.type == "mouseout") {
+              me.unfocusAt(this.nodeData);
             }
-
-            ;
-            me.app.fire(e.type, e);
-          });
-        }
-
-        ;
-        _boxShape.nodeData = node;
-        node.shapeElement = _boxShape;
-
-        if (me.node.select.list.indexOf(node.key) > -1) {
-          me.selectAt(node);
-        }
-
-        ;
-
-        if (node.ctype == "canvas") {
-          node.contentElement.context.visible = true;
-        }
-
-        ;
-
-        _boxShape.on("transform", function () {
-          if (node.ctype == "canvas") {
-            node.contentElement.context.x = node.x;
-            node.contentElement.context.y = node.y;
-          } else if (node.ctype == "html") {
-            var devicePixelRatio = typeof window !== 'undefined' ? window.devicePixelRatio : 1;
-
-            var contentMatrix = _boxShape.worldTransform.clone(); //if( node.shapeType == 'diamond' ){
-            //    contentMatrix = contentMatrix.translate( -node._innerRect.width/2, -node._innerRect.height/2 )
-            //};
-
-
-            contentMatrix = contentMatrix.scale(1 / devicePixelRatio, 1 / devicePixelRatio);
-            node.contentElement.style.transform = "matrix(" + contentMatrix.toArray().join() + ")";
-            node.contentElement.style.transformOrigin = "left top"; //修改为左上角为旋转中心点来和canvas同步
-
-            if (node.shapeType == 'diamond') {
-              node.contentElement.style.left = -(node._innerRect.width / 2) * me.status.transform.scale + "px";
-              node.contentElement.style.top = -(node._innerRect.height / 2) * me.status.transform.scale + "px";
-            } //node.contentElement.style.marginLeft = me.getProp(me.node.padding, node) * me.status.transform.scale + "px";
-            //node.contentElement.style.marginTop = me.getProp(me.node.padding, node) * me.status.transform.scale + "px";
-
-
-            node.contentElement.style.visibility = "visible";
           }
 
           ;
-        });
-      });
 
-      this.induce.context.width = this.width;
-      this.induce.context.height = this.height;
+          if (me.node.select.enabled && e.type == me.node.select.triggerEventType) {
+            //如果开启了图表的选中交互
+            //TODO:这里不能
+            var onbefore = me.node.select.onbefore;
+            var onend = me.node.select.onend;
+
+            if (!onbefore || typeof onbefore == 'function' && onbefore.apply(me, [this.nodeData]) !== false) {
+              if (this.nodeData.selected) {
+                //说明已经选中了
+                me.unselectAt(this.nodeData);
+              } else {
+                me.selectAt(this.nodeData);
+              }
+
+              onend && typeof onend == 'function' && onend.apply(me, [this.nodeData]);
+            }
+          }
+
+          ;
+          me.app.fire(e.type, e);
+        });
+      }
+
+      ;
+      _boxShape.nodeData = node;
+      node.shapeElement = _boxShape;
+
+      if (me.node.select.list.indexOf(node.key) > -1) {
+        me.selectAt(node);
+      }
+
+      ;
+
+      if (node.ctype == "canvas") {
+        node.contentElement.context.visible = true;
+      }
+
+      ;
+
+      _boxShape.on("transform", function () {
+        if (node.ctype == "canvas") {
+          node.contentElement.context.x = parseInt(node.x);
+          node.contentElement.context.y = parseInt(node.y);
+        } else if (node.ctype == "html") {
+          var devicePixelRatio = typeof window !== 'undefined' ? window.devicePixelRatio : 1;
+
+          var contentMatrix = _boxShape.worldTransform.clone();
+
+          contentMatrix = contentMatrix.scale(1 / devicePixelRatio, 1 / devicePixelRatio);
+          node.contentElement.style.transform = "matrix(" + contentMatrix.toArray().join() + ")";
+          node.contentElement.style.transformOrigin = "left top"; //修改为左上角为旋转中心点来和canvas同步
+
+          if (node.shapeType == 'diamond') {
+            node.contentElement.style.left = -parseInt(node._innerRect.width / 2 * me.status.transform.scale) + "px";
+            node.contentElement.style.top = -parseInt(node._innerRect.height / 2 * me.status.transform.scale) + "px";
+          }
+
+          ;
+          node.contentElement.style.visibility = "visible";
+        }
+
+        ;
+      });
     }
   }, {
     key: "_getNodeStyle",
@@ -1481,10 +1530,10 @@ function (_GraphsBase) {
   }, {
     key: "selectAll",
     value: function selectAll() {
-      var _this5 = this;
+      var _this7 = this;
 
       this.data.nodes.forEach(function (nodeData) {
-        _this5.selectAt(nodeData);
+        _this7.selectAt(nodeData);
       });
     }
   }, {
@@ -1505,16 +1554,16 @@ function (_GraphsBase) {
   }, {
     key: "unselectAll",
     value: function unselectAll() {
-      var _this6 = this;
+      var _this8 = this;
 
       this.data.nodes.forEach(function (nodeData) {
-        _this6.unselectAt(nodeData);
+        _this8.unselectAt(nodeData);
       });
     }
   }, {
     key: "getNodeDataAt",
     value: function getNodeDataAt(key) {
-      if (key.type && key.type == "relation") {
+      if (key.type && (key.type == "relation" || key.type == "tree")) {
         return key;
       }
 
@@ -1707,7 +1756,7 @@ function (_GraphsBase) {
   }, {
     key: "_getEleAndsetCanvasSize",
     value: function _getEleAndsetCanvasSize(node) {
-      var _this7 = this;
+      var _this9 = this;
 
       var me = this;
       return new Promise(function (resolve) {
@@ -1748,8 +1797,8 @@ function (_GraphsBase) {
         ;
         var inited;
 
-        if (_this7.node.content.init && typeof _this7.node.content.init === 'function') {
-          inited = _this7.node.content.init(node, _contentLabel);
+        if (_this9.node.content.init && typeof _this9.node.content.init === 'function') {
+          inited = _this9.node.content.init(node, _contentLabel);
         }
 
         ;
@@ -1796,7 +1845,7 @@ function (_GraphsBase) {
   }, {
     key: "_getEleAndsetHtmlSize",
     value: function _getEleAndsetHtmlSize(node) {
-      var _this8 = this;
+      var _this10 = this;
 
       var me = this;
       return new Promise(function (resolve) {
@@ -1805,14 +1854,14 @@ function (_GraphsBase) {
             height = node.rowData.height;
         var contentLabelClass = "__content_label_" + node.key;
 
-        var _dom = _this8.domContainer.getElementsByClassName(contentLabelClass);
+        var _dom = _this10.domContainer.getElementsByClassName(contentLabelClass);
 
         if (!_dom.length) {
           _dom = document.createElement("div");
           _dom.className = "chartx_relation_node " + contentLabelClass;
           _dom.style.cssText += "; position:absolute;visibility:hidden;";
 
-          _this8.domContainer.appendChild(_dom);
+          _this10.domContainer.appendChild(_dom);
         } else {
           _dom = _dom[0];
         }
@@ -1825,8 +1874,8 @@ function (_GraphsBase) {
         _dom.innerHTML = content;
         var inited;
 
-        if (_this8.node.content.init && typeof _this8.node.content.init === 'function') {
-          inited = _this8.node.content.init(node, _dom);
+        if (_this10.node.content.init && typeof _this10.node.content.init === 'function') {
+          inited = _this10.node.content.init(node, _dom);
         }
 
         ;

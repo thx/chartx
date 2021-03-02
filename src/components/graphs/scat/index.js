@@ -317,7 +317,6 @@ class ScatGraphs extends GraphsBase
 
     resetData( dataFrame )
     {
-        debugger
         this.dataFrame = dataFrame;
         this.data = this._trimGraphs();
         this._widget();

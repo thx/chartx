@@ -130,7 +130,7 @@ function arrayToTreeJsonForRelation(data, options) {
   var _edges = {};
 
   _canvax._.each(data, function (item) {
-    var key = item[options.field];
+    var key = item[options.field] + '';
 
     if (key.split(',').length == 1) {
       _nodes[key] = item;
@@ -148,6 +148,8 @@ function arrayToTreeJsonForRelation(data, options) {
     var isFirstLev = true;
 
     _canvax._.each(_edges, function (edge, ekey) {
+      ekey = ekey + '';
+
       if (ekey.split(',')[1] == nkey) {
         isFirstLev = false;
         return false;
@@ -169,6 +171,8 @@ function arrayToTreeJsonForRelation(data, options) {
       var key = node[options.field];
 
       _canvax._.each(_edges, function (edge, ekey) {
+        ekey = ekey + '';
+
         if (ekey.split(',')[0] == key) {
           //那么说明[1] 就是自己的children
           var childNode = _nodes[ekey.split(',')[1]];

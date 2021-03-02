@@ -238,36 +238,44 @@ class Tips extends Component {
     }
 
     _getDefaultContent(info) {
+        
         let str = "";
-        if( !info.nodes.length ){
+        if( !info.nodes.length && !info.tipsContent ){
             return str;
         };
-        if (info.title !== undefined && info.title !== null && info.title !== "") {
-            str += "<div style='font-size:14px;border-bottom:1px solid #f0f0f0;padding:4px;margin-bottom:6px;'>" + info.title + "</div>";
-        }; 
-        _.each(info.nodes, function (node, i) {
-            /*
-            if (!node.value && node.value !== 0) {
-                return;
-            };
-            */
-            let style = node.color || node.fillStyle || node.strokeStyle;
-            let name = node.name || node.field || node.content;
-            let value = typeof(node.value) == "object" ? JSON.stringify(node.value) : numAddSymbol(node.value);
-            let hasVal = node.value || node.value == 0
 
-            str += "<div style='line-height:1.5;font-size:12px;padding:0 4px;'>"
-            if( style ){
-                str += "<span style='background:" + style + ";margin-right:8px;margin-top:7px;float:left;width:8px;height:8px;border-radius:4px;overflow:hidden;font-size:0;'></span>";
-            };
-            if( name ){
-                str += "<span style='margin-right:5px;'>"+name;
-                hasVal && (str += "：");
-                str += "</span>";
-            };
-            hasVal && (str += value);
-            str += "</div>";
-        });
+        if( info.nodes.length ){
+            if (info.title !== undefined && info.title !== null && info.title !== "") {
+                str += "<div style='font-size:14px;border-bottom:1px solid #f0f0f0;padding:4px;margin-bottom:6px;'>" + info.title + "</div>";
+            }; 
+            _.each(info.nodes, function (node, i) {
+                /*
+                if (!node.value && node.value !== 0) {
+                    return;
+                };
+                */
+                let style = node.color || node.fillStyle || node.strokeStyle;
+                let name = node.name || node.field || node.content;
+                let value = typeof(node.value) == "object" ? JSON.stringify(node.value) : numAddSymbol(node.value);
+                let hasVal = node.value || node.value == 0
+
+                str += "<div style='line-height:1.5;font-size:12px;padding:0 4px;'>"
+                if( style ){
+                    str += "<span style='background:" + style + ";margin-right:8px;margin-top:7px;float:left;width:8px;height:8px;border-radius:4px;overflow:hidden;font-size:0;'></span>";
+                };
+                if( name ){
+                    str += "<span style='margin-right:5px;'>"+name;
+                    hasVal && (str += "：");
+                    str += "</span>";
+                };
+                hasVal && (str += value);
+                str += "</div>";
+            });
+        }
+        if( info.tipsContent ){
+            str += info.tipsContent;
+        }
+
         return str;
     }
 

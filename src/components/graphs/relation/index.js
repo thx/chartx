@@ -243,6 +243,7 @@ class Relation extends GraphsBase {
                             }
                         }
                     }
+                    
                 }
             },
             line: {
@@ -355,7 +356,8 @@ class Relation extends GraphsBase {
                                 default: null
                             }
                         }
-                    }
+                    },
+                    cursor: 'default'
                 }
             },
             layout: {
@@ -472,6 +474,7 @@ class Relation extends GraphsBase {
         this.graphsView = new Canvax.Display.Sprite({
             id: "graphsView"
         });
+
         this.graphsSp.addChild(this.edgesSp);
         this.graphsSp.addChild(this.nodesSp);
         this.graphsSp.addChild(this.nodesContentSp);
@@ -527,8 +530,8 @@ class Relation extends GraphsBase {
                 if (e.type == "mousemove") {
                     if ( _mosedownIng ) {
                         let {x,y} = me.zoom.move( point );
-                        me.graphsView.context.x = x;
-                        me.graphsView.context.y = y;
+                        me.graphsView.context.x = parseInt(x);
+                        me.graphsView.context.y = parseInt(y);
                     }
                 };
 
@@ -571,17 +574,11 @@ class Relation extends GraphsBase {
 
     }
 
-    //全局画布
-    scale(scale, globalScaleOrigin) {
-      
-    }
-
     draw( opt ) {
     
         !opt && (opt = {});
         _.extend(true, this, opt);
 
-        
         this._initData( opt.data ).then( data => {
 
             this.data = data;
@@ -590,8 +587,10 @@ class Relation extends GraphsBase {
 
             this.widget();
 
-            this.sprite.context.x = this.origin.x;
-            this.sprite.context.y = this.origin.y;
+            this.induce.context.width = this.width;
+            this.induce.context.height = this.height;
+            this.sprite.context.x = parseInt(this.origin.x);
+            this.sprite.context.y = parseInt(this.origin.y);
 
             let _offsetLeft = (this.width - this.data.size.width) / 2;
             if (_offsetLeft < 0) {
@@ -602,8 +601,8 @@ class Relation extends GraphsBase {
                 _offsetTop = 0;
             };
             
-            this.graphsSp.context.x = _offsetLeft;
-            this.graphsSp.context.y = _offsetTop;
+            this.graphsSp.context.x = parseInt(_offsetLeft);
+            this.graphsSp.context.y = parseInt(_offsetTop);
 
             this.fire("complete");
 
@@ -612,49 +611,67 @@ class Relation extends GraphsBase {
     }
 
     //如果dataTrigger.origin 有传入， 则已经这个origin为参考点做重新布局
-    resetData( data, dataTrigger ){
+    //TODO， 如果这个图的options中有配置 一个 符合 关系图的数据{nodes, edges, size}
+    //那么这个时候的resetData还不能满足，因为resetData的第一个个参数是dataFrame， 而options.data其实已经算是配置了，
+    //后面遇到这个情况再调整吧
+    resetData( dataFrame, dataTrigger ){
+        this._resetData( dataFrame, dataTrigger ).then( ()=>{
+            this.fire("complete");
+        } );
+    }
+
+    _resetData( data, dataTrigger ){
 
         let me = this;
         this._preData = this.data;
 
-        this._initData( data ).then( _data => {
+        return new Promise( resolve => {
 
-            this.data = _data;
-        
-            this._layoutData();
+            this._initData( data ).then( _data => {
 
-            _.each( this._preData.nodes, function( preNode ){
-                if( !_.find( me.data.nodes, function( node ){ return preNode.key == node.key } ) ){
-                    me._destroy( preNode );
-                }
-            } );
-            _.each( this._preData.edges, function( preEdge ){
-                if( !_.find( me.data.edges, function( edge ){ return preEdge.key.join('_') == edge.key.join('_') } ) ){
-                    me._destroy( preEdge );
-                }
-            } );
+                this.data = _data;
+            
+                this._layoutData();
 
-            this.widget();
+                _.each( this._preData.nodes, function( preNode ){
+                    let nodeData = _.find( me.data.nodes, function( node ){ return preNode.key == node.key } );
+                    if( !nodeData ){
+                        me._destroy( preNode );
+                    } else {
+                        //如果找到了，要从前面
+                        nodeData.focused  = preNode.focused;
+                        nodeData.selected = preNode.selected;
+                    }
+                } );
+                _.each( this._preData.edges, function( preEdge ){
+                    if( !_.find( me.data.edges, function( edge ){ return preEdge.key.join('_') == edge.key.join('_') } ) ){
+                        me._destroy( preEdge );
+                    }
+                } );
 
-            //钉住某个node为参考点（不移动）
-            if( dataTrigger && dataTrigger.origin ){
-                let preOriginNode = _.find( this._preData.nodes, (node) => { return node.key == dataTrigger.origin } );
-                let originNode = _.find( this.data.nodes, (node) => { return node.key == dataTrigger.origin } );
-                
-                if( preOriginNode && originNode ){
-                    let offsetPos = { 
-                        x: preOriginNode.x-originNode.x, 
-                        y: preOriginNode.y-originNode.y
+                this.widget();
+
+                //钉住某个node为参考点（不移动)
+                if( dataTrigger && dataTrigger.origin ){
+                    
+                    let preOriginNode = _.find( this._preData.nodes, (node) => { return node.key == dataTrigger.origin } );
+                    let originNode = _.find( this.data.nodes, (node) => { return node.key == dataTrigger.origin } );
+                    
+                    if( preOriginNode && originNode ){
+                        let offsetPos = { 
+                            x: parseInt(preOriginNode.x)-parseInt(originNode.x), 
+                            y: parseInt(preOriginNode.y)-parseInt(originNode.y)
+                        };
+                        let { x, y } = this.zoom.offset( offsetPos );
+                        me.graphsView.context.x = parseInt(x);
+                        me.graphsView.context.y = parseInt(y);
                     };
-                    let { x, y } = this.zoom.offset( offsetPos );
-                    me.graphsView.context.x = x;
-                    me.graphsView.context.y = y;
+
                 };
 
-            };
+                resolve();
 
-            this.fire("complete");
-
+            } );
         } );
     }
 
@@ -674,25 +691,53 @@ class Relation extends GraphsBase {
         item.edgeIconElement && item.edgeIconElement.destroy()
     }
 
-    _initData( _data ) {
+
+    _getDefNode(){
+        let node = {
+            type: "relation",
+            iNode: 0,
+            rowData: null,
+            key: "",
+            content: '',
+            _contentInited: false,
+            ctype: 'canvas',
+
+            //下面三个属性在_setElementAndSize中设置
+            contentElement: null, //外面传的layout数据可能没有element，widget的时候要检测下
+            width: null,
+            height: null,
+
+            //这个在layout的时候设置
+            x: null,
+            y: null,
+            shapeType: null,
+
+            //如果是edge，要填写这两节点
+            source : null,
+            target : null,
+
+            focused : false,
+            selected: false
+        };  
+        return node;
+    }
+
+    //$data如果用户设置了符合data的数据格式数据{nodes, edges, size}，那就直接返回
+    _initData( $data ) {
+        
         return new Promise( resolve => {
 
-            if( _data && _data.nodes && _data.edges ){
-                resolve( _data );
+            if( $data && $data.nodes && $data.edges ){
+                resolve( $data );
                 return;
             };
 
             let data = {
-                nodes: [
-                    //{ type,key,content,ctype,width,height,x,y }
-                ],
-                edges: [
-                    //{ type,key[],content,ctype,width,height,x,y }
-                ],
-                size: {
-                    width: 0,
-                    height: 0
-                }
+                //{ type,key,content,ctype,width,height,x,y }
+                nodes: [],
+                //{ type,key[],content,ctype,width,height,x,y }
+                edges: [],
+                size: {width: 0,height: 0}
             };
 
             let originData = this.app._data;
@@ -703,102 +748,94 @@ class Relation extends GraphsBase {
                 if( this.layout == "tree" ){
                     //源数据就是图表标准数据，只需要转换成json的Children格式
                     //app.dataFrame.jsonOrg ==> [{name: key:} ...] 不是children的树结构
-                    //tree layout算法需要children格式的数据，蛋疼
                     this.jsonData = arrayToTreeJsonForRelation(this.app.dataFrame.jsonOrg, this);
                 };
             };
 
-            let _nodeMap = {};
-            let initNum  = 0;
-            //this.graphsSp.context.visible = false;
-            //this.domContainer.style.visibility = 'hidden';
 
             for (let i = 0; i < this.dataFrame.length; i++) {
                 let rowData = this.dataFrame.getRowDataAt(i);
+
                 let fields = _.flatten([(rowData[this.field] + "").split(",")]);
                 let content = this._getContent(rowData);
 
-                let node = {
-                    type: "relation",
+                let node = this._getDefNode();
+                Object.assign( node, {
                     iNode: i,
                     rowData: rowData,
                     key: fields.length == 1 ? fields[0] : fields,
                     content: content,
-                    _contentInited: false,
-                    ctype: this._checkHtml(content) ? 'html' : 'canvas',
+                    ctype: this._checkHtml(content) ? 'html' : 'canvas'
+                } );
 
-                    //下面三个属性在_setElementAndSize中设置
-                    contentElement: null, //外面传的layout数据可能没有element，widget的时候要检测下
-                    width: null,
-                    height: null,
-
-                    //这个在layout的时候设置
-                    x: null,
-                    y: null,
-                    shapeType: null,
-
-                    //如果是edge，要填写这两节点
-                    source : null,
-                    target : null,
-
-                    focused : false,
-                    selected : false
-                    
+                if( fields.length == 1 ){
+                    //isNode
+                    node.shapeType = this.getProp( this.node.shapeType, node );
+                    Object.assign(node, this.layoutOpts.node);
+                    data.nodes.push(node);
+                } else {
+                    // isEdge
+                    node.shapeType = this.getProp( this.line.shapeType, node );
+                    Object.assign(node, this.layoutOpts.edge);
+                    data.edges.push(node);
                 };
-                
+            };
+
+            this._initAllDataSize(data).then( data => {
+                resolve( data );
+            } );
+
+        } );
+    }
+
+    _initAllDataSize( data ){
+        
+        return new Promise( resolve => {
+
+            let _nodeMap = {};
+            let initNum  = 0;
+
+            data.nodes.concat( data.edges ).forEach( node => {
+
+                _nodeMap[ node.key ] = node;
+
                 //计算和设置node的尺寸
-                this._initContentAndGetSize(node).then( opt => {
+                this._initContentAndGetSize( node ).then( opt => {
 
                     _.extend(node, opt);
-
-                    if (fields.length == 1) {
-                        // isNode
-                        node.shapeType = this.getProp( this.node.shapeType, node );
-
-                        if( node.shapeType == 'diamond' ){
-                            //因为node的尺寸前面计算出来的是矩形的尺寸，如果是菱形的话，这里就是指内接矩形的尺寸，
-                            //需要换算成外接矩形的尺寸
-                            let innerRect = { //内接矩形
-                                width: node.width,
-                                height: node.height
-                            };
-                            let includedAngle = this.node.includedAngle/2;
-                            let includeRad    = includedAngle * Math.PI / 180
-
-                            let newWidthDiff  = innerRect.height / Math.tan( includeRad );
-                            let newHeightDiff = innerRect.width  * Math.tan( includeRad );
-
-                            //在内接矩形基础上扩展出来的外界矩形
-                            let newWidth      = innerRect.width  + newWidthDiff;
-                            let newHeight     = innerRect.height + newHeightDiff;
-
-                            //把新的菱形的外界边界回写
-                            node._innerRect   = {
-                                width  : node.width,
-                                height : node.height 
-                            };
-                            node.width        = newWidth;
-                            node.height       = newHeight;
-                            
+                    //如果是菱形，还需要重新调整新的尺寸
+                    if( node.shapeType == 'diamond' ){
+                        //因为node的尺寸前面计算出来的是矩形的尺寸，如果是菱形的话，这里就是指内接矩形的尺寸，
+                        //需要换算成外接矩形的尺寸
+                        let innerRect = { //内接矩形
+                            width: node.width,
+                            height: node.height
                         };
+                        let includedAngle = this.node.includedAngle/2;
+                        let includeRad    = includedAngle * Math.PI / 180
 
-                        data.nodes.push(node);
-                        Object.assign(node, this.layoutOpts.node);
-                        _nodeMap[ node.key ] = node;
-                    } else {
-                        // isEdge
-                        node.shapeType = this.getProp( this.line.shapeType, node );
-                        //node.labeloffset = 0;
-                        //node.labelpos = 'l';
-                        //额外的会有minlen weight labelpos labeloffset 四个属性可以配置
-                        Object.assign(node, this.layoutOpts.edge);
-                        data.edges.push(node);
+                        let newWidthDiff  = innerRect.height / Math.tan( includeRad );
+                        let newHeightDiff = innerRect.width  * Math.tan( includeRad );
+
+                        //在内接矩形基础上扩展出来的外界矩形
+                        let newWidth      = innerRect.width  + newWidthDiff;
+                        let newHeight     = innerRect.height + newHeightDiff;
+
+                        //把新的菱形的外界边界回写
+                        node._innerRect   = {
+                            width  : node.width,
+                            height : node.height 
+                        };
+                        node.width        = newWidth;
+                        node.height       = newHeight;
+                        
                     };
-
+                
                     node._contentInited = true;
                     initNum ++
 
-                    if( initNum == this.dataFrame.length ){
+                    //如果所有的node的size都初始化完毕
+                    if( initNum == (data.nodes.length+data.edges.length) ){
                         //all is inited
                         //然后给edge填写source 和 target
                         _.each( data.edges, function( edge ){
@@ -806,15 +843,11 @@ class Relation extends GraphsBase {
                             edge.source = _nodeMap[ keys[0] ];
                             edge.target = _nodeMap[ keys[1] ];
                         } );
-
-                        //this.graphsSp.context.visible = true;
-                        //this.domContainer.style.visibility = 'visible';
                         resolve( data );
                     };
 
                 } );
-
-            };
+            });
 
         } );
     }
@@ -874,15 +907,19 @@ class Relation extends GraphsBase {
     }
 
     widget() {
-        let me = this;
-
         /*
         me.g.edges().forEach( e => {
             let edge = me.g.edge(e);
             console.log( edge )
         } );
         */
+     
+        this._drawEdges();
+        this._drawNodes();
+    }
 
+    _drawEdges(){
+        let me = this;
         _.each(this.data.edges, function ( edge ) {
 
             console.log(edge.points)
@@ -898,6 +935,7 @@ class Relation extends GraphsBase {
             let lineWidth   = me.getProp( me.line.lineWidth, edge );
             let strokeStyle = me.getProp( me.line.strokeStyle, edge );
             let lineType    = me.getProp( me.line.lineType, edge );
+            let cursor      = me.getProp( me.line.cursor, edge );
 
             let edgeId = 'edge_'+key;
             let _path  = me.edgesSp.getChildById( edgeId );
@@ -913,7 +951,8 @@ class Relation extends GraphsBase {
                         path,
                         lineWidth,
                         strokeStyle,
-                        lineType
+                        lineType,
+                        cursor
                     }
                 });
                 _path.on(event.types.get(), function (e) {
@@ -1116,128 +1155,126 @@ class Relation extends GraphsBase {
             };
     
         });
+    }
 
+    _drawNodes(){
+        let me = this;
         _.each(this.data.nodes, function (node) {
-            
-            let shape = Rect;
+            me._drawNode( node );
+        });
+    }
 
-            let nodeId = "node_"+node.key;
+    _drawNode( node ){
+        let me = this;
+        
+        let shape = Rect;
 
-            let cursor = me.node.cursor;
+        let nodeId = "node_"+node.key;
 
-            let { lineWidth,fillStyle,strokeStyle,radius,shadowOffsetX,shadowOffsetY,shadowBlur,shadowColor } = me._getNodeStyle( node );   
+        let cursor = me.node.cursor;
 
-            let context = {
-                x: node.x - node.width / 2,
-                y: node.y - node.height / 2,
-                width: node.width,
-                height: node.height,
+        let { lineWidth,fillStyle,strokeStyle,radius,shadowOffsetX,shadowOffsetY,shadowBlur,shadowColor } = me._getNodeStyle( node );   
+
+        let context = {
+            x: parseInt(node.x) - parseInt(node.width / 2),
+            y: parseInt(node.y) - parseInt(node.height / 2),
+            width: node.width,
+            height: node.height,
+            cursor,
+            lineWidth,
+            fillStyle,
+            strokeStyle,
+            radius,
+            shadowOffsetX,shadowOffsetY,shadowBlur,shadowColor
+        };
+        if( node.shapeType == 'diamond' ){
+            shape = Diamond;
+            context = {
+                x: parseInt(node.x),
+                y: parseInt(node.y),
                 cursor,
+                innerRect : node._innerRect,
                 lineWidth,
                 fillStyle,
                 strokeStyle,
-                radius,
                 shadowOffsetX,shadowOffsetY,shadowBlur,shadowColor
-            };
-            if( node.shapeType == 'diamond' ){
-                shape = Diamond;
-                context = {
-                    x: node.x,
-                    y: node.y,
-                    cursor,
-                    innerRect : node._innerRect,
-                    lineWidth,
-                    fillStyle,
-                    strokeStyle,
-                    shadowOffsetX,shadowOffsetY,shadowBlur,shadowColor
-                }
-            };
-            
-            let _boxShape = me.nodesSp.getChildById( nodeId );
-            if( _boxShape ){
-                _.extend( _boxShape.context, context );
-            } else {
-                _boxShape = new shape({
-                    id: nodeId,
-                    hoverClone: false,
-                    context
-                });
-                me.nodesSp.addChild(_boxShape);
-                _boxShape.on(event.types.get(), function (e) {
-                    e.eventInfo = {
-                        trigger: me.node,
-                        nodes: [this.nodeData]
-                    };
-
-                    if( me.node.focus.enabled ){
-                        if( e.type == "mouseover" ){
-                            me.focusAt( this.nodeData );
-                        }
-                        if( e.type == "mouseout" ){
-                            me.unfocusAt( this.nodeData );
-                        }
-                    };
-            
-                    if( me.node.select.enabled && e.type == me.node.select.triggerEventType ){
-                        //如果开启了图表的选中交互
-                        //TODO:这里不能
-                        let onbefore = me.node.select.onbefore;
-                        let onend    = me.node.select.onend;
-                        if( !onbefore || ( typeof onbefore == 'function' && onbefore.apply(me, [this.nodeData]) !== false ) ){
-                            if( this.nodeData.selected ){
-                                //说明已经选中了
-                                me.unselectAt( this.nodeData );
-                            } else {
-                                me.selectAt( this.nodeData );
-                            }
-                            onend && typeof onend == 'function' && onend.apply( me, [this.nodeData] );
-                        }
-                        
-                    };
-
-                    me.app.fire(e.type, e);
-                });
-            };
+            }
+        };
         
-            _boxShape.nodeData = node;
-            node.shapeElement = _boxShape;
-
-            if( me.node.select.list.indexOf( node.key ) > -1 ){
-                me.selectAt( node );
-            };
-
-            if (node.ctype == "canvas") {
-                node.contentElement.context.visible = true;
-            };
-
-            _boxShape.on("transform", function () {
-                if (node.ctype == "canvas") {
-                    node.contentElement.context.x = node.x;
-                    node.contentElement.context.y = node.y;
-                } else if (node.ctype == "html") {
-                    let devicePixelRatio = typeof (window) !== 'undefined' ? window.devicePixelRatio : 1;
-                    let contentMatrix = _boxShape.worldTransform.clone();
-                    //if( node.shapeType == 'diamond' ){
-                    //    contentMatrix = contentMatrix.translate( -node._innerRect.width/2, -node._innerRect.height/2 )
-                    //};
-                    contentMatrix = contentMatrix.scale(1 / devicePixelRatio, 1 / devicePixelRatio);
-                    
-                    node.contentElement.style.transform = "matrix(" + contentMatrix.toArray().join() + ")";
-                    node.contentElement.style.transformOrigin = "left top"; //修改为左上角为旋转中心点来和canvas同步
-                    if( node.shapeType == 'diamond' ){
-                        node.contentElement.style.left = -(node._innerRect.width/2) * me.status.transform.scale + "px";
-                        node.contentElement.style.top = -(node._innerRect.height/2) * me.status.transform.scale + "px";
-                    }
-                    //node.contentElement.style.marginLeft = me.getProp(me.node.padding, node) * me.status.transform.scale + "px";
-                    //node.contentElement.style.marginTop = me.getProp(me.node.padding, node) * me.status.transform.scale + "px";
-                    node.contentElement.style.visibility = "visible";
-                };
+        let _boxShape = me.nodesSp.getChildById( nodeId );
+        if( _boxShape ){
+            _.extend( _boxShape.context, context );
+        } else {
+            _boxShape = new shape({
+                id: nodeId,
+                hoverClone: false,
+                context
             });
+            me.nodesSp.addChild(_boxShape);
+            _boxShape.on(event.types.get(), function (e) {
+                e.eventInfo = {
+                    trigger: me.node,
+                    nodes: [this.nodeData]
+                };
+
+                if( me.node.focus.enabled ){
+                    if( e.type == "mouseover" ){
+                        me.focusAt( this.nodeData );
+                    }
+                    if( e.type == "mouseout" ){
+                        me.unfocusAt( this.nodeData );
+                    }
+                };
+        
+                if( me.node.select.enabled && e.type == me.node.select.triggerEventType ){
+                    //如果开启了图表的选中交互
+                    //TODO:这里不能
+                    let onbefore = me.node.select.onbefore;
+                    let onend    = me.node.select.onend;
+                    if( !onbefore || ( typeof onbefore == 'function' && onbefore.apply(me, [this.nodeData]) !== false ) ){
+                        if( this.nodeData.selected ){
+                            //说明已经选中了
+                            me.unselectAt( this.nodeData );
+                        } else {
+                            me.selectAt( this.nodeData );
+                        }
+                        onend && typeof onend == 'function' && onend.apply( me, [this.nodeData] );
+                    }
+                    
+                };
+
+                me.app.fire(e.type, e);
+            });
+        };
+    
+        _boxShape.nodeData = node;
+        node.shapeElement = _boxShape;
+
+        if( me.node.select.list.indexOf( node.key ) > -1 ){
+            me.selectAt( node );
+        };
+        if (node.ctype == "canvas") {
+            node.contentElement.context.visible = true;
+        };
+
+        _boxShape.on("transform", function() {
+            if (node.ctype == "canvas") {
+                node.contentElement.context.x = parseInt(node.x);
+                node.contentElement.context.y = parseInt(node.y);
+            } else if (node.ctype == "html") {
+                let devicePixelRatio = typeof (window) !== 'undefined' ? window.devicePixelRatio : 1;
+                let contentMatrix = _boxShape.worldTransform.clone();
+                contentMatrix = contentMatrix.scale(1 / devicePixelRatio, 1 / devicePixelRatio);
+                
+                node.contentElement.style.transform = "matrix(" + contentMatrix.toArray().join() + ")";
+                node.contentElement.style.transformOrigin = "left top"; //修改为左上角为旋转中心点来和canvas同步
+                if( node.shapeType == 'diamond' ){
+                    node.contentElement.style.left = -parseInt((node._innerRect.width/2) * me.status.transform.scale) + "px";
+                    node.contentElement.style.top = -parseInt((node._innerRect.height/2) * me.status.transform.scale) + "px";
+                };
+                node.contentElement.style.visibility = "visible";
+            };
         });
-
-        this.induce.context.width = this.width;
-        this.induce.context.height = this.height;
-
     }
 
     _getNodeStyle( nodeData , targetPath){
@@ -1328,7 +1365,7 @@ class Relation extends GraphsBase {
     }
 
     getNodeDataAt( key ){
-        if( key.type && key.type == "relation" ){
+        if( key.type && (key.type == "relation" || key.type == "tree") ){
             return key
         };
         if( typeof key == 'string' ){
@@ -1551,11 +1588,7 @@ class Relation extends GraphsBase {
                     width          : width,
                     height         : height
                 });
-            }
-
-
-
-            
+            } 
         });
 
     }

@@ -390,11 +390,11 @@ class Chart extends event.Dispatcher
     {
         let me = this;
 
-        this._data = data;
+        data && (this._data = data); //注意，resetData不能为null，必须是 数组格式
 
         let preDataLenth = this.dataFrame.org.length;
 
-        this.dataFrame.resetData( data );
+        this.dataFrame.resetData( this._data );
 
         let graphsList = this.getComponents({name:'graphs'});
         let allGraphsHasResetData = true;
@@ -679,7 +679,7 @@ class Chart extends event.Dispatcher
             let iNode = e.eventInfo.iNode;
             
             _.each( this.getComponents({name:'graphs'}), function( _g ){
-                if( _g.getNodesAt ){
+                if( _g.getNodesAt && iNode !== undefined ){
                     nodes = nodes.concat( _g.getNodesAt( iNode, e ) );
                 }
             } );

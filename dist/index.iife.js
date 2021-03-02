@@ -7968,6 +7968,7 @@ var chartx = (function () {
 	      var codeWithoutVariables = code.slice(0, range[0]) + code.slice(range[1]);
 	      return this._eval(codeWithoutVariables, 'options', 'variables', variables);
 	    } catch (e) {
+	      console.log('parse error');
 	      return {};
 	    }
 	  }
@@ -9255,9 +9256,10 @@ var chartx = (function () {
 	    key: "resetData",
 	    value: function resetData(data, trigger) {
 	      var me = this;
-	      this._data = data;
+	      data && (this._data = data); //注意，resetData不能为null，必须是 数组格式
+
 	      var preDataLenth = this.dataFrame.org.length;
-	      this.dataFrame.resetData(data);
+	      this.dataFrame.resetData(this._data);
 	      var graphsList = this.getComponents({
 	        name: 'graphs'
 	      });
@@ -9586,7 +9588,7 @@ var chartx = (function () {
 	        _.each(this.getComponents({
 	          name: 'graphs'
 	        }), function (_g) {
-	          if (_g.getNodesAt) {
+	          if (_g.getNodesAt && iNode !== undefined) {
 	            nodes = nodes.concat(_g.getNodesAt(iNode, e));
 	          }
 	        });
@@ -25806,6 +25808,7 @@ var chartx = (function () {
 	      yRange = bounds.yRange;
 
 	  if (xRange.max == xRange.min || yRange.max == yRange.min) {
+	    console.log("not scaling solution: zero size detected");
 	    return solution;
 	  }
 
@@ -26449,7 +26452,9 @@ var chartx = (function () {
 	    var centre = computeTextCentre(interior, exterior);
 	    ret[area] = centre;
 
-	    if (centre.disjoint && areas[i].size > 0) ;
+	    if (centre.disjoint && areas[i].size > 0) {
+	      console.log("WARNING: area " + area + " not represented on screen");
+	    }
 	  }
 
 	  return ret;
@@ -28856,6 +28861,7 @@ var chartx = (function () {
 	  var label = options.node && options.node.content && options.node.content.field;
 
 	  if (!checkDataIsJson(data, key, childrenKey)) {
+	    console.error('该数据不能正确绘制，请提供数组对象形式的数据！');
 	    return result;
 	  }
 	  var childrens = [];
@@ -28922,7 +28928,7 @@ var chartx = (function () {
 	  var _edges = {};
 
 	  Canvax._.each(data, function (item) {
-	    var key = item[options.field];
+	    var key = item[options.field] + '';
 
 	    if (key.split(',').length == 1) {
 	      _nodes[key] = item;
@@ -28938,6 +28944,8 @@ var chartx = (function () {
 	    var isFirstLev = true;
 
 	    Canvax._.each(_edges, function (edge, ekey) {
+	      ekey = ekey + '';
+
 	      if (ekey.split(',')[1] == nkey) {
 	        isFirstLev = false;
 	        return false;
@@ -28957,6 +28965,8 @@ var chartx = (function () {
 	      var key = node[options.field];
 
 	      Canvax._.each(_edges, function (edge, ekey) {
+	        ekey = ekey + '';
+
 	        if (ekey.split(',')[0] == key) {
 	          //那么说明[1] 就是自己的children
 	          var childNode = _nodes[ekey.split(',')[1]];
@@ -32623,6 +32633,7 @@ var chartx = (function () {
 	        try {
 	          return fn();
 	        } finally {
+	          console.log(name + " time: " + (_.now() - start) + "ms");
 	        }
 	      }
 
@@ -42594,7 +42605,8 @@ var chartx = (function () {
 	                  "default": null
 	                }
 	              }
-	            }
+	            },
+	            cursor: 'default'
 	          }
 	        },
 	        layout: {
@@ -42768,12 +42780,13 @@ var chartx = (function () {
 	                  x = _me$zoom$move.x,
 	                  y = _me$zoom$move.y;
 
-	              me.graphsView.context.x = x;
-	              me.graphsView.context.y = y;
+	              me.graphsView.context.x = parseInt(x);
+	              me.graphsView.context.y = parseInt(y);
 	            }
 	          }
 
 	          if (e.type == "wheel") {
+	            console.log(_deltaY, e.deltaY);
 
 	            if (Math.abs(e.deltaY) > Math.abs(_deltaY)) {
 	              _deltaY = e.deltaY;
@@ -42816,11 +42829,7 @@ var chartx = (function () {
 	          }
 	        }
 	      });
-	    } //全局画布
-
-	  }, {
-	    key: "scale",
-	    value: function scale(_scale, globalScaleOrigin) {}
+	    }
 	  }, {
 	    key: "draw",
 	    value: function draw(opt) {
@@ -42837,8 +42846,10 @@ var chartx = (function () {
 
 	        _this2.widget();
 
-	        _this2.sprite.context.x = _this2.origin.x;
-	        _this2.sprite.context.y = _this2.origin.y;
+	        _this2.induce.context.width = _this2.width;
+	        _this2.induce.context.height = _this2.height;
+	        _this2.sprite.context.x = parseInt(_this2.origin.x);
+	        _this2.sprite.context.y = parseInt(_this2.origin.y);
 
 	        var _offsetLeft = (_this2.width - _this2.data.size.width) / 2;
 
@@ -42851,70 +42862,88 @@ var chartx = (function () {
 	        if (_offsetTop < 0) {
 	          _offsetTop = 0;
 	        }
-	        _this2.graphsSp.context.x = _offsetLeft;
-	        _this2.graphsSp.context.y = _offsetTop;
+	        _this2.graphsSp.context.x = parseInt(_offsetLeft);
+	        _this2.graphsSp.context.y = parseInt(_offsetTop);
 
 	        _this2.fire("complete");
 	      });
 	    } //如果dataTrigger.origin 有传入， 则已经这个origin为参考点做重新布局
+	    //TODO， 如果这个图的options中有配置 一个 符合 关系图的数据{nodes, edges, size}
+	    //那么这个时候的resetData还不能满足，因为resetData的第一个个参数是dataFrame， 而options.data其实已经算是配置了，
+	    //后面遇到这个情况再调整吧
 
 	  }, {
 	    key: "resetData",
-	    value: function resetData(data, dataTrigger) {
+	    value: function resetData(dataFrame, dataTrigger) {
 	      var _this3 = this;
+
+	      this._resetData(dataFrame, dataTrigger).then(function () {
+	        _this3.fire("complete");
+	      });
+	    }
+	  }, {
+	    key: "_resetData",
+	    value: function _resetData(data, dataTrigger) {
+	      var _this4 = this;
 
 	      var me = this;
 	      this._preData = this.data;
+	      return new Promise(function (resolve) {
+	        _this4._initData(data).then(function (_data) {
+	          _this4.data = _data;
 
-	      this._initData(data).then(function (_data) {
-	        _this3.data = _data;
+	          _this4._layoutData();
 
-	        _this3._layoutData();
+	          _.each(_this4._preData.nodes, function (preNode) {
+	            var nodeData = _.find(me.data.nodes, function (node) {
+	              return preNode.key == node.key;
+	            });
 
-	        _.each(_this3._preData.nodes, function (preNode) {
-	          if (!_.find(me.data.nodes, function (node) {
-	            return preNode.key == node.key;
-	          })) {
-	            me._destroy(preNode);
-	          }
-	        });
-
-	        _.each(_this3._preData.edges, function (preEdge) {
-	          if (!_.find(me.data.edges, function (edge) {
-	            return preEdge.key.join('_') == edge.key.join('_');
-	          })) {
-	            me._destroy(preEdge);
-	          }
-	        });
-
-	        _this3.widget(); //钉住某个node为参考点（不移动）
-
-
-	        if (dataTrigger && dataTrigger.origin) {
-	          var preOriginNode = _.find(_this3._preData.nodes, function (node) {
-	            return node.key == dataTrigger.origin;
+	            if (!nodeData) {
+	              me._destroy(preNode);
+	            } else {
+	              //如果找到了，要从前面
+	              nodeData.focused = preNode.focused;
+	              nodeData.selected = preNode.selected;
+	            }
 	          });
 
-	          var originNode = _.find(_this3.data.nodes, function (node) {
-	            return node.key == dataTrigger.origin;
+	          _.each(_this4._preData.edges, function (preEdge) {
+	            if (!_.find(me.data.edges, function (edge) {
+	              return preEdge.key.join('_') == edge.key.join('_');
+	            })) {
+	              me._destroy(preEdge);
+	            }
 	          });
 
-	          if (preOriginNode && originNode) {
-	            var offsetPos = {
-	              x: preOriginNode.x - originNode.x,
-	              y: preOriginNode.y - originNode.y
-	            };
+	          _this4.widget(); //钉住某个node为参考点（不移动)
 
-	            var _this3$zoom$offset = _this3.zoom.offset(offsetPos),
-	                x = _this3$zoom$offset.x,
-	                y = _this3$zoom$offset.y;
 
-	            me.graphsView.context.x = x;
-	            me.graphsView.context.y = y;
+	          if (dataTrigger && dataTrigger.origin) {
+	            var preOriginNode = _.find(_this4._preData.nodes, function (node) {
+	              return node.key == dataTrigger.origin;
+	            });
+
+	            var originNode = _.find(_this4.data.nodes, function (node) {
+	              return node.key == dataTrigger.origin;
+	            });
+
+	            if (preOriginNode && originNode) {
+	              var offsetPos = {
+	                x: parseInt(preOriginNode.x) - parseInt(originNode.x),
+	                y: parseInt(preOriginNode.y) - parseInt(originNode.y)
+	              };
+
+	              var _this4$zoom$offset = _this4.zoom.offset(offsetPos),
+	                  x = _this4$zoom$offset.x,
+	                  y = _this4$zoom$offset.y;
+
+	              me.graphsView.context.x = parseInt(x);
+	              me.graphsView.context.y = parseInt(y);
+	            }
 	          }
-	        }
-
-	        _this3.fire("complete");
+	          resolve();
+	        });
 	      });
 	    }
 	  }, {
@@ -42935,137 +42964,156 @@ var chartx = (function () {
 	      item.edgeIconElement && item.edgeIconElement.destroy();
 	    }
 	  }, {
+	    key: "_getDefNode",
+	    value: function _getDefNode() {
+	      var node = {
+	        type: "relation",
+	        iNode: 0,
+	        rowData: null,
+	        key: "",
+	        content: '',
+	        _contentInited: false,
+	        ctype: 'canvas',
+	        //下面三个属性在_setElementAndSize中设置
+	        contentElement: null,
+	        //外面传的layout数据可能没有element，widget的时候要检测下
+	        width: null,
+	        height: null,
+	        //这个在layout的时候设置
+	        x: null,
+	        y: null,
+	        shapeType: null,
+	        //如果是edge，要填写这两节点
+	        source: null,
+	        target: null,
+	        focused: false,
+	        selected: false
+	      };
+	      return node;
+	    } //$data如果用户设置了符合data的数据格式数据{nodes, edges, size}，那就直接返回
+
+	  }, {
 	    key: "_initData",
-	    value: function _initData(_data) {
-	      var _this4 = this;
+	    value: function _initData($data) {
+	      var _this5 = this;
 
 	      return new Promise(function (resolve) {
-	        if (_data && _data.nodes && _data.edges) {
-	          resolve(_data);
+	        if ($data && $data.nodes && $data.edges) {
+	          resolve($data);
 	          return;
 	        }
 	        var data$1 = {
-	          nodes: [//{ type,key,content,ctype,width,height,x,y }
-	          ],
-	          edges: [//{ type,key[],content,ctype,width,height,x,y }
-	          ],
+	          //{ type,key,content,ctype,width,height,x,y }
+	          nodes: [],
+	          //{ type,key[],content,ctype,width,height,x,y }
+	          edges: [],
 	          size: {
 	            width: 0,
 	            height: 0
 	          }
 	        };
-	        var originData = _this4.app._data;
+	        var originData = _this5.app._data;
 
-	        if ((0, data.checkDataIsJson)(originData, _this4.field, _this4.childrenField)) {
-	          _this4.jsonData = (0, data.jsonToArrayForRelation)(originData, _this4, _this4.childrenField);
-	          _this4.dataFrame = _this4.app.dataFrame = (0, _dataFrame["default"])(_this4.jsonData);
+	        if ((0, data.checkDataIsJson)(originData, _this5.field, _this5.childrenField)) {
+	          _this5.jsonData = (0, data.jsonToArrayForRelation)(originData, _this5, _this5.childrenField);
+	          _this5.dataFrame = _this5.app.dataFrame = (0, _dataFrame["default"])(_this5.jsonData);
 	        } else {
-	          if (_this4.layout == "tree") {
+	          if (_this5.layout == "tree") {
 	            //源数据就是图表标准数据，只需要转换成json的Children格式
 	            //app.dataFrame.jsonOrg ==> [{name: key:} ...] 不是children的树结构
-	            //tree layout算法需要children格式的数据，蛋疼
-	            _this4.jsonData = (0, data.arrayToTreeJsonForRelation)(_this4.app.dataFrame.jsonOrg, _this4);
+	            _this5.jsonData = (0, data.arrayToTreeJsonForRelation)(_this5.app.dataFrame.jsonOrg, _this5);
 	          }
 	        }
-	        var _nodeMap = {};
-	        var initNum = 0; //this.graphsSp.context.visible = false;
-	        //this.domContainer.style.visibility = 'hidden';
 
-	        var _loop = function _loop(i) {
-	          var rowData = _this4.dataFrame.getRowDataAt(i);
+	        for (var i = 0; i < _this5.dataFrame.length; i++) {
+	          var rowData = _this5.dataFrame.getRowDataAt(i);
 
-	          var fields = _.flatten([(rowData[_this4.field] + "").split(",")]);
+	          var fields = _.flatten([(rowData[_this5.field] + "").split(",")]);
 
-	          var content = _this4._getContent(rowData);
+	          var content = _this5._getContent(rowData);
 
-	          var node = {
-	            type: "relation",
+	          var node = _this5._getDefNode();
+
+	          Object.assign(node, {
 	            iNode: i,
 	            rowData: rowData,
 	            key: fields.length == 1 ? fields[0] : fields,
 	            content: content,
-	            _contentInited: false,
-	            ctype: _this4._checkHtml(content) ? 'html' : 'canvas',
-	            //下面三个属性在_setElementAndSize中设置
-	            contentElement: null,
-	            //外面传的layout数据可能没有element，widget的时候要检测下
-	            width: null,
-	            height: null,
-	            //这个在layout的时候设置
-	            x: null,
-	            y: null,
-	            shapeType: null,
-	            //如果是edge，要填写这两节点
-	            source: null,
-	            target: null,
-	            focused: false,
-	            selected: false
-	          }; //计算和设置node的尺寸
+	            ctype: _this5._checkHtml(content) ? 'html' : 'canvas'
+	          });
 
-	          _this4._initContentAndGetSize(node).then(function (opt) {
-	            _.extend(node, opt);
+	          if (fields.length == 1) {
+	            //isNode
+	            node.shapeType = _this5.getProp(_this5.node.shapeType, node);
+	            Object.assign(node, _this5.layoutOpts.node);
+	            data$1.nodes.push(node);
+	          } else {
+	            // isEdge
+	            node.shapeType = _this5.getProp(_this5.line.shapeType, node);
+	            Object.assign(node, _this5.layoutOpts.edge);
+	            data$1.edges.push(node);
+	          }
+	        }
 
-	            if (fields.length == 1) {
-	              // isNode
-	              node.shapeType = _this4.getProp(_this4.node.shapeType, node);
+	        _this5._initAllDataSize(data$1).then(function (data) {
+	          resolve(data);
+	        });
+	      });
+	    }
+	  }, {
+	    key: "_initAllDataSize",
+	    value: function _initAllDataSize(data) {
+	      var _this6 = this;
 
-	              if (node.shapeType == 'diamond') {
-	                //因为node的尺寸前面计算出来的是矩形的尺寸，如果是菱形的话，这里就是指内接矩形的尺寸，
-	                //需要换算成外接矩形的尺寸
-	                var innerRect = {
-	                  //内接矩形
-	                  width: node.width,
-	                  height: node.height
-	                };
-	                var includedAngle = _this4.node.includedAngle / 2;
-	                var includeRad = includedAngle * Math.PI / 180;
-	                var newWidthDiff = innerRect.height / Math.tan(includeRad);
-	                var newHeightDiff = innerRect.width * Math.tan(includeRad); //在内接矩形基础上扩展出来的外界矩形
+	      return new Promise(function (resolve) {
+	        var _nodeMap = {};
+	        var initNum = 0;
+	        data.nodes.concat(data.edges).forEach(function (node) {
+	          _nodeMap[node.key] = node; //计算和设置node的尺寸
 
-	                var newWidth = innerRect.width + newWidthDiff;
-	                var newHeight = innerRect.height + newHeightDiff; //把新的菱形的外界边界回写
+	          _this6._initContentAndGetSize(node).then(function (opt) {
+	            _.extend(node, opt); //如果是菱形，还需要重新调整新的尺寸
 
-	                node._innerRect = {
-	                  width: node.width,
-	                  height: node.height
-	                };
-	                node.width = newWidth;
-	                node.height = newHeight;
-	              }
-	              data$1.nodes.push(node);
-	              Object.assign(node, _this4.layoutOpts.node);
-	              _nodeMap[node.key] = node;
-	            } else {
-	              // isEdge
-	              node.shapeType = _this4.getProp(_this4.line.shapeType, node); //node.labeloffset = 0;
-	              //node.labelpos = 'l';
-	              //额外的会有minlen weight labelpos labeloffset 四个属性可以配置
 
-	              Object.assign(node, _this4.layoutOpts.edge);
-	              data$1.edges.push(node);
+	            if (node.shapeType == 'diamond') {
+	              //因为node的尺寸前面计算出来的是矩形的尺寸，如果是菱形的话，这里就是指内接矩形的尺寸，
+	              //需要换算成外接矩形的尺寸
+	              var innerRect = {
+	                //内接矩形
+	                width: node.width,
+	                height: node.height
+	              };
+	              var includedAngle = _this6.node.includedAngle / 2;
+	              var includeRad = includedAngle * Math.PI / 180;
+	              var newWidthDiff = innerRect.height / Math.tan(includeRad);
+	              var newHeightDiff = innerRect.width * Math.tan(includeRad); //在内接矩形基础上扩展出来的外界矩形
+
+	              var newWidth = innerRect.width + newWidthDiff;
+	              var newHeight = innerRect.height + newHeightDiff; //把新的菱形的外界边界回写
+
+	              node._innerRect = {
+	                width: node.width,
+	                height: node.height
+	              };
+	              node.width = newWidth;
+	              node.height = newHeight;
 	            }
 	            node._contentInited = true;
-	            initNum++;
+	            initNum++; //如果所有的node的size都初始化完毕
 
-	            if (initNum == _this4.dataFrame.length) {
+	            if (initNum == data.nodes.length + data.edges.length) {
 	              //all is inited
 	              //然后给edge填写source 和 target
-	              _.each(data$1.edges, function (edge) {
+	              _.each(data.edges, function (edge) {
 	                var keys = edge.key;
 	                edge.source = _nodeMap[keys[0]];
 	                edge.target = _nodeMap[keys[1]];
-	              }); //this.graphsSp.context.visible = true;
-	              //this.domContainer.style.visibility = 'visible';
+	              });
 
-
-	              resolve(data$1);
+	              resolve(data);
 	            }
 	          });
-	        };
-
-	        for (var i = 0; i < _this4.dataFrame.length; i++) {
-	          _loop(i);
-	        }
+	        });
 	      });
 	    }
 	  }, {
@@ -43121,15 +43169,23 @@ var chartx = (function () {
 	  }, {
 	    key: "widget",
 	    value: function widget() {
-	      var me = this;
 	      /*
 	      me.g.edges().forEach( e => {
 	          let edge = me.g.edge(e);
 	          console.log( edge )
 	      } );
 	      */
+	      this._drawEdges();
+
+	      this._drawNodes();
+	    }
+	  }, {
+	    key: "_drawEdges",
+	    value: function _drawEdges() {
+	      var me = this;
 
 	      _.each(this.data.edges, function (edge) {
+	        console.log(edge.points);
 	        var key = edge.key.join('_');
 
 	        if (me.line.isTree && edge.points.length == 3) {
@@ -43142,6 +43198,7 @@ var chartx = (function () {
 	        var lineWidth = me.getProp(me.line.lineWidth, edge);
 	        var strokeStyle = me.getProp(me.line.strokeStyle, edge);
 	        var lineType = me.getProp(me.line.lineType, edge);
+	        var cursor = me.getProp(me.line.cursor, edge);
 	        var edgeId = 'edge_' + key;
 
 	        var _path = me.edgesSp.getChildById(edgeId);
@@ -43158,7 +43215,8 @@ var chartx = (function () {
 	              path: path,
 	              lineWidth: lineWidth,
 	              strokeStyle: strokeStyle,
-	              lineType: lineType
+	              lineType: lineType,
+	              cursor: cursor
 	            }
 	          });
 
@@ -43373,144 +43431,146 @@ var chartx = (function () {
 	          edge.arrowElement = _arrow;
 	        }
 	      });
+	    }
+	  }, {
+	    key: "_drawNodes",
+	    value: function _drawNodes() {
+	      var me = this;
 
 	      _.each(this.data.nodes, function (node) {
-	        var shape = Rect;
-	        var nodeId = "node_" + node.key;
-	        var cursor = me.node.cursor;
+	        me._drawNode(node);
+	      });
+	    }
+	  }, {
+	    key: "_drawNode",
+	    value: function _drawNode(node) {
+	      var me = this;
+	      var shape = Rect;
+	      var nodeId = "node_" + node.key;
+	      var cursor = me.node.cursor;
 
-	        var _me$_getNodeStyle = me._getNodeStyle(node),
-	            lineWidth = _me$_getNodeStyle.lineWidth,
-	            fillStyle = _me$_getNodeStyle.fillStyle,
-	            strokeStyle = _me$_getNodeStyle.strokeStyle,
-	            radius = _me$_getNodeStyle.radius,
-	            shadowOffsetX = _me$_getNodeStyle.shadowOffsetX,
-	            shadowOffsetY = _me$_getNodeStyle.shadowOffsetY,
-	            shadowBlur = _me$_getNodeStyle.shadowBlur,
-	            shadowColor = _me$_getNodeStyle.shadowColor;
+	      var _me$_getNodeStyle = me._getNodeStyle(node),
+	          lineWidth = _me$_getNodeStyle.lineWidth,
+	          fillStyle = _me$_getNodeStyle.fillStyle,
+	          strokeStyle = _me$_getNodeStyle.strokeStyle,
+	          radius = _me$_getNodeStyle.radius,
+	          shadowOffsetX = _me$_getNodeStyle.shadowOffsetX,
+	          shadowOffsetY = _me$_getNodeStyle.shadowOffsetY,
+	          shadowBlur = _me$_getNodeStyle.shadowBlur,
+	          shadowColor = _me$_getNodeStyle.shadowColor;
 
-	        var context = {
-	          x: node.x - node.width / 2,
-	          y: node.y - node.height / 2,
-	          width: node.width,
-	          height: node.height,
+	      var context = {
+	        x: parseInt(node.x) - parseInt(node.width / 2),
+	        y: parseInt(node.y) - parseInt(node.height / 2),
+	        width: node.width,
+	        height: node.height,
+	        cursor: cursor,
+	        lineWidth: lineWidth,
+	        fillStyle: fillStyle,
+	        strokeStyle: strokeStyle,
+	        radius: radius,
+	        shadowOffsetX: shadowOffsetX,
+	        shadowOffsetY: shadowOffsetY,
+	        shadowBlur: shadowBlur,
+	        shadowColor: shadowColor
+	      };
+
+	      if (node.shapeType == 'diamond') {
+	        shape = Diamond;
+	        context = {
+	          x: parseInt(node.x),
+	          y: parseInt(node.y),
 	          cursor: cursor,
+	          innerRect: node._innerRect,
 	          lineWidth: lineWidth,
 	          fillStyle: fillStyle,
 	          strokeStyle: strokeStyle,
-	          radius: radius,
 	          shadowOffsetX: shadowOffsetX,
 	          shadowOffsetY: shadowOffsetY,
 	          shadowBlur: shadowBlur,
 	          shadowColor: shadowColor
 	        };
+	      }
 
-	        if (node.shapeType == 'diamond') {
-	          shape = Diamond;
-	          context = {
-	            x: node.x,
-	            y: node.y,
-	            cursor: cursor,
-	            innerRect: node._innerRect,
-	            lineWidth: lineWidth,
-	            fillStyle: fillStyle,
-	            strokeStyle: strokeStyle,
-	            shadowOffsetX: shadowOffsetX,
-	            shadowOffsetY: shadowOffsetY,
-	            shadowBlur: shadowBlur,
-	            shadowColor: shadowColor
-	          };
-	        }
+	      var _boxShape = me.nodesSp.getChildById(nodeId);
 
-	        var _boxShape = me.nodesSp.getChildById(nodeId);
-
-	        if (_boxShape) {
-	          _.extend(_boxShape.context, context);
-	        } else {
-	          _boxShape = new shape({
-	            id: nodeId,
-	            hoverClone: false,
-	            context: context
-	          });
-	          me.nodesSp.addChild(_boxShape);
-
-	          _boxShape.on(event.types.get(), function (e) {
-	            e.eventInfo = {
-	              trigger: me.node,
-	              nodes: [this.nodeData]
-	            };
-
-	            if (me.node.focus.enabled) {
-	              if (e.type == "mouseover") {
-	                me.focusAt(this.nodeData);
-	              }
-
-	              if (e.type == "mouseout") {
-	                me.unfocusAt(this.nodeData);
-	              }
-	            }
-
-	            if (me.node.select.enabled && e.type == me.node.select.triggerEventType) {
-	              //如果开启了图表的选中交互
-	              //TODO:这里不能
-	              var onbefore = me.node.select.onbefore;
-	              var onend = me.node.select.onend;
-
-	              if (!onbefore || typeof onbefore == 'function' && onbefore.apply(me, [this.nodeData]) !== false) {
-	                if (this.nodeData.selected) {
-	                  //说明已经选中了
-	                  me.unselectAt(this.nodeData);
-	                } else {
-	                  me.selectAt(this.nodeData);
-	                }
-
-	                onend && typeof onend == 'function' && onend.apply(me, [this.nodeData]);
-	              }
-	            }
-	            me.app.fire(e.type, e);
-	          });
-	        }
-	        _boxShape.nodeData = node;
-	        node.shapeElement = _boxShape;
-
-	        if (me.node.select.list.indexOf(node.key) > -1) {
-	          me.selectAt(node);
-	        }
-
-	        if (node.ctype == "canvas") {
-	          node.contentElement.context.visible = true;
-	        }
-
-	        _boxShape.on("transform", function () {
-	          if (node.ctype == "canvas") {
-	            node.contentElement.context.x = node.x;
-	            node.contentElement.context.y = node.y;
-	          } else if (node.ctype == "html") {
-	            var devicePixelRatio = typeof window !== 'undefined' ? window.devicePixelRatio : 1;
-
-	            var contentMatrix = _boxShape.worldTransform.clone(); //if( node.shapeType == 'diamond' ){
-	            //    contentMatrix = contentMatrix.translate( -node._innerRect.width/2, -node._innerRect.height/2 )
-	            //};
-
-
-	            contentMatrix = contentMatrix.scale(1 / devicePixelRatio, 1 / devicePixelRatio);
-	            node.contentElement.style.transform = "matrix(" + contentMatrix.toArray().join() + ")";
-	            node.contentElement.style.transformOrigin = "left top"; //修改为左上角为旋转中心点来和canvas同步
-
-	            if (node.shapeType == 'diamond') {
-	              node.contentElement.style.left = -(node._innerRect.width / 2) * me.status.transform.scale + "px";
-	              node.contentElement.style.top = -(node._innerRect.height / 2) * me.status.transform.scale + "px";
-	            } //node.contentElement.style.marginLeft = me.getProp(me.node.padding, node) * me.status.transform.scale + "px";
-	            //node.contentElement.style.marginTop = me.getProp(me.node.padding, node) * me.status.transform.scale + "px";
-
-
-	            node.contentElement.style.visibility = "visible";
-	          }
+	      if (_boxShape) {
+	        _.extend(_boxShape.context, context);
+	      } else {
+	        _boxShape = new shape({
+	          id: nodeId,
+	          hoverClone: false,
+	          context: context
 	        });
-	      });
+	        me.nodesSp.addChild(_boxShape);
 
-	      this.induce.context.width = this.width;
-	      this.induce.context.height = this.height;
+	        _boxShape.on(event.types.get(), function (e) {
+	          e.eventInfo = {
+	            trigger: me.node,
+	            nodes: [this.nodeData]
+	          };
+
+	          if (me.node.focus.enabled) {
+	            if (e.type == "mouseover") {
+	              me.focusAt(this.nodeData);
+	            }
+
+	            if (e.type == "mouseout") {
+	              me.unfocusAt(this.nodeData);
+	            }
+	          }
+
+	          if (me.node.select.enabled && e.type == me.node.select.triggerEventType) {
+	            //如果开启了图表的选中交互
+	            //TODO:这里不能
+	            var onbefore = me.node.select.onbefore;
+	            var onend = me.node.select.onend;
+
+	            if (!onbefore || typeof onbefore == 'function' && onbefore.apply(me, [this.nodeData]) !== false) {
+	              if (this.nodeData.selected) {
+	                //说明已经选中了
+	                me.unselectAt(this.nodeData);
+	              } else {
+	                me.selectAt(this.nodeData);
+	              }
+
+	              onend && typeof onend == 'function' && onend.apply(me, [this.nodeData]);
+	            }
+	          }
+	          me.app.fire(e.type, e);
+	        });
+	      }
+	      _boxShape.nodeData = node;
+	      node.shapeElement = _boxShape;
+
+	      if (me.node.select.list.indexOf(node.key) > -1) {
+	        me.selectAt(node);
+	      }
+
+	      if (node.ctype == "canvas") {
+	        node.contentElement.context.visible = true;
+	      }
+
+	      _boxShape.on("transform", function () {
+	        if (node.ctype == "canvas") {
+	          node.contentElement.context.x = parseInt(node.x);
+	          node.contentElement.context.y = parseInt(node.y);
+	        } else if (node.ctype == "html") {
+	          var devicePixelRatio = typeof window !== 'undefined' ? window.devicePixelRatio : 1;
+
+	          var contentMatrix = _boxShape.worldTransform.clone();
+
+	          contentMatrix = contentMatrix.scale(1 / devicePixelRatio, 1 / devicePixelRatio);
+	          node.contentElement.style.transform = "matrix(" + contentMatrix.toArray().join() + ")";
+	          node.contentElement.style.transformOrigin = "left top"; //修改为左上角为旋转中心点来和canvas同步
+
+	          if (node.shapeType == 'diamond') {
+	            node.contentElement.style.left = -parseInt(node._innerRect.width / 2 * me.status.transform.scale) + "px";
+	            node.contentElement.style.top = -parseInt(node._innerRect.height / 2 * me.status.transform.scale) + "px";
+	          }
+	          node.contentElement.style.visibility = "visible";
+	        }
+	      });
 	    }
 	  }, {
 	    key: "_getNodeStyle",
@@ -43608,10 +43668,10 @@ var chartx = (function () {
 	  }, {
 	    key: "selectAll",
 	    value: function selectAll() {
-	      var _this5 = this;
+	      var _this7 = this;
 
 	      this.data.nodes.forEach(function (nodeData) {
-	        _this5.selectAt(nodeData);
+	        _this7.selectAt(nodeData);
 	      });
 	    }
 	  }, {
@@ -43632,16 +43692,16 @@ var chartx = (function () {
 	  }, {
 	    key: "unselectAll",
 	    value: function unselectAll() {
-	      var _this6 = this;
+	      var _this8 = this;
 
 	      this.data.nodes.forEach(function (nodeData) {
-	        _this6.unselectAt(nodeData);
+	        _this8.unselectAt(nodeData);
 	      });
 	    }
 	  }, {
 	    key: "getNodeDataAt",
 	    value: function getNodeDataAt(key) {
-	      if (key.type && key.type == "relation") {
+	      if (key.type && (key.type == "relation" || key.type == "tree")) {
 	        return key;
 	      }
 
@@ -43812,7 +43872,7 @@ var chartx = (function () {
 	  }, {
 	    key: "_getEleAndsetCanvasSize",
 	    value: function _getEleAndsetCanvasSize(node) {
-	      var _this7 = this;
+	      var _this9 = this;
 
 	      var me = this;
 	      return new Promise(function (resolve) {
@@ -43849,8 +43909,8 @@ var chartx = (function () {
 	        }
 	        var inited;
 
-	        if (_this7.node.content.init && typeof _this7.node.content.init === 'function') {
-	          inited = _this7.node.content.init(node, _contentLabel);
+	        if (_this9.node.content.init && typeof _this9.node.content.init === 'function') {
+	          inited = _this9.node.content.init(node, _contentLabel);
 	        }
 
 	        if (inited && typeof inited.then == 'function') {
@@ -43887,7 +43947,7 @@ var chartx = (function () {
 	  }, {
 	    key: "_getEleAndsetHtmlSize",
 	    value: function _getEleAndsetHtmlSize(node) {
-	      var _this8 = this;
+	      var _this10 = this;
 
 	      var me = this;
 	      return new Promise(function (resolve) {
@@ -43896,14 +43956,14 @@ var chartx = (function () {
 	            height = node.rowData.height;
 	        var contentLabelClass = "__content_label_" + node.key;
 
-	        var _dom = _this8.domContainer.getElementsByClassName(contentLabelClass);
+	        var _dom = _this10.domContainer.getElementsByClassName(contentLabelClass);
 
 	        if (!_dom.length) {
 	          _dom = document.createElement("div");
 	          _dom.className = "chartx_relation_node " + contentLabelClass;
 	          _dom.style.cssText += "; position:absolute;visibility:hidden;";
 
-	          _this8.domContainer.appendChild(_dom);
+	          _this10.domContainer.appendChild(_dom);
 	        } else {
 	          _dom = _dom[0];
 	        }
@@ -43914,8 +43974,8 @@ var chartx = (function () {
 	        _dom.innerHTML = content;
 	        var inited;
 
-	        if (_this8.node.content.init && typeof _this8.node.content.init === 'function') {
-	          inited = _this8.node.content.init(node, _dom);
+	        if (_this10.node.content.init && typeof _this10.node.content.init === 'function') {
+	          inited = _this10.node.content.init(node, _dom);
 	        }
 
 	        if (inited && typeof inited.then == 'function') {
@@ -43981,6 +44041,396 @@ var chartx = (function () {
 	});
 
 	unwrapExports(relation);
+
+	var tree = createCommonjsModule(function (module, exports) {
+
+
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports["default"] = void 0;
+
+	var _classCallCheck2 = interopRequireDefault(classCallCheck$1);
+
+	var _possibleConstructorReturn2 = interopRequireDefault(possibleConstructorReturn$1);
+
+	var _getPrototypeOf2 = interopRequireDefault(getPrototypeOf$1);
+
+	var _assertThisInitialized2 = interopRequireDefault(assertThisInitialized$1);
+
+	var _createClass2 = interopRequireDefault(createClass$1);
+
+	var _inherits2 = interopRequireDefault(inherits$1);
+
+	var _canvax = interopRequireDefault(Canvax);
+
+	var _index = interopRequireDefault(relation);
+
+	var _global = interopRequireDefault(global$1);
+
+	var _dataFrame = interopRequireDefault(dataFrame);
+
+
+
+
+
+	var _ = _canvax["default"]._,
+	    event = _canvax["default"].event;
+	var Rect = _canvax["default"].Shapes.Rect;
+	var Diamond = _canvax["default"].Shapes.Diamond;
+	var Path = _canvax["default"].Shapes.Path;
+	var Circle = _canvax["default"].Shapes.Circle;
+	var Arrow = _canvax["default"].Shapes.Arrow;
+	/**
+	 * 关系图中 包括了  配置，数据，和布局数据，
+	 * 默认用配置和数据可以完成绘图， 但是如果有布局数据，就绘图玩额外调用一次绘图，把布局数据传入修正布局效果
+	 */
+
+	var Tree =
+	/*#__PURE__*/
+	function (_GraphsBase) {
+	  (0, _inherits2["default"])(Tree, _GraphsBase);
+	  (0, _createClass2["default"])(Tree, null, [{
+	    key: "defaultProps",
+	    value: function defaultProps() {
+	      return {
+	        node: {
+	          detail: '单个节点的配置',
+	          propertys: {
+	            shrink: {
+	              detail: '树状图是否有节点收缩按钮',
+	              propertys: {
+	                enabled: {
+	                  detail: "是否开启",
+	                  "default": true
+	                },
+	                openCharCode: {
+	                  detail: "点击后触发展开的icon chartCode，当前状态为收缩",
+	                  "default": ''
+	                },
+	                closeCharCode: {
+	                  detail: "点击后触发收缩的icon chartCode，当前状态为展开",
+	                  "default": ''
+	                },
+	                fontSize: {
+	                  detail: "icon字号大小",
+	                  "default": 12
+	                },
+	                fontColor: {
+	                  detail: "icon字体颜色",
+	                  "default": '#666'
+	                },
+	                fontFamily: {
+	                  detail: "icon在css中的fontFamily",
+	                  "default": 'iconfont'
+	                },
+	                tipsContent: {
+	                  detail: '鼠标移动到收缩icon上面的tips内容',
+	                  "default": ''
+	                },
+	                offsetX: {
+	                  detail: 'x方向偏移量',
+	                  "default": 10
+	                },
+	                offsetY: {
+	                  detail: 'y方向偏移量',
+	                  "default": 1
+	                },
+	                background: {
+	                  detail: 'icon的 背景色',
+	                  "default": '#fff'
+	                },
+	                lineWidth: {
+	                  detail: '边框大小',
+	                  "default": 1
+	                },
+	                strokeStyle: {
+	                  detail: '描边颜色',
+	                  "default": '#667894'
+	                }
+	              }
+	            }
+	          }
+	        }
+	      };
+	    }
+	  }]);
+
+	  function Tree(opt, app) {
+	    var _this;
+
+	    (0, _classCallCheck2["default"])(this, Tree);
+	    _this = (0, _possibleConstructorReturn2["default"])(this, (0, _getPrototypeOf2["default"])(Tree).call(this, opt, app));
+	    _this.type = "tree";
+	    _this.shrinked = []; //所有被设置了收缩的node的key
+
+	    _.extend(true, (0, _assertThisInitialized2["default"])(_this), (0, tools.getDefaultProps)(Tree.defaultProps()), opt);
+
+	    return _this;
+	  }
+
+	  (0, _createClass2["default"])(Tree, [{
+	    key: "_initData",
+	    value: function _initData(_data) {
+	      var _this2 = this;
+
+	      return new Promise(function (resolve) {
+	        if (_data && _data.nodes && _data.edges) {
+	          resolve(_data);
+	          return;
+	        }
+	        var data$1 = {
+	          //{ type,key,content,ctype,width,height,x,y }
+	          nodes: [],
+	          //{ type,key[],content,ctype,width,height,x,y }
+	          edges: [],
+	          size: {
+	            width: 0,
+	            height: 0
+	          }
+	        };
+	        var originData = _this2.app._data;
+
+	        if ((0, data.checkDataIsJson)(originData, _this2.field, _this2.childrenField)) {
+	          _this2.jsonData = (0, data.jsonToArrayForRelation)(originData, _this2, _this2.childrenField);
+	          _this2.dataFrame = _this2.app.dataFrame = (0, _dataFrame["default"])(_this2.jsonData);
+	        } else {
+	          //源数据就是图表标准数据，只需要转换成json的Children格式
+	          //app.dataFrame.jsonOrg ==> [{name: key:} ...] 不是children的树结构
+	          _this2.jsonData = (0, data.arrayToTreeJsonForRelation)(_this2.app.dataFrame.jsonOrg, _this2);
+	        }
+
+	        var setData = function setData(list, parentRowData) {
+	          list.forEach(function (rowData) {
+	            var key = rowData[_this2.field];
+
+	            var content = _this2._getContent(rowData); //let preNode = this._preData ? this._preData.nodes.find( item => item.key == key ) : null
+
+
+	            var node = _this2._getDefNode();
+
+	            Object.assign(node, {
+	              type: 'tree',
+	              iNode: rowData.__index__,
+	              rowData: rowData,
+	              key: key,
+	              content: content,
+	              ctype: _this2._checkHtml(content) ? 'html' : 'canvas'
+	            });
+	            node.shapeType = _this2.getProp(_this2.node.shapeType, node);
+	            Object.assign(node, _this2.layoutOpts.node);
+	            data$1.nodes.push(node); //如果有parent，那么就还有连线需要处理
+
+	            if (parentRowData) {
+	              //edge在relation中也是一个标准的node数据结构
+	              var edgeKey = [parentRowData[_this2.field], rowData[_this2.field]]; //let preEdge = this._preData ? this._preData.edges.find( item => item.key.join(',') == edgeKey.join(',') ) : null
+
+	              var edge = _this2._getDefNode();
+
+	              var edgeFilter = {};
+	              edgeFilter[_this2.field] = edgeKey.join(',');
+
+	              var edgeRowDatas = _this2.dataFrame.getRowDataOf(edgeFilter);
+
+	              if (edgeRowDatas && edgeRowDatas.length) {
+	                //edgeRowData
+	                var edgeRowData = edgeRowDatas[0];
+
+	                var edgeContent = _this2._getContent(edgeRowData);
+
+	                Object.assign(edge, {
+	                  type: 'tree',
+	                  iNode: edgeRowData.__index__,
+	                  rowData: edgeRowData,
+	                  key: edgeKey,
+	                  content: edgeContent,
+	                  ctype: _this2._checkHtml(edgeContent) ? 'html' : 'canvas'
+	                });
+	                edge.shapeType = _this2.getProp(_this2.line.shapeType, edge);
+	                Object.assign(edge, _this2.layoutOpts.edge);
+	                data$1.edges.push(edge);
+	              }
+	            }
+
+	            if (rowData.children && _this2.shrinked.indexOf(key) == -1) {
+	              setData(rowData.children, rowData);
+	            }
+	          });
+	        };
+
+	        setData(_this2.jsonData);
+
+	        _this2._initAllDataSize(data$1).then(function (data) {
+	          resolve(data);
+	        });
+	      });
+	    }
+	  }, {
+	    key: "_drawNodes",
+	    value: function _drawNodes() {
+	      var _this3 = this;
+
+	      _.each(this.data.nodes, function (node) {
+	        _this3._drawNode(node); //shrink
+
+
+	        if (_this3.node.shrink.enabled) {
+	          if (node.rowData.children && node.rowData.children.length) {
+	            var iconId = node.key + "_shrink_icon";
+	            var iconBackId = node.key + "_shrink_icon_back";
+	            var charCode = _this3.node.shrink.openCharCode;
+
+	            if (_this3.shrinked.indexOf(node.key) == -1) {
+	              charCode = _this3.node.shrink.closeCharCode;
+	            }
+	            var iconText = String.fromCharCode(parseInt(_this3.getProp(charCode, node), 16));
+
+	            var fontSize = _this3.getProp(_this3.node.shrink.fontSize, node);
+
+	            var fontColor = _this3.getProp(_this3.node.shrink.fontColor, node);
+
+	            var fontFamily = _this3.getProp(_this3.node.shrink.fontFamily, node);
+
+	            var offsetX = _this3.getProp(_this3.node.shrink.offsetX, node);
+
+	            var offsetY = _this3.getProp(_this3.node.shrink.offsetY, node);
+
+	            var tipsContent = _this3.getProp(_this3.node.shrink.tipsContent, node);
+
+	            var background = _this3.getProp(_this3.node.shrink.background, node);
+
+	            var lineWidth = _this3.getProp(_this3.node.shrink.lineWidth, node);
+
+	            var strokeStyle = _this3.getProp(_this3.node.shrink.strokeStyle, node);
+
+	            var _shrinkIcon = _this3.labelsSp.getChildById(iconId);
+
+	            var _shrinkIconBack = _this3.labelsSp.getChildById(iconBackId);
+
+	            var x = parseInt(node.x + node.width / 2 + offsetX);
+	            var y = parseInt(node.y + offsetY); //shrinkIcon的 位置默认为左右方向的xy
+
+	            var shrinkCtx = {
+	              x: x,
+	              y: y + 1,
+	              fontSize: fontSize,
+	              fontFamily: fontFamily,
+	              fillStyle: fontColor,
+	              textAlign: "center",
+	              textBaseline: "middle",
+	              cursor: 'pointer'
+	            };
+	            var _shrinkBackCtx = {
+	              x: x,
+	              y: y,
+	              r: parseInt(fontSize * 0.5) + 2,
+	              fillStyle: background,
+	              strokeStyle: strokeStyle,
+	              lineWidth: lineWidth
+	            };
+
+	            if (_shrinkIcon) {
+	              _shrinkIcon.resetText(iconText);
+
+	              Object.assign(_shrinkIcon.context, shrinkCtx);
+	              Object.assign(_shrinkIconBack.context, _shrinkBackCtx);
+	            } else {
+	              _shrinkIcon = new _canvax["default"].Display.Text(iconText, {
+	                id: iconId,
+	                context: shrinkCtx
+	              });
+	              _shrinkIconBack = new Circle({
+	                id: iconBackId,
+	                context: _shrinkBackCtx
+	              });
+
+	              _this3.labelsSp.addChild(_shrinkIconBack);
+
+	              _this3.labelsSp.addChild(_shrinkIcon);
+
+	              _shrinkIcon.on(event.types.get(), function (e) {
+	                var trigger = _this3.node.shrink;
+	                e.eventInfo = {
+	                  trigger: trigger,
+	                  tipsContent: tipsContent,
+	                  nodes: [] //node
+
+	                };
+
+	                if (e.type == 'mousedown') {
+	                  _shrinkIconBack.context.r += 1; //_shrinkIcon.context.fontSize += 1;
+	                  //_shrinkIcon.context.x += 1;
+	                  //_shrinkIcon.context.y += .5;
+	                }
+
+	                if (e.type == 'mouseup') {
+	                  _shrinkIconBack.context.r -= 1; //_shrinkIcon.context.fontSize -= 1;
+	                  //_shrinkIcon.context.x -= 1;
+	                  //_shrinkIcon.context.y -= .5;
+	                }
+
+	                if (e.type == 'click') {
+	                  if (_this3.shrinked.indexOf(node.key) == -1) {
+	                    _this3.shrinked.push(node.key);
+	                  } else {
+	                    for (var i = 0, l = _this3.shrinked.length; i < l; i++) {
+	                      if (_this3.shrinked[i] == node.key) {
+	                        _this3.shrinked.splice(i, 1);
+
+	                        i--;
+	                        l--;
+	                      }
+	                    }
+	                  }
+
+	                  _this3.app.resetData(null, {
+	                    origin: node.key
+	                  });
+	                }
+
+	                _this3.app.fire(e.type, e);
+	              });
+	            }
+	            //shrinkIcon的引用就断了
+
+	            _shrinkIcon.nodeData = node;
+	            node.shrinkIcon = _shrinkIcon;
+	            node.shrinkIconBack = _shrinkIconBack;
+	          }
+	        }
+	      });
+	    }
+	  }, {
+	    key: "_destroy",
+	    value: function _destroy(item) {
+	      item.shapeElement && item.shapeElement.destroy();
+
+	      if (item.contentElement.destroy) {
+	        item.contentElement.destroy();
+	      } else {
+	        //否则就可定是个dom
+	        this.domContainer.removeChild(item.contentElement);
+	      }
+
+	      item.pathElement && item.pathElement.destroy();
+	      item.labelElement && item.labelElement.destroy();
+	      item.arrowElement && item.arrowElement.destroy();
+	      item.edgeIconElement && item.edgeIconElement.destroy();
+	      item.shrinkIcon && item.shrinkIcon.destroy();
+	      item.shrinkIconBack && item.shrinkIconBack.destroy();
+	    }
+	  }]);
+	  return Tree;
+	}(_index["default"]);
+
+	_index["default"].registerComponent(Tree, 'graphs', 'tree');
+
+	var _default = Tree;
+	exports["default"] = _default;
+	});
+
+	unwrapExports(tree);
 
 	var interopRequireWildcard = createCommonjsModule(function (module) {
 	function _getRequireWildcardCache() {
@@ -46997,6 +47447,7 @@ var chartx = (function () {
 	      this._setNodeStyle(_path, 'select');
 
 	      nodeData.selected = true;
+	      console.log("select:true");
 	    }
 	  }, {
 	    key: "unselectAt",
@@ -47010,6 +47461,7 @@ var chartx = (function () {
 	      this._setNodeStyle(_path);
 
 	      geoGraph.selected = false;
+	      console.log("select:false");
 
 	      if (geoGraph.focused) {
 	        this.focusAt(adcode);
@@ -47127,7 +47579,7 @@ var chartx = (function () {
 
 	unwrapExports(map);
 
-	var tree = createCommonjsModule(function (module, exports) {
+	var tree$1 = createCommonjsModule(function (module, exports) {
 
 
 
@@ -47407,7 +47859,7 @@ var chartx = (function () {
 	exports["default"] = _default;
 	});
 
-	unwrapExports(tree);
+	unwrapExports(tree$1);
 
 	var trigger = createCommonjsModule(function (module, exports) {
 
@@ -49449,38 +49901,44 @@ var chartx = (function () {
 	    value: function _getDefaultContent(info) {
 	      var str = "";
 
-	      if (!info.nodes.length) {
+	      if (!info.nodes.length && !info.tipsContent) {
 	        return str;
 	      }
 
-	      if (info.title !== undefined && info.title !== null && info.title !== "") {
-	        str += "<div style='font-size:14px;border-bottom:1px solid #f0f0f0;padding:4px;margin-bottom:6px;'>" + info.title + "</div>";
+	      if (info.nodes.length) {
+	        if (info.title !== undefined && info.title !== null && info.title !== "") {
+	          str += "<div style='font-size:14px;border-bottom:1px solid #f0f0f0;padding:4px;margin-bottom:6px;'>" + info.title + "</div>";
+	        }
+
+	        _.each(info.nodes, function (node, i) {
+	          /*
+	          if (!node.value && node.value !== 0) {
+	              return;
+	          };
+	          */
+	          var style = node.color || node.fillStyle || node.strokeStyle;
+	          var name = node.name || node.field || node.content;
+	          var value = (0, _typeof2["default"])(node.value) == "object" ? JSON.stringify(node.value) : (0, tools.numAddSymbol)(node.value);
+	          var hasVal = node.value || node.value == 0;
+	          str += "<div style='line-height:1.5;font-size:12px;padding:0 4px;'>";
+
+	          if (style) {
+	            str += "<span style='background:" + style + ";margin-right:8px;margin-top:7px;float:left;width:8px;height:8px;border-radius:4px;overflow:hidden;font-size:0;'></span>";
+	          }
+
+	          if (name) {
+	            str += "<span style='margin-right:5px;'>" + name;
+	            hasVal && (str += "：");
+	            str += "</span>";
+	          }
+	          hasVal && (str += value);
+	          str += "</div>";
+	        });
 	      }
 
-	      _.each(info.nodes, function (node, i) {
-	        /*
-	        if (!node.value && node.value !== 0) {
-	            return;
-	        };
-	        */
-	        var style = node.color || node.fillStyle || node.strokeStyle;
-	        var name = node.name || node.field || node.content;
-	        var value = (0, _typeof2["default"])(node.value) == "object" ? JSON.stringify(node.value) : (0, tools.numAddSymbol)(node.value);
-	        var hasVal = node.value || node.value == 0;
-	        str += "<div style='line-height:1.5;font-size:12px;padding:0 4px;'>";
-
-	        if (style) {
-	          str += "<span style='background:" + style + ";margin-right:8px;margin-top:7px;float:left;width:8px;height:8px;border-radius:4px;overflow:hidden;font-size:0;'></span>";
-	        }
-
-	        if (name) {
-	          str += "<span style='margin-right:5px;'>" + name;
-	          hasVal && (str += "：");
-	          str += "</span>";
-	        }
-	        hasVal && (str += value);
-	        str += "</div>";
-	      });
+	      if (info.tipsContent) {
+	        str += info.tipsContent;
+	      }
 
 	      return str;
 	    }
@@ -51599,6 +52057,8 @@ var chartx = (function () {
 	exports["default"] = void 0;
 
 	var _global = interopRequireDefault(global$1);
+
+
 
 
 

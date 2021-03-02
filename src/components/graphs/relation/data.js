@@ -121,7 +121,7 @@ function arrayToTreeJsonForRelation(data, options){
     let _nodes = {}
     let _edges = {}
     _.each( data, function( item ){
-        let key = item[ options.field ];
+        let key = item[ options.field ]+'';
         if( key.split(',').length == 1 ){
             _nodes[ key ] = item;
         } else {
@@ -134,6 +134,7 @@ function arrayToTreeJsonForRelation(data, options){
     _.each( _nodes, function( node, nkey ){
         let isFirstLev=true;
         _.each( _edges, function( edge, ekey ){
+            ekey = ekey+'';
             if( ekey.split(',')[1] == nkey ){
                 isFirstLev = false;
                 return false;
@@ -152,6 +153,7 @@ function arrayToTreeJsonForRelation(data, options){
             if( node.__cycle ) return;
             let key = node[ options.field ];
             _.each( _edges, function( edge, ekey ){
+                ekey = ekey + '';
                 if( ekey.split(',')[0] == key ){
                     //那么说明[1] 就是自己的children
                     let childNode = _nodes[ ekey.split(',')[1] ];

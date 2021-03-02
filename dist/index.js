@@ -41,6 +41,8 @@ require("./components/graphs/progress/index");
 
 require("./components/graphs/relation/index");
 
+require("./components/graphs/tree/index");
+
 require("./components/graphs/force/index");
 
 require("./components/graphs/map/index");
