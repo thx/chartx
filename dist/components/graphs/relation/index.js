@@ -364,7 +364,7 @@ function (_GraphsBase) {
                 },
                 lineWidth: {
                   detail: 'icon描边线宽',
-                  "default": 0
+                  "default": 1
                 },
                 strokeStyle: {
                   detail: 'icon的描边颜色',
@@ -380,11 +380,23 @@ function (_GraphsBase) {
                 },
                 fontSize: {
                   detail: 'icon的字体大小',
-                  "default": 16
+                  "default": 14
                 },
                 offset: {
                   detail: 'icon的位置，函数，参数是整个edge对象',
                   "default": null
+                },
+                offsetX: {
+                  detail: '在计算出offset后的X再次便宜量',
+                  "default": 1
+                },
+                offsetY: {
+                  detail: '在计算出offset后的Y再次便宜量',
+                  "default": 2
+                },
+                background: {
+                  detail: 'icon的背景颜色，背景为圆形',
+                  "default": "#fff"
                 }
               }
             },
@@ -772,6 +784,7 @@ function (_GraphsBase) {
       item.labelElement && item.labelElement.destroy();
       item.arrowElement && item.arrowElement.destroy();
       item.edgeIconElement && item.edgeIconElement.destroy();
+      item.edgeIconBack && item.edgeIconBack.destroy();
     }
   }, {
     key: "_getDefNode",
@@ -1151,7 +1164,6 @@ function (_GraphsBase) {
         var edgeIconEnabled = me.getProp(me.line.icon.enabled, edge);
 
         if (edgeIconEnabled) {
-          var edgeIconId = 'edge_item_' + key;
           var charCode = String.fromCharCode(parseInt(me.getProp(me.line.icon.charCode, edge), 16));
 
           if (charCode) {
@@ -1165,20 +1177,51 @@ function (_GraphsBase) {
 
             var _fontColor = me.getProp(me.line.icon.fontColor, edge);
 
+            var background = me.getProp(me.line.icon.background, edge);
             var _textAlign = 'center';
             var _textBaseline = 'middle';
 
             var _offset = me.getProp(me.line.icon.offset, edge);
 
+            var offsetX = me.getProp(me.line.icon.offsetX, edge);
+            var offsetY = me.getProp(me.line.icon.offsetY, edge);
+
             if (!_offset) {
               //default 使用edge.x edge.y 也就是edge label的位置
               _offset = {
-                x: edge.x,
-                y: edge.y
+                x: parseInt(edge.x) + offsetX,
+                y: parseInt(edge.y) + offsetY
               };
             }
 
             ;
+            var _iconBackCtx = {
+              x: _offset.x,
+              y: _offset.y - 1,
+              r: parseInt(_fontSize * 0.5) + 2,
+              fillStyle: background,
+              strokeStyle: _strokeStyle,
+              lineWidth: _lineWidth
+            };
+            var edgeIconBackId = 'edge_item_icon_back_' + key;
+
+            var _iconBack = me.labelsSp.getChildById(edgeIconBackId);
+
+            if (_iconBack) {
+              //_.extend( true, _iconBack.context, _iconBackCtx )
+              Object.assign(_iconBack.context, _iconBackCtx);
+            } else {
+              _iconBack = new Circle({
+                id: edgeIconBackId,
+                context: _iconBackCtx
+              });
+              me.labelsSp.addChild(_iconBack);
+            }
+
+            ;
+            edge.edgeIconBack = _iconBack;
+            _iconBack.nodeData = edge;
+            var edgeIconId = 'edge_item_icon_' + key;
 
             var _edgeIcon = me.labelsSp.getChildById(edgeIconId);
 
@@ -1191,9 +1234,8 @@ function (_GraphsBase) {
               _edgeIcon.context.fillStyle = _fontColor;
               _edgeIcon.context.textAlign = _textAlign;
               _edgeIcon.context.textBaseline = _textBaseline;
-              _edgeIcon.context.fontFamily = fontFamily;
-              _edgeIcon.context.lineWidth = _lineWidth;
-              _edgeIcon.context.strokeStyle = _strokeStyle;
+              _edgeIcon.context.fontFamily = fontFamily; //_edgeIcon.context.lineWidth    = lineWidth;
+              //_edgeIcon.context.strokeStyle  = strokeStyle;
             } else {
               _edgeIcon = new _canvax["default"].Display.Text(charCode, {
                 id: edgeIconId,
@@ -1205,9 +1247,7 @@ function (_GraphsBase) {
                   fontSize: _fontSize,
                   textAlign: _textAlign,
                   textBaseline: _textBaseline,
-                  fontFamily: fontFamily,
-                  lineWidth: _lineWidth,
-                  strokeStyle: _strokeStyle
+                  fontFamily: fontFamily
                 }
               });
 

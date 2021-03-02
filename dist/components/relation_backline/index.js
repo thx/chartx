@@ -30,6 +30,7 @@ var _ = _canvax["default"]._,
 var BrokenLine = _canvax["default"].Shapes.BrokenLine;
 var Arrow = _canvax["default"].Shapes.Arrow;
 var Text = _canvax["default"].Display.Text;
+var Circle = _canvax["default"].Shapes.Circle;
 
 var relationBackLine =
 /*#__PURE__*/
@@ -85,7 +86,7 @@ function (_Component) {
             },
             lineWidth: {
               detail: 'icon描边线宽',
-              "default": 0
+              "default": 1
             },
             strokeStyle: {
               detail: 'icon的描边颜色',
@@ -101,11 +102,23 @@ function (_Component) {
             },
             fontSize: {
               detail: 'icon的字体大小',
-              "default": 16
+              "default": 14
             },
             offset: {
               detail: 'icon的位置，函数，参数是整个edge对象',
               "default": null
+            },
+            offsetX: {
+              detail: '在计算出offset后的X再次便宜量',
+              "default": 1
+            },
+            offsetY: {
+              detail: '在计算出offset后的Y再次便宜量',
+              "default": 2
+            },
+            background: {
+              detail: 'icon的背景颜色，背景为圆形',
+              "default": "#fff"
             }
           }
         }
@@ -342,17 +355,43 @@ function (_Component) {
 
           var fontColor = this._getProp(this.icon.fontColor, this);
 
+          var background = this._getProp(this.icon.background, this);
+
           var textAlign = 'center';
           var textBaseline = 'middle';
 
           var offset = this._getProp(this.icon.offset, this);
 
+          var offsetX = this._getProp(this.icon.offsetX, this);
+
+          var offsetY = this._getProp(this.icon.offsetY, this);
+
           if (!offset) {
             //default 使用edge.x edge.y 也就是edge label的位置
             offset = {
-              x: secondPoint[0],
-              y: secondPoint[1]
+              x: secondPoint[0] + offsetX,
+              y: secondPoint[1] + offsetY
             };
+          }
+
+          ;
+          var _iconBackCtx = {
+            x: offset.x,
+            y: offset.y - 1,
+            r: parseInt(fontSize * 0.5) + 2,
+            fillStyle: background,
+            strokeStyle: strokeStyle,
+            lineWidth: lineWidth
+          };
+
+          if (this._iconBack) {
+            //_.extend( true, _iconBack.context, _iconBackCtx )
+            Object.assign(this._iconBack.context, _iconBackCtx);
+          } else {
+            this._iconBack = new Circle({
+              context: _iconBackCtx
+            });
+            this.sprite.addChild(this._iconBack);
           }
 
           ;

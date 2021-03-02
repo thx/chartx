@@ -333,7 +333,7 @@ class Relation extends GraphsBase {
                             },
                             lineWidth: {
                                 detail: 'icon描边线宽',
-                                default: 0
+                                default: 1
                             },
                             strokeStyle: {
                                 detail: 'icon的描边颜色',
@@ -349,11 +349,23 @@ class Relation extends GraphsBase {
                             },
                             fontSize : {
                                 detail: 'icon的字体大小',
-                                default: 16
+                                default: 14
                             },
                             offset: {
                                 detail: 'icon的位置，函数，参数是整个edge对象',
                                 default: null
+                            },
+                            offsetX: {
+                                detail: '在计算出offset后的X再次便宜量',
+                                default: 1
+                            },
+                            offsetY: {
+                                detail: '在计算出offset后的Y再次便宜量',
+                                default: 2
+                            },
+                            background:{
+                                detail: 'icon的背景颜色，背景为圆形',
+                                default: "#fff"
                             }
                         }
                     },
@@ -677,6 +689,7 @@ class Relation extends GraphsBase {
 
     _destroy( item ){
         item.shapeElement && item.shapeElement.destroy();
+
         if(item.contentElement.destroy){
             item.contentElement.destroy()
         } else {
@@ -688,7 +701,8 @@ class Relation extends GraphsBase {
         item.pathElement     && item.pathElement.destroy();
         item.labelElement    && item.labelElement.destroy();
         item.arrowElement    && item.arrowElement.destroy();
-        item.edgeIconElement && item.edgeIconElement.destroy()
+        item.edgeIconElement && item.edgeIconElement.destroy();
+        item.edgeIconBack    && item.edgeIconBack.destroy();
     }
 
 
@@ -1042,7 +1056,7 @@ class Relation extends GraphsBase {
 
             let edgeIconEnabled  = me.getProp( me.line.icon.enabled, edge);
             if( edgeIconEnabled ){
-                let edgeIconId   = 'edge_item_'+key;
+                
                 let charCode     = String.fromCharCode(parseInt( me.getProp( me.line.icon.charCode, edge ) , 16));
                
                 if( charCode ){
@@ -1051,17 +1065,45 @@ class Relation extends GraphsBase {
                     let fontFamily   = me.getProp( me.line.icon.fontFamily  , edge );
                     let fontSize     = me.getProp( me.line.icon.fontSize    , edge );
                     let fontColor    = me.getProp( me.line.icon.fontColor   , edge );
+                    let background   = me.getProp( me.line.icon.background  , edge );
                     let textAlign    = 'center';
                     let textBaseline = 'middle';
     
                     let offset       = me.getProp( me.line.icon.offset  , edge );
+                    let offsetX      = me.getProp( me.line.icon.offsetX  , edge );
+                    let offsetY      = me.getProp( me.line.icon.offsetY  , edge );
                     if( !offset ) {  //default 使用edge.x edge.y 也就是edge label的位置
                         offset = {
-                            x: edge.x,
-                            y: edge.y
+                            x: parseInt(edge.x)+offsetX, 
+                            y: parseInt(edge.y)+offsetY
                         }
                     };
 
+                    let _iconBackCtx   = {
+                        x : offset.x,
+                        y : offset.y - 1,
+                        r : parseInt(fontSize*0.5)+2,
+                        fillStyle : background,
+                        strokeStyle,
+                        lineWidth
+                    };
+                    let edgeIconBackId = 'edge_item_icon_back_'+key;
+                    let _iconBack = me.labelsSp.getChildById( edgeIconBackId );
+                    if( _iconBack ){
+                        //_.extend( true, _iconBack.context, _iconBackCtx )
+                        Object.assign(_iconBack.context, _iconBackCtx);
+                    } else {
+                        _iconBack = new Circle({
+                            id: edgeIconBackId,
+                            context: _iconBackCtx
+                        });
+                        me.labelsSp.addChild( _iconBack );
+                    };
+                    edge.edgeIconBack = _iconBack
+                    _iconBack.nodeData = edge;
+
+
+                    let edgeIconId   = 'edge_item_icon_'+key;
                     let _edgeIcon = me.labelsSp.getChildById(edgeIconId);
                     if( _edgeIcon ){
 
@@ -1073,8 +1115,8 @@ class Relation extends GraphsBase {
                         _edgeIcon.context.textAlign    = textAlign;
                         _edgeIcon.context.textBaseline = textBaseline;
                         _edgeIcon.context.fontFamily   = fontFamily;
-                        _edgeIcon.context.lineWidth    = lineWidth;
-                        _edgeIcon.context.strokeStyle  = strokeStyle;
+                        //_edgeIcon.context.lineWidth    = lineWidth;
+                        //_edgeIcon.context.strokeStyle  = strokeStyle;
 
                     } else {
                         _edgeIcon = new Canvax.Display.Text( charCode, {
@@ -1087,9 +1129,7 @@ class Relation extends GraphsBase {
                                 fontSize,
                                 textAlign,
                                 textBaseline,
-                                fontFamily,
-                                lineWidth,
-                                strokeStyle
+                                fontFamily
                             }
                         });
                         _edgeIcon.on(event.types.get(), function (e) {

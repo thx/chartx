@@ -6,6 +6,7 @@ let { _, event } = Canvax;
 let BrokenLine = Canvax.Shapes.BrokenLine;
 let Arrow = Canvax.Shapes.Arrow;
 let Text = Canvax.Display.Text;
+let Circle = Canvax.Shapes.Circle;
 
 class relationBackLine extends Component
 {
@@ -57,7 +58,7 @@ class relationBackLine extends Component
                     },
                     lineWidth: {
                         detail: 'icon描边线宽',
-                        default: 0
+                        default: 1
                     },
                     strokeStyle: {
                         detail: 'icon的描边颜色',
@@ -73,11 +74,23 @@ class relationBackLine extends Component
                     },
                     fontSize : {
                         detail: 'icon的字体大小',
-                        default: 16
+                        default: 14
                     },
                     offset: {
                         detail: 'icon的位置，函数，参数是整个edge对象',
                         default: null
+                    },
+                    offsetX: {
+                        detail: '在计算出offset后的X再次便宜量',
+                        default: 1
+                    },
+                    offsetY: {
+                        detail: '在计算出offset后的Y再次便宜量',
+                        default: 2
+                    },
+                    background:{
+                        detail: 'icon的背景颜色，背景为圆形',
+                        default: "#fff"
                     }
                 }
             }
@@ -287,15 +300,36 @@ class relationBackLine extends Component
                 let fontFamily   = this._getProp( this.icon.fontFamily  , this );
                 let fontSize     = this._getProp( this.icon.fontSize    , this );
                 let fontColor    = this._getProp( this.icon.fontColor   , this );
+                let background   = this._getProp( this.icon.background  , this );
                 let textAlign    = 'center';
                 let textBaseline = 'middle';
 
                 let offset       = this._getProp( this.icon.offset  , this );
+                let offsetX      = this._getProp( this.icon.offsetX  , this );
+                let offsetY      = this._getProp( this.icon.offsetY  , this );
                 if( !offset ) {  //default 使用edge.x edge.y 也就是edge label的位置
                     offset = {
-                        x: secondPoint[0],
-                        y: secondPoint[1]
+                        x: secondPoint[0] + offsetX,
+                        y: secondPoint[1] + offsetY
                     }
+                };
+
+                let _iconBackCtx   = {
+                    x : offset.x,
+                    y : offset.y - 1,
+                    r : parseInt(fontSize*0.5)+2,
+                    fillStyle : background,
+                    strokeStyle,
+                    lineWidth
+                };
+                if( this._iconBack ){
+                    //_.extend( true, _iconBack.context, _iconBackCtx )
+                    Object.assign(this._iconBack.context, _iconBackCtx);
+                } else {
+                    this._iconBack = new Circle({
+                        context: _iconBackCtx
+                    });
+                    this.sprite.addChild( this._iconBack );
                 };
 
                 if( this._icon ){

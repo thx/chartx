@@ -25,15 +25,16 @@
 <script type="text/javascript" src="../../lib/demo.js"></script>
 <link rel="stylesheet" href="../../lib/demo.css">
 <style>
-    @font-face {
-       font-family: 'iconfont';  /* project id 308 */
-       src: url('http://at.alicdn.com/t/font_308_g5p4byrm2rm.eot');
-       src: url('http://at.alicdn.com/t/font_308_g5p4byrm2rm.eot?#iefix') format('embedded-opentype'),
-       url('http://at.alicdn.com/t/font_308_g5p4byrm2rm.woff2') format('woff2'),
-       url('http://at.alicdn.com/t/font_308_g5p4byrm2rm.woff') format('woff'),
-       url('http://at.alicdn.com/t/font_308_g5p4byrm2rm.ttf') format('truetype'),
-       url('http://at.alicdn.com/t/font_308_g5p4byrm2rm.svg#iconfont') format('svg');
-   }
+@font-face {
+  font-family: 'iconfont';  /* project id 1300960 */
+  src: url('http://at.alicdn.com/t/font_1300960_i8qitq28j4a.eot');
+  src: url('http://at.alicdn.com/t/font_1300960_i8qitq28j4a.eot?#iefix') format('embedded-opentype'),
+  url('http://at.alicdn.com/t/font_1300960_i8qitq28j4a.woff2') format('woff2'),
+  url('http://at.alicdn.com/t/font_1300960_i8qitq28j4a.woff') format('woff'),
+  url('http://at.alicdn.com/t/font_1300960_i8qitq28j4a.ttf') format('truetype'),
+  url('http://at.alicdn.com/t/font_1300960_i8qitq28j4a.svg#iconfont') format('svg');
+}
+   
    .iconfont {
        font-family: "iconfont";
        line-height: 1;
@@ -173,7 +174,7 @@ var options = {
             },
             icon: {
                 enabled: true,
-                charCode: 'e798',
+                charCode: 'e906',
                 fontColor: '#333',
                 fontFamily: 'iconfont',
                 onclick: function(){
@@ -212,7 +213,7 @@ var options = {
     relation_backline : [{
         key: '7,4',
         icon: {
-            charCode: 'e6f8',
+            charCode: 'e906',
             onclick: function(){
                 debugger
             }
@@ -224,6 +225,7 @@ var options = {
 window.chart = chartx.create("canvasTest" , data , options);
 
 setTimeout(function(){
+    //return
     chart.resetData( data1 , {
         origin: 4
     });
