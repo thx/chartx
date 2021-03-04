@@ -356,7 +356,7 @@ function (_GraphsBase) {
               propertys: {
                 enabled: {
                   detail: '是否开启线上的icon设置',
-                  "default": true
+                  "default": false
                 },
                 charCode: {
                   detail: 'iconfont上面对应的unicode中&#x后面的字符',
@@ -1166,7 +1166,7 @@ function (_GraphsBase) {
         if (edgeIconEnabled) {
           var charCode = String.fromCharCode(parseInt(me.getProp(me.line.icon.charCode, edge), 16));
 
-          if (charCode) {
+          if (charCode != '') {
             var _lineWidth = me.getProp(me.line.icon.lineWidth, edge);
 
             var _strokeStyle = me.getProp(me.line.icon.strokeStyle, edge);

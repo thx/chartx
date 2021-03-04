@@ -325,7 +325,7 @@ class Relation extends GraphsBase {
                         propertys: {
                             enabled: {
                                 detail: '是否开启线上的icon设置',
-                                default: true
+                                default: false
                             },
                             charCode: {
                                 detail: 'iconfont上面对应的unicode中&#x后面的字符',
@@ -1059,7 +1059,7 @@ class Relation extends GraphsBase {
                 
                 let charCode     = String.fromCharCode(parseInt( me.getProp( me.line.icon.charCode, edge ) , 16));
                
-                if( charCode ){
+                if( charCode != '' ){
                     let lineWidth    = me.getProp( me.line.icon.lineWidth   , edge );
                     let strokeStyle  = me.getProp( me.line.icon.strokeStyle , edge );
                     let fontFamily   = me.getProp( me.line.icon.fontFamily  , edge );

@@ -173,38 +173,74 @@ class relationBackLine extends Component
             let secondPoint = [ beginNodeBBox.x+beginNodeBBox.width+20, beginNodeBBox.y+beginNodeBBox.height/2 ];
 
             let endPoint;
-            let isAbove = secondPoint[1] < (endNodeBBox.y+endNodeBBox.height/2);
-            if( isAbove ){
-                //连接endNode上面的点
-                endPoint = [ endNodeBBox.x+endNodeBBox.width/2, endNodeBBox.y ];
-            } else {
-                //连接endNode下面的点
-                endPoint = [ endNodeBBox.x+endNodeBBox.width/2, endNodeBBox.y+endNodeBBox.height ];
-            };
+            let endNodeTopPoint = [ endNodeBBox.x+endNodeBBox.width/2, endNodeBBox.y ];
+            let endNodeBottomPoint = [ endNodeBBox.x+endNodeBBox.width/2, endNodeBBox.y+endNodeBBox.height ];
+            // //起始点是否在结束节点y中线的 上面
+            // let beginMidIsAbove = secondPoint[1] - (endNodeBBox.y+endNodeBBox.height/2);
+            // if( beginMidIsAbove <= 0 ){
+            //     //连接endNode上面的点
+            //     endPoint = [ endNodeBBox.x+endNodeBBox.width/2, endNodeBBox.y ];
+            // } else {
+            //     //连接endNode下面的点
+            //     endPoint = [ endNodeBBox.x+endNodeBBox.width/2, endNodeBBox.y+endNodeBBox.height ];
+            // };
 
-            let dissY;
+            let dissY, topDissY,bottomDissY;
             if( this.line.dissY == null ){
-                if( isAbove ){
-                    //在上面的话，像下是最近的路径，优先检测向下的连线
-                    let diss = beginNodeBBox.y+beginNodeBBox.height - endNodeBBox.y;
-                    if( Math.abs( diss ) > 20 ){
-                        //距离足够，可以往下连接
-                        dissY = beginNodeBBox.height/2+diss/2;
-                    } else {
-                        //距离不够就往上走，肯定够
-                        dissY = Math.min( beginNodeBBox.y-20, endNodeBBox.y-20 ) - secondPoint[1];
-                    }
+
+                debugger
+
+                //先测试连接目标节点上面的节点，只能从上往下
+                let endTopY = endNodeTopPoint[1];
+                if( endTopY - (beginNodeBBox.y+beginNodeBBox.height) > 20 ){
+                    //向下连接 z 形状
+                    topDissY = (beginNodeBBox.y + (endTopY - (beginNodeBBox.y+beginNodeBBox.height))/2) - secondPoint[1]
                 } else {
-                    //起始点再目标点的下面
-                    let diss = beginNodeBBox.y - ( endNodeBBox.y + endNodeBBox.height );
-                    if( diss > 20 ){
-                        //向上探测，间距足够的话
-                        dissY = -(beginNodeBBox.height/2+diss/2)
-                    } else {
-                        //向上空间不够， 只能向下了， 海阔天空
-                        dissY = Math.max( beginNodeBBox.y+beginNodeBBox.height+20, endNodeBBox.y+endNodeBBox.height+20 ) - secondPoint[1];
-                    };
-                }
+                    //其他情况都只能向上连接 n 字形状
+                    topDissY = (Math.min( endTopY, beginNodeBBox.y ) - 10) - secondPoint[1];
+                };
+                dissY = topDissY;
+                endPoint = endNodeTopPoint;
+
+                //然后检测出来连接目标节点下面的点，只能从下往上
+                let endBottomY = endNodeBottomPoint[1];
+                if( beginNodeBBox.y - endBottomY > 20 ){
+                    //向上的z 形状连接
+                    bottomDissY = ( endBottomY + (beginNodeBBox.y - endBottomY)/2 ) - secondPoint[1];
+                } else {
+                    //向上的u形状连接
+                    bottomDissY = (Math.max( endBottomY+endNodeBBox.height, beginNodeBBox.y+beginNodeBBox.height ) + 10) - secondPoint[1]
+                };
+                if( Math.abs( topDissY ) > Math.abs( bottomDissY ) ){
+                    dissY = bottomDissY;
+                    endPoint = endNodeBottomPoint;
+                };
+
+
+                // if( beginMidIsAbove <= 0 ){
+                //     //在上面的话，像下是最近的路径，优先检测向下的连线
+                //     //优先连接目标节点上面的边
+                //     let diss = endNodeBBox.y - (beginNodeBBox.y+beginNodeBBox.height);
+                //     if( diss > 20 ){
+                //         //距离足够，可以往下连接
+                //         dissY = beginNodeBBox.height/2+diss/2;
+                //     } else {
+                //         //diss = beginNodeBBox.y+beginNodeBBox.height - endNodeBBox.y;
+                //         //距离不够就往上走，肯定够
+                //         dissY = Math.min( beginNodeBBox.y-20, endNodeBBox.y-20 ) - secondPoint[1];
+                //     }
+                // } else {
+                //     //起始点再目标点的下面
+                //     let diss = (endNodeBBox.y + endNodeBBox.height) - beginNodeBBox.y;
+                //     if( diss > 20 ){
+                //         //向上探测，间距足够的话
+                //         dissY = -(beginNodeBBox.height/2+diss/2)
+                //     } else {
+                //         //向上空间不够， 只能向下了， 海阔天空
+                //         dissY = Math.max( beginNodeBBox.y+beginNodeBBox.height+20, endNodeBBox.y+endNodeBBox.height+20 ) - secondPoint[1];
+                //     };
+                // }
+
             } else {
                 dissY = this.line.dissY;
             };
