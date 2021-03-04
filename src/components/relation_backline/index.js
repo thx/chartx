@@ -188,8 +188,6 @@ class relationBackLine extends Component
             let dissY, topDissY,bottomDissY;
             if( this.line.dissY == null ){
 
-                debugger
-
                 //先测试连接目标节点上面的节点，只能从上往下
                 let endTopY = endNodeTopPoint[1];
                 if( endTopY - (beginNodeBBox.y+beginNodeBBox.height) > 20 ){
@@ -327,7 +325,7 @@ class relationBackLine extends Component
         if(this.icon.enabled){
             let charCode     = String.fromCharCode(parseInt( this._getProp( this.icon.charCode, this ) , 16));
                 
-            if( charCode ){
+            if( charCode != '' ){
 
                 let secondPoint  = this.pointList[1]
 

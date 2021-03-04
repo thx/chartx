@@ -51887,8 +51887,8 @@ var chartx = (function () {
 
 	        var dissY, topDissY, bottomDissY;
 
-	        if (this.line.dissY == null) { //先测试连接目标节点上面的节点，只能从上往下
-
+	        if (this.line.dissY == null) {
+	          //先测试连接目标节点上面的节点，只能从上往下
 	          var endTopY = endNodeTopPoint[1];
 
 	          if (endTopY - (beginNodeBBox.y + beginNodeBBox.height) > 20) {
@@ -52020,7 +52020,7 @@ var chartx = (function () {
 	      if (this.icon.enabled) {
 	        var charCode = String.fromCharCode(parseInt(this._getProp(this.icon.charCode, this), 16));
 
-	        if (charCode) {
+	        if (charCode != '') {
 	          var secondPoint = this.pointList[1];
 
 	          var lineWidth = this._getProp(this.icon.lineWidth, this);
