@@ -1057,9 +1057,10 @@ class Relation extends GraphsBase {
             let edgeIconEnabled  = me.getProp( me.line.icon.enabled, edge);
             if( edgeIconEnabled ){
                 
-                let charCode     = String.fromCharCode(parseInt( me.getProp( me.line.icon.charCode, edge ) , 16));
+                let _chartCode = me.getProp( me.line.icon.charCode, edge )
+                let charCode   = String.fromCharCode(parseInt( _chartCode , 16));
                
-                if( charCode != '' ){
+                if( _chartCode != '' ){
                     let lineWidth    = me.getProp( me.line.icon.lineWidth   , edge );
                     let strokeStyle  = me.getProp( me.line.icon.strokeStyle , edge );
                     let fontFamily   = me.getProp( me.line.icon.fontFamily  , edge );

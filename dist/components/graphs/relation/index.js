@@ -1164,9 +1164,11 @@ function (_GraphsBase) {
         var edgeIconEnabled = me.getProp(me.line.icon.enabled, edge);
 
         if (edgeIconEnabled) {
-          var charCode = String.fromCharCode(parseInt(me.getProp(me.line.icon.charCode, edge), 16));
+          var _chartCode = me.getProp(me.line.icon.charCode, edge);
 
-          if (charCode != '') {
+          var charCode = String.fromCharCode(parseInt(_chartCode, 16));
+
+          if (_chartCode != '') {
             var _lineWidth = me.getProp(me.line.icon.lineWidth, edge);
 
             var _strokeStyle = me.getProp(me.line.icon.strokeStyle, edge);

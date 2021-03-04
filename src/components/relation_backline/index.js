@@ -323,9 +323,10 @@ class relationBackLine extends Component
     _drawIcon(){
         let me = this;
         if(this.icon.enabled){
-            let charCode     = String.fromCharCode(parseInt( this._getProp( this.icon.charCode, this ) , 16));
+            let _chartCode = this._getProp( this.icon.charCode, this );
+            let charCode   = String.fromCharCode(parseInt( _chartCode , 16));
                 
-            if( charCode != '' ){
+            if( _chartCode != '' ){
 
                 let secondPoint  = this.pointList[1]
 

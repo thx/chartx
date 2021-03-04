@@ -370,9 +370,11 @@ function (_Component) {
       var me = this;
 
       if (this.icon.enabled) {
-        var charCode = String.fromCharCode(parseInt(this._getProp(this.icon.charCode, this), 16));
+        var _chartCode = this._getProp(this.icon.charCode, this);
 
-        if (charCode != '') {
+        var charCode = String.fromCharCode(parseInt(_chartCode, 16));
+
+        if (_chartCode != '') {
           var secondPoint = this.pointList[1];
 
           var lineWidth = this._getProp(this.icon.lineWidth, this);

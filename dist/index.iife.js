@@ -7968,6 +7968,7 @@ var chartx = (function () {
 	      var codeWithoutVariables = code.slice(0, range[0]) + code.slice(range[1]);
 	      return this._eval(codeWithoutVariables, 'options', 'variables', variables);
 	    } catch (e) {
+	      console.log('parse error');
 	      return {};
 	    }
 	  }
@@ -25807,6 +25808,7 @@ var chartx = (function () {
 	      yRange = bounds.yRange;
 
 	  if (xRange.max == xRange.min || yRange.max == yRange.min) {
+	    console.log("not scaling solution: zero size detected");
 	    return solution;
 	  }
 
@@ -26450,7 +26452,9 @@ var chartx = (function () {
 	    var centre = computeTextCentre(interior, exterior);
 	    ret[area] = centre;
 
-	    if (centre.disjoint && areas[i].size > 0) ;
+	    if (centre.disjoint && areas[i].size > 0) {
+	      console.log("WARNING: area " + area + " not represented on screen");
+	    }
 	  }
 
 	  return ret;
@@ -28857,6 +28861,7 @@ var chartx = (function () {
 	  var label = options.node && options.node.content && options.node.content.field;
 
 	  if (!checkDataIsJson(data, key, childrenKey)) {
+	    console.error('该数据不能正确绘制，请提供数组对象形式的数据！');
 	    return result;
 	  }
 	  var childrens = [];
@@ -32628,6 +32633,7 @@ var chartx = (function () {
 	        try {
 	          return fn();
 	        } finally {
+	          console.log(name + " time: " + (_.now() - start) + "ms");
 	        }
 	      }
 
@@ -42792,6 +42798,7 @@ var chartx = (function () {
 	          }
 
 	          if (e.type == "wheel") {
+	            console.log(_deltaY, e.deltaY);
 
 	            if (Math.abs(e.deltaY) > Math.abs(_deltaY)) {
 	              _deltaY = e.deltaY;
@@ -43191,6 +43198,7 @@ var chartx = (function () {
 	      var me = this;
 
 	      _.each(this.data.edges, function (edge) {
+	        console.log(edge.points);
 	        var key = edge.key.join('_');
 
 	        if (me.line.isTree && edge.points.length == 3) {
@@ -43320,9 +43328,11 @@ var chartx = (function () {
 	        var edgeIconEnabled = me.getProp(me.line.icon.enabled, edge);
 
 	        if (edgeIconEnabled) {
-	          var charCode = String.fromCharCode(parseInt(me.getProp(me.line.icon.charCode, edge), 16));
+	          var _chartCode = me.getProp(me.line.icon.charCode, edge);
 
-	          if (charCode != '') {
+	          var charCode = String.fromCharCode(parseInt(_chartCode, 16));
+
+	          if (_chartCode != '') {
 	            var _lineWidth = me.getProp(me.line.icon.lineWidth, edge);
 
 	            var _strokeStyle = me.getProp(me.line.icon.strokeStyle, edge);
@@ -47477,6 +47487,7 @@ var chartx = (function () {
 	      this._setNodeStyle(_path, 'select');
 
 	      nodeData.selected = true;
+	      console.log("select:true");
 	    }
 	  }, {
 	    key: "unselectAt",
@@ -47490,6 +47501,7 @@ var chartx = (function () {
 	      this._setNodeStyle(_path);
 
 	      geoGraph.selected = false;
+	      console.log("select:false");
 
 	      if (geoGraph.focused) {
 	        this.focusAt(adcode);
@@ -52018,9 +52030,11 @@ var chartx = (function () {
 	      var me = this;
 
 	      if (this.icon.enabled) {
-	        var charCode = String.fromCharCode(parseInt(this._getProp(this.icon.charCode, this), 16));
+	        var _chartCode = this._getProp(this.icon.charCode, this);
 
-	        if (charCode != '') {
+	        var charCode = String.fromCharCode(parseInt(_chartCode, 16));
+
+	        if (_chartCode != '') {
 	          var secondPoint = this.pointList[1];
 
 	          var lineWidth = this._getProp(this.icon.lineWidth, this);
@@ -52235,7 +52249,7 @@ var chartx = (function () {
 	}
 
 	var chartx = {
-	  version: '1.1.39',
+	  version: '1.1.40',
 	  options: {}
 	};
 
