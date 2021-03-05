@@ -25,6 +25,10 @@ var _canvax = _interopRequireDefault(require("canvax"));
 
 var _tools = require("../../utils/tools");
 
+var _intersect = require("../../utils/intersect");
+
+var _typescript = require("typescript");
+
 var _ = _canvax["default"]._,
     event = _canvax["default"].event;
 var BrokenLine = _canvax["default"].Shapes.BrokenLine;
@@ -216,75 +220,112 @@ function (_Component) {
         var fristPoint = [beginNodeBBox.x + beginNodeBBox.width, beginNodeBBox.y + beginNodeBBox.height / 2];
         var secondPoint = [beginNodeBBox.x + beginNodeBBox.width + 20, beginNodeBBox.y + beginNodeBBox.height / 2];
         var endPoint;
-        var endNodeTopPoint = [endNodeBBox.x + endNodeBBox.width / 2, endNodeBBox.y];
-        var endNodeBottomPoint = [endNodeBBox.x + endNodeBBox.width / 2, endNodeBBox.y + endNodeBBox.height]; // //起始点是否在结束节点y中线的 上面
-        // let beginMidIsAbove = secondPoint[1] - (endNodeBBox.y+endNodeBBox.height/2);
-        // if( beginMidIsAbove <= 0 ){
-        //     //连接endNode上面的点
-        //     endPoint = [ endNodeBBox.x+endNodeBBox.width/2, endNodeBBox.y ];
-        // } else {
-        //     //连接endNode下面的点
-        //     endPoint = [ endNodeBBox.x+endNodeBBox.width/2, endNodeBBox.y+endNodeBBox.height ];
-        // };
+        var endNodePointX = endNodeBBox.x + endNodeBBox.width / 2;
+        var endNodeTopPoint = [endNodePointX, endNodeBBox.y];
+        var endNodeBottomPoint = [endNodePointX, endNodeBBox.y + endNodeBBox.height];
+        endPoint = endNodeTopPoint;
 
-        var dissY, topDissY, bottomDissY;
+        var getThroughNodesNum = function getThroughNodesNum(dissY) {
+          var y = secondPoint[1] + dissY;
+          var num = 0;
+
+          _graph.data.nodes.forEach(function (node) {
+            var rectX = node.x;
+            var rectY = node.y;
+
+            if (node.shapeType == "diamond") {
+              rectX -= node.width / 2;
+              rectY -= node.height / 2;
+            }
+
+            ;
+            var nodeRect = {
+              x: rectX,
+              y: rectY,
+              xMax: rectX + node.width,
+              yMax: rectY + node.height
+            };
+
+            if ((0, _intersect.lineRect)({
+              x: secondPoint[0],
+              y: y
+            }, {
+              x: endNodePointX,
+              y: y
+            }, nodeRect)) {
+              num++;
+            }
+
+            ;
+          });
+
+          return num;
+        };
+
+        var dissY,
+            topDissY,
+            bottomDissY,
+            lines = [];
 
         if (this.line.dissY == null) {
-          //先测试连接目标节点上面的节点，只能从上往下
-          var endTopY = endNodeTopPoint[1];
+          topDissY = -(secondPoint[1] - (Math.min(endNodeBBox.y, beginNodeBBox.y) - 10));
+          lines.push({
+            dissY: topDissY,
+            throughNodesNum: getThroughNodesNum(topDissY),
+            endPoint: endNodeTopPoint,
+            type: 'n'
+          }); //如果发现两个节点中间有足够的间隙，还可以
 
-          if (endTopY - (beginNodeBBox.y + beginNodeBBox.height) > 20) {
+          if (endNodeBBox.y - (beginNodeBBox.y + beginNodeBBox.height) > 20) {
             //向下连接 z 形状
-            topDissY = beginNodeBBox.y + (endTopY - (beginNodeBBox.y + beginNodeBBox.height)) / 2 - secondPoint[1];
-          } else {
-            //其他情况都只能向上连接 n 字形状
-            topDissY = Math.min(endTopY, beginNodeBBox.y) - 10 - secondPoint[1];
+            topDissY = beginNodeBBox.y + beginNodeBBox.height + (endNodeBBox.y - (beginNodeBBox.y + beginNodeBBox.height)) / 2 - secondPoint[1];
+            lines.push({
+              dissY: topDissY,
+              throughNodesNum: getThroughNodesNum(topDissY),
+              endPoint: endNodeTopPoint,
+              type: 'down_z'
+            });
           }
 
-          ;
-          dissY = topDissY;
-          endPoint = endNodeTopPoint; //然后检测出来连接目标节点下面的点，只能从下往上
+          ; //然后检测出来连接目标节点下面的点，只能从下往上
 
           var endBottomY = endNodeBottomPoint[1];
+          bottomDissY = Math.max(endBottomY, beginNodeBBox.y + beginNodeBBox.height) + 10 - secondPoint[1];
+          lines.push({
+            dissY: bottomDissY,
+            throughNodesNum: getThroughNodesNum(bottomDissY),
+            endPoint: endNodeBottomPoint,
+            type: 'u'
+          });
 
           if (beginNodeBBox.y - endBottomY > 20) {
             //向上的z 形状连接
             bottomDissY = endBottomY + (beginNodeBBox.y - endBottomY) / 2 - secondPoint[1];
-          } else {
-            //向上的u形状连接
-            bottomDissY = Math.max(endBottomY + endNodeBBox.height, beginNodeBBox.y + beginNodeBBox.height) + 10 - secondPoint[1];
+            lines.push({
+              dissY: bottomDissY,
+              throughNodesNum: getThroughNodesNum(bottomDissY),
+              endPoint: endNodeBottomPoint,
+              type: 'up_z'
+            });
           }
 
-          ;
+          ; //先按照最小的穿过node的数量排序， 取穿过node最少的line
 
-          if (Math.abs(topDissY) > Math.abs(bottomDissY)) {
-            dissY = bottomDissY;
-            endPoint = endNodeBottomPoint;
-          }
+          lines = lines.sort(function (a, b) {
+            return a.throughNodesNum - b.throughNodesNum;
+          }); //如果前面有几个是throughNodesNum相同的，组成一个小组，重新按照dissY的绝对值最小值排序
 
-          ; // if( beginMidIsAbove <= 0 ){
-          //     //在上面的话，像下是最近的路径，优先检测向下的连线
-          //     //优先连接目标节点上面的边
-          //     let diss = endNodeBBox.y - (beginNodeBBox.y+beginNodeBBox.height);
-          //     if( diss > 20 ){
-          //         //距离足够，可以往下连接
-          //         dissY = beginNodeBBox.height/2+diss/2;
-          //     } else {
-          //         //diss = beginNodeBBox.y+beginNodeBBox.height - endNodeBBox.y;
-          //         //距离不够就往上走，肯定够
-          //         dissY = Math.min( beginNodeBBox.y-20, endNodeBBox.y-20 ) - secondPoint[1];
-          //     }
-          // } else {
-          //     //起始点再目标点的下面
-          //     let diss = (endNodeBBox.y + endNodeBBox.height) - beginNodeBBox.y;
-          //     if( diss > 20 ){
-          //         //向上探测，间距足够的话
-          //         dissY = -(beginNodeBBox.height/2+diss/2)
-          //     } else {
-          //         //向上空间不够， 只能向下了， 海阔天空
-          //         dissY = Math.max( beginNodeBBox.y+beginNodeBBox.height+20, endNodeBBox.y+endNodeBBox.height+20 ) - secondPoint[1];
-          //     };
-          // }
+          var _lines = [];
+          lines.forEach(function (line) {
+            if (line.throughNodesNum == lines[0].throughNodesNum) {
+              _lines.push(line);
+            }
+          });
+          _lines = _lines.sort(function (a, b) {
+            return Math.abs(a.dissY) - Math.abs(b.dissY);
+          });
+          dissY = _lines[0].dissY;
+          endPoint = _lines[0].endPoint;
         } else {
           dissY = this.line.dissY;
         }
