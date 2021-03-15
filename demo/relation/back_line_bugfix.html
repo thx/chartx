@@ -139,7 +139,7 @@ var options = {
                     return new Promise( resolve => {
                         setTimeout( function(){
                             resolve( {} )
-                        } , 1500)
+                        } , 100)
                     } )
                 }
             },
@@ -191,8 +191,8 @@ var options = {
         layoutOpts  : {
             graph : {
                 rankdir: "LR",  
-                align: "DL",
-                nodesep: 40,//同级node之间的距离
+                //align: "DL",
+                nodesep: 20,//同级node之间的距离
                 //edgesep: 100,
                 //ranksep: 0, //排与排之间的距离
                 //acyclicer : "greedy",
@@ -211,7 +211,7 @@ var options = {
       
     },
     relation_backline : [{
-        key: '66,8',//'7,8',
+        key: '9,2',//'7,8',
         icon: {
             charCode: 'e906',
             onclick: function(){

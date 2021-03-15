@@ -230,15 +230,8 @@ function (_Component) {
           var num = 0;
 
           _graph.data.nodes.forEach(function (node) {
-            var rectX = node.x;
-            var rectY = node.y;
-
-            if (node.shapeType == "diamond") {
-              rectX -= node.width / 2;
-              rectY -= node.height / 2;
-            }
-
-            ;
+            var rectX = node.x - node.width / 2;
+            var rectY = node.y - node.height / 2;
             var nodeRect = {
               x: rectX,
               y: rectY,
@@ -268,7 +261,7 @@ function (_Component) {
             lines = [];
 
         if (this.line.dissY == null) {
-          topDissY = -(secondPoint[1] - (Math.min(endNodeBBox.y, beginNodeBBox.y) - 10));
+          topDissY = -(secondPoint[1] - (Math.min(endNodeBBox.y, beginNodeBBox.y) - 6));
           lines.push({
             dissY: topDissY,
             throughNodesNum: getThroughNodesNum(topDissY),
@@ -290,7 +283,7 @@ function (_Component) {
           ; //然后检测出来连接目标节点下面的点，只能从下往上
 
           var endBottomY = endNodeBottomPoint[1];
-          bottomDissY = Math.max(endBottomY, beginNodeBBox.y + beginNodeBBox.height) + 10 - secondPoint[1];
+          bottomDissY = Math.max(endBottomY, beginNodeBBox.y + beginNodeBBox.height) + 6 - secondPoint[1];
           lines.push({
             dissY: bottomDissY,
             throughNodesNum: getThroughNodesNum(bottomDissY),
@@ -309,7 +302,8 @@ function (_Component) {
             });
           }
 
-          ; //先按照最小的穿过node的数量排序， 取穿过node最少的line
+          ;
+          debugger; //先按照最小的穿过node的数量排序， 取穿过node最少的line
 
           lines = lines.sort(function (a, b) {
             return a.throughNodesNum - b.throughNodesNum;

@@ -185,12 +185,9 @@ class relationBackLine extends Component
                 let y = secondPoint[1] + dissY;
                 let num = 0;
                 _graph.data.nodes.forEach( node => {
-                    let rectX = node.x;
-                    let rectY = node.y;
-                    if( node.shapeType == "diamond"){
-                        rectX -= node.width/2;
-                        rectY -= node.height/2;
-                    };
+                    let rectX = node.x - node.width/2;
+                    let rectY = node.y - node.height/2;
+                    
                     let nodeRect = {
                         x : rectX,
                         y : rectY,
@@ -208,7 +205,7 @@ class relationBackLine extends Component
             let dissY, topDissY,bottomDissY, lines=[];
             if( this.line.dissY == null ){
                 
-                topDissY = -(secondPoint[1] - (Math.min( endNodeBBox.y, beginNodeBBox.y ) - 10));
+                topDissY = -(secondPoint[1] - (Math.min( endNodeBBox.y, beginNodeBBox.y ) - 6));
                 lines.push({
                     dissY: topDissY,
                     throughNodesNum: getThroughNodesNum(topDissY),
@@ -231,7 +228,7 @@ class relationBackLine extends Component
 
                 //然后检测出来连接目标节点下面的点，只能从下往上
                 let endBottomY = endNodeBottomPoint[1];
-                bottomDissY = (Math.max( endBottomY, beginNodeBBox.y+beginNodeBBox.height ) + 10) - secondPoint[1]
+                bottomDissY = (Math.max( endBottomY, beginNodeBBox.y+beginNodeBBox.height ) + 6) - secondPoint[1]
                 lines.push({
                     dissY: bottomDissY,
                     throughNodesNum: getThroughNodesNum(bottomDissY),
@@ -250,10 +247,10 @@ class relationBackLine extends Component
                         type: 'up_z'
                     });
                 };
-
+debugger
                 //先按照最小的穿过node的数量排序， 取穿过node最少的line
                 lines = lines.sort( function(a,b){return a.throughNodesNum - b.throughNodesNum} );
-
+  
                 //如果前面有几个是throughNodesNum相同的，组成一个小组，重新按照dissY的绝对值最小值排序
                 let _lines = [];
                 lines.forEach( line => {

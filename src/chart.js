@@ -390,11 +390,11 @@ class Chart extends event.Dispatcher
     {
         let me = this;
 
-        data && (this._data = data); //注意，resetData不能为null，必须是 数组格式
+        this._data = data; //注意，resetData不能为null，必须是 数组格式
 
         let preDataLenth = this.dataFrame.org.length;
 
-        this.dataFrame.resetData( this._data );
+        this.dataFrame.resetData( data );
 
         let graphsList = this.getComponents({name:'graphs'});
         let allGraphsHasResetData = true;
