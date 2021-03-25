@@ -63,7 +63,19 @@
             legend: {},
             tips: {
                 pointer: "region",
-                positionOfPoint: "left"
+                positionOfPoint: "left",
+                content: function(e){
+                   return ''
+                },
+                onshow: function(e){
+                    console.log('show',e)
+                },
+                onmove: function(e){
+                    console.log('move',e)
+                },
+                onhide: function(e){
+                    console.log('hide',e)
+                }
             },
             graphs: [
                 {

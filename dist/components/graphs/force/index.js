@@ -177,8 +177,6 @@ function (_GraphsBase) {
 
     _.extend(true, (0, _assertThisInitialized2["default"])(_this), (0, _tools.getDefaultProps)(Force.defaultProps()), opt);
 
-    _this.domContainer = app.canvax.domView;
-
     _this.init();
 
     return _this;

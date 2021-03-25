@@ -387,7 +387,7 @@ class BarGraphs extends GraphsBase
             //vLen 为一单元bar上面纵向堆叠的 length
             //比如yAxis.field = [?
             //    ["uv","pv"],  vLen == 2
-            //    "click"       vLen == 1
+            //    "ppc"       vLen == 1
             //]
 
             //if (h <= preDataLen - 1)的话说明本次绘制之前sprite里面已经有bar了。需要做特定的动画效果走过去
@@ -486,7 +486,6 @@ class BarGraphs extends GraphsBase
                                 barGroupSectedHandle.bind( this )(e);
 
                                 //触发root统一设置e.eventInfo.nodes,所以上面不需要设置
-                                //TODO: fire需要最后触发，因为在比如click时间中要拿到所有的 上面select触发的选中态list值
                                 me.app.fire( e.type, e );
 
                             });

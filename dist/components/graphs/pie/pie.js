@@ -24,6 +24,7 @@ var _ = _canvax["default"]._,
     event = _canvax["default"].event;
 var Sector = _canvax["default"].Shapes.Sector;
 var Path = _canvax["default"].Shapes.Path;
+var Text = _canvax["default"].Display.Text;
 var AnimationFrame = _canvax["default"].AnimationFrame;
 
 var Pie =
@@ -487,28 +488,29 @@ function (_event$Dispatcher) {
             lineWidth: 1,
             strokeStyle: itemData.fillStyle
           }
-        }); //指示文字
-
-        /*
-        let textTxt = itemData.labelText;
-        //如果用户format过，那么就用用户指定的格式
-        //如果没有就默认拼接
-        if( !this._graphs.label.format ){
-            if( textTxt ){
-                textTxt = textTxt + "：" + itemData.percentage + "%" 
-            } else {
-                textTxt = itemData.percentage + "%" 
-            }
-        };
-        */
-
+        });
         var textTxt = itemData.labelText;
-        var branchTxt = document.createElement("div");
-        branchTxt.style.cssText = " ;position:absolute;left:-1000px;top:-1000px;color:" + itemData.fillStyle + "";
-        branchTxt.innerHTML = textTxt;
-        me.domContainer.appendChild(branchTxt);
-        bwidth = branchTxt.offsetWidth;
-        bheight = branchTxt.offsetHeight;
+        var textEle = void 0;
+
+        if (me.domContainer) {
+          textEle = document.createElement("div");
+          textEle.style.cssText = " ;position:absolute;left:-1000px;top:-1000px;color:" + itemData.fillStyle + "";
+          textEle.innerHTML = textTxt;
+          me.domContainer.appendChild(textEle);
+          bwidth = textEle.offsetWidth;
+          bheight = textEle.offsetHeight;
+        } else {
+          //小程序等版本里面没有domContainer， 需要直接用cavnas绘制
+          textEle = new Text(textTxt, {
+            context: {
+              fillStyle: itemData.fillStyle
+            }
+          });
+          me.textSp.addChild(textEle);
+          bwidth = Math.ceil(textEle.getTextWidth());
+          bheight = Math.ceil(textEle.getTextHeight());
+        }
+
         bx = isleft ? -adjustX : adjustX;
         by = currentY;
 
@@ -534,9 +536,17 @@ function (_event$Dispatcher) {
             break;
         }
 
+        ; //如果是dom 的话就会有style属性
+
+        if (textEle.style) {
+          textEle.style.left = bx + me.origin.x + "px";
+          textEle.style.top = by + me.origin.y + "px";
+        } else if (textEle.context) {
+          textEle.context.x = bx;
+          textEle.context.y = by;
+        }
+
         ;
-        branchTxt.style.left = bx + me.origin.x + "px";
-        branchTxt.style.top = by + me.origin.y + "px";
         me.textSp.addChild(path);
         me.textList.push({
           width: bwidth,
@@ -545,7 +555,7 @@ function (_event$Dispatcher) {
           y: by + me.origin.y,
           data: itemData,
           textTxt: textTxt,
-          textEle: branchTxt
+          textEle: textEle
         });
       }
     }
@@ -658,7 +668,9 @@ function (_event$Dispatcher) {
       ;
 
       _.each(this.textList, function (lab) {
-        me.domContainer.removeChild(lab.textEle);
+        if (me.domContainer) {
+          me.domContainer.removeChild(lab.textEle);
+        }
       });
 
       this.textList = [];
@@ -670,7 +682,9 @@ function (_event$Dispatcher) {
         this.textSp.context.globalAlpha = 1;
 
         _.each(this.textList, function (lab) {
-          lab.textEle.style.visibility = "visible";
+          if (lab.textEle.style) {
+            lab.textEle.style.visibility = "visible";
+          }
         });
       }
     }
@@ -681,7 +695,9 @@ function (_event$Dispatcher) {
         this.textSp.context.globalAlpha = 0;
 
         _.each(this.textList, function (lab) {
-          lab.textEle.style.visibility = "hidden";
+          if (lab.textEle.style) {
+            lab.textEle.style.visibility = "hidden";
+          }
         });
       }
     }

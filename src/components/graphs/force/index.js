@@ -142,8 +142,6 @@ class Force extends GraphsBase {
 
         _.extend(true, this, getDefaultProps(Force.defaultProps()), opt);
 
-        this.domContainer = app.canvax.domView;
-
         this.init();
     }
 

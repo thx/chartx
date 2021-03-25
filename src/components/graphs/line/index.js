@@ -92,7 +92,7 @@ class LineGraphs extends GraphsBase
         let me = this;
         let _coord = this.app.getComponent({name:'coord'});
         
-        //{"uv":{}.. ,"click": "pv":]}
+        //{"uv":{}.. ,"ppc": "pv":]}
         //这样按照字段摊平的一维结构
         let tmpData = {}; 
 

@@ -5,6 +5,7 @@ import Canvax from "canvax"
 let { _,event } = Canvax;
 let Sector = Canvax.Shapes.Sector
 let Path = Canvax.Shapes.Path
+let Text = Canvax.Display.Text
 let AnimationFrame = Canvax.AnimationFrame
 
 export default class Pie extends event.Dispatcher
@@ -469,32 +470,32 @@ export default class Pie extends event.Dispatcher
                 }
             });
 
-            //指示文字
-            /*
             let textTxt = itemData.labelText;
-            //如果用户format过，那么就用用户指定的格式
-            //如果没有就默认拼接
-            if( !this._graphs.label.format ){
-                if( textTxt ){
-                    textTxt = textTxt + "：" + itemData.percentage + "%" 
-                } else {
-                    textTxt = itemData.percentage + "%" 
-                }
-            };
-            */
 
-            let textTxt = itemData.labelText;
-            let branchTxt = document.createElement("div");
-            branchTxt.style.cssText = " ;position:absolute;left:-1000px;top:-1000px;color:" + itemData.fillStyle + ""
-            branchTxt.innerHTML = textTxt;
-            me.domContainer.appendChild(branchTxt);
-            bwidth = branchTxt.offsetWidth;
-            bheight = branchTxt.offsetHeight;
-
+            let textEle
+            if( me.domContainer ){
+                textEle = document.createElement("div");
+                textEle.style.cssText = " ;position:absolute;left:-1000px;top:-1000px;color:" + itemData.fillStyle + ""
+                textEle.innerHTML = textTxt;
+                me.domContainer.appendChild(textEle);
+                bwidth = textEle.offsetWidth;
+                bheight = textEle.offsetHeight;
+            } else {
+                //小程序等版本里面没有domContainer， 需要直接用cavnas绘制
+                textEle = new Text( textTxt, {
+                    context: {
+                        fillStyle : itemData.fillStyle
+                    }
+                } );
+                me.textSp.addChild( textEle );
+                bwidth = Math.ceil( textEle.getTextWidth() );
+                bheight = Math.ceil( textEle.getTextHeight() );
+            }
+            
             bx = isleft ? -adjustX : adjustX;
             by = currentY;
 
-            switch (quadrant) {
+            switch ( quadrant ) {
                 case 1:
                     bx += textOffsetX;
                     by -= bheight / 2;
@@ -513,8 +514,15 @@ export default class Pie extends event.Dispatcher
                     break;
             };
 
-            branchTxt.style.left = bx + me.origin.x + "px";
-            branchTxt.style.top = by + me.origin.y + "px";
+            //如果是dom 的话就会有style属性
+            if( textEle.style ){
+                textEle.style.left = bx + me.origin.x + "px";
+                textEle.style.top = by + me.origin.y + "px";
+            } else if( textEle.context ) {
+                textEle.context.x = bx;
+                textEle.context.y = by;
+            };
+            
 
             me.textSp.addChild( path );
             
@@ -525,7 +533,7 @@ export default class Pie extends event.Dispatcher
                 y: by + me.origin.y,
                 data: itemData,
                 textTxt: textTxt,
-                textEle: branchTxt
+                textEle: textEle
             });
         }
     }
@@ -638,7 +646,9 @@ export default class Pie extends event.Dispatcher
             this.textSp.removeAllChildren();
         };
         _.each(this.textList, function (lab) {
-            me.domContainer.removeChild( lab.textEle );
+            if( me.domContainer ){
+                me.domContainer.removeChild( lab.textEle );
+            }
         });
         this.textList = [];
     }
@@ -648,7 +658,9 @@ export default class Pie extends event.Dispatcher
         if (this.textSp && this.textSp.context) {
             this.textSp.context.globalAlpha = 1;
             _.each(this.textList, function (lab) {
-                lab.textEle.style.visibility = "visible"
+                if(lab.textEle.style){
+                    lab.textEle.style.visibility = "visible"
+                } 
             });
         }
     }
@@ -658,7 +670,9 @@ export default class Pie extends event.Dispatcher
         if (this.textSp && this.textSp.context) {
             this.textSp.context.globalAlpha = 0;
             _.each(this.textList, function (lab) {
-                lab.textEle.style.visibility = "hidden"
+                if(lab.textEle.style) {
+                    lab.textEle.style.visibility = "hidden"
+                }
             });
         }
     }

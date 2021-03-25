@@ -123,7 +123,7 @@ function (_GraphsBase) {
 
       var _coord = this.app.getComponent({
         name: 'coord'
-      }); //{"uv":{}.. ,"click": "pv":]}
+      }); //{"uv":{}.. ,"ppc": "pv":]}
       //这样按照字段摊平的一维结构
 
 

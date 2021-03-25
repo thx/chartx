@@ -324,7 +324,7 @@ class Chart extends event.Dispatcher
         this.setCoord_Graphs_Sp();
 
         this.components = []; //组件清空
-        this.canvax.domView.innerHTML = "";
+        this.canvax.domView && (this.canvax.domView.innerHTML = "");
 
         //清空事件的当前状态
         if(this.canvax.event){

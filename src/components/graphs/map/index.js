@@ -311,7 +311,7 @@ class Map extends GraphsBase {
 
         let me = this;
         let _mosedownIng = false;
-        let _preCursor = me.app.canvax.domView.style.cursor;
+        let _preCursor = me.app.canvax.domView ? me.app.canvax.domView.style.cursor : 'default';
 
         //滚轮缩放相关
         let _wheelHandleTimeLen = 32; //16 * 2
@@ -326,12 +326,12 @@ class Map extends GraphsBase {
                 
                 if (e.type == "mousedown") {
                     _mosedownIng = true;
-                    me.app.canvax.domView.style.cursor = "move";
+                    me.app.canvax.domView && (me.app.canvax.domView.style.cursor = "move");
                     me.zoom.mouseMoveTo( point );
                 };
                 if (e.type == "mouseup" || e.type == "mouseout") {
                     _mosedownIng = false;
-                    me.app.canvax.domView.style.cursor = _preCursor;
+                    me.app.canvax.domView && (me.app.canvax.domView.style.cursor = _preCursor);
                 };
                 if (e.type == "mousemove") {
                     if ( _mosedownIng ) {

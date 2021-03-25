@@ -350,7 +350,9 @@ function (_GraphsBase) {
       });
       var me = this;
       var _mosedownIng = false;
-      var _preCursor = me.app.canvax.domView.style.cursor; //滚轮缩放相关
+
+      var _preCursor = me.app.canvax.domView ? me.app.canvax.domView.style.cursor : 'default'; //滚轮缩放相关
+
 
       var _wheelHandleTimeLen = 32; //16 * 2
 
@@ -363,7 +365,7 @@ function (_GraphsBase) {
 
           if (e.type == "mousedown") {
             _mosedownIng = true;
-            me.app.canvax.domView.style.cursor = "move";
+            me.app.canvax.domView && (me.app.canvax.domView.style.cursor = "move");
             me.zoom.mouseMoveTo(point);
           }
 
@@ -371,7 +373,7 @@ function (_GraphsBase) {
 
           if (e.type == "mouseup" || e.type == "mouseout") {
             _mosedownIng = false;
-            me.app.canvax.domView.style.cursor = _preCursor;
+            me.app.canvax.domView && (me.app.canvax.domView.style.cursor = _preCursor);
           }
 
           ;

@@ -320,7 +320,7 @@ function () {
   }, {
     key: "_getDataSection",
     value: function _getDataSection() {
-      //如果有堆叠，比如[ ["uv","pv"], "click" ]
+      //如果有堆叠，比如[ ["uv","pv"], "ppc" ]
       //那么这个 this.dataOrg， 也是个对应的结构
       //vLen就会等于2
       var vLen = 1;
