@@ -92,7 +92,7 @@ export default class PlanetGroup
                             },
                             triggerEventType: {
                                 detail: '触发事件',
-                                default:'click'
+                                default:'click,tap'
                             },
                             onbefore: {
                                 detail: '执行select处理函数的前处理函数，返回false则取消执行select',
@@ -550,7 +550,7 @@ export default class PlanetGroup
                         }
                     };
             
-                    if( me.node.select.enabled && e.type == me.node.select.triggerEventType ){
+                    if( me.node.select.enabled && me.node.select.triggerEventType.indexOf(e.type)>-1 ){
                         //如果开启了图表的选中交互
                         //TODO:这里不能
                         let onbefore = me.node.select.onbefore;

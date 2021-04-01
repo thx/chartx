@@ -1,6 +1,7 @@
 //图表皮肤
 import canvax from "canvax"
 import parse from './core/parse';
+import setting from './setting'
 
 let { _,$,AnimationFrame } = canvax;
 
@@ -30,7 +31,7 @@ export default {
 
         let data = JSON.parse( JSON.stringify( _data , function(k,v) {
             if(v === undefined){
-            return null
+                return null
             }
             return v
         } ) );
@@ -44,7 +45,8 @@ export default {
         };
 
         //这个el如果之前有绘制过图表，那么就要在instances中找到图表实例，然后销毁
-        let chart_id = $.query(el).getAttribute("chart_id");
+        //小程序版本中外面会带id过来
+        let chart_id = el.id || $.query(el).getAttribute("chart_id");
         if( chart_id != undefined ){
             let _chart = me.instances[ chart_id ];
             if( _chart ){
@@ -305,8 +307,6 @@ export default {
                                     p[k].propertys = _moduleProps;
                                     setChildProps( p[k].propertys );
                                 };
-
-                                
                             };
                         }
                     }
@@ -338,6 +338,9 @@ export default {
         return this.props;
     },
 
+    setPadding: function( padding ){
+        setting.padding = padding
+    },
     //兼容有的地方已经用了Chartx.Canvax
     canvax : canvax
 };

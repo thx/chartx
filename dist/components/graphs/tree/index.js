@@ -61,6 +61,10 @@ function (_GraphsBase) {
                   detail: "是否开启",
                   "default": true
                 },
+                triggerEventType: {
+                  detail: '触发事件',
+                  "default": 'click,tap'
+                },
                 openCharCode: {
                   detail: "点击后触发展开的icon chartCode，当前状态为收缩",
                   "default": ''
@@ -322,21 +326,17 @@ function (_GraphsBase) {
                   tipsContent: tipsContent,
                   nodes: [] //node
 
-                };
+                }; //下面的这个就只在鼠标环境下有就好了
 
                 if (e.type == 'mousedown') {
-                  _shrinkIconBack.context.r += 1; //_shrinkIcon.context.fontSize += 1;
-                  //_shrinkIcon.context.x += 1;
-                  //_shrinkIcon.context.y += .5;
+                  _shrinkIconBack.context.r += 1;
                 }
 
                 if (e.type == 'mouseup') {
-                  _shrinkIconBack.context.r -= 1; //_shrinkIcon.context.fontSize -= 1;
-                  //_shrinkIcon.context.x -= 1;
-                  //_shrinkIcon.context.y -= .5;
+                  _shrinkIconBack.context.r -= 1;
                 }
 
-                if (e.type == 'click') {
+                if (_this3.node.shrink.triggerEventType.indexOf(e.type) > -1) {
                   if (_this3.shrinked.indexOf(node.key) == -1) {
                     _this3.shrinked.push(node.key);
                   } else {

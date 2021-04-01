@@ -160,6 +160,13 @@ function (_Axis) {
   }, {
     key: "resetData",
     value: function resetData(dataFrame) {
+      //如果用户没有指定width，那么resetData的时候需要清空一下width，用新的数据重新设置
+      if (!('width' in this._opt)) {
+        this.width = 0;
+      }
+
+      ;
+
       this._setField(dataFrame.field);
 
       this.resetDataOrg(dataFrame.org);
@@ -466,14 +473,6 @@ function (_Axis) {
 
             _node.addChild(_node._txt);
 
-            if (me.label.rotation == 90 || me.label.rotation == -90) {
-              me.maxW = Math.max(me.maxW, _node._txt.getTextHeight());
-            } else {
-              me.maxW = Math.max(me.maxW, _node._txt.getTextWidth());
-            }
-
-            ;
-
             if (me.animation && !opt.resize) {
               _node._txt.context.y = y + aniFrom;
               _node._txt.context.globalAlpha = 0;
@@ -490,6 +489,18 @@ function (_Axis) {
 
           ;
           me.rulesSprite.addChild(_node);
+        }
+
+        ;
+
+        if (me.label.enabled) {
+          if (me.label.rotation == 90 || me.label.rotation == -90) {
+            me.maxW = Math.max(me.maxW, _node._txt.getTextHeight());
+          } else {
+            me.maxW = Math.max(me.maxW, _node._txt.getTextWidth());
+          }
+
+          ;
         }
 
         ;

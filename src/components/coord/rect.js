@@ -202,8 +202,6 @@ class Rect extends coordBase
 
         this._resetXY_axisLine_pos();
 
-        //let _yAxis = this._yAxisLeft || this._yAxisRight;
-        
         this._grid.reset({
             animation:false
         });

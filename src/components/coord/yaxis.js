@@ -40,6 +40,7 @@ export default class yAxis extends Axis
         this.isH        = false; //是否横向
 
         _.extend( true, this, getDefaultProps( yAxis.defaultProps() ) , opt );
+        
 
         this.init(opt);
         
@@ -116,6 +117,10 @@ export default class yAxis extends Axis
     //配置和数据变化
     resetData( dataFrame )
     {
+        //如果用户没有指定width，那么resetData的时候需要清空一下width，用新的数据重新设置
+        if( !('width' in this._opt) ){
+            this.width = 0;
+        };
         this._setField(dataFrame.field);
         this.resetDataOrg( dataFrame.org );
         
@@ -346,6 +351,7 @@ export default class yAxis extends Axis
             let _node = this.rulesSprite.getChildAt( visibleInd );
 
             if( _node ){
+
                 if( _node._tickLine && me.tickLine.enabled ){
                     _node._tickLine.animate( tickLineContext, {
                         duration: duration,
@@ -359,6 +365,7 @@ export default class yAxis extends Axis
                         id: _node._txt.id
                     });
                     _node._txt.resetText( o.text );
+
                 };
             
             } else {
@@ -384,12 +391,6 @@ export default class yAxis extends Axis
                     });
                     _node.addChild( _node._txt );
 
-                    if (me.label.rotation == 90 || me.label.rotation == -90) {
-                        me.maxW = Math.max(me.maxW, _node._txt.getTextHeight());
-                    } else {
-                        me.maxW = Math.max(me.maxW, _node._txt.getTextWidth());
-                    };
-
                     if (me.animation && !opt.resize) {
                         _node._txt.context.y = y + aniFrom;
                         _node._txt.context.globalAlpha = 0;
@@ -406,6 +407,14 @@ export default class yAxis extends Axis
                 me.rulesSprite.addChild(_node);
             };
 
+            if( me.label.enabled ){
+                if (me.label.rotation == 90 || me.label.rotation == -90) {
+                    me.maxW = Math.max(me.maxW, _node._txt.getTextHeight());
+                } else {
+                    me.maxW = Math.max(me.maxW, _node._txt.getTextWidth());
+                };
+            };
+            
             visibleInd ++;
         };
         

@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
+<title>xChart demo -- bar</title>
+
+<script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
+<script type="text/javascript" src="../../dist/index.iife.js"></script>
+<!-- codemirror -->
+<script type="text/javascript" src="../../lib/codemirror/codemirror.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/active-line.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/javascript.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/matchbrackets.js"></script>
+<link rel="stylesheet" href="../../lib/codemirror/codemirror.css">
+<link rel="stylesheet" href="../../lib/codemirror/zenburn.css">
+<link rel="stylesheet" href="../../lib/codemirror/docs.css">
+<!-- codemirror end -->
+<!--bootstrap-->
+<script type="text/javascript" src="../../lib/bootstrap/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap-theme.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/docs.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap.min.css">
+<!--bootstrap end-->
+<script type="text/javascript" src="../../lib/demo.js"></script>
+<link rel="stylesheet" href="../../lib/demo.css">
+</head>
+<body >
+    <form><textarea id="code" name="code">
+
+        //chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
+        //第一行是表头。
+        var data = [
+            {"xfield":1,"uv":101,"pv":20,"click":33,"ppc":53},
+            {"xfield":2,"uv":67,"pv":51,"click":26,"ppc":62},
+            {"xfield":3,"uv":130,"pv":50,"click":50,"ppc":23},
+            {"xfield":1,"uv":101,"pv":60,"click":33,"ppc":64},
+            {"xfield":2,"uv":67,"pv":91,"click":126,"ppc":34},
+            {"xfield":3,"uv":30,"pv":50,"click":90,"ppc":21},
+            {"xfield":1,"uv":51,"pv":120,"click":33,"ppc":112},
+            {"xfield":2,"uv":67,"pv":51,"click":86,"ppc":231},
+            {"xfield":3,"uv":120,"pv":90,"click":150,"ppc":23}
+        ];
+        var options = {
+            coord: {
+                type: "rect",
+                xAxis: {
+                    field: "xfield"
+                },
+                yAxis: [
+                    {
+                        title: {
+                            text: "left"
+                        }
+                    },
+                    {
+                        title: {
+                            text: "right"
+                        }
+                    }
+                ]
+            },
+            legend: {},
+            tips: {
+                pointer: "region",
+                positionOfPoint: "left",
+                content: function(e){
+                   return ''
+                },
+                onshow: function(e){
+                    console.log('show',e)
+                },
+                onmove: function(e){
+                    console.log('move',e)
+                },
+                onhide: function(e){
+                    console.log('hide',e)
+                }
+            },
+            graphs: [
+                {
+                    type: "bar",
+                    field: "click",
+                    yAxisAlign: "left",
+                    label: {
+                        enabled: true
+                    }
+                },
+                {
+                    type: "bar",
+                    field: [
+                        [
+                            "uv",
+                            "pv"
+                        ],
+                        "ppc"
+                    ],
+                    yAxisAlign: "right"
+                }
+            ],
+            dataZoom: {
+                range: {
+                    start: 1,
+                    end: 5
+                }
+            },
+            markLine: [
+                {
+                    markTo: "uv",
+                    label: {
+                        enabled: true,
+                        format: function (yVal) {
+                            return 'UV 均值 ：' + parseInt(yVal)
+                        },
+                        fontSize: 14
+                    }
+                },
+                {
+                    markTo: "click",
+                    label: {
+                        enabled: true,
+                        fontSize: 14
+                    },
+                    y: 180
+                }
+            ]
+        };
+        
+        //chartx.setAnimationEnabled(false);
+        window.bar = chartx.create("canvasTest" , data , options)
+        
+                    
+
+    </textarea></form>
+<table>
+    <tr>
+        <td style="padding:0 10px;" id="td-vr">
+            <div id="chartdemo-r">
+            <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
+                <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
+
+                <h4>柱状图（bar chart）</h4>
+                <p>
+                    联系人：@释剑
+                </p>
+            </div>
+            <div  class="test-c">
+                <div id="canvasTest" style='width:600px;height:300px;position:relative;overflow: hidden;'></div>
+            </div>
+
+            </div>
+        </td>
+    </tr>
+</table>
+
+    
+</body> 
+</html>
+
+

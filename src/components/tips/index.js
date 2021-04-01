@@ -133,18 +133,14 @@ class Tips extends Component {
             if ( content ) {
                 this._setPosition(e);
                 this.sprite.toFront();
-
-                //比如散点图，没有hover到点的时候，也要显示，所有放到最下面
-                //反之，如果只有hover到点的时候才显示point，那么就放这里
-                //this._tipsPointerShow(e);
             } else {
-                this._hide(e);
+                this._hideDialogTips(e);
             }
-
-        };
+        } else {
+            this._hideDialogTips(e);
+        }
 
         this._tipsPointerShow(e);
-
         this.onshow.apply( this, [e] );
         
     }
@@ -157,10 +153,6 @@ class Tips extends Component {
             let content = this._setContent(e);
             if (content) {
                 this._setPosition(e);
-
-                //比如散点图，没有hover到点的时候，也要显示，所有放到最下面
-                //反之，如果只有hover到点的时候才显示point，那么就放这里
-                //this._tipsPointerMove(e)
             } else {
                 //move的时候hide的只有dialogTips, pointer不想要隐藏
                 this._hideDialogTips();
@@ -214,14 +206,17 @@ class Tips extends Component {
      *content相关-------------------------
      */
     _creatTipDom(e) {
-        this._tipDom = document.createElement("div");
-        this._tipDom.className = "chart-tips";
-        this._tipDom.style.cssText += "; border-radius:" + this.borderRadius + "px;background:" + this.fillStyle + ";border:1px solid " + this.strokeStyle + ";visibility:hidden;position:fixed;enabled:inline-block;*enabled:inline;*zoom:1;padding:6px;color:" + this.fontColor + ";line-height:1.5"
-        this._tipDom.style.cssText += "; box-shadow:1px 1px 3px " + this.strokeStyle + ";"
-        this._tipDom.style.cssText += "; border:none;white-space:nowrap;word-wrap:normal;"
-        this._tipDom.style.cssText += "; text-align:left;pointer-events:none;"
-        this._tipDom.style.cssText += "; -webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;"
-        this.tipDomContainer && this.tipDomContainer.appendChild(this._tipDom);
+        if( document ){
+            let _tipDom = document.createElement("div");
+            _tipDom.className = "chart-tips";
+            _tipDom.style.cssText += "; border-radius:" + this.borderRadius + "px;background:" + this.fillStyle + ";border:1px solid " + this.strokeStyle + ";visibility:hidden;position:fixed;enabled:inline-block;*enabled:inline;*zoom:1;padding:6px;color:" + this.fontColor + ";line-height:1.5"
+            _tipDom.style.cssText += "; box-shadow:1px 1px 3px " + this.strokeStyle + ";"
+            _tipDom.style.cssText += "; border:none;white-space:nowrap;word-wrap:normal;"
+            _tipDom.style.cssText += "; text-align:left;pointer-events:none;"
+            _tipDom.style.cssText += "; -webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;"
+            this.tipDomContainer && this.tipDomContainer.appendChild(_tipDom);
+            return _tipDom;
+        }
     }
 
     _removeContent() {
@@ -237,13 +232,16 @@ class Tips extends Component {
         };
 
         if (!this._tipDom) {
-            this._creatTipDom(e)
+            this._tipDom = this._creatTipDom(e)
         };
 
-        this._tipDom.innerHTML = tipxContent;
-        this.dW = this._tipDom.offsetWidth;
-        this.dH = this._tipDom.offsetHeight;
-
+        //小程序等场景就无法创建_tipDom
+        if( this._tipDom ){
+            this._tipDom.innerHTML = tipxContent;
+            this.dW = this._tipDom.offsetWidth;
+            this.dH = this._tipDom.offsetHeight;
+        };
+        
         return tipxContent
     }
 
@@ -344,6 +342,13 @@ class Tips extends Component {
         if (!_coord || _coord.type != 'rect') return;
 
         if (!this.pointer) return;
+
+        //自动检测到如果数据里有一个柱状图的数据， 那么就启用region的pointer
+        e.eventInfo.nodes.forEach(node => {
+            if(node.type == "bar"){
+                this.pointer = "region"
+            }
+        });
 
         let el = this._tipsPointer;
         let y = _coord.origin.y - _coord.height;

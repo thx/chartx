@@ -620,9 +620,10 @@ function (_event$Dispatcher) {
       var me = this;
       var fill_gradient = null; // _fillStyle 可以 接受渐变色，可以不用_getColor， _getColor会过滤掉渐变色
 
-      var _fillStyle = me._getProp(me.area.fillStyle) || me._getLineStrokeStyle(null, "fillStyle");
+      var _fillStyle = me._getProp(me.area.fillStyle) || me._getLineStrokeStyle(null, "fillStyle"); //fillStyle instanceof CanvasGradient 在小程序里会出错。改用fillStyle.addColorStop来嗅探
 
-      if (_.isArray(me.area.alpha) && !(_fillStyle instanceof CanvasGradient)) {
+
+      if (_.isArray(me.area.alpha) && !_fillStyle.addColorStop) {
         //alpha如果是数组，那么就是渐变背景，那么就至少要有两个值
         //如果拿回来的style已经是个gradient了，那么就不管了
         me.area.alpha.length = 2;

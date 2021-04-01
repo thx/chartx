@@ -93,9 +93,14 @@ class Legend extends Component
                     }
                 }
             },
+
+            triggerEventType: {
+                detail: '触发事件',
+                default:'click,tap'
+            },
             
             activeEnabled: {
-                detail: '是否启动图例的',
+                detail: '是否启动图例的交互事件',
                 default: true
             },
             tipsEnabled: {
@@ -338,7 +343,7 @@ class Legend extends Component
 
             sprite.on( event.types.get() , function( e ){
 
-                if( e.type == "click" && me.activeEnabled ){
+                if( me.triggerEventType.indexOf( e.type ) > -1 && me.activeEnabled ){
                     //只有一个field的时候，不支持取消
                     if( _.filter( me.data , function(obj){return obj.enabled} ).length == 1 ){
                         if( obj.enabled ){

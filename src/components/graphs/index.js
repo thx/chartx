@@ -36,7 +36,7 @@ export default class GraphsBase extends Component
         //这里所有的opts都要透传给 group
         this._opt = opt || {};
         this.app = app;
-        this.ctx = app.stage.canvas.getContext("2d");
+        this.ctx = app.stage.ctx || app.stage.canvas.getContext("2d");
         this.dataFrame = app.dataFrame; //app.dataFrame的引用
 
         this.data   = null; //没个graphs中自己_trimGraphs的数据
