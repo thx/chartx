@@ -306,8 +306,8 @@ class PieGraphs extends GraphsBase
                     let cosV = Math.cos((me.currentAngle + angle / 2) / 180 * Math.PI);
                     let sinV = Math.sin((me.currentAngle + angle / 2) / 180 * Math.PI);
                     let midAngle = me.currentAngle + angle / 2;
-                    cosV = cosV.toFixed(5);
-                    sinV = sinV.toFixed(5);
+                    //cosV = cosV.toFixed(5);
+                    //sinV = sinV.toFixed(5);
                     let quadrant = function (ang) {
                         if (ang >= limitAngle) {
                             ang = limitAngle;

@@ -353,9 +353,8 @@ function (_GraphsBase) {
             var endAngle = me.currentAngle + angle > limitAngle ? limitAngle : me.currentAngle + angle;
             var cosV = Math.cos((me.currentAngle + angle / 2) / 180 * Math.PI);
             var sinV = Math.sin((me.currentAngle + angle / 2) / 180 * Math.PI);
-            var midAngle = me.currentAngle + angle / 2;
-            cosV = cosV.toFixed(5);
-            sinV = sinV.toFixed(5);
+            var midAngle = me.currentAngle + angle / 2; //cosV = cosV.toFixed(5);
+            //sinV = sinV.toFixed(5);
 
             var quadrant = function (ang) {
               if (ang >= limitAngle) {

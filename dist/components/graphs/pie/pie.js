@@ -131,7 +131,8 @@ function (_event$Dispatcher) {
         me.textSp && me.sprite.addChild(me.textSp);
 
         for (var i = 0; i < list.length; i++) {
-          var item = list[i]; //扇形主体          
+          var item = list[i];
+          debugger; //扇形主体          
 
           var sector = new Sector({
             hoverClone: false,

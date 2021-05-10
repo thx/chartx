@@ -113,7 +113,7 @@ export default class Pie extends event.Dispatcher
             me.textSp && me.sprite.addChild(me.textSp);
             for (let i = 0; i < list.length; i++) {
                 let item = list[i];
-            
+            debugger
                 //扇形主体          
                 let sector = new Sector({
                     hoverClone: false,
