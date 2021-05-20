@@ -477,6 +477,7 @@ function (_event$Dispatcher) {
 
       var preDataLenth = this.dataFrame.org.length;
       this.dataFrame.resetData(data);
+      console.log(this.dataFrame);
       var graphsList = this.getComponents({
         name: 'graphs'
       });

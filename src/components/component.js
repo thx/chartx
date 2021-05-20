@@ -45,6 +45,8 @@ export default class Component extends event.Dispatcher
             top: 0, right: 0, bottom: 0, left: 0
         };
         this.__cid =  Canvax.utils.createId("comp_");
+
+        this.ctx = app.stage.ctx || app.stage.canvas.getContext("2d");
         
     }
 

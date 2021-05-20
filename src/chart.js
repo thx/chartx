@@ -395,6 +395,8 @@ class Chart extends event.Dispatcher
         let preDataLenth = this.dataFrame.org.length;
 
         this.dataFrame.resetData( data );
+ 
+        console.log( this.dataFrame )
 
         let graphsList = this.getComponents({name:'graphs'});
         let allGraphsHasResetData = true;

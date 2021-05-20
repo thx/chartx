@@ -6,14 +6,20 @@ import {getDefaultProps} from "../utils/tools"
 class axis {
     static defaultProps(){
         return {
+            
             layoutType : {
                 detail : '布局方式',
                 default: 'proportion'
+            },
+            axisLength : {
+                detail : '轴长度',
+                default: 1
             },
             dataSection : {
                 detail : '轴数据集',
                 default: []
             },
+
             sectionHandler : {
                 detail : '自定义dataSection的计算公式',
                 default: null
@@ -26,7 +32,7 @@ class axis {
             middleWeight : {
                 detail : '区间分隔线',
                 default: null,
-                documentation: '如果middleweight有设置的话 dataSectionGroup 为被middleweight分割出来的n个数组>..[ [0,50 , 100],[100,500,1000] ]'
+                documentation: '如果middleweight有设置的话 _dataSectionGroup 为被middleweight分割出来的n个数组>..[ [0,50 , 100],[100,500,1000] ]'
             },
             middleWeightPos : {
                 detail : '区间分隔线的物理位置，百分比,默认 0.5 ',
@@ -71,21 +77,15 @@ class axis {
         //        [1,2,3] 
         //    ]   
         // ]
-        this._opt = _.clone(opt);
+        this._opt    = _.clone(opt);
+
         this.dataOrg = dataOrg || [];
         
-        //3d中有引用到
-        this.dataSectionLayout = []; //和dataSection一一对应的，每个值的pos，//get xxx OfPos的时候，要先来这里做一次寻找
-
-        //轴总长
-        //3d中有引用到
-        this.axisLength = 1;
-
+        this._dataSectionLayout = []; //和dataSection一一对应的，每个值的pos，//get xxx OfPos的时候，要先来这里做一次寻找
         this._cellCount = null;
         this._cellLength = null; //数据变动的时候要置空
-
-        //默认的 dataSectionGroup = [ dataSection ], dataSection 其实就是 dataSectionGroup 去重后的一维版本
-        this.dataSectionGroup = [];
+        //默认的 _dataSectionGroup = [ dataSection ], dataSection 其实就是 _dataSectionGroup 去重后的一维版本
+        this._dataSectionGroup = [];
 
         this.originPos = 0; //value为 origin 对应的pos位置
         this._originTrans = 0;//当设置的 origin 和datasection的min不同的时候，
@@ -102,7 +102,7 @@ class axis {
         //配置和数据变化
 
         this.dataSection = [];
-        this.dataSectionGroup = [];
+        this._dataSectionGroup = [];
 
         this.dataOrg = dataOrg;
 
@@ -149,7 +149,7 @@ class axis {
 
 
         //get xxx OfPos的时候，要先来这里做一次寻找
-        this.dataSectionLayout = [];
+        this._dataSectionLayout = [];
         _.each(this.dataSection, function (val, i) {
 
             let ind = i;
@@ -162,7 +162,7 @@ class axis {
                 val: val
             }), 10);
 
-            me.dataSectionLayout.push({
+            me._dataSectionLayout.push({
                 val: val,
                 ind: ind,
                 pos: pos
@@ -241,7 +241,7 @@ class axis {
                 };
 
                 //如果有 middleWeight 设置，就会重新设置dataSectionGroup
-                this.dataSectionGroup = [_.clone(this.dataSection)];
+                this._dataSectionGroup = [_.clone(this.dataSection)];
 
                 this._middleweight(); //如果有middleweight配置，需要根据配置来重新矫正下datasection
 
@@ -251,12 +251,12 @@ class axis {
 
                 //非proportion 也就是 rule peak 模式下面
                 this.dataSection = _.flatten(this.dataOrg);//this._getDataSection();
-                this.dataSectionGroup = [this.dataSection];
+                this._dataSectionGroup = [this.dataSection];
 
             };
         } else {
             this.dataSection = _dataSection || this._opt.dataSection;
-            this.dataSectionGroup = [this.dataSection];
+            this._dataSectionGroup = [this.dataSection];
         };
 
         //middleWeightPos在最后设定
@@ -363,12 +363,12 @@ class axis {
 
                 this.dataSection.reverse();
 
-                //dataSectionGroup 从里到外全部都要做一次 reverse， 这样就可以对应上 dataSection.reverse()
-                _.each(this.dataSectionGroup, function (dsg) {
+                //_dataSectionGroup 从里到外全部都要做一次 reverse， 这样就可以对应上 dataSection.reverse()
+                _.each(this._dataSectionGroup, function (dsg) {
                     dsg.reverse();
                 });
-                this.dataSectionGroup.reverse();
-                //dataSectionGroup reverse end
+                this._dataSectionGroup.reverse();
+                //_dataSectionGroup reverse end
             };
         };
     }
@@ -428,7 +428,7 @@ class axis {
 
             //好了。 到这里用简单的规则重新拼接好了新的 dataSection
             this.dataSection = newDS;
-            this.dataSectionGroup = newDSG;
+            this._dataSectionGroup = newDSG;
 
         }
     }
@@ -472,12 +472,12 @@ class axis {
     _getOriginTrans(origin) {
         let pos = 0;
         let me = this;
-        let dsgLen = this.dataSectionGroup.length;
+        let dsgLen = this._dataSectionGroup.length;
         let groupLength = this.axisLength / dsgLen;
 
         for ( let i = 0, l = dsgLen; i < l; i++ ) {
 
-            let ds = this.dataSectionGroup[i];
+            let ds = this._dataSectionGroup[i];
 
             groupLength = this.axisLength * this.middleWeightPos[i];
             let preGroupLenth = 0;
@@ -533,7 +533,7 @@ class axis {
         });
 
         let layoutData;
-        _.each(this.dataSectionLayout, function (item) {
+        _.each(this._dataSectionLayout, function (item) {
             if (item[prop] === opt[prop]) {
                 layoutData = item;
             };
@@ -545,7 +545,7 @@ class axis {
     getPosOfVal(val) {
 
         /* val可能会重复，so 这里得到的会有问题，先去掉
-        //先检查下 dataSectionLayout 中有没有对应的记录
+        //先检查下 _dataSectionLayout 中有没有对应的记录
         let _pos = this._getLayoutDataOf({ val : val }).pos;
         if( _pos != undefined ){
             return _pos;
@@ -557,7 +557,7 @@ class axis {
         });
     }
     getPosOfInd(ind) {
-        //先检查下 dataSectionLayout 中有没有对应的记录
+        //先检查下 _dataSectionLayout 中有没有对应的记录
         let _pos = this._getLayoutDataOf({ ind: ind }).pos;
         if (_pos != undefined) {
             return _pos;
@@ -577,11 +577,10 @@ class axis {
 
         if (this.layoutType == "proportion") {
 
-            let dsgLen = this.dataSectionGroup.length;
-            //let groupLength = this.axisLength / dsgLen;
+            let dsgLen = this._dataSectionGroup.length;
 
             for (let i = 0, l = dsgLen; i < l; i++) {
-                let ds = this.dataSectionGroup[i];
+                let ds = this._dataSectionGroup[i];
 
                 let groupLength = this.axisLength * this.middleWeightPos[i];
                 let preGroupLenth = 0;
@@ -663,7 +662,7 @@ class axis {
     }
 
     getValOfPos(pos) {
-        //先检查下 dataSectionLayout 中有没有对应的记录
+        //先检查下 _dataSectionLayout 中有没有对应的记录
         let _val = this._getLayoutDataOf({ pos: pos }).val;
         if (_val != undefined) {
             return _val;
@@ -675,7 +674,7 @@ class axis {
     //ds可选
     getValOfInd(ind) {
 
-        //先检查下 dataSectionLayout 中有没有对应的记录
+        //先检查下 _dataSectionLayout 中有没有对应的记录
         let _val = this._getLayoutDataOf({ ind: ind }).val;
         if (_val != undefined) {
             return _val;
@@ -704,10 +703,10 @@ class axis {
 
         if (this.layoutType == "proportion") {
 
-            //let dsgLen = this.dataSectionGroup.length;
+            //let dsgLen = this._dataSectionGroup.length;
             //let groupLength = this.axisLength / dsgLen;
 
-            _.each(this.dataSectionGroup, function (ds, i) {
+            _.each(this._dataSectionGroup, function (ds, i) {
 
                 let groupLength = me.axisLength * me.middleWeightPos[i];
                 let preGroupLenth = 0;
@@ -717,7 +716,7 @@ class axis {
                     };
                 } );
 
-                if (parseInt(ind / groupLength) == i || i == me.dataSectionGroup.length - 1) {
+                if (parseInt(ind / groupLength) == i || i == me._dataSectionGroup.length - 1) {
                     let min = _.min(ds);
                     let max = _.max(ds);
                     val = min + (max - min) / groupLength * (ind - preGroupLenth);
@@ -733,7 +732,7 @@ class axis {
 
     getIndexOfPos(pos) {
 
-        //先检查下 dataSectionLayout 中有没有对应的记录
+        //先检查下 _dataSectionLayout 中有没有对应的记录
         let _ind = this._getLayoutDataOf({ pos: pos }).ind;
         if (_ind != undefined) {
             return _ind;
@@ -773,7 +772,7 @@ class axis {
         let valInd = -1;
         if (this.layoutType == "proportion") {
 
-            //先检查下 dataSectionLayout 中有没有对应的记录
+            //先检查下 _dataSectionLayout 中有没有对应的记录
             let _ind = this._getLayoutDataOf({ val: val }).ind;
             if (_ind != undefined) {
                 return _ind;

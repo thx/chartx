@@ -85,6 +85,7 @@ function (_event$Dispatcher) {
       left: 0
     };
     _this.__cid = _canvax["default"].utils.createId("comp_");
+    _this.ctx = app.stage.ctx || app.stage.canvas.getContext("2d");
     return _this;
   }
 
