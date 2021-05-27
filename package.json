@@ -54,7 +54,7 @@
   "dependencies": {
     "canvax": "2.0.70",
     "fmin": "0.0.2",
-    "d3-force": "^2.0.1",
+    "d3-force": "^2.1.1",
     "vec2":"1.6.1"
   },
   "scripts": {

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
+<title>xChart demo -- bar</title>
+
+<script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
+<script type="text/javascript" src="../../dist/index.iife.js"></script>
+<!-- codemirror -->
+<script type="text/javascript" src="../../lib/codemirror/codemirror.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/active-line.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/javascript.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/matchbrackets.js"></script>
+<link rel="stylesheet" href="../../lib/codemirror/codemirror.css">
+<link rel="stylesheet" href="../../lib/codemirror/zenburn.css">
+<link rel="stylesheet" href="../../lib/codemirror/docs.css">
+<!-- codemirror end -->
+<!--bootstrap-->
+<script type="text/javascript" src="../../lib/bootstrap/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap-theme.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/docs.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap.min.css">
+<!--bootstrap end-->
+<script type="text/javascript" src="../../lib/demo.js"></script>
+<link rel="stylesheet" href="../../lib/demo.css">
+</head>
+<body >
+
+<table>
+    <tr>
+        <td id="td-vl">
+            <form><textarea id="code" name="code">
+
+//chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
+//第一行
+var data = [
+    {"label":"干皮","type":"opinion","key":1,"value":""},
+    {"label":"平衡","type":"opinion","key":2,"value":null},
+    {"label":"Avon/雅芳","type":"brand","key":3,"value":null},
+    {"label":"Herborist/佰草集","type":"brand","key":4,"value":null},
+    {"label":"AUPRES/欧珀莱","type":"brand","key":5,"value":null},
+    {"label":"Avene/雅漾","type":"brand","key":6,"value":null},
+    {"label":"Chanel/香奈儿","type":"brand","key":7,"value":null},
+    {"label":"LG","type":"brand","key":8,"value":null},
+    {"label":null,"type":"data","key":"2,4","value":4.9375},
+    {"label":null,"type":"data","key":"1,4","value":5.0625},
+    {"label":null,"type":"data","key":"2,3","value":0.5282051282051282},
+    {"label":null,"type":"data","key":"1,3","value":4.717948717948718},
+    {"label":null,"type":"data","key":"2,5","value":0.48296593186372744},
+    {"label":null,"type":"data","key":"1,5","value":5.170340681362725},
+    {"label":null,"type":"data","key":"2,7","value":49.75845410628019},
+    {"label":null,"type":"data","key":"1,7","value":0.5024154589371981},
+    {"label":null,"type":"data","key":"2,6","value":0.5188724319159101},
+    {"label":null,"type":"data","key":"1,6","value":0.4811275680840898},
+    {"label":null,"type":"data","key":"2,8","value":0.5}
+];
+var options = {
+    graphs: {
+      type: 'force',
+      keyField: 'key',
+      node: {
+        fillStyle(e) {
+            const colorMap = {
+                'opinion':'#d1dcfd',
+                'brand':'#55D4B6' 
+            }
+            return colorMap[e.rowData.type]
+        } 
+      },
+      label: {
+          field: 'label'
+      }
+    },
+    tips: {},
+  };
+
+window.bar = chartx.create("canvasTest" , data , options)
+
+            </textarea></form>
+        </td>
+        <td style="padding:0 10px;" id="td-vr">
+            <div id="chartdemo-r">
+            <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
+                <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
+
+                <h4>关系图</h4>
+                <p>
+                    联系人：@释剑
+                </p>
+            </div>
+            <div  class="test-c">
+                <div id="canvasTest" style='width:600px;height:600px;position:relative;border:1px solid #fafafa;'></div>
+            </div>
+
+            </div>
+        </td>
+    </tr>
+</table>
+
+    
+</body> 
+</html>
+
+

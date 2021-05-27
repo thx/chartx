@@ -71,6 +71,7 @@ class LineGraphs extends GraphsBase
     {
         
         let me = this;
+        
         if( dataFrame ){
             me.dataFrame = dataFrame;
             me.data = me._trimGraphs();

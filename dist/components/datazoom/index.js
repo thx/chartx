@@ -48,7 +48,7 @@ function (_Component) {
         },
         height: {
           detail: '高',
-          "default": 26
+          "default": 24
         },
         width: {
           detail: '宽',
@@ -786,14 +786,14 @@ function (_Component) {
 
           ;
 
-          if (this.context.x > me._btnRight.context.x - me.btnWidth - 2) {
-            this.context.x = me._btnRight.context.x - me.btnWidth - 2;
+          if (this.context.x > me._btnRight.context.x - me.btnWidth) {
+            this.context.x = me._btnRight.context.x - me.btnWidth;
           }
 
           ;
 
-          if (me._btnRight.context.x + me.btnWidth - this.context.x >= me.disPart.max) {
-            this.context.x = me._btnRight.context.x + me.btnWidth - me.disPart.max;
+          if (me._btnRight.context.x + me.btnWidth - this.context.x > me.disPart.max) {
+            this.context.x = me._btnRight.context.x + me.btnWidth - me.disPart.max - 1;
           }
 
           if (me._btnRight.context.x + me.btnWidth - this.context.x < me.disPart.min) {
@@ -821,7 +821,7 @@ function (_Component) {
 
       ;
       var btnRightCtx = {
-        x: me._getRangeEnd() / me.count * me.width - me.btnWidth,
+        x: me._getRangeEnd() / me.count * me.width - me.btnWidth + 1,
         y: -me.btnOut / 2 + 1,
         width: me.btnWidth,
         height: me.btnHeight + me.btnOut,
@@ -845,13 +845,13 @@ function (_Component) {
           this.context.y = -me.btnOut / 2 + 1;
 
           if (this.context.x > me.width - me.btnWidth) {
-            this.context.x = me.width - me.btnWidth;
+            this.context.x = me.width - me.btnWidth + 1;
           }
 
           ;
 
-          if (this.context.x + me.btnWidth - me._btnLeft.context.x >= me.disPart.max) {
-            this.context.x = me.disPart.max - (me.btnWidth - me._btnLeft.context.x);
+          if (this.context.x + me.btnWidth - me._btnLeft.context.x > me.disPart.max) {
+            this.context.x = me.disPart.max - (me.btnWidth - me._btnLeft.context.x) + 1;
           }
 
           ;

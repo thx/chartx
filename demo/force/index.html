@@ -175,15 +175,14 @@ var data = [
 var options = {
     graphs : {
         type     : "force",
-        keyField    : "key",
+        keyField : "key",
         node : {
-            content : {
-                field : "label"
-            },
             fillStyle: 'color'
+        },
+        label: {
+            field: 'label'
         }
     },
-    miniMap : {},
     tips    : {}
 };
 
@@ -202,7 +201,7 @@ window.bar = chartx.create("canvasTest" , data , options)
                 </p>
             </div>
             <div  class="test-c">
-                <div id="canvasTest" style='width:600px;height:600px;position:relative;border:1px solid #fafafa;background:#323334;'></div>
+                <div id="canvasTest" style='width:600px;height:600px;position:relative;border:1px solid #fafafa;'></div>
             </div>
 
             </div>

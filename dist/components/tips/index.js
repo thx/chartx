@@ -346,7 +346,7 @@ function (_Component) {
           };
           */
           var style = node.color || node.fillStyle || node.strokeStyle;
-          var name = node.name || node.field || node.content;
+          var name = node.name || node.field || node.content || node.label;
           var value = (0, _typeof2["default"])(node.value) == "object" ? JSON.stringify(node.value) : (0, _tools.numAddSymbol)(node.value);
           var hasVal = node.value || node.value == 0;
           str += "<div style='line-height:1.5;font-size:12px;padding:0 4px;'>";
