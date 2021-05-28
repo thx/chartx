@@ -56,8 +56,8 @@ function (_Component) {
 
         },
         color: {
-          detail: '颜色',
-          "default": '#008ae6'
+          detail: '拖拽轴的主题颜色，比如其他按钮如果没有单独设置颜色，就继承该值',
+          "default": '#809fff'
         },
         shapeType: {
           detail: '背景的图形形状,可选rect，triangle',
@@ -176,7 +176,7 @@ function (_Component) {
         },
         btnOut: {
           detail: 'left,right按钮突出的大小',
-          "default": 6
+          "default": 4
         },
         btnHeight: {
           detail: 'left,right按钮高',

@@ -56,6 +56,10 @@ function (_GraphsBase) {
             strokeStyle: {
               detail: '线颜色',
               "default": null
+            },
+            lineType: {
+              detail: '线条样式,默认solid，可选dashed',
+              "default": 'solid'
             }
           }
         },
@@ -160,7 +164,9 @@ function (_GraphsBase) {
 
         var fieldMap = _coord.getFieldMapOf(field);
 
-        var _strokeStyle = me._getStyle(me.line.strokeStyle, iGroup, fieldMap.color, fieldMap);
+        var _strokeStyle = me._getStyle(me.line.strokeStyle, fieldMap, iGroup, fieldMap.color);
+
+        var _lineType = me._getStyle(me.line.lineType, fieldMap, iGroup, fieldMap.color);
 
         var polyCtx = {
           pointList: pointList,
@@ -170,13 +176,14 @@ function (_GraphsBase) {
         if (me.line.enabled) {
           polyCtx.lineWidth = me.line.lineWidth;
           polyCtx.strokeStyle = _strokeStyle;
+          polyCtx.lineType = _lineType;
         }
 
         ;
 
         if (me.area.enabled) {
-          polyCtx.fillStyle = me._getStyle(me.area.fillStyle, iGroup, fieldMap.color, fieldMap);
-          polyCtx.fillAlpha = me._getStyle(me.area.fillAlpha, iGroup, 1, fieldMap);
+          polyCtx.fillStyle = me._getStyle(me.area.fillStyle, fieldMap, iGroup, fieldMap.color);
+          polyCtx.fillAlpha = me._getStyle(me.area.fillAlpha, fieldMap, iGroup, 1);
         }
 
         ;
@@ -389,7 +396,7 @@ function (_GraphsBase) {
     }
   }, {
     key: "_getStyle",
-    value: function _getStyle(style, iGroup, def, fieldMap) {
+    value: function _getStyle(style, fieldMap, iGroup, def) {
       var _s = def;
 
       if (_.isString(style) || _.isNumber(style)) {

@@ -14,12 +14,12 @@ class Cross extends Component
             aimPoint : {
                 detail : '准心位置',
                 propertys : {
-                    x : {
-                        detail : 'x',
+                    xVal : {
+                        detail : '准心x轴value',
                         default: null
                     },
-                    y : {
-                        detail : 'y',
+                    yVal : {
+                        detail : '准心y轴value',
                         default: null
                     }
                 }
@@ -93,7 +93,6 @@ class Cross extends Component
     }
 
     reset(opt){
-        debugger
         opt && _.extend(true, this, opt);
         this._widget();
     }
@@ -111,7 +110,7 @@ class Cross extends Component
         let width  = _coord.width;
         let height = _coord.height;
 
-        let xVal = this.aimPoint.x;
+        let xVal = this.aimPoint.xVal;
         let x    = 0;
         if( xVal == null || xVal == undefined ){
             x = parseInt(width/2);
@@ -119,7 +118,7 @@ class Cross extends Component
             x = _coord._xAxis.getPosOfVal( xVal );
         }
 
-        let yVal = this.aimPoint.y;
+        let yVal = this.aimPoint.yVal;
         let y    = 0;
         if( xVal == null || xVal == undefined ){
             y = parseInt(height/2);
@@ -182,13 +181,13 @@ class Cross extends Component
         // TODO 四象限背景，待实现
         // for( let i=0,l=4; i<l; i++ ){
         //     let _x = 0,_y=0;
-        //     let _width = width - this.aimPoint.x;
+        //     let _width = width - this.aimPoint.xVal;
         //     if( i % 2 ){
-        //         _width = this.aimPoint.x;
+        //         _width = this.aimPoint.xVal;
         //     }
-        //     let _height= height - this.aimPoint.y;
+        //     let _height= height - this.aimPoint.yVal;
         //     if( i<2 ){
-        //         _height= this.aimPoint.y;
+        //         _height= this.aimPoint.yVal;
         //     };
 
         //     let rectCtx = {

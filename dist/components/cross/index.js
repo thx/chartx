@@ -40,12 +40,12 @@ function (_Component) {
         aimPoint: {
           detail: '准心位置',
           propertys: {
-            x: {
-              detail: 'x',
+            xVal: {
+              detail: '准心x轴value',
               "default": null
             },
-            y: {
-              detail: 'y',
+            yVal: {
+              detail: '准心y轴value',
               "default": null
             }
           }
@@ -129,7 +129,6 @@ function (_Component) {
   }, {
     key: "reset",
     value: function reset(opt) {
-      debugger;
       opt && _.extend(true, this, opt);
 
       this._widget();
@@ -150,7 +149,7 @@ function (_Component) {
       this.setPosition();
       var width = _coord.width;
       var height = _coord.height;
-      var xVal = this.aimPoint.x;
+      var xVal = this.aimPoint.xVal;
       var x = 0;
 
       if (xVal == null || xVal == undefined) {
@@ -159,7 +158,7 @@ function (_Component) {
         x = _coord._xAxis.getPosOfVal(xVal);
       }
 
-      var yVal = this.aimPoint.y;
+      var yVal = this.aimPoint.yVal;
       var y = 0;
 
       if (xVal == null || xVal == undefined) {
@@ -225,13 +224,13 @@ function (_Component) {
       ; // TODO 四象限背景，待实现
       // for( let i=0,l=4; i<l; i++ ){
       //     let _x = 0,_y=0;
-      //     let _width = width - this.aimPoint.x;
+      //     let _width = width - this.aimPoint.xVal;
       //     if( i % 2 ){
-      //         _width = this.aimPoint.x;
+      //         _width = this.aimPoint.xVal;
       //     }
-      //     let _height= height - this.aimPoint.y;
+      //     let _height= height - this.aimPoint.yVal;
       //     if( i<2 ){
-      //         _height= this.aimPoint.y;
+      //         _height= this.aimPoint.yVal;
       //     };
       //     let rectCtx = {
       //         width : _width,
