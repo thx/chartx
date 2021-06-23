@@ -9,21 +9,25 @@ exports["default"] = void 0;
 
 var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
-var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
-
-var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
 
 var _assertThisInitialized2 = _interopRequireDefault(require("@babel/runtime/helpers/assertThisInitialized"));
 
-var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
-
 var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
 
 var _canvax = _interopRequireDefault(require("canvax"));
 
 var _tools = require("../../../utils/tools");
 
 var _color = require("../../../utils/color");
+
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
 
 var _ = _canvax["default"]._,
     event = _canvax["default"].event;
@@ -33,137 +37,16 @@ var Circle = _canvax["default"].Shapes.Circle;
 var Isogon = _canvax["default"].Shapes.Isogon;
 var Path = _canvax["default"].Shapes.Path;
 
-var LineGraphsGroup =
-/*#__PURE__*/
-function (_event$Dispatcher) {
+var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
   (0, _inherits2["default"])(LineGraphsGroup, _event$Dispatcher);
-  (0, _createClass2["default"])(LineGraphsGroup, null, [{
-    key: "defaultProps",
-    value: function defaultProps() {
-      return {
-        line: {
-          detail: '线配置',
-          propertys: {
-            enabled: {
-              detail: '是否开启',
-              "default": true
-            },
-            strokeStyle: {
-              detail: '线的颜色',
-              "default": undefined //不会覆盖掉constructor中的定义
 
-            },
-            lineWidth: {
-              detail: '线的宽度',
-              "default": 2
-            },
-            lineType: {
-              detail: '线的样式',
-              "default": 'solid'
-            },
-            smooth: {
-              detail: '是否平滑处理',
-              "default": true
-            }
-          }
-        },
-        node: {
-          detail: '单个数据节点配置，对应线上的小icon图形',
-          propertys: {
-            enabled: {
-              detail: '是否开启',
-              "default": true
-            },
-            shapeType: {
-              detail: '节点icon的图形类型，默认circle',
-              documentation: '可选有"isogon"(正多边形)，"path"（自定义path路径，待实现）',
-              "default": 'circle'
-            },
-            isogonPointNum: {
-              detail: 'shapeType为"isogon"时有效，描述正多边形的边数',
-              "default": 3
-            },
-            path: {
-              detail: 'shapeType为path的时候，描述图形的path路径',
-              "default": null
-            },
-            corner: {
-              detail: '拐角才有节点',
-              "default": false
-            },
-            radius: {
-              detail: '节点半径',
-              "default": 3
-            },
-            fillStyle: {
-              detail: '节点图形的背景色',
-              "default": '#ffffff'
-            },
-            strokeStyle: {
-              detail: '节点图形的描边色，默认和line.strokeStyle保持一致',
-              "default": null
-            },
-            lineWidth: {
-              detail: '节点图形边宽大小',
-              "default": 2
-            },
-            visible: {
-              detail: '节点是否显示,支持函数',
-              "default": true
-            }
-          }
-        },
-        label: {
-          detail: '文本配置',
-          propertys: {
-            enabled: {
-              detail: '是否开启',
-              "default": false
-            },
-            fontColor: {
-              detail: '文本颜色',
-              "default": null
-            },
-            strokeStyle: {
-              detail: '文本描边色',
-              "default": null
-            },
-            fontSize: {
-              detail: '文本字体大小',
-              "default": 12
-            },
-            format: {
-              detail: '文本格式化处理函数',
-              "default": null
-            }
-          }
-        },
-        area: {
-          detail: '面积区域配置',
-          propertys: {
-            enabled: {
-              detail: '是否开启',
-              "default": true
-            },
-            fillStyle: {
-              detail: '面积背景色',
-              "default": null
-            },
-            alpha: {
-              detail: '面积透明度',
-              "default": 0.2
-            }
-          }
-        }
-      };
-    }
-  }]);
+  var _super = _createSuper(LineGraphsGroup);
 
   function LineGraphsGroup(fieldMap, iGroup, opt, ctx, h, w, _graphs) {
     var _this;
 
     (0, _classCallCheck2["default"])(this, LineGraphsGroup);
-    _this = (0, _possibleConstructorReturn2["default"])(this, (0, _getPrototypeOf2["default"])(LineGraphsGroup).call(this));
+    _this = _super.call(this);
     _this._graphs = _graphs;
     _this._opt = opt;
     _this.fieldMap = fieldMap;
@@ -1058,6 +941,126 @@ function (_event$Dispatcher) {
         color: me._getProp(me.node.strokeStyle) || me._getLineStrokeStyle()
       };
       return node;
+    }
+  }], [{
+    key: "defaultProps",
+    value: function defaultProps() {
+      return {
+        line: {
+          detail: '线配置',
+          propertys: {
+            enabled: {
+              detail: '是否开启',
+              "default": true
+            },
+            strokeStyle: {
+              detail: '线的颜色',
+              "default": undefined //不会覆盖掉constructor中的定义
+
+            },
+            lineWidth: {
+              detail: '线的宽度',
+              "default": 2
+            },
+            lineType: {
+              detail: '线的样式',
+              "default": 'solid'
+            },
+            smooth: {
+              detail: '是否平滑处理',
+              "default": true
+            }
+          }
+        },
+        node: {
+          detail: '单个数据节点配置，对应线上的小icon图形',
+          propertys: {
+            enabled: {
+              detail: '是否开启',
+              "default": true
+            },
+            shapeType: {
+              detail: '节点icon的图形类型，默认circle',
+              documentation: '可选有"isogon"(正多边形)，"path"（自定义path路径，待实现）',
+              "default": 'circle'
+            },
+            isogonPointNum: {
+              detail: 'shapeType为"isogon"时有效，描述正多边形的边数',
+              "default": 3
+            },
+            path: {
+              detail: 'shapeType为path的时候，描述图形的path路径',
+              "default": null
+            },
+            corner: {
+              detail: '拐角才有节点',
+              "default": false
+            },
+            radius: {
+              detail: '节点半径',
+              "default": 3
+            },
+            fillStyle: {
+              detail: '节点图形的背景色',
+              "default": '#ffffff'
+            },
+            strokeStyle: {
+              detail: '节点图形的描边色，默认和line.strokeStyle保持一致',
+              "default": null
+            },
+            lineWidth: {
+              detail: '节点图形边宽大小',
+              "default": 2
+            },
+            visible: {
+              detail: '节点是否显示,支持函数',
+              "default": true
+            }
+          }
+        },
+        label: {
+          detail: '文本配置',
+          propertys: {
+            enabled: {
+              detail: '是否开启',
+              "default": false
+            },
+            fontColor: {
+              detail: '文本颜色',
+              "default": null
+            },
+            strokeStyle: {
+              detail: '文本描边色',
+              "default": null
+            },
+            fontSize: {
+              detail: '文本字体大小',
+              "default": 12
+            },
+            format: {
+              detail: '文本格式化处理函数',
+              "default": null
+            }
+          }
+        },
+        area: {
+          detail: '面积区域配置',
+          propertys: {
+            enabled: {
+              detail: '是否开启',
+              "default": true
+            },
+            fillStyle: {
+              detail: '面积背景色',
+              "default": null
+            },
+            alpha: {
+              detail: '面积透明度',
+              "default": 0.2
+            }
+          }
+        }
+      };
     }
   }]);
   return LineGraphsGroup;

@@ -9,15 +9,15 @@ exports["default"] = void 0;
 
 var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
-var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
-
-var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
 
 var _assertThisInitialized2 = _interopRequireDefault(require("@babel/runtime/helpers/assertThisInitialized"));
 
-var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
-
 var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
 
 var _canvax = _interopRequireDefault(require("canvax"));
 
@@ -29,6 +29,10 @@ var _dataSection = _interopRequireDefault(require("../../../core/dataSection"));
 
 var _tools = require("../../../utils/tools");
 
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
 var _ = _canvax["default"]._,
     event = _canvax["default"].event;
 var Text = _canvax["default"].Display.Text;
@@ -37,167 +41,16 @@ var Line = _canvax["default"].Shapes.Line;
 var Rect = _canvax["default"].Shapes.Rect;
 var Sector = _canvax["default"].Shapes.Sector;
 
-var PlanetGraphs =
-/*#__PURE__*/
-function (_GraphsBase) {
+var PlanetGraphs = /*#__PURE__*/function (_GraphsBase) {
   (0, _inherits2["default"])(PlanetGraphs, _GraphsBase);
-  (0, _createClass2["default"])(PlanetGraphs, null, [{
-    key: "defaultProps",
-    value: function defaultProps() {
-      return {
-        field: {
-          detail: '字段设置',
-          "default": null
-        },
-        center: {
-          detail: '中心点设置',
-          propertys: {
-            enabled: {
-              detail: '是否显示中心',
-              "default": true
-            },
-            text: {
-              detail: '中心区域文本',
-              "default": 'center'
-            },
-            radius: {
-              detail: '中心圆半径',
-              "default": 30
-            },
-            fillStyle: {
-              detail: '中心背景色',
-              "default": '#70629e'
-            },
-            fontSize: {
-              detail: '中心字体大小',
-              "default": 15
-            },
-            fontColor: {
-              detail: '中心字体颜色',
-              "default": '#ffffff'
-            },
-            margin: {
-              detail: '中区区域和外围可绘图区域距离',
-              "default": 20
-            },
-            cursor: {
-              detail: '中心节点的鼠标手势',
-              "default": 'default'
-            }
-          }
-        },
-        selectInds: {
-          detail: '选中的数据索引',
-          "default": []
-        },
-        grid: {
-          detail: '星系图自己的grid',
-          propertys: {
-            rings: {
-              detail: '环配置',
-              propertys: {
-                fillStyle: {
-                  detail: '背景色',
-                  "default": null
-                },
-                strokeStyle: {
-                  detail: '环线色',
-                  "default": null
-                },
-                lineWidth: {
-                  detail: '环线宽',
-                  "default": 1
-                },
-                count: {
-                  detail: '分几环',
-                  "default": 3
-                }
-              }
-            },
-            rays: {
-              detail: '射线配置',
-              propertys: {
-                count: {
-                  detail: '射线数量',
-                  "default": 0
-                },
-                globalAlpha: {
-                  detail: '线透明度',
-                  "default": 0.4
-                },
-                strokeStyle: {
-                  detail: '线色',
-                  "default": '#10519D'
-                },
-                lineWidth: {
-                  detail: '线宽',
-                  "default": 1
-                }
-              }
-            }
-          }
-        },
-        bewrite: {
-          detail: 'planet的趋势描述',
-          propertys: {
-            enabled: {
-              detail: '是否开启趋势描述',
-              "default": false
-            },
-            text: {
-              detail: '描述文本',
-              "default": null
-            },
-            fontColor: {
-              detail: 'fontColor',
-              "default": '#999'
-            },
-            fontSize: {
-              detail: 'fontSize',
-              "default": 12
-            }
-          }
-        },
-        scan: {
-          detail: '扫描效果',
-          propertys: {
-            enabled: {
-              detail: '是否开启扫描效果',
-              "default": false
-            },
-            fillStyle: {
-              detail: '扫描效果颜色',
-              "default": null //默认取 me._graphs.center.fillStyle
 
-            },
-            alpha: {
-              detail: '起始透明度',
-              "default": 0.6
-            },
-            angle: {
-              detail: '扫描效果的覆盖角度',
-              "default": 90
-            },
-            r: {
-              detail: '扫描效果覆盖的半径',
-              "default": null
-            },
-            repeat: {
-              detail: '扫描次数',
-              "default": 3
-            }
-          }
-        },
-        _props: [_group["default"]]
-      };
-    }
-  }]);
+  var _super = _createSuper(PlanetGraphs);
 
   function PlanetGraphs(opt, app) {
     var _this;
 
     (0, _classCallCheck2["default"])(this, PlanetGraphs);
-    _this = (0, _possibleConstructorReturn2["default"])(this, (0, _getPrototypeOf2["default"])(PlanetGraphs).call(this, opt, app));
+    _this = _super.call(this, opt, app);
     _this.type = "planet";
     _this.groupDataFrames = [];
     _this.groupField = null;
@@ -970,6 +823,156 @@ function (_GraphsBase) {
       });
 
       me._ringGroups = [];
+    }
+  }], [{
+    key: "defaultProps",
+    value: function defaultProps() {
+      return {
+        field: {
+          detail: '字段设置',
+          "default": null
+        },
+        center: {
+          detail: '中心点设置',
+          propertys: {
+            enabled: {
+              detail: '是否显示中心',
+              "default": true
+            },
+            text: {
+              detail: '中心区域文本',
+              "default": 'center'
+            },
+            radius: {
+              detail: '中心圆半径',
+              "default": 30
+            },
+            fillStyle: {
+              detail: '中心背景色',
+              "default": '#70629e'
+            },
+            fontSize: {
+              detail: '中心字体大小',
+              "default": 15
+            },
+            fontColor: {
+              detail: '中心字体颜色',
+              "default": '#ffffff'
+            },
+            margin: {
+              detail: '中区区域和外围可绘图区域距离',
+              "default": 20
+            },
+            cursor: {
+              detail: '中心节点的鼠标手势',
+              "default": 'default'
+            }
+          }
+        },
+        selectInds: {
+          detail: '选中的数据索引',
+          "default": []
+        },
+        grid: {
+          detail: '星系图自己的grid',
+          propertys: {
+            rings: {
+              detail: '环配置',
+              propertys: {
+                fillStyle: {
+                  detail: '背景色',
+                  "default": null
+                },
+                strokeStyle: {
+                  detail: '环线色',
+                  "default": null
+                },
+                lineWidth: {
+                  detail: '环线宽',
+                  "default": 1
+                },
+                count: {
+                  detail: '分几环',
+                  "default": 3
+                }
+              }
+            },
+            rays: {
+              detail: '射线配置',
+              propertys: {
+                count: {
+                  detail: '射线数量',
+                  "default": 0
+                },
+                globalAlpha: {
+                  detail: '线透明度',
+                  "default": 0.4
+                },
+                strokeStyle: {
+                  detail: '线色',
+                  "default": '#10519D'
+                },
+                lineWidth: {
+                  detail: '线宽',
+                  "default": 1
+                }
+              }
+            }
+          }
+        },
+        bewrite: {
+          detail: 'planet的趋势描述',
+          propertys: {
+            enabled: {
+              detail: '是否开启趋势描述',
+              "default": false
+            },
+            text: {
+              detail: '描述文本',
+              "default": null
+            },
+            fontColor: {
+              detail: 'fontColor',
+              "default": '#999'
+            },
+            fontSize: {
+              detail: 'fontSize',
+              "default": 12
+            }
+          }
+        },
+        scan: {
+          detail: '扫描效果',
+          propertys: {
+            enabled: {
+              detail: '是否开启扫描效果',
+              "default": false
+            },
+            fillStyle: {
+              detail: '扫描效果颜色',
+              "default": null //默认取 me._graphs.center.fillStyle
+
+            },
+            alpha: {
+              detail: '起始透明度',
+              "default": 0.6
+            },
+            angle: {
+              detail: '扫描效果的覆盖角度',
+              "default": 90
+            },
+            r: {
+              detail: '扫描效果覆盖的半径',
+              "default": null
+            },
+            repeat: {
+              detail: '扫描次数',
+              "default": 3
+            }
+          }
+        },
+        _props: [_group["default"]]
+      };
     }
   }]);
   return PlanetGraphs;

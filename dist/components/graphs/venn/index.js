@@ -9,15 +9,15 @@ exports["default"] = void 0;
 
 var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
-var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
-
-var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
 
 var _assertThisInitialized2 = _interopRequireDefault(require("@babel/runtime/helpers/assertThisInitialized"));
 
-var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
-
 var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
 
 var _canvax = _interopRequireDefault(require("canvax"));
 
@@ -31,117 +31,26 @@ var _fmin = require("fmin");
 
 var _tools = require("../../../utils/tools");
 
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
 var _ = _canvax["default"]._,
     event = _canvax["default"].event;
 var Text = _canvax["default"].Display.Text;
 var Path = _canvax["default"].Shapes.Path;
 var Circle = _canvax["default"].Shapes.Circle;
 
-var VennGraphs =
-/*#__PURE__*/
-function (_GraphsBase) {
+var VennGraphs = /*#__PURE__*/function (_GraphsBase) {
   (0, _inherits2["default"])(VennGraphs, _GraphsBase);
-  (0, _createClass2["default"])(VennGraphs, null, [{
-    key: "defaultProps",
-    value: function defaultProps() {
-      return {
-        keyField: {
-          detail: 'key字段',
-          "default": 'name'
-        },
-        valueField: {
-          detail: 'value字段',
-          "default": 'value'
-        },
-        node: {
-          detail: '单个节点配置',
-          propertys: {
-            strokeStyle: {
-              detail: '边框颜色',
-              "default": null
-            },
-            lineWidth: {
-              detail: '边框大小',
-              "default": 2
-            },
-            strokeAlpha: {
-              detail: '边框透明度',
-              "default": 0
-            },
-            fillStyle: {
-              detail: '背景色',
-              "default": null
-            },
-            fillAlpha: {
-              detail: '背景透明度',
-              "default": 0.25
-            },
-            focus: {
-              detail: 'hover设置',
-              propertys: {
-                enabled: {
-                  detail: '是否开启',
-                  "default": true
-                },
-                strokeAlpha: {
-                  detail: '边框透明度',
-                  "default": 0.3
-                }
-              }
-            },
-            select: {
-              detail: '选中设置',
-              propertys: {
-                enabled: {
-                  detail: '是否开启',
-                  "default": true
-                },
-                lineWidth: {
-                  detail: '描边宽度',
-                  "default": 2
-                },
-                strokeStyle: {
-                  detail: '描边颜色',
-                  "default": '#666666'
-                }
-              }
-            }
-          }
-        },
-        label: {
-          detail: '文本设置',
-          propertys: {
-            field: {
-              detail: '获取文本的字段',
-              "default": null
-            },
-            fontSize: {
-              detail: '字体大小',
-              "default": 14
-            },
-            fontColor: {
-              detail: '文本颜色',
-              "default": null
-            },
-            fontWeight: {
-              detail: 'fontWeight',
-              "default": 'normal'
-            },
-            showInter: {
-              detail: '是否显示相交部分的文本',
-              "default": true
-            }
-          }
-        }
-      };
-    }
-  }]);
+
+  var _super = _createSuper(VennGraphs);
 
   function VennGraphs(opt, app) {
     var _this;
 
     (0, _classCallCheck2["default"])(this, VennGraphs);
-    _this = (0, _possibleConstructorReturn2["default"])(this, (0, _getPrototypeOf2["default"])(VennGraphs).call(this, opt, app));
+    _this = _super.call(this, opt, app);
     _this.type = "venn";
     _this.vennData = null;
 
@@ -575,6 +484,100 @@ function (_GraphsBase) {
       var nctx = nodeData._node.context;
       nctx.strokeStyle = this.node.strokeStyle;
       nodeData.selected = false;
+    }
+  }], [{
+    key: "defaultProps",
+    value: function defaultProps() {
+      return {
+        keyField: {
+          detail: 'key字段',
+          "default": 'name'
+        },
+        valueField: {
+          detail: 'value字段',
+          "default": 'value'
+        },
+        node: {
+          detail: '单个节点配置',
+          propertys: {
+            strokeStyle: {
+              detail: '边框颜色',
+              "default": null
+            },
+            lineWidth: {
+              detail: '边框大小',
+              "default": 2
+            },
+            strokeAlpha: {
+              detail: '边框透明度',
+              "default": 0
+            },
+            fillStyle: {
+              detail: '背景色',
+              "default": null
+            },
+            fillAlpha: {
+              detail: '背景透明度',
+              "default": 0.25
+            },
+            focus: {
+              detail: 'hover设置',
+              propertys: {
+                enabled: {
+                  detail: '是否开启',
+                  "default": true
+                },
+                strokeAlpha: {
+                  detail: '边框透明度',
+                  "default": 0.3
+                }
+              }
+            },
+            select: {
+              detail: '选中设置',
+              propertys: {
+                enabled: {
+                  detail: '是否开启',
+                  "default": true
+                },
+                lineWidth: {
+                  detail: '描边宽度',
+                  "default": 2
+                },
+                strokeStyle: {
+                  detail: '描边颜色',
+                  "default": '#666666'
+                }
+              }
+            }
+          }
+        },
+        label: {
+          detail: '文本设置',
+          propertys: {
+            field: {
+              detail: '获取文本的字段',
+              "default": null
+            },
+            fontSize: {
+              detail: '字体大小',
+              "default": 14
+            },
+            fontColor: {
+              detail: '文本颜色',
+              "default": null
+            },
+            fontWeight: {
+              detail: 'fontWeight',
+              "default": 'normal'
+            },
+            showInter: {
+              detail: '是否显示相交部分的文本',
+              "default": true
+            }
+          }
+        }
+      };
     }
   }]);
   return VennGraphs;

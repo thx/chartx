@@ -9,143 +9,39 @@ exports["default"] = void 0;
 
 var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
+
+var _assertThisInitialized2 = _interopRequireDefault(require("@babel/runtime/helpers/assertThisInitialized"));
+
+var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
 var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
 
 var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
 
-var _assertThisInitialized2 = _interopRequireDefault(require("@babel/runtime/helpers/assertThisInitialized"));
-
-var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
-
-var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
-
 var _canvax = _interopRequireDefault(require("canvax"));
 
 var _tools = require("../../utils/tools");
+
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
 
 var _ = _canvax["default"]._,
     event = _canvax["default"].event;
 var Line = _canvax["default"].Shapes.Line;
 var Rect = _canvax["default"].Shapes.Rect;
 
-var rectGrid =
-/*#__PURE__*/
-function (_event$Dispatcher) {
+var rectGrid = /*#__PURE__*/function (_event$Dispatcher) {
   (0, _inherits2["default"])(rectGrid, _event$Dispatcher);
-  (0, _createClass2["default"])(rectGrid, null, [{
-    key: "defaultProps",
-    value: function defaultProps() {
-      return {
-        enabled: {
-          detail: '是否开启grid绘制',
-          "default": true
-        },
-        line: {
-          detail: '网格线条配置',
-          propertys: {
-            xDimension: {
-              detail: '一维方向的网格线',
-              propertys: {
-                enabled: {
-                  detail: '是否开启',
-                  "default": true
-                },
-                data: [],
-                lineType: {
-                  detail: '线的样式，虚线或者实现',
-                  "default": 'solid'
-                },
-                lineWidth: {
-                  detail: '线宽',
-                  "default": 1
-                },
-                strokeStyle: {
-                  detail: '线颜色',
-                  "default": '#f0f0f0'
-                }
-              }
-            },
-            yDimension: {
-              detail: '二维方向的网格线',
-              propertys: {
-                enabled: {
-                  detail: '是否开启',
-                  "default": false
-                },
-                data: [],
-                lineType: {
-                  detail: '线的样式，虚线或者实现',
-                  "default": 'solid'
-                },
-                lineWidth: {
-                  detail: '线宽',
-                  "default": 1
-                },
-                strokeStyle: {
-                  detail: '线颜色',
-                  "default": '#f0f0f0'
-                }
-              }
-            }
-          }
-        },
-        fill: {
-          detail: '背景色配置',
-          propertys: {
-            xDimension: {
-              detail: '以为方向的背景色块，x方向',
-              propertys: {
-                enabled: {
-                  detail: '是否开启',
-                  "default": false
-                },
-                splitVals: {
-                  detail: "从x轴上面用来分割区块的vals",
-                  "default": null //默认等于xaxis的dataSection
 
-                },
-                fillStyle: {
-                  detail: '背景颜色',
-                  "default": null
-                },
-                alpha: {
-                  detail: '背景透明度',
-                  "default": null
-                }
-              }
-            },
-            yDimension: {
-              detail: '以为方向的背景色块，y方向',
-              propertys: {
-                enabled: {
-                  detail: '是否开启',
-                  "default": false
-                },
-                splitVals: {
-                  detail: "从x轴上面用来分割区块的vals",
-                  "default": null
-                },
-                fillStyle: {
-                  detail: '背景颜色',
-                  "default": null
-                },
-                alpha: {
-                  detail: '背景透明度',
-                  "default": null
-                }
-              }
-            }
-          }
-        }
-      };
-    }
-  }]);
+  var _super = _createSuper(rectGrid);
 
   function rectGrid(opt, _coord) {
     var _this;
 
     (0, _classCallCheck2["default"])(this, rectGrid);
-    _this = (0, _possibleConstructorReturn2["default"])(this, (0, _getPrototypeOf2["default"])(rectGrid).call(this, opt, _coord));
+    _this = _super.call(this, opt, _coord);
 
     _.extend(true, (0, _assertThisInitialized2["default"])(_this), (0, _tools.getDefaultProps)(rectGrid.defaultProps()));
 
@@ -375,6 +271,113 @@ function (_event$Dispatcher) {
 
       ;
       return res;
+    }
+  }], [{
+    key: "defaultProps",
+    value: function defaultProps() {
+      return {
+        enabled: {
+          detail: '是否开启grid绘制',
+          "default": true
+        },
+        line: {
+          detail: '网格线条配置',
+          propertys: {
+            xDimension: {
+              detail: '一维方向的网格线',
+              propertys: {
+                enabled: {
+                  detail: '是否开启',
+                  "default": true
+                },
+                data: [],
+                lineType: {
+                  detail: '线的样式，虚线或者实现',
+                  "default": 'solid'
+                },
+                lineWidth: {
+                  detail: '线宽',
+                  "default": 1
+                },
+                strokeStyle: {
+                  detail: '线颜色',
+                  "default": '#f0f0f0'
+                }
+              }
+            },
+            yDimension: {
+              detail: '二维方向的网格线',
+              propertys: {
+                enabled: {
+                  detail: '是否开启',
+                  "default": false
+                },
+                data: [],
+                lineType: {
+                  detail: '线的样式，虚线或者实现',
+                  "default": 'solid'
+                },
+                lineWidth: {
+                  detail: '线宽',
+                  "default": 1
+                },
+                strokeStyle: {
+                  detail: '线颜色',
+                  "default": '#f0f0f0'
+                }
+              }
+            }
+          }
+        },
+        fill: {
+          detail: '背景色配置',
+          propertys: {
+            xDimension: {
+              detail: '以为方向的背景色块，x方向',
+              propertys: {
+                enabled: {
+                  detail: '是否开启',
+                  "default": false
+                },
+                splitVals: {
+                  detail: "从x轴上面用来分割区块的vals",
+                  "default": null //默认等于xaxis的dataSection
+
+                },
+                fillStyle: {
+                  detail: '背景颜色',
+                  "default": null
+                },
+                alpha: {
+                  detail: '背景透明度',
+                  "default": null
+                }
+              }
+            },
+            yDimension: {
+              detail: '以为方向的背景色块，y方向',
+              propertys: {
+                enabled: {
+                  detail: '是否开启',
+                  "default": false
+                },
+                splitVals: {
+                  detail: "从x轴上面用来分割区块的vals",
+                  "default": null
+                },
+                fillStyle: {
+                  detail: '背景颜色',
+                  "default": null
+                },
+                alpha: {
+                  detail: '背景透明度',
+                  "default": null
+                }
+              }
+            }
+          }
+        }
+      };
     }
   }]);
   return rectGrid;

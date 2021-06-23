@@ -11,15 +11,15 @@ var _typeof2 = _interopRequireDefault(require("@babel/runtime/helpers/typeof"));
 
 var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
-var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
-
-var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
 
 var _assertThisInitialized2 = _interopRequireDefault(require("@babel/runtime/helpers/assertThisInitialized"));
 
-var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
-
 var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
 
 var _component = _interopRequireDefault(require("../component"));
 
@@ -27,88 +27,24 @@ var _canvax = _interopRequireDefault(require("canvax"));
 
 var _tools = require("../../utils/tools");
 
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
 var _ = _canvax["default"]._;
 var Rect = _canvax["default"].Shapes.Rect;
 var Line = _canvax["default"].Shapes.Line;
 
-var Tips =
-/*#__PURE__*/
-function (_Component) {
+var Tips = /*#__PURE__*/function (_Component) {
   (0, _inherits2["default"])(Tips, _Component);
-  (0, _createClass2["default"])(Tips, null, [{
-    key: "defaultProps",
-    value: function defaultProps() {
-      return {
-        enabled: {
-          detail: '是否开启Tips',
-          "default": true
-        },
-        content: {
-          detail: '自定义tips的内容（html）',
-          "default": null
-        },
-        borderRadius: {
-          detail: 'tips的边框圆角半径',
-          "default": 5
-        },
-        strokeStyle: {
-          detail: 'tips边框颜色',
-          "default": '#ccc'
-        },
-        fillStyle: {
-          detail: 'tips背景色',
-          "default": 'rgba(255,255,255,0.95)'
-        },
-        fontColor: {
-          detail: 'tips文本颜色',
-          "default": '#999999'
-        },
-        positionOfPoint: {
-          detail: 'tips在触发点的位置，默认在右侧',
-          "default": 'right'
-        },
-        offsetX: {
-          detail: 'tips内容到鼠标位置的偏移量x',
-          "default": 10
-        },
-        offsetY: {
-          detail: 'tips内容到鼠标位置的偏移量y',
-          "default": 10
-        },
-        positionInRange: {
-          detail: 'tip的浮层是否限定在画布区域(废弃)',
-          "default": false
-        },
-        pointer: {
-          detail: '触发tips的时候的指针样式',
-          "default": 'line',
-          documentation: 'tips的指针,默认为直线，可选为："line" | "region"(柱状图中一般用region)'
-        },
-        pointerAnim: {
-          detail: 'tips移动的时候，指针是否开启动画',
-          "default": true
-        },
-        onshow: {
-          detail: 'show的时候的事件',
-          "default": function _default() {}
-        },
-        onmove: {
-          detail: 'move的时候的事件',
-          "default": function _default() {}
-        },
-        onhide: {
-          detail: 'hide的时候的事件',
-          "default": function _default() {}
-        }
-      };
-    }
-  }]);
+
+  var _super = _createSuper(Tips);
 
   function Tips(opt, app) {
     var _this;
 
     (0, _classCallCheck2["default"])(this, Tips);
-    _this = (0, _possibleConstructorReturn2["default"])(this, (0, _getPrototypeOf2["default"])(Tips).call(this, opt, app));
+    _this = _super.call(this, opt, app);
     _this.name = "tips";
     _this.tipDomContainer = _this.app.canvax.domView;
     _this.cW = 0; //容器的width
@@ -596,6 +532,73 @@ function (_Component) {
         el.context.x = x;
         el.context.y = y;
       }
+    }
+  }], [{
+    key: "defaultProps",
+    value: function defaultProps() {
+      return {
+        enabled: {
+          detail: '是否开启Tips',
+          "default": true
+        },
+        content: {
+          detail: '自定义tips的内容（html）',
+          "default": null
+        },
+        borderRadius: {
+          detail: 'tips的边框圆角半径',
+          "default": 5
+        },
+        strokeStyle: {
+          detail: 'tips边框颜色',
+          "default": '#ccc'
+        },
+        fillStyle: {
+          detail: 'tips背景色',
+          "default": 'rgba(255,255,255,0.95)'
+        },
+        fontColor: {
+          detail: 'tips文本颜色',
+          "default": '#999999'
+        },
+        positionOfPoint: {
+          detail: 'tips在触发点的位置，默认在右侧',
+          "default": 'right'
+        },
+        offsetX: {
+          detail: 'tips内容到鼠标位置的偏移量x',
+          "default": 10
+        },
+        offsetY: {
+          detail: 'tips内容到鼠标位置的偏移量y',
+          "default": 10
+        },
+        positionInRange: {
+          detail: 'tip的浮层是否限定在画布区域(废弃)',
+          "default": false
+        },
+        pointer: {
+          detail: '触发tips的时候的指针样式',
+          "default": 'line',
+          documentation: 'tips的指针,默认为直线，可选为："line" | "region"(柱状图中一般用region)'
+        },
+        pointerAnim: {
+          detail: 'tips移动的时候，指针是否开启动画',
+          "default": true
+        },
+        onshow: {
+          detail: 'show的时候的事件',
+          "default": function _default() {}
+        },
+        onmove: {
+          detail: 'move的时候的事件',
+          "default": function _default() {}
+        },
+        onhide: {
+          detail: 'hide的时候的事件',
+          "default": function _default() {}
+        }
+      };
     }
   }]);
   return Tips;

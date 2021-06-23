@@ -9,15 +9,15 @@ exports["default"] = void 0;
 
 var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
-var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
-
-var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
 
 var _assertThisInitialized2 = _interopRequireDefault(require("@babel/runtime/helpers/assertThisInitialized"));
 
-var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
-
 var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
 
 var _canvax = _interopRequireDefault(require("canvax"));
 
@@ -27,214 +27,25 @@ var _tools = require("../../../utils/tools");
 
 var _color = require("../../../utils/color");
 
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
 var _ = _canvax["default"]._,
     event = _canvax["default"].event;
 var Text = _canvax["default"].Display.Text;
 var Polygon = _canvax["default"].Shapes.Polygon;
 
-var FunnelGraphs =
-/*#__PURE__*/
-function (_GraphsBase) {
+var FunnelGraphs = /*#__PURE__*/function (_GraphsBase) {
   (0, _inherits2["default"])(FunnelGraphs, _GraphsBase);
-  (0, _createClass2["default"])(FunnelGraphs, null, [{
-    key: "defaultProps",
-    value: function defaultProps() {
-      return {
-        field: {
-          detail: '字段配置',
-          "default": null
-        },
-        sort: {
-          detail: '排序规则',
-          "default": null
-        },
-        node: {
-          detail: '单个元素图形配置',
-          propertys: {
-            margin: {
-              detail: 'node节点之间的间距',
-              "default": 2
-            },
-            maxWidth: {
-              detail: '最大的元素宽',
-              "default": null
-            },
-            minWidth: {
-              detail: '最小的元素宽',
-              "default": null
-            },
-            spireWidth: {
-              detail: '漏斗的塔尖的宽度，默认等于minWidth',
-              documentation: '如果想要实现全三角的效果，可以设置为0',
-              "default": null
-            },
-            height: {
-              detail: '高',
-              "default": 0,
-              documentation: '漏斗单元高，如果options没有设定， 就会被自动计算为 this.height/dataOrg.length'
-            },
-            drawEnd: {
-              detail: '单个节点绘制完毕处理函数',
-              "default": function _default() {}
-            },
-            fillStyle: {
-              detail: '单个区块背景色',
-              "default": null //'#fff' //从themeColor获取默认 , 默认为空就会没有颜色的区块不会有事件点击
 
-            },
-            fillAlpha: {
-              detail: '单个区块透明度',
-              "default": 1
-            },
-            maxFillStyle: {
-              detail: '单个区块数值最大的颜色值',
-              "default": null
-            },
-            maxFillAlpha: {
-              detail: '单个区块最大透明度',
-              "default": 1
-            },
-            minFillAlpha: {
-              detail: '单个区块最小透明度',
-              "default": 0.5
-            },
-            strokeStyle: {
-              detail: '单个区块描边颜色',
-              "default": null
-            },
-            strokeAlpha: {
-              detail: '单个区块描边透明度',
-              "default": 1
-            },
-            lineWidth: {
-              detail: '单个区块描边线宽',
-              "default": 0
-            },
-            lineType: {
-              detail: '区块描边样式',
-              "default": 'solid'
-            },
-            focus: {
-              detail: "单个区块hover态设置",
-              propertys: {
-                enabled: {
-                  detail: '是否开启',
-                  "default": true
-                },
-                fillStyle: {
-                  detail: 'hover态单个区块背景色',
-                  "default": null //从themeColor获取默认
-
-                },
-                fillAlpha: {
-                  detail: 'hover态单个区块透明度',
-                  "default": 0.95
-                },
-                strokeStyle: {
-                  detail: 'hover态单个区块描边颜色',
-                  "default": null //默认获取themeColor
-
-                },
-                strokeAlpha: {
-                  detail: 'hover态单个区块描边透明度',
-                  "default": null //默认获取themeColor
-
-                },
-                lineWidth: {
-                  detail: 'hover态单个区块描边线宽',
-                  "default": null
-                },
-                lineType: {
-                  detail: 'hover态区块描边样式',
-                  "default": null
-                }
-              }
-            },
-            select: {
-              detail: "单个区块选中态设置",
-              propertys: {
-                enabled: {
-                  detail: '是否开启',
-                  "default": false
-                },
-                fillStyle: {
-                  detail: '选中态单个区块背景色',
-                  "default": null //从themeColor获取默认
-
-                },
-                fillAlpha: {
-                  detail: '选中态单个区块透明度',
-                  "default": 1
-                },
-                strokeStyle: {
-                  detail: '选中态单个区块描边颜色',
-                  "default": null
-                },
-                strokeAlpha: {
-                  detail: '选中态单个区块描边颜色',
-                  "default": null
-                },
-                lineWidth: {
-                  detail: '选中态单个区块描边线宽',
-                  "default": null
-                },
-                lineType: {
-                  detail: '选中态区块描边样式',
-                  "default": null
-                }
-              }
-            }
-          }
-        },
-        label: {
-          detail: '文本配置',
-          propertys: {
-            enabled: {
-              detail: '是否开启文本',
-              "default": true
-            },
-            textAlign: {
-              detail: '文本布局位置(left,center,right)',
-              "default": 'center'
-            },
-            textBaseline: {
-              detail: '文本基线对齐方式',
-              "default": 'middle'
-            },
-            format: {
-              detail: '文本格式化处理函数',
-              "default": function _default(num) {
-                return (0, _tools.numAddSymbol)(num);
-              }
-            },
-            fontSize: {
-              detail: '文本字体大小',
-              "default": 13
-            },
-            fontColor: {
-              detail: '文本颜色',
-              "default": '#ffffff',
-              documentation: 'align为center的时候的颜色，align为其他属性时候取node的颜色'
-            },
-            strokeStyle: {
-              detail: '文本描边色',
-              "default": '#fff'
-            },
-            lineWidth: {
-              detail: '文本描边宽',
-              "default": 0
-            }
-          }
-        }
-      };
-    }
-  }]);
+  var _super = _createSuper(FunnelGraphs);
 
   function FunnelGraphs(opt, app) {
     var _this;
 
     (0, _classCallCheck2["default"])(this, FunnelGraphs);
-    _this = (0, _possibleConstructorReturn2["default"])(this, (0, _getPrototypeOf2["default"])(FunnelGraphs).call(this, opt, app));
+    _this = _super.call(this, opt, app);
     _this.type = "funnel";
     _this.dataOrg = []; //this.dataFrame.getFieldData( this.field )
 
@@ -633,6 +444,198 @@ function (_GraphsBase) {
       }
 
       return value;
+    }
+  }], [{
+    key: "defaultProps",
+    value: function defaultProps() {
+      return {
+        field: {
+          detail: '字段配置',
+          "default": null
+        },
+        sort: {
+          detail: '排序规则',
+          "default": null
+        },
+        node: {
+          detail: '单个元素图形配置',
+          propertys: {
+            margin: {
+              detail: 'node节点之间的间距',
+              "default": 2
+            },
+            maxWidth: {
+              detail: '最大的元素宽',
+              "default": null
+            },
+            minWidth: {
+              detail: '最小的元素宽',
+              "default": null
+            },
+            spireWidth: {
+              detail: '漏斗的塔尖的宽度，默认等于minWidth',
+              documentation: '如果想要实现全三角的效果，可以设置为0',
+              "default": null
+            },
+            height: {
+              detail: '高',
+              "default": 0,
+              documentation: '漏斗单元高，如果options没有设定， 就会被自动计算为 this.height/dataOrg.length'
+            },
+            drawEnd: {
+              detail: '单个节点绘制完毕处理函数',
+              "default": function _default() {}
+            },
+            fillStyle: {
+              detail: '单个区块背景色',
+              "default": null //'#fff' //从themeColor获取默认 , 默认为空就会没有颜色的区块不会有事件点击
+
+            },
+            fillAlpha: {
+              detail: '单个区块透明度',
+              "default": 1
+            },
+            maxFillStyle: {
+              detail: '单个区块数值最大的颜色值',
+              "default": null
+            },
+            maxFillAlpha: {
+              detail: '单个区块最大透明度',
+              "default": 1
+            },
+            minFillAlpha: {
+              detail: '单个区块最小透明度',
+              "default": 0.5
+            },
+            strokeStyle: {
+              detail: '单个区块描边颜色',
+              "default": null
+            },
+            strokeAlpha: {
+              detail: '单个区块描边透明度',
+              "default": 1
+            },
+            lineWidth: {
+              detail: '单个区块描边线宽',
+              "default": 0
+            },
+            lineType: {
+              detail: '区块描边样式',
+              "default": 'solid'
+            },
+            focus: {
+              detail: "单个区块hover态设置",
+              propertys: {
+                enabled: {
+                  detail: '是否开启',
+                  "default": true
+                },
+                fillStyle: {
+                  detail: 'hover态单个区块背景色',
+                  "default": null //从themeColor获取默认
+
+                },
+                fillAlpha: {
+                  detail: 'hover态单个区块透明度',
+                  "default": 0.95
+                },
+                strokeStyle: {
+                  detail: 'hover态单个区块描边颜色',
+                  "default": null //默认获取themeColor
+
+                },
+                strokeAlpha: {
+                  detail: 'hover态单个区块描边透明度',
+                  "default": null //默认获取themeColor
+
+                },
+                lineWidth: {
+                  detail: 'hover态单个区块描边线宽',
+                  "default": null
+                },
+                lineType: {
+                  detail: 'hover态区块描边样式',
+                  "default": null
+                }
+              }
+            },
+            select: {
+              detail: "单个区块选中态设置",
+              propertys: {
+                enabled: {
+                  detail: '是否开启',
+                  "default": false
+                },
+                fillStyle: {
+                  detail: '选中态单个区块背景色',
+                  "default": null //从themeColor获取默认
+
+                },
+                fillAlpha: {
+                  detail: '选中态单个区块透明度',
+                  "default": 1
+                },
+                strokeStyle: {
+                  detail: '选中态单个区块描边颜色',
+                  "default": null
+                },
+                strokeAlpha: {
+                  detail: '选中态单个区块描边颜色',
+                  "default": null
+                },
+                lineWidth: {
+                  detail: '选中态单个区块描边线宽',
+                  "default": null
+                },
+                lineType: {
+                  detail: '选中态区块描边样式',
+                  "default": null
+                }
+              }
+            }
+          }
+        },
+        label: {
+          detail: '文本配置',
+          propertys: {
+            enabled: {
+              detail: '是否开启文本',
+              "default": true
+            },
+            textAlign: {
+              detail: '文本布局位置(left,center,right)',
+              "default": 'center'
+            },
+            textBaseline: {
+              detail: '文本基线对齐方式',
+              "default": 'middle'
+            },
+            format: {
+              detail: '文本格式化处理函数',
+              "default": function _default(num) {
+                return (0, _tools.numAddSymbol)(num);
+              }
+            },
+            fontSize: {
+              detail: '文本字体大小',
+              "default": 13
+            },
+            fontColor: {
+              detail: '文本颜色',
+              "default": '#ffffff',
+              documentation: 'align为center的时候的颜色，align为其他属性时候取node的颜色'
+            },
+            strokeStyle: {
+              detail: '文本描边色',
+              "default": '#fff'
+            },
+            lineWidth: {
+              detail: '文本描边宽',
+              "default": 0
+            }
+          }
+        }
+      };
     }
   }]);
   return FunnelGraphs;

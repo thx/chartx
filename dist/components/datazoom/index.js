@@ -11,15 +11,15 @@ var _toConsumableArray2 = _interopRequireDefault(require("@babel/runtime/helpers
 
 var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
-var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
-
-var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
 
 var _assertThisInitialized2 = _interopRequireDefault(require("@babel/runtime/helpers/assertThisInitialized"));
 
-var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
-
 var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
 
 var _component = _interopRequireDefault(require("../component"));
 
@@ -29,174 +29,25 @@ var _trigger = _interopRequireDefault(require("../trigger"));
 
 var _tools = require("../../utils/tools");
 
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
 var _ = _canvax["default"]._;
 var Line = _canvax["default"].Shapes.Line;
 var Rect = _canvax["default"].Shapes.Rect;
 var Polygon = _canvax["default"].Shapes.Polygon;
 
-var dataZoom =
-/*#__PURE__*/
-function (_Component) {
+var dataZoom = /*#__PURE__*/function (_Component) {
   (0, _inherits2["default"])(dataZoom, _Component);
-  (0, _createClass2["default"])(dataZoom, null, [{
-    key: "defaultProps",
-    value: function defaultProps() {
-      return {
-        position: {
-          detail: '位置，默认bottom,其他可选left,right,top',
-          "default": 'bottom'
-        },
-        height: {
-          detail: '高',
-          "default": 24
-        },
-        width: {
-          detail: '宽',
-          "default": 0 //默认0，从轴去取width
 
-        },
-        color: {
-          detail: '拖拽轴的主题颜色，比如其他按钮如果没有单独设置颜色，就继承该值',
-          "default": '#809fff'
-        },
-        shapeType: {
-          detail: '背景的图形形状,可选rect，triangle',
-          "default": 'rect' // rect,triangle
-
-        },
-        range: {
-          //propotion中，start 和 end代表的是数值的大小
-          detail: '范围设置',
-          propertys: {
-            start: {
-              detail: '开始位置',
-              "default": 0
-            },
-            end: {
-              detail: '结束位置，默认为null，表示到最后',
-              "default": null
-            },
-            max: {
-              detail: '最多可以选择多大的数据区间',
-              "default": null
-            },
-            min: {
-              detail: '最少可以选择多大的数据区间',
-              "default": 1
-            },
-            eventEnabled: {
-              detail: '是否响应事件',
-              "default": true
-            },
-            fillStyle: {
-              detail: '填充色',
-              "default": '#000000'
-            },
-            alpha: {
-              detail: '透明度',
-              "default": 0.015
-            }
-          }
-        },
-        left: {
-          detail: '左边按钮',
-          propertys: {
-            eventEnabled: {
-              detail: '是否响应事件',
-              "default": true
-            },
-            fillStyle: {
-              detail: '颜色，默认取组件.color',
-              "default": ''
-            }
-          }
-        },
-        right: {
-          detail: '右边按钮',
-          propertys: {
-            eventEnabled: {
-              detail: '是否响应事件',
-              "default": true
-            },
-            fillStyle: {
-              detail: '颜色，默认取组件.color',
-              "default": ''
-            }
-          }
-        },
-        bg: {
-          detail: '背景设置',
-          propertys: {
-            enabled: {
-              detail: '是否开启',
-              "default": true
-            },
-            fillStyle: {
-              detail: '填充色',
-              "default": ''
-            },
-            alpha: {
-              detail: '透明度',
-              "default": 0.5
-            },
-            strokeStyle: {
-              detail: '边框色',
-              "default": '#e6e6e6'
-            },
-            lineWidth: {
-              detail: '线宽',
-              "default": 1
-            }
-          }
-        },
-        graphAlpha: {
-          detail: '图形的透明度',
-          "default": 0.6
-        },
-        graphStyle: {
-          detail: '图形的颜色',
-          "default": '#dddddd'
-        },
-        underline: {
-          detail: 'underline',
-          propertys: {
-            enabled: {
-              detail: '是否开启',
-              "default": true
-            },
-            strokeStyle: {
-              detail: '线条色',
-              "default": null
-            },
-            lineWidth: {
-              detail: '线宽',
-              "default": 2
-            }
-          }
-        },
-        btnOut: {
-          detail: 'left,right按钮突出的大小',
-          "default": 4
-        },
-        btnHeight: {
-          detail: 'left,right按钮高',
-          "default": 20,
-          documentation: 'left,right按钮的高，不在left，right下面，统一在这个属性里， 以为要强制保持一致'
-        },
-        btnWidth: {
-          detail: 'left,right按钮的宽',
-          "default": 9,
-          documentation: 'left,right按钮的宽，不在left，right下面，统一在这个属性里， 以为要强制保持一致'
-        }
-      };
-    }
-  }]);
+  var _super = _createSuper(dataZoom);
 
   function dataZoom(opt, app) {
     var _this;
 
     (0, _classCallCheck2["default"])(this, dataZoom);
-    _this = (0, _possibleConstructorReturn2["default"])(this, (0, _getPrototypeOf2["default"])(dataZoom).call(this, opt, app));
+    _this = _super.call(this, opt, app);
     _this.name = "dataZoom";
     _this._cloneChart = null;
     _this.count = 1; //把w 均为为多少个区间， 同样多节点的line 和  bar， 这个count相差一
@@ -481,7 +332,8 @@ function (_Component) {
             _.extend(app.dataFrame.range, range);
           }
 
-          ; //不想要重新构造dataFrame，所以第一个参数为null
+          ;
+          console.log(range); //不想要重新构造dataFrame，所以第一个参数为null
 
           app.resetData(null, trigger);
           app.fire("dataZoomDragIng");
@@ -862,13 +714,18 @@ function (_Component) {
 
           ;
 
-          if (me.shapeType == 'bg') {
+          if (me.shapeType == 'rect') {
             me._rangeElement.context.width = this.context.x - me._btnLeft.context.x - me.btnWidth;
+            me._rangeElement.context.x = me._btnLeft.context.x + me.btnWidth;
           }
+
+          ;
 
           if (me.shapeType == 'triangle') {
             me._rangeElement.context.pointList = me._getRangeTrianglePoints();
           }
+
+          ;
 
           me._setRange();
         });
@@ -929,41 +786,40 @@ function (_Component) {
             hoverClone: false,
             context: rangeRectCtx
           });
+
+          this._rangeElement.on("draging", function () {
+            this.context.y = 1;
+
+            if (this.context.x < 0) {
+              this.context.x = 0;
+            }
+
+            ;
+
+            if (this.context.x > me.width - this.context.width) {
+              this.context.x = me.width - this.context.width;
+            }
+
+            ;
+            me._btnLeft.context.x = this.context.x;
+            me._btnRight.context.x = this.context.x + this.context.width - me.btnWidth;
+
+            me._setRange("btnRange");
+          });
+
+          this._rangeElement.on("dragend", function () {
+            me.dragEnd(me.range);
+          });
         } else {
           this._rangeElement = new Polygon({
             id: 'btnRange',
-            dragEnabled: true,
-            hoverClone: false,
+            //dragEnabled : true,
+            //hoverClone  : false,
             context: bgTriangleCtx
-          });
+          }); //三角形的 zoom 暂时不需要添加事件
         }
 
-        ;
-
-        this._rangeElement.on("draging", function () {
-          this.context.y = 1;
-
-          if (this.context.x < me.btnWidth) {
-            this.context.x = me.btnWidth;
-          }
-
-          ;
-
-          if (this.context.x > me.width - this.context.width - me.btnWidth) {
-            this.context.x = me.width - this.context.width - me.btnWidth;
-          }
-
-          ;
-          me._btnLeft.context.x = this.context.x - me.btnWidth;
-          me._btnRight.context.x = this.context.x + this.context.width;
-
-          me._setRange("btnRange");
-        });
-
-        this._rangeElement.on("dragend", function () {
-          me.dragEnd(me.range);
-        }); //addChild到1 ， 因为0的bg
-
+        ; //addChild到1 ， 因为0的bg
 
         this.dataZoomBtns.addChild(this._rangeElement, 0);
       }
@@ -1035,6 +891,57 @@ function (_Component) {
   }, {
     key: "_setRange",
     value: function _setRange(trigger) {
+      var me = this;
+
+      var _end = me._getRangeEnd();
+
+      var _preDis = _end - me.range.start;
+
+      var start = me._btnLeft.context.x / me.width * me.count;
+      var end = (me._btnRight.context.x + me.btnWidth) / me.width * me.count; //console.log( (me._btnRight.context.x + me.btnWidth)+"|"+ me.width + "|" + me.count )
+
+      if (this.axisLayoutType == "peak") {
+        start = Math.round(start);
+        end = Math.round(end);
+      } else if (this.axisLayoutType == "rule") {
+        start = parseInt(start);
+        end = parseInt(end);
+      } else {
+        start = parseInt(start);
+        end = parseInt(end);
+        ;
+      }
+
+      ;
+
+      if (trigger == "btnRange") {
+        //如果是拖动中间部分，那么要保持 end-start的总量一致
+        if (end - start != _preDis) {
+          end = start + _preDis;
+        }
+      }
+
+      ;
+
+      if (start != me.range.start || end != _end) {
+        me.range.start = start;
+
+        if (me.axisLayoutType == "peak") {
+          end -= 1;
+        }
+
+        ;
+        me.range.end = end;
+        me.dragIng(me.range);
+      }
+
+      ;
+
+      me._setLines();
+    }
+  }, {
+    key: "_setRange_bak",
+    value: function _setRange_bak(trigger) {
       var me = this;
 
       var _start = me._preRange ? me._preRange.start : 0;
@@ -1187,6 +1094,158 @@ function (_Component) {
       this._cloneChart.thumbChart.destroy();
 
       this._cloneChart.cloneEl.parentNode.removeChild(this._cloneChart.cloneEl);
+    }
+  }], [{
+    key: "defaultProps",
+    value: function defaultProps() {
+      return {
+        position: {
+          detail: '位置，默认bottom,其他可选left,right,top',
+          "default": 'bottom'
+        },
+        height: {
+          detail: '高',
+          "default": 24
+        },
+        width: {
+          detail: '宽',
+          "default": 0 //默认0，从轴去取width
+
+        },
+        color: {
+          detail: '拖拽轴的主题颜色，比如其他按钮如果没有单独设置颜色，就继承该值',
+          "default": '#809fff'
+        },
+        shapeType: {
+          detail: '背景的图形形状,可选rect，triangle',
+          "default": 'rect' // rect,triangle
+
+        },
+        range: {
+          //propotion中，start 和 end代表的是数值的大小
+          detail: '范围设置',
+          propertys: {
+            start: {
+              detail: '开始位置',
+              "default": 0
+            },
+            end: {
+              detail: '结束位置，默认为null，表示到最后',
+              "default": null
+            },
+            max: {
+              detail: '最多可以选择多大的数据区间',
+              "default": null
+            },
+            min: {
+              detail: '最少可以选择多大的数据区间',
+              "default": 1
+            },
+            eventEnabled: {
+              detail: '是否响应事件',
+              "default": true
+            },
+            fillStyle: {
+              detail: '填充色',
+              "default": '#000000'
+            },
+            alpha: {
+              detail: '透明度',
+              "default": 0.015
+            }
+          }
+        },
+        left: {
+          detail: '左边按钮',
+          propertys: {
+            eventEnabled: {
+              detail: '是否响应事件',
+              "default": true
+            },
+            fillStyle: {
+              detail: '颜色，默认取组件.color',
+              "default": ''
+            }
+          }
+        },
+        right: {
+          detail: '右边按钮',
+          propertys: {
+            eventEnabled: {
+              detail: '是否响应事件',
+              "default": true
+            },
+            fillStyle: {
+              detail: '颜色，默认取组件.color',
+              "default": ''
+            }
+          }
+        },
+        bg: {
+          detail: '背景设置',
+          propertys: {
+            enabled: {
+              detail: '是否开启',
+              "default": true
+            },
+            fillStyle: {
+              detail: '填充色',
+              "default": ''
+            },
+            alpha: {
+              detail: '透明度',
+              "default": 0.5
+            },
+            strokeStyle: {
+              detail: '边框色',
+              "default": '#e6e6e6'
+            },
+            lineWidth: {
+              detail: '线宽',
+              "default": 1
+            }
+          }
+        },
+        graphAlpha: {
+          detail: '图形的透明度',
+          "default": 0.6
+        },
+        graphStyle: {
+          detail: '图形的颜色',
+          "default": '#dddddd'
+        },
+        underline: {
+          detail: 'underline',
+          propertys: {
+            enabled: {
+              detail: '是否开启',
+              "default": true
+            },
+            strokeStyle: {
+              detail: '线条色',
+              "default": null
+            },
+            lineWidth: {
+              detail: '线宽',
+              "default": 2
+            }
+          }
+        },
+        btnOut: {
+          detail: 'left,right按钮突出的大小',
+          "default": 4
+        },
+        btnHeight: {
+          detail: 'left,right按钮高',
+          "default": 20,
+          documentation: 'left,right按钮的高，不在left，right下面，统一在这个属性里， 以为要强制保持一致'
+        },
+        btnWidth: {
+          detail: 'left,right按钮的宽',
+          "default": 9,
+          documentation: 'left,right按钮的宽，不在left，right下面，统一在这个属性里， 以为要强制保持一致'
+        }
+      };
     }
   }]);
   return dataZoom;

@@ -9,15 +9,15 @@ exports["default"] = void 0;
 
 var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
-var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
-
-var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
 
 var _assertThisInitialized2 = _interopRequireDefault(require("@babel/runtime/helpers/assertThisInitialized"));
 
-var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
-
 var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
 
 var _canvax = _interopRequireDefault(require("canvax"));
 
@@ -25,48 +25,22 @@ var _tools = require("../../utils/tools");
 
 var _component = _interopRequireDefault(require("../component"));
 
-/**
- * 水印组件
- */
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
 var _ = _canvax["default"]._;
 
-var waterMark =
-/*#__PURE__*/
-function (_Component) {
+var waterMark = /*#__PURE__*/function (_Component) {
   (0, _inherits2["default"])(waterMark, _Component);
-  (0, _createClass2["default"])(waterMark, null, [{
-    key: "defaultProps",
-    value: function defaultProps() {
-      return {
-        text: {
-          detail: '水印内容',
-          "default": 'chartx'
-        },
-        fontSize: {
-          detail: '字体大小',
-          "default": 20
-        },
-        fontColor: {
-          detail: '水印颜色',
-          "default": '#cccccc'
-        },
-        alpha: {
-          detail: '水印透明度',
-          "default": 0.2
-        },
-        rotation: {
-          detail: '水印旋转角度',
-          "default": 45
-        }
-      };
-    }
-  }]);
+
+  var _super = _createSuper(waterMark);
 
   function waterMark(opt, app) {
     var _this;
 
     (0, _classCallCheck2["default"])(this, waterMark);
-    _this = (0, _possibleConstructorReturn2["default"])(this, (0, _getPrototypeOf2["default"])(waterMark).call(this, opt, app));
+    _this = _super.call(this, opt, app);
     _this.name = "waterMark";
     _this.width = _this.app.width;
     _this.height = _this.app.height;
@@ -116,6 +90,32 @@ function (_Component) {
           this.spripte.addChild(_textEl);
         }
       }
+    }
+  }], [{
+    key: "defaultProps",
+    value: function defaultProps() {
+      return {
+        text: {
+          detail: '水印内容',
+          "default": 'chartx'
+        },
+        fontSize: {
+          detail: '字体大小',
+          "default": 20
+        },
+        fontColor: {
+          detail: '水印颜色',
+          "default": '#cccccc'
+        },
+        alpha: {
+          detail: '水印透明度',
+          "default": 0.2
+        },
+        rotation: {
+          detail: '水印旋转角度',
+          "default": 45
+        }
+      };
     }
   }]);
   return waterMark;

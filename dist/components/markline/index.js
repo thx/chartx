@@ -9,15 +9,15 @@ exports["default"] = void 0;
 
 var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
-var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
-
-var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
 
 var _assertThisInitialized2 = _interopRequireDefault(require("@babel/runtime/helpers/assertThisInitialized"));
 
-var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
-
 var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
 
 var _component = _interopRequireDefault(require("../component"));
 
@@ -25,83 +25,25 @@ var _canvax = _interopRequireDefault(require("canvax"));
 
 var _tools = require("../../utils/tools");
 
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
 var _ = _canvax["default"]._;
 var BrokenLine = _canvax["default"].Shapes.BrokenLine;
 var Sprite = _canvax["default"].Display.Sprite;
 var Text = _canvax["default"].Display.Text;
 
-var MarkLine =
-/*#__PURE__*/
-function (_Component) {
+var MarkLine = /*#__PURE__*/function (_Component) {
   (0, _inherits2["default"])(MarkLine, _Component);
-  (0, _createClass2["default"])(MarkLine, null, [{
-    key: "defaultProps",
-    value: function defaultProps() {
-      return {
-        markTo: {
-          detail: '标准哪个目标字段',
-          "default": null
-        },
-        yVal: {
-          detail: '组件的值',
-          "default": 0,
-          documentation: '可能是个function，均值计算就是个function'
-        },
-        yPixel: {
-          detail: '组件指定的具体y像素值',
-          "default": 0
-        },
-        line: {
-          detail: '线的配置',
-          propertys: {
-            strokeStyle: {
-              detail: '线的颜色',
-              "default": '#999999'
-            },
-            lineWidth: {
-              detail: '线宽',
-              "default": 1
-            },
-            lineType: {
-              detail: '线样式',
-              "default": 'dashed'
-            }
-          }
-        },
-        label: {
-          detail: '文本',
-          propertys: {
-            enabled: {
-              detail: '是否开启',
-              "default": false
-            },
-            fontColor: {
-              detail: '文本字体颜色',
-              "default": '#666'
-            },
-            fontSize: {
-              detail: '文本字体大小',
-              "default": 12
-            },
-            text: {
-              detail: '文本内容',
-              "default": null
-            },
-            format: {
-              detail: '文本格式化函数',
-              "default": null
-            }
-          }
-        }
-      };
-    }
-  }]);
+
+  var _super = _createSuper(MarkLine);
 
   function MarkLine(opt, app) {
     var _this;
 
     (0, _classCallCheck2["default"])(this, MarkLine);
-    _this = (0, _possibleConstructorReturn2["default"])(this, (0, _getPrototypeOf2["default"])(MarkLine).call(this, opt, app));
+    _this = _super.call(this, opt, app);
     _this.name = "markLine";
     _this._yAxis = null;
     _this.line = {
@@ -364,6 +306,67 @@ function (_Component) {
 
       ;
       return str;
+    }
+  }], [{
+    key: "defaultProps",
+    value: function defaultProps() {
+      return {
+        markTo: {
+          detail: '标准哪个目标字段',
+          "default": null
+        },
+        yVal: {
+          detail: '组件的值',
+          "default": 0,
+          documentation: '可能是个function，均值计算就是个function'
+        },
+        yPixel: {
+          detail: '组件指定的具体y像素值',
+          "default": 0
+        },
+        line: {
+          detail: '线的配置',
+          propertys: {
+            strokeStyle: {
+              detail: '线的颜色',
+              "default": '#999999'
+            },
+            lineWidth: {
+              detail: '线宽',
+              "default": 1
+            },
+            lineType: {
+              detail: '线样式',
+              "default": 'dashed'
+            }
+          }
+        },
+        label: {
+          detail: '文本',
+          propertys: {
+            enabled: {
+              detail: '是否开启',
+              "default": false
+            },
+            fontColor: {
+              detail: '文本字体颜色',
+              "default": '#666'
+            },
+            fontSize: {
+              detail: '文本字体大小',
+              "default": 12
+            },
+            text: {
+              detail: '文本内容',
+              "default": null
+            },
+            format: {
+              detail: '文本格式化函数',
+              "default": null
+            }
+          }
+        }
+      };
     }
   }]);
   return MarkLine;

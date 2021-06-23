@@ -9,15 +9,15 @@ exports["default"] = void 0;
 
 var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
-var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
-
-var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
 
 var _assertThisInitialized2 = _interopRequireDefault(require("@babel/runtime/helpers/assertThisInitialized"));
 
-var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
-
 var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
 
 var _group = _interopRequireDefault(require("./group"));
 
@@ -27,32 +27,20 @@ var _canvax = require("canvax");
 
 var _tools = require("../../../utils/tools");
 
-var LineGraphs =
-/*#__PURE__*/
-function (_GraphsBase) {
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
+var LineGraphs = /*#__PURE__*/function (_GraphsBase) {
   (0, _inherits2["default"])(LineGraphs, _GraphsBase);
-  (0, _createClass2["default"])(LineGraphs, null, [{
-    key: "defaultProps",
-    value: function defaultProps() {
-      return {
-        field: {
-          detail: '字段配置，支持二维数组格式',
-          "default": null
-        },
-        yAxisAlign: {
-          detail: '绘制在哪根y轴上面',
-          "default": 'left'
-        },
-        _props: [_group["default"]]
-      };
-    }
-  }]);
+
+  var _super = _createSuper(LineGraphs);
 
   function LineGraphs(opt, app) {
     var _this;
 
     (0, _classCallCheck2["default"])(this, LineGraphs);
-    _this = (0, _possibleConstructorReturn2["default"])(this, (0, _getPrototypeOf2["default"])(LineGraphs).call(this, opt, app));
+    _this = _super.call(this, opt, app);
     _this.type = "line";
     _this.enabledField = null;
     _this.groups = []; //群组集合
@@ -333,6 +321,21 @@ function (_GraphsBase) {
       });
 
       return _nodesInfoList;
+    }
+  }], [{
+    key: "defaultProps",
+    value: function defaultProps() {
+      return {
+        field: {
+          detail: '字段配置，支持二维数组格式',
+          "default": null
+        },
+        yAxisAlign: {
+          detail: '绘制在哪根y轴上面',
+          "default": 'left'
+        },
+        _props: [_group["default"]]
+      };
     }
   }]);
   return LineGraphs;

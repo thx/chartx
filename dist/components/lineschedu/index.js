@@ -9,15 +9,15 @@ exports["default"] = void 0;
 
 var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
-var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
-
-var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
 
 var _assertThisInitialized2 = _interopRequireDefault(require("@babel/runtime/helpers/assertThisInitialized"));
 
-var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
-
 var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
 
 var _component = _interopRequireDefault(require("../component"));
 
@@ -25,57 +25,22 @@ var _canvax = _interopRequireDefault(require("canvax"));
 
 var _tools = require("../../utils/tools");
 
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
 var _ = _canvax["default"]._;
 
-var lineSchedu =
-/*#__PURE__*/
-function (_Component) {
+var lineSchedu = /*#__PURE__*/function (_Component) {
   (0, _inherits2["default"])(lineSchedu, _Component);
-  (0, _createClass2["default"])(lineSchedu, null, [{
-    key: "defaultProps",
-    value: function defaultProps() {
-      return {
-        lineField: {
-          detail: '对应的line字段',
-          "default": null
-        },
-        style: {
-          detail: '默认色',
-          "default": '#3995ff'
-        },
-        fillStyle: {
-          detail: '节点填充色',
-          "default": "#ffffff"
-        },
-        lineWidth: {
-          detail: '线宽',
-          "default": 2
-        },
-        radius: {
-          detail: '圆点半径',
-          "default": 6
-        },
-        timeFontSize: {
-          detail: '时间文本大小',
-          "default": 14
-        },
-        timeFontColor: {
-          detail: '时间文本颜色',
-          "default": '#606060'
-        },
-        listFontSize: {
-          detail: '列表信息文本大小',
-          "default": 12
-        }
-      };
-    }
-  }]);
+
+  var _super = _createSuper(lineSchedu);
 
   function lineSchedu(opt, app) {
     var _this;
 
     (0, _classCallCheck2["default"])(this, lineSchedu);
-    _this = (0, _possibleConstructorReturn2["default"])(this, (0, _getPrototypeOf2["default"])(lineSchedu).call(this, opt, app));
+    _this = _super.call(this, opt, app);
     _this.name = "lineSchedu";
 
     _.extend(true, (0, _assertThisInitialized2["default"])(_this), (0, _tools.getDefaultProps)(lineSchedu.defaultProps()), opt);
@@ -241,6 +206,44 @@ function (_Component) {
 
       ;
       return y;
+    }
+  }], [{
+    key: "defaultProps",
+    value: function defaultProps() {
+      return {
+        lineField: {
+          detail: '对应的line字段',
+          "default": null
+        },
+        style: {
+          detail: '默认色',
+          "default": '#3995ff'
+        },
+        fillStyle: {
+          detail: '节点填充色',
+          "default": "#ffffff"
+        },
+        lineWidth: {
+          detail: '线宽',
+          "default": 2
+        },
+        radius: {
+          detail: '圆点半径',
+          "default": 6
+        },
+        timeFontSize: {
+          detail: '时间文本大小',
+          "default": 14
+        },
+        timeFontColor: {
+          detail: '时间文本颜色',
+          "default": '#606060'
+        },
+        listFontSize: {
+          detail: '列表信息文本大小',
+          "default": 12
+        }
+      };
     }
   }]);
   return lineSchedu;

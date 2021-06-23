@@ -1,8 +1,8 @@
 "use strict";
 
-var _interopRequireWildcard = require("@babel/runtime/helpers/interopRequireWildcard");
-
 var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
+
+var _typeof = require("@babel/runtime/helpers/typeof");
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -11,15 +11,15 @@ exports["default"] = void 0;
 
 var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
-var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
-
-var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
 
 var _assertThisInitialized2 = _interopRequireDefault(require("@babel/runtime/helpers/assertThisInitialized"));
 
-var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
-
 var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
 
 var _canvax = _interopRequireDefault(require("canvax"));
 
@@ -29,141 +29,30 @@ var force = _interopRequireWildcard(require("d3-force"));
 
 var _tools = require("../../../utils/tools");
 
-//import * as force from "../../../layout/force/index";
+function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
+
+function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== "object" && typeof obj !== "function") { return { "default": obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj["default"] = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
 var _ = _canvax["default"]._,
     event = _canvax["default"].event;
 var Circle = _canvax["default"].Shapes.Circle;
 var Text = _canvax["default"].Display.Text;
 var Line = _canvax["default"].Shapes.Line;
 
-var Force =
-/*#__PURE__*/
-function (_GraphsBase) {
+var Force = /*#__PURE__*/function (_GraphsBase) {
   (0, _inherits2["default"])(Force, _GraphsBase);
-  (0, _createClass2["default"])(Force, null, [{
-    key: "defaultProps",
-    value: function defaultProps() {
-      return {
-        keyField: {
-          detail: 'key字段',
-          "default": 'key'
-        },
-        valueField: {
-          detail: 'value字段，node，link都公用这个字段',
-          "default": 'value'
-        },
-        node: {
-          detail: '单个节点的配置',
-          propertys: {
-            shapeType: {
-              detail: '节点图形',
-              "default": 'circle'
-            },
-            radiusMin: {
-              detail: '最小节点半径',
-              "default": 6
-            },
-            radiusMax: {
-              detail: '最大节点半径',
-              "default": 30
-            },
-            radius: {
-              detail: '节点半径',
-              "default": null
-            },
-            fillStyle: {
-              detail: '节点背景色',
-              "default": '#acdf7d'
-            },
-            strokeStyle: {
-              detail: '描边颜色',
-              "default": '#e5e5e5'
-            },
-            lineWidth: {
-              detail: '描边线宽',
-              "default": 0
-            },
-            nodeAlpha: {
-              detail: '节点透明度',
-              "default": 1
-            },
-            strength: {
-              detail: '节点之间作用力',
-              "default": -300
-            }
-          }
-        },
-        line: {
-          detail: '两个节点连线配置',
-          propertys: {
-            lineWidth: {
-              detail: '线宽',
-              "default": 1
-            },
-            strokeStyle: {
-              detail: '连线的颜色',
-              "default": '#e5e5e5'
-            },
-            lineType: {
-              detail: '连线样式（虚线等）',
-              "default": 'solid'
-            },
-            lineAlpha: {
-              detail: '连线透明度',
-              "default": 0.6
-            },
-            distanceMin: {
-              detail: '最小连线距离',
-              "default": 30
-            },
-            distanceMax: {
-              detail: '最大连线距离',
-              "default": 200
-            },
-            distance: {
-              detail: '连线距离',
-              "default": null
-            },
-            arrow: {
-              detail: '是否有箭头',
-              "default": true
-            }
-          }
-        },
-        label: {
-          detail: '节点内容配置',
-          propertys: {
-            field: {
-              detail: '内容字段',
-              "default": 'label'
-            },
-            fontColor: {
-              detail: '内容文本颜色',
-              "default": '#666'
-            },
-            format: {
-              detail: '内容格式化处理函数',
-              "default": null
-            },
-            textAlign: {
-              detail: "textAlign",
-              "default": "center"
-            },
-            textBaseline: {
-              detail: 'textBaseline',
-              "default": "middle"
-            }
-          }
-        }
-      };
-    }
-  }]);
+
+  var _super = _createSuper(Force);
 
   function Force(opt, app) {
     var _this;
 
     (0, _classCallCheck2["default"])(this, Force);
-    _this = (0, _possibleConstructorReturn2["default"])(this, (0, _getPrototypeOf2["default"])(Force).call(this, opt, app));
+    _this = _super.call(this, opt, app);
     _this.type = "force";
 
     _.extend(true, (0, _assertThisInitialized2["default"])(_this), (0, _tools.getDefaultProps)(Force.defaultProps()), opt);
@@ -526,6 +415,123 @@ function (_GraphsBase) {
 
       ;
       return _prop;
+    }
+  }], [{
+    key: "defaultProps",
+    value: function defaultProps() {
+      return {
+        keyField: {
+          detail: 'key字段',
+          "default": 'key'
+        },
+        valueField: {
+          detail: 'value字段，node，link都公用这个字段',
+          "default": 'value'
+        },
+        node: {
+          detail: '单个节点的配置',
+          propertys: {
+            shapeType: {
+              detail: '节点图形',
+              "default": 'circle'
+            },
+            radiusMin: {
+              detail: '最小节点半径',
+              "default": 6
+            },
+            radiusMax: {
+              detail: '最大节点半径',
+              "default": 30
+            },
+            radius: {
+              detail: '节点半径',
+              "default": null
+            },
+            fillStyle: {
+              detail: '节点背景色',
+              "default": '#acdf7d'
+            },
+            strokeStyle: {
+              detail: '描边颜色',
+              "default": '#e5e5e5'
+            },
+            lineWidth: {
+              detail: '描边线宽',
+              "default": 0
+            },
+            nodeAlpha: {
+              detail: '节点透明度',
+              "default": 1
+            },
+            strength: {
+              detail: '节点之间作用力',
+              "default": -300
+            }
+          }
+        },
+        line: {
+          detail: '两个节点连线配置',
+          propertys: {
+            lineWidth: {
+              detail: '线宽',
+              "default": 1
+            },
+            strokeStyle: {
+              detail: '连线的颜色',
+              "default": '#e5e5e5'
+            },
+            lineType: {
+              detail: '连线样式（虚线等）',
+              "default": 'solid'
+            },
+            lineAlpha: {
+              detail: '连线透明度',
+              "default": 0.6
+            },
+            distanceMin: {
+              detail: '最小连线距离',
+              "default": 30
+            },
+            distanceMax: {
+              detail: '最大连线距离',
+              "default": 200
+            },
+            distance: {
+              detail: '连线距离',
+              "default": null
+            },
+            arrow: {
+              detail: '是否有箭头',
+              "default": true
+            }
+          }
+        },
+        label: {
+          detail: '节点内容配置',
+          propertys: {
+            field: {
+              detail: '内容字段',
+              "default": 'label'
+            },
+            fontColor: {
+              detail: '内容文本颜色',
+              "default": '#666'
+            },
+            format: {
+              detail: '内容格式化处理函数',
+              "default": null
+            },
+            textAlign: {
+              detail: "textAlign",
+              "default": "center"
+            },
+            textBaseline: {
+              detail: 'textBaseline',
+              "default": "middle"
+            }
+          }
+        }
+      };
     }
   }]);
   return Force;

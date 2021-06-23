@@ -9,15 +9,15 @@ exports["default"] = void 0;
 
 var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
-var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
-
-var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
 
 var _assertThisInitialized2 = _interopRequireDefault(require("@babel/runtime/helpers/assertThisInitialized"));
 
-var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
-
 var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
 
 var _canvax = _interopRequireDefault(require("canvax"));
 
@@ -27,72 +27,24 @@ var _partition = _interopRequireDefault(require("../../../layout/partition"));
 
 var _tools = require("../../../utils/tools");
 
-/*
-* 太阳图
-*/
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
 var _ = _canvax["default"]._,
     event = _canvax["default"].event;
 var Sector = _canvax["default"].Shapes.Sector;
 
-var sunburstGraphs =
-/*#__PURE__*/
-function (_GraphsBase) {
+var sunburstGraphs = /*#__PURE__*/function (_GraphsBase) {
   (0, _inherits2["default"])(sunburstGraphs, _GraphsBase);
-  (0, _createClass2["default"])(sunburstGraphs, null, [{
-    key: "defaultProps",
-    value: function defaultProps() {
-      return {
-        keyField: {
-          detail: 'key字段',
-          "default": 'name'
-        },
-        valueField: {
-          detail: 'value字段',
-          "default": 'value'
-        },
-        parentField: {
-          detail: 'parent字段',
-          "default": 'parent'
-        },
-        node: {
-          detail: '单个节点图形设置',
-          propertys: {
-            strokeStyle: {
-              detail: '描边色',
-              "default": '#ffffff'
-            },
-            lineWidth: {
-              detail: '描边线宽',
-              "default": 1
-            },
-            strokeAlpha: {
-              detail: '描边边框透明度',
-              "default": 1
-            },
-            fillStyle: {
-              detail: '背景色',
-              "default": null
-            },
-            fillAlpha: {
-              detail: '背景透明度',
-              "default": 1
-            },
-            blurAlpha: {
-              detail: '非激活状态透明度',
-              documentation: '比如选中其中一项，其他不先关的要降低透明度',
-              "default": 0.4
-            }
-          }
-        }
-      };
-    }
-  }]);
+
+  var _super = _createSuper(sunburstGraphs);
 
   function sunburstGraphs(opt, app) {
     var _this;
 
     (0, _classCallCheck2["default"])(this, sunburstGraphs);
-    _this = (0, _possibleConstructorReturn2["default"])(this, (0, _getPrototypeOf2["default"])(sunburstGraphs).call(this, opt, app));
+    _this = _super.call(this, opt, app);
     _this.type = "sunburst";
 
     _.extend(true, (0, _assertThisInitialized2["default"])(_this), (0, _tools.getDefaultProps)(sunburstGraphs.defaultProps()), opt);
@@ -361,6 +313,54 @@ function (_GraphsBase) {
           }
         });
       }
+    }
+  }], [{
+    key: "defaultProps",
+    value: function defaultProps() {
+      return {
+        keyField: {
+          detail: 'key字段',
+          "default": 'name'
+        },
+        valueField: {
+          detail: 'value字段',
+          "default": 'value'
+        },
+        parentField: {
+          detail: 'parent字段',
+          "default": 'parent'
+        },
+        node: {
+          detail: '单个节点图形设置',
+          propertys: {
+            strokeStyle: {
+              detail: '描边色',
+              "default": '#ffffff'
+            },
+            lineWidth: {
+              detail: '描边线宽',
+              "default": 1
+            },
+            strokeAlpha: {
+              detail: '描边边框透明度',
+              "default": 1
+            },
+            fillStyle: {
+              detail: '背景色',
+              "default": null
+            },
+            fillAlpha: {
+              detail: '背景透明度',
+              "default": 1
+            },
+            blurAlpha: {
+              detail: '非激活状态透明度',
+              documentation: '比如选中其中一项，其他不先关的要降低透明度',
+              "default": 0.4
+            }
+          }
+        }
+      };
     }
   }]);
   return sunburstGraphs;

@@ -9,15 +9,15 @@ exports["default"] = void 0;
 
 var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
-var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
-
-var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
 
 var _assertThisInitialized2 = _interopRequireDefault(require("@babel/runtime/helpers/assertThisInitialized"));
 
-var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
-
 var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
 
 var _component = _interopRequireDefault(require("../component"));
 
@@ -25,53 +25,22 @@ var _canvax = _interopRequireDefault(require("canvax"));
 
 var _tools = require("../../utils/tools");
 
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
 var _ = _canvax["default"]._;
 
-var coordBase =
-/*#__PURE__*/
-function (_Component) {
+var coordBase = /*#__PURE__*/function (_Component) {
   (0, _inherits2["default"])(coordBase, _Component);
-  (0, _createClass2["default"])(coordBase, null, [{
-    key: "defaultProps",
-    value: function defaultProps() {
-      return {
-        type: {
-          detail: '坐标系组件',
-          documentation: "坐标系组件，可选值有'rect'（二维直角坐标系）,'polar'（二维极坐标系）,'box'（三维直角坐标系） ",
-          insertText: "type: ",
-          "default": "",
-          values: ["rect", "polar", "box", "polar3d"]
-        },
-        width: {
-          detail: '坐标系width',
-          "default": 0
-        },
-        height: {
-          detail: '坐标系height',
-          "default": 0
-        },
-        origin: {
-          detail: '坐标系原点',
-          propertys: {
-            x: {
-              detail: '原点x位置',
-              "default": 0
-            },
-            y: {
-              detail: '原点x位置',
-              "default": 0
-            }
-          }
-        }
-      };
-    }
-  }]);
+
+  var _super = _createSuper(coordBase);
 
   function coordBase(opt, app) {
     var _this;
 
     (0, _classCallCheck2["default"])(this, coordBase);
-    _this = (0, _possibleConstructorReturn2["default"])(this, (0, _getPrototypeOf2["default"])(coordBase).call(this, opt, app));
+    _this = _super.call(this, opt, app);
 
     _.extend(true, (0, _assertThisInitialized2["default"])(_this), (0, _tools.getDefaultProps)(coordBase.defaultProps()));
 
@@ -367,6 +336,40 @@ function (_Component) {
       });
 
       return arr;
+    }
+  }], [{
+    key: "defaultProps",
+    value: function defaultProps() {
+      return {
+        type: {
+          detail: '坐标系组件',
+          documentation: "坐标系组件，可选值有'rect'（二维直角坐标系）,'polar'（二维极坐标系）,'box'（三维直角坐标系） ",
+          insertText: "type: ",
+          "default": "",
+          values: ["rect", "polar", "box", "polar3d"]
+        },
+        width: {
+          detail: '坐标系width',
+          "default": 0
+        },
+        height: {
+          detail: '坐标系height',
+          "default": 0
+        },
+        origin: {
+          detail: '坐标系原点',
+          propertys: {
+            x: {
+              detail: '原点x位置',
+              "default": 0
+            },
+            y: {
+              detail: '原点x位置',
+              "default": 0
+            }
+          }
+        }
+      };
     }
   }]);
   return coordBase;

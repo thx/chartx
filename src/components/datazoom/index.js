@@ -424,6 +424,8 @@ class dataZoom extends Component
                     _.extend( app.dataFrame.range , range );
                 };
             
+                console.log( range )
+
                 //不想要重新构造dataFrame，所以第一个参数为null
                 app.resetData( null , trigger );
                 app.fire("dataZoomDragIng");
@@ -760,12 +762,13 @@ class dataZoom extends Component
                     this.context.x = me.disPart.min - me.btnWidth + me._btnLeft.context.x;
                 };
                 
-                if( me.shapeType == 'bg' ){
+                if( me.shapeType == 'rect' ){
                     me._rangeElement.context.width = this.context.x - me._btnLeft.context.x - me.btnWidth;
-                }
+                    me._rangeElement.context.x = me._btnLeft.context.x + me.btnWidth;
+                };
                 if( me.shapeType == 'triangle' ){
                     me._rangeElement.context.pointList = me._getRangeTrianglePoints();
-                }
+                };
                 
                 me._setRange();
             });
@@ -821,32 +824,36 @@ class dataZoom extends Component
                     hoverClone  : false,
                     context     : rangeRectCtx
                 });
+                this._rangeElement.on("draging" , function(){
+                
+                    this.context.y = 1;
+                    if( this.context.x < 0 ){
+                        this.context.x = 0; 
+                    };
+                    if( this.context.x > me.width - this.context.width ){
+                        this.context.x = me.width - this.context.width;
+                    };
+                    me._btnLeft.context.x  = this.context.x;
+                    me._btnRight.context.x = this.context.x + this.context.width - me.btnWidth;
+                    me._setRange( "btnRange" );
+    
+                });
+                this._rangeElement.on("dragend" , function(){
+                    me.dragEnd( me.range );
+                });
             } else {
+                
                 this._rangeElement = new Polygon({
                     id          : 'btnRange',
-                    dragEnabled : true,
-                    hoverClone  : false,
+                    //dragEnabled : true,
+                    //hoverClone  : false,
                     context     : bgTriangleCtx
                 });
+
+                //三角形的 zoom 暂时不需要添加事件
             };
 
-            this._rangeElement.on("draging" , function(){
-                
-                this.context.y = 1;
-                if( this.context.x < me.btnWidth ){
-                    this.context.x = me.btnWidth; 
-                };
-                if( this.context.x > me.width - this.context.width - me.btnWidth ){
-                    this.context.x = me.width - this.context.width - me.btnWidth;
-                };
-                me._btnLeft.context.x  = this.context.x - me.btnWidth;
-                me._btnRight.context.x = this.context.x + this.context.width;
-                me._setRange( "btnRange" );
-
-            });
-            this._rangeElement.on("dragend" , function(){
-                me.dragEnd( me.range );
-            });
+            
             //addChild到1 ， 因为0的bg
             this.dataZoomBtns.addChild( this._rangeElement , 0 );
         };
@@ -904,6 +911,47 @@ class dataZoom extends Component
 
     _setRange( trigger )
     {
+        let me = this;
+        let _end = me._getRangeEnd();
+        let _preDis = _end - me.range.start;
+
+        let start = (me._btnLeft.context.x / me.width) * me.count;
+        let end =  ((me._btnRight.context.x + me.btnWidth) / me.width) * me.count;
+       
+        //console.log( (me._btnRight.context.x + me.btnWidth)+"|"+ me.width + "|" + me.count )
+        if( this.axisLayoutType == "peak" ){
+            start = Math.round( start );
+            end = Math.round( end );
+        } else if( this.axisLayoutType == "rule" ) {
+            start = parseInt( start );
+            end = parseInt( end );
+        } else {
+            start = parseInt( start );
+            end = parseInt( end );;
+        };
+
+        if( trigger == "btnRange" ){
+            //如果是拖动中间部分，那么要保持 end-start的总量一致
+            if( (end - start) != _preDis ){
+                end = start + _preDis;
+            }
+        };
+        
+        if( start != me.range.start || end != _end ){
+            me.range.start = start;
+            if( me.axisLayoutType == "peak" ){
+                end -= 1;
+            };
+            
+            me.range.end = end;
+            me.dragIng( me.range );
+        };
+
+        me._setLines();
+    }
+
+    _setRange_bak( trigger )
+    {
         
         let me = this;
         let _start = me._preRange ? me._preRange.start : 0;
@@ -914,6 +962,7 @@ class dataZoom extends Component
         let end =  ((me._btnRight.context.x + me.btnWidth) / me.width) * me.count;
        
         //console.log( (me._btnRight.context.x + me.btnWidth)+"|"+ me.width + "|" + me.count )
+        
         if( this.axisLayoutType == "peak" ){
             start = Math.round( start );
             end = Math.round( end );
@@ -955,8 +1004,8 @@ class dataZoom extends Component
         let linesLeft   = this.linesLeft;
         let linesRight  = this.linesRight;
         
-        let btnLeft    = this._btnLeft;
-        let btnRight   = this._btnRight;
+        let btnLeft     = this._btnLeft;
+        let btnRight    = this._btnRight;
         
         linesLeft.context.x  = btnLeft.context.x + (btnLeft.context.width - linesLeft.context.width ) / 2
         linesLeft.context.y  = btnLeft.context.y + (btnLeft.context.height - linesLeft.context.height ) / 2

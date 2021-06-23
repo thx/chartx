@@ -11,15 +11,15 @@ var _toConsumableArray2 = _interopRequireDefault(require("@babel/runtime/helpers
 
 var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
-var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
-
-var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
 
 var _assertThisInitialized2 = _interopRequireDefault(require("@babel/runtime/helpers/assertThisInitialized"));
 
-var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
-
 var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
 
 var _canvax = _interopRequireDefault(require("canvax"));
 
@@ -37,6 +37,10 @@ var _zoom = _interopRequireDefault(require("../../../utils/zoom"));
 
 var _index2 = _interopRequireDefault(require("../../../layout/dagre/index"));
 
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
 var _ = _canvax["default"]._,
     event = _canvax["default"].event;
 var Rect = _canvax["default"].Shapes.Rect;
@@ -49,411 +53,16 @@ var Arrow = _canvax["default"].Shapes.Arrow;
  * 默认用配置和数据可以完成绘图， 但是如果有布局数据，就绘图玩额外调用一次绘图，把布局数据传入修正布局效果
  */
 
-var Relation =
-/*#__PURE__*/
-function (_GraphsBase) {
+var Relation = /*#__PURE__*/function (_GraphsBase) {
   (0, _inherits2["default"])(Relation, _GraphsBase);
-  (0, _createClass2["default"])(Relation, null, [{
-    key: "defaultProps",
-    value: function defaultProps() {
-      return {
-        field: {
-          detail: 'key字段设置',
-          documentation: '',
-          "default": null
-        },
-        childrenField: {
-          detail: '树结构数据的关联字段',
-          documentation: '如果是树结构的关联数据，不是行列式，那么就通过这个字段来建立父子关系',
-          "default": 'children'
-        },
-        //rankdir: "TB",
-        //align: "DR",
-        //nodesep: 0,//同级node之间的距离
-        //edgesep: 0,
-        //ranksep: 0, //排与排之间的距离
-        rankdir: {
-          detail: '布局方向',
-          "default": null
-        },
-        node: {
-          detail: '单个节点的配置',
-          propertys: {
-            shapeType: {
-              detail: '节点图形，支持rect,diamond',
-              "default": 'rect'
-            },
-            maxWidth: {
-              detail: '节点最大的width',
-              "default": 200
-            },
-            cursor: {
-              detail: '节点的鼠标样式',
-              "default": 'pointer'
-            },
-            width: {
-              detail: '内容的width',
-              "default": null
-            },
-            height: {
-              detail: '内容的height',
-              "default": null
-            },
-            radius: {
-              detail: '圆角角度，对rect生效',
-              "default": 6
-            },
-            includedAngle: {
-              detail: 'shapeType为diamond(菱形)的时候生效,x方向的夹角',
-              "default": 60
-            },
-            fillStyle: {
-              detail: '节点背景色',
-              "default": '#ffffff'
-            },
-            lineWidth: {
-              detail: '描边宽度',
-              "default": 1
-            },
-            strokeStyle: {
-              detail: '描边颜色',
-              "default": '#e5e5e5'
-            },
-            shadow: {
-              detail: '阴影设置',
-              propertys: {
-                shadowOffsetX: {
-                  detail: 'x偏移量',
-                  "default": 0
-                },
-                shadowOffsetY: {
-                  detail: 'y偏移量',
-                  "default": 0
-                },
-                shadowBlur: {
-                  detail: '阴影模糊值',
-                  "default": 0
-                },
-                shadowColor: {
-                  detail: '阴影颜色',
-                  "default": '#000000'
-                }
-              }
-            },
-            select: {
-              detail: '选中效果',
-              propertys: {
-                enabled: {
-                  detail: '是否开启选中',
-                  "default": false
-                },
-                list: {
-                  detail: '选中的node.key的集合,外部传入可以选中',
-                  "default": []
-                },
-                triggerEventType: {
-                  detail: '触发事件',
-                  "default": 'click'
-                },
-                shadow: {
-                  detail: '选中效果的阴影设置',
-                  propertys: {
-                    shadowOffsetX: {
-                      detail: 'x偏移量',
-                      "default": 0
-                    },
-                    shadowOffsetY: {
-                      detail: 'y偏移量',
-                      "default": 0
-                    },
-                    shadowBlur: {
-                      detail: '阴影模糊值',
-                      "default": 0
-                    },
-                    shadowColor: {
-                      detail: '阴影颜色',
-                      "default": '#000000'
-                    }
-                  }
-                },
-                fillStyle: {
-                  detail: 'hover节点背景色',
-                  "default": '#ffffff'
-                },
-                lineWidth: {
-                  detail: 'hover描边宽度',
-                  "default": 1
-                },
-                strokeStyle: {
-                  detail: 'hover描边颜色',
-                  "default": '#e5e5e5'
-                },
-                onbefore: {
-                  detail: '执行select处理函数的前处理函数，返回false则取消执行select',
-                  "default": null
-                },
-                onend: {
-                  detail: '执行select处理函数的后处理函数',
-                  "default": null
-                }
-              }
-            },
-            focus: {
-              detail: 'hover效果',
-              propertys: {
-                enabled: {
-                  detail: '是否开启hover效果',
-                  "default": false
-                },
-                shadow: {
-                  detail: '选中效果的阴影设置',
-                  propertys: {
-                    shadowOffsetX: {
-                      detail: 'x偏移量',
-                      "default": 0
-                    },
-                    shadowOffsetY: {
-                      detail: 'y偏移量',
-                      "default": 0
-                    },
-                    shadowBlur: {
-                      detail: '阴影模糊值',
-                      "default": 0
-                    },
-                    shadowColor: {
-                      detail: '阴影颜色',
-                      "default": '#000000'
-                    }
-                  }
-                },
-                fillStyle: {
-                  detail: 'hover节点背景色',
-                  "default": '#ffffff'
-                },
-                lineWidth: {
-                  detail: 'hover描边宽度',
-                  "default": 1
-                },
-                strokeStyle: {
-                  detail: 'hover描边颜色',
-                  "default": '#e5e5e5'
-                }
-              }
-            },
-            padding: {
-              detail: 'node节点容器到内容的边距,节点内容是canvas的时候生效，dom节点不生效',
-              "default": 10
-            },
-            content: {
-              detail: '节点内容配置',
-              propertys: {
-                field: {
-                  detail: '内容字段',
-                  documentation: '默认content字段',
-                  "default": 'content'
-                },
-                fontColor: {
-                  detail: '内容文本颜色',
-                  "default": '#666'
-                },
-                format: {
-                  detail: '内容格式化处理函数',
-                  "default": null
-                },
-                textAlign: {
-                  detail: "textAlign",
-                  "default": "center"
-                },
-                textBaseline: {
-                  detail: 'textBaseline',
-                  "default": "middle"
-                },
-                init: {
-                  detail: '内容节点的初始化完成回调',
-                  documentation: '在节点内容配置为需要异步完成的时候，比如节点内容配置为一个magix的view',
-                  "default": null
-                }
-              }
-            }
-          }
-        },
-        line: {
-          detail: '两个节点连线配置',
-          propertys: {
-            isTree: {
-              detail: '是否树结构的连线',
-              documentation: '非树结构启用该配置可能会有意想不到的惊喜，慎用',
-              "default": false
-            },
-            inflectionRadius: {
-              detail: '树状连线的拐点圆角半径',
-              "default": 0
-            },
-            shapeType: {
-              detail: '连线的图形样式 brokenLine or bezier',
-              "default": 'bezier'
-            },
-            lineWidth: {
-              detail: '线宽',
-              "default": 1
-            },
-            strokeStyle: {
-              detail: '连线的颜色',
-              "default": '#e5e5e5'
-            },
-            lineType: {
-              detail: '连线样式（虚线等）',
-              "default": 'solid'
-            },
-            arrow: {
-              detail: '连线箭头配置',
-              propertys: {
-                enabled: {
-                  detail: '是否开启arrow设置',
-                  "default": true
-                },
-                offsetX: {
-                  detail: 'x方向偏移',
-                  "default": 0
-                },
-                offsetY: {
-                  detail: 'y方向偏移',
-                  "default": 0
-                }
-              }
-            },
-            edgeLabel: {
-              detail: '连线上面的label配置',
-              propertys: {
-                enabled: {
-                  detail: '是否开启label设置',
-                  "default": true
-                },
-                fontColor: {
-                  detail: '文本颜色',
-                  "default": '#ccc'
-                },
-                fontSize: {
-                  detail: '文本大小',
-                  "default": 12
-                },
-                // offsetX: {
-                //     detail: 'x方向偏移量',
-                //     default:0
-                // },
-                // offsetY: {
-                //     detail: 'y方向偏移量',
-                //     default:0
-                // },
-                offset: {
-                  detail: 'label的位置，函数，参数是整个edge对象',
-                  "default": null
-                }
-              }
-            },
-            icon: {
-              detail: '连线上面的操作icon',
-              propertys: {
-                enabled: {
-                  detail: '是否开启线上的icon设置',
-                  "default": false
-                },
-                charCode: {
-                  detail: 'iconfont上面对应的unicode中&#x后面的字符',
-                  "default": null
-                },
-                lineWidth: {
-                  detail: 'icon描边线宽',
-                  "default": 1
-                },
-                strokeStyle: {
-                  detail: 'icon的描边颜色',
-                  "default": '#e5e5e5'
-                },
-                fontColor: {
-                  detail: 'icon的颜色',
-                  "default": '#e5e5e5'
-                },
-                fontFamily: {
-                  detail: 'font-face的font-family设置',
-                  "default": 'iconfont'
-                },
-                fontSize: {
-                  detail: 'icon的字体大小',
-                  "default": 14
-                },
-                offset: {
-                  detail: 'icon的位置，函数，参数是整个edge对象',
-                  "default": null
-                },
-                offsetX: {
-                  detail: '在计算出offset后的X再次便宜量',
-                  "default": 1
-                },
-                offsetY: {
-                  detail: '在计算出offset后的Y再次便宜量',
-                  "default": 2
-                },
-                background: {
-                  detail: 'icon的背景颜色，背景为圆形',
-                  "default": "#fff"
-                }
-              }
-            },
-            cursor: 'default'
-          }
-        },
-        layout: {
-          detail: '采用的布局引擎,比如dagre',
-          "default": "dagre"
-        },
-        layoutOpts: {
-          detail: '布局引擎对应的配置,dagre详见dagre的官方wiki',
-          propertys: {}
-        },
-        status: {
-          detail: '一些开关配置',
-          propertys: {
-            transform: {
-              detail: "是否启动拖拽缩放整个画布",
-              propertys: {
-                fitView: {
-                  detail: "自动缩放",
-                  "default": '' //autoZoom
 
-                },
-                enabled: {
-                  detail: "是否开启",
-                  "default": true
-                },
-                scale: {
-                  detail: "缩放值",
-                  "default": 1
-                },
-                scaleOrigin: {
-                  detail: "缩放原点",
-                  "default": {
-                    x: 0,
-                    y: 0
-                  }
-                },
-                wheelAction: {
-                  detail: "滚轮触屏滑动触发的行为，可选有scale和offset，默认offset",
-                  "default": "offset"
-                }
-              }
-            }
-          }
-        }
-      };
-    }
-  }]);
+  var _super = _createSuper(Relation);
 
   function Relation(opt, app) {
     var _this;
 
     (0, _classCallCheck2["default"])(this, Relation);
-    _this = (0, _possibleConstructorReturn2["default"])(this, (0, _getPrototypeOf2["default"])(Relation).call(this, opt, app));
+    _this = _super.call(this, opt, app);
     _this.type = "relation";
 
     _.extend(true, (0, _assertThisInitialized2["default"])(_this), (0, _tools.getDefaultProps)(Relation.defaultProps()), opt);
@@ -1991,6 +1600,400 @@ function (_GraphsBase) {
 
       ;
       return _prop;
+    }
+  }], [{
+    key: "defaultProps",
+    value: function defaultProps() {
+      return {
+        field: {
+          detail: 'key字段设置',
+          documentation: '',
+          "default": null
+        },
+        childrenField: {
+          detail: '树结构数据的关联字段',
+          documentation: '如果是树结构的关联数据，不是行列式，那么就通过这个字段来建立父子关系',
+          "default": 'children'
+        },
+        //rankdir: "TB",
+        //align: "DR",
+        //nodesep: 0,//同级node之间的距离
+        //edgesep: 0,
+        //ranksep: 0, //排与排之间的距离
+        rankdir: {
+          detail: '布局方向',
+          "default": null
+        },
+        node: {
+          detail: '单个节点的配置',
+          propertys: {
+            shapeType: {
+              detail: '节点图形，支持rect,diamond',
+              "default": 'rect'
+            },
+            maxWidth: {
+              detail: '节点最大的width',
+              "default": 200
+            },
+            cursor: {
+              detail: '节点的鼠标样式',
+              "default": 'pointer'
+            },
+            width: {
+              detail: '内容的width',
+              "default": null
+            },
+            height: {
+              detail: '内容的height',
+              "default": null
+            },
+            radius: {
+              detail: '圆角角度，对rect生效',
+              "default": 6
+            },
+            includedAngle: {
+              detail: 'shapeType为diamond(菱形)的时候生效,x方向的夹角',
+              "default": 60
+            },
+            fillStyle: {
+              detail: '节点背景色',
+              "default": '#ffffff'
+            },
+            lineWidth: {
+              detail: '描边宽度',
+              "default": 1
+            },
+            strokeStyle: {
+              detail: '描边颜色',
+              "default": '#e5e5e5'
+            },
+            shadow: {
+              detail: '阴影设置',
+              propertys: {
+                shadowOffsetX: {
+                  detail: 'x偏移量',
+                  "default": 0
+                },
+                shadowOffsetY: {
+                  detail: 'y偏移量',
+                  "default": 0
+                },
+                shadowBlur: {
+                  detail: '阴影模糊值',
+                  "default": 0
+                },
+                shadowColor: {
+                  detail: '阴影颜色',
+                  "default": '#000000'
+                }
+              }
+            },
+            select: {
+              detail: '选中效果',
+              propertys: {
+                enabled: {
+                  detail: '是否开启选中',
+                  "default": false
+                },
+                list: {
+                  detail: '选中的node.key的集合,外部传入可以选中',
+                  "default": []
+                },
+                triggerEventType: {
+                  detail: '触发事件',
+                  "default": 'click'
+                },
+                shadow: {
+                  detail: '选中效果的阴影设置',
+                  propertys: {
+                    shadowOffsetX: {
+                      detail: 'x偏移量',
+                      "default": 0
+                    },
+                    shadowOffsetY: {
+                      detail: 'y偏移量',
+                      "default": 0
+                    },
+                    shadowBlur: {
+                      detail: '阴影模糊值',
+                      "default": 0
+                    },
+                    shadowColor: {
+                      detail: '阴影颜色',
+                      "default": '#000000'
+                    }
+                  }
+                },
+                fillStyle: {
+                  detail: 'hover节点背景色',
+                  "default": '#ffffff'
+                },
+                lineWidth: {
+                  detail: 'hover描边宽度',
+                  "default": 1
+                },
+                strokeStyle: {
+                  detail: 'hover描边颜色',
+                  "default": '#e5e5e5'
+                },
+                onbefore: {
+                  detail: '执行select处理函数的前处理函数，返回false则取消执行select',
+                  "default": null
+                },
+                onend: {
+                  detail: '执行select处理函数的后处理函数',
+                  "default": null
+                }
+              }
+            },
+            focus: {
+              detail: 'hover效果',
+              propertys: {
+                enabled: {
+                  detail: '是否开启hover效果',
+                  "default": false
+                },
+                shadow: {
+                  detail: '选中效果的阴影设置',
+                  propertys: {
+                    shadowOffsetX: {
+                      detail: 'x偏移量',
+                      "default": 0
+                    },
+                    shadowOffsetY: {
+                      detail: 'y偏移量',
+                      "default": 0
+                    },
+                    shadowBlur: {
+                      detail: '阴影模糊值',
+                      "default": 0
+                    },
+                    shadowColor: {
+                      detail: '阴影颜色',
+                      "default": '#000000'
+                    }
+                  }
+                },
+                fillStyle: {
+                  detail: 'hover节点背景色',
+                  "default": '#ffffff'
+                },
+                lineWidth: {
+                  detail: 'hover描边宽度',
+                  "default": 1
+                },
+                strokeStyle: {
+                  detail: 'hover描边颜色',
+                  "default": '#e5e5e5'
+                }
+              }
+            },
+            padding: {
+              detail: 'node节点容器到内容的边距,节点内容是canvas的时候生效，dom节点不生效',
+              "default": 10
+            },
+            content: {
+              detail: '节点内容配置',
+              propertys: {
+                field: {
+                  detail: '内容字段',
+                  documentation: '默认content字段',
+                  "default": 'content'
+                },
+                fontColor: {
+                  detail: '内容文本颜色',
+                  "default": '#666'
+                },
+                format: {
+                  detail: '内容格式化处理函数',
+                  "default": null
+                },
+                textAlign: {
+                  detail: "textAlign",
+                  "default": "center"
+                },
+                textBaseline: {
+                  detail: 'textBaseline',
+                  "default": "middle"
+                },
+                init: {
+                  detail: '内容节点的初始化完成回调',
+                  documentation: '在节点内容配置为需要异步完成的时候，比如节点内容配置为一个magix的view',
+                  "default": null
+                }
+              }
+            }
+          }
+        },
+        line: {
+          detail: '两个节点连线配置',
+          propertys: {
+            isTree: {
+              detail: '是否树结构的连线',
+              documentation: '非树结构启用该配置可能会有意想不到的惊喜，慎用',
+              "default": false
+            },
+            inflectionRadius: {
+              detail: '树状连线的拐点圆角半径',
+              "default": 0
+            },
+            shapeType: {
+              detail: '连线的图形样式 brokenLine or bezier',
+              "default": 'bezier'
+            },
+            lineWidth: {
+              detail: '线宽',
+              "default": 1
+            },
+            strokeStyle: {
+              detail: '连线的颜色',
+              "default": '#e5e5e5'
+            },
+            lineType: {
+              detail: '连线样式（虚线等）',
+              "default": 'solid'
+            },
+            arrow: {
+              detail: '连线箭头配置',
+              propertys: {
+                enabled: {
+                  detail: '是否开启arrow设置',
+                  "default": true
+                },
+                offsetX: {
+                  detail: 'x方向偏移',
+                  "default": 0
+                },
+                offsetY: {
+                  detail: 'y方向偏移',
+                  "default": 0
+                }
+              }
+            },
+            edgeLabel: {
+              detail: '连线上面的label配置',
+              propertys: {
+                enabled: {
+                  detail: '是否开启label设置',
+                  "default": true
+                },
+                fontColor: {
+                  detail: '文本颜色',
+                  "default": '#ccc'
+                },
+                fontSize: {
+                  detail: '文本大小',
+                  "default": 12
+                },
+                // offsetX: {
+                //     detail: 'x方向偏移量',
+                //     default:0
+                // },
+                // offsetY: {
+                //     detail: 'y方向偏移量',
+                //     default:0
+                // },
+                offset: {
+                  detail: 'label的位置，函数，参数是整个edge对象',
+                  "default": null
+                }
+              }
+            },
+            icon: {
+              detail: '连线上面的操作icon',
+              propertys: {
+                enabled: {
+                  detail: '是否开启线上的icon设置',
+                  "default": false
+                },
+                charCode: {
+                  detail: 'iconfont上面对应的unicode中&#x后面的字符',
+                  "default": null
+                },
+                lineWidth: {
+                  detail: 'icon描边线宽',
+                  "default": 1
+                },
+                strokeStyle: {
+                  detail: 'icon的描边颜色',
+                  "default": '#e5e5e5'
+                },
+                fontColor: {
+                  detail: 'icon的颜色',
+                  "default": '#e5e5e5'
+                },
+                fontFamily: {
+                  detail: 'font-face的font-family设置',
+                  "default": 'iconfont'
+                },
+                fontSize: {
+                  detail: 'icon的字体大小',
+                  "default": 14
+                },
+                offset: {
+                  detail: 'icon的位置，函数，参数是整个edge对象',
+                  "default": null
+                },
+                offsetX: {
+                  detail: '在计算出offset后的X再次便宜量',
+                  "default": 1
+                },
+                offsetY: {
+                  detail: '在计算出offset后的Y再次便宜量',
+                  "default": 2
+                },
+                background: {
+                  detail: 'icon的背景颜色，背景为圆形',
+                  "default": "#fff"
+                }
+              }
+            },
+            cursor: 'default'
+          }
+        },
+        layout: {
+          detail: '采用的布局引擎,比如dagre',
+          "default": "dagre"
+        },
+        layoutOpts: {
+          detail: '布局引擎对应的配置,dagre详见dagre的官方wiki',
+          propertys: {}
+        },
+        status: {
+          detail: '一些开关配置',
+          propertys: {
+            transform: {
+              detail: "是否启动拖拽缩放整个画布",
+              propertys: {
+                fitView: {
+                  detail: "自动缩放",
+                  "default": '' //autoZoom
+
+                },
+                enabled: {
+                  detail: "是否开启",
+                  "default": true
+                },
+                scale: {
+                  detail: "缩放值",
+                  "default": 1
+                },
+                scaleOrigin: {
+                  detail: "缩放原点",
+                  "default": {
+                    x: 0,
+                    y: 0
+                  }
+                },
+                wheelAction: {
+                  detail: "滚轮触屏滑动触发的行为，可选有scale和offset，默认offset",
+                  "default": "offset"
+                }
+              }
+            }
+          }
+        }
+      };
     }
   }]);
   return Relation;

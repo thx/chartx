@@ -9,15 +9,15 @@ exports["default"] = void 0;
 
 var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
-var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
-
-var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
 
 var _assertThisInitialized2 = _interopRequireDefault(require("@babel/runtime/helpers/assertThisInitialized"));
 
-var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
-
 var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
 
 var _pie = _interopRequireDefault(require("./pie"));
 
@@ -27,119 +27,20 @@ var _canvax = require("canvax");
 
 var _tools = require("../../../utils/tools");
 
-var PieGraphs =
-/*#__PURE__*/
-function (_GraphsBase) {
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
+var PieGraphs = /*#__PURE__*/function (_GraphsBase) {
   (0, _inherits2["default"])(PieGraphs, _GraphsBase);
-  (0, _createClass2["default"])(PieGraphs, null, [{
-    key: "defaultProps",
-    value: function defaultProps() {
-      return {
-        field: {
-          detail: '字段配置',
-          "default": null
-        },
-        groupField: {
-          detail: '分组字段',
-          "default": null,
-          documentation: 'groupField主要是给legend用的， 所有在legend中需要显示的分组数据，都用groupField'
-        },
-        sort: {
-          detail: '排序，默认不排序，可以配置为asc,desc',
-          "default": null
-        },
-        startAngle: {
-          detail: '起始角度',
-          "default": -90
-        },
-        allAngle: {
-          detail: '全部角度',
-          "default": 360
-        },
-        node: {
-          detail: '单个节点（扇形）配置',
-          propertys: {
-            radius: {
-              detail: '半径',
-              "default": null,
-              documentation: '每个扇形单元的半径，也可以配置一个字段，就成了丁格尔玫瑰图'
-            },
-            innerRadius: {
-              detail: '内径',
-              "default": 0
-            },
-            outRadius: {
-              detail: '外径',
-              "default": null
-            },
-            minRadius: {
-              detail: '最小的半径厚度',
-              "default": 10,
-              documentation: 'outRadius - innerRadius ， 也就是radius的最小值'
-            },
-            moveDis: {
-              detail: 'hover偏移量',
-              "default": 15,
-              documentation: '要预留moveDis位置来hover sector 的时候外扩'
-            },
-            fillStyle: {
-              detail: '单个图形背景色',
-              "default": null
-            },
-            focus: {
-              detail: '图形的hover设置',
-              propertys: {
-                enabled: {
-                  detail: '是否开启',
-                  "default": true
-                }
-              }
-            },
-            select: {
-              detail: '图形的选中效果',
-              propertys: {
-                enabled: {
-                  detail: '是否开启',
-                  "default": true
-                },
-                radius: {
-                  detail: '选中效果图形的半径厚度',
-                  "default": 5
-                },
-                alpha: {
-                  detail: '选中效果图形的透明度',
-                  "default": 0.7
-                }
-              }
-            }
-          }
-        },
-        label: {
-          detail: 'label',
-          propertys: {
-            field: {
-              detail: '获取label的字段',
-              "default": null
-            },
-            enabled: {
-              detail: '是否开启',
-              "default": false
-            },
-            format: {
-              detail: 'label的格式化函数，支持html',
-              "default": null
-            }
-          }
-        }
-      };
-    }
-  }]);
+
+  var _super = _createSuper(PieGraphs);
 
   function PieGraphs(opt, app) {
     var _this;
 
     (0, _classCallCheck2["default"])(this, PieGraphs);
-    _this = (0, _possibleConstructorReturn2["default"])(this, (0, _getPrototypeOf2["default"])(PieGraphs).call(this, opt, app));
+    _this = _super.call(this, opt, app);
     _this.type = "pie";
 
     _canvax._.extend(true, (0, _assertThisInitialized2["default"])(_this), (0, _tools.getDefaultProps)(PieGraphs.defaultProps()), opt);
@@ -561,6 +462,108 @@ function (_GraphsBase) {
       if (!this.node.select.enabled) return;
 
       this._pie.unselectOf(nodeData);
+    }
+  }], [{
+    key: "defaultProps",
+    value: function defaultProps() {
+      return {
+        field: {
+          detail: '字段配置',
+          "default": null
+        },
+        groupField: {
+          detail: '分组字段',
+          "default": null,
+          documentation: 'groupField主要是给legend用的， 所有在legend中需要显示的分组数据，都用groupField'
+        },
+        sort: {
+          detail: '排序，默认不排序，可以配置为asc,desc',
+          "default": null
+        },
+        startAngle: {
+          detail: '起始角度',
+          "default": -90
+        },
+        allAngle: {
+          detail: '全部角度',
+          "default": 360
+        },
+        node: {
+          detail: '单个节点（扇形）配置',
+          propertys: {
+            radius: {
+              detail: '半径',
+              "default": null,
+              documentation: '每个扇形单元的半径，也可以配置一个字段，就成了丁格尔玫瑰图'
+            },
+            innerRadius: {
+              detail: '内径',
+              "default": 0
+            },
+            outRadius: {
+              detail: '外径',
+              "default": null
+            },
+            minRadius: {
+              detail: '最小的半径厚度',
+              "default": 10,
+              documentation: 'outRadius - innerRadius ， 也就是radius的最小值'
+            },
+            moveDis: {
+              detail: 'hover偏移量',
+              "default": 15,
+              documentation: '要预留moveDis位置来hover sector 的时候外扩'
+            },
+            fillStyle: {
+              detail: '单个图形背景色',
+              "default": null
+            },
+            focus: {
+              detail: '图形的hover设置',
+              propertys: {
+                enabled: {
+                  detail: '是否开启',
+                  "default": true
+                }
+              }
+            },
+            select: {
+              detail: '图形的选中效果',
+              propertys: {
+                enabled: {
+                  detail: '是否开启',
+                  "default": true
+                },
+                radius: {
+                  detail: '选中效果图形的半径厚度',
+                  "default": 5
+                },
+                alpha: {
+                  detail: '选中效果图形的透明度',
+                  "default": 0.7
+                }
+              }
+            }
+          }
+        },
+        label: {
+          detail: 'label',
+          propertys: {
+            field: {
+              detail: '获取label的字段',
+              "default": null
+            },
+            enabled: {
+              detail: '是否开启',
+              "default": false
+            },
+            format: {
+              detail: 'label的格式化函数，支持html',
+              "default": null
+            }
+          }
+        }
+      };
     }
   }]);
   return PieGraphs;

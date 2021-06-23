@@ -9,15 +9,15 @@ exports["default"] = void 0;
 
 var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
-var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
-
-var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
 
 var _assertThisInitialized2 = _interopRequireDefault(require("@babel/runtime/helpers/assertThisInitialized"));
 
-var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
-
 var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
 
 var _index = _interopRequireDefault(require("./index"));
 
@@ -29,128 +29,23 @@ var _dataSection = _interopRequireDefault(require("../../core/dataSection"));
 
 var _tools = require("../../utils/tools");
 
-//极坐标 坐标轴
-//极坐标系目前对外抛出三个方法
-//获取极坐标系内任意半径上的弧度集合
-//[ [{point , radian} , {point , radian}] ... ]
-//getRadiansAtR
-//获取某个点相对圆心的弧度值
-//getRadianInPoint
-//获取某个弧度方向，半径为r的时候的point坐标点位置
-//getPointInRadianOfR
-//应用场景中一般需要用到的属性有
-//width, height, origin(默认为width/2,height/2)
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
 var _ = _canvax["default"]._,
     event = _canvax["default"].event;
 
-var Polar =
-/*#__PURE__*/
-function (_coordBase) {
+var Polar = /*#__PURE__*/function (_coordBase) {
   (0, _inherits2["default"])(Polar, _coordBase);
-  (0, _createClass2["default"])(Polar, null, [{
-    key: "defaultProps",
-    value: function defaultProps() {
-      return {
-        allAngle: {
-          detail: '坐标系总角度',
-          documentation: "",
-          "default": 360,
-          values: [0, 360]
-        },
-        startAngle: {
-          detail: '坐标系起始角度',
-          documentation: "",
-          "default": 0,
-          values: [0, 360]
-        },
-        radius: {
-          detail: '坐标系的最大半径',
-          documentation: "默认自动计算view的高宽，如果squareRange==true，则会取Math.min(width,height)",
-          "default": 'auto',
-          values: null
-        },
-        aAxis: {
-          detail: '角度轴',
-          documentation: "类似直角坐标系中的x轴",
-          propertys: {
-            data: [],
-            angleList: [],
-            //对应layoutType下的角度list
-            layoutData: [],
-            //aAxis.data的 label.format后版本
-            field: {
-              detail: '数据字段',
-              documentation: "",
-              "default": ''
-            },
-            layoutType: {
-              detail: '布局类型',
-              documentation: "",
-              "default": 'proportion'
-            },
-            beginAngle: {
-              detail: '起始角度',
-              documentation: "",
-              "default": -90
-            },
-            enabled: {
-              detail: '是否显示',
-              documentation: "",
-              "default": false
-            },
-            label: {
-              detail: '文本配置',
-              documentation: '',
-              propertys: {
-                enabled: {
-                  detail: '是否显示',
-                  documentation: "",
-                  "default": true
-                },
-                format: {
-                  detail: 'label的格式化处理函数',
-                  documentation: "",
-                  "default": null
-                },
-                fontColor: {
-                  detail: 'label颜色',
-                  documentation: '',
-                  "default": "#666"
-                }
-              }
-            }
-          }
-        },
-        rAxis: {
-          detail: '半径维度轴',
-          documentation: '类似直角坐标系中的y轴维度',
-          propertys: {
-            field: {
-              detail: '数据字段',
-              documentation: "",
-              "default": ''
-            },
-            dataSection: {
-              detail: '轴的显示数据',
-              documentation: "默认根据源数据中自动计算，用户也可以手动指定",
-              "default": false
-            },
-            enabled: {
-              detail: '是否显示',
-              documentation: "",
-              "default": false
-            }
-          }
-        }
-      };
-    }
-  }]);
+
+  var _super = _createSuper(Polar);
 
   function Polar(opt, app) {
     var _this;
 
     (0, _classCallCheck2["default"])(this, Polar);
-    _this = (0, _possibleConstructorReturn2["default"])(this, (0, _getPrototypeOf2["default"])(Polar).call(this, opt, app));
+    _this = _super.call(this, opt, app);
     _this.type = "polar";
 
     _.extend(true, (0, _assertThisInitialized2["default"])(_this), (0, _tools.getDefaultProps)(Polar.defaultProps()), _this.setDefaultOpt(opt, app));
@@ -1023,6 +918,103 @@ function (_coordBase) {
       }
 
       return res;
+    }
+  }], [{
+    key: "defaultProps",
+    value: function defaultProps() {
+      return {
+        allAngle: {
+          detail: '坐标系总角度',
+          documentation: "",
+          "default": 360,
+          values: [0, 360]
+        },
+        startAngle: {
+          detail: '坐标系起始角度',
+          documentation: "",
+          "default": 0,
+          values: [0, 360]
+        },
+        radius: {
+          detail: '坐标系的最大半径',
+          documentation: "默认自动计算view的高宽，如果squareRange==true，则会取Math.min(width,height)",
+          "default": 'auto',
+          values: null
+        },
+        aAxis: {
+          detail: '角度轴',
+          documentation: "类似直角坐标系中的x轴",
+          propertys: {
+            data: [],
+            angleList: [],
+            //对应layoutType下的角度list
+            layoutData: [],
+            //aAxis.data的 label.format后版本
+            field: {
+              detail: '数据字段',
+              documentation: "",
+              "default": ''
+            },
+            layoutType: {
+              detail: '布局类型',
+              documentation: "",
+              "default": 'proportion'
+            },
+            beginAngle: {
+              detail: '起始角度',
+              documentation: "",
+              "default": -90
+            },
+            enabled: {
+              detail: '是否显示',
+              documentation: "",
+              "default": false
+            },
+            label: {
+              detail: '文本配置',
+              documentation: '',
+              propertys: {
+                enabled: {
+                  detail: '是否显示',
+                  documentation: "",
+                  "default": true
+                },
+                format: {
+                  detail: 'label的格式化处理函数',
+                  documentation: "",
+                  "default": null
+                },
+                fontColor: {
+                  detail: 'label颜色',
+                  documentation: '',
+                  "default": "#666"
+                }
+              }
+            }
+          }
+        },
+        rAxis: {
+          detail: '半径维度轴',
+          documentation: '类似直角坐标系中的y轴维度',
+          propertys: {
+            field: {
+              detail: '数据字段',
+              documentation: "",
+              "default": ''
+            },
+            dataSection: {
+              detail: '轴的显示数据',
+              documentation: "默认根据源数据中自动计算，用户也可以手动指定",
+              "default": false
+            },
+            enabled: {
+              detail: '是否显示',
+              documentation: "",
+              "default": false
+            }
+          }
+        }
+      };
     }
   }]);
   return Polar;
