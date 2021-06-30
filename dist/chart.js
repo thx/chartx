@@ -11,11 +11,11 @@ var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/cl
 
 var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
 
+var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
 var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
 
 var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
-
-var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
 
 var _global = _interopRequireDefault(require("./global"));
 
@@ -25,14 +25,18 @@ var _dataFrame = _interopRequireDefault(require("./core/dataFrame"));
 
 var _setting = _interopRequireDefault(require("./setting"));
 
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
 var _ = _canvax["default"]._,
     $ = _canvax["default"].$,
     event = _canvax["default"].event;
 
-var Chart =
-/*#__PURE__*/
-function (_event$Dispatcher) {
+var Chart = /*#__PURE__*/function (_event$Dispatcher) {
   (0, _inherits2["default"])(Chart, _event$Dispatcher);
+
+  var _super = _createSuper(Chart);
 
   //node 为外部宿主的id 或者 dom节点
   //也可能就是外部已经创建好的 canvax对象 { canvax（实例）, stage, width, height }
@@ -40,7 +44,7 @@ function (_event$Dispatcher) {
     var _this;
 
     (0, _classCallCheck2["default"])(this, Chart);
-    _this = (0, _possibleConstructorReturn2["default"])(this, (0, _getPrototypeOf2["default"])(Chart).call(this));
+    _this = _super.call(this);
     _this.componentModules = componentModules;
     _this._node = node;
     _this._data = data;
