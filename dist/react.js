@@ -11,11 +11,11 @@ var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/cl
 
 var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
 
+var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
 var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
 
 var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
-
-var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
 
 var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
 
@@ -23,18 +23,20 @@ var _react = _interopRequireDefault(require("react"));
 
 var _index = _interopRequireDefault(require("./index"));
 
-//https://babeljs.io/repl/#?babili=false&evaluate=true&lineWrap=false&presets=es2015%2Creact%2Cstage-0&code=function%20hello()%20%7B%0A%20%20return%20%3Cdiv%3EHello%20world!%3C%2Fdiv%3E%3B%0A%7D
-//用上面的地址转换成es的react模块，不用jsx
-var chartxReact =
-/*#__PURE__*/
-function (_React$Component) {
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
+var chartxReact = /*#__PURE__*/function (_React$Component) {
   (0, _inherits2["default"])(chartxReact, _React$Component);
+
+  var _super = _createSuper(chartxReact);
 
   function chartxReact(props) {
     var _this;
 
     (0, _classCallCheck2["default"])(this, chartxReact);
-    _this = (0, _possibleConstructorReturn2["default"])(this, (0, _getPrototypeOf2["default"])(chartxReact).call(this, props));
+    _this = _super.call(this, props);
     _this.myRef = _react["default"].createRef();
     _this.chart = null;
     _this.chartOptions = _this.getChartOptions(); //最终用来渲染的options，如果有props.chartId和props.options，两者会做一次extend
@@ -129,7 +131,7 @@ function (_React$Component) {
     value: function createChart(dom, data, options) {
       this.chart = _index["default"].create(dom, data, options);
 
-      if (!_index["default"]._registWindowOnResize) {
+      if (!_index["default"]._registWindowOnResize && window && window.addEventListener) {
         //整个Chartx只需要注册一次window.onresize就够了
         window.addEventListener("resize", function (e) {
           _index["default"].resize();

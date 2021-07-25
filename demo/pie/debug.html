@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
-<title>xChart demo -- bar</title>
+<title>xChart demo -- 饼图</title>
 
 <script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
 <script type="text/javascript" src="../../dist/index.iife.js"></script>
@@ -31,66 +31,65 @@
     <tr>
         <td id="td-vl">
             <form><textarea id="code" name="code">
-
-//chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
-//第一行是表头。
+//chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组
 var data = [
-    {"time":"2017-03-21","pv":10,"uv":11,"click":12,"ppc":45},
-    {"time":"2017-03-22","pv":20,"uv":32,"click":14,"ppc":34},
-    {"time":"2017-03-23","pv":30,"uv":15,"click":12,"ppc":65},
-    {"time":"2017-03-24","pv":15,"uv":23,"click":21,"ppc":23},
-    {"time":"2017-03-25","pv":28,"uv":15,"click":15,"ppc":12}
+    {"key":0,"node":"标准计划","value":5942300},
+    {"key":8,"node":"智能计划","value":78045}
 ];
 
+
+
 var options = {
-    coord: {
-        type: "rect",
-        xAxis: {
-            field: "time"
-        }
+    "coord": {
+      "type": "polar"
     },
-    graphs: [
-        {
-            type: "line",
-            field: "pv"
+    "graphs": [
+      {
+        "type": "pie",
+        "field": "value",
+        "startAngle": -90,
+        "sort": "desc",
+        "animation": true,
+        "label": {
+          "enabled": false,
+          "field": "node"
+        },
+        "node": {
+          "outRadius": 110,
+          "innerRadius": 40,
+          "select": {
+            "enabled": false
+          }
         }
+      }
     ],
-    dataZoom: {},
-    markLine: [
-        {
-            markTo: "pv",
-            label: {
-                enabled: true,
-                format: function ( yval ){
-                    return 'click 均线 ：' + parseInt( yval )
-                }
-            }
-        }
+    "tips": {},
+    "theme": [
+      "#6588FC",
+      "#F2BD49",
+      "#FF9757"
     ]
-};
+  }
 
 
-window.line = chartx.create("canvasTest" , data , options)
+window.chart = chartx.create("canvasTest" , data , options);
 
-setTimeout( function(){
-    return;
-    chartx.create("canvasTest" , data , options)
-} , 3000)
 
-            </textarea></form>
+</textarea></form>
+
         </td>
         <td style="padding:0 10px;" id="td-vr">
             <div id="chartdemo-r">
             <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
                 <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
 
-                <h4>折线图（bar chart）</h4>
+                <h4>饼图（pie chart）- 基础饼图</h4>
                 <p>
                     联系人：@释剑
                 </p>
             </div>
             <div  class="test-c">
-                <div id="canvasTest" style='width:100%;height:300px;position:relative;'></div>
+                <div id="canvasTest" style='width:400px;height:300px;position:relative;'></div>
             </div>
 
             </div>
@@ -98,7 +97,7 @@ setTimeout( function(){
     </tr>
 </table>
 
-
+    
 </body> 
 </html>
 

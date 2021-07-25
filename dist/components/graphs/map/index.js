@@ -9,15 +9,15 @@ exports["default"] = void 0;
 
 var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
-var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
-
-var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
 
 var _assertThisInitialized2 = _interopRequireDefault(require("@babel/runtime/helpers/assertThisInitialized"));
 
-var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
-
 var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
 
 var _canvax = _interopRequireDefault(require("canvax"));
 
@@ -31,265 +31,26 @@ var _color = require("../../../utils/color");
 
 var _zoom = _interopRequireDefault(require("../../../utils/zoom"));
 
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
 var _ = _canvax["default"]._,
     event = _canvax["default"].event;
 var Text = _canvax["default"].Display.Text;
 var Path = _canvax["default"].Shapes.Path;
 var Rect = _canvax["default"].Shapes.Rect;
 
-var Map =
-/*#__PURE__*/
-function (_GraphsBase) {
+var Map = /*#__PURE__*/function (_GraphsBase) {
   (0, _inherits2["default"])(Map, _GraphsBase);
-  (0, _createClass2["default"])(Map, null, [{
-    key: "defaultProps",
-    value: function defaultProps() {
-      return {
-        field: {
-          detail: '数据中的adcode字段',
-          "default": 'adcode',
-          documentation: '数据中的adcode字段，用来对应上地图中的某个区块的adcode，从而找到这个区块对应的这一条数据'
-        },
-        valueField: {
-          detail: '数据中的值字段',
-          "default": 'value',
-          documentation: '作为field字段的补充，通过field字段找到数据后，用来从数据中取值'
-        },
-        mapAdcode: {
-          detail: '当前绘制的地图adcode',
-          "default": null
-        },
-        adcodeUrlTempl: {
-          detail: 'adcode的url模板',
-          "default": '//geo.datav.aliyun.com/areas_v2/bound/{adcode}_full.json',
-          //http://datav.aliyun.com/tools/atlas/#&lat=43.29320031385282&lng=104.32617187499999&zoom=4
-          documentation: '如果是是配置的adcode，那么和他对应的url模板'
-        },
-        geoJson: {
-          detail: '要绘制的geoJson数据',
-          "default": null
-        },
-        geoJsonUrl: {
-          detail: '要绘制的geoJson的url',
-          "default": null
-        },
-        geoJsonFilter: {
-          detail: 'geoJson的二次过滤处理',
-          "default": function _default(json) {
-            return json;
-          }
-        },
-        specialArea: {
-          detail: '要排除掉不绘制的数据集合，可以是adcode，也可以是name',
-          "default": []
-        },
-        node: {
-          detail: '单个元素图形配置',
-          propertys: {
-            drawBegin: {
-              detail: '开始绘制的钩子函数',
-              "default": function _default() {}
-            },
-            drawEnd: {
-              detail: '开始绘制的钩子函数',
-              "default": function _default() {}
-            },
-            fillStyle: {
-              detail: '单个区块背景色',
-              "default": null //'#fff' //从themeColor获取默认 , 默认为空就会没有颜色的区块不会有事件点击
 
-            },
-            fillAlpha: {
-              detail: '单个区块透明度',
-              "default": 1
-            },
-            maxFillStyle: {
-              detail: '单个区块数据最大对应的颜色',
-              "default": null
-            },
-            maxFillAlpha: {
-              detail: '单个区块最大透明度',
-              "default": 1
-            },
-            minFillAlpha: {
-              detail: '单个区块最小透明度',
-              "default": 0.4
-            },
-            beginFillStyle: {
-              detail: '区域颜色的起始色',
-              documentation: '设置区域颜色的另外一个方案，两个颜色确定一个区间的结束色',
-              "default": null
-            },
-            endFillStyle: {
-              detail: '区域颜色的结束色',
-              documentation: '设置区域颜色的另外一个方案，两个颜色确定一个区间的结束色',
-              "default": null
-            },
-            strokeStyle: {
-              detail: '单个区块描边颜色',
-              "default": "#ccc"
-            },
-            strokeAlpha: {
-              detail: '单个区块描边透明度',
-              "default": 1
-            },
-            lineWidth: {
-              detail: '单个区块描边线宽',
-              "default": 1
-            },
-            lineType: {
-              detail: '区块描边样式',
-              "default": 'solid'
-            },
-            focus: {
-              detail: "单个区块hover态设置",
-              propertys: {
-                enabled: {
-                  detail: '是否开启',
-                  "default": true
-                },
-                fillStyle: {
-                  detail: 'hover态单个区块背景色',
-                  "default": null //从themeColor获取默认
-
-                },
-                fillAlpha: {
-                  detail: 'hover态单个区块透明度',
-                  "default": 1
-                },
-                strokeStyle: {
-                  detail: 'hover态单个区块描边颜色',
-                  "default": null //默认获取themeColor
-
-                },
-                strokeAlpha: {
-                  detail: 'hover态单个区块描边透明度',
-                  "default": 1 //默认获取themeColor
-
-                },
-                lineWidth: {
-                  detail: 'hover态单个区块描边线宽',
-                  "default": 1
-                },
-                lineType: {
-                  detail: 'hover态区块描边样式',
-                  "default": null
-                }
-              }
-            },
-            select: {
-              detail: "单个区块选中态设置",
-              propertys: {
-                enabled: {
-                  detail: '是否开启',
-                  "default": false
-                },
-                fillStyle: {
-                  detail: '选中态单个区块背景色',
-                  "default": null //从themeColor获取默认
-
-                },
-                fillAlpha: {
-                  detail: '选中态单个区块透明度',
-                  "default": 1
-                },
-                strokeStyle: {
-                  detail: '选中态单个区块描边颜色',
-                  "default": null
-                },
-                strokeAlpha: {
-                  detail: '选中态单个区块描边颜色',
-                  "default": 1
-                },
-                lineWidth: {
-                  detail: '选中态单个区块描边线宽',
-                  "default": 1
-                },
-                lineType: {
-                  detail: '选中态区块描边样式',
-                  "default": null
-                }
-              }
-            }
-          }
-        },
-        label: {
-          detail: '文本配置',
-          propertys: {
-            enabled: {
-              detail: '是否开启文本',
-              "default": true
-            },
-            textAlign: {
-              detail: '文本布局位置(left,center,right)',
-              "default": 'center'
-            },
-            textBaseline: {
-              detail: '文本基线对齐方式',
-              "default": 'middle'
-            },
-            format: {
-              detail: '文本格式化处理函数',
-              "default": null
-            },
-            fontSize: {
-              detail: '文本字体大小',
-              "default": 12
-            },
-            fontColor: {
-              detail: '文本颜色',
-              "default": '#666',
-              documentation: 'align为center的时候的颜色，align为其他属性时候取node的颜色'
-            }
-          }
-        },
-        status: {
-          detail: '一些开关配置',
-          propertys: {
-            transform: {
-              detail: "是否启动拖拽缩放整个画布",
-              propertys: {
-                fitView: {
-                  detail: "自动缩放",
-                  "default": '' //autoZoom
-
-                },
-                enabled: {
-                  detail: "是否开启",
-                  "default": true
-                },
-                scale: {
-                  detail: "缩放值",
-                  "default": 1
-                },
-                scaleMin: {
-                  detail: "缩放最小值",
-                  "default": 1
-                },
-                scaleMax: {
-                  detail: "缩放最大值",
-                  "default": 10
-                },
-                scaleOrigin: {
-                  detail: "缩放原点",
-                  "default": {
-                    x: 0,
-                    y: 0
-                  }
-                }
-              }
-            }
-          }
-        }
-      };
-    }
-  }]);
+  var _super = _createSuper(Map);
 
   function Map(opt, app) {
     var _this;
 
     (0, _classCallCheck2["default"])(this, Map);
-    _this = (0, _possibleConstructorReturn2["default"])(this, (0, _getPrototypeOf2["default"])(Map).call(this, opt, app));
+    _this = _super.call(this, opt, app);
     _this.type = "map";
     _this.maxValue = 0;
     _this.dataOrg = []; //this.dataFrame.getFieldData( this.field )
@@ -779,6 +540,248 @@ function (_GraphsBase) {
       }
 
       return value;
+    }
+  }], [{
+    key: "defaultProps",
+    value: function defaultProps() {
+      return {
+        field: {
+          detail: '数据中的adcode字段',
+          "default": 'adcode',
+          documentation: '数据中的adcode字段，用来对应上地图中的某个区块的adcode，从而找到这个区块对应的这一条数据'
+        },
+        valueField: {
+          detail: '数据中的值字段',
+          "default": 'value',
+          documentation: '作为field字段的补充，通过field字段找到数据后，用来从数据中取值'
+        },
+        mapAdcode: {
+          detail: '当前绘制的地图adcode',
+          "default": null
+        },
+        adcodeUrlTempl: {
+          detail: 'adcode的url模板',
+          "default": '//geo.datav.aliyun.com/areas_v2/bound/{adcode}_full.json',
+          //http://datav.aliyun.com/tools/atlas/#&lat=43.29320031385282&lng=104.32617187499999&zoom=4
+          documentation: '如果是是配置的adcode，那么和他对应的url模板'
+        },
+        geoJson: {
+          detail: '要绘制的geoJson数据',
+          "default": null
+        },
+        geoJsonUrl: {
+          detail: '要绘制的geoJson的url',
+          "default": null
+        },
+        geoJsonFilter: {
+          detail: 'geoJson的二次过滤处理',
+          "default": function _default(json) {
+            return json;
+          }
+        },
+        specialArea: {
+          detail: '要排除掉不绘制的数据集合，可以是adcode，也可以是name',
+          "default": []
+        },
+        node: {
+          detail: '单个元素图形配置',
+          propertys: {
+            drawBegin: {
+              detail: '开始绘制的钩子函数',
+              "default": function _default() {}
+            },
+            drawEnd: {
+              detail: '开始绘制的钩子函数',
+              "default": function _default() {}
+            },
+            fillStyle: {
+              detail: '单个区块背景色',
+              "default": null //'#fff' //从themeColor获取默认 , 默认为空就会没有颜色的区块不会有事件点击
+
+            },
+            fillAlpha: {
+              detail: '单个区块透明度',
+              "default": 1
+            },
+            maxFillStyle: {
+              detail: '单个区块数据最大对应的颜色',
+              "default": null
+            },
+            maxFillAlpha: {
+              detail: '单个区块最大透明度',
+              "default": 1
+            },
+            minFillAlpha: {
+              detail: '单个区块最小透明度',
+              "default": 0.4
+            },
+            beginFillStyle: {
+              detail: '区域颜色的起始色',
+              documentation: '设置区域颜色的另外一个方案，两个颜色确定一个区间的结束色',
+              "default": null
+            },
+            endFillStyle: {
+              detail: '区域颜色的结束色',
+              documentation: '设置区域颜色的另外一个方案，两个颜色确定一个区间的结束色',
+              "default": null
+            },
+            strokeStyle: {
+              detail: '单个区块描边颜色',
+              "default": "#ccc"
+            },
+            strokeAlpha: {
+              detail: '单个区块描边透明度',
+              "default": 1
+            },
+            lineWidth: {
+              detail: '单个区块描边线宽',
+              "default": 1
+            },
+            lineType: {
+              detail: '区块描边样式',
+              "default": 'solid'
+            },
+            focus: {
+              detail: "单个区块hover态设置",
+              propertys: {
+                enabled: {
+                  detail: '是否开启',
+                  "default": true
+                },
+                fillStyle: {
+                  detail: 'hover态单个区块背景色',
+                  "default": null //从themeColor获取默认
+
+                },
+                fillAlpha: {
+                  detail: 'hover态单个区块透明度',
+                  "default": 1
+                },
+                strokeStyle: {
+                  detail: 'hover态单个区块描边颜色',
+                  "default": null //默认获取themeColor
+
+                },
+                strokeAlpha: {
+                  detail: 'hover态单个区块描边透明度',
+                  "default": 1 //默认获取themeColor
+
+                },
+                lineWidth: {
+                  detail: 'hover态单个区块描边线宽',
+                  "default": 1
+                },
+                lineType: {
+                  detail: 'hover态区块描边样式',
+                  "default": null
+                }
+              }
+            },
+            select: {
+              detail: "单个区块选中态设置",
+              propertys: {
+                enabled: {
+                  detail: '是否开启',
+                  "default": false
+                },
+                fillStyle: {
+                  detail: '选中态单个区块背景色',
+                  "default": null //从themeColor获取默认
+
+                },
+                fillAlpha: {
+                  detail: '选中态单个区块透明度',
+                  "default": 1
+                },
+                strokeStyle: {
+                  detail: '选中态单个区块描边颜色',
+                  "default": null
+                },
+                strokeAlpha: {
+                  detail: '选中态单个区块描边颜色',
+                  "default": 1
+                },
+                lineWidth: {
+                  detail: '选中态单个区块描边线宽',
+                  "default": 1
+                },
+                lineType: {
+                  detail: '选中态区块描边样式',
+                  "default": null
+                }
+              }
+            }
+          }
+        },
+        label: {
+          detail: '文本配置',
+          propertys: {
+            enabled: {
+              detail: '是否开启文本',
+              "default": true
+            },
+            textAlign: {
+              detail: '文本布局位置(left,center,right)',
+              "default": 'center'
+            },
+            textBaseline: {
+              detail: '文本基线对齐方式',
+              "default": 'middle'
+            },
+            format: {
+              detail: '文本格式化处理函数',
+              "default": null
+            },
+            fontSize: {
+              detail: '文本字体大小',
+              "default": 12
+            },
+            fontColor: {
+              detail: '文本颜色',
+              "default": '#666',
+              documentation: 'align为center的时候的颜色，align为其他属性时候取node的颜色'
+            }
+          }
+        },
+        status: {
+          detail: '一些开关配置',
+          propertys: {
+            transform: {
+              detail: "是否启动拖拽缩放整个画布",
+              propertys: {
+                fitView: {
+                  detail: "自动缩放",
+                  "default": '' //autoZoom
+
+                },
+                enabled: {
+                  detail: "是否开启",
+                  "default": true
+                },
+                scale: {
+                  detail: "缩放值",
+                  "default": 1
+                },
+                scaleMin: {
+                  detail: "缩放最小值",
+                  "default": 1
+                },
+                scaleMax: {
+                  detail: "缩放最大值",
+                  "default": 10
+                },
+                scaleOrigin: {
+                  detail: "缩放原点",
+                  "default": {
+                    x: 0,
+                    y: 0
+                  }
+                }
+              }
+            }
+          }
+        }
+      };
     }
   }]);
   return Map;

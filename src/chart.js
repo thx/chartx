@@ -111,7 +111,7 @@ class Chart extends event.Dispatcher
                 //所有的组件都按照数组方式处理，这里，组件里面就不需要再这样处理了
                 if( ! _.isArray( comps ) ){
                     comps = [ comps ];
-                };
+                }; 
                 _.each( comps, function( comp ){
                     let compModule = me.componentModules.get( _p, comp.type );
                     if( compModule ){
@@ -406,6 +406,8 @@ class Chart extends event.Dispatcher
         let preDataLenth = this.dataFrame.org.length;
 
         this.dataFrame.resetData( data );
+ 
+        //console.log( this.dataFrame )
 
         let graphsList = this.getComponents({name:'graphs'});
         let allGraphsHasResetData = true;

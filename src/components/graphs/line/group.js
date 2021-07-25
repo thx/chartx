@@ -306,6 +306,7 @@ export default class LineGraphsGroup extends event.Dispatcher
 
         me._createNodes();
         me._createTexts();
+
         me._grow();
     }
 

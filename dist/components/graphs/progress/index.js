@@ -9,15 +9,15 @@ exports["default"] = void 0;
 
 var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
-var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
-
-var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
 
 var _assertThisInitialized2 = _interopRequireDefault(require("@babel/runtime/helpers/assertThisInitialized"));
 
-var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
-
 var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
 
 var _canvax = _interopRequireDefault(require("canvax"));
 
@@ -25,142 +25,22 @@ var _index = _interopRequireDefault(require("../index"));
 
 var _tools = require("../../../utils/tools");
 
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
 var _ = _canvax["default"]._;
 
-var Progress =
-/*#__PURE__*/
-function (_GraphsBase) {
+var Progress = /*#__PURE__*/function (_GraphsBase) {
   (0, _inherits2["default"])(Progress, _GraphsBase);
-  (0, _createClass2["default"])(Progress, null, [{
-    key: "defaultProps",
-    value: function defaultProps() {
-      return {
-        node: {
-          detail: '进度条设置',
-          propertys: {
-            width: {
-              detail: '进度条的宽度',
-              "default": 20
-            },
-            radius: {
-              detail: '进度条两端的圆角半径',
-              "default": 10 //默认为width的一半
 
-            },
-            fillStyle: {
-              detail: '进度条的填充色',
-              documentation: '可以是单个颜色，也可以是数组，也可以是一个函数,也可以是个lineargradient',
-              "default": null
-            }
-          }
-        },
-        label: {
-          detail: '进度值文本',
-          propertys: {
-            enabled: {
-              detail: '是否启用label',
-              "default": 'true'
-            },
-            unit: {
-              detail: '单位值，默认%',
-              "default": '%'
-            },
-            unitColor: {
-              detail: '单位值的颜色',
-              "default": null
-            },
-            unitFontSize: {
-              detail: '单位值的大小',
-              "default": 14
-            },
-            fontColor: {
-              detail: 'label颜色',
-              "default": null //默认同node.fillStyle
-
-            },
-            fontSize: {
-              detail: 'label文本大小',
-              "default": 26
-            },
-            fixNum: {
-              detail: 'toFixed的位数',
-              "default": 2
-            },
-            format: {
-              detail: 'label格式化处理函数',
-              "default": function _default(val) {
-                return val.toFixed(this.label.fixNum);
-              }
-            },
-            lineWidth: {
-              detail: 'label文本描边线宽',
-              "default": null
-            },
-            strokeStyle: {
-              detail: 'label描边颜色',
-              "default": null
-            },
-            rotation: {
-              detail: 'label旋转角度',
-              "default": 0
-            },
-            textAlign: {
-              detail: 'label textAlign',
-              "default": 'center',
-              values: ['left', 'center', 'right']
-            },
-            //left center right
-            verticalAlign: {
-              detail: 'label verticalAlign',
-              "default": 'middle',
-              values: ['top', 'middle', 'bottom']
-            },
-            //top middle bottom
-            position: {
-              detail: 'label位置',
-              "default": 'origin'
-            },
-            offsetX: {
-              detail: 'label在x方向的偏移量',
-              "default": 0
-            },
-            offsetY: {
-              detail: 'label在y方向的偏移量',
-              "default": 0
-            }
-          }
-        },
-        bgEnabled: {
-          detail: '是否开启背景',
-          "default": true
-        },
-        bgColor: {
-          detail: '进度条背景颜色',
-          "default": '#f7f7f7'
-        },
-        radius: {
-          detail: '半径',
-          "default": null
-        },
-        allAngle: {
-          detail: '总角度',
-          documentation: '默认为null，则和坐标系同步',
-          "default": null
-        },
-        startAngle: {
-          detail: '其实角度',
-          documentation: '默认为null，则和坐标系同步',
-          "default": null
-        }
-      };
-    }
-  }]);
+  var _super = _createSuper(Progress);
 
   function Progress(opt, app) {
     var _this;
 
     (0, _classCallCheck2["default"])(this, Progress);
-    _this = (0, _possibleConstructorReturn2["default"])(this, (0, _getPrototypeOf2["default"])(Progress).call(this, opt, app));
+    _this = _super.call(this, opt, app);
     _this.type = "progress";
 
     _.extend(true, (0, _assertThisInitialized2["default"])(_this), (0, _tools.getDefaultProps)(Progress.defaultProps()), opt);
@@ -504,6 +384,129 @@ function (_GraphsBase) {
       }
 
       return style;
+    }
+  }], [{
+    key: "defaultProps",
+    value: function defaultProps() {
+      return {
+        node: {
+          detail: '进度条设置',
+          propertys: {
+            width: {
+              detail: '进度条的宽度',
+              "default": 20
+            },
+            radius: {
+              detail: '进度条两端的圆角半径',
+              "default": 10 //默认为width的一半
+
+            },
+            fillStyle: {
+              detail: '进度条的填充色',
+              documentation: '可以是单个颜色，也可以是数组，也可以是一个函数,也可以是个lineargradient',
+              "default": null
+            }
+          }
+        },
+        label: {
+          detail: '进度值文本',
+          propertys: {
+            enabled: {
+              detail: '是否启用label',
+              "default": 'true'
+            },
+            unit: {
+              detail: '单位值，默认%',
+              "default": '%'
+            },
+            unitColor: {
+              detail: '单位值的颜色',
+              "default": null
+            },
+            unitFontSize: {
+              detail: '单位值的大小',
+              "default": 14
+            },
+            fontColor: {
+              detail: 'label颜色',
+              "default": null //默认同node.fillStyle
+
+            },
+            fontSize: {
+              detail: 'label文本大小',
+              "default": 26
+            },
+            fixNum: {
+              detail: 'toFixed的位数',
+              "default": 2
+            },
+            format: {
+              detail: 'label格式化处理函数',
+              "default": function _default(val) {
+                return val.toFixed(this.label.fixNum);
+              }
+            },
+            lineWidth: {
+              detail: 'label文本描边线宽',
+              "default": null
+            },
+            strokeStyle: {
+              detail: 'label描边颜色',
+              "default": null
+            },
+            rotation: {
+              detail: 'label旋转角度',
+              "default": 0
+            },
+            textAlign: {
+              detail: 'label textAlign',
+              "default": 'center',
+              values: ['left', 'center', 'right']
+            },
+            //left center right
+            verticalAlign: {
+              detail: 'label verticalAlign',
+              "default": 'middle',
+              values: ['top', 'middle', 'bottom']
+            },
+            //top middle bottom
+            position: {
+              detail: 'label位置',
+              "default": 'origin'
+            },
+            offsetX: {
+              detail: 'label在x方向的偏移量',
+              "default": 0
+            },
+            offsetY: {
+              detail: 'label在y方向的偏移量',
+              "default": 0
+            }
+          }
+        },
+        bgEnabled: {
+          detail: '是否开启背景',
+          "default": true
+        },
+        bgColor: {
+          detail: '进度条背景颜色',
+          "default": '#f7f7f7'
+        },
+        radius: {
+          detail: '半径',
+          "default": null
+        },
+        allAngle: {
+          detail: '总角度',
+          documentation: '默认为null，则和坐标系同步',
+          "default": null
+        },
+        startAngle: {
+          detail: '其实角度',
+          documentation: '默认为null，则和坐标系同步',
+          "default": null
+        }
+      };
     }
   }]);
   return Progress;

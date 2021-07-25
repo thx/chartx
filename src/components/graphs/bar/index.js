@@ -570,7 +570,8 @@ class BarGraphs extends GraphsBase
                         height    : finalPos.height,
                         fillStyle : finalPos.fillStyle,
                         fillAlpha : me.node.fillAlpha,
-                        scaleY    : 0
+                        scaleY    : 0,
+                        cursor    : 'pointer'
                     };
                     
                     if ( !!me.node.radius && nodeData.isLeaf && !me.proportion ) {

@@ -9,15 +9,15 @@ exports["default"] = void 0;
 
 var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
-var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
-
-var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
 
 var _assertThisInitialized2 = _interopRequireDefault(require("@babel/runtime/helpers/assertThisInitialized"));
 
-var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
-
 var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
 
 var _canvax = _interopRequireDefault(require("canvax"));
 
@@ -27,113 +27,25 @@ var _index2 = _interopRequireDefault(require("../../../layout/sankey/index"));
 
 var _tools = require("../../../utils/tools");
 
-/*
-* 太阳图
-*/
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
 var _ = _canvax["default"]._,
     event = _canvax["default"].event;
 var Path = _canvax["default"].Shapes.Path;
 var Rect = _canvax["default"].Shapes.Rect;
 
-var sankeyGraphs =
-/*#__PURE__*/
-function (_GraphsBase) {
+var sankeyGraphs = /*#__PURE__*/function (_GraphsBase) {
   (0, _inherits2["default"])(sankeyGraphs, _GraphsBase);
-  (0, _createClass2["default"])(sankeyGraphs, null, [{
-    key: "defaultProps",
-    value: function defaultProps() {
-      return {
-        keyField: {
-          detail: 'key字段',
-          "default": null
-        },
-        valueField: {
-          detail: 'value字段',
-          "default": 'value'
-        },
-        parentField: {
-          detail: 'parent字段',
-          "default": null
-        },
-        node: {
-          detail: 'node',
-          propertys: {
-            width: {
-              detail: '节点宽',
-              "default": 18
-            },
-            padding: {
-              detail: '节点间距',
-              "default": 10
-            },
-            sort: {
-              detail: '节点排序字段',
-              "default": function _default(a, b) {
-                return a.y - b.y;
-              }
-            },
-            fillStyle: {
-              detail: '节点背景色',
-              "default": null
-            }
-          }
-        },
-        line: {
-          detail: '线设置',
-          propertys: {
-            strokeStyle: {
-              detail: '线颜色',
-              "default": 'blue'
-            },
-            alpha: {
-              detail: '线透明度',
-              "default": 0.3
-            },
-            focus: {
-              detail: '图形的hover设置',
-              propertys: {
-                enabled: {
-                  detail: '是否开启',
-                  "default": true
-                }
-              }
-            }
-          }
-        },
-        label: {
-          detail: '文本设置',
-          propertys: {
-            fontColor: {
-              detail: '文本颜色',
-              "default": '#666666'
-            },
-            fontSize: {
-              detail: '文本字体大小',
-              "default": 12
-            },
-            textAlign: {
-              detail: '水平对齐方式',
-              "default": 'left'
-            },
-            verticalAlign: {
-              detail: '垂直对齐方式',
-              "default": 'middle'
-            },
-            format: {
-              detail: '文本格式函数',
-              "default": null
-            }
-          }
-        }
-      };
-    }
-  }]);
+
+  var _super = _createSuper(sankeyGraphs);
 
   function sankeyGraphs(opt, app) {
     var _this;
 
     (0, _classCallCheck2["default"])(this, sankeyGraphs);
-    _this = (0, _possibleConstructorReturn2["default"])(this, (0, _getPrototypeOf2["default"])(sankeyGraphs).call(this, opt, app));
+    _this = _super.call(this, opt, app);
     _this.type = "sankey";
 
     _.extend(true, (0, _assertThisInitialized2["default"])(_this), (0, _tools.getDefaultProps)(sankeyGraphs.defaultProps()), opt);
@@ -370,6 +282,94 @@ function (_GraphsBase) {
 
         ;
       });
+    }
+  }], [{
+    key: "defaultProps",
+    value: function defaultProps() {
+      return {
+        keyField: {
+          detail: 'key字段',
+          "default": null
+        },
+        valueField: {
+          detail: 'value字段',
+          "default": 'value'
+        },
+        parentField: {
+          detail: 'parent字段',
+          "default": null
+        },
+        node: {
+          detail: 'node',
+          propertys: {
+            width: {
+              detail: '节点宽',
+              "default": 18
+            },
+            padding: {
+              detail: '节点间距',
+              "default": 10
+            },
+            sort: {
+              detail: '节点排序字段',
+              "default": function _default(a, b) {
+                return a.y - b.y;
+              }
+            },
+            fillStyle: {
+              detail: '节点背景色',
+              "default": null
+            }
+          }
+        },
+        line: {
+          detail: '线设置',
+          propertys: {
+            strokeStyle: {
+              detail: '线颜色',
+              "default": 'blue'
+            },
+            alpha: {
+              detail: '线透明度',
+              "default": 0.3
+            },
+            focus: {
+              detail: '图形的hover设置',
+              propertys: {
+                enabled: {
+                  detail: '是否开启',
+                  "default": true
+                }
+              }
+            }
+          }
+        },
+        label: {
+          detail: '文本设置',
+          propertys: {
+            fontColor: {
+              detail: '文本颜色',
+              "default": '#666666'
+            },
+            fontSize: {
+              detail: '文本字体大小',
+              "default": 12
+            },
+            textAlign: {
+              detail: '水平对齐方式',
+              "default": 'left'
+            },
+            verticalAlign: {
+              detail: '垂直对齐方式',
+              "default": 'middle'
+            },
+            format: {
+              detail: '文本格式函数',
+              "default": null
+            }
+          }
+        }
+      };
     }
   }]);
   return sankeyGraphs;

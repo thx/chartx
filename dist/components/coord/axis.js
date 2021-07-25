@@ -9,15 +9,15 @@ exports["default"] = void 0;
 
 var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
-var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
-
-var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
 
 var _assertThisInitialized2 = _interopRequireDefault(require("@babel/runtime/helpers/assertThisInitialized"));
 
-var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
-
 var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
 
 var _axis = _interopRequireDefault(require("../../core/axis"));
 
@@ -25,11 +25,45 @@ var _canvax = require("canvax");
 
 var _tools = require("../../utils/tools");
 
-var Axis =
-/*#__PURE__*/
-function (_baseAxis) {
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
+var Axis = /*#__PURE__*/function (_baseAxis) {
   (0, _inherits2["default"])(Axis, _baseAxis);
-  (0, _createClass2["default"])(Axis, null, [{
+
+  var _super = _createSuper(Axis);
+
+  function Axis(opt, dataOrg) {
+    var _this;
+
+    (0, _classCallCheck2["default"])(this, Axis);
+    _this = _super.call(this, opt, dataOrg);
+
+    _canvax._.extend(true, (0, _assertThisInitialized2["default"])(_this), (0, _tools.getDefaultProps)(Axis.defaultProps()));
+
+    return _this;
+  }
+
+  (0, _createClass2["default"])(Axis, [{
+    key: "drawWaterLine",
+    value: function drawWaterLine(y) {
+      //如果y在现有的数据区间里面， 就不需要重新计算和绘制了
+      if (this.layoutType == "proportion") {
+        if (y >= this._min && y <= this._max) {
+          return;
+        }
+      }
+
+      ;
+      this.dataSection = [];
+      this.setWaterLine(y);
+
+      this._initHandle();
+
+      this.draw();
+    }
+  }], [{
     key: "defaultProps",
     value: function defaultProps() {
       return {
@@ -191,37 +225,6 @@ function (_baseAxis) {
           "default": null
         }
       };
-    }
-  }]);
-
-  function Axis(opt, dataOrg) {
-    var _this;
-
-    (0, _classCallCheck2["default"])(this, Axis);
-    _this = (0, _possibleConstructorReturn2["default"])(this, (0, _getPrototypeOf2["default"])(Axis).call(this, opt, dataOrg));
-
-    _canvax._.extend(true, (0, _assertThisInitialized2["default"])(_this), (0, _tools.getDefaultProps)(Axis.defaultProps()));
-
-    return _this;
-  }
-
-  (0, _createClass2["default"])(Axis, [{
-    key: "drawWaterLine",
-    value: function drawWaterLine(y) {
-      //如果y在现有的数据区间里面， 就不需要重新计算和绘制了
-      if (this.layoutType == "proportion") {
-        if (y >= this._min && y <= this._max) {
-          return;
-        }
-      }
-
-      ;
-      this.dataSection = [];
-      this.setWaterLine(y);
-
-      this._initHandle();
-
-      this.draw();
     }
   }]);
   return Axis;

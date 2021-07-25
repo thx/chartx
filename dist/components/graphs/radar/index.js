@@ -9,15 +9,15 @@ exports["default"] = void 0;
 
 var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
-var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
-
-var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
 
 var _assertThisInitialized2 = _interopRequireDefault(require("@babel/runtime/helpers/assertThisInitialized"));
 
-var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
-
 var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
 
 var _canvax = _interopRequireDefault(require("canvax"));
 
@@ -25,87 +25,25 @@ var _index = _interopRequireDefault(require("../index"));
 
 var _tools = require("../../../utils/tools");
 
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
 var _ = _canvax["default"]._,
     event = _canvax["default"].event;
 var Polygon = _canvax["default"].Shapes.Polygon;
 var Circle = _canvax["default"].Shapes.Circle;
 
-var RadarGraphs =
-/*#__PURE__*/
-function (_GraphsBase) {
+var RadarGraphs = /*#__PURE__*/function (_GraphsBase) {
   (0, _inherits2["default"])(RadarGraphs, _GraphsBase);
-  (0, _createClass2["default"])(RadarGraphs, null, [{
-    key: "defaultProps",
-    value: function defaultProps() {
-      return {
-        field: {
-          detail: '字段配置',
-          "default": null
-        },
-        line: {
-          detail: '线配置',
-          propertys: {
-            enabled: {
-              detail: '是否显示',
-              "default": true
-            },
-            lineWidth: {
-              detail: '线宽',
-              "default": 2
-            },
-            strokeStyle: {
-              detail: '线颜色',
-              "default": null
-            }
-          }
-        },
-        area: {
-          detail: '面积区域配置',
-          propertys: {
-            enabled: {
-              detail: '是否显示',
-              "default": true
-            },
-            fillStyle: {
-              detail: '面积背景色',
-              "default": null
-            },
-            fillAlpha: {
-              detail: '面积透明度',
-              "default": 0.1
-            }
-          }
-        },
-        node: {
-          detail: '线上面的单数据节点图形配置',
-          propertys: {
-            enabled: {
-              detail: '是否显示',
-              "default": true
-            },
-            strokeStyle: {
-              detail: '边框色',
-              "default": '#ffffff'
-            },
-            radius: {
-              detail: '半径',
-              "default": 4
-            },
-            lineWidth: {
-              detail: '边框大小',
-              "default": 1
-            }
-          }
-        }
-      };
-    }
-  }]);
+
+  var _super = _createSuper(RadarGraphs);
 
   function RadarGraphs(opt, app) {
     var _this;
 
     (0, _classCallCheck2["default"])(this, RadarGraphs);
-    _this = (0, _possibleConstructorReturn2["default"])(this, (0, _getPrototypeOf2["default"])(RadarGraphs).call(this, opt, app));
+    _this = _super.call(this, opt, app);
     _this.type = "radar";
     _this.enabledField = null;
     _this.groups = {//uv : {
@@ -160,7 +98,9 @@ function (_GraphsBase) {
 
         var fieldMap = _coord.getFieldMapOf(field);
 
-        var _strokeStyle = me._getStyle(me.line.strokeStyle, iGroup, fieldMap.color, fieldMap);
+        var _strokeStyle = me._getStyle(me.line.strokeStyle, fieldMap, iGroup, fieldMap.color);
+
+        var _lineType = me._getStyle(me.line.lineType, fieldMap, iGroup, fieldMap.color);
 
         var polyCtx = {
           pointList: pointList,
@@ -170,13 +110,14 @@ function (_GraphsBase) {
         if (me.line.enabled) {
           polyCtx.lineWidth = me.line.lineWidth;
           polyCtx.strokeStyle = _strokeStyle;
+          polyCtx.lineType = _lineType;
         }
 
         ;
 
         if (me.area.enabled) {
-          polyCtx.fillStyle = me._getStyle(me.area.fillStyle, iGroup, fieldMap.color, fieldMap);
-          polyCtx.fillAlpha = me._getStyle(me.area.fillAlpha, iGroup, 1, fieldMap);
+          polyCtx.fillStyle = me._getStyle(me.area.fillStyle, fieldMap, iGroup, fieldMap.color);
+          polyCtx.fillAlpha = me._getStyle(me.area.fillAlpha, fieldMap, iGroup, 1);
         }
 
         ;
@@ -389,7 +330,7 @@ function (_GraphsBase) {
     }
   }, {
     key: "_getStyle",
-    value: function _getStyle(style, iGroup, def, fieldMap) {
+    value: function _getStyle(style, fieldMap, iGroup, def) {
       var _s = def;
 
       if (_.isString(style) || _.isNumber(style)) {
@@ -440,6 +381,75 @@ function (_GraphsBase) {
       });
 
       return _nodesInfoList;
+    }
+  }], [{
+    key: "defaultProps",
+    value: function defaultProps() {
+      return {
+        field: {
+          detail: '字段配置',
+          "default": null
+        },
+        line: {
+          detail: '线配置',
+          propertys: {
+            enabled: {
+              detail: '是否显示',
+              "default": true
+            },
+            lineWidth: {
+              detail: '线宽',
+              "default": 2
+            },
+            strokeStyle: {
+              detail: '线颜色',
+              "default": null
+            },
+            lineType: {
+              detail: '线条样式,默认solid，可选dashed',
+              "default": 'solid'
+            }
+          }
+        },
+        area: {
+          detail: '面积区域配置',
+          propertys: {
+            enabled: {
+              detail: '是否显示',
+              "default": true
+            },
+            fillStyle: {
+              detail: '面积背景色',
+              "default": null
+            },
+            fillAlpha: {
+              detail: '面积透明度',
+              "default": 0.1
+            }
+          }
+        },
+        node: {
+          detail: '线上面的单数据节点图形配置',
+          propertys: {
+            enabled: {
+              detail: '是否显示',
+              "default": true
+            },
+            strokeStyle: {
+              detail: '边框色',
+              "default": '#ffffff'
+            },
+            radius: {
+              detail: '半径',
+              "default": 4
+            },
+            lineWidth: {
+              detail: '边框大小',
+              "default": 1
+            }
+          }
+        }
+      };
     }
   }]);
   return RadarGraphs;

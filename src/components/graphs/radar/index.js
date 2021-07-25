@@ -28,6 +28,10 @@ class RadarGraphs extends GraphsBase
                     strokeStyle: {
                         detail: '线颜色',
                         default:null
+                    },
+                    lineType: {
+                        detail: '线条样式,默认solid，可选dashed',
+                        default: 'solid'
                     }
                 }
             },
@@ -129,7 +133,8 @@ class RadarGraphs extends GraphsBase
 
             let fieldMap = _coord.getFieldMapOf( field );
 
-            let _strokeStyle = me._getStyle( me.line.strokeStyle , iGroup, fieldMap.color, fieldMap );
+            let _strokeStyle = me._getStyle( me.line.strokeStyle , fieldMap, iGroup, fieldMap.color );            
+            let _lineType    = me._getStyle( me.line.lineType    , fieldMap, iGroup, fieldMap.color );
 
             let polyCtx = {
                 pointList : pointList,
@@ -139,10 +144,11 @@ class RadarGraphs extends GraphsBase
             if( me.line.enabled ){
                 polyCtx.lineWidth = me.line.lineWidth;
                 polyCtx.strokeStyle = _strokeStyle;
+                polyCtx.lineType = _lineType;
             };
             if( me.area.enabled ){
-                polyCtx.fillStyle = me._getStyle( me.area.fillStyle , iGroup, fieldMap.color, fieldMap );
-                polyCtx.fillAlpha = me._getStyle( me.area.fillAlpha , iGroup, 1, fieldMap );
+                polyCtx.fillStyle = me._getStyle( me.area.fillStyle , fieldMap, iGroup, fieldMap.color );
+                polyCtx.fillAlpha = me._getStyle( me.area.fillAlpha , fieldMap, iGroup, 1 );
             };
 
             let _poly = new Polygon({
@@ -321,7 +327,7 @@ class RadarGraphs extends GraphsBase
         return data;
     }
 
-    _getStyle( style, iGroup ,def, fieldMap )
+    _getStyle( style, fieldMap, iGroup ,def )
     {
         let _s = def;
         if( _.isString( style ) || _.isNumber( style ) ){

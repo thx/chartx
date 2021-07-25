@@ -9,15 +9,15 @@ exports["default"] = void 0;
 
 var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
-var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
-
-var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
 
 var _assertThisInitialized2 = _interopRequireDefault(require("@babel/runtime/helpers/assertThisInitialized"));
 
-var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
-
 var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
 
 var _canvax = _interopRequireDefault(require("canvax"));
 
@@ -31,6 +31,10 @@ var _tools = require("../../../utils/tools");
 
 var _data2 = require("../relation/data");
 
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
 var _ = _canvax["default"]._,
     event = _canvax["default"].event;
 var Rect = _canvax["default"].Shapes.Rect;
@@ -43,85 +47,16 @@ var Arrow = _canvax["default"].Shapes.Arrow;
  * 默认用配置和数据可以完成绘图， 但是如果有布局数据，就绘图玩额外调用一次绘图，把布局数据传入修正布局效果
  */
 
-var Tree =
-/*#__PURE__*/
-function (_GraphsBase) {
+var Tree = /*#__PURE__*/function (_GraphsBase) {
   (0, _inherits2["default"])(Tree, _GraphsBase);
-  (0, _createClass2["default"])(Tree, null, [{
-    key: "defaultProps",
-    value: function defaultProps() {
-      return {
-        node: {
-          detail: '单个节点的配置',
-          propertys: {
-            shrink: {
-              detail: '树状图是否有节点收缩按钮',
-              propertys: {
-                enabled: {
-                  detail: "是否开启",
-                  "default": true
-                },
-                triggerEventType: {
-                  detail: '触发事件',
-                  "default": 'click,tap'
-                },
-                openCharCode: {
-                  detail: "点击后触发展开的icon chartCode，当前状态为收缩",
-                  "default": ''
-                },
-                closeCharCode: {
-                  detail: "点击后触发收缩的icon chartCode，当前状态为展开",
-                  "default": ''
-                },
-                fontSize: {
-                  detail: "icon字号大小",
-                  "default": 12
-                },
-                fontColor: {
-                  detail: "icon字体颜色",
-                  "default": '#666'
-                },
-                fontFamily: {
-                  detail: "icon在css中的fontFamily",
-                  "default": 'iconfont'
-                },
-                tipsContent: {
-                  detail: '鼠标移动到收缩icon上面的tips内容',
-                  "default": ''
-                },
-                offsetX: {
-                  detail: 'x方向偏移量',
-                  "default": 10
-                },
-                offsetY: {
-                  detail: 'y方向偏移量',
-                  "default": 1
-                },
-                background: {
-                  detail: 'icon的 背景色',
-                  "default": '#fff'
-                },
-                lineWidth: {
-                  detail: '边框大小',
-                  "default": 1
-                },
-                strokeStyle: {
-                  detail: '描边颜色',
-                  "default": '#667894'
-                }
-              }
-            }
-          }
-        }
-      };
-    }
-  }]);
+
+  var _super = _createSuper(Tree);
 
   function Tree(opt, app) {
     var _this;
 
     (0, _classCallCheck2["default"])(this, Tree);
-    _this = (0, _possibleConstructorReturn2["default"])(this, (0, _getPrototypeOf2["default"])(Tree).call(this, opt, app));
+    _this = _super.call(this, opt, app);
     _this.type = "tree";
     _this.shrinked = []; //所有被设置了收缩的node的key
 
@@ -391,6 +326,74 @@ function (_GraphsBase) {
       item.edgeIconElement && item.edgeIconElement.destroy();
       item.shrinkIcon && item.shrinkIcon.destroy();
       item.shrinkIconBack && item.shrinkIconBack.destroy();
+    }
+  }], [{
+    key: "defaultProps",
+    value: function defaultProps() {
+      return {
+        node: {
+          detail: '单个节点的配置',
+          propertys: {
+            shrink: {
+              detail: '树状图是否有节点收缩按钮',
+              propertys: {
+                enabled: {
+                  detail: "是否开启",
+                  "default": true
+                },
+                triggerEventType: {
+                  detail: '触发事件',
+                  "default": 'click,tap'
+                },
+                openCharCode: {
+                  detail: "点击后触发展开的icon chartCode，当前状态为收缩",
+                  "default": ''
+                },
+                closeCharCode: {
+                  detail: "点击后触发收缩的icon chartCode，当前状态为展开",
+                  "default": ''
+                },
+                fontSize: {
+                  detail: "icon字号大小",
+                  "default": 12
+                },
+                fontColor: {
+                  detail: "icon字体颜色",
+                  "default": '#666'
+                },
+                fontFamily: {
+                  detail: "icon在css中的fontFamily",
+                  "default": 'iconfont'
+                },
+                tipsContent: {
+                  detail: '鼠标移动到收缩icon上面的tips内容',
+                  "default": ''
+                },
+                offsetX: {
+                  detail: 'x方向偏移量',
+                  "default": 10
+                },
+                offsetY: {
+                  detail: 'y方向偏移量',
+                  "default": 1
+                },
+                background: {
+                  detail: 'icon的 背景色',
+                  "default": '#fff'
+                },
+                lineWidth: {
+                  detail: '边框大小',
+                  "default": 1
+                },
+                strokeStyle: {
+                  detail: '描边颜色',
+                  "default": '#667894'
+                }
+              }
+            }
+          }
+        }
+      };
     }
   }]);
   return Tree;

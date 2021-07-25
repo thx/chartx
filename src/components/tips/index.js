@@ -276,7 +276,7 @@ class Tips extends Component {
                 };
                 */
                 let style = node.color || node.fillStyle || node.strokeStyle;
-                let name = node.name || node.field || node.content;
+                let name = node.name || node.field || node.content || node.label;
                 let value = typeof(node.value) == "object" ? JSON.stringify(node.value) : numAddSymbol(node.value);
                 let hasVal = node.value || node.value == 0
 

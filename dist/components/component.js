@@ -9,15 +9,15 @@ exports["default"] = void 0;
 
 var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
-var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
-
-var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
 
 var _assertThisInitialized2 = _interopRequireDefault(require("@babel/runtime/helpers/assertThisInitialized"));
 
-var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
-
 var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
 
 var _global = _interopRequireDefault(require("../global"));
 
@@ -25,41 +25,23 @@ var _canvax = _interopRequireDefault(require("canvax"));
 
 var _tools = require("../utils/tools");
 
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
 var event = _canvax["default"].event,
     _ = _canvax["default"]._;
 
-var Component =
-/*#__PURE__*/
-function (_event$Dispatcher) {
+var Component = /*#__PURE__*/function (_event$Dispatcher) {
   (0, _inherits2["default"])(Component, _event$Dispatcher);
-  (0, _createClass2["default"])(Component, null, [{
-    key: "defaultProps",
-    value: function defaultProps() {
-      return {
-        enabled: {
-          detail: '是否开启该组件',
-          "default": false
-        }
-      };
-    }
-  }, {
-    key: "registerComponent",
-    value: function registerComponent(compModule, name, type) {
-      return _global["default"].registerComponent(compModule, name, type);
-    } //global.getProps 中会用到
 
-  }, {
-    key: "_isComponentRoot",
-    value: function _isComponentRoot() {
-      return true;
-    }
-  }]);
+  var _super = _createSuper(Component);
 
   function Component(opt, app) {
     var _this;
 
     (0, _classCallCheck2["default"])(this, Component);
-    _this = (0, _possibleConstructorReturn2["default"])(this, (0, _getPrototypeOf2["default"])(Component).call(this, opt, app));
+    _this = _super.call(this, opt, app);
 
     _.extend(true, (0, _assertThisInitialized2["default"])(_this), (0, _tools.getDefaultProps)(Component.defaultProps()), opt);
 
@@ -85,6 +67,7 @@ function (_event$Dispatcher) {
       left: 0
     };
     _this.__cid = _canvax["default"].utils.createId("comp_");
+    _this.ctx = app.stage.ctx || app.stage.canvas.getContext("2d");
     return _this;
   }
 
@@ -114,6 +97,27 @@ function (_event$Dispatcher) {
   }, {
     key: "layout",
     value: function layout() {}
+  }], [{
+    key: "defaultProps",
+    value: function defaultProps() {
+      return {
+        enabled: {
+          detail: '是否开启该组件',
+          "default": false
+        }
+      };
+    }
+  }, {
+    key: "registerComponent",
+    value: function registerComponent(compModule, name, type) {
+      return _global["default"].registerComponent(compModule, name, type);
+    } //global.getProps 中会用到
+
+  }, {
+    key: "_isComponentRoot",
+    value: function _isComponentRoot() {
+      return true;
+    }
   }]);
   return Component;
 }(event.Dispatcher);

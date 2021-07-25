@@ -11,15 +11,18 @@ var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/cl
 
 var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
 
+var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
 var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
 
 var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
 
-var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
-
 var _canvax = _interopRequireDefault(require("canvax"));
 
-//单环pie
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
 var _ = _canvax["default"]._,
     event = _canvax["default"].event;
 var Sector = _canvax["default"].Shapes.Sector;
@@ -27,16 +30,16 @@ var Path = _canvax["default"].Shapes.Path;
 var Text = _canvax["default"].Display.Text;
 var AnimationFrame = _canvax["default"].AnimationFrame;
 
-var Pie =
-/*#__PURE__*/
-function (_event$Dispatcher) {
+var Pie = /*#__PURE__*/function (_event$Dispatcher) {
   (0, _inherits2["default"])(Pie, _event$Dispatcher);
+
+  var _super = _createSuper(Pie);
 
   function Pie(_graphs, data) {
     var _this;
 
     (0, _classCallCheck2["default"])(this, Pie);
-    _this = (0, _possibleConstructorReturn2["default"])(this, (0, _getPrototypeOf2["default"])(Pie).call(this));
+    _this = _super.call(this);
     _this.width = 0;
     _this.height = 0;
     _this.origin = {

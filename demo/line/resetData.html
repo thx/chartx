@@ -35,53 +35,85 @@
             <td id="td-vl">
                 <form>
                     <textarea id="code" name="code">
-var data0 = []
-var data = [
-    ["percent"   ,"self","compete"],
-    ["2017-03-21",1011  ,11],
-    ["2017-03-22",2011  ,32],
-    ["2017-03-23",3011  ,15]
-];
-var data1 = [
-    ["percent"   ,"self","compete"],
-    ["2017-03-21",1011  ,11],
-    ["2017-03-22",2011  ,32],
-    ["2017-03-23",3011  ,15],
-    ["2017-03-21",1011  ,11],
-    ["2017-03-22",2011  ,32],
-    ["2017-03-23",3011  ,15]
-];
-                
-var options = {
-    coord: {
-        type: "rect",
-        xAxis: {
-            field: "percent",
-            title: "Title"
-        },
-        yAxis: {
-            title: {
-                text: "yAxis Title"
-            }
-        }
-    },
-    graphs: [
-        {
-            type: "line",
-            field: "self"
-        }
-    ]
-}
-
-window.line = chartx.create("canvasTest" , data0 , options)
-            
-setTimeout(function(){
-    line.resetData( data )       
-    setTimeout(function(){
-            debugger
-            line.resetData( data1 )
-        } , 1000)
-} , 1000)
+                        var data0 = []
+                        var data = [
+                            ["percent"   ,"self","compete"],
+                            ["2017-03-21",1011  ,11],
+                            ["2017-03-22",2011  ,32],
+                            ["2017-03-23",3011  ,15]
+                        ];
+                        var data1 = [
+                            ["percent"   ,"self","compete"],
+                            ["2017-03-21",1011  ,11],
+                            ["2017-03-22",2011  ,32],
+                            ["2017-03-23",3011  ,15],
+                            ["2017-03-21",1011  ,11],
+                            ["2017-03-22",2011  ,32],
+                            ["2017-03-23",3011  ,15]
+                        ];
+                        var data2 = [
+                            ["percent"   ,"self","compete"],
+                            ["2017-03-21",1011  ,11],
+                            ["2017-03-22",2011  ,32],
+                            ["2017-03-23",''  ,15],
+                            ["2017-03-21",''  ,11],
+                            ["2017-03-22",2011  ,32],
+                            ["2017-03-23",3011  ,15]
+                        ];
+                        var data3 = [
+                            ["percent"   ,"self","compete"],
+                            ["2017-03-21",1011  ,11],
+                            ["2017-03-22",2011  ,32],
+                            ["2017-03-23",2022  ,15],
+                            ["2017-03-21",2011  ,11],
+                            ["2017-03-22",''  ,32],
+                            ["2017-03-23",''  ,15]
+                        ];
+                                        
+                        var options = {
+                            coord: {
+                                type: "rect",
+                                xAxis: {
+                                    field: "percent",
+                                    title: "Title"
+                                },
+                                yAxis: {
+                                    title: {
+                                        text: "yAxis Title"
+                                    }
+                                }
+                            },
+                            graphs: [
+                                {
+                                    type: "line",
+                                  //animation:false,
+                                    field: "self"
+                                }
+                            ]
+                        }
+                        
+                        window.line = chartx.create("canvasTest" , data0 , options)
+                                    
+                        setTimeout(function(){
+                            line.resetData( data )
+                            
+                            setTimeout(function(){
+                                    debugger
+                                    line.resetData( data1 );
+                              setTimeout(function(){
+                                    debugger
+                                    line.resetData( data2 )
+                                    setTimeout(function(){
+                                    debugger
+                                    line.resetData( data3 )
+                                } , 1000)
+                                } , 1000)
+                                } , 1000)
+                        } , 1000)
+                                               
+                                    
+                        
+                                    
                        
             
 

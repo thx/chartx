@@ -9,15 +9,15 @@ exports["default"] = void 0;
 
 var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
-var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
-
-var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
 
 var _assertThisInitialized2 = _interopRequireDefault(require("@babel/runtime/helpers/assertThisInitialized"));
 
-var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
-
 var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
 
 var _component = _interopRequireDefault(require("../component"));
 
@@ -27,122 +27,24 @@ var _trigger = _interopRequireDefault(require("../trigger"));
 
 var _tools = require("../../utils/tools");
 
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
 var _ = _canvax["default"]._,
     event = _canvax["default"].event;
 var Circle = _canvax["default"].Shapes.Circle;
 
-var Legend =
-/*#__PURE__*/
-function (_Component) {
+var Legend = /*#__PURE__*/function (_Component) {
   (0, _inherits2["default"])(Legend, _Component);
-  (0, _createClass2["default"])(Legend, null, [{
-    key: "defaultProps",
-    value: function defaultProps() {
-      return {
-        data: {
-          detail: '图例数据',
-          "default": [],
-          documentation: '\
-                    数据结构为：{name: "uv", color: "#ff8533", field: "" ...}\
-                    如果手动传入数据只需要前面这三个 enabled: true, ind: 0\
-                    外部只需要传field和fillStyle就行了\
-                    '
-        },
-        position: {
-          detail: '图例位置',
-          documentation: '图例所在的方向top,right,bottom,left',
-          "default": 'top'
-        },
-        direction: {
-          detail: '图例布局方向',
-          "default": 'h',
-          documentation: '横向 top,bottom --> h left,right -- >v'
-        },
-        textAlign: {
-          detail: '水平方向的对其，默认居左对其',
-          "default": 'left',
-          documentation: '可选left，center，right'
-        },
-        verticalAlign: {
-          detail: '垂直方向的对其方式，默认居中（待实现）',
-          "default": 'middle',
-          documentation: '可选top，middle，bottom'
-        },
-        icon: {
-          detail: '图标设置',
-          propertys: {
-            height: {
-              detail: '高',
-              "default": 26
-            },
-            width: {
-              detail: '图标宽',
-              "default": 'auto'
-            },
-            shapeType: {
-              detail: '图标的图形类型，目前只实现了圆形',
-              "default": 'circle'
-            },
-            radius: {
-              detail: '图标（circle）半径',
-              "default": 5
-            },
-            lineWidth: {
-              detail: '图标描边宽度',
-              "default": 1
-            },
-            fillStyle: {
-              detail: '图标颜色，一般会从data里面取，这里是默认色',
-              "default": null
-            }
-          }
-        },
-        label: {
-          detail: '文本配置',
-          propertys: {
-            textAlign: {
-              detail: '水平对齐方式',
-              "default": 'left'
-            },
-            textBaseline: {
-              detail: '文本基线对齐方式',
-              "default": 'middle'
-            },
-            fontColor: {
-              detail: '文本颜色',
-              "default": '#333333'
-            },
-            cursor: {
-              detail: '鼠标样式',
-              "default": 'pointer'
-            },
-            format: {
-              detail: '文本格式化处理函数',
-              "default": null
-            }
-          }
-        },
-        triggerEventType: {
-          detail: '触发事件',
-          "default": 'click,tap'
-        },
-        activeEnabled: {
-          detail: '是否启动图例的交互事件',
-          "default": true
-        },
-        tipsEnabled: {
-          detail: '是否开启图例的tips',
-          "default": false
-        }
-      };
-    }
-  }]);
+
+  var _super = _createSuper(Legend);
 
   function Legend(opt, app) {
     var _this;
 
     (0, _classCallCheck2["default"])(this, Legend);
-    _this = (0, _possibleConstructorReturn2["default"])(this, (0, _getPrototypeOf2["default"])(Legend).call(this, opt, app));
+    _this = _super.call(this, opt, app);
     _this.name = "legend";
 
     _.extend(true, (0, _assertThisInitialized2["default"])(_this), (0, _tools.getDefaultProps)(Legend.defaultProps()), opt);
@@ -482,6 +384,107 @@ function (_Component) {
 
       ;
       return _prop;
+    }
+  }], [{
+    key: "defaultProps",
+    value: function defaultProps() {
+      return {
+        data: {
+          detail: '图例数据',
+          "default": [],
+          documentation: '\
+                    数据结构为：{name: "uv", color: "#ff8533", field: "" ...}\
+                    如果手动传入数据只需要前面这三个 enabled: true, ind: 0\
+                    外部只需要传field和fillStyle就行了\
+                    '
+        },
+        position: {
+          detail: '图例位置',
+          documentation: '图例所在的方向top,right,bottom,left',
+          "default": 'top'
+        },
+        direction: {
+          detail: '图例布局方向',
+          "default": 'h',
+          documentation: '横向 top,bottom --> h left,right -- >v'
+        },
+        textAlign: {
+          detail: '水平方向的对其，默认居左对其',
+          "default": 'left',
+          documentation: '可选left，center，right'
+        },
+        verticalAlign: {
+          detail: '垂直方向的对其方式，默认居中（待实现）',
+          "default": 'middle',
+          documentation: '可选top，middle，bottom'
+        },
+        icon: {
+          detail: '图标设置',
+          propertys: {
+            height: {
+              detail: '高',
+              "default": 26
+            },
+            width: {
+              detail: '图标宽',
+              "default": 'auto'
+            },
+            shapeType: {
+              detail: '图标的图形类型，目前只实现了圆形',
+              "default": 'circle'
+            },
+            radius: {
+              detail: '图标（circle）半径',
+              "default": 5
+            },
+            lineWidth: {
+              detail: '图标描边宽度',
+              "default": 1
+            },
+            fillStyle: {
+              detail: '图标颜色，一般会从data里面取，这里是默认色',
+              "default": null
+            }
+          }
+        },
+        label: {
+          detail: '文本配置',
+          propertys: {
+            textAlign: {
+              detail: '水平对齐方式',
+              "default": 'left'
+            },
+            textBaseline: {
+              detail: '文本基线对齐方式',
+              "default": 'middle'
+            },
+            fontColor: {
+              detail: '文本颜色',
+              "default": '#333333'
+            },
+            cursor: {
+              detail: '鼠标样式',
+              "default": 'pointer'
+            },
+            format: {
+              detail: '文本格式化处理函数',
+              "default": null
+            }
+          }
+        },
+        triggerEventType: {
+          detail: '触发事件',
+          "default": 'click,tap'
+        },
+        activeEnabled: {
+          detail: '是否启动图例的交互事件',
+          "default": true
+        },
+        tipsEnabled: {
+          detail: '是否开启图例的tips',
+          "default": false
+        }
+      };
     }
   }]);
   return Legend;

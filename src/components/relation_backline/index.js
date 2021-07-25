@@ -2,7 +2,6 @@ import Component from "../component"
 import Canvax from "canvax"
 import {getDefaultProps} from "../../utils/tools"
 import {lineRect} from "../../utils/intersect"
-import { getMutableClone } from "typescript";
 
 let { _, event } = Canvax;
 let BrokenLine = Canvax.Shapes.BrokenLine;
@@ -247,7 +246,7 @@ class relationBackLine extends Component
                         type: 'up_z'
                     });
                 };
-debugger
+
                 //先按照最小的穿过node的数量排序， 取穿过node最少的line
                 lines = lines.sort( function(a,b){return a.throughNodesNum - b.throughNodesNum} );
   
@@ -405,7 +404,7 @@ debugger
                     this._icon.context.strokeStyle  = strokeStyle;
 
                 } else {
-                    this._icon = new Canvax.Display.Text( charCode, {
+                    this._icon = new Text( charCode, {
                         context: {
                             x         : offset.x,
                             y         : offset.y,

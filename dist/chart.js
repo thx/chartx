@@ -488,7 +488,8 @@ var Chart = /*#__PURE__*/function (_event$Dispatcher) {
       this._data = data; //注意，resetData不能为null，必须是 数组格式
 
       var preDataLenth = this.dataFrame.org.length;
-      this.dataFrame.resetData(data);
+      this.dataFrame.resetData(data); //console.log( this.dataFrame )
+
       var graphsList = this.getComponents({
         name: 'graphs'
       });

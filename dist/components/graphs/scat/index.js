@@ -9,15 +9,15 @@ exports["default"] = void 0;
 
 var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
-var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
-
-var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
 
 var _assertThisInitialized2 = _interopRequireDefault(require("@babel/runtime/helpers/assertThisInitialized"));
 
-var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
-
 var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
 
 var _canvax = _interopRequireDefault(require("canvax"));
 
@@ -27,6 +27,10 @@ var _tools = require("../../../utils/tools");
 
 var _index2 = _interopRequireDefault(require("../../../utils/hull/index"));
 
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
 var _ = _canvax["default"]._,
     event = _canvax["default"].event;
 var Circle = _canvax["default"].Shapes.Circle;
@@ -34,253 +38,16 @@ var Rect = _canvax["default"].Shapes.Rect;
 var Line = _canvax["default"].Shapes.Line;
 var Polygon = _canvax["default"].Shapes.Polygon; //TODO iGroup 的实现有问题
 
-var ScatGraphs =
-/*#__PURE__*/
-function (_GraphsBase) {
+var ScatGraphs = /*#__PURE__*/function (_GraphsBase) {
   (0, _inherits2["default"])(ScatGraphs, _GraphsBase);
-  (0, _createClass2["default"])(ScatGraphs, null, [{
-    key: "defaultProps",
-    value: function defaultProps() {
-      return {
-        field: {
-          detail: '字段配置',
-          "default": null
-        },
-        groupField: {
-          detail: '分组字段',
-          "default": null,
-          documentation: '分组字段，如果area配置enabled为true，那么需要groupField来构建几个area'
-        },
-        dataFilter: {
-          detail: '散点过滤数据',
-          "default": null,
-          documentation: "数据过滤器，可以和groupField实现交叉过滤"
-        },
-        aniOrigin: {
-          detail: '节点动画的原点',
-          "default": 'default',
-          documentation: '可选的还有center（坐标正中）、origin（坐标原点）'
-        },
-        node: {
-          detail: '单数据节点图形设置',
-          propertys: {
-            dataKey: {
-              detail: '元素的数据id，默认索引匹配',
-              "default": '__index__'
-            },
-            shapeType: {
-              detail: '图形类型',
-              "default": 'circle',
-              documentation: '节点的现状可以是圆 ，也可以是rect，也可以是三角形，后面两种后面实现'
-            },
-            maxRadius: {
-              detail: '节点最大半径',
-              "default": 25
-            },
-            minRadius: {
-              detail: '节点最小半径',
-              "default": 5
-            },
-            radius: {
-              detail: '半径',
-              "default": null
-            },
-            radiusScale: {
-              detail: '半径缩放比例',
-              documentation: '在计算好真实半径后缩放，主要用在,缩略图中，比如datazoom的缩略图',
-              "default": 1
-            },
-            normalRadius: {
-              detail: '默认半径',
-              "default": 15
-            },
-            fillStyle: {
-              detail: '节点景色',
-              "default": null
-            },
-            fillAlpha: {
-              detail: '节点透明度',
-              "default": 0.8
-            },
-            strokeStyle: {
-              detail: '节点描边颜色',
-              "default": null
-            },
-            lineWidth: {
-              detail: '节点描边线宽',
-              "default": 0
-            },
-            strokeAlpha: {
-              detail: '节点描边透明度',
-              "default": 1
-            },
-            focus: {
-              detail: "节点hover态设置",
-              propertys: {
-                enabled: {
-                  detail: '是否开启',
-                  "default": true
-                },
-                lineWidth: {
-                  detail: 'hover后的边框大小',
-                  "default": 6
-                },
-                strokeAlpha: {
-                  detail: 'hover后的边框透明度',
-                  "default": 0.2
-                },
-                fillAlpha: {
-                  detail: 'hover后的背景透明度',
-                  "default": 0.8
-                }
-              }
-            },
-            select: {
-              detail: "节点选中态设置",
-              propertys: {
-                enabled: {
-                  detail: '是否开启',
-                  "default": false
-                },
-                lineWidth: {
-                  detail: '选中后的边框大小',
-                  "default": 8
-                },
-                strokeAlpha: {
-                  detail: '选中后的边框透明度',
-                  "default": 0.4
-                },
-                fillAlpha: {
-                  detail: '选中后的背景透明度',
-                  "default": 1
-                }
-              }
-            }
-          }
-        },
-        line: {
-          detail: '每个节点和指标轴线的连线',
-          propertys: {
-            enabled: {
-              detail: '是否开启',
-              "default": false
-            },
-            lineWidth: {
-              detail: '连线宽',
-              "default": 1
-            },
-            strokeStyle: {
-              detail: '连线颜色',
-              "default": '#ccc'
-            },
-            lineType: {
-              detail: '连线类型',
-              "default": 'dashed'
-            }
-          }
-        },
-        area: {
-          detail: '散点集合组成的面',
-          propertys: {
-            enabled: {
-              detail: '是否开启',
-              "default": false
-            },
-            concavity: {
-              detail: '凹凸系数，默认80，越大越凸',
-              "default": 88
-            },
-            quantile: {
-              detail: '散点用来计入面积的分位数',
-              "default": 8
-            },
-            fillStyle: {
-              detail: '散点集合面的背景色',
-              "default": null
-            },
-            fillAlpha: {
-              detail: '散点集合面的透明度',
-              "default": 0.15
-            },
-            strokeStyle: {
-              detail: '散点集合面的描边颜色',
-              "default": null
-            },
-            lineWidth: {
-              detail: '散点集合面的描边线宽',
-              "default": 0
-            },
-            strokeAlpha: {
-              detail: '散点集合面的描边透明度',
-              "default": 0.5
-            }
-          }
-        },
-        label: {
-          detail: '文本设置',
-          propertys: {
-            enabled: {
-              detail: '是否开启',
-              "default": true
-            },
-            field: {
-              detail: '获取label的字段',
-              "default": null
-            },
-            format: {
-              detail: 'label格式化处理函数',
-              "default": function _default(txt) {
-                return txt;
-              }
-            },
-            fontSize: {
-              detail: 'label字体大小',
-              "default": 13
-            },
-            fontColor: {
-              detail: '字体颜色',
-              "default": '#888'
-            },
-            strokeStyle: {
-              detail: '字体描边颜色',
-              "default": '#ffffff'
-            },
-            lineWidth: {
-              detail: '描边大小',
-              "default": 0
-            },
-            textAlign: {
-              detail: '水平对齐方式',
-              "default": 'center'
-            },
-            verticalAlign: {
-              detail: '垂直基线对齐方式',
-              "default": 'middle'
-            },
-            position: {
-              detail: '文本布局位置',
-              documentation: 'auto(目前等于center，还未实现),center,top,right,bottom,left',
-              "default": 'center'
-            },
-            offsetX: {
-              detail: 'x方向偏移量',
-              "default": 0
-            },
-            offsetY: {
-              detail: 'y方向偏移量',
-              "default": 0
-            }
-          }
-        }
-      };
-    }
-  }]);
+
+  var _super = _createSuper(ScatGraphs);
 
   function ScatGraphs(opt, app) {
     var _this;
 
     (0, _classCallCheck2["default"])(this, ScatGraphs);
-    _this = (0, _possibleConstructorReturn2["default"])(this, (0, _getPrototypeOf2["default"])(ScatGraphs).call(this, opt, app));
+    _this = _super.call(this, opt, app);
     _this.type = "scat"; //计算半径的时候需要用到， 每次执行_trimGraphs都必须要初始化一次
 
     _this._rData = null;
@@ -1163,6 +930,242 @@ function (_GraphsBase) {
       var _nodesInfoList = []; //节点信息集合
 
       return _nodesInfoList;
+    }
+  }], [{
+    key: "defaultProps",
+    value: function defaultProps() {
+      return {
+        field: {
+          detail: '字段配置',
+          "default": null
+        },
+        groupField: {
+          detail: '分组字段',
+          "default": null,
+          documentation: '分组字段，如果area配置enabled为true，那么需要groupField来构建几个area'
+        },
+        dataFilter: {
+          detail: '散点过滤数据',
+          "default": null,
+          documentation: "数据过滤器，可以和groupField实现交叉过滤"
+        },
+        aniOrigin: {
+          detail: '节点动画的原点',
+          "default": 'default',
+          documentation: '可选的还有center（坐标正中）、origin（坐标原点）'
+        },
+        node: {
+          detail: '单数据节点图形设置',
+          propertys: {
+            dataKey: {
+              detail: '元素的数据id，默认索引匹配',
+              "default": '__index__'
+            },
+            shapeType: {
+              detail: '图形类型',
+              "default": 'circle',
+              documentation: '节点的现状可以是圆 ，也可以是rect，也可以是三角形，后面两种后面实现'
+            },
+            maxRadius: {
+              detail: '节点最大半径',
+              "default": 25
+            },
+            minRadius: {
+              detail: '节点最小半径',
+              "default": 5
+            },
+            radius: {
+              detail: '半径',
+              "default": null
+            },
+            radiusScale: {
+              detail: '半径缩放比例',
+              documentation: '在计算好真实半径后缩放，主要用在,缩略图中，比如datazoom的缩略图',
+              "default": 1
+            },
+            normalRadius: {
+              detail: '默认半径',
+              "default": 15
+            },
+            fillStyle: {
+              detail: '节点景色',
+              "default": null
+            },
+            fillAlpha: {
+              detail: '节点透明度',
+              "default": 0.8
+            },
+            strokeStyle: {
+              detail: '节点描边颜色',
+              "default": null
+            },
+            lineWidth: {
+              detail: '节点描边线宽',
+              "default": 0
+            },
+            strokeAlpha: {
+              detail: '节点描边透明度',
+              "default": 1
+            },
+            focus: {
+              detail: "节点hover态设置",
+              propertys: {
+                enabled: {
+                  detail: '是否开启',
+                  "default": true
+                },
+                lineWidth: {
+                  detail: 'hover后的边框大小',
+                  "default": 6
+                },
+                strokeAlpha: {
+                  detail: 'hover后的边框透明度',
+                  "default": 0.2
+                },
+                fillAlpha: {
+                  detail: 'hover后的背景透明度',
+                  "default": 0.8
+                }
+              }
+            },
+            select: {
+              detail: "节点选中态设置",
+              propertys: {
+                enabled: {
+                  detail: '是否开启',
+                  "default": false
+                },
+                lineWidth: {
+                  detail: '选中后的边框大小',
+                  "default": 8
+                },
+                strokeAlpha: {
+                  detail: '选中后的边框透明度',
+                  "default": 0.4
+                },
+                fillAlpha: {
+                  detail: '选中后的背景透明度',
+                  "default": 1
+                }
+              }
+            }
+          }
+        },
+        line: {
+          detail: '每个节点和指标轴线的连线',
+          propertys: {
+            enabled: {
+              detail: '是否开启',
+              "default": false
+            },
+            lineWidth: {
+              detail: '连线宽',
+              "default": 1
+            },
+            strokeStyle: {
+              detail: '连线颜色',
+              "default": '#ccc'
+            },
+            lineType: {
+              detail: '连线类型',
+              "default": 'dashed'
+            }
+          }
+        },
+        area: {
+          detail: '散点集合组成的面',
+          propertys: {
+            enabled: {
+              detail: '是否开启',
+              "default": false
+            },
+            concavity: {
+              detail: '凹凸系数，默认80，越大越凸',
+              "default": 88
+            },
+            quantile: {
+              detail: '散点用来计入面积的分位数',
+              "default": 8
+            },
+            fillStyle: {
+              detail: '散点集合面的背景色',
+              "default": null
+            },
+            fillAlpha: {
+              detail: '散点集合面的透明度',
+              "default": 0.15
+            },
+            strokeStyle: {
+              detail: '散点集合面的描边颜色',
+              "default": null
+            },
+            lineWidth: {
+              detail: '散点集合面的描边线宽',
+              "default": 0
+            },
+            strokeAlpha: {
+              detail: '散点集合面的描边透明度',
+              "default": 0.5
+            }
+          }
+        },
+        label: {
+          detail: '文本设置',
+          propertys: {
+            enabled: {
+              detail: '是否开启',
+              "default": true
+            },
+            field: {
+              detail: '获取label的字段',
+              "default": null
+            },
+            format: {
+              detail: 'label格式化处理函数',
+              "default": function _default(txt) {
+                return txt;
+              }
+            },
+            fontSize: {
+              detail: 'label字体大小',
+              "default": 13
+            },
+            fontColor: {
+              detail: '字体颜色',
+              "default": '#888'
+            },
+            strokeStyle: {
+              detail: '字体描边颜色',
+              "default": '#ffffff'
+            },
+            lineWidth: {
+              detail: '描边大小',
+              "default": 0
+            },
+            textAlign: {
+              detail: '水平对齐方式',
+              "default": 'center'
+            },
+            verticalAlign: {
+              detail: '垂直基线对齐方式',
+              "default": 'middle'
+            },
+            position: {
+              detail: '文本布局位置',
+              documentation: 'auto(目前等于center，还未实现),center,top,right,bottom,left',
+              "default": 'center'
+            },
+            offsetX: {
+              detail: 'x方向偏移量',
+              "default": 0
+            },
+            offsetY: {
+              detail: 'y方向偏移量',
+              "default": 0
+            }
+          }
+        }
+      };
     }
   }]);
   return ScatGraphs;

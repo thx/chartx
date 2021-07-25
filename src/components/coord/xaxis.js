@@ -150,7 +150,7 @@ export default class xAxis extends Axis
                     }
                 });
             } else {
-                this._title.resetText( this.title.text );
+                this._title.resetText( this.title.text || '' );
             }
         }
     }
@@ -352,7 +352,7 @@ export default class xAxis extends Axis
                         duration: duration,
                         id: _node._txt.id
                     });
-                    _node._txt.resetText( o.text );
+                    _node._txt.resetText( o.text || '' );
                 };
             } else {
                 _node = new Canvax.Display.Sprite({

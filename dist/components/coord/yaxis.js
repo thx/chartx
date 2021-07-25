@@ -9,15 +9,15 @@ exports["default"] = void 0;
 
 var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
-var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
-
-var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
 
 var _assertThisInitialized2 = _interopRequireDefault(require("@babel/runtime/helpers/assertThisInitialized"));
 
-var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
-
 var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
 
 var _canvax = _interopRequireDefault(require("canvax"));
 
@@ -25,34 +25,23 @@ var _tools = require("../../utils/tools");
 
 var _axis = _interopRequireDefault(require("./axis"));
 
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
 var _ = _canvax["default"]._;
 var Line = _canvax["default"].Shapes.Line;
 
-var yAxis =
-/*#__PURE__*/
-function (_Axis) {
+var yAxis = /*#__PURE__*/function (_Axis) {
   (0, _inherits2["default"])(yAxis, _Axis);
-  (0, _createClass2["default"])(yAxis, null, [{
-    key: "defaultProps",
-    value: function defaultProps() {
-      return {
-        align: {
-          detail: '左右轴设置',
-          "default": 'left'
-        },
-        layoutType: {
-          detail: '布局方式',
-          "default": 'proportion'
-        }
-      };
-    }
-  }]);
+
+  var _super = _createSuper(yAxis);
 
   function yAxis(opt, data, _coord) {
     var _this;
 
     (0, _classCallCheck2["default"])(this, yAxis);
-    _this = (0, _possibleConstructorReturn2["default"])(this, (0, _getPrototypeOf2["default"])(yAxis).call(this, opt, data.org));
+    _this = _super.call(this, opt, data.org);
     _this.type = "yAxis";
     _this._coord = _coord || {};
     _this._title = null; //this.label对应的文本对象
@@ -599,6 +588,20 @@ function (_Axis) {
 
       ;
       return res;
+    }
+  }], [{
+    key: "defaultProps",
+    value: function defaultProps() {
+      return {
+        align: {
+          detail: '左右轴设置',
+          "default": 'left'
+        },
+        layoutType: {
+          detail: '布局方式',
+          "default": 'proportion'
+        }
+      };
     }
   }]);
   return yAxis;

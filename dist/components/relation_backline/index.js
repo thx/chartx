@@ -9,15 +9,15 @@ exports["default"] = void 0;
 
 var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
-var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
-
-var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
 
 var _assertThisInitialized2 = _interopRequireDefault(require("@babel/runtime/helpers/assertThisInitialized"));
 
-var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
-
 var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
 
 var _component = _interopRequireDefault(require("../component"));
 
@@ -27,7 +27,9 @@ var _tools = require("../../utils/tools");
 
 var _intersect = require("../../utils/intersect");
 
-var _typescript = require("typescript");
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
 
 var _ = _canvax["default"]._,
     event = _canvax["default"].event;
@@ -36,105 +38,16 @@ var Arrow = _canvax["default"].Shapes.Arrow;
 var Text = _canvax["default"].Display.Text;
 var Circle = _canvax["default"].Shapes.Circle;
 
-var relationBackLine =
-/*#__PURE__*/
-function (_Component) {
+var relationBackLine = /*#__PURE__*/function (_Component) {
   (0, _inherits2["default"])(relationBackLine, _Component);
-  (0, _createClass2["default"])(relationBackLine, null, [{
-    key: "defaultProps",
-    value: function defaultProps() {
-      return {
-        key: {
-          detail: '和relation的line保持一致，用逗号分割',
-          "default": null
-        },
-        line: {
-          detail: '线的配置',
-          propertys: {
-            enabled: {
-              detail: '是否开启',
-              "default": true
-            },
-            pointList: {
-              detail: '回链线的points',
-              "default": null
-            },
-            lineWidth: {
-              detail: '线宽',
-              "default": 1
-            },
-            strokeStyle: {
-              detail: '线的颜色',
-              "default": '#e5e5e5'
-            },
-            lineType: {
-              detail: '线的样式，虚线(dashed)实线(solid)',
-              "default": 'solid'
-            },
-            dissY: {
-              detail: '拐点和起始节点的距离',
-              "default": null
-            }
-          }
-        },
-        icon: {
-          detail: 'line上面的icon',
-          propertys: {
-            enabled: {
-              detail: '是否开启线上的icon设置',
-              "default": true
-            },
-            charCode: {
-              detail: 'iconfont上面对应的unicode中&#x后面的字符',
-              "default": null
-            },
-            lineWidth: {
-              detail: 'icon描边线宽',
-              "default": 1
-            },
-            strokeStyle: {
-              detail: 'icon的描边颜色',
-              "default": '#e5e5e5'
-            },
-            fontColor: {
-              detail: 'icon的颜色',
-              "default": '#e5e5e5'
-            },
-            fontFamily: {
-              detail: 'font-face的font-family设置',
-              "default": 'iconfont'
-            },
-            fontSize: {
-              detail: 'icon的字体大小',
-              "default": 14
-            },
-            offset: {
-              detail: 'icon的位置，函数，参数是整个edge对象',
-              "default": null
-            },
-            offsetX: {
-              detail: '在计算出offset后的X再次便宜量',
-              "default": 1
-            },
-            offsetY: {
-              detail: '在计算出offset后的Y再次便宜量',
-              "default": 2
-            },
-            background: {
-              detail: 'icon的背景颜色，背景为圆形',
-              "default": "#fff"
-            }
-          }
-        }
-      };
-    }
-  }]);
+
+  var _super = _createSuper(relationBackLine);
 
   function relationBackLine(opt, app) {
     var _this;
 
     (0, _classCallCheck2["default"])(this, relationBackLine);
-    _this = (0, _possibleConstructorReturn2["default"])(this, (0, _getPrototypeOf2["default"])(relationBackLine).call(this, opt, app));
+    _this = _super.call(this, opt, app);
     _this.name = "relation_backline";
 
     _.extend(true, (0, _assertThisInitialized2["default"])(_this), (0, _tools.getDefaultProps)(relationBackLine.defaultProps()), opt);
@@ -302,8 +215,7 @@ function (_Component) {
             });
           }
 
-          ;
-          debugger; //先按照最小的穿过node的数量排序， 取穿过node最少的line
+          ; //先按照最小的穿过node的数量排序， 取穿过node最少的line
 
           lines = lines.sort(function (a, b) {
             return a.throughNodesNum - b.throughNodesNum;
@@ -476,7 +388,7 @@ function (_Component) {
             this._icon.context.lineWidth = lineWidth;
             this._icon.context.strokeStyle = strokeStyle;
           } else {
-            this._icon = new _canvax["default"].Display.Text(charCode, {
+            this._icon = new Text(charCode, {
               context: {
                 x: offset.x,
                 y: offset.y,
@@ -524,6 +436,94 @@ function (_Component) {
 
       ;
       return _prop;
+    }
+  }], [{
+    key: "defaultProps",
+    value: function defaultProps() {
+      return {
+        key: {
+          detail: '和relation的line保持一致，用逗号分割',
+          "default": null
+        },
+        line: {
+          detail: '线的配置',
+          propertys: {
+            enabled: {
+              detail: '是否开启',
+              "default": true
+            },
+            pointList: {
+              detail: '回链线的points',
+              "default": null
+            },
+            lineWidth: {
+              detail: '线宽',
+              "default": 1
+            },
+            strokeStyle: {
+              detail: '线的颜色',
+              "default": '#e5e5e5'
+            },
+            lineType: {
+              detail: '线的样式，虚线(dashed)实线(solid)',
+              "default": 'solid'
+            },
+            dissY: {
+              detail: '拐点和起始节点的距离',
+              "default": null
+            }
+          }
+        },
+        icon: {
+          detail: 'line上面的icon',
+          propertys: {
+            enabled: {
+              detail: '是否开启线上的icon设置',
+              "default": true
+            },
+            charCode: {
+              detail: 'iconfont上面对应的unicode中&#x后面的字符',
+              "default": null
+            },
+            lineWidth: {
+              detail: 'icon描边线宽',
+              "default": 1
+            },
+            strokeStyle: {
+              detail: 'icon的描边颜色',
+              "default": '#e5e5e5'
+            },
+            fontColor: {
+              detail: 'icon的颜色',
+              "default": '#e5e5e5'
+            },
+            fontFamily: {
+              detail: 'font-face的font-family设置',
+              "default": 'iconfont'
+            },
+            fontSize: {
+              detail: 'icon的字体大小',
+              "default": 14
+            },
+            offset: {
+              detail: 'icon的位置，函数，参数是整个edge对象',
+              "default": null
+            },
+            offsetX: {
+              detail: '在计算出offset后的X再次便宜量',
+              "default": 1
+            },
+            offsetY: {
+              detail: '在计算出offset后的Y再次便宜量',
+              "default": 2
+            },
+            background: {
+              detail: 'icon的背景颜色，背景为圆形',
+              "default": "#fff"
+            }
+          }
+        }
+      };
     }
   }]);
   return relationBackLine;

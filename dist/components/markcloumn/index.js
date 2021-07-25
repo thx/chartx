@@ -9,15 +9,15 @@ exports["default"] = void 0;
 
 var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
-var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
-
-var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
 
 var _assertThisInitialized2 = _interopRequireDefault(require("@babel/runtime/helpers/assertThisInitialized"));
 
-var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
-
 var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
 
 var _component = _interopRequireDefault(require("../component"));
 
@@ -25,123 +25,26 @@ var _canvax = _interopRequireDefault(require("canvax"));
 
 var _tools = require("../../utils/tools");
 
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
 var _ = _canvax["default"]._,
     event = _canvax["default"].event;
 var Line = _canvax["default"].Shapes.Line;
 var Circle = _canvax["default"].Shapes.Circle;
 var Text = _canvax["default"].Display.Text;
 
-var markCloumn =
-/*#__PURE__*/
-function (_Component) {
+var markCloumn = /*#__PURE__*/function (_Component) {
   (0, _inherits2["default"])(markCloumn, _Component);
-  (0, _createClass2["default"])(markCloumn, null, [{
-    key: "defaultProps",
-    value: function defaultProps() {
-      return {
-        xVal: {
-          detail: 'x的value值',
-          "default": null
-        },
-        xPixel: {
-          detail: 'x方向的具体像素值',
-          "default": null
-        },
-        markTo: {
-          detail: '标准哪个目标字段，主要用作折线图',
-          documentation: '如果设置了这个字段，那么line的起点将是这个graphs上的node节点',
-          "default": null
-        },
-        line: {
-          detail: '线的配置',
-          propertys: {
-            enabled: {
-              detail: '是否开启',
-              "default": true
-            },
-            lineWidth: {
-              detail: '线宽',
-              "default": 2
-            },
-            strokeStyle: {
-              detail: '线的颜色',
-              "default": '#d5d5d5'
-            },
-            lineType: {
-              detail: '线的样式，虚线(dashed)实线(solid)',
-              "default": 'solid'
-            },
-            startY: {
-              detail: 'startY',
-              "default": 0
-            },
-            endY: {
-              detail: 'startY',
-              "default": null //'node'
 
-            }
-          }
-        },
-        node: {
-          detail: '数据图形节点',
-          propertys: {
-            enabled: {
-              detail: '是否开启',
-              "default": true
-            },
-            radius: {
-              detail: '节点半径',
-              "default": 5
-            },
-            fillStyle: {
-              detail: '节点图形的背景色',
-              "default": '#ffffff'
-            },
-            strokeStyle: {
-              detail: '节点图形的描边色，默认和line.strokeStyle保持一致',
-              "default": null
-            },
-            lineWidth: {
-              detail: '节点图形边宽大小',
-              "default": 2
-            }
-          }
-        },
-        label: {
-          detail: '文本',
-          propertys: {
-            enabled: {
-              detail: '是否开启',
-              "default": false
-            },
-            fontColor: {
-              detail: '文本字体颜色',
-              "default": null
-            },
-            fontSize: {
-              detail: '文本字体大小',
-              "default": 12
-            },
-            text: {
-              detail: '文本内容',
-              documentation: "可以是函数",
-              "default": null
-            },
-            format: {
-              detail: '文本格式化函数',
-              "default": null
-            }
-          }
-        }
-      };
-    }
-  }]);
+  var _super = _createSuper(markCloumn);
 
   function markCloumn(opt, app) {
     var _this;
 
     (0, _classCallCheck2["default"])(this, markCloumn);
-    _this = (0, _possibleConstructorReturn2["default"])(this, (0, _getPrototypeOf2["default"])(markCloumn).call(this, opt, app));
+    _this = _super.call(this, opt, app);
     _this.name = "markcloumn";
 
     _.extend(true, (0, _assertThisInitialized2["default"])(_this), (0, _tools.getDefaultProps)(markCloumn.defaultProps()), opt);
@@ -425,6 +328,106 @@ function (_Component) {
 
         ;
       });
+    }
+  }], [{
+    key: "defaultProps",
+    value: function defaultProps() {
+      return {
+        xVal: {
+          detail: 'x的value值',
+          "default": null
+        },
+        xPixel: {
+          detail: 'x方向的具体像素值',
+          "default": null
+        },
+        markTo: {
+          detail: '标准哪个目标字段，主要用作折线图',
+          documentation: '如果设置了这个字段，那么line的起点将是这个graphs上的node节点',
+          "default": null
+        },
+        line: {
+          detail: '线的配置',
+          propertys: {
+            enabled: {
+              detail: '是否开启',
+              "default": true
+            },
+            lineWidth: {
+              detail: '线宽',
+              "default": 2
+            },
+            strokeStyle: {
+              detail: '线的颜色',
+              "default": '#d5d5d5'
+            },
+            lineType: {
+              detail: '线的样式，虚线(dashed)实线(solid)',
+              "default": 'solid'
+            },
+            startY: {
+              detail: 'startY',
+              "default": 0
+            },
+            endY: {
+              detail: 'startY',
+              "default": null //'node'
+
+            }
+          }
+        },
+        node: {
+          detail: '数据图形节点',
+          propertys: {
+            enabled: {
+              detail: '是否开启',
+              "default": true
+            },
+            radius: {
+              detail: '节点半径',
+              "default": 5
+            },
+            fillStyle: {
+              detail: '节点图形的背景色',
+              "default": '#ffffff'
+            },
+            strokeStyle: {
+              detail: '节点图形的描边色，默认和line.strokeStyle保持一致',
+              "default": null
+            },
+            lineWidth: {
+              detail: '节点图形边宽大小',
+              "default": 2
+            }
+          }
+        },
+        label: {
+          detail: '文本',
+          propertys: {
+            enabled: {
+              detail: '是否开启',
+              "default": false
+            },
+            fontColor: {
+              detail: '文本字体颜色',
+              "default": null
+            },
+            fontSize: {
+              detail: '文本字体大小',
+              "default": 12
+            },
+            text: {
+              detail: '文本内容',
+              documentation: "可以是函数",
+              "default": null
+            },
+            format: {
+              detail: '文本格式化函数',
+              "default": null
+            }
+          }
+        }
+      };
     }
   }]);
   return markCloumn;
