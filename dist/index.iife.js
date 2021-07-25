@@ -9154,12 +9154,10 @@ var chartx = (function () {
 	        height = _coord.height;
 	        origin = _coord.origin;
 	      }
-
-	      if (this.dataFrame.length == 0) {
-	        //如果没有数据，不需要绘制graphs
-	        me.fire("complete");
-	        return;
-	      }
+	      //如果没有数据，不需要绘制graphs
+	      //me.fire("complete");
+	      //return;
+	      //};
 
 	      var _graphs = this.getComponents({
 	        name: 'graphs'
@@ -9171,21 +9169,22 @@ var chartx = (function () {
 	        width: width,
 	        height: height,
 	        origin: origin
-	      });
+	      }); //没有数据的时候可以不绘制graphs，但是下面的其他components还是需要绘制的，比如图例
 
-	      _.each(_graphs, function (_g) {
-	        _g.on("complete", function (g) {
-	          completeNum++;
+	      if (this.dataFrame.length > 0) {
+	        _.each(_graphs, function (_g) {
+	          _g.on("complete", function (g) {
+	            completeNum++;
 
-	          if (completeNum == graphsCount) {
-	            me.fire("complete");
-	          }
-	          _g.inited = true;
+	            if (completeNum == graphsCount) {
+	              me.fire("complete");
+	            }
+	            _g.inited = true;
+	          });
+
+	          _g.draw(opt);
 	        });
-
-	        _g.draw(opt);
-	      }); //绘制除开coord graphs 以外的所有组件
-
+	      }
 
 	      for (var i = 0, l = this.components.length; i < l; i++) {
 	        var p = this.components[i];
@@ -50001,6 +50000,7 @@ var chartx = (function () {
 	    value: function _setTxtPos(y) {
 	      var me = this;
 	      var txt = me._txt;
+	      if (!this._yAxis) return 0;
 
 	      if (this._yAxis.align == "left") {
 	        txt.context.x = 5;
@@ -50033,7 +50033,11 @@ var chartx = (function () {
 	        return -this._opt.yPixel;
 	      }
 
-	      return -this._yAxis.getPosOfVal(this._getYVal());
+	      if (this._yAxis) {
+	        return -this._yAxis.getPosOfVal(this._getYVal());
+	      } else {
+	        return 0;
+	      }
 	    }
 	  }, {
 	    key: "_getLabel",
@@ -50447,7 +50451,7 @@ var chartx = (function () {
 	      var h = this.dH + 2; //后面的2 是 两边的 linewidth
 
 	      var scrollTop = document.body.scrollTop;
-	      var clientHeight = document.body.clientHeight;
+	      var clientHeight = document.documentElement.clientHeight;
 
 	      if (y < scrollTop) {
 	        y = scrollTop;
