@@ -341,7 +341,7 @@ var Tips = /*#__PURE__*/function (_Component) {
       var h = this.dH + 2; //后面的2 是 两边的 linewidth
 
       var scrollTop = document.body.scrollTop;
-      var clientHeight = document.body.clientHeight;
+      var clientHeight = document.documentElement.clientHeight;
 
       if (y < scrollTop) {
         y = scrollTop;

@@ -254,6 +254,8 @@ class MarkLine extends Component
         let me = this;
         let txt = me._txt;
         
+        if( !this._yAxis ) return 0;
+
         if( this._yAxis.align == "left" ){
             txt.context.x = 5;
         } else {
@@ -284,7 +286,12 @@ class MarkLine extends Component
             //如果用户有指定的具体像素位置，则直接使用该值
             return -this._opt.yPixel
         }
-        return -this._yAxis.getPosOfVal( this._getYVal() );;
+        if( this._yAxis ){
+            return -this._yAxis.getPosOfVal( this._getYVal() );
+        } else {
+            return 0;
+        }
+        
     }
 
     _getLabel()

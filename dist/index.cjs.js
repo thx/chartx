@@ -27,14 +27,28 @@ module.exports["default"] = module.exports, module.exports.__esModule = true;
 
 unwrapExports(interopRequireDefault);
 
+function unwrapExports$1 (x) {
+	return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x['default'] : x;
+}
+
+function createCommonjsModule$1(fn, module) {
+	return module = { exports: {} }, fn(module, module.exports), module.exports;
+}
+
+var classCallCheck = createCommonjsModule$1(function (module) {
 function _classCallCheck(instance, Constructor) {
   if (!(instance instanceof Constructor)) {
     throw new TypeError("Cannot call a class as a function");
   }
 }
 
-var classCallCheck = _classCallCheck;
+module.exports = _classCallCheck;
+module.exports["default"] = module.exports, module.exports.__esModule = true;
+});
 
+var _classCallCheck = unwrapExports$1(classCallCheck);
+
+var createClass = createCommonjsModule$1(function (module) {
 function _defineProperties(target, props) {
   for (var i = 0; i < props.length; i++) {
     var descriptor = props[i];
@@ -51,32 +65,13 @@ function _createClass(Constructor, protoProps, staticProps) {
   return Constructor;
 }
 
-var createClass = _createClass;
-
-function createCommonjsModule$1(fn, module) {
-	return module = { exports: {} }, fn(module, module.exports), module.exports;
-}
-
-var _typeof_1 = createCommonjsModule$1(function (module) {
-function _typeof(obj) {
-  "@babel/helpers - typeof";
-
-  if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
-    module.exports = _typeof = function _typeof(obj) {
-      return typeof obj;
-    };
-  } else {
-    module.exports = _typeof = function _typeof(obj) {
-      return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-    };
-  }
-
-  return _typeof(obj);
-}
-
-module.exports = _typeof;
+module.exports = _createClass;
+module.exports["default"] = module.exports, module.exports.__esModule = true;
 });
 
+var _createClass = unwrapExports$1(createClass);
+
+var assertThisInitialized = createCommonjsModule$1(function (module) {
 function _assertThisInitialized(self) {
   if (self === void 0) {
     throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
@@ -85,28 +80,11 @@ function _assertThisInitialized(self) {
   return self;
 }
 
-var assertThisInitialized = _assertThisInitialized;
-
-function _possibleConstructorReturn(self, call) {
-  if (call && (_typeof_1(call) === "object" || typeof call === "function")) {
-    return call;
-  }
-
-  return assertThisInitialized(self);
-}
-
-var possibleConstructorReturn = _possibleConstructorReturn;
-
-var getPrototypeOf = createCommonjsModule$1(function (module) {
-function _getPrototypeOf(o) {
-  module.exports = _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) {
-    return o.__proto__ || Object.getPrototypeOf(o);
-  };
-  return _getPrototypeOf(o);
-}
-
-module.exports = _getPrototypeOf;
+module.exports = _assertThisInitialized;
+module.exports["default"] = module.exports, module.exports.__esModule = true;
 });
+
+var _assertThisInitialized = unwrapExports$1(assertThisInitialized);
 
 var setPrototypeOf = createCommonjsModule$1(function (module) {
 function _setPrototypeOf(o, p) {
@@ -115,12 +93,17 @@ function _setPrototypeOf(o, p) {
     return o;
   };
 
+  module.exports["default"] = module.exports, module.exports.__esModule = true;
   return _setPrototypeOf(o, p);
 }
 
 module.exports = _setPrototypeOf;
+module.exports["default"] = module.exports, module.exports.__esModule = true;
 });
 
+unwrapExports$1(setPrototypeOf);
+
+var inherits = createCommonjsModule$1(function (module) {
 function _inherits(subClass, superClass) {
   if (typeof superClass !== "function" && superClass !== null) {
     throw new TypeError("Super expression must either be null or a function");
@@ -136,7 +119,72 @@ function _inherits(subClass, superClass) {
   if (superClass) setPrototypeOf(subClass, superClass);
 }
 
-var inherits = _inherits;
+module.exports = _inherits;
+module.exports["default"] = module.exports, module.exports.__esModule = true;
+});
+
+var _inherits = unwrapExports$1(inherits);
+
+var _typeof_1 = createCommonjsModule$1(function (module) {
+function _typeof(obj) {
+  "@babel/helpers - typeof";
+
+  if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
+    module.exports = _typeof = function _typeof(obj) {
+      return typeof obj;
+    };
+
+    module.exports["default"] = module.exports, module.exports.__esModule = true;
+  } else {
+    module.exports = _typeof = function _typeof(obj) {
+      return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+    };
+
+    module.exports["default"] = module.exports, module.exports.__esModule = true;
+  }
+
+  return _typeof(obj);
+}
+
+module.exports = _typeof;
+module.exports["default"] = module.exports, module.exports.__esModule = true;
+});
+
+var _typeof = unwrapExports$1(_typeof_1);
+
+var possibleConstructorReturn = createCommonjsModule$1(function (module) {
+var _typeof = _typeof_1["default"];
+
+
+
+function _possibleConstructorReturn(self, call) {
+  if (call && (_typeof(call) === "object" || typeof call === "function")) {
+    return call;
+  }
+
+  return assertThisInitialized(self);
+}
+
+module.exports = _possibleConstructorReturn;
+module.exports["default"] = module.exports, module.exports.__esModule = true;
+});
+
+var _possibleConstructorReturn = unwrapExports$1(possibleConstructorReturn);
+
+var getPrototypeOf = createCommonjsModule$1(function (module) {
+function _getPrototypeOf(o) {
+  module.exports = _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) {
+    return o.__proto__ || Object.getPrototypeOf(o);
+  };
+  module.exports["default"] = module.exports, module.exports.__esModule = true;
+  return _getPrototypeOf(o);
+}
+
+module.exports = _getPrototypeOf;
+module.exports["default"] = module.exports, module.exports.__esModule = true;
+});
+
+var _getPrototypeOf = unwrapExports$1(getPrototypeOf);
 
 var _ = {};
 var breaker = {};
@@ -546,7 +594,7 @@ _.extend = function () {
     i = 2;
   }
 
-  if (_typeof_1(target) !== "object" && !_.isFunction(target)) {
+  if (_typeof(target) !== "object" && !_.isFunction(target)) {
     target = {};
   }
 
@@ -600,9 +648,62 @@ _.radToDeg = function (radians) {
   return radians * _.RAD2DEG;
 };
 
-var RESOLUTION = typeof window !== 'undefined' ? window.devicePixelRatio : 1;
+var Settings = {
+  //设备分辨率
+  RESOLUTION: 1,
+
+  /**
+   * Target frames per millisecond.
+   */
+  TARGET_FPMS: 0.06,
+
+  /**
+   * If set to true WebGL will attempt make textures mimpaped by default.
+   * Mipmapping will only succeed if the base texture uploaded has power of two dimensions.
+   */
+  MIPMAP_TEXTURES: true,
+
+  /**
+   * Default filter resolution.
+   */
+  FILTER_RESOLUTION: 1,
+  // TODO: maybe change to SPRITE.BATCH_SIZE: 2000
+  // TODO: maybe add PARTICLE.BATCH_SIZE: 15000
+
+  /**
+   * The default sprite batch size.
+   *
+   * The default aims to balance desktop and mobile devices.
+   */
+  SPRITE_BATCH_SIZE: 4096,
+
+  /**
+   * The prefix that denotes a URL is for a retina asset.
+   */
+  RETINA_PREFIX: /@(.+)x/,
+  RENDER_OPTIONS: {
+    view: null,
+    antialias: true,
+    forceFXAA: false,
+    autoResize: false,
+    transparent: true,
+    backgroundColor: 0x000000,
+    clearBeforeRender: true,
+    preserveDrawingBuffer: false,
+    roundPixels: false
+  },
+  TRANSFORM_MODE: 0,
+  GC_MODE: 0,
+  GC_MAX_IDLE: 60 * 60,
+  GC_MAX_CHECK_COUNT: 60 * 10,
+  WRAP_MODE: 0,
+  SCALE_MODE: 0,
+  PRECISION: 'mediump'
+};
 
 var addOrRmoveEventHand = function addOrRmoveEventHand(domHand, ieHand) {
+  if (!document) return;
+
   if (document[domHand]) {
     var eventDomFn = function eventDomFn(el, type, fn) {
       if (el.length) {
@@ -633,6 +734,8 @@ var addOrRmoveEventHand = function addOrRmoveEventHand(domHand, ieHand) {
 var $ = {
   // dom操作相关代码
   query: function query(el) {
+    if (!el) return;
+
     if (_.isString(el)) {
       return document.getElementById(el);
     }
@@ -649,6 +752,12 @@ var $ = {
     return null;
   },
   offset: function offset(el) {
+    if (!el) {
+      return {
+        top: 0,
+        left: 0
+      };
+    }
     var box = el.getBoundingClientRect(),
         doc = el.ownerDocument,
         body = doc.body,
@@ -692,14 +801,15 @@ var $ = {
    * @param {string} type : dom type， such as canvas, div etc.
    */
   createCanvas: function createCanvas(_width, _height, id) {
+    if (!document) return;
     var canvas = document.createElement("canvas");
     canvas.style.position = 'absolute';
     canvas.style.width = _width + 'px';
     canvas.style.height = _height + 'px';
     canvas.style.left = 0;
     canvas.style.top = 0;
-    canvas.setAttribute('width', _width * RESOLUTION);
-    canvas.setAttribute('height', _height * RESOLUTION);
+    canvas.setAttribute('width', _width * Settings.RESOLUTION);
+    canvas.setAttribute('height', _height * Settings.RESOLUTION);
     canvas.setAttribute('id', id);
     return canvas;
   },
@@ -737,7 +847,6 @@ var Utils = {
   _pixelCtx: null,
   __emptyFunc: function __emptyFunc() {},
   //retina 屏幕优化
-  _devicePixelRatio: typeof window !== 'undefined' ? window.devicePixelRatio : 1,
   _UID: 0,
   //该值为向上的自增长整数值
   getUID: function getUID() {
@@ -753,6 +862,8 @@ var Utils = {
     return !!document.createElement('canvas').getContext;
   },
   initElement: function initElement(canvas) {
+    if (!window) return;
+
     if (window.FlashCanvas && FlashCanvas.initElement) {
       FlashCanvas.initElement(canvas);
     }
@@ -824,7 +935,10 @@ var Utils = {
     return opt;
   }
 };
-Utils._pixelCtx = Utils.initElement($.createCanvas(1, 1, "_pixelCanvas")).getContext('2d');
+
+var _canvas = Utils.initElement($.createCanvas(1, 1, "_pixelCanvas"));
+
+Utils._pixelCtx = _canvas && _canvas.getContext('2d');
 
 /**
  * Canvax
@@ -1087,18 +1201,22 @@ Manager.prototype = {
   }
 };
 
-var Dispatcher =
-/*#__PURE__*/
-function (_Manager) {
-  inherits(Dispatcher, _Manager);
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
+var Dispatcher = /*#__PURE__*/function (_Manager) {
+  _inherits(Dispatcher, _Manager);
+
+  var _super = _createSuper(Dispatcher);
 
   function Dispatcher() {
-    classCallCheck(this, Dispatcher);
+    _classCallCheck(this, Dispatcher);
 
-    return possibleConstructorReturn(this, getPrototypeOf(Dispatcher).call(this));
+    return _super.call(this);
   }
 
-  createClass(Dispatcher, [{
+  _createClass(Dispatcher, [{
     key: "on",
     value: function on(type, listener) {
       this._addEventListener(type, listener);
@@ -1270,7 +1388,8 @@ function (_Manager) {
  */
 var _hammerEventTypes = ["pan", "panstart", "panmove", "panend", "pancancel", "panleft", "panright", "panup", "pandown", "press", "pressup", "swipe", "swipeleft", "swiperight", "swipeup", "swipedown", "tap"];
 
-var Handler = function Handler(canvax, opt) {
+var Handler = function Handler(canvax) {
+  var opt = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
   this.canvax = canvax;
   this.curPoints = [{
     x: 0,
@@ -1292,6 +1411,7 @@ var Handler = function Handler(canvax, opt) {
     move: "panmove",
     end: "panend"
   };
+  this._opt = opt;
 
   _.extend(true, this, opt);
 }; //这样的好处是document.compareDocumentPosition只会在定义的时候执行一次。
@@ -1314,33 +1434,46 @@ Handler.prototype = {
     //依次添加上浏览器的自带事件侦听
     var me = this;
 
-    if (me.target.nodeType == undefined) {
-      //如果target.nodeType没有的话， 说明该target为一个jQuery对象 or kissy 对象or hammer对象
-      //即为第三方库，那么就要对接第三方库的事件系统。默认实现hammer的大部分事件系统
-      types.register(_hammerEventTypes);
+    if (this._opt.events) {
+      types.register(this._opt.events);
     }
 
-    $.addEvent(me.target, "contextmenu", function (e) {
-      if (e && e.preventDefault) {
-        e.preventDefault();
-      } else {
-        window.event.returnValue = false;
+    if (me.target) {
+      if (me.target.nodeType == undefined) {
+        //如果target.nodeType没有的话， 说明该target为一个jQuery对象 or kissy 对象or hammer对象
+        //即为第三方库，那么就要对接第三方库的事件系统。默认实现hammer的大部分事件系统
+        types.register(_hammerEventTypes);
       }
-    });
 
-    _.each(types.get(), function (type) {
-      //不再关心浏览器环境是否 'ontouchstart' in window 
-      //而是直接只管传给事件模块的是一个原生dom还是 jq对象 or hammer对象等
-      if (me.target.nodeType == 1) {
-        $.addEvent(me.target, type, function (e) {
-          me.__mouseHandler(e);
-        });
-      } else {
-        me.target.on(type, function (e) {
-          me.__libHandler(e);
-        });
-      }
-    });
+      $.addEvent(me.target, "contextmenu", function (e) {
+        if (e && e.preventDefault) {
+          e.preventDefault();
+        } else {
+          window.event.returnValue = false;
+        }
+      });
+
+      _.each(types.get(), function (type) {
+        //不再关心浏览器环境是否 'ontouchstart' in window 
+        //而是直接只管传给事件模块的是一个原生dom还是 jq对象 or hammer对象等
+        if (me.target.nodeType == 1) {
+          $.addEvent(me.target, type, function (e) {
+            me.__mouseHandler(e);
+          });
+        } else {
+          me.target.on(type, function (e) {
+            me.__libHandler(e);
+          });
+        }
+      });
+    }
+  },
+  bindEventHandle: function bindEventHandle(e, type) {
+    if (type == 'mouse') {
+      this.__mouseHandler.apply(this, [e]);
+    } else {
+      this.__libHandler.apply(this, [e]);
+    }
   },
 
   /*
@@ -1539,7 +1672,7 @@ Handler.prototype = {
 
     if (me.curPointsTarget.length > 0) {
       //drag开始
-      if (e.type == me.drag.start) {
+      if (me.drag.start.indexOf(e.type) > -1) {
         //dragstart的时候touch已经准备好了target， curPointsTarget 里面只要有一个是有效的
         //就认为drags开始
         _.each(me.curPointsTarget, function (child, i) {
@@ -1561,7 +1694,7 @@ Handler.prototype = {
         });
       }
 
-      if (e.type == me.drag.move) {
+      if (me.drag.move.indexOf(e.type) > -1) {
         if (me._draging) {
           _.each(me.curPointsTarget, function (child, i) {
             if (child && child.dragEnabled) {
@@ -1571,7 +1704,7 @@ Handler.prototype = {
         }
       }
 
-      if (e.type == me.drag.end) {
+      if (me.drag.end.indexOf(e.type) > -1) {
         if (me._draging) {
           _.each(me.curPointsTarget, function (child, i) {
             if (child && child.dragEnabled) {
@@ -1597,10 +1730,10 @@ Handler.prototype = {
     var root = me.canvax;
     var curTouchs = [];
 
-    _.each(e.point, function (touch) {
+    _.each(e.point || e.touches, function (touch) {
       curTouchs.push({
-        x: $.pageX(touch) - root.viewOffset.left,
-        y: $.pageY(touch) - root.viewOffset.top
+        x: 'x' in touch ? touch.x : $.pageX(touch) - root.viewOffset.left,
+        y: 'y' in touch ? touch.y : $.pageY(touch) - root.viewOffset.top
       });
     });
 
@@ -1896,16 +2029,14 @@ Matrix.prototype = {
  *
  * @author 释剑 (李涛, litao.lt@alibaba-inc.com)
  */
-var Point =
-/*#__PURE__*/
-function () {
+var Point = /*#__PURE__*/function () {
   function Point() {
     var x = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
     var y = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
 
-    classCallCheck(this, Point);
+    _classCallCheck(this, Point);
 
-    if (arguments.length == 1 && _typeof_1(arguments[0]) == 'object') {
+    if (arguments.length == 1 && _typeof(arguments[0]) == 'object') {
       var arg = arguments[0];
 
       if ("x" in arg && "y" in arg) {
@@ -1931,7 +2062,7 @@ function () {
     }
   }
 
-  createClass(Point, [{
+  _createClass(Point, [{
     key: "toArray",
     value: function toArray() {
       return [this.x, this.y];
@@ -1941,7 +2072,376 @@ function () {
   return Point;
 }();
 
-var Tween = createCommonjsModule$1(function (module, exports) {
+/**
+ * The Ease class provides a collection of easing functions for use with tween.js.
+ */
+var Easing = {
+    Linear: {
+        None: function (amount) {
+            return amount;
+        },
+    },
+    Quadratic: {
+        In: function (amount) {
+            return amount * amount;
+        },
+        Out: function (amount) {
+            return amount * (2 - amount);
+        },
+        InOut: function (amount) {
+            if ((amount *= 2) < 1) {
+                return 0.5 * amount * amount;
+            }
+            return -0.5 * (--amount * (amount - 2) - 1);
+        },
+    },
+    Cubic: {
+        In: function (amount) {
+            return amount * amount * amount;
+        },
+        Out: function (amount) {
+            return --amount * amount * amount + 1;
+        },
+        InOut: function (amount) {
+            if ((amount *= 2) < 1) {
+                return 0.5 * amount * amount * amount;
+            }
+            return 0.5 * ((amount -= 2) * amount * amount + 2);
+        },
+    },
+    Quartic: {
+        In: function (amount) {
+            return amount * amount * amount * amount;
+        },
+        Out: function (amount) {
+            return 1 - --amount * amount * amount * amount;
+        },
+        InOut: function (amount) {
+            if ((amount *= 2) < 1) {
+                return 0.5 * amount * amount * amount * amount;
+            }
+            return -0.5 * ((amount -= 2) * amount * amount * amount - 2);
+        },
+    },
+    Quintic: {
+        In: function (amount) {
+            return amount * amount * amount * amount * amount;
+        },
+        Out: function (amount) {
+            return --amount * amount * amount * amount * amount + 1;
+        },
+        InOut: function (amount) {
+            if ((amount *= 2) < 1) {
+                return 0.5 * amount * amount * amount * amount * amount;
+            }
+            return 0.5 * ((amount -= 2) * amount * amount * amount * amount + 2);
+        },
+    },
+    Sinusoidal: {
+        In: function (amount) {
+            return 1 - Math.cos((amount * Math.PI) / 2);
+        },
+        Out: function (amount) {
+            return Math.sin((amount * Math.PI) / 2);
+        },
+        InOut: function (amount) {
+            return 0.5 * (1 - Math.cos(Math.PI * amount));
+        },
+    },
+    Exponential: {
+        In: function (amount) {
+            return amount === 0 ? 0 : Math.pow(1024, amount - 1);
+        },
+        Out: function (amount) {
+            return amount === 1 ? 1 : 1 - Math.pow(2, -10 * amount);
+        },
+        InOut: function (amount) {
+            if (amount === 0) {
+                return 0;
+            }
+            if (amount === 1) {
+                return 1;
+            }
+            if ((amount *= 2) < 1) {
+                return 0.5 * Math.pow(1024, amount - 1);
+            }
+            return 0.5 * (-Math.pow(2, -10 * (amount - 1)) + 2);
+        },
+    },
+    Circular: {
+        In: function (amount) {
+            return 1 - Math.sqrt(1 - amount * amount);
+        },
+        Out: function (amount) {
+            return Math.sqrt(1 - --amount * amount);
+        },
+        InOut: function (amount) {
+            if ((amount *= 2) < 1) {
+                return -0.5 * (Math.sqrt(1 - amount * amount) - 1);
+            }
+            return 0.5 * (Math.sqrt(1 - (amount -= 2) * amount) + 1);
+        },
+    },
+    Elastic: {
+        In: function (amount) {
+            if (amount === 0) {
+                return 0;
+            }
+            if (amount === 1) {
+                return 1;
+            }
+            return -Math.pow(2, 10 * (amount - 1)) * Math.sin((amount - 1.1) * 5 * Math.PI);
+        },
+        Out: function (amount) {
+            if (amount === 0) {
+                return 0;
+            }
+            if (amount === 1) {
+                return 1;
+            }
+            return Math.pow(2, -10 * amount) * Math.sin((amount - 0.1) * 5 * Math.PI) + 1;
+        },
+        InOut: function (amount) {
+            if (amount === 0) {
+                return 0;
+            }
+            if (amount === 1) {
+                return 1;
+            }
+            amount *= 2;
+            if (amount < 1) {
+                return -0.5 * Math.pow(2, 10 * (amount - 1)) * Math.sin((amount - 1.1) * 5 * Math.PI);
+            }
+            return 0.5 * Math.pow(2, -10 * (amount - 1)) * Math.sin((amount - 1.1) * 5 * Math.PI) + 1;
+        },
+    },
+    Back: {
+        In: function (amount) {
+            var s = 1.70158;
+            return amount * amount * ((s + 1) * amount - s);
+        },
+        Out: function (amount) {
+            var s = 1.70158;
+            return --amount * amount * ((s + 1) * amount + s) + 1;
+        },
+        InOut: function (amount) {
+            var s = 1.70158 * 1.525;
+            if ((amount *= 2) < 1) {
+                return 0.5 * (amount * amount * ((s + 1) * amount - s));
+            }
+            return 0.5 * ((amount -= 2) * amount * ((s + 1) * amount + s) + 2);
+        },
+    },
+    Bounce: {
+        In: function (amount) {
+            return 1 - Easing.Bounce.Out(1 - amount);
+        },
+        Out: function (amount) {
+            if (amount < 1 / 2.75) {
+                return 7.5625 * amount * amount;
+            }
+            else if (amount < 2 / 2.75) {
+                return 7.5625 * (amount -= 1.5 / 2.75) * amount + 0.75;
+            }
+            else if (amount < 2.5 / 2.75) {
+                return 7.5625 * (amount -= 2.25 / 2.75) * amount + 0.9375;
+            }
+            else {
+                return 7.5625 * (amount -= 2.625 / 2.75) * amount + 0.984375;
+            }
+        },
+        InOut: function (amount) {
+            if (amount < 0.5) {
+                return Easing.Bounce.In(amount * 2) * 0.5;
+            }
+            return Easing.Bounce.Out(amount * 2 - 1) * 0.5 + 0.5;
+        },
+    },
+};
+
+var now;
+// Include a performance.now polyfill.
+// In node.js, use process.hrtime.
+// eslint-disable-next-line
+// @ts-ignore
+if (typeof self === 'undefined' && typeof process !== 'undefined' && process.hrtime) {
+    now = function () {
+        // eslint-disable-next-line
+        // @ts-ignore
+        var time = process.hrtime();
+        // Convert [seconds, nanoseconds] to milliseconds.
+        return time[0] * 1000 + time[1] / 1000000;
+    };
+}
+// In a browser, use self.performance.now if it is available.
+else if (typeof self !== 'undefined' && self.performance !== undefined && self.performance.now !== undefined) {
+    // This must be bound, because directly assigning this function
+    // leads to an invocation exception in Chrome.
+    now = self.performance.now.bind(self.performance);
+}
+// Use Date.now if it is available.
+else if (Date.now !== undefined) {
+    now = Date.now;
+}
+// Otherwise, use 'new Date().getTime()'.
+else {
+    now = function () {
+        return new Date().getTime();
+    };
+}
+var now$1 = now;
+
+/**
+ * Controlling groups of tweens
+ *
+ * Using the TWEEN singleton to manage your tweens can cause issues in large apps with many components.
+ * In these cases, you may want to create your own smaller groups of tween
+ */
+var Group = /** @class */ (function () {
+    function Group() {
+        this._tweens = {};
+        this._tweensAddedDuringUpdate = {};
+    }
+    Group.prototype.getAll = function () {
+        var _this = this;
+        return Object.keys(this._tweens).map(function (tweenId) {
+            return _this._tweens[tweenId];
+        });
+    };
+    Group.prototype.removeAll = function () {
+        this._tweens = {};
+    };
+    Group.prototype.add = function (tween) {
+        this._tweens[tween.getId()] = tween;
+        this._tweensAddedDuringUpdate[tween.getId()] = tween;
+    };
+    Group.prototype.remove = function (tween) {
+        delete this._tweens[tween.getId()];
+        delete this._tweensAddedDuringUpdate[tween.getId()];
+    };
+    Group.prototype.update = function (time, preserve) {
+        if (time === void 0) { time = now$1(); }
+        if (preserve === void 0) { preserve = false; }
+        var tweenIds = Object.keys(this._tweens);
+        if (tweenIds.length === 0) {
+            return false;
+        }
+        // Tweens are updated in "batches". If you add a new tween during an
+        // update, then the new tween will be updated in the next batch.
+        // If you remove a tween during an update, it may or may not be updated.
+        // However, if the removed tween was added during the current batch,
+        // then it will not be updated.
+        while (tweenIds.length > 0) {
+            this._tweensAddedDuringUpdate = {};
+            for (var i = 0; i < tweenIds.length; i++) {
+                var tween = this._tweens[tweenIds[i]];
+                var autoStart = !preserve;
+                if (tween && tween.update(time, autoStart) === false && !preserve) {
+                    delete this._tweens[tweenIds[i]];
+                }
+            }
+            tweenIds = Object.keys(this._tweensAddedDuringUpdate);
+        }
+        return true;
+    };
+    return Group;
+}());
+
+/**
+ *
+ */
+var Interpolation = {
+    Linear: function (v, k) {
+        var m = v.length - 1;
+        var f = m * k;
+        var i = Math.floor(f);
+        var fn = Interpolation.Utils.Linear;
+        if (k < 0) {
+            return fn(v[0], v[1], f);
+        }
+        if (k > 1) {
+            return fn(v[m], v[m - 1], m - f);
+        }
+        return fn(v[i], v[i + 1 > m ? m : i + 1], f - i);
+    },
+    Bezier: function (v, k) {
+        var b = 0;
+        var n = v.length - 1;
+        var pw = Math.pow;
+        var bn = Interpolation.Utils.Bernstein;
+        for (var i = 0; i <= n; i++) {
+            b += pw(1 - k, n - i) * pw(k, i) * v[i] * bn(n, i);
+        }
+        return b;
+    },
+    CatmullRom: function (v, k) {
+        var m = v.length - 1;
+        var f = m * k;
+        var i = Math.floor(f);
+        var fn = Interpolation.Utils.CatmullRom;
+        if (v[0] === v[m]) {
+            if (k < 0) {
+                i = Math.floor((f = m * (1 + k)));
+            }
+            return fn(v[(i - 1 + m) % m], v[i], v[(i + 1) % m], v[(i + 2) % m], f - i);
+        }
+        else {
+            if (k < 0) {
+                return v[0] - (fn(v[0], v[0], v[1], v[1], -f) - v[0]);
+            }
+            if (k > 1) {
+                return v[m] - (fn(v[m], v[m], v[m - 1], v[m - 1], f - m) - v[m]);
+            }
+            return fn(v[i ? i - 1 : 0], v[i], v[m < i + 1 ? m : i + 1], v[m < i + 2 ? m : i + 2], f - i);
+        }
+    },
+    Utils: {
+        Linear: function (p0, p1, t) {
+            return (p1 - p0) * t + p0;
+        },
+        Bernstein: function (n, i) {
+            var fc = Interpolation.Utils.Factorial;
+            return fc(n) / fc(i) / fc(n - i);
+        },
+        Factorial: (function () {
+            var a = [1];
+            return function (n) {
+                var s = 1;
+                if (a[n]) {
+                    return a[n];
+                }
+                for (var i = n; i > 1; i--) {
+                    s *= i;
+                }
+                a[n] = s;
+                return s;
+            };
+        })(),
+        CatmullRom: function (p0, p1, p2, p3, t) {
+            var v0 = (p2 - p0) * 0.5;
+            var v1 = (p3 - p1) * 0.5;
+            var t2 = t * t;
+            var t3 = t * t2;
+            return (2 * p1 - 2 * p2 + v0 + v1) * t3 + (-3 * p1 + 3 * p2 - 2 * v0 - v1) * t2 + v0 * t + p1;
+        },
+    },
+};
+
+/**
+ * Utils
+ */
+var Sequence = /** @class */ (function () {
+    function Sequence() {
+    }
+    Sequence.nextId = function () {
+        return Sequence._nextId++;
+    };
+    Sequence._nextId = 0;
+    return Sequence;
+}());
+
+var mainGroup = new Group();
+
 /**
  * Tween.js - Licensed under the MIT license
  * https://github.com/tweenjs/tween.js
@@ -1950,904 +2450,428 @@ var Tween = createCommonjsModule$1(function (module, exports) {
  * See https://github.com/tweenjs/tween.js/graphs/contributors for the full list of contributors.
  * Thank you all, you're awesome!
  */
+var Tween = /** @class */ (function () {
+    function Tween(_object, _group) {
+        if (_group === void 0) { _group = mainGroup; }
+        this._object = _object;
+        this._group = _group;
+        this._isPaused = false;
+        this._pauseStart = 0;
+        this._valuesStart = {};
+        this._valuesEnd = {};
+        this._valuesStartRepeat = {};
+        this._duration = 1000;
+        this._initialRepeat = 0;
+        this._repeat = 0;
+        this._yoyo = false;
+        this._isPlaying = false;
+        this._reversed = false;
+        this._delayTime = 0;
+        this._startTime = 0;
+        this._easingFunction = Easing.Linear.None;
+        this._interpolationFunction = Interpolation.Linear;
+        this._chainedTweens = [];
+        this._onStartCallbackFired = false;
+        this._id = Sequence.nextId();
+        this._isChainStopped = false;
+        this._goToEnd = false;
+    }
+    Tween.prototype.getId = function () {
+        return this._id;
+    };
+    Tween.prototype.isPlaying = function () {
+        return this._isPlaying;
+    };
+    Tween.prototype.isPaused = function () {
+        return this._isPaused;
+    };
+    Tween.prototype.to = function (properties, duration) {
+        // TODO? restore this, then update the 07_dynamic_to example to set fox
+        // tween's to on each update. That way the behavior is opt-in (there's
+        // currently no opt-out).
+        // for (const prop in properties) this._valuesEnd[prop] = properties[prop]
+        this._valuesEnd = Object.create(properties);
+        if (duration !== undefined) {
+            this._duration = duration;
+        }
+        return this;
+    };
+    Tween.prototype.duration = function (d) {
+        this._duration = d;
+        return this;
+    };
+    Tween.prototype.start = function (time) {
+        if (this._isPlaying) {
+            return this;
+        }
+        // eslint-disable-next-line
+        this._group && this._group.add(this);
+        this._repeat = this._initialRepeat;
+        if (this._reversed) {
+            // If we were reversed (f.e. using the yoyo feature) then we need to
+            // flip the tween direction back to forward.
+            this._reversed = false;
+            for (var property in this._valuesStartRepeat) {
+                this._swapEndStartRepeatValues(property);
+                this._valuesStart[property] = this._valuesStartRepeat[property];
+            }
+        }
+        this._isPlaying = true;
+        this._isPaused = false;
+        this._onStartCallbackFired = false;
+        this._isChainStopped = false;
+        this._startTime = time !== undefined ? (typeof time === 'string' ? now$1() + parseFloat(time) : time) : now$1();
+        this._startTime += this._delayTime;
+        this._setupProperties(this._object, this._valuesStart, this._valuesEnd, this._valuesStartRepeat);
+        return this;
+    };
+    Tween.prototype._setupProperties = function (_object, _valuesStart, _valuesEnd, _valuesStartRepeat) {
+        for (var property in _valuesEnd) {
+            var startValue = _object[property];
+            var startValueIsArray = Array.isArray(startValue);
+            var propType = startValueIsArray ? 'array' : typeof startValue;
+            var isInterpolationList = !startValueIsArray && Array.isArray(_valuesEnd[property]);
+            // If `to()` specifies a property that doesn't exist in the source object,
+            // we should not set that property in the object
+            if (propType === 'undefined' || propType === 'function') {
+                continue;
+            }
+            // Check if an Array was provided as property value
+            if (isInterpolationList) {
+                var endValues = _valuesEnd[property];
+                if (endValues.length === 0) {
+                    continue;
+                }
+                // handle an array of relative values
+                endValues = endValues.map(this._handleRelativeValue.bind(this, startValue));
+                // Create a local copy of the Array with the start value at the front
+                _valuesEnd[property] = [startValue].concat(endValues);
+            }
+            // handle the deepness of the values
+            if ((propType === 'object' || startValueIsArray) && startValue && !isInterpolationList) {
+                _valuesStart[property] = startValueIsArray ? [] : {};
+                // eslint-disable-next-line
+                for (var prop in startValue) {
+                    // eslint-disable-next-line
+                    // @ts-ignore FIXME?
+                    _valuesStart[property][prop] = startValue[prop];
+                }
+                _valuesStartRepeat[property] = startValueIsArray ? [] : {}; // TODO? repeat nested values? And yoyo? And array values?
+                // eslint-disable-next-line
+                // @ts-ignore FIXME?
+                this._setupProperties(startValue, _valuesStart[property], _valuesEnd[property], _valuesStartRepeat[property]);
+            }
+            else {
+                // Save the starting value, but only once.
+                if (typeof _valuesStart[property] === 'undefined') {
+                    _valuesStart[property] = startValue;
+                }
+                if (!startValueIsArray) {
+                    // eslint-disable-next-line
+                    // @ts-ignore FIXME?
+                    _valuesStart[property] *= 1.0; // Ensures we're using numbers, not strings
+                }
+                if (isInterpolationList) {
+                    // eslint-disable-next-line
+                    // @ts-ignore FIXME?
+                    _valuesStartRepeat[property] = _valuesEnd[property].slice().reverse();
+                }
+                else {
+                    _valuesStartRepeat[property] = _valuesStart[property] || 0;
+                }
+            }
+        }
+    };
+    Tween.prototype.stop = function () {
+        if (!this._isChainStopped) {
+            this._isChainStopped = true;
+            this.stopChainedTweens();
+        }
+        if (!this._isPlaying) {
+            return this;
+        }
+        // eslint-disable-next-line
+        this._group && this._group.remove(this);
+        this._isPlaying = false;
+        this._isPaused = false;
+        if (this._onStopCallback) {
+            this._onStopCallback(this._object);
+        }
+        return this;
+    };
+    Tween.prototype.end = function () {
+        this._goToEnd = true;
+        this.update(Infinity);
+        return this;
+    };
+    Tween.prototype.pause = function (time) {
+        if (time === void 0) { time = now$1(); }
+        if (this._isPaused || !this._isPlaying) {
+            return this;
+        }
+        this._isPaused = true;
+        this._pauseStart = time;
+        // eslint-disable-next-line
+        this._group && this._group.remove(this);
+        return this;
+    };
+    Tween.prototype.resume = function (time) {
+        if (time === void 0) { time = now$1(); }
+        if (!this._isPaused || !this._isPlaying) {
+            return this;
+        }
+        this._isPaused = false;
+        this._startTime += time - this._pauseStart;
+        this._pauseStart = 0;
+        // eslint-disable-next-line
+        this._group && this._group.add(this);
+        return this;
+    };
+    Tween.prototype.stopChainedTweens = function () {
+        for (var i = 0, numChainedTweens = this._chainedTweens.length; i < numChainedTweens; i++) {
+            this._chainedTweens[i].stop();
+        }
+        return this;
+    };
+    Tween.prototype.group = function (group) {
+        this._group = group;
+        return this;
+    };
+    Tween.prototype.delay = function (amount) {
+        this._delayTime = amount;
+        return this;
+    };
+    Tween.prototype.repeat = function (times) {
+        this._initialRepeat = times;
+        this._repeat = times;
+        return this;
+    };
+    Tween.prototype.repeatDelay = function (amount) {
+        this._repeatDelayTime = amount;
+        return this;
+    };
+    Tween.prototype.yoyo = function (yoyo) {
+        this._yoyo = yoyo;
+        return this;
+    };
+    Tween.prototype.easing = function (easingFunction) {
+        this._easingFunction = easingFunction;
+        return this;
+    };
+    Tween.prototype.interpolation = function (interpolationFunction) {
+        this._interpolationFunction = interpolationFunction;
+        return this;
+    };
+    Tween.prototype.chain = function () {
+        var tweens = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            tweens[_i] = arguments[_i];
+        }
+        this._chainedTweens = tweens;
+        return this;
+    };
+    Tween.prototype.onStart = function (callback) {
+        this._onStartCallback = callback;
+        return this;
+    };
+    Tween.prototype.onUpdate = function (callback) {
+        this._onUpdateCallback = callback;
+        return this;
+    };
+    Tween.prototype.onRepeat = function (callback) {
+        this._onRepeatCallback = callback;
+        return this;
+    };
+    Tween.prototype.onComplete = function (callback) {
+        this._onCompleteCallback = callback;
+        return this;
+    };
+    Tween.prototype.onStop = function (callback) {
+        this._onStopCallback = callback;
+        return this;
+    };
+    /**
+     * @returns true if the tween is still playing after the update, false
+     * otherwise (calling update on a paused tween still returns true because
+     * it is still playing, just paused).
+     */
+    Tween.prototype.update = function (time, autoStart) {
+        if (time === void 0) { time = now$1(); }
+        if (autoStart === void 0) { autoStart = true; }
+        if (this._isPaused)
+            return true;
+        var property;
+        var elapsed;
+        var endTime = this._startTime + this._duration;
+        if (!this._goToEnd && !this._isPlaying) {
+            if (time > endTime)
+                return false;
+            if (autoStart)
+                this.start(time);
+        }
+        this._goToEnd = false;
+        if (time < this._startTime) {
+            return true;
+        }
+        if (this._onStartCallbackFired === false) {
+            if (this._onStartCallback) {
+                this._onStartCallback(this._object);
+            }
+            this._onStartCallbackFired = true;
+        }
+        elapsed = (time - this._startTime) / this._duration;
+        elapsed = this._duration === 0 || elapsed > 1 ? 1 : elapsed;
+        var value = this._easingFunction(elapsed);
+        // properties transformations
+        this._updateProperties(this._object, this._valuesStart, this._valuesEnd, value);
+        if (this._onUpdateCallback) {
+            this._onUpdateCallback(this._object, elapsed);
+        }
+        if (elapsed === 1) {
+            if (this._repeat > 0) {
+                if (isFinite(this._repeat)) {
+                    this._repeat--;
+                }
+                // Reassign starting values, restart by making startTime = now
+                for (property in this._valuesStartRepeat) {
+                    if (!this._yoyo && typeof this._valuesEnd[property] === 'string') {
+                        this._valuesStartRepeat[property] =
+                            // eslint-disable-next-line
+                            // @ts-ignore FIXME?
+                            this._valuesStartRepeat[property] + parseFloat(this._valuesEnd[property]);
+                    }
+                    if (this._yoyo) {
+                        this._swapEndStartRepeatValues(property);
+                    }
+                    this._valuesStart[property] = this._valuesStartRepeat[property];
+                }
+                if (this._yoyo) {
+                    this._reversed = !this._reversed;
+                }
+                if (this._repeatDelayTime !== undefined) {
+                    this._startTime = time + this._repeatDelayTime;
+                }
+                else {
+                    this._startTime = time + this._delayTime;
+                }
+                if (this._onRepeatCallback) {
+                    this._onRepeatCallback(this._object);
+                }
+                return true;
+            }
+            else {
+                if (this._onCompleteCallback) {
+                    this._onCompleteCallback(this._object);
+                }
+                for (var i = 0, numChainedTweens = this._chainedTweens.length; i < numChainedTweens; i++) {
+                    // Make the chained tweens start exactly at the time they should,
+                    // even if the `update()` method was called way past the duration of the tween
+                    this._chainedTweens[i].start(this._startTime + this._duration);
+                }
+                this._isPlaying = false;
+                return false;
+            }
+        }
+        return true;
+    };
+    Tween.prototype._updateProperties = function (_object, _valuesStart, _valuesEnd, value) {
+        for (var property in _valuesEnd) {
+            // Don't update properties that do not exist in the source object
+            if (_valuesStart[property] === undefined) {
+                continue;
+            }
+            var start = _valuesStart[property] || 0;
+            var end = _valuesEnd[property];
+            var startIsArray = Array.isArray(_object[property]);
+            var endIsArray = Array.isArray(end);
+            var isInterpolationList = !startIsArray && endIsArray;
+            if (isInterpolationList) {
+                _object[property] = this._interpolationFunction(end, value);
+            }
+            else if (typeof end === 'object' && end) {
+                // eslint-disable-next-line
+                // @ts-ignore FIXME?
+                this._updateProperties(_object[property], start, end, value);
+            }
+            else {
+                // Parses relative end values with start as base (e.g.: +10, -3)
+                end = this._handleRelativeValue(start, end);
+                // Protect against non numeric properties.
+                if (typeof end === 'number') {
+                    // eslint-disable-next-line
+                    // @ts-ignore FIXME?
+                    _object[property] = start + (end - start) * value;
+                }
+            }
+        }
+    };
+    Tween.prototype._handleRelativeValue = function (start, end) {
+        if (typeof end !== 'string') {
+            return end;
+        }
+        if (end.charAt(0) === '+' || end.charAt(0) === '-') {
+            return start + parseFloat(end);
+        }
+        else {
+            return parseFloat(end);
+        }
+    };
+    Tween.prototype._swapEndStartRepeatValues = function (property) {
+        var tmp = this._valuesStartRepeat[property];
+        var endValue = this._valuesEnd[property];
+        if (typeof endValue === 'string') {
+            this._valuesStartRepeat[property] = this._valuesStartRepeat[property] + parseFloat(endValue);
+        }
+        else {
+            this._valuesStartRepeat[property] = this._valuesEnd[property];
+        }
+        this._valuesEnd[property] = tmp;
+    };
+    return Tween;
+}());
 
+var VERSION = '18.6.4';
 
-var _Group = function () {
-	this._tweens = {};
-	this._tweensAddedDuringUpdate = {};
+/**
+ * Tween.js - Licensed under the MIT license
+ * https://github.com/tweenjs/tween.js
+ * ----------------------------------------------
+ *
+ * See https://github.com/tweenjs/tween.js/graphs/contributors for the full list of contributors.
+ * Thank you all, you're awesome!
+ */
+var nextId = Sequence.nextId;
+/**
+ * Controlling groups of tweens
+ *
+ * Using the TWEEN singleton to manage your tweens can cause issues in large apps with many components.
+ * In these cases, you may want to create your own smaller groups of tweens.
+ */
+var TWEEN = mainGroup;
+// This is the best way to export things in a way that's compatible with both ES
+// Modules and CommonJS, without build hacks, and so as not to break the
+// existing API.
+// https://github.com/rollup/rollup/issues/1961#issuecomment-423037881
+var getAll = TWEEN.getAll.bind(TWEEN);
+var removeAll = TWEEN.removeAll.bind(TWEEN);
+var add = TWEEN.add.bind(TWEEN);
+var remove = TWEEN.remove.bind(TWEEN);
+var update = TWEEN.update.bind(TWEEN);
+var exports$1 = {
+    Easing: Easing,
+    Group: Group,
+    Interpolation: Interpolation,
+    now: now$1,
+    Sequence: Sequence,
+    nextId: nextId,
+    Tween: Tween,
+    VERSION: VERSION,
+    getAll: getAll,
+    removeAll: removeAll,
+    add: add,
+    remove: remove,
+    update: update,
 };
-
-_Group.prototype = {
-	getAll: function () {
-
-		return Object.keys(this._tweens).map(function (tweenId) {
-			return this._tweens[tweenId];
-		}.bind(this));
-
-	},
-
-	removeAll: function () {
-
-		this._tweens = {};
-
-	},
-
-	add: function (tween) {
-
-		this._tweens[tween.getId()] = tween;
-		this._tweensAddedDuringUpdate[tween.getId()] = tween;
-
-	},
-
-	remove: function (tween) {
-
-		delete this._tweens[tween.getId()];
-		delete this._tweensAddedDuringUpdate[tween.getId()];
-
-	},
-
-	update: function (time, preserve) {
-
-		var tweenIds = Object.keys(this._tweens);
-
-		if (tweenIds.length === 0) {
-			return false;
-		}
-
-		time = time !== undefined ? time : TWEEN.now();
-
-		// Tweens are updated in "batches". If you add a new tween during an update, then the
-		// new tween will be updated in the next batch.
-		// If you remove a tween during an update, it may or may not be updated. However,
-		// if the removed tween was added during the current batch, then it will not be updated.
-		while (tweenIds.length > 0) {
-			this._tweensAddedDuringUpdate = {};
-
-			for (var i = 0; i < tweenIds.length; i++) {
-
-				var tween = this._tweens[tweenIds[i]];
-
-				if (tween && tween.update(time) === false) {
-					tween._isPlaying = false;
-
-					if (!preserve) {
-						delete this._tweens[tweenIds[i]];
-					}
-				}
-			}
-
-			tweenIds = Object.keys(this._tweensAddedDuringUpdate);
-		}
-
-		return true;
-
-	}
-};
-
-var TWEEN = new _Group();
-
-TWEEN.Group = _Group;
-TWEEN._nextId = 0;
-TWEEN.nextId = function () {
-	return TWEEN._nextId++;
-};
-
-
-// Include a performance.now polyfill.
-// In node.js, use process.hrtime.
-if (typeof (window) === 'undefined' && typeof (process) !== 'undefined') {
-	TWEEN.now = function () {
-		var time = process.hrtime();
-
-		// Convert [seconds, nanoseconds] to milliseconds.
-		return time[0] * 1000 + time[1] / 1000000;
-	};
-}
-// In a browser, use window.performance.now if it is available.
-else if (typeof (window) !== 'undefined' &&
-         window.performance !== undefined &&
-		 window.performance.now !== undefined) {
-	// This must be bound, because directly assigning this function
-	// leads to an invocation exception in Chrome.
-	TWEEN.now = window.performance.now.bind(window.performance);
-}
-// Use Date.now if it is available.
-else if (Date.now !== undefined) {
-	TWEEN.now = Date.now;
-}
-// Otherwise, use 'new Date().getTime()'.
-else {
-	TWEEN.now = function () {
-		return new Date().getTime();
-	};
-}
-
-
-TWEEN.Tween = function (object, group) {
-	this._object = object;
-	this._valuesStart = {};
-	this._valuesEnd = {};
-	this._valuesStartRepeat = {};
-	this._duration = 1000;
-	this._repeat = 0;
-	this._repeatDelayTime = undefined;
-	this._yoyo = false;
-	this._isPlaying = false;
-	this._reversed = false;
-	this._delayTime = 0;
-	this._startTime = null;
-	this._easingFunction = TWEEN.Easing.Linear.None;
-	this._interpolationFunction = TWEEN.Interpolation.Linear;
-	this._chainedTweens = [];
-	this._onStartCallback = null;
-	this._onStartCallbackFired = false;
-	this._onUpdateCallback = null;
-	this._onCompleteCallback = null;
-	this._onStopCallback = null;
-	this._group = group || TWEEN;
-	this._id = TWEEN.nextId();
-
-};
-
-TWEEN.Tween.prototype = {
-	getId: function getId() {
-		return this._id;
-	},
-
-	isPlaying: function isPlaying() {
-		return this._isPlaying;
-	},
-
-	to: function to(properties, duration) {
-
-		this._valuesEnd = properties;
-
-		if (duration !== undefined) {
-			this._duration = duration;
-		}
-
-		return this;
-
-	},
-
-	start: function start(time) {
-
-		this._group.add(this);
-
-		this._isPlaying = true;
-
-		this._onStartCallbackFired = false;
-
-		this._startTime = time !== undefined ? typeof time === 'string' ? TWEEN.now() + parseFloat(time) : time : TWEEN.now();
-		this._startTime += this._delayTime;
-
-		for (var property in this._valuesEnd) {
-
-			// Check if an Array was provided as property value
-			if (this._valuesEnd[property] instanceof Array) {
-
-				if (this._valuesEnd[property].length === 0) {
-					continue;
-				}
-
-				// Create a local copy of the Array with the start value at the front
-				this._valuesEnd[property] = [this._object[property]].concat(this._valuesEnd[property]);
-
-			}
-
-			// If `to()` specifies a property that doesn't exist in the source object,
-			// we should not set that property in the object
-			if (this._object[property] === undefined) {
-				continue;
-			}
-
-			// Save the starting value.
-			this._valuesStart[property] = this._object[property];
-
-			if ((this._valuesStart[property] instanceof Array) === false) {
-				this._valuesStart[property] *= 1.0; // Ensures we're using numbers, not strings
-			}
-
-			this._valuesStartRepeat[property] = this._valuesStart[property] || 0;
-
-		}
-
-		return this;
-
-	},
-
-	stop: function stop() {
-
-		if (!this._isPlaying) {
-			return this;
-		}
-
-		this._group.remove(this);
-		this._isPlaying = false;
-
-		if (this._onStopCallback !== null) {
-			this._onStopCallback(this._object);
-		}
-
-		this.stopChainedTweens();
-		return this;
-
-	},
-
-	end: function end() {
-
-		this.update(this._startTime + this._duration);
-		return this;
-
-	},
-
-	stopChainedTweens: function stopChainedTweens() {
-
-		for (var i = 0, numChainedTweens = this._chainedTweens.length; i < numChainedTweens; i++) {
-			this._chainedTweens[i].stop();
-		}
-
-	},
-
-	group: function group(group) {
-		this._group = group;
-		return this;
-	},
-
-	delay: function delay(amount) {
-
-		this._delayTime = amount;
-		return this;
-
-	},
-
-	repeat: function repeat(times) {
-
-		this._repeat = times;
-		return this;
-
-	},
-
-	repeatDelay: function repeatDelay(amount) {
-
-		this._repeatDelayTime = amount;
-		return this;
-
-	},
-
-	yoyo: function yoyo(yy) {
-
-		this._yoyo = yy;
-		return this;
-
-	},
-
-	easing: function easing(eas) {
-
-		this._easingFunction = eas;
-		return this;
-
-	},
-
-	interpolation: function interpolation(inter) {
-
-		this._interpolationFunction = inter;
-		return this;
-
-	},
-
-	chain: function chain() {
-
-		this._chainedTweens = arguments;
-		return this;
-
-	},
-
-	onStart: function onStart(callback) {
-
-		this._onStartCallback = callback;
-		return this;
-
-	},
-
-	onUpdate: function onUpdate(callback) {
-
-		this._onUpdateCallback = callback;
-		return this;
-
-	},
-
-	onComplete: function onComplete(callback) {
-
-		this._onCompleteCallback = callback;
-		return this;
-
-	},
-
-	onStop: function onStop(callback) {
-
-		this._onStopCallback = callback;
-		return this;
-
-	},
-
-	update: function update(time) {
-
-		var property;
-		var elapsed;
-		var value;
-
-		if (time < this._startTime) {
-			return true;
-		}
-
-		if (this._onStartCallbackFired === false) {
-
-			if (this._onStartCallback !== null) {
-				this._onStartCallback(this._object);
-			}
-
-			this._onStartCallbackFired = true;
-		}
-
-		elapsed = (time - this._startTime) / this._duration;
-		elapsed = (this._duration === 0 || elapsed > 1) ? 1 : elapsed;
-
-		value = this._easingFunction(elapsed);
-
-		for (property in this._valuesEnd) {
-
-			// Don't update properties that do not exist in the source object
-			if (this._valuesStart[property] === undefined) {
-				continue;
-			}
-
-			var start = this._valuesStart[property] || 0;
-			var end = this._valuesEnd[property];
-
-			if (end instanceof Array) {
-
-				this._object[property] = this._interpolationFunction(end, value);
-
-			} else {
-
-				// Parses relative end values with start as base (e.g.: +10, -3)
-				if (typeof (end) === 'string') {
-
-					if (end.charAt(0) === '+' || end.charAt(0) === '-') {
-						end = start + parseFloat(end);
-					} else {
-						end = parseFloat(end);
-					}
-				}
-
-				// Protect against non numeric properties.
-				if (typeof (end) === 'number') {
-					this._object[property] = start + (end - start) * value;
-				}
-
-			}
-
-		}
-
-		if (this._onUpdateCallback !== null) {
-			this._onUpdateCallback(this._object);
-		}
-
-		if (elapsed === 1) {
-
-			if (this._repeat > 0) {
-
-				if (isFinite(this._repeat)) {
-					this._repeat--;
-				}
-
-				// Reassign starting values, restart by making startTime = now
-				for (property in this._valuesStartRepeat) {
-
-					if (typeof (this._valuesEnd[property]) === 'string') {
-						this._valuesStartRepeat[property] = this._valuesStartRepeat[property] + parseFloat(this._valuesEnd[property]);
-					}
-
-					if (this._yoyo) {
-						var tmp = this._valuesStartRepeat[property];
-
-						this._valuesStartRepeat[property] = this._valuesEnd[property];
-						this._valuesEnd[property] = tmp;
-					}
-
-					this._valuesStart[property] = this._valuesStartRepeat[property];
-
-				}
-
-				if (this._yoyo) {
-					this._reversed = !this._reversed;
-				}
-
-				if (this._repeatDelayTime !== undefined) {
-					this._startTime = time + this._repeatDelayTime;
-				} else {
-					this._startTime = time + this._delayTime;
-				}
-
-				return true;
-
-			} else {
-
-				if (this._onCompleteCallback !== null) {
-
-					this._onCompleteCallback(this._object);
-				}
-
-				for (var i = 0, numChainedTweens = this._chainedTweens.length; i < numChainedTweens; i++) {
-					// Make the chained tweens start exactly at the time they should,
-					// even if the `update()` method was called way past the duration of the tween
-					this._chainedTweens[i].start(this._startTime + this._duration);
-				}
-
-				return false;
-
-			}
-
-		}
-
-		return true;
-
-	}
-};
-
-
-TWEEN.Easing = {
-
-	Linear: {
-
-		None: function (k) {
-
-			return k;
-
-		}
-
-	},
-
-	Quadratic: {
-
-		In: function (k) {
-
-			return k * k;
-
-		},
-
-		Out: function (k) {
-
-			return k * (2 - k);
-
-		},
-
-		InOut: function (k) {
-
-			if ((k *= 2) < 1) {
-				return 0.5 * k * k;
-			}
-
-			return - 0.5 * (--k * (k - 2) - 1);
-
-		}
-
-	},
-
-	Cubic: {
-
-		In: function (k) {
-
-			return k * k * k;
-
-		},
-
-		Out: function (k) {
-
-			return --k * k * k + 1;
-
-		},
-
-		InOut: function (k) {
-
-			if ((k *= 2) < 1) {
-				return 0.5 * k * k * k;
-			}
-
-			return 0.5 * ((k -= 2) * k * k + 2);
-
-		}
-
-	},
-
-	Quartic: {
-
-		In: function (k) {
-
-			return k * k * k * k;
-
-		},
-
-		Out: function (k) {
-
-			return 1 - (--k * k * k * k);
-
-		},
-
-		InOut: function (k) {
-
-			if ((k *= 2) < 1) {
-				return 0.5 * k * k * k * k;
-			}
-
-			return - 0.5 * ((k -= 2) * k * k * k - 2);
-
-		}
-
-	},
-
-	Quintic: {
-
-		In: function (k) {
-
-			return k * k * k * k * k;
-
-		},
-
-		Out: function (k) {
-
-			return --k * k * k * k * k + 1;
-
-		},
-
-		InOut: function (k) {
-
-			if ((k *= 2) < 1) {
-				return 0.5 * k * k * k * k * k;
-			}
-
-			return 0.5 * ((k -= 2) * k * k * k * k + 2);
-
-		}
-
-	},
-
-	Sinusoidal: {
-
-		In: function (k) {
-
-			return 1 - Math.cos(k * Math.PI / 2);
-
-		},
-
-		Out: function (k) {
-
-			return Math.sin(k * Math.PI / 2);
-
-		},
-
-		InOut: function (k) {
-
-			return 0.5 * (1 - Math.cos(Math.PI * k));
-
-		}
-
-	},
-
-	Exponential: {
-
-		In: function (k) {
-
-			return k === 0 ? 0 : Math.pow(1024, k - 1);
-
-		},
-
-		Out: function (k) {
-
-			return k === 1 ? 1 : 1 - Math.pow(2, - 10 * k);
-
-		},
-
-		InOut: function (k) {
-
-			if (k === 0) {
-				return 0;
-			}
-
-			if (k === 1) {
-				return 1;
-			}
-
-			if ((k *= 2) < 1) {
-				return 0.5 * Math.pow(1024, k - 1);
-			}
-
-			return 0.5 * (- Math.pow(2, - 10 * (k - 1)) + 2);
-
-		}
-
-	},
-
-	Circular: {
-
-		In: function (k) {
-
-			return 1 - Math.sqrt(1 - k * k);
-
-		},
-
-		Out: function (k) {
-
-			return Math.sqrt(1 - (--k * k));
-
-		},
-
-		InOut: function (k) {
-
-			if ((k *= 2) < 1) {
-				return - 0.5 * (Math.sqrt(1 - k * k) - 1);
-			}
-
-			return 0.5 * (Math.sqrt(1 - (k -= 2) * k) + 1);
-
-		}
-
-	},
-
-	Elastic: {
-
-		In: function (k) {
-
-			if (k === 0) {
-				return 0;
-			}
-
-			if (k === 1) {
-				return 1;
-			}
-
-			return -Math.pow(2, 10 * (k - 1)) * Math.sin((k - 1.1) * 5 * Math.PI);
-
-		},
-
-		Out: function (k) {
-
-			if (k === 0) {
-				return 0;
-			}
-
-			if (k === 1) {
-				return 1;
-			}
-
-			return Math.pow(2, -10 * k) * Math.sin((k - 0.1) * 5 * Math.PI) + 1;
-
-		},
-
-		InOut: function (k) {
-
-			if (k === 0) {
-				return 0;
-			}
-
-			if (k === 1) {
-				return 1;
-			}
-
-			k *= 2;
-
-			if (k < 1) {
-				return -0.5 * Math.pow(2, 10 * (k - 1)) * Math.sin((k - 1.1) * 5 * Math.PI);
-			}
-
-			return 0.5 * Math.pow(2, -10 * (k - 1)) * Math.sin((k - 1.1) * 5 * Math.PI) + 1;
-
-		}
-
-	},
-
-	Back: {
-
-		In: function (k) {
-
-			var s = 1.70158;
-
-			return k * k * ((s + 1) * k - s);
-
-		},
-
-		Out: function (k) {
-
-			var s = 1.70158;
-
-			return --k * k * ((s + 1) * k + s) + 1;
-
-		},
-
-		InOut: function (k) {
-
-			var s = 1.70158 * 1.525;
-
-			if ((k *= 2) < 1) {
-				return 0.5 * (k * k * ((s + 1) * k - s));
-			}
-
-			return 0.5 * ((k -= 2) * k * ((s + 1) * k + s) + 2);
-
-		}
-
-	},
-
-	Bounce: {
-
-		In: function (k) {
-
-			return 1 - TWEEN.Easing.Bounce.Out(1 - k);
-
-		},
-
-		Out: function (k) {
-
-			if (k < (1 / 2.75)) {
-				return 7.5625 * k * k;
-			} else if (k < (2 / 2.75)) {
-				return 7.5625 * (k -= (1.5 / 2.75)) * k + 0.75;
-			} else if (k < (2.5 / 2.75)) {
-				return 7.5625 * (k -= (2.25 / 2.75)) * k + 0.9375;
-			} else {
-				return 7.5625 * (k -= (2.625 / 2.75)) * k + 0.984375;
-			}
-
-		},
-
-		InOut: function (k) {
-
-			if (k < 0.5) {
-				return TWEEN.Easing.Bounce.In(k * 2) * 0.5;
-			}
-
-			return TWEEN.Easing.Bounce.Out(k * 2 - 1) * 0.5 + 0.5;
-
-		}
-
-	}
-
-};
-
-TWEEN.Interpolation = {
-
-	Linear: function (v, k) {
-
-		var m = v.length - 1;
-		var f = m * k;
-		var i = Math.floor(f);
-		var fn = TWEEN.Interpolation.Utils.Linear;
-
-		if (k < 0) {
-			return fn(v[0], v[1], f);
-		}
-
-		if (k > 1) {
-			return fn(v[m], v[m - 1], m - f);
-		}
-
-		return fn(v[i], v[i + 1 > m ? m : i + 1], f - i);
-
-	},
-
-	Bezier: function (v, k) {
-
-		var b = 0;
-		var n = v.length - 1;
-		var pw = Math.pow;
-		var bn = TWEEN.Interpolation.Utils.Bernstein;
-
-		for (var i = 0; i <= n; i++) {
-			b += pw(1 - k, n - i) * pw(k, i) * v[i] * bn(n, i);
-		}
-
-		return b;
-
-	},
-
-	CatmullRom: function (v, k) {
-
-		var m = v.length - 1;
-		var f = m * k;
-		var i = Math.floor(f);
-		var fn = TWEEN.Interpolation.Utils.CatmullRom;
-
-		if (v[0] === v[m]) {
-
-			if (k < 0) {
-				i = Math.floor(f = m * (1 + k));
-			}
-
-			return fn(v[(i - 1 + m) % m], v[i], v[(i + 1) % m], v[(i + 2) % m], f - i);
-
-		} else {
-
-			if (k < 0) {
-				return v[0] - (fn(v[0], v[0], v[1], v[1], -f) - v[0]);
-			}
-
-			if (k > 1) {
-				return v[m] - (fn(v[m], v[m], v[m - 1], v[m - 1], f - m) - v[m]);
-			}
-
-			return fn(v[i ? i - 1 : 0], v[i], v[m < i + 1 ? m : i + 1], v[m < i + 2 ? m : i + 2], f - i);
-
-		}
-
-	},
-
-	Utils: {
-
-		Linear: function (p0, p1, t) {
-
-			return (p1 - p0) * t + p0;
-
-		},
-
-		Bernstein: function (n, i) {
-
-			var fc = TWEEN.Interpolation.Utils.Factorial;
-
-			return fc(n) / fc(i) / fc(n - i);
-
-		},
-
-		Factorial: (function () {
-
-			var a = [1];
-
-			return function (n) {
-
-				var s = 1;
-
-				if (a[n]) {
-					return a[n];
-				}
-
-				for (var i = n; i > 1; i--) {
-					s *= i;
-				}
-
-				a[n] = s;
-				return s;
-
-			};
-
-		})(),
-
-		CatmullRom: function (p0, p1, p2, p3, t) {
-
-			var v0 = (p2 - p0) * 0.5;
-			var v1 = (p3 - p1) * 0.5;
-			var t2 = t * t;
-			var t3 = t * t2;
-
-			return (2 * p1 - 2 * p2 + v0 + v1) * t3 + (- 3 * p1 + 3 * p2 - 2 * v0 - v1) * t2 + v0 * t + p1;
-
-		}
-
-	}
-
-};
-
-// UMD (Universal Module Definition)
-(function (root) {
-
-	{
-
-		// Node.js
-		module.exports = TWEEN;
-
-	}
-
-})();
-});
 
 /**
  * 设置 AnimationFrame begin
@@ -2895,7 +2919,7 @@ function enabledAnimationFrame() {
     _requestAid = requestAnimationFrame(function () {
       //console.log("frame__" + _taskList.length);
       //if ( Tween.getAll().length ) {
-      Tween.update(); //tween自己会做length判断
+      exports$1.update(); //tween自己会做length判断
       //};
 
       var currTaskList = _taskList;
@@ -2992,7 +3016,7 @@ function registTween(options) {
       });
     };
 
-    tween = new Tween.Tween(opt.from).to(opt.to, opt.duration).onStart(function () {
+    tween = new exports$1.Tween(opt.from).to(opt.to, opt.duration).onStart(function () {
       //opt.onStart.apply( this )
       opt.onStart(opt.from);
     }).onUpdate(function () {
@@ -3012,7 +3036,7 @@ function registTween(options) {
       tween._isStoped = true; //opt.onStop.apply( this , [this] );
 
       opt.onStop(opt.from);
-    }).repeat(opt.repeat).delay(opt.delay).easing(Tween.Easing[opt.easing.split(".")[0]][opt.easing.split(".")[1]]);
+    }).repeat(opt.repeat).delay(opt.delay).easing(exports$1.Easing[opt.easing.split(".")[0]][opt.easing.split(".")[1]]);
     tween.id = tid;
     tween.start();
     animate();
@@ -3043,7 +3067,7 @@ var AnimationFrame = {
   destroyFrame: destroyFrame,
   registTween: registTween,
   destroyTween: destroyTween,
-  Tween: Tween,
+  Tween: exports$1,
   taskList: _taskList
 };
 
@@ -3065,7 +3089,7 @@ function Observe(scope) {
       model[name] = val;
     }
 
-    var valueType = _typeof_1(val);
+    var valueType = _typeof(val);
 
     if (_.indexOf(Publics, name) > -1) {
       return;
@@ -3083,7 +3107,7 @@ function Observe(scope) {
         if (arguments.length) {
           //写操作
           //set 的 值的 类型
-          var neoType = _typeof_1(neo);
+          var neoType = _typeof(neo);
 
           if (stopRepeatAssign) {
             return; //阻止重复赋值
@@ -3263,70 +3287,21 @@ function insideLine(data, x, y, line) {
   return insideCatch;
 }
 
-var settings = {
-  //设备分辨率
-  RESOLUTION: typeof window !== 'undefined' ? window.devicePixelRatio : 1,
+function _createSuper$1(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct$1(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
 
-  /**
-   * Target frames per millisecond.
-   */
-  TARGET_FPMS: 0.06,
+function _isNativeReflectConstruct$1() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
 
-  /**
-   * If set to true WebGL will attempt make textures mimpaped by default.
-   * Mipmapping will only succeed if the base texture uploaded has power of two dimensions.
-   */
-  MIPMAP_TEXTURES: true,
+var DisplayObject = /*#__PURE__*/function (_event$Dispatcher) {
+  _inherits(DisplayObject, _event$Dispatcher);
 
-  /**
-   * Default filter resolution.
-   */
-  FILTER_RESOLUTION: 1,
-  // TODO: maybe change to SPRITE.BATCH_SIZE: 2000
-  // TODO: maybe add PARTICLE.BATCH_SIZE: 15000
-
-  /**
-   * The default sprite batch size.
-   *
-   * The default aims to balance desktop and mobile devices.
-   */
-  SPRITE_BATCH_SIZE: 4096,
-
-  /**
-   * The prefix that denotes a URL is for a retina asset.
-   */
-  RETINA_PREFIX: /@(.+)x/,
-  RENDER_OPTIONS: {
-    view: null,
-    antialias: true,
-    forceFXAA: false,
-    autoResize: false,
-    transparent: true,
-    backgroundColor: 0x000000,
-    clearBeforeRender: true,
-    preserveDrawingBuffer: false,
-    roundPixels: false
-  },
-  TRANSFORM_MODE: 0,
-  GC_MODE: 0,
-  GC_MAX_IDLE: 60 * 60,
-  GC_MAX_CHECK_COUNT: 60 * 10,
-  WRAP_MODE: 0,
-  SCALE_MODE: 0,
-  PRECISION: 'mediump'
-};
-
-var DisplayObject =
-/*#__PURE__*/
-function (_event$Dispatcher) {
-  inherits(DisplayObject, _event$Dispatcher);
+  var _super = _createSuper$1(DisplayObject);
 
   function DisplayObject(opt) {
     var _this;
 
-    classCallCheck(this, DisplayObject);
+    _classCallCheck(this, DisplayObject);
 
-    _this = possibleConstructorReturn(this, getPrototypeOf(DisplayObject).call(this, opt)); //相对父级元素的矩阵
+    _this = _super.call(this, opt); //相对父级元素的矩阵
 
     _this._transform = null;
     _this.worldTransform = null; //_transform如果有修改，则_transformChange为true，renderer的时候worldTransform
@@ -3350,14 +3325,14 @@ function (_event$Dispatcher) {
     _this.id = opt.id || Utils.createId(_this.type);
     _this._trackList = []; //一个元素可以追踪另外元素的变动
 
-    _this.init.apply(assertThisInitialized(_this), arguments); //所有属性准备好了后，先要计算一次this._updateTransform()得到_tansform
+    _this.init.apply(_assertThisInitialized(_this), arguments); //所有属性准备好了后，先要计算一次this._updateTransform()得到_tansform
 
 
     _this._updateTransform();
 
     _this._tweens = [];
 
-    var me = assertThisInitialized(_this);
+    var me = _assertThisInitialized(_this);
 
     _this.on("destroy", function () {
       me.cleanAnimates();
@@ -3366,7 +3341,7 @@ function (_event$Dispatcher) {
     return _this;
   }
 
-  createClass(DisplayObject, [{
+  _createClass(DisplayObject, [{
     key: "init",
     value: function init() {}
   }, {
@@ -3785,7 +3760,7 @@ function (_event$Dispatcher) {
 
       if (this.worldTransform) {
         var inverseMatrix = this.worldTransform.clone().invert();
-        var originPos = [x * settings.RESOLUTION, y * settings.RESOLUTION];
+        var originPos = [x * Settings.RESOLUTION, y * Settings.RESOLUTION];
         originPos = inverseMatrix.mulVector(originPos);
         x = originPos[0];
         y = originPos[1];
@@ -4011,19 +3986,22 @@ function (_event$Dispatcher) {
   return DisplayObject;
 }(event.Dispatcher);
 
-var DisplayObjectContainer =
-/*#__PURE__*/
-function (_DisplayObject) {
-  inherits(DisplayObjectContainer, _DisplayObject);
+function _createSuper$2(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct$2(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _isNativeReflectConstruct$2() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
+var DisplayObjectContainer = /*#__PURE__*/function (_DisplayObject) {
+  _inherits(DisplayObjectContainer, _DisplayObject);
+
+  var _super = _createSuper$2(DisplayObjectContainer);
 
   function DisplayObjectContainer(opt) {
     var _this;
 
-    classCallCheck(this, DisplayObjectContainer);
+    _classCallCheck(this, DisplayObjectContainer);
 
-    _this = possibleConstructorReturn(this, getPrototypeOf(DisplayObjectContainer).call(this, opt));
-    _this.children = [];
-    _this.mouseChildren = []; //所有的容器默认支持event 检测，因为 可能有里面的shape是eventEnable是true的
+    _this = _super.call(this, opt);
+    _this.children = []; //所有的容器默认支持event 检测，因为 可能有里面的shape是eventEnable是true的
     //如果用户有强制的需求让容器下的所有元素都 不可检测，可以调用
     //DisplayObjectContainer的 setEventEnable() 方法
 
@@ -4031,7 +4009,7 @@ function (_DisplayObject) {
     return _this;
   }
 
-  createClass(DisplayObjectContainer, [{
+  _createClass(DisplayObjectContainer, [{
     key: "addChild",
     value: function addChild(child, index) {
       if (!child) {
@@ -4222,7 +4200,7 @@ function (_DisplayObject) {
             continue;
           }
 
-          if (child.mouseChildren && child.getNumChildren() > 0) {
+          if (child.getNumChildren() > 0) {
             var objs = child.getObjectsUnderPoint(point);
 
             if (objs.length > 0) {
@@ -4253,29 +4231,34 @@ function (_DisplayObject) {
   return DisplayObjectContainer;
 }(DisplayObject);
 
-var Stage =
-/*#__PURE__*/
-function (_DisplayObjectContain) {
-  inherits(Stage, _DisplayObjectContain);
+function _createSuper$3(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct$3(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _isNativeReflectConstruct$3() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
+var Stage = /*#__PURE__*/function (_DisplayObjectContain) {
+  _inherits(Stage, _DisplayObjectContain);
+
+  var _super = _createSuper$3(Stage);
 
   function Stage(opt) {
     var _this;
 
-    classCallCheck(this, Stage);
+    _classCallCheck(this, Stage);
 
     opt.type = "stage";
-    _this = possibleConstructorReturn(this, getPrototypeOf(Stage).call(this, opt));
-    _this.canvas = null;
-    _this.ctx = null; //渲染的时候由renderer决定,这里不做初始值
-    //stage正在渲染中
+    _this = _super.call(this, opt);
+    _this.canvas = null; //渲染的时候由renderer决定,这里不做初始值, 也接受外界手动设置好的ctx
+
+    _this.ctx = opt.ctx || null; //stage正在渲染中
 
     _this.stageRending = false;
     _this._isReady = false;
     return _this;
   } //由canvax的afterAddChild 回调
+  //width、height都是app的width， 如果后续有每个stage设置不同的width和height，在判断opt里面的width和height
 
 
-  createClass(Stage, [{
+  _createClass(Stage, [{
     key: "initStage",
     value: function initStage(canvas, width, height) {
       var self = this;
@@ -4283,8 +4266,8 @@ function (_DisplayObjectContain) {
       var model = self.context;
       model.width = width;
       model.height = height;
-      model.scaleX = Utils._devicePixelRatio;
-      model.scaleY = Utils._devicePixelRatio;
+      model.scaleX = Settings.RESOLUTION;
+      model.scaleY = Settings.RESOLUTION;
       self._isReady = true;
     }
   }, {
@@ -4307,28 +4290,26 @@ function (_DisplayObjectContain) {
   return Stage;
 }(DisplayObjectContainer);
 
-var SystemRenderer =
-/*#__PURE__*/
-function () {
+var SystemRenderer = /*#__PURE__*/function () {
   function SystemRenderer() {
     var type = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : RENDERER_TYPE.UNKNOWN;
     var app = arguments.length > 1 ? arguments[1] : undefined;
     var options = arguments.length > 2 ? arguments[2] : undefined;
 
-    classCallCheck(this, SystemRenderer);
+    _classCallCheck(this, SystemRenderer);
 
     this.type = type; //2canvas,1webgl
 
     this.app = app;
 
     if (options) {
-      for (var i in settings.RENDER_OPTIONS) {
+      for (var i in Settings.RENDER_OPTIONS) {
         if (typeof options[i] === 'undefined') {
-          options[i] = settings.RENDER_OPTIONS[i];
+          options[i] = Settings.RENDER_OPTIONS[i];
         }
       }
     } else {
-      options = settings.RENDER_OPTIONS;
+      options = Settings.RENDER_OPTIONS;
     }
 
     this.options = options;
@@ -4339,7 +4320,7 @@ function () {
   } //如果引擎处于静默状态的话，就会启动
 
 
-  createClass(SystemRenderer, [{
+  _createClass(SystemRenderer, [{
     key: "startEnter",
     value: function startEnter() {
       var self = this;
@@ -4475,11 +4456,9 @@ function () {
   return SystemRenderer;
 }();
 
-var CanvasGraphicsRenderer =
-/*#__PURE__*/
-function () {
+var CanvasGraphicsRenderer = /*#__PURE__*/function () {
   function CanvasGraphicsRenderer(renderer) {
-    classCallCheck(this, CanvasGraphicsRenderer);
+    _classCallCheck(this, CanvasGraphicsRenderer);
 
     this.renderer = renderer;
   }
@@ -4489,7 +4468,7 @@ function () {
   */
 
 
-  createClass(CanvasGraphicsRenderer, [{
+  _createClass(CanvasGraphicsRenderer, [{
     key: "render",
     value: function render(displayObject, stage, globalAlpha, isClip) {
       var renderer = this.renderer;
@@ -4642,24 +4621,29 @@ function () {
   return CanvasGraphicsRenderer;
 }();
 
-var CanvasRenderer =
-/*#__PURE__*/
-function (_SystemRenderer) {
-  inherits(CanvasRenderer, _SystemRenderer);
+function _createSuper$4(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct$4(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _isNativeReflectConstruct$4() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
+var CanvasRenderer = /*#__PURE__*/function (_SystemRenderer) {
+  _inherits(CanvasRenderer, _SystemRenderer);
+
+  var _super = _createSuper$4(CanvasRenderer);
 
   function CanvasRenderer(app) {
     var _this;
 
     var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
-    classCallCheck(this, CanvasRenderer);
+    _classCallCheck(this, CanvasRenderer);
 
-    _this = possibleConstructorReturn(this, getPrototypeOf(CanvasRenderer).call(this, RENDERER_TYPE.CANVAS, app, options));
-    _this.CGR = new CanvasGraphicsRenderer(assertThisInitialized(_this));
+    _this = _super.call(this, RENDERER_TYPE.CANVAS, app, options);
+    _this.renderType = 'canvas';
+    _this.CGR = new CanvasGraphicsRenderer(_assertThisInitialized(_this));
     return _this;
   }
 
-  createClass(CanvasRenderer, [{
+  _createClass(CanvasRenderer, [{
     key: "render",
     value: function render(app) {
       var me = this;
@@ -4781,6 +4765,10 @@ function (_SystemRenderer) {
         //如果这个对象有裁剪对象， 则要恢复，裁剪之前的环境
         ctx.restore();
       }
+
+      if (ctx.draw) {
+        ctx.draw(true);
+      }
     }
   }, {
     key: "_clear",
@@ -4794,8 +4782,41 @@ function (_SystemRenderer) {
   return CanvasRenderer;
 }(SystemRenderer);
 
-function autoRenderer(app, options) {
-  return new CanvasRenderer(app, options);
+function _createSuper$5(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct$5(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _isNativeReflectConstruct$5() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
+var AlipayMiniRenderer = /*#__PURE__*/function (_CanvasRenderer) {
+  _inherits(AlipayMiniRenderer, _CanvasRenderer);
+
+  var _super = _createSuper$5(AlipayMiniRenderer);
+
+  function AlipayMiniRenderer(app) {
+    var _this;
+
+    var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
+    _classCallCheck(this, AlipayMiniRenderer);
+
+    _this = _super.call(this, app, options);
+    _this.renderType = 'alipayMini';
+    return _this;
+  }
+
+  return AlipayMiniRenderer;
+}(CanvasRenderer);
+
+function autoRenderer(app, opt) {
+  var _renderer; //opt.renderer 支持cavnas alipayMini webGl(暂时弃用)
+
+
+  if (opt.renderer == 'alipayMini') {
+    _renderer = new AlipayMiniRenderer(app, opt);
+  } else {
+    _renderer = new CanvasRenderer(app, opt);
+  }
+
+  return _renderer;
   /*
      if (app.webGL && utils.isWebGLSupported())
      {
@@ -4805,53 +4826,55 @@ function autoRenderer(app, options) {
      */
 }
 
-var Application =
-/*#__PURE__*/
-function (_DisplayObjectContain) {
-  inherits(Application, _DisplayObjectContain);
+function _createSuper$6(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct$6(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _isNativeReflectConstruct$6() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
+var Application = /*#__PURE__*/function (_DisplayObjectContain) {
+  _inherits(Application, _DisplayObjectContain);
+
+  var _super = _createSuper$6(Application);
 
   function Application(opt) {
     var _this;
 
-    var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-
-    classCallCheck(this, Application);
+    _classCallCheck(this, Application);
 
     opt.type = "canvax";
-    _this = possibleConstructorReturn(this, getPrototypeOf(Application).call(this, opt));
-    _this._cid = new Date().getTime() + "_" + Math.floor(Math.random() * 100);
-    _this.el = $.query(opt.el);
-    _this.width = parseInt("width" in opt || _this.el.offsetWidth, 10);
-    _this.height = parseInt("height" in opt || _this.el.offsetHeight, 10);
-    var viewObj = $.createView(_this.width, _this.height, _this._cid);
-    _this.view = viewObj.view;
-    _this.stageView = viewObj.stageView;
-    _this.domView = viewObj.domView;
-    _this.el.innerHTML = "";
+    _this = _super.call(this, opt);
+    _this.uid = opt.uid || new Date().getTime() + "_" + Math.floor(Math.random() * 100);
+    Settings.RESOLUTION = opt.devicePixelRatio || (typeof window !== 'undefined' ? window.devicePixelRatio : 1);
+    _this.el = $.query(opt.el); //优先使用外部传入的width
 
-    _this.el.appendChild(_this.view);
+    _this.width = opt.width || parseInt("width" in opt || _this.el.offsetWidth, 10);
+    _this.height = opt.height || parseInt("height" in opt || _this.el.offsetHeight, 10); //小程序的话 没有el， 也就么有domview了
 
-    _this.viewOffset = $.offset(_this.view);
+    if (_this.el) {
+      var viewObj = $.createView(_this.width, _this.height, _this.uid);
+      _this.view = viewObj.view;
+      _this.stageView = viewObj.stageView;
+      _this.domView = viewObj.domView;
+      _this.el.innerHTML = "";
+
+      _this.el.appendChild(_this.view);
+    }
+    _this.viewOffset = opt.viewOffset || $.offset(_this.view);
     _this.lastGetRO = 0; //最后一次获取 viewOffset 的时间
 
-    _this.webGL = opt.webGL;
-    _this.renderer = autoRenderer(assertThisInitialized(_this), options);
+    _this.renderer = autoRenderer(_assertThisInitialized(_this), opt);
     _this.event = null; //该属性在systenRender里面操作，每帧由心跳上报的 需要重绘的stages 列表
 
     _this.convertStages = {};
     _this.context.$model.width = _this.width;
     _this.context.$model.height = _this.height; //然后创建一个用于绘制激活 shape 的 stage 到activation
 
-    _this._bufferStage = null;
-
-    _this._creatHoverStage(); //设置一个默认的matrix做为app的世界根节点坐标
-
+    _this._bufferStage = _this._creatHoverStage(opt); //设置一个默认的matrix做为app的世界根节点坐标
 
     _this.worldTransform = new Matrix().identity();
     return _this;
   }
 
-  createClass(Application, [{
+  _createClass(Application, [{
     key: "registEvent",
     value: function registEvent(opt) {
       //初始化事件委托到root元素上面
@@ -4876,7 +4899,7 @@ function (_DisplayObjectContain) {
         this.view.removeChild(this.domView);
         this.el.removeChild(this.view);
       } catch (e) {}
-      this.el.innerHTML = "";
+      this.el && (this.el.innerHTML = "");
       this.event = null;
       this._bufferStage = null;
     }
@@ -4889,7 +4912,9 @@ function (_DisplayObjectContain) {
       //this.view.style.width  = this.width +"px";
       //this.view.style.height = this.height+"px";
 
-      this.viewOffset = $.offset(this.view);
+      if (this.view) {
+        this.viewOffset = $.offset(this.view);
+      }
       this.context.$model.width = this.width;
       this.context.$model.height = this.height;
       var me = this;
@@ -4897,8 +4922,8 @@ function (_DisplayObjectContain) {
       var reSizeCanvas = function reSizeCanvas(canvas) {
         canvas.style.width = me.width + "px";
         canvas.style.height = me.height + "px";
-        canvas.setAttribute("width", me.width * Utils._devicePixelRatio);
-        canvas.setAttribute("height", me.height * Utils._devicePixelRatio);
+        canvas.setAttribute("width", me.width * Settings.RESOLUTION);
+        canvas.setAttribute("height", me.height * Settings.RESOLUTION);
       };
 
       _.each(this.children, function (s, i) {
@@ -4920,26 +4945,25 @@ function (_DisplayObjectContain) {
     }
   }, {
     key: "_creatHoverStage",
-    value: function _creatHoverStage() {
+    value: function _creatHoverStage(opt) {
       //TODO:创建stage的时候一定要传入width height  两个参数
       this._bufferStage = new Stage({
         id: "activCanvas" + new Date().getTime(),
-        context: {
-          width: this.context.$model.width,
-          height: this.context.$model.height
-        }
+        ctx: opt.activCanvas || null
       }); //该stage不参与事件检测
 
       this._bufferStage._eventEnabled = false;
       this.addChild(this._bufferStage);
-    }
+      return this._bufferStage;
+    } //小程序等不支持dom获取的地址需要手动调用下updateViewOffset()
+
   }, {
     key: "updateViewOffset",
-    value: function updateViewOffset() {
+    value: function updateViewOffset(viewOffset) {
       var now = new Date().getTime();
 
       if (now - this.lastGetRO > 1000) {
-        this.viewOffset = $.offset(this.view);
+        this.viewOffset = viewOffset || $.offset(this.view);
         this.lastGetRO = now;
       }
     }
@@ -4954,18 +4978,20 @@ function (_DisplayObjectContain) {
         canvas = stage.canvas;
       }
 
-      if (this.children.length == 1) {
-        this.stageView.appendChild(canvas);
-      } else if (this.children.length > 1) {
-        if (index === undefined) {
-          //如果没有指定位置，那么就放到 _bufferStage 的下面。
-          this.stageView.insertBefore(canvas, this._bufferStage.canvas);
-        } else {
-          //如果有指定的位置，那么就指定的位置来
-          if (index >= this.children.length - 1) {
-            this.stageView.appendChild(canvas);
+      if (this.stageView) {
+        if (this.children.length == 1) {
+          this.stageView.appendChild(canvas);
+        } else if (this.children.length > 1) {
+          if (index === undefined) {
+            //如果没有指定位置，那么就放到 _bufferStage 的下面。
+            this.stageView.insertBefore(canvas, this._bufferStage.canvas);
           } else {
-            this.stageView.insertBefore(canvas, this.children[index].canvas);
+            //如果有指定的位置，那么就指定的位置来
+            if (index >= this.children.length - 1) {
+              this.stageView.appendChild(canvas);
+            } else {
+              this.stageView.insertBefore(canvas, this.children[index].canvas);
+            }
           }
         }
       }
@@ -4976,7 +5002,7 @@ function (_DisplayObjectContain) {
     key: "_afterDelChild",
     value: function _afterDelChild(stage) {
       try {
-        this.stageView.removeChild(stage.canvas);
+        this.stageView && stage.canvas && this.stageView.removeChild(stage.canvas);
       } catch (error) {}
     }
   }, {
@@ -4997,33 +5023,41 @@ function (_DisplayObjectContain) {
       });
 
       return canvas.toDataURL();
+    } //一些不能动态创建_pixelCtx用来做文本检测的环境，要支持可以从外面传一个ctx进来
+
+  }, {
+    key: "setPixelCtx",
+    value: function setPixelCtx(ctx) {
+      Utils._pixelCtx = ctx;
     }
   }]);
 
   return Application;
 }(DisplayObjectContainer);
 
-var Sprite =
-/*#__PURE__*/
-function (_DisplayObjectContain) {
-  inherits(Sprite, _DisplayObjectContain);
+function _createSuper$7(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct$7(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _isNativeReflectConstruct$7() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
+var Sprite = /*#__PURE__*/function (_DisplayObjectContain) {
+  _inherits(Sprite, _DisplayObjectContain);
+
+  var _super = _createSuper$7(Sprite);
 
   function Sprite(opt) {
-    classCallCheck(this, Sprite);
+    _classCallCheck(this, Sprite);
 
     opt = Utils.checkOpt(opt);
     opt.type = "sprite";
-    return possibleConstructorReturn(this, getPrototypeOf(Sprite).call(this, opt));
+    return _super.call(this, opt);
   }
 
   return Sprite;
 }(DisplayObjectContainer);
 
-var GraphicsData =
-/*#__PURE__*/
-function () {
+var GraphicsData = /*#__PURE__*/function () {
   function GraphicsData(lineWidth, strokeStyle, strokeAlpha, fillStyle, fillAlpha, shadowOffsetX, shadowOffsetY, shadowBlur, shadowColor, shape) {
-    classCallCheck(this, GraphicsData);
+    _classCallCheck(this, GraphicsData);
 
     this.lineWidth = lineWidth;
     this.strokeStyle = strokeStyle;
@@ -5043,7 +5077,7 @@ function () {
     this.line = true;
   }
 
-  createClass(GraphicsData, [{
+  _createClass(GraphicsData, [{
     key: "clone",
     value: function clone() {
       var cloneGraphicsData = new GraphicsData(this.lineWidth, this.strokeStyle, this.strokeAlpha, this.fillStyle, this.fillAlpha, this.shadowOffsetX, this.shadowOffsetY, this.shadowBlur, this.shadowColor, this.shape);
@@ -5393,16 +5427,14 @@ var Arc = {
   getBoundsOfArc: getBoundsOfArc
 };
 
-var Rectangle =
-/*#__PURE__*/
-function () {
+var Rectangle = /*#__PURE__*/function () {
   function Rectangle() {
     var x = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
     var y = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
     var width = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
     var height = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 0;
 
-    classCallCheck(this, Rectangle);
+    _classCallCheck(this, Rectangle);
 
     this.x = x;
     this.y = y;
@@ -5412,7 +5444,7 @@ function () {
     this.closed = true;
   }
 
-  createClass(Rectangle, [{
+  _createClass(Rectangle, [{
     key: "clone",
     value: function clone() {
       return new Rectangle(this.x, this.y, this.width, this.height);
@@ -5450,15 +5482,13 @@ function () {
   return Rectangle;
 }();
 
-var Circle =
-/*#__PURE__*/
-function () {
+var Circle = /*#__PURE__*/function () {
   function Circle() {
     var x = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
     var y = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
     var radius = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
 
-    classCallCheck(this, Circle);
+    _classCallCheck(this, Circle);
 
     this.x = x;
     this.y = y;
@@ -5467,7 +5497,7 @@ function () {
     this.closed = true;
   }
 
-  createClass(Circle, [{
+  _createClass(Circle, [{
     key: "clone",
     value: function clone() {
       return new Circle(this.x, this.y, this.radius);
@@ -5496,16 +5526,14 @@ function () {
   return Circle;
 }();
 
-var Ellipse =
-/*#__PURE__*/
-function () {
+var Ellipse = /*#__PURE__*/function () {
   function Ellipse() {
     var x = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
     var y = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
     var width = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
     var height = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 0;
 
-    classCallCheck(this, Ellipse);
+    _classCallCheck(this, Ellipse);
 
     this.x = x;
     this.y = y;
@@ -5515,7 +5543,7 @@ function () {
     this.closed = true;
   }
 
-  createClass(Ellipse, [{
+  _createClass(Ellipse, [{
     key: "clone",
     value: function clone() {
       return new Ellipse(this.x, this.y, this.width, this.height);
@@ -5543,15 +5571,13 @@ function () {
   return Ellipse;
 }();
 
-var Polygon =
-/*#__PURE__*/
-function () {
+var Polygon = /*#__PURE__*/function () {
   function Polygon() {
     for (var _len = arguments.length, points = new Array(_len), _key = 0; _key < _len; _key++) {
       points[_key] = arguments[_key];
     }
 
-    classCallCheck(this, Polygon);
+    _classCallCheck(this, Polygon);
 
     var point_0 = points[0];
 
@@ -5574,7 +5600,7 @@ function () {
     this.type = SHAPES.POLY;
   }
 
-  createClass(Polygon, [{
+  _createClass(Polygon, [{
     key: "clone",
     value: function clone() {
       return new Polygon(this.points.slice());
@@ -5647,11 +5673,9 @@ function bezierCurveTo(fromX, fromY, cpX, cpY, cpX2, cpY2, toX, toY) {
   return path;
 }
 
-var Graphics =
-/*#__PURE__*/
-function () {
+var Graphics = /*#__PURE__*/function () {
   function Graphics(shape) {
-    classCallCheck(this, Graphics);
+    _classCallCheck(this, Graphics);
 
     this.lineWidth = 1;
     this.strokeStyle = null;
@@ -5686,7 +5710,7 @@ function () {
     };
   }
 
-  createClass(Graphics, [{
+  _createClass(Graphics, [{
     key: "setStyle",
     value: function setStyle(context) {
       //从 shape 中把绘图需要的style属性同步过来
@@ -6133,15 +6157,19 @@ function () {
   return Graphics;
 }();
 
-var Shape =
-/*#__PURE__*/
-function (_DisplayObject) {
-  inherits(Shape, _DisplayObject);
+function _createSuper$8(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct$8(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _isNativeReflectConstruct$8() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
+var Shape = /*#__PURE__*/function (_DisplayObject) {
+  _inherits(Shape, _DisplayObject);
+
+  var _super = _createSuper$8(Shape);
 
   function Shape(opt) {
     var _this;
 
-    classCallCheck(this, Shape);
+    _classCallCheck(this, Shape);
 
     opt = Utils.checkOpt(opt);
     var styleContext = {
@@ -6180,7 +6208,7 @@ function (_DisplayObject) {
     if (opt.id === undefined && opt.type !== undefined) {
       opt.id = Utils.createId(opt.type);
     }
-    _this = possibleConstructorReturn(this, getPrototypeOf(Shape).call(this, opt)); //over的时候如果有修改样式，就为true
+    _this = _super.call(this, opt); //over的时候如果有修改样式，就为true
 
     _this._hoverClass = false;
     _this.hoverClone = true; //是否开启在hover的时候clone一份到active stage 中 
@@ -6210,7 +6238,7 @@ function (_DisplayObject) {
     return _this;
   }
 
-  createClass(Shape, [{
+  _createClass(Shape, [{
     key: "_draw",
     value: function _draw(graphics) {
       if (graphics.graphicsData.length == 0) {
@@ -6254,15 +6282,19 @@ function (_DisplayObject) {
   return Shape;
 }(DisplayObject);
 
-var Text =
-/*#__PURE__*/
-function (_DisplayObject) {
-  inherits(Text, _DisplayObject);
+function _createSuper$9(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct$9(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _isNativeReflectConstruct$9() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
+var Text = /*#__PURE__*/function (_DisplayObject) {
+  _inherits(Text, _DisplayObject);
+
+  var _super = _createSuper$9(Text);
 
   function Text(text, opt) {
     var _this;
 
-    classCallCheck(this, Text);
+    _classCallCheck(this, Text);
 
     opt.type = "text";
 
@@ -6285,7 +6317,7 @@ function (_DisplayObject) {
       backgroundColor: null,
       textBackgroundColor: null
     }, opt.context);
-    _this = possibleConstructorReturn(this, getPrototypeOf(Text).call(this, opt));
+    _this = _super.call(this, opt);
     _this._reNewline = /\r?\n/;
     _this.fontProperts = ["fontStyle", "fontVariant", "fontWeight", "fontSize", "fontFamily"];
     _this.context.font = _this._getFontDeclaration();
@@ -6295,7 +6327,7 @@ function (_DisplayObject) {
     return _this;
   }
 
-  createClass(Text, [{
+  _createClass(Text, [{
     key: "$watch",
     value: function $watch(name, value, preValue) {
       //context属性有变化的监听函数
@@ -6356,7 +6388,7 @@ function (_DisplayObject) {
   }, {
     key: "getTextHeight",
     value: function getTextHeight() {
-      return this._getTextHeight(Utils._pixelCtx, this._getTextLines());
+      return this._getTextHeight(this._getTextLines());
     }
   }, {
     key: "_getTextLines",
@@ -6498,7 +6530,7 @@ function (_DisplayObject) {
     }
   }, {
     key: "_getTextHeight",
-    value: function _getTextHeight(ctx, textLines) {
+    value: function _getTextHeight(textLines) {
       return this.context.$model.fontSize * textLines.length * this.context.$model.lineHeight;
     }
     /**
@@ -6836,15 +6868,19 @@ var myMath = {
   isValibPoint: isValibPoint
 };
 
-var BrokenLine =
-/*#__PURE__*/
-function (_Shape) {
-  inherits(BrokenLine, _Shape);
+function _createSuper$a(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct$a(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _isNativeReflectConstruct$a() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
+var BrokenLine = /*#__PURE__*/function (_Shape) {
+  _inherits(BrokenLine, _Shape);
+
+  var _super = _createSuper$a(BrokenLine);
 
   function BrokenLine(opt) {
     var _this;
 
-    classCallCheck(this, BrokenLine);
+    _classCallCheck(this, BrokenLine);
 
     opt = Utils.checkOpt(opt);
 
@@ -6861,13 +6897,13 @@ function (_Shape) {
     }
     opt.context = _context;
     opt.type = "brokenline";
-    _this = possibleConstructorReturn(this, getPrototypeOf(BrokenLine).call(this, opt)); //保存好原始值
+    _this = _super.call(this, opt); //保存好原始值
 
     _this._pointList = _context.pointList;
     return _this;
   }
 
-  createClass(BrokenLine, [{
+  _createClass(BrokenLine, [{
     key: "watch",
     value: function watch(name, value, preValue) {
       if (name == "pointList" || name == "smooth" || name == "lineType") {
@@ -6917,13 +6953,17 @@ function (_Shape) {
   return BrokenLine;
 }(Shape);
 
-var Circle$1 =
-/*#__PURE__*/
-function (_Shape) {
-  inherits(Circle, _Shape);
+function _createSuper$b(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct$b(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _isNativeReflectConstruct$b() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
+var Circle$1 = /*#__PURE__*/function (_Shape) {
+  _inherits(Circle, _Shape);
+
+  var _super = _createSuper$b(Circle);
 
   function Circle(opt) {
-    classCallCheck(this, Circle);
+    _classCallCheck(this, Circle);
 
     opt = _.extend(true, {
       type: "circle",
@@ -6932,10 +6972,10 @@ function (_Shape) {
         r: 0
       }
     }, Utils.checkOpt(opt));
-    return possibleConstructorReturn(this, getPrototypeOf(Circle).call(this, opt));
+    return _super.call(this, opt);
   }
 
-  createClass(Circle, [{
+  _createClass(Circle, [{
     key: "watch",
     value: function watch(name, value, preValue) {
       if (name == "r") {
@@ -6957,13 +6997,17 @@ function (_Shape) {
   return Circle;
 }(Shape);
 
-var Path =
-/*#__PURE__*/
-function (_Shape) {
-  inherits(Path, _Shape);
+function _createSuper$c(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct$c(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _isNativeReflectConstruct$c() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
+var Path = /*#__PURE__*/function (_Shape) {
+  _inherits(Path, _Shape);
+
+  var _super = _createSuper$c(Path);
 
   function Path(opt) {
-    classCallCheck(this, Path);
+    _classCallCheck(this, Path);
 
     var _context = _.extend(true, {
       pointList: [],
@@ -6984,10 +7028,10 @@ function (_Shape) {
     opt.context = _context;
     opt.__parsePathData = null;
     opt.type = "path";
-    return possibleConstructorReturn(this, getPrototypeOf(Path).call(this, opt));
+    return _super.call(this, opt);
   }
 
-  createClass(Path, [{
+  _createClass(Path, [{
     key: "watch",
     value: function watch(name, value, preValue) {
       if (name == "path") {
@@ -7322,15 +7366,19 @@ function (_Shape) {
   return Path;
 }(Shape);
 
-var Droplet =
-/*#__PURE__*/
-function (_Path) {
-  inherits(Droplet, _Path);
+function _createSuper$d(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct$d(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _isNativeReflectConstruct$d() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
+var Droplet = /*#__PURE__*/function (_Path) {
+  _inherits(Droplet, _Path);
+
+  var _super = _createSuper$d(Droplet);
 
   function Droplet(opt) {
     var _this;
 
-    classCallCheck(this, Droplet);
+    _classCallCheck(this, Droplet);
 
     opt = _.extend(true, {
       type: "droplet",
@@ -7342,13 +7390,13 @@ function (_Path) {
       }
     }, Utils.checkOpt(opt));
 
-    var my = _this = possibleConstructorReturn(this, getPrototypeOf(Droplet).call(this, opt));
+    var my = _this = _super.call(this, opt);
 
     _this.context.$model.path = _this.createPath();
     return _this;
   }
 
-  createClass(Droplet, [{
+  _createClass(Droplet, [{
     key: "watch",
     value: function watch(name, value, preValue) {
       if (name == "hr" || name == "vr") {
@@ -7368,13 +7416,17 @@ function (_Path) {
   return Droplet;
 }(Path);
 
-var Ellipse$1 =
-/*#__PURE__*/
-function (_Shape) {
-  inherits(Ellipse, _Shape);
+function _createSuper$e(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct$e(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _isNativeReflectConstruct$e() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
+var Ellipse$1 = /*#__PURE__*/function (_Shape) {
+  _inherits(Ellipse, _Shape);
+
+  var _super = _createSuper$e(Ellipse);
 
   function Ellipse(opt) {
-    classCallCheck(this, Ellipse);
+    _classCallCheck(this, Ellipse);
 
     opt = _.extend(true, {
       type: "ellipse",
@@ -7385,10 +7437,10 @@ function (_Shape) {
 
       }
     }, Utils.checkOpt(opt));
-    return possibleConstructorReturn(this, getPrototypeOf(Ellipse).call(this, opt));
+    return _super.call(this, opt);
   }
 
-  createClass(Ellipse, [{
+  _createClass(Ellipse, [{
     key: "watch",
     value: function watch(name, value, preValue) {
       if (name == "hr" || name == "vr") {
@@ -7405,13 +7457,17 @@ function (_Shape) {
   return Ellipse;
 }(Shape);
 
-var Polygon$1 =
-/*#__PURE__*/
-function (_Shape) {
-  inherits(Polygon, _Shape);
+function _createSuper$f(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct$f(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _isNativeReflectConstruct$f() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
+var Polygon$1 = /*#__PURE__*/function (_Shape) {
+  _inherits(Polygon, _Shape);
+
+  var _super = _createSuper$f(Polygon);
 
   function Polygon(opt) {
-    classCallCheck(this, Polygon);
+    _classCallCheck(this, Polygon);
 
     var _context = _.extend(true, {
       lineType: null,
@@ -7434,10 +7490,10 @@ function (_Shape) {
     }
     opt.context = _context;
     opt.type = "polygon";
-    return possibleConstructorReturn(this, getPrototypeOf(Polygon).call(this, opt));
+    return _super.call(this, opt);
   }
 
-  createClass(Polygon, [{
+  _createClass(Polygon, [{
     key: "watch",
     value: function watch(name, value, preValue) {
       //调用parent的setGraphics
@@ -7469,13 +7525,17 @@ function (_Shape) {
   return Polygon;
 }(Shape);
 
-var Isogon =
-/*#__PURE__*/
-function (_Polygon) {
-  inherits(Isogon, _Polygon);
+function _createSuper$g(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct$g(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _isNativeReflectConstruct$g() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
+var Isogon = /*#__PURE__*/function (_Polygon) {
+  _inherits(Isogon, _Polygon);
+
+  var _super = _createSuper$g(Isogon);
 
   function Isogon(opt) {
-    classCallCheck(this, Isogon);
+    _classCallCheck(this, Isogon);
 
     var _context = _.extend(true, {
       pointList: [],
@@ -7489,10 +7549,10 @@ function (_Polygon) {
     _context.pointList = myMath.getIsgonPointList(_context.n, _context.r);
     opt.context = _context;
     opt.type = "isogon";
-    return possibleConstructorReturn(this, getPrototypeOf(Isogon).call(this, opt));
+    return _super.call(this, opt);
   }
 
-  createClass(Isogon, [{
+  _createClass(Isogon, [{
     key: "watch",
     value: function watch(name, value, preValue) {
       if (name == "r" || name == "n") {
@@ -7509,13 +7569,17 @@ function (_Polygon) {
   return Isogon;
 }(Polygon$1);
 
-var Line =
-/*#__PURE__*/
-function (_Shape) {
-  inherits(Line, _Shape);
+function _createSuper$h(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct$h(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _isNativeReflectConstruct$h() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
+var Line = /*#__PURE__*/function (_Shape) {
+  _inherits(Line, _Shape);
+
+  var _super = _createSuper$h(Line);
 
   function Line(opt) {
-    classCallCheck(this, Line);
+    _classCallCheck(this, Line);
 
     var _context = _.extend(true, {
       start: {
@@ -7534,10 +7598,10 @@ function (_Shape) {
 
     opt.context = _context;
     opt.type = "line";
-    return possibleConstructorReturn(this, getPrototypeOf(Line).call(this, opt));
+    return _super.call(this, opt);
   }
 
-  createClass(Line, [{
+  _createClass(Line, [{
     key: "watch",
     value: function watch(name, value, preValue) {
       //并不清楚是start.x 还是end.x， 当然，这并不重要
@@ -7558,13 +7622,17 @@ function (_Shape) {
   return Line;
 }(Shape);
 
-var Rect =
-/*#__PURE__*/
-function (_Shape) {
-  inherits(Rect, _Shape);
+function _createSuper$i(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct$i(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _isNativeReflectConstruct$i() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
+var Rect = /*#__PURE__*/function (_Shape) {
+  _inherits(Rect, _Shape);
+
+  var _super = _createSuper$i(Rect);
 
   function Rect(opt) {
-    classCallCheck(this, Rect);
+    _classCallCheck(this, Rect);
 
     var _context = _.extend(true, {
       width: 0,
@@ -7574,10 +7642,10 @@ function (_Shape) {
 
     opt.context = _context;
     opt.type = "rect";
-    return possibleConstructorReturn(this, getPrototypeOf(Rect).call(this, opt));
+    return _super.call(this, opt);
   }
 
-  createClass(Rect, [{
+  _createClass(Rect, [{
     key: "watch",
     value: function watch(name, value, preValue) {
       if (name == "width" || name == "height" || name == "radius") {
@@ -7638,13 +7706,17 @@ function (_Shape) {
   return Rect;
 }(Shape);
 
-var Sector =
-/*#__PURE__*/
-function (_Shape) {
-  inherits(Sector, _Shape);
+function _createSuper$j(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct$j(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _isNativeReflectConstruct$j() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
+var Sector = /*#__PURE__*/function (_Shape) {
+  _inherits(Sector, _Shape);
+
+  var _super = _createSuper$j(Sector);
 
   function Sector(opt) {
-    classCallCheck(this, Sector);
+    _classCallCheck(this, Sector);
 
     var _context = _.extend(true, {
       pointList: [],
@@ -7666,10 +7738,10 @@ function (_Shape) {
     opt.isRing = false; //是否为一个圆环
 
     opt.type = "sector";
-    return possibleConstructorReturn(this, getPrototypeOf(Sector).call(this, opt));
+    return _super.call(this, opt);
   }
 
-  createClass(Sector, [{
+  _createClass(Sector, [{
     key: "watch",
     value: function watch(name, value, preValue) {
       if (name == "r0" || name == "r" || name == "startAngle" || name == "endAngle" || name == "clockwise") {
@@ -7763,13 +7835,17 @@ function (_Shape) {
   return Sector;
 }(Shape);
 
-var Arrow =
-/*#__PURE__*/
-function (_Shape) {
-  inherits(Arrow, _Shape);
+function _createSuper$k(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct$k(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _isNativeReflectConstruct$k() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
+var Arrow = /*#__PURE__*/function (_Shape) {
+  _inherits(Arrow, _Shape);
+
+  var _super = _createSuper$k(Arrow);
 
   function Arrow(opt) {
-    classCallCheck(this, Arrow);
+    _classCallCheck(this, Arrow);
 
     var _context = _.extend(true, {
       control: {
@@ -7797,10 +7873,10 @@ function (_Shape) {
 
     opt.context = _context;
     opt.type = "arrow";
-    return possibleConstructorReturn(this, getPrototypeOf(Arrow).call(this, opt));
+    return _super.call(this, opt);
   }
 
-  createClass(Arrow, [{
+  _createClass(Arrow, [{
     key: "watch",
     value: function watch(name, value, preValue) {
       //并不清楚是start.x 还是end.x， 当然，这并不重要
@@ -7841,13 +7917,17 @@ function (_Shape) {
   return Arrow;
 }(Shape);
 
-var Diamond =
-/*#__PURE__*/
-function (_Shape) {
-  inherits(Diamond, _Shape);
+function _createSuper$l(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct$l(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _isNativeReflectConstruct$l() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
+var Diamond = /*#__PURE__*/function (_Shape) {
+  _inherits(Diamond, _Shape);
+
+  var _super = _createSuper$l(Diamond);
 
   function Diamond(opt) {
-    classCallCheck(this, Diamond);
+    _classCallCheck(this, Diamond);
 
     var _context = _.extend(true, {
       innerRect: {
@@ -7861,10 +7941,10 @@ function (_Shape) {
 
     opt.context = _context;
     opt.type = "diamond";
-    return possibleConstructorReturn(this, getPrototypeOf(Diamond).call(this, opt));
+    return _super.call(this, opt);
   }
 
-  createClass(Diamond, [{
+  _createClass(Diamond, [{
     key: "watch",
     value: function watch(name, value, preValue) {
       //并不清楚是start.x 还是end.x， 当然，这并不重要
@@ -7898,7 +7978,7 @@ function (_Shape) {
 }(Shape);
 
 var Canvax = {
-  version: "2.0.70",
+  version: "2.0.74",
   _: _,
   $: $,
   event: event,
@@ -7968,6 +8048,7 @@ var _default = {
       var codeWithoutVariables = code.slice(0, range[0]) + code.slice(range[1]);
       return this._eval(codeWithoutVariables, 'options', 'variables', variables);
     } catch (e) {
+      console.log('parse error');
       return {};
     }
   }
@@ -9045,12 +9126,10 @@ var Chart = /*#__PURE__*/function (_event$Dispatcher) {
         height = _coord.height;
         origin = _coord.origin;
       }
-
-      if (this.dataFrame.length == 0) {
-        //如果没有数据，不需要绘制graphs
-        me.fire("complete");
-        return;
-      }
+      //如果没有数据，不需要绘制graphs
+      //me.fire("complete");
+      //return;
+      //};
 
       var _graphs = this.getComponents({
         name: 'graphs'
@@ -9062,21 +9141,22 @@ var Chart = /*#__PURE__*/function (_event$Dispatcher) {
         width: width,
         height: height,
         origin: origin
-      });
+      }); //没有数据的时候可以不绘制graphs，但是下面的其他components还是需要绘制的，比如图例
 
-      _.each(_graphs, function (_g) {
-        _g.on("complete", function (g) {
-          completeNum++;
+      if (this.dataFrame.length > 0) {
+        _.each(_graphs, function (_g) {
+          _g.on("complete", function (g) {
+            completeNum++;
 
-          if (completeNum == graphsCount) {
-            me.fire("complete");
-          }
-          _g.inited = true;
+            if (completeNum == graphsCount) {
+              me.fire("complete");
+            }
+            _g.inited = true;
+          });
+
+          _g.draw(opt);
         });
-
-        _g.draw(opt);
-      }); //绘制除开coord graphs 以外的所有组件
-
+      }
 
       for (var i = 0, l = this.components.length; i < l; i++) {
         var p = this.components[i];
@@ -25973,6 +26053,7 @@ function scaleSolution(solution, width, height, padding) {
       yRange = bounds.yRange;
 
   if (xRange.max == xRange.min || yRange.max == yRange.min) {
+    console.log("not scaling solution: zero size detected");
     return solution;
   }
 
@@ -26619,7 +26700,9 @@ function computeTextCentres(circles, areas) {
     var centre = computeTextCentre(interior, exterior);
     ret[area] = centre;
 
-    if (centre.disjoint && areas[i].size > 0) ;
+    if (centre.disjoint && areas[i].size > 0) {
+      console.log("WARNING: area " + area + " not represented on screen");
+    }
   }
 
   return ret;
@@ -29043,6 +29126,7 @@ function jsonToArrayForRelation(data, options, _childrenField) {
   var label = options.node && options.node.content && options.node.content.field;
 
   if (!checkDataIsJson(data, key, childrenKey)) {
+    console.error('该数据不能正确绘制，请提供数组对象形式的数据！');
     return result;
   }
   var childrens = [];
@@ -32814,6 +32898,7 @@ var _typeof2 = interopRequireDefault(_typeof_1$1);
         try {
           return fn();
         } finally {
+          console.log(name + " time: " + (_.now() - start) + "ms");
         }
       }
 
@@ -42589,6 +42674,7 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
           }
 
           if (e.type == "wheel") {
+            console.log(_deltaY, e.deltaY);
 
             if (Math.abs(e.deltaY) > Math.abs(_deltaY)) {
               _deltaY = e.deltaY;
@@ -42988,6 +43074,7 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
       var me = this;
 
       _.each(this.data.edges, function (edge) {
+        console.log(edge.points);
         var key = edge.key.join('_');
 
         if (me.line.isTree && edge.points.length == 3) {
@@ -44702,10 +44789,10 @@ function center(x, y) {
 function tree_add(d) {
   const x = +this._x.call(null, d),
       y = +this._y.call(null, d);
-  return add(this.cover(x, y), x, y, d);
+  return add$1(this.cover(x, y), x, y, d);
 }
 
-function add(tree, x, y, d) {
+function add$1(tree, x, y, d) {
   if (isNaN(x) || isNaN(y)) return tree; // ignore invalid points
 
   var parent,
@@ -44778,7 +44865,7 @@ function addAll(data) {
 
   // Add the new points.
   for (i = 0; i < n; ++i) {
-    add(this, xz[i], yz[i], data[i]);
+    add$1(this, xz[i], yz[i], data[i]);
   }
 
   return this;
@@ -44977,7 +45064,7 @@ function tree_remove(d) {
   return this;
 }
 
-function removeAll(data) {
+function removeAll$1(data) {
   for (var i = 0, n = data.length; i < n; ++i) this.remove(data[i]);
   return this;
 }
@@ -45098,7 +45185,7 @@ treeProto.data = tree_data;
 treeProto.extent = tree_extent;
 treeProto.find = tree_find;
 treeProto.remove = tree_remove;
-treeProto.removeAll = removeAll;
+treeProto.removeAll = removeAll$1;
 treeProto.root = tree_root;
 treeProto.size = tree_size;
 treeProto.visit = tree_visit;
@@ -45423,7 +45510,7 @@ var frame = 0, // is an animation frame pending?
     clock = typeof performance === "object" && performance.now ? performance : Date,
     setFrame = typeof window === "object" && window.requestAnimationFrame ? window.requestAnimationFrame.bind(window) : function(f) { setTimeout(f, 17); };
 
-function now() {
+function now$2() {
   return clockNow || (setFrame(clearNow), clockNow = clock.now() + clockSkew);
 }
 
@@ -45441,7 +45528,7 @@ Timer.prototype = timer.prototype = {
   constructor: Timer,
   restart: function(callback, delay, time) {
     if (typeof callback !== "function") throw new TypeError("callback is not a function");
-    time = (time == null ? now() : +time) + (delay == null ? 0 : +delay);
+    time = (time == null ? now$2() : +time) + (delay == null ? 0 : +delay);
     if (!this._next && taskTail !== this) {
       if (taskTail) taskTail._next = this;
       else taskHead = this;
@@ -45467,7 +45554,7 @@ function timer(callback, delay, time) {
 }
 
 function timerFlush() {
-  now(); // Get the current time, if not already set.
+  now$2(); // Get the current time, if not already set.
   ++frame; // Pretend we’ve set an alarm, if we haven’t already.
   var t = taskHead, e;
   while (t) {
@@ -47377,6 +47464,7 @@ var Map = /*#__PURE__*/function (_GraphsBase) {
       this._setNodeStyle(_path, 'select');
 
       nodeData.selected = true;
+      console.log("select:true");
     }
   }, {
     key: "unselectAt",
@@ -47390,6 +47478,7 @@ var Map = /*#__PURE__*/function (_GraphsBase) {
       this._setNodeStyle(_path);
 
       geoGraph.selected = false;
+      console.log("select:false");
 
       if (geoGraph.focused) {
         this.focusAt(adcode);
@@ -48811,6 +48900,7 @@ var dataZoom = /*#__PURE__*/function (_Component) {
 
             _.extend(app.dataFrame.range, range);
           }
+          console.log(range); //不想要重新构造dataFrame，所以第一个参数为null
 
           app.resetData(null, trigger);
           app.fire("dataZoomDragIng");
@@ -49879,6 +49969,7 @@ var MarkLine = /*#__PURE__*/function (_Component) {
     value: function _setTxtPos(y) {
       var me = this;
       var txt = me._txt;
+      if (!this._yAxis) return 0;
 
       if (this._yAxis.align == "left") {
         txt.context.x = 5;
@@ -49911,7 +50002,11 @@ var MarkLine = /*#__PURE__*/function (_Component) {
         return -this._opt.yPixel;
       }
 
-      return -this._yAxis.getPosOfVal(this._getYVal());
+      if (this._yAxis) {
+        return -this._yAxis.getPosOfVal(this._getYVal());
+      } else {
+        return 0;
+      }
     }
   }, {
     key: "_getLabel",
@@ -50321,7 +50416,7 @@ var Tips = /*#__PURE__*/function (_Component) {
       var h = this.dH + 2; //后面的2 是 两边的 linewidth
 
       var scrollTop = document.body.scrollTop;
-      var clientHeight = document.body.clientHeight;
+      var clientHeight = document.documentElement.clientHeight;
 
       if (y < scrollTop) {
         y = scrollTop;
@@ -53296,7 +53391,7 @@ if (projectTheme && projectTheme.length) {
 }
 
 var chartx = {
-  version: '1.1.48',
+  version: '1.1.49',
   options: {}
 };
 

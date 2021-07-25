@@ -323,7 +323,7 @@ class Tips extends Component {
     _checkY(y) {
         let h = this.dH + 2; //后面的2 是 两边的 linewidth
         let scrollTop = document.body.scrollTop;
-        let clientHeight = document.body.clientHeight;
+        let clientHeight = document.documentElement.clientHeight;
         if( y < scrollTop ){
             y = scrollTop;
         } else if( y + h > clientHeight ){

@@ -244,6 +244,7 @@ var MarkLine = /*#__PURE__*/function (_Component) {
     value: function _setTxtPos(y) {
       var me = this;
       var txt = me._txt;
+      if (!this._yAxis) return 0;
 
       if (this._yAxis.align == "left") {
         txt.context.x = 5;
@@ -282,8 +283,11 @@ var MarkLine = /*#__PURE__*/function (_Component) {
         return -this._opt.yPixel;
       }
 
-      return -this._yAxis.getPosOfVal(this._getYVal());
-      ;
+      if (this._yAxis) {
+        return -this._yAxis.getPosOfVal(this._getYVal());
+      } else {
+        return 0;
+      }
     }
   }, {
     key: "_getLabel",
