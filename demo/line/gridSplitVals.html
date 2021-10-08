@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
+<title>xChart demo -- bar</title>
+
+<script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
+<script type="text/javascript" src="../../dist/index.iife.js"></script>
+<!-- codemirror -->
+<script type="text/javascript" src="../../lib/codemirror/codemirror.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/active-line.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/javascript.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/matchbrackets.js"></script>
+<link rel="stylesheet" href="../../lib/codemirror/codemirror.css">
+<link rel="stylesheet" href="../../lib/codemirror/zenburn.css">
+<link rel="stylesheet" href="../../lib/codemirror/docs.css">
+<!-- codemirror end -->
+<!--bootstrap-->
+<script type="text/javascript" src="../../lib/bootstrap/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap-theme.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/docs.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap.min.css">
+<!--bootstrap end-->
+<script type="text/javascript" src="../../lib/demo.js"></script>
+<link rel="stylesheet" href="../../lib/demo.css">
+</head>
+<body >
+
+<table>
+    <tr>
+        <td id="td-vl">
+            <form><textarea id="code" name="code">
+
+//chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
+//第一行是表头。
+
+var data = [
+{"ds":"2020-10-15","a2322":219,"a2e2i":229},
+{"ds":"2020-10-16","a2322":216,"a2e2i":212},
+{"ds":"2020-10-17","a2322":35,"a2e2i":35},
+{"ds":"2020-10-18","a2322":37,"a2e2i":37},
+{"ds":"2020-10-19","a2322":126,"a2e2i":116},
+{"ds":"2020-10-20","a2322":94,"a2e2i":94},
+{"ds":"2020-10-21","a2322":103,"a2e2i":103},
+{"ds":"2020-10-22","a2322":80,"a2e2i":80},
+{"ds":"2020-10-23","a2322":77,"a2e2i":77},
+{"ds":"2020-10-24","a2322":98,"a2e2i":98},
+{"ds":"2020-10-25","a2322":45,"a2e2i":45},
+{"ds":"2020-10-26","a2322":40,"a2e2i":40},
+{"ds":"2020-10-27","a2322":57,"a2e2i":57},
+{"ds":"2020-10-28","a2322":67,"a2e2i":67},
+{"ds":"2020-10-29","a2322":66,"a2e2i":66},
+{"ds":"2020-10-30","a2322":56,"a2e2i":56},
+{"ds":"2020-10-31","a2322":92,"a2e2i":92},
+{"ds":"2020-11-01","a2322":182,"a2e2i":182},
+{"ds":"2020-11-02","a2322":109,"a2e2i":127},
+{"ds":"2020-11-03","a2322":124,"a2e2i":124},
+{"ds":"2020-11-04","a2322":127,"a2e2i":127},
+{"ds":"2020-11-05","a2322":105,"a2e2i":105},
+{"ds":"2020-11-06","a2322":94,"a2e2i":94},
+{"ds":"2020-11-07","a2322":180,"a2e2i":180},
+{"ds":"2020-11-08","a2322":113,"a2e2i":113},
+{"ds":"2020-11-09","a2322":158,"a2e2i":158},
+{"ds":"2020-11-10","a2322":126,"a2e2i":126},
+{"ds":"2020-11-11","a2322":147,"a2e2i":147}
+];
+
+
+var variables = {
+    gridSplitVals: [ '2020-10-21', '2020-10-29', '2020-11-01', '2020-11-04', '2020-11-06', '2020-11-11' ],
+    gridSplitLabels: [ '', '标记一下', '', '', '', '结束了' ],
+    gridFillStyle: ['#FAFBFE','#F2F3FC','#FAFBFE','#F2F3FC','#FAFBFE','#F2F3FC']
+  }
+  
+  const options = {
+    coord: {
+      type: 'rect',
+      xAxis: {
+        field: 'ds'
+      },
+      grid:{
+        fill:{
+          xDimension:{
+            enabled : true,
+            splitVals: variables.gridSplitVals,
+            splitLabels: variables.gridSplitLabels,
+            fillStyle : variables.gridFillStyle,
+            alpha: 1
+          }
+        }
+      }
+    },
+    graphs: [
+      {
+        type: 'line',
+        field: 'a2322',
+        node: {
+          enabled: false
+        },
+        line: {
+          strokeStyle: '#F58600'
+        },
+        area: {
+          enabled: false
+        }
+      },
+      {
+        type: 'line',
+        field: 'a2e2i',
+        node: {
+          enabled: false
+        },
+        line: {
+          strokeStyle: '#38CA68'
+        },
+        area: {
+          enabled: false
+        }
+      }
+    ],
+    tips:{},
+    datazoom:{}
+  };
+  
+    chartx.create("canvasTest" , data , options)
+
+
+            </textarea></form>
+        </td>
+        <td style="padding:0 10px;" id="td-vr">
+            <div id="chartdemo-r">
+            <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
+                <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
+
+                <h4>折线图（bar chart）</h4>
+                <p>
+                    联系人：@释剑
+                </p>
+            </div>
+            <div  class="test-c">
+                <div id="canvasTest" style='width:100%;height:300px;position:relative;'></div>
+            </div>
+
+            </div>
+        </td>
+    </tr>
+</table>
+
+
+</body> 
+</html>
+
+

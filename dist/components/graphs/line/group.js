@@ -300,7 +300,7 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
 
               if (_text) {
                 _text.context.x = point[0];
-                _text.context.y = point[1] - 3;
+                _text.context.y = point[1] - 3 - 3;
 
                 me._checkTextPos(_text, i);
               }
@@ -743,7 +743,7 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
           ;
           var context = {
             x: _point[0],
-            y: _point[1] - 3,
+            y: _point[1] - 3 - 3,
             fontSize: this.label.fontSize,
             textAlign: "center",
             textBaseline: "bottom",
@@ -808,7 +808,7 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
       var next = list[ind + 1];
 
       if (pre && next && pre[1] < _label.context.y && next[1] < _label.context.y) {
-        _label.context.y += 7;
+        _label.context.y += 12;
         _label.context.textBaseline = "top";
       }
     }
