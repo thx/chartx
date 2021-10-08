@@ -346,7 +346,7 @@ export default class LineGraphsGroup extends event.Dispatcher
                         let _text = me._labels.getChildAt(iNode);
                         if( _text ){
                             _text.context.x = point[0];
-                            _text.context.y = point[1] - 3;
+                            _text.context.y = point[1] - 3 - 3;
                             me._checkTextPos( _text , i );
                         }
                     }
@@ -737,7 +737,7 @@ export default class LineGraphsGroup extends event.Dispatcher
 
                 let context = {
                     x: _point[0],
-                    y: _point[1] - 3,
+                    y: _point[1] - 3 - 3,
                     fontSize: this.label.fontSize,
                     textAlign: "center",
                     textBaseline: "bottom",
@@ -792,7 +792,7 @@ export default class LineGraphsGroup extends event.Dispatcher
             pre && next &&
             ( pre[1] < _label.context.y && next[1] < _label.context.y )
          ){
-            _label.context.y += 7;
+            _label.context.y += 12;
             _label.context.textBaseline = "top"
         }
       

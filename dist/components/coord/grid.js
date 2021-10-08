@@ -128,9 +128,15 @@ var rectGrid = /*#__PURE__*/function (_event$Dispatcher) {
             splitVals = _axis.dataSection;
           } else {
             splitVals = [_axis.dataSection[0]].concat(_.flatten([fill.splitVals]));
-            splitVals.push(_axis.dataSection.slice(-1)[0]);
+
+            var lastSectionVal = _axis.dataSection.slice(-1)[0];
+
+            if (splitVals.indexOf(lastSectionVal) == -1) {
+              splitVals.push(lastSectionVal);
+            }
           }
 
+          ;
           var fillRanges = [];
 
           if (splitVals.length >= 2) {
@@ -184,6 +190,39 @@ var rectGrid = /*#__PURE__*/function (_event$Dispatcher) {
                 context: rectCtx
               });
               self.fillSp.addChild(fillRect);
+
+              var _text = self.getProp(fill.splitLabels, rInd, "");
+
+              if (_text) {
+                var fontColor = self.getProp(fill.fontColor, rInd, "#666");
+                var fontSize = self.getProp(fill.fontSize, rInd, 12);
+                var textAlign = 'center';
+                var textBaseline = 'top';
+                var x = rectCtx.x + rectCtx.width / 2;
+                var y = rectCtx.height + 8;
+
+                if (ind) {
+                  //y轴上面排列的fill
+                  textAlign = 'left';
+                  textBaseline = 'middle';
+                  x = rectCtx.x + 8;
+                  y = rectCtx.y + rectCtx.height / 2;
+                }
+
+                var txt = new _canvax["default"].Display.Text(_text, {
+                  context: {
+                    fontSize: fontSize,
+                    fillStyle: fontColor,
+                    x: x,
+                    y: y,
+                    textAlign: textAlign,
+                    //"center",//this.isH ? "center" : "left",
+                    textBaseline: textBaseline //"middle", //this.isH ? "top" : "middle",
+
+                  }
+                });
+                self.fillSp.addChild(txt);
+              }
             });
           }
         }
@@ -344,6 +383,18 @@ var rectGrid = /*#__PURE__*/function (_event$Dispatcher) {
                   "default": null //默认等于xaxis的dataSection
 
                 },
+                splitLabels: {
+                  detail: "对应splitVals的文本",
+                  "default": null
+                },
+                fontColor: {
+                  detail: "对应splitLabels的文本颜色",
+                  "default": null
+                },
+                fontSize: {
+                  detail: "对应splitLabels的文本字体大小",
+                  "default": null
+                },
                 fillStyle: {
                   detail: '背景颜色',
                   "default": null
@@ -363,6 +414,18 @@ var rectGrid = /*#__PURE__*/function (_event$Dispatcher) {
                 },
                 splitVals: {
                   detail: "从x轴上面用来分割区块的vals",
+                  "default": null
+                },
+                splitLabels: {
+                  detail: "对应splitVals的文本",
+                  "default": null
+                },
+                fontColor: {
+                  detail: "对应splitLabels的文本颜色",
+                  "default": null
+                },
+                fontSize: {
+                  detail: "对应splitLabels的文本字体大小",
                   "default": null
                 },
                 fillStyle: {

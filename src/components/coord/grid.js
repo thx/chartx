@@ -77,6 +77,18 @@ export default class rectGrid extends event.Dispatcher
                                 detail : "从x轴上面用来分割区块的vals",
                                 default: null//默认等于xaxis的dataSection
                             },
+                            splitLabels : {
+                                detail : "对应splitVals的文本",
+                                default: null
+                            },
+                            fontColor : {
+                                detail : "对应splitLabels的文本颜色",
+                                default: null
+                            },
+                            fontSize : {
+                                detail : "对应splitLabels的文本字体大小",
+                                default: null
+                            },
                             fillStyle : {
                                 detail : '背景颜色',
                                 default: null
@@ -96,6 +108,18 @@ export default class rectGrid extends event.Dispatcher
                             },
                             splitVals : {
                                 detail : "从x轴上面用来分割区块的vals",
+                                default: null
+                            },
+                            splitLabels : {
+                                detail : "对应splitVals的文本",
+                                default: null
+                            },
+                            fontColor : {
+                                detail : "对应splitLabels的文本颜色",
+                                default: null
+                            },
+                            fontSize : {
+                                detail : "对应splitLabels的文本字体大小",
                                 default: null
                             },
                             fillStyle : {
@@ -190,12 +214,17 @@ export default class rectGrid extends event.Dispatcher
             let _axis = ind ? _yAxis : _xAxis;
             let splitVals = [];
             if( fill.enabled ){
-                if( !fill.splitVals ){
+                
+                if (!fill.splitVals) {
                     splitVals = _axis.dataSection;
-                } else {
-                    splitVals = [ _axis.dataSection[0] ].concat( _.flatten([ fill.splitVals ]) );
-                    splitVals.push( _axis.dataSection.slice(-1)[0] );
-                }
+                  } else {
+                    splitVals = [_axis.dataSection[0]].concat(_.flatten([fill.splitVals]));
+                    let lastSectionVal = _axis.dataSection.slice(-1)[0];
+                    if( splitVals.indexOf( lastSectionVal ) == -1 ){
+                      splitVals.push( lastSectionVal );
+                    }
+                };
+
                 let fillRanges = [];
                 if(splitVals.length >=2){
 
@@ -246,6 +275,38 @@ export default class rectGrid extends event.Dispatcher
                         });
                         
                         self.fillSp.addChild( fillRect );
+
+
+                        let _text = self.getProp( fill.splitLabels, rInd, "" );
+                        
+                        if( _text ){
+                            let fontColor = self.getProp( fill.fontColor, rInd, "#666" );
+                            let fontSize = self.getProp( fill.fontSize, rInd, 12 );
+                            let textAlign = 'center';
+                            let textBaseline = 'top';
+                            let x = rectCtx.x + rectCtx.width/2;
+                            let y = rectCtx.height + 8;
+                            if( ind ){
+                                //y轴上面排列的fill
+                                textAlign = 'left';
+                                textBaseline = 'middle';
+                                x = rectCtx.x + 8;
+                                y = rectCtx.y + rectCtx.height/2;
+                            }
+                            let txt = new Canvax.Display.Text( _text , {
+                                context: {
+                                    fontSize,
+                                    fillStyle: fontColor,
+                                    x,
+                                    y,
+                                    textAlign,  //"center",//this.isH ? "center" : "left",
+                                    textBaseline//"middle", //this.isH ? "top" : "middle",
+                                }
+                            });
+                            self.fillSp.addChild( txt );
+                        }
+                        
+
                     } );
 
                 }

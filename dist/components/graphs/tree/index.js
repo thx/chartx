@@ -23,8 +23,6 @@ var _canvax = _interopRequireDefault(require("canvax"));
 
 var _index = _interopRequireDefault(require("../relation/index"));
 
-var _global = _interopRequireDefault(require("../../../global"));
-
 var _dataFrame = _interopRequireDefault(require("../../../core/dataFrame"));
 
 var _tools = require("../../../utils/tools");

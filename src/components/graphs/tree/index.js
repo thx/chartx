@@ -1,6 +1,5 @@
 import Canvax from "canvax"
 import GraphsBase from "../relation/index"
-import global from "../../../global"
 import dataFrame from "../../../core/dataFrame"
 import {getDefaultProps} from "../../../utils/tools"
 import { checkDataIsJson, jsonToArrayForRelation, arrayToTreeJsonForRelation } from '../relation/data'

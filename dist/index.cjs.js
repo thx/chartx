@@ -8048,7 +8048,6 @@ var _default = {
       var codeWithoutVariables = code.slice(0, range[0]) + code.slice(range[1]);
       return this._eval(codeWithoutVariables, 'options', 'variables', variables);
     } catch (e) {
-      console.log('parse error');
       return {};
     }
   }
@@ -12957,9 +12956,13 @@ var rectGrid = /*#__PURE__*/function (_event$Dispatcher) {
             splitVals = _axis.dataSection;
           } else {
             splitVals = [_axis.dataSection[0]].concat(_.flatten([fill.splitVals]));
-            splitVals.push(_axis.dataSection.slice(-1)[0]);
-          }
 
+            var lastSectionVal = _axis.dataSection.slice(-1)[0];
+
+            if (splitVals.indexOf(lastSectionVal) == -1) {
+              splitVals.push(lastSectionVal);
+            }
+          }
           var fillRanges = [];
 
           if (splitVals.length >= 2) {
@@ -13011,6 +13014,39 @@ var rectGrid = /*#__PURE__*/function (_event$Dispatcher) {
                 context: rectCtx
               });
               self.fillSp.addChild(fillRect);
+
+              var _text = self.getProp(fill.splitLabels, rInd, "");
+
+              if (_text) {
+                var fontColor = self.getProp(fill.fontColor, rInd, "#666");
+                var fontSize = self.getProp(fill.fontSize, rInd, 12);
+                var textAlign = 'center';
+                var textBaseline = 'top';
+                var x = rectCtx.x + rectCtx.width / 2;
+                var y = rectCtx.height + 8;
+
+                if (ind) {
+                  //y轴上面排列的fill
+                  textAlign = 'left';
+                  textBaseline = 'middle';
+                  x = rectCtx.x + 8;
+                  y = rectCtx.y + rectCtx.height / 2;
+                }
+
+                var txt = new _canvax["default"].Display.Text(_text, {
+                  context: {
+                    fontSize: fontSize,
+                    fillStyle: fontColor,
+                    x: x,
+                    y: y,
+                    textAlign: textAlign,
+                    //"center",//this.isH ? "center" : "left",
+                    textBaseline: textBaseline //"middle", //this.isH ? "top" : "middle",
+
+                  }
+                });
+                self.fillSp.addChild(txt);
+              }
             });
           }
         }
@@ -13161,6 +13197,18 @@ var rectGrid = /*#__PURE__*/function (_event$Dispatcher) {
                   "default": null //默认等于xaxis的dataSection
 
                 },
+                splitLabels: {
+                  detail: "对应splitVals的文本",
+                  "default": null
+                },
+                fontColor: {
+                  detail: "对应splitLabels的文本颜色",
+                  "default": null
+                },
+                fontSize: {
+                  detail: "对应splitLabels的文本字体大小",
+                  "default": null
+                },
                 fillStyle: {
                   detail: '背景颜色',
                   "default": null
@@ -13180,6 +13228,18 @@ var rectGrid = /*#__PURE__*/function (_event$Dispatcher) {
                 },
                 splitVals: {
                   detail: "从x轴上面用来分割区块的vals",
+                  "default": null
+                },
+                splitLabels: {
+                  detail: "对应splitVals的文本",
+                  "default": null
+                },
+                fontColor: {
+                  detail: "对应splitLabels的文本颜色",
+                  "default": null
+                },
+                fontSize: {
+                  detail: "对应splitLabels的文本字体大小",
                   "default": null
                 },
                 fillStyle: {
@@ -16994,7 +17054,7 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
 
               if (_text) {
                 _text.context.x = point[0];
-                _text.context.y = point[1] - 3;
+                _text.context.y = point[1] - 3 - 3;
 
                 me._checkTextPos(_text, i);
               }
@@ -17382,7 +17442,7 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
           }
           var context = {
             x: _point[0],
-            y: _point[1] - 3,
+            y: _point[1] - 3 - 3,
             fontSize: this.label.fontSize,
             textAlign: "center",
             textBaseline: "bottom",
@@ -17437,7 +17497,7 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
       var next = list[ind + 1];
 
       if (pre && next && pre[1] < _label.context.y && next[1] < _label.context.y) {
-        _label.context.y += 7;
+        _label.context.y += 12;
         _label.context.textBaseline = "top";
       }
     }
@@ -26079,7 +26139,6 @@ function scaleSolution(solution, width, height, padding) {
       yRange = bounds.yRange;
 
   if (xRange.max == xRange.min || yRange.max == yRange.min) {
-    console.log("not scaling solution: zero size detected");
     return solution;
   }
 
@@ -26726,9 +26785,7 @@ function computeTextCentres(circles, areas) {
     var centre = computeTextCentre(interior, exterior);
     ret[area] = centre;
 
-    if (centre.disjoint && areas[i].size > 0) {
-      console.log("WARNING: area " + area + " not represented on screen");
-    }
+    if (centre.disjoint && areas[i].size > 0) ;
   }
 
   return ret;
@@ -29152,7 +29209,6 @@ function jsonToArrayForRelation(data, options, _childrenField) {
   var label = options.node && options.node.content && options.node.content.field;
 
   if (!checkDataIsJson(data, key, childrenKey)) {
-    console.error('该数据不能正确绘制，请提供数组对象形式的数据！');
     return result;
   }
   var childrens = [];
@@ -32924,7 +32980,6 @@ var _typeof2 = interopRequireDefault(_typeof_1$1);
         try {
           return fn();
         } finally {
-          console.log(name + " time: " + (_.now() - start) + "ms");
         }
       }
 
@@ -42700,7 +42755,6 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
           }
 
           if (e.type == "wheel") {
-            console.log(_deltaY, e.deltaY);
 
             if (Math.abs(e.deltaY) > Math.abs(_deltaY)) {
               _deltaY = e.deltaY;
@@ -43100,7 +43154,6 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
       var me = this;
 
       _.each(this.data.edges, function (edge) {
-        console.log(edge.points);
         var key = edge.key.join('_');
 
         if (me.line.isTree && edge.points.length == 3) {
@@ -44402,8 +44455,6 @@ var _getPrototypeOf2 = interopRequireDefault(getPrototypeOf$1);
 var _canvax = interopRequireDefault(Canvax);
 
 var _index = interopRequireDefault(relation);
-
-var _global = interopRequireDefault(global$1);
 
 var _dataFrame = interopRequireDefault(dataFrame);
 
@@ -47490,7 +47541,6 @@ var Map = /*#__PURE__*/function (_GraphsBase) {
       this._setNodeStyle(_path, 'select');
 
       nodeData.selected = true;
-      console.log("select:true");
     }
   }, {
     key: "unselectAt",
@@ -47504,7 +47554,6 @@ var Map = /*#__PURE__*/function (_GraphsBase) {
       this._setNodeStyle(_path);
 
       geoGraph.selected = false;
-      console.log("select:false");
 
       if (geoGraph.focused) {
         this.focusAt(adcode);
@@ -48930,7 +48979,6 @@ var dataZoom = /*#__PURE__*/function (_Component) {
 
             _.extend(app.dataFrame.range, range);
           }
-          console.log(range); //不想要重新构造dataFrame，所以第一个参数为null
 
           app.resetData(null, trigger);
           app.fire("dataZoomDragIng");
@@ -53433,7 +53481,7 @@ if (projectTheme && projectTheme.length) {
 }
 
 var chartx = {
-  version: '1.1.49',
+  version: '1.1.50',
   options: {}
 };
 
