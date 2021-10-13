@@ -12919,42 +12919,39 @@ var rectGrid = /*#__PURE__*/function (_event$Dispatcher) {
           if (!fill.splitVals) {
             splitVals = _axis.dataSection;
           } else {
-            splitVals = [_axis.dataSection[0]].concat(_.flatten([fill.splitVals]));
-
-            var lastSectionVal = _axis.dataSection.slice(-1)[0];
-
-            if (splitVals.indexOf(lastSectionVal) == -1) {
-              splitVals.push(lastSectionVal);
-            }
+            splitVals = _.flatten([fill.splitVals]); // splitVals = [_axis.dataSection[0]].concat(_.flatten([fill.splitVals]));
+            // let lastSectionVal = _axis.dataSection.slice(-1)[0];
+            // if( splitVals.indexOf( lastSectionVal ) == -1 ){
+            //   splitVals.push( lastSectionVal );
+            // }
           }
           var fillRanges = [];
 
           if (splitVals.length >= 2) {
-            var range = [];
+            //splitVals去重
+            splitVals = _.uniq(splitVals);
+            var range = [0];
 
             for (var i = 0, l = splitVals.length; i < l; i++) {
               var pos = _axis.getPosOf({
                 val: splitVals[i]
               });
 
-              if (!range.length) {
-                range.push(pos);
-                continue;
-              }
-
               if (range.length == 1) {
-                if (pos - range[0] < 1) {
-                  continue;
-                } else {
-                  range.push(pos);
-                  fillRanges.push(range);
-                  var nextBegin = range[1];
-                  range = [nextBegin];
+                //TODO: 目前轴的计算有bug， 超过的部分返回也是0
+                if (range[0] > 0 && pos == 0) {
+                  pos = self.width;
                 }
+
+                range.push(pos);
+                fillRanges.push(range);
+                var nextBegin = range[1];
+                range = [nextBegin];
               }
             }
 
             _.each(fillRanges, function (range, rInd) {
+              if (!range || range && range.length && range[1] == range[0]) return;
               var rectCtx = {
                 fillStyle: self.getProp(fill.fillStyle, rInd, "#000"),
                 fillAlpha: self.getProp(fill.alpha, rInd, 0.02 * (rInd % 2))
@@ -17416,8 +17413,8 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
             x: _point[0],
             y: _point[1] - 3 - 3,
             fontSize: this.label.fontSize,
-            textAlign: "center",
-            textBaseline: "bottom",
+            textAlign: this.label.textAlign,
+            textBaseline: this.label.textBaseline,
             fillStyle: me._getColor(me.label.fontColor, a),
             lineWidth: 1,
             strokeStyle: "#ffffff"
@@ -17689,6 +17686,14 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
             format: {
               detail: '文本格式化处理函数',
               "default": null
+            },
+            textAlign: {
+              detail: '水平布局方式',
+              "default": 'center'
+            },
+            textBaseline: {
+              detail: '垂直布局方式',
+              "default": 'middle'
             }
           }
         },
@@ -53437,7 +53442,7 @@ if (projectTheme && projectTheme.length) {
 }
 
 var chartx = {
-  version: '1.1.50',
+  version: '1.1.51',
   options: {}
 };
 

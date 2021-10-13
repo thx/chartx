@@ -218,39 +218,42 @@ export default class rectGrid extends event.Dispatcher
                 if (!fill.splitVals) {
                     splitVals = _axis.dataSection;
                   } else {
-                    splitVals = [_axis.dataSection[0]].concat(_.flatten([fill.splitVals]));
-                    let lastSectionVal = _axis.dataSection.slice(-1)[0];
-                    if( splitVals.indexOf( lastSectionVal ) == -1 ){
-                      splitVals.push( lastSectionVal );
-                    }
+                    splitVals = _.flatten([fill.splitVals]);
+
+                    // splitVals = [_axis.dataSection[0]].concat(_.flatten([fill.splitVals]));
+                    // let lastSectionVal = _axis.dataSection.slice(-1)[0];
+                    // if( splitVals.indexOf( lastSectionVal ) == -1 ){
+                    //   splitVals.push( lastSectionVal );
+                    // }
                 };
 
                 let fillRanges = [];
                 if(splitVals.length >=2){
 
-                    let range = [];
+                    //splitVals去重
+                    splitVals = _.uniq( splitVals )
+
+                    let range = [0];
                     for(let i=0,l=splitVals.length; i<l; i++){
                         let pos = _axis.getPosOf({
                             val : splitVals[i]
                         });
-                        if(!range.length){
-                            range.push( pos );
-                            continue;
-                        }
                         if( range.length == 1 ){
-                            if( pos - range[0] < 1 ){
-                                continue;
-                            } else {
-                                range.push( pos );
-                                fillRanges.push( range );
-                                let nextBegin = range[1]
-                                range = [ nextBegin ];
+                            //TODO: 目前轴的计算有bug， 超过的部分返回也是0
+                            if( range[0] > 0 && pos == 0 ){
+                                pos = self.width;
                             }
+                            range.push( pos );
+                            fillRanges.push( range );
+                            let nextBegin = range[1]
+                            range = [ nextBegin ];
                         }
                     };
     
                     //fill的区间数据准备好了
                     _.each( fillRanges, function( range, rInd ){
+
+                        if( !range || ( range && range.length && range[1] == range[0]) ) return;
 
                         let rectCtx = {
                             fillStyle : self.getProp( fill.fillStyle, rInd, "#000" ),
