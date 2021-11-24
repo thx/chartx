@@ -476,6 +476,18 @@ var Chart = /*#__PURE__*/function (_event$Dispatcher) {
     key: "resetData",
     value: function resetData(data, trigger) {
       var me = this;
+
+      if (!data) {
+        data = [];
+      }
+
+      ;
+
+      if (!data.length) {
+        this.clean();
+      }
+
+      ;
       this._data = data; //注意，resetData不能为null，必须是 数组格式
 
       var preDataLenth = this.dataFrame.org.length;

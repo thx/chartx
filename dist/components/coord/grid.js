@@ -137,27 +137,61 @@ var rectGrid = /*#__PURE__*/function (_event$Dispatcher) {
           ;
           var fillRanges = [];
 
-          if (splitVals.length >= 2) {
+          if (splitVals.length) {
             //splitVals去重
             splitVals = _.uniq(splitVals);
             var range = [0];
 
-            for (var i = 0, l = splitVals.length; i < l; i++) {
+            var _loop = function _loop(i, l) {
+              var val = splitVals[i];
+
               var pos = _axis.getPosOf({
-                val: splitVals[i]
+                val: val
               });
 
               if (range.length == 1) {
                 //TODO: 目前轴的计算有bug， 超过的部分返回也是0
-                if (range[0] > 0 && pos == 0) {
-                  pos = self.width;
+                // if( (
+                //         splitVals.length == 1 || 
+                //         (
+                //             splitVals.length > 1 && 
+                //             ( 
+                //                 fillRanges.length && (fillRanges.slice(-1)[0][0] || fillRanges.slice(-1)[0][1] )
+                //             ) 
+                //         )
+                //     ) && pos == 0 ){
+                //     pos = self.width;
+                // };
+                if (!pos && _axis.type == 'xAxis' && _axis.layoutType == 'rule') {
+                  var dataFrame = self._coord.app.dataFrame;
+
+                  var orgData = _.find(dataFrame.jsonOrg, function (item) {
+                    return item[_axis.field] == val;
+                  });
+
+                  if (orgData) {
+                    var orgIndex = orgData.__index__;
+
+                    if (orgIndex <= dataFrame.range.start) {
+                      pos = 0;
+                    }
+
+                    if (orgIndex >= dataFrame.range.end) {
+                      pos = self.width;
+                    }
+                  }
                 }
 
+                ;
                 range.push(pos);
                 fillRanges.push(range);
                 var nextBegin = range[1];
                 range = [nextBegin];
               }
+            };
+
+            for (var i = 0, l = splitVals.length; i < l; i++) {
+              _loop(i, l);
             }
 
             ; //fill的区间数据准备好了

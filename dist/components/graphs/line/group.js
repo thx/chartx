@@ -621,7 +621,13 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
 
         me.data[a].color = _nodeColor; //回写回data里，tips的是用的到
 
-        if (!me.node.enabled) {
+        var nodeEnabled = me.node.enabled;
+
+        if (list.length == 1 && !nodeEnabled) {
+          nodeEnabled = true; //只有一个数据的时候， 强制显示node
+        }
+
+        if (!nodeEnabled) {
           //不能写return， 是因为每个data的color还是需要计算一遍
           continue;
         }

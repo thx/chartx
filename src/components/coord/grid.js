@@ -228,21 +228,50 @@ export default class rectGrid extends event.Dispatcher
                 };
 
                 let fillRanges = [];
-                if(splitVals.length >=2){
+                if( splitVals.length ){
 
                     //splitVals去重
                     splitVals = _.uniq( splitVals )
 
                     let range = [0];
                     for(let i=0,l=splitVals.length; i<l; i++){
+                        let val = splitVals[i];
                         let pos = _axis.getPosOf({
-                            val : splitVals[i]
+                            val
                         });
                         if( range.length == 1 ){
                             //TODO: 目前轴的计算有bug， 超过的部分返回也是0
-                            if( range[0] > 0 && pos == 0 ){
-                                pos = self.width;
-                            }
+                            // if( (
+                            //         splitVals.length == 1 || 
+                            //         (
+                            //             splitVals.length > 1 && 
+                            //             ( 
+                            //                 fillRanges.length && (fillRanges.slice(-1)[0][0] || fillRanges.slice(-1)[0][1] )
+                            //             ) 
+                            //         )
+                            //     ) && pos == 0 ){
+                            //     pos = self.width;
+                            // };
+
+
+                            if( !pos &&  _axis.type == 'xAxis' && _axis.layoutType == 'rule' ){
+                                
+                                let dataFrame = self._coord.app.dataFrame;
+                                let orgData = _.find( dataFrame.jsonOrg, function(item){
+                                    return item[ _axis.field ] == val;
+                                } );
+                                if( orgData ){
+                                    let orgIndex = orgData.__index__;
+                                    if( orgIndex <= dataFrame.range.start ){
+                                        pos = 0;
+                                    }
+                                    if( orgIndex >= dataFrame.range.end ){
+                                        pos = self.width;
+                                    }
+                                }
+
+                            };
+
                             range.push( pos );
                             fillRanges.push( range );
                             let nextBegin = range[1]

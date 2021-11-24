@@ -98,17 +98,21 @@
                             line.resetData( data )
                             
                             setTimeout(function(){
-                                    debugger
-                                    line.resetData( data1 );
-                              setTimeout(function(){
+                                debugger
+                                line.resetData( data1 );
+                                setTimeout(function(){
                                     debugger
                                     line.resetData( data2 )
                                     setTimeout(function(){
-                                    debugger
-                                    line.resetData( data3 )
+                                        debugger
+                                        line.resetData( data0 )
+                                        setTimeout(function(){
+                                            debugger
+                                            line.resetData( data3 )
+                                        } , 1000)
+                                    } , 1000)
                                 } , 1000)
-                                } , 1000)
-                                } , 1000)
+                            } , 1000)
                         } , 1000)
                                                
                                     
