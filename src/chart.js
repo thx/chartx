@@ -404,6 +404,13 @@ class Chart extends event.Dispatcher
     {
         let me = this;
 
+        if( !data ){
+            data = [];
+        };
+        if( !data.length ){
+            this.clean();
+        };
+
         this._data = data; //注意，resetData不能为null，必须是 数组格式
 
         let preDataLenth = this.dataFrame.org.length;

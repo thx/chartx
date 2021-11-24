@@ -9410,6 +9410,14 @@ var chartx = (function () {
 	    key: "resetData",
 	    value: function resetData(data, trigger) {
 	      var me = this;
+
+	      if (!data) {
+	        data = [];
+	      }
+
+	      if (!data.length) {
+	        this.clean();
+	      }
 	      this._data = data; //注意，resetData不能为null，必须是 数组格式
 
 	      var preDataLenth = this.dataFrame.org.length;
@@ -12956,42 +12964,71 @@ var chartx = (function () {
 	          if (!fill.splitVals) {
 	            splitVals = _axis.dataSection;
 	          } else {
-	            splitVals = [_axis.dataSection[0]].concat(_.flatten([fill.splitVals]));
-
-	            var lastSectionVal = _axis.dataSection.slice(-1)[0];
-
-	            if (splitVals.indexOf(lastSectionVal) == -1) {
-	              splitVals.push(lastSectionVal);
-	            }
+	            splitVals = _.flatten([fill.splitVals]); // splitVals = [_axis.dataSection[0]].concat(_.flatten([fill.splitVals]));
+	            // let lastSectionVal = _axis.dataSection.slice(-1)[0];
+	            // if( splitVals.indexOf( lastSectionVal ) == -1 ){
+	            //   splitVals.push( lastSectionVal );
+	            // }
 	          }
 	          var fillRanges = [];
 
-	          if (splitVals.length >= 2) {
-	            var range = [];
+	          if (splitVals.length) {
+	            //splitVals去重
+	            splitVals = _.uniq(splitVals);
+	            var range = [0];
 
-	            for (var i = 0, l = splitVals.length; i < l; i++) {
+	            var _loop = function _loop(i, l) {
+	              var val = splitVals[i];
+
 	              var pos = _axis.getPosOf({
-	                val: splitVals[i]
+	                val: val
 	              });
 
-	              if (!range.length) {
-	                range.push(pos);
-	                continue;
-	              }
-
 	              if (range.length == 1) {
-	                if (pos - range[0] < 1) {
-	                  continue;
-	                } else {
-	                  range.push(pos);
-	                  fillRanges.push(range);
-	                  var nextBegin = range[1];
-	                  range = [nextBegin];
+	                //TODO: 目前轴的计算有bug， 超过的部分返回也是0
+	                // if( (
+	                //         splitVals.length == 1 || 
+	                //         (
+	                //             splitVals.length > 1 && 
+	                //             ( 
+	                //                 fillRanges.length && (fillRanges.slice(-1)[0][0] || fillRanges.slice(-1)[0][1] )
+	                //             ) 
+	                //         )
+	                //     ) && pos == 0 ){
+	                //     pos = self.width;
+	                // };
+	                if (!pos && _axis.type == 'xAxis' && _axis.layoutType == 'rule') {
+	                  var dataFrame = self._coord.app.dataFrame;
+
+	                  var orgData = _.find(dataFrame.jsonOrg, function (item) {
+	                    return item[_axis.field] == val;
+	                  });
+
+	                  if (orgData) {
+	                    var orgIndex = orgData.__index__;
+
+	                    if (orgIndex <= dataFrame.range.start) {
+	                      pos = 0;
+	                    }
+
+	                    if (orgIndex >= dataFrame.range.end) {
+	                      pos = self.width;
+	                    }
+	                  }
 	                }
+	                range.push(pos);
+	                fillRanges.push(range);
+	                var nextBegin = range[1];
+	                range = [nextBegin];
 	              }
+	            };
+
+	            for (var i = 0, l = splitVals.length; i < l; i++) {
+	              _loop(i, l);
 	            }
 
 	            _.each(fillRanges, function (range, rInd) {
+	              if (!range || range && range.length && range[1] == range[0]) return;
 	              var rectCtx = {
 	                fillStyle: self.getProp(fill.fillStyle, rInd, "#000"),
 	                fillAlpha: self.getProp(fill.alpha, rInd, 0.02 * (rInd % 2))
@@ -17341,7 +17378,13 @@ var chartx = (function () {
 
 	        me.data[a].color = _nodeColor; //回写回data里，tips的是用的到
 
-	        if (!me.node.enabled) {
+	        var nodeEnabled = me.node.enabled;
+
+	        if (list.length == 1 && !nodeEnabled) {
+	          nodeEnabled = true; //只有一个数据的时候， 强制显示node
+	        }
+
+	        if (!nodeEnabled) {
 	          //不能写return， 是因为每个data的color还是需要计算一遍
 	          continue;
 	        }
@@ -17445,8 +17488,8 @@ var chartx = (function () {
 	            x: _point[0],
 	            y: _point[1] - 3 - 3,
 	            fontSize: this.label.fontSize,
-	            textAlign: "center",
-	            textBaseline: "bottom",
+	            textAlign: this.label.textAlign,
+	            textBaseline: this.label.textBaseline,
 	            fillStyle: me._getColor(me.label.fontColor, a),
 	            lineWidth: 1,
 	            strokeStyle: "#ffffff"
@@ -17718,6 +17761,14 @@ var chartx = (function () {
 	            format: {
 	              detail: '文本格式化处理函数',
 	              "default": null
+	            },
+	            textAlign: {
+	              detail: '水平布局方式',
+	              "default": 'center'
+	            },
+	            textBaseline: {
+	              detail: '垂直布局方式',
+	              "default": 'middle'
 	            }
 	          }
 	        },
@@ -53482,7 +53533,7 @@ var chartx = (function () {
 	}
 
 	var chartx = {
-	  version: '1.1.50',
+	  version: '1.1.53',
 	  options: {}
 	};
 

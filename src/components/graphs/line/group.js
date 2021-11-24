@@ -107,6 +107,14 @@ export default class LineGraphsGroup extends event.Dispatcher
                     format: {
                         detail: '文本格式化处理函数',
                         default: null
+                    },
+                    textAlign: {
+                        detail: '水平布局方式',
+                        default: 'center'
+                    },
+                    textBaseline: {
+                        detail: '垂直布局方式',
+                        default: 'middle'
                     }
                 }
             },
@@ -632,7 +640,11 @@ export default class LineGraphsGroup extends event.Dispatcher
 
                 let _nodeColor = me._getColor( (me.node.strokeStyle || me.line.strokeStyle), a );
                 me.data[a].color = _nodeColor; //回写回data里，tips的是用的到
-                if( !me.node.enabled ){
+                let nodeEnabled = me.node.enabled;
+                if( list.length == 1 && !nodeEnabled ){
+                    nodeEnabled = true; //只有一个数据的时候， 强制显示node
+                }
+                if( !nodeEnabled ){
                     //不能写return， 是因为每个data的color还是需要计算一遍
                     continue;
                 };
@@ -739,8 +751,8 @@ export default class LineGraphsGroup extends event.Dispatcher
                     x: _point[0],
                     y: _point[1] - 3 - 3,
                     fontSize: this.label.fontSize,
-                    textAlign: "center",
-                    textBaseline: "bottom",
+                    textAlign: this.label.textAlign,
+                    textBaseline: this.label.textBaseline,
                     fillStyle: me._getColor( me.label.fontColor, a ),
                     lineWidth:1,
                     strokeStyle:"#ffffff"
