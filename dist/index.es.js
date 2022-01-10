@@ -9399,7 +9399,8 @@ var Chart = /*#__PURE__*/function (_event$Dispatcher) {
     /*
      * 只响应数据的变化，不涉及配置变化
      * 
-     * @trigger 一般是触发这个data reset的一些场景数据，
+     * @trigger 一般是触发这个data reset的一些场景数据，内部触发才会有，比如datazoom， tree的收缩节点
+     * 外部调用resetData的时候，是只会传递第一个data数据的
      * 比如如果是 datazoom 触发的， 就会有 trigger数据{ name:'datazoom', left:1,right:1 }
      */
 
@@ -9407,18 +9408,24 @@ var Chart = /*#__PURE__*/function (_event$Dispatcher) {
     key: "resetData",
     value: function resetData(data, trigger) {
       var me = this;
-
-      if (!data) {
-        data = [];
-      }
-
-      if (!data.length) {
-        this.clean();
-      }
-      this._data = data; //注意，resetData不能为null，必须是 数组格式
-
       var preDataLenth = this.dataFrame.org.length;
-      this.dataFrame.resetData(data); //console.log( this.dataFrame )
+
+      if (!trigger || !trigger.comp) {
+        //只有非内部trigger的的resetData，才会有原数据的改变
+        if (!data) {
+          data = [];
+        }
+
+        if (!data.length) {
+          this.clean();
+        }
+        this._data = data; //注意，resetData不能为null，必须是 数组格式
+
+        this.dataFrame.resetData(data);
+      } else {
+        //内部组件trigger的话，比如datazoom
+        this.dataFrame.resetData();
+      }
 
       var graphsList = this.getComponents({
         name: 'graphs'
@@ -29369,7 +29376,13 @@ function arrayToTreeJsonForRelation(data, options) {
 
           if (childNode) {
             if (!node.children) node.children = [];
-            node.children.push(childNode); //如果这个目标节点__inRelation已经在关系结构中
+
+            if (!Canvax._.find(node.children, function (_child) {
+              return _child.key == childNode.key;
+            })) {
+              node.children.push(childNode);
+            }
+            //如果这个目标节点__inRelation已经在关系结构中
             //那么说明形成闭环了，不需要再分析这个节点的children
 
             if (childNode.__inRelation) {
@@ -44480,6 +44493,35 @@ exports["default"] = _default;
 
 unwrapExports(relation);
 
+var trigger = createCommonjsModule(function (module, exports) {
+
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports["default"] = void 0;
+
+var _classCallCheck2 = interopRequireDefault(classCallCheck$1);
+
+/**
+ * 每个组件中对外影响的时候，要抛出一个trigger对象
+ * 上面的comp属性就是触发这个trigger的组件本身
+ * params属性则是这次trigger的一些动作参数
+ * 目前legend和datazoom组件都有用到
+ */
+var Trigger = function Trigger(comp) {
+  var params = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+  (0, _classCallCheck2["default"])(this, Trigger);
+  this.comp = comp;
+  this.params = params;
+};
+
+exports["default"] = Trigger;
+});
+
+unwrapExports(trigger);
+
 var tree = createCommonjsModule(function (module, exports) {
 
 
@@ -44508,6 +44550,8 @@ var _index = interopRequireDefault(relation);
 var _dataFrame = interopRequireDefault(dataFrame);
 
 
+
+var _trigger2 = interopRequireDefault(trigger);
 
 
 
@@ -44646,6 +44690,8 @@ var Tree = /*#__PURE__*/function (_GraphsBase) {
     value: function _drawNodes() {
       var _this3 = this;
 
+      var me = this;
+
       _.each(this.data.nodes, function (node) {
         _this3._drawNode(node); //shrink
 
@@ -44755,9 +44801,11 @@ var Tree = /*#__PURE__*/function (_GraphsBase) {
                     }
                   }
 
-                  _this3.app.resetData(null, {
+                  var _trigger = new _trigger2["default"](me, {
                     origin: node.key
                   });
+
+                  _this3.app.resetData(null, _trigger);
                 }
 
                 _this3.app.fire(e.type, e);
@@ -48244,35 +48292,6 @@ exports["default"] = _default;
 
 unwrapExports(tree$1);
 
-var trigger = createCommonjsModule(function (module, exports) {
-
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports["default"] = void 0;
-
-var _classCallCheck2 = interopRequireDefault(classCallCheck$1);
-
-/**
- * 每个组件中对外影响的时候，要抛出一个trigger对象
- * 上面的comp属性就是触发这个trigger的组件本身
- * params属性则是这次trigger的一些动作参数
- * 目前legend和datazoom组件都有用到
- */
-var Trigger = function Trigger(comp) {
-  var params = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-  (0, _classCallCheck2["default"])(this, Trigger);
-  this.comp = comp;
-  this.params = params;
-};
-
-exports["default"] = Trigger;
-});
-
-unwrapExports(trigger);
-
 var legend = createCommonjsModule(function (module, exports) {
 
 
@@ -49028,7 +49047,6 @@ var dataZoom = /*#__PURE__*/function (_Component) {
 
             _.extend(app.dataFrame.range, range);
           }
-
           app.resetData(null, trigger);
           app.fire("dataZoomDragIng");
         },
@@ -53530,7 +53548,7 @@ if (projectTheme && projectTheme.length) {
 }
 
 var chartx = {
-  version: '1.1.53',
+  version: '1.1.56',
   options: {}
 };
 

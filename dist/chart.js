@@ -476,7 +476,8 @@ var Chart = /*#__PURE__*/function (_event$Dispatcher) {
     /*
      * 只响应数据的变化，不涉及配置变化
      * 
-     * @trigger 一般是触发这个data reset的一些场景数据，
+     * @trigger 一般是触发这个data reset的一些场景数据，内部触发才会有，比如datazoom， tree的收缩节点
+     * 外部调用resetData的时候，是只会传递第一个data数据的
      * 比如如果是 datazoom 触发的， 就会有 trigger数据{ name:'datazoom', left:1,right:1 }
      */
 
@@ -484,22 +485,30 @@ var Chart = /*#__PURE__*/function (_event$Dispatcher) {
     key: "resetData",
     value: function resetData(data, trigger) {
       var me = this;
-
-      if (!data) {
-        data = [];
-      }
-
-      ;
-
-      if (!data.length) {
-        this.clean();
-      }
-
-      ;
-      this._data = data; //注意，resetData不能为null，必须是 数组格式
-
       var preDataLenth = this.dataFrame.org.length;
-      this.dataFrame.resetData(data); //console.log( this.dataFrame )
+
+      if (!trigger || !trigger.comp) {
+        //只有非内部trigger的的resetData，才会有原数据的改变
+        if (!data) {
+          data = [];
+        }
+
+        ;
+
+        if (!data.length) {
+          this.clean();
+        }
+
+        ;
+        this._data = data; //注意，resetData不能为null，必须是 数组格式
+
+        this.dataFrame.resetData(data);
+      } else {
+        //内部组件trigger的话，比如datazoom
+        this.dataFrame.resetData();
+      }
+
+      ; //console.log( this.dataFrame )
 
       var graphsList = this.getComponents({
         name: 'graphs'
