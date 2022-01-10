@@ -173,9 +173,6 @@ export default function( dataOrg, opt ){
             //比如datazoom修改了dataFrame.range
             dataFrame.data = _getDataAndSetDataLen();
         }
-
-        
-        
     };
 
     function _getDataAndSetDataLen(){

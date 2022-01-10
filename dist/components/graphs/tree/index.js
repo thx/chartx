@@ -27,6 +27,8 @@ var _dataFrame = _interopRequireDefault(require("../../../core/dataFrame"));
 
 var _tools = require("../../../utils/tools");
 
+var _trigger2 = _interopRequireDefault(require("../../trigger"));
+
 var _data2 = require("../relation/data");
 
 function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
@@ -172,6 +174,8 @@ var Tree = /*#__PURE__*/function (_GraphsBase) {
     value: function _drawNodes() {
       var _this3 = this;
 
+      var me = this;
+
       _.each(this.data.nodes, function (node) {
         _this3._drawNode(node); //shrink
 
@@ -289,9 +293,11 @@ var Tree = /*#__PURE__*/function (_GraphsBase) {
 
                   ;
 
-                  _this3.app.resetData(null, {
+                  var _trigger = new _trigger2["default"](me, {
                     origin: node.key
                   });
+
+                  _this3.app.resetData(null, _trigger);
                 }
 
                 _this3.app.fire(e.type, e);

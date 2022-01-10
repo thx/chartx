@@ -160,7 +160,13 @@ function arrayToTreeJsonForRelation(data, options){
 
                     if( childNode ){
                         if( !node.children ) node.children = [];
-                        node.children.push( childNode );
+
+                        if( !_.find( node.children, function(_child){
+                            return _child.key == childNode.key
+                        } ) ) {
+                          node.children.push(childNode);
+                        };
+                        //node.children.push( childNode );
 
                         //如果这个目标节点__inRelation已经在关系结构中
                         //那么说明形成闭环了，不需要再分析这个节点的children

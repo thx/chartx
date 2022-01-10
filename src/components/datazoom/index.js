@@ -424,9 +424,8 @@ class dataZoom extends Component
                     _.extend( app.dataFrame.range , range );
                 };
             
-                console.log( range )
+                console.log( range );
 
-                //不想要重新构造dataFrame，所以第一个参数为null
                 app.resetData( null , trigger );
                 app.fire("dataZoomDragIng");
             },

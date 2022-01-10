@@ -2,6 +2,7 @@ import Canvax from "canvax"
 import GraphsBase from "../relation/index"
 import dataFrame from "../../../core/dataFrame"
 import {getDefaultProps} from "../../../utils/tools"
+import Trigger from "../../trigger"
 import { checkDataIsJson, jsonToArrayForRelation, arrayToTreeJsonForRelation } from '../relation/data'
 
 let { _, event } = Canvax;
@@ -184,6 +185,7 @@ class Tree extends GraphsBase {
     }
 
     _drawNodes(){
+        let me = this;
         _.each(this.data.nodes, (node) => {
             this._drawNode( node );
             //shrink
@@ -285,9 +287,11 @@ class Tree extends GraphsBase {
                                     }
                                 };
 
-                                this.app.resetData( null , {
+                                let trigger = new Trigger( me, {
                                     origin : node.key
                                 } );
+
+                                this.app.resetData( null ,  trigger);
                             }
                             
                             this.app.fire(e.type, e);

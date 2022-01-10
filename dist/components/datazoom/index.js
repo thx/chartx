@@ -333,8 +333,7 @@ var dataZoom = /*#__PURE__*/function (_Component) {
           }
 
           ;
-          console.log(range); //不想要重新构造dataFrame，所以第一个参数为null
-
+          console.log(range);
           app.resetData(null, trigger);
           app.fire("dataZoomDragIng");
         },
