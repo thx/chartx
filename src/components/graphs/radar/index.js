@@ -172,9 +172,10 @@ class RadarGraphs extends GraphsBase
                 me.app.fire( e.type, e );
             });
             
+
+            let _nodes = [];
             if( me.node.enabled ){
                 //绘制圆点
-                let _nodes = [];
                 _.each( list , function( node, i ){
                     pointList.push([ node.point.x, node.point.y ]);
                     let _node = new Circle({
@@ -204,8 +205,9 @@ class RadarGraphs extends GraphsBase
                     });
                     _nodes.push( _node );
                 } );
-                group.nodes = _nodes;
             };
+
+            group.nodes = _nodes;
 
             me.groups[ field ] = group;
 
@@ -248,20 +250,24 @@ class RadarGraphs extends GraphsBase
     {
         if( node.focused ) return;
         let me = this;
-        let _node = me.groups[ node.field ].nodes[ node.iNode ];
-        _node.context.r += 1;
-        _node.context.fillStyle = me.node.strokeStyle;
-        _node.context.strokeStyle = _node._strokeStyle;
+        if(me.node.enabled){
+            let _node = me.groups[ node.field ].nodes[ node.iNode ];
+            _node.context.r += 1;
+            _node.context.fillStyle = me.node.strokeStyle;
+            _node.context.strokeStyle = _node._strokeStyle;
+        }
         node.focused = true;
     }
     unfocusOf( node )
     {
         if( !node.focused ) return;
         let me = this;
-        let _node = me.groups[ node.field ].nodes[ node.iNode ];
-        _node.context.r -= 1;
-        _node.context.fillStyle = _node._strokeStyle;
-        _node.context.strokeStyle = me.node.strokeStyle;
+        if(me.node.enabled){
+            let _node = me.groups[ node.field ].nodes[ node.iNode ];
+            _node.context.r -= 1;
+            _node.context.fillStyle = _node._strokeStyle;
+            _node.context.strokeStyle = me.node.strokeStyle;
+        }
         node.focused = false;
     }
 

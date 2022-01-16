@@ -8048,6 +8048,7 @@ var _default = {
       var codeWithoutVariables = code.slice(0, range[0]) + code.slice(range[1]);
       return this._eval(codeWithoutVariables, 'options', 'variables', variables);
     } catch (e) {
+      console.log('parse error');
       return {};
     }
   }
@@ -11564,7 +11565,7 @@ var Axis = /*#__PURE__*/function (_baseAxis) {
             },
             strokeStyle: {
               detail: '描边颜色',
-              "default": '#cccccc'
+              "default": '#e6e6e6'
             }
           }
         },
@@ -11586,7 +11587,7 @@ var Axis = /*#__PURE__*/function (_baseAxis) {
             },
             strokeStyle: {
               detail: '轴线的颜色',
-              "default": '#cccccc'
+              "default": '#e6e6e6'
             }
           }
         },
@@ -11599,11 +11600,11 @@ var Axis = /*#__PURE__*/function (_baseAxis) {
             },
             fontColor: {
               detail: '文本颜色',
-              "default": '#999'
+              "default": '#ccc'
             },
             fontSize: {
               detail: '字体大小',
-              "default": 12
+              "default": 10
             },
             rotation: {
               detail: '旋转角度',
@@ -13164,7 +13165,7 @@ var rectGrid = /*#__PURE__*/function (_event$Dispatcher) {
                 },
                 strokeStyle: {
                   detail: '线颜色',
-                  "default": '#f0f0f0'
+                  "default": '#e6e6e6'
                 }
               }
             },
@@ -21011,10 +21012,10 @@ var RadarGraphs = /*#__PURE__*/function (_GraphsBase) {
           me.app.fire(e.type, e);
         });
 
+        var _nodes = [];
+
         if (me.node.enabled) {
           //绘制圆点
-          var _nodes = [];
-
           _.each(list, function (node, i) {
             pointList.push([node.point.x, node.point.y]);
 
@@ -21047,9 +21048,8 @@ var RadarGraphs = /*#__PURE__*/function (_GraphsBase) {
 
             _nodes.push(_node);
           });
-
-          group.nodes = _nodes;
         }
+        group.nodes = _nodes;
         me.groups[field] = group;
         iGroup++;
       });
@@ -21091,10 +21091,14 @@ var RadarGraphs = /*#__PURE__*/function (_GraphsBase) {
     value: function focusOf(node) {
       if (node.focused) return;
       var me = this;
-      var _node = me.groups[node.field].nodes[node.iNode];
-      _node.context.r += 1;
-      _node.context.fillStyle = me.node.strokeStyle;
-      _node.context.strokeStyle = _node._strokeStyle;
+
+      if (me.node.enabled) {
+        var _node = me.groups[node.field].nodes[node.iNode];
+        _node.context.r += 1;
+        _node.context.fillStyle = me.node.strokeStyle;
+        _node.context.strokeStyle = _node._strokeStyle;
+      }
+
       node.focused = true;
     }
   }, {
@@ -21102,10 +21106,14 @@ var RadarGraphs = /*#__PURE__*/function (_GraphsBase) {
     value: function unfocusOf(node) {
       if (!node.focused) return;
       var me = this;
-      var _node = me.groups[node.field].nodes[node.iNode];
-      _node.context.r -= 1;
-      _node.context.fillStyle = _node._strokeStyle;
-      _node.context.strokeStyle = me.node.strokeStyle;
+
+      if (me.node.enabled) {
+        var _node = me.groups[node.field].nodes[node.iNode];
+        _node.context.r -= 1;
+        _node.context.fillStyle = _node._strokeStyle;
+        _node.context.strokeStyle = me.node.strokeStyle;
+      }
+
       node.focused = false;
     }
   }, {
@@ -26171,6 +26179,7 @@ function scaleSolution(solution, width, height, padding) {
       yRange = bounds.yRange;
 
   if (xRange.max == xRange.min || yRange.max == yRange.min) {
+    console.log("not scaling solution: zero size detected");
     return solution;
   }
 
@@ -26817,7 +26826,9 @@ function computeTextCentres(circles, areas) {
     var centre = computeTextCentre(interior, exterior);
     ret[area] = centre;
 
-    if (centre.disjoint && areas[i].size > 0) ;
+    if (centre.disjoint && areas[i].size > 0) {
+      console.log("WARNING: area " + area + " not represented on screen");
+    }
   }
 
   return ret;
@@ -29241,6 +29252,7 @@ function jsonToArrayForRelation(data, options, _childrenField) {
   var label = options.node && options.node.content && options.node.content.field;
 
   if (!checkDataIsJson(data, key, childrenKey)) {
+    console.error('该数据不能正确绘制，请提供数组对象形式的数据！');
     return result;
   }
   var childrens = [];
@@ -33018,6 +33030,7 @@ var _typeof2 = interopRequireDefault(_typeof_1$1);
         try {
           return fn();
         } finally {
+          console.log(name + " time: " + (_.now() - start) + "ms");
         }
       }
 
@@ -42793,6 +42806,7 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
           }
 
           if (e.type == "wheel") {
+            console.log(_deltaY, e.deltaY);
 
             if (Math.abs(e.deltaY) > Math.abs(_deltaY)) {
               _deltaY = e.deltaY;
@@ -43192,6 +43206,7 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
       var me = this;
 
       _.each(this.data.edges, function (edge) {
+        console.log(edge.points);
         var key = edge.key.join('_');
 
         if (me.line.isTree && edge.points.length == 3) {
@@ -47614,6 +47629,7 @@ var Map = /*#__PURE__*/function (_GraphsBase) {
       this._setNodeStyle(_path, 'select');
 
       nodeData.selected = true;
+      console.log("select:true");
     }
   }, {
     key: "unselectAt",
@@ -47627,6 +47643,7 @@ var Map = /*#__PURE__*/function (_GraphsBase) {
       this._setNodeStyle(_path);
 
       geoGraph.selected = false;
+      console.log("select:false");
 
       if (geoGraph.focused) {
         this.focusAt(adcode);
@@ -49019,6 +49036,7 @@ var dataZoom = /*#__PURE__*/function (_Component) {
 
             _.extend(app.dataFrame.range, range);
           }
+          console.log(range);
           app.resetData(null, trigger);
           app.fire("dataZoomDragIng");
         },
@@ -50414,7 +50432,7 @@ var Tips = /*#__PURE__*/function (_Component) {
     value: function _creatTipDom(e) {
       this._tipDom = document.createElement("div");
       this._tipDom.className = "chart-tips";
-      this._tipDom.style.cssText += "; border-radius:" + this.borderRadius + "px;background:" + this.fillStyle + ";border:1px solid " + this.strokeStyle + ";visibility:hidden;position:fixed;enabled:inline-block;*enabled:inline;*zoom:1;padding:6px;color:" + this.fontColor + ";line-height:1.5";
+      this._tipDom.style.cssText += "; border-radius:" + this.borderRadius + "px;background:" + this.fillStyle + ";border:1px solid " + this.strokeStyle + ";visibility:hidden;position:fixed;z-index:99999;enabled:inline-block;*enabled:inline;*zoom:1;padding:6px;color:" + this.fontColor + ";line-height:1.5";
       this._tipDom.style.cssText += "; box-shadow:1px 1px 3px " + this.strokeStyle + ";";
       this._tipDom.style.cssText += "; border:none;white-space:nowrap;word-wrap:normal;";
       this._tipDom.style.cssText += "; text-align:left;pointer-events:none;";
@@ -53508,7 +53526,7 @@ if (projectTheme && projectTheme.length) {
 }
 
 var chartx = {
-  version: '1.1.56',
+  version: '1.1.57',
   options: {}
 };
 

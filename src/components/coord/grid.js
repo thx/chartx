@@ -34,7 +34,7 @@ export default class rectGrid extends event.Dispatcher
                             },
                             strokeStyle : {
                                 detail : '线颜色',
-                                default: '#f0f0f0'
+                                default: '#e6e6e6'
                             }
                         }
                     },
