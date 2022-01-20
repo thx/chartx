@@ -11589,7 +11589,7 @@ var Axis = /*#__PURE__*/function (_baseAxis) {
             },
             strokeStyle: {
               detail: '描边颜色',
-              "default": '#cccccc'
+              "default": '#e6e6e6'
             }
           }
         },
@@ -11611,7 +11611,7 @@ var Axis = /*#__PURE__*/function (_baseAxis) {
             },
             strokeStyle: {
               detail: '轴线的颜色',
-              "default": '#cccccc'
+              "default": '#e6e6e6'
             }
           }
         },
@@ -11624,11 +11624,11 @@ var Axis = /*#__PURE__*/function (_baseAxis) {
             },
             fontColor: {
               detail: '文本颜色',
-              "default": '#999'
+              "default": '#ccc'
             },
             fontSize: {
               detail: '字体大小',
-              "default": 12
+              "default": 10
             },
             rotation: {
               detail: '旋转角度',
@@ -13196,7 +13196,7 @@ var rectGrid = /*#__PURE__*/function (_event$Dispatcher) {
                 },
                 strokeStyle: {
                   detail: '线颜色',
-                  "default": '#f0f0f0'
+                  "default": '#e6e6e6'
                 }
               }
             },
@@ -21035,10 +21035,10 @@ var RadarGraphs = /*#__PURE__*/function (_GraphsBase) {
           me.app.fire(e.type, e);
         });
 
+        var _nodes = [];
+
         if (me.node.enabled) {
           //绘制圆点
-          var _nodes = [];
-
           _.each(list, function (node, i) {
             pointList.push([node.point.x, node.point.y]);
 
@@ -21071,9 +21071,8 @@ var RadarGraphs = /*#__PURE__*/function (_GraphsBase) {
 
             _nodes.push(_node);
           });
-
-          group.nodes = _nodes;
         }
+        group.nodes = _nodes;
         me.groups[field] = group;
         iGroup++;
       });
@@ -21115,10 +21114,14 @@ var RadarGraphs = /*#__PURE__*/function (_GraphsBase) {
     value: function focusOf(node) {
       if (node.focused) return;
       var me = this;
-      var _node = me.groups[node.field].nodes[node.iNode];
-      _node.context.r += 1;
-      _node.context.fillStyle = me.node.strokeStyle;
-      _node.context.strokeStyle = _node._strokeStyle;
+
+      if (me.node.enabled) {
+        var _node = me.groups[node.field].nodes[node.iNode];
+        _node.context.r += 1;
+        _node.context.fillStyle = me.node.strokeStyle;
+        _node.context.strokeStyle = _node._strokeStyle;
+      }
+
       node.focused = true;
     }
   }, {
@@ -21126,10 +21129,14 @@ var RadarGraphs = /*#__PURE__*/function (_GraphsBase) {
     value: function unfocusOf(node) {
       if (!node.focused) return;
       var me = this;
-      var _node = me.groups[node.field].nodes[node.iNode];
-      _node.context.r -= 1;
-      _node.context.fillStyle = _node._strokeStyle;
-      _node.context.strokeStyle = me.node.strokeStyle;
+
+      if (me.node.enabled) {
+        var _node = me.groups[node.field].nodes[node.iNode];
+        _node.context.r -= 1;
+        _node.context.fillStyle = _node._strokeStyle;
+        _node.context.strokeStyle = me.node.strokeStyle;
+      }
+
       node.focused = false;
     }
   }, {
@@ -50438,15 +50445,14 @@ var Tips = /*#__PURE__*/function (_Component) {
     key: "_creatTipDom",
     value: function _creatTipDom(e) {
       if (document) {
-        var _tipDom = document.createElement("div");
-
-        _tipDom.className = "chart-tips";
-        _tipDom.style.cssText += "; border-radius:" + this.borderRadius + "px;background:" + this.fillStyle + ";border:1px solid " + this.strokeStyle + ";visibility:hidden;position:fixed;enabled:inline-block;*enabled:inline;*zoom:1;padding:6px;color:" + this.fontColor + ";line-height:1.5";
-        _tipDom.style.cssText += "; box-shadow:1px 1px 3px " + this.strokeStyle + ";";
-        _tipDom.style.cssText += "; border:none;white-space:nowrap;word-wrap:normal;";
-        _tipDom.style.cssText += "; text-align:left;pointer-events:none;";
-        _tipDom.style.cssText += "; -webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;";
-        this.tipDomContainer && this.tipDomContainer.appendChild(_tipDom);
+        this._tipDom = document.createElement("div");
+        this._tipDom.className = "chart-tips";
+        this._tipDom.style.cssText += "; border-radius:" + this.borderRadius + "px;background:" + this.fillStyle + ";border:1px solid " + this.strokeStyle + ";visibility:hidden;position:fixed;z-index:99999;enabled:inline-block;*enabled:inline;*zoom:1;padding:6px;color:" + this.fontColor + ";line-height:1.5";
+        this._tipDom.style.cssText += "; box-shadow:1px 1px 3px " + this.strokeStyle + ";";
+        this._tipDom.style.cssText += "; border:none;white-space:nowrap;word-wrap:normal;";
+        this._tipDom.style.cssText += "; text-align:left;pointer-events:none;";
+        this._tipDom.style.cssText += "; -webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;";
+        this.tipDomContainer && this.tipDomContainer.appendChild(this._tipDom);
         return _tipDom;
       }
     }
@@ -53548,7 +53554,7 @@ if (projectTheme && projectTheme.length) {
 }
 
 var chartx = {
-  version: '1.1.56',
+  version: '1.1.59',
   options: {}
 };
 

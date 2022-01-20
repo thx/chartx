@@ -207,14 +207,14 @@ class Tips extends Component {
      */
     _creatTipDom(e) {
         if( document ){
-            let _tipDom = document.createElement("div");
-            _tipDom.className = "chart-tips";
-            _tipDom.style.cssText += "; border-radius:" + this.borderRadius + "px;background:" + this.fillStyle + ";border:1px solid " + this.strokeStyle + ";visibility:hidden;position:fixed;enabled:inline-block;*enabled:inline;*zoom:1;padding:6px;color:" + this.fontColor + ";line-height:1.5"
-            _tipDom.style.cssText += "; box-shadow:1px 1px 3px " + this.strokeStyle + ";"
-            _tipDom.style.cssText += "; border:none;white-space:nowrap;word-wrap:normal;"
-            _tipDom.style.cssText += "; text-align:left;pointer-events:none;"
-            _tipDom.style.cssText += "; -webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;"
-            this.tipDomContainer && this.tipDomContainer.appendChild(_tipDom);
+            this._tipDom = document.createElement("div");
+            this._tipDom.className = "chart-tips";
+            this._tipDom.style.cssText += "; border-radius:" + this.borderRadius + "px;background:" + this.fillStyle + ";border:1px solid " + this.strokeStyle + ";visibility:hidden;position:fixed;z-index:99999;enabled:inline-block;*enabled:inline;*zoom:1;padding:6px;color:" + this.fontColor + ";line-height:1.5"
+            this._tipDom.style.cssText += "; box-shadow:1px 1px 3px " + this.strokeStyle + ";"
+            this._tipDom.style.cssText += "; border:none;white-space:nowrap;word-wrap:normal;"
+            this._tipDom.style.cssText += "; text-align:left;pointer-events:none;"
+            this._tipDom.style.cssText += "; -webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;"
+            this.tipDomContainer && this.tipDomContainer.appendChild(this._tipDom);
             return _tipDom;
         }
     }

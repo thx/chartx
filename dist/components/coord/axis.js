@@ -147,7 +147,7 @@ var Axis = /*#__PURE__*/function (_baseAxis) {
             },
             strokeStyle: {
               detail: '描边颜色',
-              "default": '#cccccc'
+              "default": '#e6e6e6'
             }
           }
         },
@@ -169,7 +169,7 @@ var Axis = /*#__PURE__*/function (_baseAxis) {
             },
             strokeStyle: {
               detail: '轴线的颜色',
-              "default": '#cccccc'
+              "default": '#e6e6e6'
             }
           }
         },
@@ -182,11 +182,11 @@ var Axis = /*#__PURE__*/function (_baseAxis) {
             },
             fontColor: {
               detail: '文本颜色',
-              "default": '#999'
+              "default": '#ccc'
             },
             fontSize: {
               detail: '字体大小',
-              "default": 12
+              "default": 10
             },
             rotation: {
               detail: '旋转角度',
