@@ -7,6 +7,8 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports["default"] = void 0;
 
+var _toConsumableArray2 = _interopRequireDefault(require("@babel/runtime/helpers/toConsumableArray"));
+
 var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
 var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
@@ -506,6 +508,8 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
       var _fillStyle = me._getProp(me.area.fillStyle) || me._getLineStrokeStyle(null, "fillStyle");
 
       if (_.isArray(me.area.alpha) && !(_fillStyle instanceof CanvasGradient)) {
+        var _me$ctx;
+
         //alpha如果是数组，那么就是渐变背景，那么就至少要有两个值
         //如果拿回来的style已经是个gradient了，那么就不管了
         me.area.alpha.length = 2;
@@ -520,19 +524,13 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
           me.area.alpha[1] = 0;
         }
 
-        ; //从bline中找到最高的点
+        ;
 
-        var topP = _.min(me._bline.context.pointList, function (p) {
-          return p[1];
-        });
+        var lps = this._getLinearGradientPoints();
 
-        if (topP[0] === undefined || topP[1] === undefined) {
-          return null;
-        }
+        if (!lps) return; //创建一个线性渐变
 
-        ; //创建一个线性渐变
-
-        fill_gradient = me.ctx.createLinearGradient(topP[0], topP[1], topP[0], 0);
+        fill_gradient = (_me$ctx = me.ctx).createLinearGradient.apply(_me$ctx, (0, _toConsumableArray2["default"])(lps));
         var rgb = (0, _color.colorRgb)(_fillStyle);
         var rgba0 = rgb.replace(')', ', ' + me._getProp(me.area.alpha[0]) + ')').replace('RGB', 'RGBA');
         fill_gradient.addColorStop(0, rgba0);
@@ -559,33 +557,32 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
       ;
 
       if (this._opt.line.strokeStyle.lineargradient) {
+        var _me$ctx2;
+
         //如果用户配置 填充是一个线性渐变
         //从bline中找到最高的点
-        !pointList && (pointList = this._bline.context.pointList);
+        // !pointList && ( pointList = this._bline.context.pointList );
+        // let topP = _.min(pointList, function(p) {
+        //     return p[1];
+        // });
+        // let bottomP = _.max(pointList, function(p) {
+        //     return p[1];
+        // });
+        // if( from == "fillStyle" ){
+        //     bottomP = [ 0 , 0 ];
+        // };
+        // if( topP[0] === undefined || topP[1] === undefined || bottomP[1] === undefined ){
+        //     return null;
+        // };
+        var lps = this._getLinearGradientPoints(this.line.lineargradientDriction);
 
-        var topP = _.min(pointList, function (p) {
-          return p[1];
-        });
-
-        var bottomP = _.max(pointList, function (p) {
-          return p[1];
-        });
-
-        if (from == "fillStyle") {
-          bottomP = [0, 0];
-        }
-
-        ;
-
-        if (topP[0] === undefined || topP[1] === undefined || bottomP[1] === undefined) {
-          return null;
-        }
-
-        ; //let bottomP = [ 0 , 0 ];
+        if (!lps) return;
+        debugger; //let bottomP = [ 0 , 0 ];
         //创建一个线性渐变
         //console.log( topP[0] + "|"+ topP[1]+ "|"+  topP[0]+ "|"+ bottomP[1] )
+        //_style = me.ctx.createLinearGradient(topP[0], topP[1], topP[0], bottomP[1]);
 
-        _style = me.ctx.createLinearGradient(topP[0], topP[1], topP[0], bottomP[1]);
+        _style = (_me$ctx2 = me.ctx).createLinearGradient.apply(_me$ctx2, (0, _toConsumableArray2["default"])(lps));
 
         _.each(this._opt.line.strokeStyle.lineargradient, function (item) {
           _style.addColorStop(item.position, item.color);
@@ -601,6 +598,64 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
 
         return _style;
       }
+    }
+  }, {
+    key: "_getLinearGradientPoints",
+    value: function _getLinearGradientPoints() {
+      var driction = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'topBottom';
+      var linearPointStart, linearPointEnd;
+      var pointList = this._bline.context.pointList;
+
+      if (driction == 'topBottom') {
+        //top -> bottom
+        var topX = 0,
+            topY = 0,
+            bottomX = 0,
+            bottomY = 0;
+
+        for (var i = 0, l = pointList.length; i < l; i++) {
+          var point = pointList[i];
+          topY = Math.min(point[1], topY);
+          bottomY = Math.max(point[1], bottomY);
+        }
+
+        linearPointStart = {
+          x: topX,
+          y: topY
+        };
+        linearPointEnd = {
+          x: bottomX,
+          y: bottomY
+        };
+      } else {
+        //left->right
+        var leftX = 0,
+            rightX = 0,
+            leftY = 0,
+            rightY = 0;
+
+        for (var _i = 0, _l = pointList.length; _i < _l; _i++) {
+          var _point2 = pointList[_i];
+          leftX = Math.min(_point2[0], leftX);
+          rightX = Math.max(_point2[0], rightX);
+        }
+
+        ;
+        linearPointStart = {
+          x: leftX,
+          y: leftY
+        };
+        linearPointEnd = {
+          x: rightX,
+          y: rightY
+        };
+      }
+
+      if (linearPointStart.x == undefined || linearPointStart.y == undefined || linearPointEnd.x == undefined || linearPointEnd.y == undefined) {
+        return null;
+      }
+
+      return [linearPointStart.x, linearPointStart.y, linearPointEnd.x, linearPointEnd.y];
     }
   }, {
     key: "_createNodes",
@@ -964,6 +1019,11 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
               "default": undefined //不会覆盖掉constructor中的定义
 
             },
+            lineargradientDriction: {
+              detail: '线的填充色是渐变对象的话，这里用来描述方向，默认从上到下（topBottom）,可选leftRight',
+              "default": 'topBottom' //可选 leftRight
+
+            },
             lineWidth: {
               detail: '线的宽度',
               "default": 2
@@ -1063,6 +1123,11 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
             enabled: {
               detail: '是否开启',
               "default": true
+            },
+            lineargradientDriction: {
+              detail: '面积的填充色是渐变对象的话，这里用来描述方向，默认null(就会从line中取),从上到下（topBottom）,可选leftRight',
+              "default": null //默认null（就会和line保持一致），可选 topBottom leftRight
+
             },
             fillStyle: {
               detail: '面积背景色',

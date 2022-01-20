@@ -8048,6 +8048,7 @@ var _default = {
       var codeWithoutVariables = code.slice(0, range[0]) + code.slice(range[1]);
       return this._eval(codeWithoutVariables, 'options', 'variables', variables);
     } catch (e) {
+      console.log('parse error');
       return {};
     }
   }
@@ -16579,6 +16580,83 @@ exports["default"] = _default;
 
 unwrapExports(bar);
 
+var arrayLikeToArray = createCommonjsModule(function (module) {
+function _arrayLikeToArray(arr, len) {
+  if (len == null || len > arr.length) len = arr.length;
+
+  for (var i = 0, arr2 = new Array(len); i < len; i++) {
+    arr2[i] = arr[i];
+  }
+
+  return arr2;
+}
+
+module.exports = _arrayLikeToArray;
+module.exports["default"] = module.exports, module.exports.__esModule = true;
+});
+
+unwrapExports(arrayLikeToArray);
+
+var arrayWithoutHoles = createCommonjsModule(function (module) {
+function _arrayWithoutHoles(arr) {
+  if (Array.isArray(arr)) return arrayLikeToArray(arr);
+}
+
+module.exports = _arrayWithoutHoles;
+module.exports["default"] = module.exports, module.exports.__esModule = true;
+});
+
+unwrapExports(arrayWithoutHoles);
+
+var iterableToArray = createCommonjsModule(function (module) {
+function _iterableToArray(iter) {
+  if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter);
+}
+
+module.exports = _iterableToArray;
+module.exports["default"] = module.exports, module.exports.__esModule = true;
+});
+
+unwrapExports(iterableToArray);
+
+var unsupportedIterableToArray = createCommonjsModule(function (module) {
+function _unsupportedIterableToArray(o, minLen) {
+  if (!o) return;
+  if (typeof o === "string") return arrayLikeToArray(o, minLen);
+  var n = Object.prototype.toString.call(o).slice(8, -1);
+  if (n === "Object" && o.constructor) n = o.constructor.name;
+  if (n === "Map" || n === "Set") return Array.from(o);
+  if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return arrayLikeToArray(o, minLen);
+}
+
+module.exports = _unsupportedIterableToArray;
+module.exports["default"] = module.exports, module.exports.__esModule = true;
+});
+
+unwrapExports(unsupportedIterableToArray);
+
+var nonIterableSpread = createCommonjsModule(function (module) {
+function _nonIterableSpread() {
+  throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+}
+
+module.exports = _nonIterableSpread;
+module.exports["default"] = module.exports, module.exports.__esModule = true;
+});
+
+unwrapExports(nonIterableSpread);
+
+var toConsumableArray = createCommonjsModule(function (module) {
+function _toConsumableArray(arr) {
+  return arrayWithoutHoles(arr) || iterableToArray(arr) || unsupportedIterableToArray(arr) || nonIterableSpread();
+}
+
+module.exports = _toConsumableArray;
+module.exports["default"] = module.exports, module.exports.__esModule = true;
+});
+
+unwrapExports(toConsumableArray);
+
 var arrayWithHoles = createCommonjsModule(function (module) {
 function _arrayWithHoles(arr) {
   if (Array.isArray(arr)) return arr;
@@ -16626,39 +16704,6 @@ module.exports["default"] = module.exports, module.exports.__esModule = true;
 });
 
 unwrapExports(iterableToArrayLimit);
-
-var arrayLikeToArray = createCommonjsModule(function (module) {
-function _arrayLikeToArray(arr, len) {
-  if (len == null || len > arr.length) len = arr.length;
-
-  for (var i = 0, arr2 = new Array(len); i < len; i++) {
-    arr2[i] = arr[i];
-  }
-
-  return arr2;
-}
-
-module.exports = _arrayLikeToArray;
-module.exports["default"] = module.exports, module.exports.__esModule = true;
-});
-
-unwrapExports(arrayLikeToArray);
-
-var unsupportedIterableToArray = createCommonjsModule(function (module) {
-function _unsupportedIterableToArray(o, minLen) {
-  if (!o) return;
-  if (typeof o === "string") return arrayLikeToArray(o, minLen);
-  var n = Object.prototype.toString.call(o).slice(8, -1);
-  if (n === "Object" && o.constructor) n = o.constructor.name;
-  if (n === "Map" || n === "Set") return Array.from(o);
-  if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return arrayLikeToArray(o, minLen);
-}
-
-module.exports = _unsupportedIterableToArray;
-module.exports["default"] = module.exports, module.exports.__esModule = true;
-});
-
-unwrapExports(unsupportedIterableToArray);
 
 var nonIterableRest = createCommonjsModule(function (module) {
 function _nonIterableRest() {
@@ -16807,6 +16852,8 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = void 0;
+
+var _toConsumableArray2 = interopRequireDefault(toConsumableArray);
 
 var _classCallCheck2 = interopRequireDefault(classCallCheck$1);
 
@@ -17259,6 +17306,8 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
       var _fillStyle = me._getProp(me.area.fillStyle) || me._getLineStrokeStyle(null, "fillStyle");
 
       if (_.isArray(me.area.alpha) && !(_fillStyle instanceof CanvasGradient)) {
+        var _me$ctx;
+
         //alpha如果是数组，那么就是渐变背景，那么就至少要有两个值
         //如果拿回来的style已经是个gradient了，那么就不管了
         me.area.alpha.length = 2;
@@ -17271,15 +17320,11 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
           me.area.alpha[1] = 0;
         }
 
-        var topP = _.min(me._bline.context.pointList, function (p) {
-          return p[1];
-        });
+        var lps = this._getLinearGradientPoints();
 
-        if (topP[0] === undefined || topP[1] === undefined) {
-          return null;
-        }
+        if (!lps) return; //创建一个线性渐变
 
-        fill_gradient = me.ctx.createLinearGradient(topP[0], topP[1], topP[0], 0);
+        fill_gradient = (_me$ctx = me.ctx).createLinearGradient.apply(_me$ctx, (0, _toConsumableArray2["default"])(lps));
         var rgb = (0, color.colorRgb)(_fillStyle);
         var rgba0 = rgb.replace(')', ', ' + me._getProp(me.area.alpha[0]) + ')').replace('RGB', 'RGBA');
         fill_gradient.addColorStop(0, rgba0);
@@ -17302,29 +17347,32 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
       }
 
       if (this._opt.line.strokeStyle.lineargradient) {
+        var _me$ctx2;
+
         //如果用户配置 填充是一个线性渐变
         //从bline中找到最高的点
-        !pointList && (pointList = this._bline.context.pointList);
+        // !pointList && ( pointList = this._bline.context.pointList );
+        // let topP = _.min(pointList, function(p) {
+        //     return p[1];
+        // });
+        // let bottomP = _.max(pointList, function(p) {
+        //     return p[1];
+        // });
+        // if( from == "fillStyle" ){
+        //     bottomP = [ 0 , 0 ];
+        // };
+        // if( topP[0] === undefined || topP[1] === undefined || bottomP[1] === undefined ){
+        //     return null;
+        // };
+        var lps = this._getLinearGradientPoints(this.line.lineargradientDriction);
 
-        var topP = _.min(pointList, function (p) {
-          return p[1];
-        });
-
-        var bottomP = _.max(pointList, function (p) {
-          return p[1];
-        });
-
-        if (from == "fillStyle") {
-          bottomP = [0, 0];
-        }
-
-        if (topP[0] === undefined || topP[1] === undefined || bottomP[1] === undefined) {
-          return null;
-        }
+        if (!lps) return;
+        debugger; //let bottomP = [ 0 , 0 ];
         //创建一个线性渐变
         //console.log( topP[0] + "|"+ topP[1]+ "|"+  topP[0]+ "|"+ bottomP[1] )
+        //_style = me.ctx.createLinearGradient(topP[0], topP[1], topP[0], bottomP[1]);
 
-        _style = me.ctx.createLinearGradient(topP[0], topP[1], topP[0], bottomP[1]);
+        _style = (_me$ctx2 = me.ctx).createLinearGradient.apply(_me$ctx2, (0, _toConsumableArray2["default"])(lps));
 
         _.each(this._opt.line.strokeStyle.lineargradient, function (item) {
           _style.addColorStop(item.position, item.color);
@@ -17340,6 +17388,62 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
 
         return _style;
       }
+    }
+  }, {
+    key: "_getLinearGradientPoints",
+    value: function _getLinearGradientPoints() {
+      var driction = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'topBottom';
+      var linearPointStart, linearPointEnd;
+      var pointList = this._bline.context.pointList;
+
+      if (driction == 'topBottom') {
+        //top -> bottom
+        var topX = 0,
+            topY = 0,
+            bottomX = 0,
+            bottomY = 0;
+
+        for (var i = 0, l = pointList.length; i < l; i++) {
+          var point = pointList[i];
+          topY = Math.min(point[1], topY);
+          bottomY = Math.max(point[1], bottomY);
+        }
+
+        linearPointStart = {
+          x: topX,
+          y: topY
+        };
+        linearPointEnd = {
+          x: bottomX,
+          y: bottomY
+        };
+      } else {
+        //left->right
+        var leftX = 0,
+            rightX = 0,
+            leftY = 0,
+            rightY = 0;
+
+        for (var _i = 0, _l = pointList.length; _i < _l; _i++) {
+          var _point2 = pointList[_i];
+          leftX = Math.min(_point2[0], leftX);
+          rightX = Math.max(_point2[0], rightX);
+        }
+        linearPointStart = {
+          x: leftX,
+          y: leftY
+        };
+        linearPointEnd = {
+          x: rightX,
+          y: rightY
+        };
+      }
+
+      if (linearPointStart.x == undefined || linearPointStart.y == undefined || linearPointEnd.x == undefined || linearPointEnd.y == undefined) {
+        return null;
+      }
+
+      return [linearPointStart.x, linearPointStart.y, linearPointEnd.x, linearPointEnd.y];
     }
   }, {
     key: "_createNodes",
@@ -17659,6 +17763,11 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
               "default": undefined //不会覆盖掉constructor中的定义
 
             },
+            lineargradientDriction: {
+              detail: '线的填充色是渐变对象的话，这里用来描述方向，默认从上到下（topBottom）,可选leftRight',
+              "default": 'topBottom' //可选 leftRight
+
+            },
             lineWidth: {
               detail: '线的宽度',
               "default": 2
@@ -17758,6 +17867,11 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
             enabled: {
               detail: '是否开启',
               "default": true
+            },
+            lineargradientDriction: {
+              detail: '面积的填充色是渐变对象的话，这里用来描述方向，默认null(就会从line中取),从上到下（topBottom）,可选leftRight',
+              "default": null //默认null（就会和line保持一致），可选 topBottom leftRight
+
             },
             fillStyle: {
               detail: '面积背景色',
@@ -26178,6 +26292,7 @@ function scaleSolution(solution, width, height, padding) {
       yRange = bounds.yRange;
 
   if (xRange.max == xRange.min || yRange.max == yRange.min) {
+    console.log("not scaling solution: zero size detected");
     return solution;
   }
 
@@ -26824,7 +26939,9 @@ function computeTextCentres(circles, areas) {
     var centre = computeTextCentre(interior, exterior);
     ret[area] = centre;
 
-    if (centre.disjoint && areas[i].size > 0) ;
+    if (centre.disjoint && areas[i].size > 0) {
+      console.log("WARNING: area " + area + " not represented on screen");
+    }
   }
 
   return ret;
@@ -29143,50 +29260,6 @@ exports["default"] = _default2;
 
 unwrapExports(progress);
 
-var arrayWithoutHoles = createCommonjsModule(function (module) {
-function _arrayWithoutHoles(arr) {
-  if (Array.isArray(arr)) return arrayLikeToArray(arr);
-}
-
-module.exports = _arrayWithoutHoles;
-module.exports["default"] = module.exports, module.exports.__esModule = true;
-});
-
-unwrapExports(arrayWithoutHoles);
-
-var iterableToArray = createCommonjsModule(function (module) {
-function _iterableToArray(iter) {
-  if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter);
-}
-
-module.exports = _iterableToArray;
-module.exports["default"] = module.exports, module.exports.__esModule = true;
-});
-
-unwrapExports(iterableToArray);
-
-var nonIterableSpread = createCommonjsModule(function (module) {
-function _nonIterableSpread() {
-  throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-}
-
-module.exports = _nonIterableSpread;
-module.exports["default"] = module.exports, module.exports.__esModule = true;
-});
-
-unwrapExports(nonIterableSpread);
-
-var toConsumableArray = createCommonjsModule(function (module) {
-function _toConsumableArray(arr) {
-  return arrayWithoutHoles(arr) || iterableToArray(arr) || unsupportedIterableToArray(arr) || nonIterableSpread();
-}
-
-module.exports = _toConsumableArray;
-module.exports["default"] = module.exports, module.exports.__esModule = true;
-});
-
-unwrapExports(toConsumableArray);
-
 var data = createCommonjsModule(function (module, exports) {
 
 Object.defineProperty(exports, "__esModule", {
@@ -29248,6 +29321,7 @@ function jsonToArrayForRelation(data, options, _childrenField) {
   var label = options.node && options.node.content && options.node.content.field;
 
   if (!checkDataIsJson(data, key, childrenKey)) {
+    console.error('该数据不能正确绘制，请提供数组对象形式的数据！');
     return result;
   }
   var childrens = [];
@@ -33025,6 +33099,7 @@ var _typeof2 = interopRequireDefault(_typeof_1$1);
         try {
           return fn();
         } finally {
+          console.log(name + " time: " + (_.now() - start) + "ms");
         }
       }
 
@@ -42800,6 +42875,7 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
           }
 
           if (e.type == "wheel") {
+            console.log(_deltaY, e.deltaY);
 
             if (Math.abs(e.deltaY) > Math.abs(_deltaY)) {
               _deltaY = e.deltaY;
@@ -43199,6 +43275,7 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
       var me = this;
 
       _.each(this.data.edges, function (edge) {
+        console.log(edge.points);
         var key = edge.key.join('_');
 
         if (me.line.isTree && edge.points.length == 3) {
@@ -47621,6 +47698,7 @@ var Map = /*#__PURE__*/function (_GraphsBase) {
       this._setNodeStyle(_path, 'select');
 
       nodeData.selected = true;
+      console.log("select:true");
     }
   }, {
     key: "unselectAt",
@@ -47634,6 +47712,7 @@ var Map = /*#__PURE__*/function (_GraphsBase) {
       this._setNodeStyle(_path);
 
       geoGraph.selected = false;
+      console.log("select:false");
 
       if (geoGraph.focused) {
         this.focusAt(adcode);
@@ -49026,6 +49105,7 @@ var dataZoom = /*#__PURE__*/function (_Component) {
 
             _.extend(app.dataFrame.range, range);
           }
+          console.log(range);
           app.resetData(null, trigger);
           app.fire("dataZoomDragIng");
         },

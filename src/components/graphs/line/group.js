@@ -25,6 +25,10 @@ export default class LineGraphsGroup extends event.Dispatcher
                         detail: '线的颜色',
                         default: undefined //不会覆盖掉constructor中的定义
                     },
+                    lineargradientDriction: {
+                        detail: '线的填充色是渐变对象的话，这里用来描述方向，默认从上到下（topBottom）,可选leftRight',
+                        default: 'topBottom' //可选 leftRight
+                    },
                     lineWidth: {
                         detail: '线的宽度',
                         default: 2
@@ -124,6 +128,10 @@ export default class LineGraphsGroup extends event.Dispatcher
                     enabled : {
                         detail: '是否开启',
                         default: true
+                    },
+                    lineargradientDriction: {
+                        detail: '面积的填充色是渐变对象的话，这里用来描述方向，默认null(就会从line中取),从上到下（topBottom）,可选leftRight',
+                        default: null //默认null（就会和line保持一致），可选 topBottom leftRight
                     },
                     fillStyle: {
                         detail: '面积背景色',
@@ -547,17 +555,11 @@ export default class LineGraphsGroup extends event.Dispatcher
                 me.area.alpha[1] = 0;
             };
 
-            //从bline中找到最高的点
-            let topP = _.min(me._bline.context.pointList, function(p) {
-                return p[1]
-            });
-
-            if( topP[0] === undefined || topP[1] === undefined ){
-                return null
-            };
+            let lps = this._getLinearGradientPoints();
+            if(!lps) return;
 
             //创建一个线性渐变
-            fill_gradient = me.ctx.createLinearGradient(topP[0], topP[1], topP[0], 0);
+            fill_gradient = me.ctx.createLinearGradient( ...lps );
 
             let rgb = colorRgb( _fillStyle );
             let rgba0 = rgb.replace(')', ', ' + me._getProp(me.area.alpha[0]) + ')').replace('RGB', 'RGBA');
@@ -584,26 +586,30 @@ export default class LineGraphsGroup extends event.Dispatcher
         if( this._opt.line.strokeStyle.lineargradient ){
             //如果用户配置 填充是一个线性渐变
             //从bline中找到最高的点
-            !pointList && ( pointList = this._bline.context.pointList );
+            // !pointList && ( pointList = this._bline.context.pointList );
             
-            let topP = _.min(pointList, function(p) {
-                return p[1];
-            });
-            let bottomP = _.max(pointList, function(p) {
-                return p[1];
-            });
-            if( from == "fillStyle" ){
-                bottomP = [ 0 , 0 ];
-            };
+            // let topP = _.min(pointList, function(p) {
+            //     return p[1];
+            // });
+            // let bottomP = _.max(pointList, function(p) {
+            //     return p[1];
+            // });
+            // if( from == "fillStyle" ){
+            //     bottomP = [ 0 , 0 ];
+            // };
 
-            if( topP[0] === undefined || topP[1] === undefined || bottomP[1] === undefined ){
-                return null;
-            };
-       
+            // if( topP[0] === undefined || topP[1] === undefined || bottomP[1] === undefined ){
+            //     return null;
+            // };
+
+            let lps = this._getLinearGradientPoints( this.line.lineargradientDriction );
+            if( !lps ) return;
+       debugger
             //let bottomP = [ 0 , 0 ];
             //创建一个线性渐变
             //console.log( topP[0] + "|"+ topP[1]+ "|"+  topP[0]+ "|"+ bottomP[1] )
-            _style = me.ctx.createLinearGradient(topP[0], topP[1], topP[0], bottomP[1]);
+            //_style = me.ctx.createLinearGradient(topP[0], topP[1], topP[0], bottomP[1]);
+            _style = me.ctx.createLinearGradient( ...lps );
             _.each( this._opt.line.strokeStyle.lineargradient , function( item ){
                 _style.addColorStop( item.position , item.color);
             });
@@ -622,6 +628,55 @@ export default class LineGraphsGroup extends event.Dispatcher
         
     }
 
+    _getLinearGradientPoints( driction='topBottom' ){
+        let linearPointStart,linearPointEnd;
+        let pointList = this._bline.context.pointList;
+        if( driction == 'topBottom' ){
+            //top -> bottom
+            let topX=0,topY=0,bottomX=0,bottomY=0;
+            for( let i=0,l=pointList.length; i<l; i++ ){
+                let point = pointList[i];
+                topY = Math.min( point[1], topY );
+                bottomY = Math.max( point[1], bottomY );
+            }
+
+            linearPointStart = {
+                x: topX,
+                y: topY
+            }
+            linearPointEnd= {
+                x: bottomX,
+                y: bottomY
+            }
+
+        } else {
+            //left->right
+            let leftX=0,rightX=0,leftY=0,rightY=0;
+            for( let i=0,l= pointList.length; i<l; i++ ){
+                let point = pointList[i];
+                leftX = Math.min( point[0], leftX );
+                rightX = Math.max( point[0], rightX );
+            };
+            linearPointStart = {
+                x: leftX,
+                y: leftY
+            }
+            linearPointEnd= {
+                x: rightX,
+                y: rightY
+            }
+
+        }
+
+        if( linearPointStart.x == undefined || linearPointStart.y == undefined || linearPointEnd.x==undefined || linearPointEnd.y == undefined){
+            return null;
+        }
+
+        return [
+            linearPointStart.x, linearPointStart.y, 
+            linearPointEnd.x, linearPointEnd.y
+        ]
+    }
 
     _createNodes()
     {
