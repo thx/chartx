@@ -3,16 +3,16 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.venn = venn;
-exports.distanceFromIntersectArea = distanceFromIntersectArea;
-exports.getDistanceMatrices = getDistanceMatrices;
 exports.bestInitialLayout = bestInitialLayout;
 exports.constrainedMDSLayout = constrainedMDSLayout;
+exports.disjointCluster = disjointCluster;
+exports.distanceFromIntersectArea = distanceFromIntersectArea;
+exports.getDistanceMatrices = getDistanceMatrices;
 exports.greedyLayout = greedyLayout;
 exports.lossFunction = lossFunction;
-exports.disjointCluster = disjointCluster;
 exports.normalizeSolution = normalizeSolution;
 exports.scaleSolution = scaleSolution;
+exports.venn = venn;
 
 var _fmin = require("fmin");
 

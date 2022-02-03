@@ -1,6 +1,7 @@
 import Component from "../component"
 import Canvax from "canvax"
-import { numAddSymbol,getDefaultProps } from "../../utils/tools"
+import { getDefaultProps } from "../../utils/tools"
+import numeral from "numeral"
 
 let _ = Canvax._;
 let Rect = Canvax.Shapes.Rect;
@@ -79,13 +80,12 @@ class Tips extends Component {
 
         this.name = "tips"
 
-        this.tipDomContainer = this.app.canvax.domView;
+        this.tipDomContainer = document.body; //this.app.canvax.domView;
         this.cW = 0;  //容器的width
         this.cH = 0;  //容器的height
 
         this.dW = 0;  //html的tips内容width
         this.dH = 0;  //html的tips内容Height
-
 
         this._tipDom = null;
         this._tipsPointer = null;
@@ -102,7 +102,8 @@ class Tips extends Component {
 
         let me = this;
         this.sprite.on("destroy", function() {
-            me._tipDom = null;
+            //me._tipDom = null;
+            me._removeContent();
         });
 
         _.extend(true, this, getDefaultProps( Tips.defaultProps() ), opt);
@@ -268,32 +269,29 @@ class Tips extends Component {
         };
 
         if( info.nodes.length ){
+            str += "<table >"
             if (info.title !== undefined && info.title !== null && info.title !== "") {
-                str += "<div style='font-size:14px;border-bottom:1px solid #f0f0f0;padding:4px;margin-bottom:6px;'>" + info.title + "</div>";
+                str += "<tr><td colspan='2' style='text-align:left'>"
+                str += "<span style='font-size:12px;padding:4px;color:#333;'>" + info.title + "</span>";
+                str += "</td></tr>"
             }; 
             _.each(info.nodes, function (node, i) {
-                /*
+                
                 if (!node.value && node.value !== 0) {
                     return;
                 };
-                */
+                
                 let style = node.color || node.fillStyle || node.strokeStyle;
                 let name = node.name || node.field || node.content || node.label;
-                let value = typeof(node.value) == "object" ? JSON.stringify(node.value) : numAddSymbol(node.value);
-                let hasVal = node.value || node.value == 0
+                let value = typeof(node.value) == "object" ? JSON.stringify(node.value) : numeral(node.value).format('0,0');
 
-                str += "<div style='line-height:1.5;font-size:12px;padding:0 4px;'>"
-                if( style ){
-                    str += "<span style='background:" + style + ";margin-right:8px;margin-top:7px;float:left;width:8px;height:8px;border-radius:4px;overflow:hidden;font-size:0;'></span>";
-                };
-                if( name ){
-                    str += "<span style='margin-right:5px;'>"+name;
-                    hasVal && (str += "：");
-                    str += "</span>";
-                };
-                hasVal && (str += value);
-                str += "</div>";
+                str += "<tr>"
+                str += "<td style='padding:0px 6px;color:#a0a0a0;'>"+name+"</td>"
+                str += "<td style='padding:0px 6px;'><span style='color:"+style+"'>"+value+"</span></td>"
+                str += "</tr>";
+
             });
+            str += "</table>"
         }
         if( info.tipsContent ){
             str += info.tipsContent;

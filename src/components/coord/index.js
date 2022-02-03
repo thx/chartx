@@ -75,7 +75,7 @@ export default class coordBase extends Component
     setFieldsMap( axisExp )
     {
         let me = this;
-        let fieldInd = 0;
+        let ind = 0;
 
         let axisType = axisExp.type || "yAxis";
 
@@ -85,6 +85,8 @@ export default class coordBase extends Component
                 fieldsArr = fieldsArr.concat( _axis.field );
             };
         } );
+
+        let graphs = _.flatten( [this.app._opt.graphs] );
         
         function _set( fields ){
     
@@ -94,18 +96,45 @@ export default class coordBase extends Component
 
             let clone_fields = _.clone( fields );
             for(let i = 0 , l=fields.length ; i<l ; i++) {
-                if( _.isString( fields[i] ) ){
-                    clone_fields[i] = {
-                        field   : fields[i],
-                        enabled : true,
-                        //yAxis : me.getAxis({type:'yAxis', field:fields[i] }),
-                        color   : me.app.getTheme(fieldInd),
-                        ind     : fieldInd++
+                let field = fields[i];
+                if( _.isString( field ) ){
+
+                    let color = me.app.getTheme( ind );
+
+                    let graph;
+                    let graphFieldInd;
+                    let graphColorProp; //graphs.find( graph => {_.flatten([graph.field]).indexOf( field )} ).color;
+                    for( let _i=0,_l=graphs.length; _i<_l; _i++ ){
+                        graph = graphs[i];
+                        graphFieldInd = _.flatten([graph.field]).indexOf( field );
+                        if( graphFieldInd >-1 ){
+                            graphColorProp = graph.color;
+                            break;
+                        }
                     };
-                    clone_fields[i][ axisType ] = me.getAxis({type:axisType, field:fields[i] })
+                    if( graphColorProp ){
+                        if( typeof graphColorProp == 'string' ){
+                            color = graphColorProp
+                        }
+                        if( Array.isArray( graphColorProp ) ){
+                            color = graphColorProp[ graphFieldInd ]
+                        }
+                        if( typeof graphColorProp == 'function' ){
+                            color = graphColorProp.apply( this.app, [ graph ] )
+                        }
+                    };
+                    
+                    clone_fields[i] = {
+                        field,
+                        enabled : true,
+                        color,
+                        ind : ind++
+                    };
+
+                    clone_fields[i][ axisType ] = me.getAxis({ type:axisType, field:field })
                 };
-                if( _.isArray( fields[i] ) ){
-                    clone_fields[i] = _set( fields[i], fieldInd );
+                if( _.isArray( field ) ){
+                    clone_fields[i] = _set( field, ind );
                 };
             };
 

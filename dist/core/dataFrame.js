@@ -202,7 +202,7 @@ function _default(dataOrg, opt) {
         } //一些当前状态恢复到dataFrame里去 end  
 
       } else {//如果之前是没有数据的，那么就不用管了
-        }
+      }
     } else {
       //就算没有dataOrg，但是data还是要重新构建一边的，因为可能dataFrame上面的其他状态被外界改变了
       //比如datazoom修改了dataFrame.range

@@ -3,10 +3,10 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.numAddSymbol = numAddSymbol;
+exports.getDefaultProps = getDefaultProps;
 exports.getDisMinATArr = getDisMinATArr;
 exports.getPath = getPath;
-exports.getDefaultProps = getDefaultProps;
+exports.numAddSymbol = numAddSymbol;
 
 var _canvax = require("canvax");
 

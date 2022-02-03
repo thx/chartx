@@ -16,6 +16,10 @@ class LineGraphs extends GraphsBase
                 detail : '绘制在哪根y轴上面',
                 default: 'left'
             },
+            aniDuration: { //覆盖基类中的设置，line的duration要1000
+                detail: '动画时长',
+                default: 1200
+            },
             _props : [
                 Group
             ]
@@ -44,6 +48,7 @@ class LineGraphs extends GraphsBase
 
     draw(opt)
     {
+        
         !opt && (opt ={});
         this.width = opt.width;
         this.height = opt.height;
@@ -108,7 +113,7 @@ class LineGraphs extends GraphsBase
             let _lineData = me.dataFrame.getFieldData(field);
             
             if( !_lineData ) return;
-            //console.log( JSON.stringify( _lineData ) )
+            
             let _data = [];
 
             for (let b = 0, bl = _lineData.length; b < bl; b++) {
@@ -169,9 +174,9 @@ class LineGraphs extends GraphsBase
         return this;
     }
 
+    //field 可以是单个 field 也可以是fields数组
     show( field )
     {
-        let me = this;
         
         //过渡优化，有field的状态变化，可能就y轴的数据区间都有了变化，这里的优化就成了bug，所有的field都需要绘制一次
         //这个field不再这个graphs里面的，不相关
@@ -180,11 +185,18 @@ class LineGraphs extends GraphsBase
         // };
 
         this.data = this._trimGraphs();
-        this._setGroupsForYfield( this.data , field );
-        
-        _.each(this.groups, function(g) {
-            g.resetData( me.data[ g.field ].data );
+
+        //先把现有的group resetData
+        this.groups.forEach(g => {
+            g.resetData( this.data[ g.field ].data );
         });
+
+        //然后把field添加到groups里面去
+        let newGroups = this._setGroupsForYfield( this.data , field );
+        newGroups.forEach(g => {
+            g._grow();
+        });
+
     }
 
     hide( field )
@@ -234,6 +246,8 @@ class LineGraphs extends GraphsBase
 
         let _flattenField = _.flatten( [ this.field ] );
 
+        let newGroups = [];
+
         _.each( data , function( g, field ){
         
             if( fields && _.indexOf( fields, field ) == -1 ){
@@ -261,6 +275,8 @@ class LineGraphs extends GraphsBase
                 animation : me.animation && !opt.resize
             }, g.data );
 
+            newGroups.push( group );
+
             let insert = false;
             //在groups数组中插入到比自己_groupInd小的元素前面去
             for( let gi=0,gl=me.groups.length ; gi<gl ; gi++ ){
@@ -280,6 +296,8 @@ class LineGraphs extends GraphsBase
             };
 
         } );
+
+        return newGroups;
 
     }
 
@@ -302,6 +320,21 @@ class LineGraphs extends GraphsBase
         } );
         return _nodesInfoList;
     }
+
+
+    tipsPointerOf( e )
+    {
+        this.groups.forEach(group => {
+            group.tipsPointerOf(e)
+        });
+    }
+    tipsPointerHideOf( e )
+    {
+        this.groups.forEach(group => {
+            group.tipsPointerHideOf(e)
+        });
+    }
+
 }
 
 GraphsBase.registerComponent( LineGraphs, 'graphs', 'line' );

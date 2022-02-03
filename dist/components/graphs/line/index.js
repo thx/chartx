@@ -126,8 +126,7 @@ var LineGraphs = /*#__PURE__*/function (_GraphsBase) {
 
         var _lineData = me.dataFrame.getFieldData(field);
 
-        if (!_lineData) return; //console.log( JSON.stringify( _lineData ) )
-
+        if (!_lineData) return;
         var _data = [];
 
         for (var b = 0, bl = _lineData.length; b < bl; b++) {
@@ -190,22 +189,28 @@ var LineGraphs = /*#__PURE__*/function (_GraphsBase) {
       });
 
       return this;
-    }
+    } //field 可以是单个 field 也可以是fields数组
+
   }, {
     key: "show",
     value: function show(field) {
-      var me = this; //过渡优化，有field的状态变化，可能就y轴的数据区间都有了变化，这里的优化就成了bug，所有的field都需要绘制一次
+      var _this2 = this;
+
+      //过渡优化，有field的状态变化，可能就y轴的数据区间都有了变化，这里的优化就成了bug，所有的field都需要绘制一次
       //这个field不再这个graphs里面的，不相关
       // if( _.indexOf( _.flatten( [me.field] ), field ) == -1 ){
       //     return;
       // };
+      this.data = this._trimGraphs(); //先把现有的group resetData
 
-      this.data = this._trimGraphs();
+      this.groups.forEach(function (g) {
+        g.resetData(_this2.data[g.field].data);
+      }); //然后把field添加到groups里面去
 
-      this._setGroupsForYfield(this.data, field);
+      var newGroups = this._setGroupsForYfield(this.data, field);
 
-      _canvax._.each(this.groups, function (g) {
-        g.resetData(me.data[g.field].data);
+      newGroups.forEach(function (g) {
+        g._grow();
       });
     }
   }, {
@@ -258,6 +263,8 @@ var LineGraphs = /*#__PURE__*/function (_GraphsBase) {
 
       var _flattenField = _canvax._.flatten([this.field]);
 
+      var newGroups = [];
+
       _canvax._.each(data, function (g, field) {
         if (fields && _canvax._.indexOf(fields, field) == -1) {
           //如果有传入fields，但是当前field不在fields里面的话，不需要处理
@@ -277,6 +284,7 @@ var LineGraphs = /*#__PURE__*/function (_GraphsBase) {
         group.draw({
           animation: me.animation && !opt.resize
         }, g.data);
+        newGroups.push(group);
         var insert = false; //在groups数组中插入到比自己_groupInd小的元素前面去
 
         for (var gi = 0, gl = me.groups.length; gi < gl; gi++) {
@@ -297,6 +305,8 @@ var LineGraphs = /*#__PURE__*/function (_GraphsBase) {
 
         ;
       });
+
+      return newGroups;
     }
   }, {
     key: "getNodesAt",
@@ -322,6 +332,20 @@ var LineGraphs = /*#__PURE__*/function (_GraphsBase) {
 
       return _nodesInfoList;
     }
+  }, {
+    key: "tipsPointerOf",
+    value: function tipsPointerOf(e) {
+      this.groups.forEach(function (group) {
+        group.tipsPointerOf(e);
+      });
+    }
+  }, {
+    key: "tipsPointerHideOf",
+    value: function tipsPointerHideOf(e) {
+      this.groups.forEach(function (group) {
+        group.tipsPointerHideOf(e);
+      });
+    }
   }], [{
     key: "defaultProps",
     value: function defaultProps() {
@@ -333,6 +357,11 @@ var LineGraphs = /*#__PURE__*/function (_GraphsBase) {
         yAxisAlign: {
           detail: '绘制在哪根y轴上面',
           "default": 'left'
+        },
+        aniDuration: {
+          //覆盖基类中的设置，line的duration要1000
+          detail: '动画时长',
+          "default": 1200
         },
         _props: [_group["default"]]
       };

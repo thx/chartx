@@ -55,7 +55,8 @@
     "canvax": "2.0.70",
     "fmin": "0.0.2",
     "d3-force": "^2.1.1",
-    "vec2":"1.6.1"
+    "vec2": "1.6.1",
+    "numeral": "2.0.6"
   },
   "scripts": {
     "release": "npm publish && npm run cdn",

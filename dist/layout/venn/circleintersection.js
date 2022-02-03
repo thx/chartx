@@ -3,13 +3,13 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.intersectionArea = intersectionArea;
-exports.containedInCircles = containedInCircles;
 exports.circleArea = circleArea;
-exports.distance = distance;
-exports.circleOverlap = circleOverlap;
 exports.circleCircleIntersection = circleCircleIntersection;
+exports.circleOverlap = circleOverlap;
+exports.containedInCircles = containedInCircles;
+exports.distance = distance;
 exports.getCenter = getCenter;
+exports.intersectionArea = intersectionArea;
 var SMALL = 1e-10;
 /** Returns the intersection area of a bunch of circles (where each circle
  is an object having an x,y and radius property) */

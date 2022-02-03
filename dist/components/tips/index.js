@@ -27,6 +27,8 @@ var _canvax = _interopRequireDefault(require("canvax"));
 
 var _tools = require("../../utils/tools");
 
+var _numeral = _interopRequireDefault(require("numeral"));
+
 function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
 
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
@@ -46,7 +48,8 @@ var Tips = /*#__PURE__*/function (_Component) {
     (0, _classCallCheck2["default"])(this, Tips);
     _this = _super.call(this, opt, app);
     _this.name = "tips";
-    _this.tipDomContainer = _this.app.canvax.domView;
+    _this.tipDomContainer = document.body; //this.app.canvax.domView;
+
     _this.cW = 0; //容器的width
 
     _this.cH = 0; //容器的height
@@ -70,7 +73,8 @@ var Tips = /*#__PURE__*/function (_Component) {
     var me = (0, _assertThisInitialized2["default"])(_this);
 
     _this.sprite.on("destroy", function () {
-      me._tipDom = null;
+      //me._tipDom = null;
+      me._removeContent();
     });
 
     _.extend(true, (0, _assertThisInitialized2["default"])(_this), (0, _tools.getDefaultProps)(Tips.defaultProps()), opt);
@@ -269,40 +273,32 @@ var Tips = /*#__PURE__*/function (_Component) {
       ;
 
       if (info.nodes.length) {
+        str += "<table >";
+
         if (info.title !== undefined && info.title !== null && info.title !== "") {
-          str += "<div style='font-size:14px;border-bottom:1px solid #f0f0f0;padding:4px;margin-bottom:6px;'>" + info.title + "</div>";
+          str += "<tr><td colspan='2' style='text-align:left'>";
+          str += "<span style='font-size:12px;padding:4px;color:#333;'>" + info.title + "</span>";
+          str += "</td></tr>";
         }
 
         ;
 
         _.each(info.nodes, function (node, i) {
-          /*
           if (!node.value && node.value !== 0) {
-              return;
-          };
-          */
+            return;
+          }
+
+          ;
           var style = node.color || node.fillStyle || node.strokeStyle;
           var name = node.name || node.field || node.content || node.label;
-          var value = (0, _typeof2["default"])(node.value) == "object" ? JSON.stringify(node.value) : (0, _tools.numAddSymbol)(node.value);
-          var hasVal = node.value || node.value == 0;
-          str += "<div style='line-height:1.5;font-size:12px;padding:0 4px;'>";
-
-          if (style) {
-            str += "<span style='background:" + style + ";margin-right:8px;margin-top:7px;float:left;width:8px;height:8px;border-radius:4px;overflow:hidden;font-size:0;'></span>";
-          }
-
-          ;
-
-          if (name) {
-            str += "<span style='margin-right:5px;'>" + name;
-            hasVal && (str += "：");
-            str += "</span>";
-          }
-
-          ;
-          hasVal && (str += value);
-          str += "</div>";
+          var value = (0, _typeof2["default"])(node.value) == "object" ? JSON.stringify(node.value) : (0, _numeral["default"])(node.value).format('0,0');
+          str += "<tr>";
+          str += "<td style='padding:0px 6px;color:#a0a0a0;'>" + name + "</td>";
+          str += "<td style='padding:0px 6px;'><span style='color:" + style + "'>" + value + "</span></td>";
+          str += "</tr>";
         });
+
+        str += "</table>";
       }
 
       if (info.tipsContent) {

@@ -22,34 +22,19 @@ var chartx = (function () {
 	  };
 	}
 
-	module.exports = _interopRequireDefault;
-	module.exports["default"] = module.exports, module.exports.__esModule = true;
+	module.exports = _interopRequireDefault, module.exports.__esModule = true, module.exports["default"] = module.exports;
 	});
 
 	unwrapExports(interopRequireDefault);
 
-	function unwrapExports$1 (x) {
-		return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x['default'] : x;
-	}
-
-	function createCommonjsModule$1(fn, module) {
-		return module = { exports: {} }, fn(module, module.exports), module.exports;
-	}
-
-	var classCallCheck = createCommonjsModule$1(function (module) {
 	function _classCallCheck(instance, Constructor) {
 	  if (!(instance instanceof Constructor)) {
 	    throw new TypeError("Cannot call a class as a function");
 	  }
 	}
 
-	module.exports = _classCallCheck;
-	module.exports["default"] = module.exports, module.exports.__esModule = true;
-	});
+	var classCallCheck = _classCallCheck;
 
-	var _classCallCheck = unwrapExports$1(classCallCheck);
-
-	var createClass = createCommonjsModule$1(function (module) {
 	function _defineProperties(target, props) {
 	  for (var i = 0; i < props.length; i++) {
 	    var descriptor = props[i];
@@ -66,13 +51,32 @@ var chartx = (function () {
 	  return Constructor;
 	}
 
-	module.exports = _createClass;
-	module.exports["default"] = module.exports, module.exports.__esModule = true;
+	var createClass = _createClass;
+
+	function createCommonjsModule$1(fn, module) {
+		return module = { exports: {} }, fn(module, module.exports), module.exports;
+	}
+
+	var _typeof_1 = createCommonjsModule$1(function (module) {
+	function _typeof(obj) {
+	  "@babel/helpers - typeof";
+
+	  if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
+	    module.exports = _typeof = function _typeof(obj) {
+	      return typeof obj;
+	    };
+	  } else {
+	    module.exports = _typeof = function _typeof(obj) {
+	      return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+	    };
+	  }
+
+	  return _typeof(obj);
+	}
+
+	module.exports = _typeof;
 	});
 
-	var _createClass = unwrapExports$1(createClass);
-
-	var assertThisInitialized = createCommonjsModule$1(function (module) {
 	function _assertThisInitialized(self) {
 	  if (self === void 0) {
 	    throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
@@ -81,11 +85,28 @@ var chartx = (function () {
 	  return self;
 	}
 
-	module.exports = _assertThisInitialized;
-	module.exports["default"] = module.exports, module.exports.__esModule = true;
-	});
+	var assertThisInitialized = _assertThisInitialized;
 
-	var _assertThisInitialized = unwrapExports$1(assertThisInitialized);
+	function _possibleConstructorReturn(self, call) {
+	  if (call && (_typeof_1(call) === "object" || typeof call === "function")) {
+	    return call;
+	  }
+
+	  return assertThisInitialized(self);
+	}
+
+	var possibleConstructorReturn = _possibleConstructorReturn;
+
+	var getPrototypeOf = createCommonjsModule$1(function (module) {
+	function _getPrototypeOf(o) {
+	  module.exports = _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) {
+	    return o.__proto__ || Object.getPrototypeOf(o);
+	  };
+	  return _getPrototypeOf(o);
+	}
+
+	module.exports = _getPrototypeOf;
+	});
 
 	var setPrototypeOf = createCommonjsModule$1(function (module) {
 	function _setPrototypeOf(o, p) {
@@ -94,17 +115,12 @@ var chartx = (function () {
 	    return o;
 	  };
 
-	  module.exports["default"] = module.exports, module.exports.__esModule = true;
 	  return _setPrototypeOf(o, p);
 	}
 
 	module.exports = _setPrototypeOf;
-	module.exports["default"] = module.exports, module.exports.__esModule = true;
 	});
 
-	unwrapExports$1(setPrototypeOf);
-
-	var inherits = createCommonjsModule$1(function (module) {
 	function _inherits(subClass, superClass) {
 	  if (typeof superClass !== "function" && superClass !== null) {
 	    throw new TypeError("Super expression must either be null or a function");
@@ -120,72 +136,7 @@ var chartx = (function () {
 	  if (superClass) setPrototypeOf(subClass, superClass);
 	}
 
-	module.exports = _inherits;
-	module.exports["default"] = module.exports, module.exports.__esModule = true;
-	});
-
-	var _inherits = unwrapExports$1(inherits);
-
-	var _typeof_1 = createCommonjsModule$1(function (module) {
-	function _typeof(obj) {
-	  "@babel/helpers - typeof";
-
-	  if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
-	    module.exports = _typeof = function _typeof(obj) {
-	      return typeof obj;
-	    };
-
-	    module.exports["default"] = module.exports, module.exports.__esModule = true;
-	  } else {
-	    module.exports = _typeof = function _typeof(obj) {
-	      return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-	    };
-
-	    module.exports["default"] = module.exports, module.exports.__esModule = true;
-	  }
-
-	  return _typeof(obj);
-	}
-
-	module.exports = _typeof;
-	module.exports["default"] = module.exports, module.exports.__esModule = true;
-	});
-
-	var _typeof = unwrapExports$1(_typeof_1);
-
-	var possibleConstructorReturn = createCommonjsModule$1(function (module) {
-	var _typeof = _typeof_1["default"];
-
-
-
-	function _possibleConstructorReturn(self, call) {
-	  if (call && (_typeof(call) === "object" || typeof call === "function")) {
-	    return call;
-	  }
-
-	  return assertThisInitialized(self);
-	}
-
-	module.exports = _possibleConstructorReturn;
-	module.exports["default"] = module.exports, module.exports.__esModule = true;
-	});
-
-	var _possibleConstructorReturn = unwrapExports$1(possibleConstructorReturn);
-
-	var getPrototypeOf = createCommonjsModule$1(function (module) {
-	function _getPrototypeOf(o) {
-	  module.exports = _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) {
-	    return o.__proto__ || Object.getPrototypeOf(o);
-	  };
-	  module.exports["default"] = module.exports, module.exports.__esModule = true;
-	  return _getPrototypeOf(o);
-	}
-
-	module.exports = _getPrototypeOf;
-	module.exports["default"] = module.exports, module.exports.__esModule = true;
-	});
-
-	var _getPrototypeOf = unwrapExports$1(getPrototypeOf);
+	var inherits = _inherits;
 
 	var _ = {};
 	var breaker = {};
@@ -595,7 +546,7 @@ var chartx = (function () {
 	    i = 2;
 	  }
 
-	  if (_typeof(target) !== "object" && !_.isFunction(target)) {
+	  if (_typeof_1(target) !== "object" && !_.isFunction(target)) {
 	    target = {};
 	  }
 
@@ -649,62 +600,9 @@ var chartx = (function () {
 	  return radians * _.RAD2DEG;
 	};
 
-	var Settings = {
-	  //设备分辨率
-	  RESOLUTION: 1,
-
-	  /**
-	   * Target frames per millisecond.
-	   */
-	  TARGET_FPMS: 0.06,
-
-	  /**
-	   * If set to true WebGL will attempt make textures mimpaped by default.
-	   * Mipmapping will only succeed if the base texture uploaded has power of two dimensions.
-	   */
-	  MIPMAP_TEXTURES: true,
-
-	  /**
-	   * Default filter resolution.
-	   */
-	  FILTER_RESOLUTION: 1,
-	  // TODO: maybe change to SPRITE.BATCH_SIZE: 2000
-	  // TODO: maybe add PARTICLE.BATCH_SIZE: 15000
-
-	  /**
-	   * The default sprite batch size.
-	   *
-	   * The default aims to balance desktop and mobile devices.
-	   */
-	  SPRITE_BATCH_SIZE: 4096,
-
-	  /**
-	   * The prefix that denotes a URL is for a retina asset.
-	   */
-	  RETINA_PREFIX: /@(.+)x/,
-	  RENDER_OPTIONS: {
-	    view: null,
-	    antialias: true,
-	    forceFXAA: false,
-	    autoResize: false,
-	    transparent: true,
-	    backgroundColor: 0x000000,
-	    clearBeforeRender: true,
-	    preserveDrawingBuffer: false,
-	    roundPixels: false
-	  },
-	  TRANSFORM_MODE: 0,
-	  GC_MODE: 0,
-	  GC_MAX_IDLE: 60 * 60,
-	  GC_MAX_CHECK_COUNT: 60 * 10,
-	  WRAP_MODE: 0,
-	  SCALE_MODE: 0,
-	  PRECISION: 'mediump'
-	};
+	var RESOLUTION = typeof window !== 'undefined' ? window.devicePixelRatio : 1;
 
 	var addOrRmoveEventHand = function addOrRmoveEventHand(domHand, ieHand) {
-	  if (!document) return;
-
 	  if (document[domHand]) {
 	    var eventDomFn = function eventDomFn(el, type, fn) {
 	      if (el.length) {
@@ -735,8 +633,6 @@ var chartx = (function () {
 	var $ = {
 	  // dom操作相关代码
 	  query: function query(el) {
-	    if (!el) return;
-
 	    if (_.isString(el)) {
 	      return document.getElementById(el);
 	    }
@@ -753,12 +649,6 @@ var chartx = (function () {
 	    return null;
 	  },
 	  offset: function offset(el) {
-	    if (!el) {
-	      return {
-	        top: 0,
-	        left: 0
-	      };
-	    }
 	    var box = el.getBoundingClientRect(),
 	        doc = el.ownerDocument,
 	        body = doc.body,
@@ -802,15 +692,14 @@ var chartx = (function () {
 	   * @param {string} type : dom type， such as canvas, div etc.
 	   */
 	  createCanvas: function createCanvas(_width, _height, id) {
-	    if (!document) return;
 	    var canvas = document.createElement("canvas");
 	    canvas.style.position = 'absolute';
 	    canvas.style.width = _width + 'px';
 	    canvas.style.height = _height + 'px';
 	    canvas.style.left = 0;
 	    canvas.style.top = 0;
-	    canvas.setAttribute('width', _width * Settings.RESOLUTION);
-	    canvas.setAttribute('height', _height * Settings.RESOLUTION);
+	    canvas.setAttribute('width', _width * RESOLUTION);
+	    canvas.setAttribute('height', _height * RESOLUTION);
 	    canvas.setAttribute('id', id);
 	    return canvas;
 	  },
@@ -848,6 +737,7 @@ var chartx = (function () {
 	  _pixelCtx: null,
 	  __emptyFunc: function __emptyFunc() {},
 	  //retina 屏幕优化
+	  _devicePixelRatio: typeof window !== 'undefined' ? window.devicePixelRatio : 1,
 	  _UID: 0,
 	  //该值为向上的自增长整数值
 	  getUID: function getUID() {
@@ -863,8 +753,6 @@ var chartx = (function () {
 	    return !!document.createElement('canvas').getContext;
 	  },
 	  initElement: function initElement(canvas) {
-	    if (!window) return;
-
 	    if (window.FlashCanvas && FlashCanvas.initElement) {
 	      FlashCanvas.initElement(canvas);
 	    }
@@ -936,10 +824,7 @@ var chartx = (function () {
 	    return opt;
 	  }
 	};
-
-	var _canvas = Utils.initElement($.createCanvas(1, 1, "_pixelCanvas"));
-
-	Utils._pixelCtx = _canvas && _canvas.getContext('2d');
+	Utils._pixelCtx = Utils.initElement($.createCanvas(1, 1, "_pixelCanvas")).getContext('2d');
 
 	/**
 	 * Canvax
@@ -1202,22 +1087,18 @@ var chartx = (function () {
 	  }
 	};
 
-	function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-	function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
-
-	var Dispatcher = /*#__PURE__*/function (_Manager) {
-	  _inherits(Dispatcher, _Manager);
-
-	  var _super = _createSuper(Dispatcher);
+	var Dispatcher =
+	/*#__PURE__*/
+	function (_Manager) {
+	  inherits(Dispatcher, _Manager);
 
 	  function Dispatcher() {
-	    _classCallCheck(this, Dispatcher);
+	    classCallCheck(this, Dispatcher);
 
-	    return _super.call(this);
+	    return possibleConstructorReturn(this, getPrototypeOf(Dispatcher).call(this));
 	  }
 
-	  _createClass(Dispatcher, [{
+	  createClass(Dispatcher, [{
 	    key: "on",
 	    value: function on(type, listener) {
 	      this._addEventListener(type, listener);
@@ -1389,8 +1270,7 @@ var chartx = (function () {
 	 */
 	var _hammerEventTypes = ["pan", "panstart", "panmove", "panend", "pancancel", "panleft", "panright", "panup", "pandown", "press", "pressup", "swipe", "swipeleft", "swiperight", "swipeup", "swipedown", "tap"];
 
-	var Handler = function Handler(canvax) {
-	  var opt = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+	var Handler = function Handler(canvax, opt) {
 	  this.canvax = canvax;
 	  this.curPoints = [{
 	    x: 0,
@@ -1412,7 +1292,6 @@ var chartx = (function () {
 	    move: "panmove",
 	    end: "panend"
 	  };
-	  this._opt = opt;
 
 	  _.extend(true, this, opt);
 	}; //这样的好处是document.compareDocumentPosition只会在定义的时候执行一次。
@@ -1435,46 +1314,33 @@ var chartx = (function () {
 	    //依次添加上浏览器的自带事件侦听
 	    var me = this;
 
-	    if (this._opt.events) {
-	      types.register(this._opt.events);
+	    if (me.target.nodeType == undefined) {
+	      //如果target.nodeType没有的话， 说明该target为一个jQuery对象 or kissy 对象or hammer对象
+	      //即为第三方库，那么就要对接第三方库的事件系统。默认实现hammer的大部分事件系统
+	      types.register(_hammerEventTypes);
 	    }
 
-	    if (me.target) {
-	      if (me.target.nodeType == undefined) {
-	        //如果target.nodeType没有的话， 说明该target为一个jQuery对象 or kissy 对象or hammer对象
-	        //即为第三方库，那么就要对接第三方库的事件系统。默认实现hammer的大部分事件系统
-	        types.register(_hammerEventTypes);
+	    $.addEvent(me.target, "contextmenu", function (e) {
+	      if (e && e.preventDefault) {
+	        e.preventDefault();
+	      } else {
+	        window.event.returnValue = false;
 	      }
+	    });
 
-	      $.addEvent(me.target, "contextmenu", function (e) {
-	        if (e && e.preventDefault) {
-	          e.preventDefault();
-	        } else {
-	          window.event.returnValue = false;
-	        }
-	      });
-
-	      _.each(types.get(), function (type) {
-	        //不再关心浏览器环境是否 'ontouchstart' in window 
-	        //而是直接只管传给事件模块的是一个原生dom还是 jq对象 or hammer对象等
-	        if (me.target.nodeType == 1) {
-	          $.addEvent(me.target, type, function (e) {
-	            me.__mouseHandler(e);
-	          });
-	        } else {
-	          me.target.on(type, function (e) {
-	            me.__libHandler(e);
-	          });
-	        }
-	      });
-	    }
-	  },
-	  bindEventHandle: function bindEventHandle(e, type) {
-	    if (type == 'mouse') {
-	      this.__mouseHandler.apply(this, [e]);
-	    } else {
-	      this.__libHandler.apply(this, [e]);
-	    }
+	    _.each(types.get(), function (type) {
+	      //不再关心浏览器环境是否 'ontouchstart' in window 
+	      //而是直接只管传给事件模块的是一个原生dom还是 jq对象 or hammer对象等
+	      if (me.target.nodeType == 1) {
+	        $.addEvent(me.target, type, function (e) {
+	          me.__mouseHandler(e);
+	        });
+	      } else {
+	        me.target.on(type, function (e) {
+	          me.__libHandler(e);
+	        });
+	      }
+	    });
 	  },
 
 	  /*
@@ -1673,7 +1539,7 @@ var chartx = (function () {
 
 	    if (me.curPointsTarget.length > 0) {
 	      //drag开始
-	      if (me.drag.start.indexOf(e.type) > -1) {
+	      if (e.type == me.drag.start) {
 	        //dragstart的时候touch已经准备好了target， curPointsTarget 里面只要有一个是有效的
 	        //就认为drags开始
 	        _.each(me.curPointsTarget, function (child, i) {
@@ -1695,7 +1561,7 @@ var chartx = (function () {
 	        });
 	      }
 
-	      if (me.drag.move.indexOf(e.type) > -1) {
+	      if (e.type == me.drag.move) {
 	        if (me._draging) {
 	          _.each(me.curPointsTarget, function (child, i) {
 	            if (child && child.dragEnabled) {
@@ -1705,7 +1571,7 @@ var chartx = (function () {
 	        }
 	      }
 
-	      if (me.drag.end.indexOf(e.type) > -1) {
+	      if (e.type == me.drag.end) {
 	        if (me._draging) {
 	          _.each(me.curPointsTarget, function (child, i) {
 	            if (child && child.dragEnabled) {
@@ -1731,10 +1597,10 @@ var chartx = (function () {
 	    var root = me.canvax;
 	    var curTouchs = [];
 
-	    _.each(e.point || e.touches, function (touch) {
+	    _.each(e.point, function (touch) {
 	      curTouchs.push({
-	        x: 'x' in touch ? touch.x : $.pageX(touch) - root.viewOffset.left,
-	        y: 'y' in touch ? touch.y : $.pageY(touch) - root.viewOffset.top
+	        x: $.pageX(touch) - root.viewOffset.left,
+	        y: $.pageY(touch) - root.viewOffset.top
 	      });
 	    });
 
@@ -2030,14 +1896,16 @@ var chartx = (function () {
 	 *
 	 * @author 释剑 (李涛, litao.lt@alibaba-inc.com)
 	 */
-	var Point = /*#__PURE__*/function () {
+	var Point =
+	/*#__PURE__*/
+	function () {
 	  function Point() {
 	    var x = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 	    var y = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
 
-	    _classCallCheck(this, Point);
+	    classCallCheck(this, Point);
 
-	    if (arguments.length == 1 && _typeof(arguments[0]) == 'object') {
+	    if (arguments.length == 1 && _typeof_1(arguments[0]) == 'object') {
 	      var arg = arguments[0];
 
 	      if ("x" in arg && "y" in arg) {
@@ -2063,7 +1931,7 @@ var chartx = (function () {
 	    }
 	  }
 
-	  _createClass(Point, [{
+	  createClass(Point, [{
 	    key: "toArray",
 	    value: function toArray() {
 	      return [this.x, this.y];
@@ -2073,806 +1941,913 @@ var chartx = (function () {
 	  return Point;
 	}();
 
+	var Tween = createCommonjsModule$1(function (module, exports) {
 	/**
-	 * The Ease class provides a collection of easing functions for use with tween.js.
+	 * Tween.js - Licensed under the MIT license
+	 * https://github.com/tweenjs/tween.js
+	 * ----------------------------------------------
+	 *
+	 * See https://github.com/tweenjs/tween.js/graphs/contributors for the full list of contributors.
+	 * Thank you all, you're awesome!
 	 */
-	var Easing = {
-	    Linear: {
-	        None: function (amount) {
-	            return amount;
-	        },
-	    },
-	    Quadratic: {
-	        In: function (amount) {
-	            return amount * amount;
-	        },
-	        Out: function (amount) {
-	            return amount * (2 - amount);
-	        },
-	        InOut: function (amount) {
-	            if ((amount *= 2) < 1) {
-	                return 0.5 * amount * amount;
-	            }
-	            return -0.5 * (--amount * (amount - 2) - 1);
-	        },
-	    },
-	    Cubic: {
-	        In: function (amount) {
-	            return amount * amount * amount;
-	        },
-	        Out: function (amount) {
-	            return --amount * amount * amount + 1;
-	        },
-	        InOut: function (amount) {
-	            if ((amount *= 2) < 1) {
-	                return 0.5 * amount * amount * amount;
-	            }
-	            return 0.5 * ((amount -= 2) * amount * amount + 2);
-	        },
-	    },
-	    Quartic: {
-	        In: function (amount) {
-	            return amount * amount * amount * amount;
-	        },
-	        Out: function (amount) {
-	            return 1 - --amount * amount * amount * amount;
-	        },
-	        InOut: function (amount) {
-	            if ((amount *= 2) < 1) {
-	                return 0.5 * amount * amount * amount * amount;
-	            }
-	            return -0.5 * ((amount -= 2) * amount * amount * amount - 2);
-	        },
-	    },
-	    Quintic: {
-	        In: function (amount) {
-	            return amount * amount * amount * amount * amount;
-	        },
-	        Out: function (amount) {
-	            return --amount * amount * amount * amount * amount + 1;
-	        },
-	        InOut: function (amount) {
-	            if ((amount *= 2) < 1) {
-	                return 0.5 * amount * amount * amount * amount * amount;
-	            }
-	            return 0.5 * ((amount -= 2) * amount * amount * amount * amount + 2);
-	        },
-	    },
-	    Sinusoidal: {
-	        In: function (amount) {
-	            return 1 - Math.cos((amount * Math.PI) / 2);
-	        },
-	        Out: function (amount) {
-	            return Math.sin((amount * Math.PI) / 2);
-	        },
-	        InOut: function (amount) {
-	            return 0.5 * (1 - Math.cos(Math.PI * amount));
-	        },
-	    },
-	    Exponential: {
-	        In: function (amount) {
-	            return amount === 0 ? 0 : Math.pow(1024, amount - 1);
-	        },
-	        Out: function (amount) {
-	            return amount === 1 ? 1 : 1 - Math.pow(2, -10 * amount);
-	        },
-	        InOut: function (amount) {
-	            if (amount === 0) {
-	                return 0;
-	            }
-	            if (amount === 1) {
-	                return 1;
-	            }
-	            if ((amount *= 2) < 1) {
-	                return 0.5 * Math.pow(1024, amount - 1);
-	            }
-	            return 0.5 * (-Math.pow(2, -10 * (amount - 1)) + 2);
-	        },
-	    },
-	    Circular: {
-	        In: function (amount) {
-	            return 1 - Math.sqrt(1 - amount * amount);
-	        },
-	        Out: function (amount) {
-	            return Math.sqrt(1 - --amount * amount);
-	        },
-	        InOut: function (amount) {
-	            if ((amount *= 2) < 1) {
-	                return -0.5 * (Math.sqrt(1 - amount * amount) - 1);
-	            }
-	            return 0.5 * (Math.sqrt(1 - (amount -= 2) * amount) + 1);
-	        },
-	    },
-	    Elastic: {
-	        In: function (amount) {
-	            if (amount === 0) {
-	                return 0;
-	            }
-	            if (amount === 1) {
-	                return 1;
-	            }
-	            return -Math.pow(2, 10 * (amount - 1)) * Math.sin((amount - 1.1) * 5 * Math.PI);
-	        },
-	        Out: function (amount) {
-	            if (amount === 0) {
-	                return 0;
-	            }
-	            if (amount === 1) {
-	                return 1;
-	            }
-	            return Math.pow(2, -10 * amount) * Math.sin((amount - 0.1) * 5 * Math.PI) + 1;
-	        },
-	        InOut: function (amount) {
-	            if (amount === 0) {
-	                return 0;
-	            }
-	            if (amount === 1) {
-	                return 1;
-	            }
-	            amount *= 2;
-	            if (amount < 1) {
-	                return -0.5 * Math.pow(2, 10 * (amount - 1)) * Math.sin((amount - 1.1) * 5 * Math.PI);
-	            }
-	            return 0.5 * Math.pow(2, -10 * (amount - 1)) * Math.sin((amount - 1.1) * 5 * Math.PI) + 1;
-	        },
-	    },
-	    Back: {
-	        In: function (amount) {
-	            var s = 1.70158;
-	            return amount * amount * ((s + 1) * amount - s);
-	        },
-	        Out: function (amount) {
-	            var s = 1.70158;
-	            return --amount * amount * ((s + 1) * amount + s) + 1;
-	        },
-	        InOut: function (amount) {
-	            var s = 1.70158 * 1.525;
-	            if ((amount *= 2) < 1) {
-	                return 0.5 * (amount * amount * ((s + 1) * amount - s));
-	            }
-	            return 0.5 * ((amount -= 2) * amount * ((s + 1) * amount + s) + 2);
-	        },
-	    },
-	    Bounce: {
-	        In: function (amount) {
-	            return 1 - Easing.Bounce.Out(1 - amount);
-	        },
-	        Out: function (amount) {
-	            if (amount < 1 / 2.75) {
-	                return 7.5625 * amount * amount;
-	            }
-	            else if (amount < 2 / 2.75) {
-	                return 7.5625 * (amount -= 1.5 / 2.75) * amount + 0.75;
-	            }
-	            else if (amount < 2.5 / 2.75) {
-	                return 7.5625 * (amount -= 2.25 / 2.75) * amount + 0.9375;
-	            }
-	            else {
-	                return 7.5625 * (amount -= 2.625 / 2.75) * amount + 0.984375;
-	            }
-	        },
-	        InOut: function (amount) {
-	            if (amount < 0.5) {
-	                return Easing.Bounce.In(amount * 2) * 0.5;
-	            }
-	            return Easing.Bounce.Out(amount * 2 - 1) * 0.5 + 0.5;
-	        },
-	    },
+
+
+	var _Group = function () {
+		this._tweens = {};
+		this._tweensAddedDuringUpdate = {};
 	};
 
-	var now;
+	_Group.prototype = {
+		getAll: function () {
+
+			return Object.keys(this._tweens).map(function (tweenId) {
+				return this._tweens[tweenId];
+			}.bind(this));
+
+		},
+
+		removeAll: function () {
+
+			this._tweens = {};
+
+		},
+
+		add: function (tween) {
+
+			this._tweens[tween.getId()] = tween;
+			this._tweensAddedDuringUpdate[tween.getId()] = tween;
+
+		},
+
+		remove: function (tween) {
+
+			delete this._tweens[tween.getId()];
+			delete this._tweensAddedDuringUpdate[tween.getId()];
+
+		},
+
+		update: function (time, preserve) {
+
+			var tweenIds = Object.keys(this._tweens);
+
+			if (tweenIds.length === 0) {
+				return false;
+			}
+
+			time = time !== undefined ? time : TWEEN.now();
+
+			// Tweens are updated in "batches". If you add a new tween during an update, then the
+			// new tween will be updated in the next batch.
+			// If you remove a tween during an update, it may or may not be updated. However,
+			// if the removed tween was added during the current batch, then it will not be updated.
+			while (tweenIds.length > 0) {
+				this._tweensAddedDuringUpdate = {};
+
+				for (var i = 0; i < tweenIds.length; i++) {
+
+					var tween = this._tweens[tweenIds[i]];
+
+					if (tween && tween.update(time) === false) {
+						tween._isPlaying = false;
+
+						if (!preserve) {
+							delete this._tweens[tweenIds[i]];
+						}
+					}
+				}
+
+				tweenIds = Object.keys(this._tweensAddedDuringUpdate);
+			}
+
+			return true;
+
+		}
+	};
+
+	var TWEEN = new _Group();
+
+	TWEEN.Group = _Group;
+	TWEEN._nextId = 0;
+	TWEEN.nextId = function () {
+		return TWEEN._nextId++;
+	};
+
+
 	// Include a performance.now polyfill.
 	// In node.js, use process.hrtime.
-	// eslint-disable-next-line
-	// @ts-ignore
-	if (typeof self === 'undefined' && typeof process !== 'undefined' && process.hrtime) {
-	    now = function () {
-	        // eslint-disable-next-line
-	        // @ts-ignore
-	        var time = process.hrtime();
-	        // Convert [seconds, nanoseconds] to milliseconds.
-	        return time[0] * 1000 + time[1] / 1000000;
-	    };
+	if (typeof (window) === 'undefined' && typeof (process) !== 'undefined') {
+		TWEEN.now = function () {
+			var time = process.hrtime();
+
+			// Convert [seconds, nanoseconds] to milliseconds.
+			return time[0] * 1000 + time[1] / 1000000;
+		};
 	}
-	// In a browser, use self.performance.now if it is available.
-	else if (typeof self !== 'undefined' && self.performance !== undefined && self.performance.now !== undefined) {
-	    // This must be bound, because directly assigning this function
-	    // leads to an invocation exception in Chrome.
-	    now = self.performance.now.bind(self.performance);
+	// In a browser, use window.performance.now if it is available.
+	else if (typeof (window) !== 'undefined' &&
+	         window.performance !== undefined &&
+			 window.performance.now !== undefined) {
+		// This must be bound, because directly assigning this function
+		// leads to an invocation exception in Chrome.
+		TWEEN.now = window.performance.now.bind(window.performance);
 	}
 	// Use Date.now if it is available.
 	else if (Date.now !== undefined) {
-	    now = Date.now;
+		TWEEN.now = Date.now;
 	}
 	// Otherwise, use 'new Date().getTime()'.
 	else {
-	    now = function () {
-	        return new Date().getTime();
-	    };
+		TWEEN.now = function () {
+			return new Date().getTime();
+		};
 	}
-	var now$1 = now;
 
-	/**
-	 * Controlling groups of tweens
-	 *
-	 * Using the TWEEN singleton to manage your tweens can cause issues in large apps with many components.
-	 * In these cases, you may want to create your own smaller groups of tween
-	 */
-	var Group = /** @class */ (function () {
-	    function Group() {
-	        this._tweens = {};
-	        this._tweensAddedDuringUpdate = {};
-	    }
-	    Group.prototype.getAll = function () {
-	        var _this = this;
-	        return Object.keys(this._tweens).map(function (tweenId) {
-	            return _this._tweens[tweenId];
-	        });
-	    };
-	    Group.prototype.removeAll = function () {
-	        this._tweens = {};
-	    };
-	    Group.prototype.add = function (tween) {
-	        this._tweens[tween.getId()] = tween;
-	        this._tweensAddedDuringUpdate[tween.getId()] = tween;
-	    };
-	    Group.prototype.remove = function (tween) {
-	        delete this._tweens[tween.getId()];
-	        delete this._tweensAddedDuringUpdate[tween.getId()];
-	    };
-	    Group.prototype.update = function (time, preserve) {
-	        if (time === void 0) { time = now$1(); }
-	        if (preserve === void 0) { preserve = false; }
-	        var tweenIds = Object.keys(this._tweens);
-	        if (tweenIds.length === 0) {
-	            return false;
-	        }
-	        // Tweens are updated in "batches". If you add a new tween during an
-	        // update, then the new tween will be updated in the next batch.
-	        // If you remove a tween during an update, it may or may not be updated.
-	        // However, if the removed tween was added during the current batch,
-	        // then it will not be updated.
-	        while (tweenIds.length > 0) {
-	            this._tweensAddedDuringUpdate = {};
-	            for (var i = 0; i < tweenIds.length; i++) {
-	                var tween = this._tweens[tweenIds[i]];
-	                var autoStart = !preserve;
-	                if (tween && tween.update(time, autoStart) === false && !preserve) {
-	                    delete this._tweens[tweenIds[i]];
-	                }
-	            }
-	            tweenIds = Object.keys(this._tweensAddedDuringUpdate);
-	        }
-	        return true;
-	    };
-	    return Group;
-	}());
 
-	/**
-	 *
-	 */
-	var Interpolation = {
-	    Linear: function (v, k) {
-	        var m = v.length - 1;
-	        var f = m * k;
-	        var i = Math.floor(f);
-	        var fn = Interpolation.Utils.Linear;
-	        if (k < 0) {
-	            return fn(v[0], v[1], f);
-	        }
-	        if (k > 1) {
-	            return fn(v[m], v[m - 1], m - f);
-	        }
-	        return fn(v[i], v[i + 1 > m ? m : i + 1], f - i);
-	    },
-	    Bezier: function (v, k) {
-	        var b = 0;
-	        var n = v.length - 1;
-	        var pw = Math.pow;
-	        var bn = Interpolation.Utils.Bernstein;
-	        for (var i = 0; i <= n; i++) {
-	            b += pw(1 - k, n - i) * pw(k, i) * v[i] * bn(n, i);
-	        }
-	        return b;
-	    },
-	    CatmullRom: function (v, k) {
-	        var m = v.length - 1;
-	        var f = m * k;
-	        var i = Math.floor(f);
-	        var fn = Interpolation.Utils.CatmullRom;
-	        if (v[0] === v[m]) {
-	            if (k < 0) {
-	                i = Math.floor((f = m * (1 + k)));
-	            }
-	            return fn(v[(i - 1 + m) % m], v[i], v[(i + 1) % m], v[(i + 2) % m], f - i);
-	        }
-	        else {
-	            if (k < 0) {
-	                return v[0] - (fn(v[0], v[0], v[1], v[1], -f) - v[0]);
-	            }
-	            if (k > 1) {
-	                return v[m] - (fn(v[m], v[m], v[m - 1], v[m - 1], f - m) - v[m]);
-	            }
-	            return fn(v[i ? i - 1 : 0], v[i], v[m < i + 1 ? m : i + 1], v[m < i + 2 ? m : i + 2], f - i);
-	        }
-	    },
-	    Utils: {
-	        Linear: function (p0, p1, t) {
-	            return (p1 - p0) * t + p0;
-	        },
-	        Bernstein: function (n, i) {
-	            var fc = Interpolation.Utils.Factorial;
-	            return fc(n) / fc(i) / fc(n - i);
-	        },
-	        Factorial: (function () {
-	            var a = [1];
-	            return function (n) {
-	                var s = 1;
-	                if (a[n]) {
-	                    return a[n];
-	                }
-	                for (var i = n; i > 1; i--) {
-	                    s *= i;
-	                }
-	                a[n] = s;
-	                return s;
-	            };
-	        })(),
-	        CatmullRom: function (p0, p1, p2, p3, t) {
-	            var v0 = (p2 - p0) * 0.5;
-	            var v1 = (p3 - p1) * 0.5;
-	            var t2 = t * t;
-	            var t3 = t * t2;
-	            return (2 * p1 - 2 * p2 + v0 + v1) * t3 + (-3 * p1 + 3 * p2 - 2 * v0 - v1) * t2 + v0 * t + p1;
-	        },
-	    },
+	TWEEN.Tween = function (object, group) {
+		this._object = object;
+		this._valuesStart = {};
+		this._valuesEnd = {};
+		this._valuesStartRepeat = {};
+		this._duration = 1000;
+		this._repeat = 0;
+		this._repeatDelayTime = undefined;
+		this._yoyo = false;
+		this._isPlaying = false;
+		this._reversed = false;
+		this._delayTime = 0;
+		this._startTime = null;
+		this._easingFunction = TWEEN.Easing.Linear.None;
+		this._interpolationFunction = TWEEN.Interpolation.Linear;
+		this._chainedTweens = [];
+		this._onStartCallback = null;
+		this._onStartCallbackFired = false;
+		this._onUpdateCallback = null;
+		this._onCompleteCallback = null;
+		this._onStopCallback = null;
+		this._group = group || TWEEN;
+		this._id = TWEEN.nextId();
+
 	};
 
-	/**
-	 * Utils
-	 */
-	var Sequence = /** @class */ (function () {
-	    function Sequence() {
-	    }
-	    Sequence.nextId = function () {
-	        return Sequence._nextId++;
-	    };
-	    Sequence._nextId = 0;
-	    return Sequence;
-	}());
+	TWEEN.Tween.prototype = {
+		getId: function getId() {
+			return this._id;
+		},
 
-	var mainGroup = new Group();
+		isPlaying: function isPlaying() {
+			return this._isPlaying;
+		},
 
-	/**
-	 * Tween.js - Licensed under the MIT license
-	 * https://github.com/tweenjs/tween.js
-	 * ----------------------------------------------
-	 *
-	 * See https://github.com/tweenjs/tween.js/graphs/contributors for the full list of contributors.
-	 * Thank you all, you're awesome!
-	 */
-	var Tween = /** @class */ (function () {
-	    function Tween(_object, _group) {
-	        if (_group === void 0) { _group = mainGroup; }
-	        this._object = _object;
-	        this._group = _group;
-	        this._isPaused = false;
-	        this._pauseStart = 0;
-	        this._valuesStart = {};
-	        this._valuesEnd = {};
-	        this._valuesStartRepeat = {};
-	        this._duration = 1000;
-	        this._initialRepeat = 0;
-	        this._repeat = 0;
-	        this._yoyo = false;
-	        this._isPlaying = false;
-	        this._reversed = false;
-	        this._delayTime = 0;
-	        this._startTime = 0;
-	        this._easingFunction = Easing.Linear.None;
-	        this._interpolationFunction = Interpolation.Linear;
-	        this._chainedTweens = [];
-	        this._onStartCallbackFired = false;
-	        this._id = Sequence.nextId();
-	        this._isChainStopped = false;
-	        this._goToEnd = false;
-	    }
-	    Tween.prototype.getId = function () {
-	        return this._id;
-	    };
-	    Tween.prototype.isPlaying = function () {
-	        return this._isPlaying;
-	    };
-	    Tween.prototype.isPaused = function () {
-	        return this._isPaused;
-	    };
-	    Tween.prototype.to = function (properties, duration) {
-	        // TODO? restore this, then update the 07_dynamic_to example to set fox
-	        // tween's to on each update. That way the behavior is opt-in (there's
-	        // currently no opt-out).
-	        // for (const prop in properties) this._valuesEnd[prop] = properties[prop]
-	        this._valuesEnd = Object.create(properties);
-	        if (duration !== undefined) {
-	            this._duration = duration;
-	        }
-	        return this;
-	    };
-	    Tween.prototype.duration = function (d) {
-	        this._duration = d;
-	        return this;
-	    };
-	    Tween.prototype.start = function (time) {
-	        if (this._isPlaying) {
-	            return this;
-	        }
-	        // eslint-disable-next-line
-	        this._group && this._group.add(this);
-	        this._repeat = this._initialRepeat;
-	        if (this._reversed) {
-	            // If we were reversed (f.e. using the yoyo feature) then we need to
-	            // flip the tween direction back to forward.
-	            this._reversed = false;
-	            for (var property in this._valuesStartRepeat) {
-	                this._swapEndStartRepeatValues(property);
-	                this._valuesStart[property] = this._valuesStartRepeat[property];
-	            }
-	        }
-	        this._isPlaying = true;
-	        this._isPaused = false;
-	        this._onStartCallbackFired = false;
-	        this._isChainStopped = false;
-	        this._startTime = time !== undefined ? (typeof time === 'string' ? now$1() + parseFloat(time) : time) : now$1();
-	        this._startTime += this._delayTime;
-	        this._setupProperties(this._object, this._valuesStart, this._valuesEnd, this._valuesStartRepeat);
-	        return this;
-	    };
-	    Tween.prototype._setupProperties = function (_object, _valuesStart, _valuesEnd, _valuesStartRepeat) {
-	        for (var property in _valuesEnd) {
-	            var startValue = _object[property];
-	            var startValueIsArray = Array.isArray(startValue);
-	            var propType = startValueIsArray ? 'array' : typeof startValue;
-	            var isInterpolationList = !startValueIsArray && Array.isArray(_valuesEnd[property]);
-	            // If `to()` specifies a property that doesn't exist in the source object,
-	            // we should not set that property in the object
-	            if (propType === 'undefined' || propType === 'function') {
-	                continue;
-	            }
-	            // Check if an Array was provided as property value
-	            if (isInterpolationList) {
-	                var endValues = _valuesEnd[property];
-	                if (endValues.length === 0) {
-	                    continue;
-	                }
-	                // handle an array of relative values
-	                endValues = endValues.map(this._handleRelativeValue.bind(this, startValue));
-	                // Create a local copy of the Array with the start value at the front
-	                _valuesEnd[property] = [startValue].concat(endValues);
-	            }
-	            // handle the deepness of the values
-	            if ((propType === 'object' || startValueIsArray) && startValue && !isInterpolationList) {
-	                _valuesStart[property] = startValueIsArray ? [] : {};
-	                // eslint-disable-next-line
-	                for (var prop in startValue) {
-	                    // eslint-disable-next-line
-	                    // @ts-ignore FIXME?
-	                    _valuesStart[property][prop] = startValue[prop];
-	                }
-	                _valuesStartRepeat[property] = startValueIsArray ? [] : {}; // TODO? repeat nested values? And yoyo? And array values?
-	                // eslint-disable-next-line
-	                // @ts-ignore FIXME?
-	                this._setupProperties(startValue, _valuesStart[property], _valuesEnd[property], _valuesStartRepeat[property]);
-	            }
-	            else {
-	                // Save the starting value, but only once.
-	                if (typeof _valuesStart[property] === 'undefined') {
-	                    _valuesStart[property] = startValue;
-	                }
-	                if (!startValueIsArray) {
-	                    // eslint-disable-next-line
-	                    // @ts-ignore FIXME?
-	                    _valuesStart[property] *= 1.0; // Ensures we're using numbers, not strings
-	                }
-	                if (isInterpolationList) {
-	                    // eslint-disable-next-line
-	                    // @ts-ignore FIXME?
-	                    _valuesStartRepeat[property] = _valuesEnd[property].slice().reverse();
-	                }
-	                else {
-	                    _valuesStartRepeat[property] = _valuesStart[property] || 0;
-	                }
-	            }
-	        }
-	    };
-	    Tween.prototype.stop = function () {
-	        if (!this._isChainStopped) {
-	            this._isChainStopped = true;
-	            this.stopChainedTweens();
-	        }
-	        if (!this._isPlaying) {
-	            return this;
-	        }
-	        // eslint-disable-next-line
-	        this._group && this._group.remove(this);
-	        this._isPlaying = false;
-	        this._isPaused = false;
-	        if (this._onStopCallback) {
-	            this._onStopCallback(this._object);
-	        }
-	        return this;
-	    };
-	    Tween.prototype.end = function () {
-	        this._goToEnd = true;
-	        this.update(Infinity);
-	        return this;
-	    };
-	    Tween.prototype.pause = function (time) {
-	        if (time === void 0) { time = now$1(); }
-	        if (this._isPaused || !this._isPlaying) {
-	            return this;
-	        }
-	        this._isPaused = true;
-	        this._pauseStart = time;
-	        // eslint-disable-next-line
-	        this._group && this._group.remove(this);
-	        return this;
-	    };
-	    Tween.prototype.resume = function (time) {
-	        if (time === void 0) { time = now$1(); }
-	        if (!this._isPaused || !this._isPlaying) {
-	            return this;
-	        }
-	        this._isPaused = false;
-	        this._startTime += time - this._pauseStart;
-	        this._pauseStart = 0;
-	        // eslint-disable-next-line
-	        this._group && this._group.add(this);
-	        return this;
-	    };
-	    Tween.prototype.stopChainedTweens = function () {
-	        for (var i = 0, numChainedTweens = this._chainedTweens.length; i < numChainedTweens; i++) {
-	            this._chainedTweens[i].stop();
-	        }
-	        return this;
-	    };
-	    Tween.prototype.group = function (group) {
-	        this._group = group;
-	        return this;
-	    };
-	    Tween.prototype.delay = function (amount) {
-	        this._delayTime = amount;
-	        return this;
-	    };
-	    Tween.prototype.repeat = function (times) {
-	        this._initialRepeat = times;
-	        this._repeat = times;
-	        return this;
-	    };
-	    Tween.prototype.repeatDelay = function (amount) {
-	        this._repeatDelayTime = amount;
-	        return this;
-	    };
-	    Tween.prototype.yoyo = function (yoyo) {
-	        this._yoyo = yoyo;
-	        return this;
-	    };
-	    Tween.prototype.easing = function (easingFunction) {
-	        this._easingFunction = easingFunction;
-	        return this;
-	    };
-	    Tween.prototype.interpolation = function (interpolationFunction) {
-	        this._interpolationFunction = interpolationFunction;
-	        return this;
-	    };
-	    Tween.prototype.chain = function () {
-	        var tweens = [];
-	        for (var _i = 0; _i < arguments.length; _i++) {
-	            tweens[_i] = arguments[_i];
-	        }
-	        this._chainedTweens = tweens;
-	        return this;
-	    };
-	    Tween.prototype.onStart = function (callback) {
-	        this._onStartCallback = callback;
-	        return this;
-	    };
-	    Tween.prototype.onUpdate = function (callback) {
-	        this._onUpdateCallback = callback;
-	        return this;
-	    };
-	    Tween.prototype.onRepeat = function (callback) {
-	        this._onRepeatCallback = callback;
-	        return this;
-	    };
-	    Tween.prototype.onComplete = function (callback) {
-	        this._onCompleteCallback = callback;
-	        return this;
-	    };
-	    Tween.prototype.onStop = function (callback) {
-	        this._onStopCallback = callback;
-	        return this;
-	    };
-	    /**
-	     * @returns true if the tween is still playing after the update, false
-	     * otherwise (calling update on a paused tween still returns true because
-	     * it is still playing, just paused).
-	     */
-	    Tween.prototype.update = function (time, autoStart) {
-	        if (time === void 0) { time = now$1(); }
-	        if (autoStart === void 0) { autoStart = true; }
-	        if (this._isPaused)
-	            return true;
-	        var property;
-	        var elapsed;
-	        var endTime = this._startTime + this._duration;
-	        if (!this._goToEnd && !this._isPlaying) {
-	            if (time > endTime)
-	                return false;
-	            if (autoStart)
-	                this.start(time);
-	        }
-	        this._goToEnd = false;
-	        if (time < this._startTime) {
-	            return true;
-	        }
-	        if (this._onStartCallbackFired === false) {
-	            if (this._onStartCallback) {
-	                this._onStartCallback(this._object);
-	            }
-	            this._onStartCallbackFired = true;
-	        }
-	        elapsed = (time - this._startTime) / this._duration;
-	        elapsed = this._duration === 0 || elapsed > 1 ? 1 : elapsed;
-	        var value = this._easingFunction(elapsed);
-	        // properties transformations
-	        this._updateProperties(this._object, this._valuesStart, this._valuesEnd, value);
-	        if (this._onUpdateCallback) {
-	            this._onUpdateCallback(this._object, elapsed);
-	        }
-	        if (elapsed === 1) {
-	            if (this._repeat > 0) {
-	                if (isFinite(this._repeat)) {
-	                    this._repeat--;
-	                }
-	                // Reassign starting values, restart by making startTime = now
-	                for (property in this._valuesStartRepeat) {
-	                    if (!this._yoyo && typeof this._valuesEnd[property] === 'string') {
-	                        this._valuesStartRepeat[property] =
-	                            // eslint-disable-next-line
-	                            // @ts-ignore FIXME?
-	                            this._valuesStartRepeat[property] + parseFloat(this._valuesEnd[property]);
-	                    }
-	                    if (this._yoyo) {
-	                        this._swapEndStartRepeatValues(property);
-	                    }
-	                    this._valuesStart[property] = this._valuesStartRepeat[property];
-	                }
-	                if (this._yoyo) {
-	                    this._reversed = !this._reversed;
-	                }
-	                if (this._repeatDelayTime !== undefined) {
-	                    this._startTime = time + this._repeatDelayTime;
-	                }
-	                else {
-	                    this._startTime = time + this._delayTime;
-	                }
-	                if (this._onRepeatCallback) {
-	                    this._onRepeatCallback(this._object);
-	                }
-	                return true;
-	            }
-	            else {
-	                if (this._onCompleteCallback) {
-	                    this._onCompleteCallback(this._object);
-	                }
-	                for (var i = 0, numChainedTweens = this._chainedTweens.length; i < numChainedTweens; i++) {
-	                    // Make the chained tweens start exactly at the time they should,
-	                    // even if the `update()` method was called way past the duration of the tween
-	                    this._chainedTweens[i].start(this._startTime + this._duration);
-	                }
-	                this._isPlaying = false;
-	                return false;
-	            }
-	        }
-	        return true;
-	    };
-	    Tween.prototype._updateProperties = function (_object, _valuesStart, _valuesEnd, value) {
-	        for (var property in _valuesEnd) {
-	            // Don't update properties that do not exist in the source object
-	            if (_valuesStart[property] === undefined) {
-	                continue;
-	            }
-	            var start = _valuesStart[property] || 0;
-	            var end = _valuesEnd[property];
-	            var startIsArray = Array.isArray(_object[property]);
-	            var endIsArray = Array.isArray(end);
-	            var isInterpolationList = !startIsArray && endIsArray;
-	            if (isInterpolationList) {
-	                _object[property] = this._interpolationFunction(end, value);
-	            }
-	            else if (typeof end === 'object' && end) {
-	                // eslint-disable-next-line
-	                // @ts-ignore FIXME?
-	                this._updateProperties(_object[property], start, end, value);
-	            }
-	            else {
-	                // Parses relative end values with start as base (e.g.: +10, -3)
-	                end = this._handleRelativeValue(start, end);
-	                // Protect against non numeric properties.
-	                if (typeof end === 'number') {
-	                    // eslint-disable-next-line
-	                    // @ts-ignore FIXME?
-	                    _object[property] = start + (end - start) * value;
-	                }
-	            }
-	        }
-	    };
-	    Tween.prototype._handleRelativeValue = function (start, end) {
-	        if (typeof end !== 'string') {
-	            return end;
-	        }
-	        if (end.charAt(0) === '+' || end.charAt(0) === '-') {
-	            return start + parseFloat(end);
-	        }
-	        else {
-	            return parseFloat(end);
-	        }
-	    };
-	    Tween.prototype._swapEndStartRepeatValues = function (property) {
-	        var tmp = this._valuesStartRepeat[property];
-	        var endValue = this._valuesEnd[property];
-	        if (typeof endValue === 'string') {
-	            this._valuesStartRepeat[property] = this._valuesStartRepeat[property] + parseFloat(endValue);
-	        }
-	        else {
-	            this._valuesStartRepeat[property] = this._valuesEnd[property];
-	        }
-	        this._valuesEnd[property] = tmp;
-	    };
-	    return Tween;
-	}());
+		to: function to(properties, duration) {
 
-	var VERSION = '18.6.4';
+			this._valuesEnd = properties;
 
-	/**
-	 * Tween.js - Licensed under the MIT license
-	 * https://github.com/tweenjs/tween.js
-	 * ----------------------------------------------
-	 *
-	 * See https://github.com/tweenjs/tween.js/graphs/contributors for the full list of contributors.
-	 * Thank you all, you're awesome!
-	 */
-	var nextId = Sequence.nextId;
-	/**
-	 * Controlling groups of tweens
-	 *
-	 * Using the TWEEN singleton to manage your tweens can cause issues in large apps with many components.
-	 * In these cases, you may want to create your own smaller groups of tweens.
-	 */
-	var TWEEN = mainGroup;
-	// This is the best way to export things in a way that's compatible with both ES
-	// Modules and CommonJS, without build hacks, and so as not to break the
-	// existing API.
-	// https://github.com/rollup/rollup/issues/1961#issuecomment-423037881
-	var getAll = TWEEN.getAll.bind(TWEEN);
-	var removeAll = TWEEN.removeAll.bind(TWEEN);
-	var add = TWEEN.add.bind(TWEEN);
-	var remove = TWEEN.remove.bind(TWEEN);
-	var update = TWEEN.update.bind(TWEEN);
-	var exports$1 = {
-	    Easing: Easing,
-	    Group: Group,
-	    Interpolation: Interpolation,
-	    now: now$1,
-	    Sequence: Sequence,
-	    nextId: nextId,
-	    Tween: Tween,
-	    VERSION: VERSION,
-	    getAll: getAll,
-	    removeAll: removeAll,
-	    add: add,
-	    remove: remove,
-	    update: update,
+			if (duration !== undefined) {
+				this._duration = duration;
+			}
+
+			return this;
+
+		},
+
+		start: function start(time) {
+
+			this._group.add(this);
+
+			this._isPlaying = true;
+
+			this._onStartCallbackFired = false;
+
+			this._startTime = time !== undefined ? typeof time === 'string' ? TWEEN.now() + parseFloat(time) : time : TWEEN.now();
+			this._startTime += this._delayTime;
+
+			for (var property in this._valuesEnd) {
+
+				// Check if an Array was provided as property value
+				if (this._valuesEnd[property] instanceof Array) {
+
+					if (this._valuesEnd[property].length === 0) {
+						continue;
+					}
+
+					// Create a local copy of the Array with the start value at the front
+					this._valuesEnd[property] = [this._object[property]].concat(this._valuesEnd[property]);
+
+				}
+
+				// If `to()` specifies a property that doesn't exist in the source object,
+				// we should not set that property in the object
+				if (this._object[property] === undefined) {
+					continue;
+				}
+
+				// Save the starting value.
+				this._valuesStart[property] = this._object[property];
+
+				if ((this._valuesStart[property] instanceof Array) === false) {
+					this._valuesStart[property] *= 1.0; // Ensures we're using numbers, not strings
+				}
+
+				this._valuesStartRepeat[property] = this._valuesStart[property] || 0;
+
+			}
+
+			return this;
+
+		},
+
+		stop: function stop() {
+
+			if (!this._isPlaying) {
+				return this;
+			}
+
+			this._group.remove(this);
+			this._isPlaying = false;
+
+			if (this._onStopCallback !== null) {
+				this._onStopCallback(this._object);
+			}
+
+			this.stopChainedTweens();
+			return this;
+
+		},
+
+		end: function end() {
+
+			this.update(this._startTime + this._duration);
+			return this;
+
+		},
+
+		stopChainedTweens: function stopChainedTweens() {
+
+			for (var i = 0, numChainedTweens = this._chainedTweens.length; i < numChainedTweens; i++) {
+				this._chainedTweens[i].stop();
+			}
+
+		},
+
+		group: function group(group) {
+			this._group = group;
+			return this;
+		},
+
+		delay: function delay(amount) {
+
+			this._delayTime = amount;
+			return this;
+
+		},
+
+		repeat: function repeat(times) {
+
+			this._repeat = times;
+			return this;
+
+		},
+
+		repeatDelay: function repeatDelay(amount) {
+
+			this._repeatDelayTime = amount;
+			return this;
+
+		},
+
+		yoyo: function yoyo(yy) {
+
+			this._yoyo = yy;
+			return this;
+
+		},
+
+		easing: function easing(eas) {
+
+			this._easingFunction = eas;
+			return this;
+
+		},
+
+		interpolation: function interpolation(inter) {
+
+			this._interpolationFunction = inter;
+			return this;
+
+		},
+
+		chain: function chain() {
+
+			this._chainedTweens = arguments;
+			return this;
+
+		},
+
+		onStart: function onStart(callback) {
+
+			this._onStartCallback = callback;
+			return this;
+
+		},
+
+		onUpdate: function onUpdate(callback) {
+
+			this._onUpdateCallback = callback;
+			return this;
+
+		},
+
+		onComplete: function onComplete(callback) {
+
+			this._onCompleteCallback = callback;
+			return this;
+
+		},
+
+		onStop: function onStop(callback) {
+
+			this._onStopCallback = callback;
+			return this;
+
+		},
+
+		update: function update(time) {
+
+			var property;
+			var elapsed;
+			var value;
+
+			if (time < this._startTime) {
+				return true;
+			}
+
+			if (this._onStartCallbackFired === false) {
+
+				if (this._onStartCallback !== null) {
+					this._onStartCallback(this._object);
+				}
+
+				this._onStartCallbackFired = true;
+			}
+
+			elapsed = (time - this._startTime) / this._duration;
+			elapsed = (this._duration === 0 || elapsed > 1) ? 1 : elapsed;
+
+			value = this._easingFunction(elapsed);
+
+			for (property in this._valuesEnd) {
+
+				// Don't update properties that do not exist in the source object
+				if (this._valuesStart[property] === undefined) {
+					continue;
+				}
+
+				var start = this._valuesStart[property] || 0;
+				var end = this._valuesEnd[property];
+
+				if (end instanceof Array) {
+
+					this._object[property] = this._interpolationFunction(end, value);
+
+				} else {
+
+					// Parses relative end values with start as base (e.g.: +10, -3)
+					if (typeof (end) === 'string') {
+
+						if (end.charAt(0) === '+' || end.charAt(0) === '-') {
+							end = start + parseFloat(end);
+						} else {
+							end = parseFloat(end);
+						}
+					}
+
+					// Protect against non numeric properties.
+					if (typeof (end) === 'number') {
+						this._object[property] = start + (end - start) * value;
+					}
+
+				}
+
+			}
+
+			if (this._onUpdateCallback !== null) {
+				this._onUpdateCallback(this._object);
+			}
+
+			if (elapsed === 1) {
+
+				if (this._repeat > 0) {
+
+					if (isFinite(this._repeat)) {
+						this._repeat--;
+					}
+
+					// Reassign starting values, restart by making startTime = now
+					for (property in this._valuesStartRepeat) {
+
+						if (typeof (this._valuesEnd[property]) === 'string') {
+							this._valuesStartRepeat[property] = this._valuesStartRepeat[property] + parseFloat(this._valuesEnd[property]);
+						}
+
+						if (this._yoyo) {
+							var tmp = this._valuesStartRepeat[property];
+
+							this._valuesStartRepeat[property] = this._valuesEnd[property];
+							this._valuesEnd[property] = tmp;
+						}
+
+						this._valuesStart[property] = this._valuesStartRepeat[property];
+
+					}
+
+					if (this._yoyo) {
+						this._reversed = !this._reversed;
+					}
+
+					if (this._repeatDelayTime !== undefined) {
+						this._startTime = time + this._repeatDelayTime;
+					} else {
+						this._startTime = time + this._delayTime;
+					}
+
+					return true;
+
+				} else {
+
+					if (this._onCompleteCallback !== null) {
+
+						this._onCompleteCallback(this._object);
+					}
+
+					for (var i = 0, numChainedTweens = this._chainedTweens.length; i < numChainedTweens; i++) {
+						// Make the chained tweens start exactly at the time they should,
+						// even if the `update()` method was called way past the duration of the tween
+						this._chainedTweens[i].start(this._startTime + this._duration);
+					}
+
+					return false;
+
+				}
+
+			}
+
+			return true;
+
+		}
 	};
+
+
+	TWEEN.Easing = {
+
+		Linear: {
+
+			None: function (k) {
+
+				return k;
+
+			}
+
+		},
+
+		Quadratic: {
+
+			In: function (k) {
+
+				return k * k;
+
+			},
+
+			Out: function (k) {
+
+				return k * (2 - k);
+
+			},
+
+			InOut: function (k) {
+
+				if ((k *= 2) < 1) {
+					return 0.5 * k * k;
+				}
+
+				return - 0.5 * (--k * (k - 2) - 1);
+
+			}
+
+		},
+
+		Cubic: {
+
+			In: function (k) {
+
+				return k * k * k;
+
+			},
+
+			Out: function (k) {
+
+				return --k * k * k + 1;
+
+			},
+
+			InOut: function (k) {
+
+				if ((k *= 2) < 1) {
+					return 0.5 * k * k * k;
+				}
+
+				return 0.5 * ((k -= 2) * k * k + 2);
+
+			}
+
+		},
+
+		Quartic: {
+
+			In: function (k) {
+
+				return k * k * k * k;
+
+			},
+
+			Out: function (k) {
+
+				return 1 - (--k * k * k * k);
+
+			},
+
+			InOut: function (k) {
+
+				if ((k *= 2) < 1) {
+					return 0.5 * k * k * k * k;
+				}
+
+				return - 0.5 * ((k -= 2) * k * k * k - 2);
+
+			}
+
+		},
+
+		Quintic: {
+
+			In: function (k) {
+
+				return k * k * k * k * k;
+
+			},
+
+			Out: function (k) {
+
+				return --k * k * k * k * k + 1;
+
+			},
+
+			InOut: function (k) {
+
+				if ((k *= 2) < 1) {
+					return 0.5 * k * k * k * k * k;
+				}
+
+				return 0.5 * ((k -= 2) * k * k * k * k + 2);
+
+			}
+
+		},
+
+		Sinusoidal: {
+
+			In: function (k) {
+
+				return 1 - Math.cos(k * Math.PI / 2);
+
+			},
+
+			Out: function (k) {
+
+				return Math.sin(k * Math.PI / 2);
+
+			},
+
+			InOut: function (k) {
+
+				return 0.5 * (1 - Math.cos(Math.PI * k));
+
+			}
+
+		},
+
+		Exponential: {
+
+			In: function (k) {
+
+				return k === 0 ? 0 : Math.pow(1024, k - 1);
+
+			},
+
+			Out: function (k) {
+
+				return k === 1 ? 1 : 1 - Math.pow(2, - 10 * k);
+
+			},
+
+			InOut: function (k) {
+
+				if (k === 0) {
+					return 0;
+				}
+
+				if (k === 1) {
+					return 1;
+				}
+
+				if ((k *= 2) < 1) {
+					return 0.5 * Math.pow(1024, k - 1);
+				}
+
+				return 0.5 * (- Math.pow(2, - 10 * (k - 1)) + 2);
+
+			}
+
+		},
+
+		Circular: {
+
+			In: function (k) {
+
+				return 1 - Math.sqrt(1 - k * k);
+
+			},
+
+			Out: function (k) {
+
+				return Math.sqrt(1 - (--k * k));
+
+			},
+
+			InOut: function (k) {
+
+				if ((k *= 2) < 1) {
+					return - 0.5 * (Math.sqrt(1 - k * k) - 1);
+				}
+
+				return 0.5 * (Math.sqrt(1 - (k -= 2) * k) + 1);
+
+			}
+
+		},
+
+		Elastic: {
+
+			In: function (k) {
+
+				if (k === 0) {
+					return 0;
+				}
+
+				if (k === 1) {
+					return 1;
+				}
+
+				return -Math.pow(2, 10 * (k - 1)) * Math.sin((k - 1.1) * 5 * Math.PI);
+
+			},
+
+			Out: function (k) {
+
+				if (k === 0) {
+					return 0;
+				}
+
+				if (k === 1) {
+					return 1;
+				}
+
+				return Math.pow(2, -10 * k) * Math.sin((k - 0.1) * 5 * Math.PI) + 1;
+
+			},
+
+			InOut: function (k) {
+
+				if (k === 0) {
+					return 0;
+				}
+
+				if (k === 1) {
+					return 1;
+				}
+
+				k *= 2;
+
+				if (k < 1) {
+					return -0.5 * Math.pow(2, 10 * (k - 1)) * Math.sin((k - 1.1) * 5 * Math.PI);
+				}
+
+				return 0.5 * Math.pow(2, -10 * (k - 1)) * Math.sin((k - 1.1) * 5 * Math.PI) + 1;
+
+			}
+
+		},
+
+		Back: {
+
+			In: function (k) {
+
+				var s = 1.70158;
+
+				return k * k * ((s + 1) * k - s);
+
+			},
+
+			Out: function (k) {
+
+				var s = 1.70158;
+
+				return --k * k * ((s + 1) * k + s) + 1;
+
+			},
+
+			InOut: function (k) {
+
+				var s = 1.70158 * 1.525;
+
+				if ((k *= 2) < 1) {
+					return 0.5 * (k * k * ((s + 1) * k - s));
+				}
+
+				return 0.5 * ((k -= 2) * k * ((s + 1) * k + s) + 2);
+
+			}
+
+		},
+
+		Bounce: {
+
+			In: function (k) {
+
+				return 1 - TWEEN.Easing.Bounce.Out(1 - k);
+
+			},
+
+			Out: function (k) {
+
+				if (k < (1 / 2.75)) {
+					return 7.5625 * k * k;
+				} else if (k < (2 / 2.75)) {
+					return 7.5625 * (k -= (1.5 / 2.75)) * k + 0.75;
+				} else if (k < (2.5 / 2.75)) {
+					return 7.5625 * (k -= (2.25 / 2.75)) * k + 0.9375;
+				} else {
+					return 7.5625 * (k -= (2.625 / 2.75)) * k + 0.984375;
+				}
+
+			},
+
+			InOut: function (k) {
+
+				if (k < 0.5) {
+					return TWEEN.Easing.Bounce.In(k * 2) * 0.5;
+				}
+
+				return TWEEN.Easing.Bounce.Out(k * 2 - 1) * 0.5 + 0.5;
+
+			}
+
+		}
+
+	};
+
+	TWEEN.Interpolation = {
+
+		Linear: function (v, k) {
+
+			var m = v.length - 1;
+			var f = m * k;
+			var i = Math.floor(f);
+			var fn = TWEEN.Interpolation.Utils.Linear;
+
+			if (k < 0) {
+				return fn(v[0], v[1], f);
+			}
+
+			if (k > 1) {
+				return fn(v[m], v[m - 1], m - f);
+			}
+
+			return fn(v[i], v[i + 1 > m ? m : i + 1], f - i);
+
+		},
+
+		Bezier: function (v, k) {
+
+			var b = 0;
+			var n = v.length - 1;
+			var pw = Math.pow;
+			var bn = TWEEN.Interpolation.Utils.Bernstein;
+
+			for (var i = 0; i <= n; i++) {
+				b += pw(1 - k, n - i) * pw(k, i) * v[i] * bn(n, i);
+			}
+
+			return b;
+
+		},
+
+		CatmullRom: function (v, k) {
+
+			var m = v.length - 1;
+			var f = m * k;
+			var i = Math.floor(f);
+			var fn = TWEEN.Interpolation.Utils.CatmullRom;
+
+			if (v[0] === v[m]) {
+
+				if (k < 0) {
+					i = Math.floor(f = m * (1 + k));
+				}
+
+				return fn(v[(i - 1 + m) % m], v[i], v[(i + 1) % m], v[(i + 2) % m], f - i);
+
+			} else {
+
+				if (k < 0) {
+					return v[0] - (fn(v[0], v[0], v[1], v[1], -f) - v[0]);
+				}
+
+				if (k > 1) {
+					return v[m] - (fn(v[m], v[m], v[m - 1], v[m - 1], f - m) - v[m]);
+				}
+
+				return fn(v[i ? i - 1 : 0], v[i], v[m < i + 1 ? m : i + 1], v[m < i + 2 ? m : i + 2], f - i);
+
+			}
+
+		},
+
+		Utils: {
+
+			Linear: function (p0, p1, t) {
+
+				return (p1 - p0) * t + p0;
+
+			},
+
+			Bernstein: function (n, i) {
+
+				var fc = TWEEN.Interpolation.Utils.Factorial;
+
+				return fc(n) / fc(i) / fc(n - i);
+
+			},
+
+			Factorial: (function () {
+
+				var a = [1];
+
+				return function (n) {
+
+					var s = 1;
+
+					if (a[n]) {
+						return a[n];
+					}
+
+					for (var i = n; i > 1; i--) {
+						s *= i;
+					}
+
+					a[n] = s;
+					return s;
+
+				};
+
+			})(),
+
+			CatmullRom: function (p0, p1, p2, p3, t) {
+
+				var v0 = (p2 - p0) * 0.5;
+				var v1 = (p3 - p1) * 0.5;
+				var t2 = t * t;
+				var t3 = t * t2;
+
+				return (2 * p1 - 2 * p2 + v0 + v1) * t3 + (- 3 * p1 + 3 * p2 - 2 * v0 - v1) * t2 + v0 * t + p1;
+
+			}
+
+		}
+
+	};
+
+	// UMD (Universal Module Definition)
+	(function (root) {
+
+		{
+
+			// Node.js
+			module.exports = TWEEN;
+
+		}
+
+	})();
+	});
 
 	/**
 	 * 设置 AnimationFrame begin
@@ -2920,7 +2895,7 @@ var chartx = (function () {
 	    _requestAid = requestAnimationFrame(function () {
 	      //console.log("frame__" + _taskList.length);
 	      //if ( Tween.getAll().length ) {
-	      exports$1.update(); //tween自己会做length判断
+	      Tween.update(); //tween自己会做length判断
 	      //};
 
 	      var currTaskList = _taskList;
@@ -3017,7 +2992,7 @@ var chartx = (function () {
 	      });
 	    };
 
-	    tween = new exports$1.Tween(opt.from).to(opt.to, opt.duration).onStart(function () {
+	    tween = new Tween.Tween(opt.from).to(opt.to, opt.duration).onStart(function () {
 	      //opt.onStart.apply( this )
 	      opt.onStart(opt.from);
 	    }).onUpdate(function () {
@@ -3037,7 +3012,7 @@ var chartx = (function () {
 	      tween._isStoped = true; //opt.onStop.apply( this , [this] );
 
 	      opt.onStop(opt.from);
-	    }).repeat(opt.repeat).delay(opt.delay).easing(exports$1.Easing[opt.easing.split(".")[0]][opt.easing.split(".")[1]]);
+	    }).repeat(opt.repeat).delay(opt.delay).easing(Tween.Easing[opt.easing.split(".")[0]][opt.easing.split(".")[1]]);
 	    tween.id = tid;
 	    tween.start();
 	    animate();
@@ -3068,7 +3043,7 @@ var chartx = (function () {
 	  destroyFrame: destroyFrame,
 	  registTween: registTween,
 	  destroyTween: destroyTween,
-	  Tween: exports$1,
+	  Tween: Tween,
 	  taskList: _taskList
 	};
 
@@ -3090,7 +3065,7 @@ var chartx = (function () {
 	      model[name] = val;
 	    }
 
-	    var valueType = _typeof(val);
+	    var valueType = _typeof_1(val);
 
 	    if (_.indexOf(Publics, name) > -1) {
 	      return;
@@ -3108,7 +3083,7 @@ var chartx = (function () {
 	        if (arguments.length) {
 	          //写操作
 	          //set 的 值的 类型
-	          var neoType = _typeof(neo);
+	          var neoType = _typeof_1(neo);
 
 	          if (stopRepeatAssign) {
 	            return; //阻止重复赋值
@@ -3288,21 +3263,70 @@ var chartx = (function () {
 	  return insideCatch;
 	}
 
-	function _createSuper$1(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct$1(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+	var settings = {
+	  //设备分辨率
+	  RESOLUTION: typeof window !== 'undefined' ? window.devicePixelRatio : 1,
 
-	function _isNativeReflectConstruct$1() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+	  /**
+	   * Target frames per millisecond.
+	   */
+	  TARGET_FPMS: 0.06,
 
-	var DisplayObject = /*#__PURE__*/function (_event$Dispatcher) {
-	  _inherits(DisplayObject, _event$Dispatcher);
+	  /**
+	   * If set to true WebGL will attempt make textures mimpaped by default.
+	   * Mipmapping will only succeed if the base texture uploaded has power of two dimensions.
+	   */
+	  MIPMAP_TEXTURES: true,
 
-	  var _super = _createSuper$1(DisplayObject);
+	  /**
+	   * Default filter resolution.
+	   */
+	  FILTER_RESOLUTION: 1,
+	  // TODO: maybe change to SPRITE.BATCH_SIZE: 2000
+	  // TODO: maybe add PARTICLE.BATCH_SIZE: 15000
+
+	  /**
+	   * The default sprite batch size.
+	   *
+	   * The default aims to balance desktop and mobile devices.
+	   */
+	  SPRITE_BATCH_SIZE: 4096,
+
+	  /**
+	   * The prefix that denotes a URL is for a retina asset.
+	   */
+	  RETINA_PREFIX: /@(.+)x/,
+	  RENDER_OPTIONS: {
+	    view: null,
+	    antialias: true,
+	    forceFXAA: false,
+	    autoResize: false,
+	    transparent: true,
+	    backgroundColor: 0x000000,
+	    clearBeforeRender: true,
+	    preserveDrawingBuffer: false,
+	    roundPixels: false
+	  },
+	  TRANSFORM_MODE: 0,
+	  GC_MODE: 0,
+	  GC_MAX_IDLE: 60 * 60,
+	  GC_MAX_CHECK_COUNT: 60 * 10,
+	  WRAP_MODE: 0,
+	  SCALE_MODE: 0,
+	  PRECISION: 'mediump'
+	};
+
+	var DisplayObject =
+	/*#__PURE__*/
+	function (_event$Dispatcher) {
+	  inherits(DisplayObject, _event$Dispatcher);
 
 	  function DisplayObject(opt) {
 	    var _this;
 
-	    _classCallCheck(this, DisplayObject);
+	    classCallCheck(this, DisplayObject);
 
-	    _this = _super.call(this, opt); //相对父级元素的矩阵
+	    _this = possibleConstructorReturn(this, getPrototypeOf(DisplayObject).call(this, opt)); //相对父级元素的矩阵
 
 	    _this._transform = null;
 	    _this.worldTransform = null; //_transform如果有修改，则_transformChange为true，renderer的时候worldTransform
@@ -3326,14 +3350,14 @@ var chartx = (function () {
 	    _this.id = opt.id || Utils.createId(_this.type);
 	    _this._trackList = []; //一个元素可以追踪另外元素的变动
 
-	    _this.init.apply(_assertThisInitialized(_this), arguments); //所有属性准备好了后，先要计算一次this._updateTransform()得到_tansform
+	    _this.init.apply(assertThisInitialized(_this), arguments); //所有属性准备好了后，先要计算一次this._updateTransform()得到_tansform
 
 
 	    _this._updateTransform();
 
 	    _this._tweens = [];
 
-	    var me = _assertThisInitialized(_this);
+	    var me = assertThisInitialized(_this);
 
 	    _this.on("destroy", function () {
 	      me.cleanAnimates();
@@ -3342,7 +3366,7 @@ var chartx = (function () {
 	    return _this;
 	  }
 
-	  _createClass(DisplayObject, [{
+	  createClass(DisplayObject, [{
 	    key: "init",
 	    value: function init() {}
 	  }, {
@@ -3761,7 +3785,7 @@ var chartx = (function () {
 
 	      if (this.worldTransform) {
 	        var inverseMatrix = this.worldTransform.clone().invert();
-	        var originPos = [x * Settings.RESOLUTION, y * Settings.RESOLUTION];
+	        var originPos = [x * settings.RESOLUTION, y * settings.RESOLUTION];
 	        originPos = inverseMatrix.mulVector(originPos);
 	        x = originPos[0];
 	        y = originPos[1];
@@ -3987,22 +4011,19 @@ var chartx = (function () {
 	  return DisplayObject;
 	}(event.Dispatcher);
 
-	function _createSuper$2(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct$2(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-	function _isNativeReflectConstruct$2() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
-
-	var DisplayObjectContainer = /*#__PURE__*/function (_DisplayObject) {
-	  _inherits(DisplayObjectContainer, _DisplayObject);
-
-	  var _super = _createSuper$2(DisplayObjectContainer);
+	var DisplayObjectContainer =
+	/*#__PURE__*/
+	function (_DisplayObject) {
+	  inherits(DisplayObjectContainer, _DisplayObject);
 
 	  function DisplayObjectContainer(opt) {
 	    var _this;
 
-	    _classCallCheck(this, DisplayObjectContainer);
+	    classCallCheck(this, DisplayObjectContainer);
 
-	    _this = _super.call(this, opt);
-	    _this.children = []; //所有的容器默认支持event 检测，因为 可能有里面的shape是eventEnable是true的
+	    _this = possibleConstructorReturn(this, getPrototypeOf(DisplayObjectContainer).call(this, opt));
+	    _this.children = [];
+	    _this.mouseChildren = []; //所有的容器默认支持event 检测，因为 可能有里面的shape是eventEnable是true的
 	    //如果用户有强制的需求让容器下的所有元素都 不可检测，可以调用
 	    //DisplayObjectContainer的 setEventEnable() 方法
 
@@ -4010,7 +4031,7 @@ var chartx = (function () {
 	    return _this;
 	  }
 
-	  _createClass(DisplayObjectContainer, [{
+	  createClass(DisplayObjectContainer, [{
 	    key: "addChild",
 	    value: function addChild(child, index) {
 	      if (!child) {
@@ -4201,7 +4222,7 @@ var chartx = (function () {
 	            continue;
 	          }
 
-	          if (child.getNumChildren() > 0) {
+	          if (child.mouseChildren && child.getNumChildren() > 0) {
 	            var objs = child.getObjectsUnderPoint(point);
 
 	            if (objs.length > 0) {
@@ -4232,34 +4253,29 @@ var chartx = (function () {
 	  return DisplayObjectContainer;
 	}(DisplayObject);
 
-	function _createSuper$3(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct$3(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-	function _isNativeReflectConstruct$3() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
-
-	var Stage = /*#__PURE__*/function (_DisplayObjectContain) {
-	  _inherits(Stage, _DisplayObjectContain);
-
-	  var _super = _createSuper$3(Stage);
+	var Stage =
+	/*#__PURE__*/
+	function (_DisplayObjectContain) {
+	  inherits(Stage, _DisplayObjectContain);
 
 	  function Stage(opt) {
 	    var _this;
 
-	    _classCallCheck(this, Stage);
+	    classCallCheck(this, Stage);
 
 	    opt.type = "stage";
-	    _this = _super.call(this, opt);
-	    _this.canvas = null; //渲染的时候由renderer决定,这里不做初始值, 也接受外界手动设置好的ctx
-
-	    _this.ctx = opt.ctx || null; //stage正在渲染中
+	    _this = possibleConstructorReturn(this, getPrototypeOf(Stage).call(this, opt));
+	    _this.canvas = null;
+	    _this.ctx = null; //渲染的时候由renderer决定,这里不做初始值
+	    //stage正在渲染中
 
 	    _this.stageRending = false;
 	    _this._isReady = false;
 	    return _this;
 	  } //由canvax的afterAddChild 回调
-	  //width、height都是app的width， 如果后续有每个stage设置不同的width和height，在判断opt里面的width和height
 
 
-	  _createClass(Stage, [{
+	  createClass(Stage, [{
 	    key: "initStage",
 	    value: function initStage(canvas, width, height) {
 	      var self = this;
@@ -4267,8 +4283,8 @@ var chartx = (function () {
 	      var model = self.context;
 	      model.width = width;
 	      model.height = height;
-	      model.scaleX = Settings.RESOLUTION;
-	      model.scaleY = Settings.RESOLUTION;
+	      model.scaleX = Utils._devicePixelRatio;
+	      model.scaleY = Utils._devicePixelRatio;
 	      self._isReady = true;
 	    }
 	  }, {
@@ -4291,26 +4307,28 @@ var chartx = (function () {
 	  return Stage;
 	}(DisplayObjectContainer);
 
-	var SystemRenderer = /*#__PURE__*/function () {
+	var SystemRenderer =
+	/*#__PURE__*/
+	function () {
 	  function SystemRenderer() {
 	    var type = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : RENDERER_TYPE.UNKNOWN;
 	    var app = arguments.length > 1 ? arguments[1] : undefined;
 	    var options = arguments.length > 2 ? arguments[2] : undefined;
 
-	    _classCallCheck(this, SystemRenderer);
+	    classCallCheck(this, SystemRenderer);
 
 	    this.type = type; //2canvas,1webgl
 
 	    this.app = app;
 
 	    if (options) {
-	      for (var i in Settings.RENDER_OPTIONS) {
+	      for (var i in settings.RENDER_OPTIONS) {
 	        if (typeof options[i] === 'undefined') {
-	          options[i] = Settings.RENDER_OPTIONS[i];
+	          options[i] = settings.RENDER_OPTIONS[i];
 	        }
 	      }
 	    } else {
-	      options = Settings.RENDER_OPTIONS;
+	      options = settings.RENDER_OPTIONS;
 	    }
 
 	    this.options = options;
@@ -4321,7 +4339,7 @@ var chartx = (function () {
 	  } //如果引擎处于静默状态的话，就会启动
 
 
-	  _createClass(SystemRenderer, [{
+	  createClass(SystemRenderer, [{
 	    key: "startEnter",
 	    value: function startEnter() {
 	      var self = this;
@@ -4457,9 +4475,11 @@ var chartx = (function () {
 	  return SystemRenderer;
 	}();
 
-	var CanvasGraphicsRenderer = /*#__PURE__*/function () {
+	var CanvasGraphicsRenderer =
+	/*#__PURE__*/
+	function () {
 	  function CanvasGraphicsRenderer(renderer) {
-	    _classCallCheck(this, CanvasGraphicsRenderer);
+	    classCallCheck(this, CanvasGraphicsRenderer);
 
 	    this.renderer = renderer;
 	  }
@@ -4469,7 +4489,7 @@ var chartx = (function () {
 	  */
 
 
-	  _createClass(CanvasGraphicsRenderer, [{
+	  createClass(CanvasGraphicsRenderer, [{
 	    key: "render",
 	    value: function render(displayObject, stage, globalAlpha, isClip) {
 	      var renderer = this.renderer;
@@ -4622,29 +4642,24 @@ var chartx = (function () {
 	  return CanvasGraphicsRenderer;
 	}();
 
-	function _createSuper$4(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct$4(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-	function _isNativeReflectConstruct$4() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
-
-	var CanvasRenderer = /*#__PURE__*/function (_SystemRenderer) {
-	  _inherits(CanvasRenderer, _SystemRenderer);
-
-	  var _super = _createSuper$4(CanvasRenderer);
+	var CanvasRenderer =
+	/*#__PURE__*/
+	function (_SystemRenderer) {
+	  inherits(CanvasRenderer, _SystemRenderer);
 
 	  function CanvasRenderer(app) {
 	    var _this;
 
 	    var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
-	    _classCallCheck(this, CanvasRenderer);
+	    classCallCheck(this, CanvasRenderer);
 
-	    _this = _super.call(this, RENDERER_TYPE.CANVAS, app, options);
-	    _this.renderType = 'canvas';
-	    _this.CGR = new CanvasGraphicsRenderer(_assertThisInitialized(_this));
+	    _this = possibleConstructorReturn(this, getPrototypeOf(CanvasRenderer).call(this, RENDERER_TYPE.CANVAS, app, options));
+	    _this.CGR = new CanvasGraphicsRenderer(assertThisInitialized(_this));
 	    return _this;
 	  }
 
-	  _createClass(CanvasRenderer, [{
+	  createClass(CanvasRenderer, [{
 	    key: "render",
 	    value: function render(app) {
 	      var me = this;
@@ -4766,10 +4781,6 @@ var chartx = (function () {
 	        //如果这个对象有裁剪对象， 则要恢复，裁剪之前的环境
 	        ctx.restore();
 	      }
-
-	      if (ctx.draw) {
-	        ctx.draw(true);
-	      }
 	    }
 	  }, {
 	    key: "_clear",
@@ -4783,41 +4794,8 @@ var chartx = (function () {
 	  return CanvasRenderer;
 	}(SystemRenderer);
 
-	function _createSuper$5(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct$5(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-	function _isNativeReflectConstruct$5() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
-
-	var AlipayMiniRenderer = /*#__PURE__*/function (_CanvasRenderer) {
-	  _inherits(AlipayMiniRenderer, _CanvasRenderer);
-
-	  var _super = _createSuper$5(AlipayMiniRenderer);
-
-	  function AlipayMiniRenderer(app) {
-	    var _this;
-
-	    var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-
-	    _classCallCheck(this, AlipayMiniRenderer);
-
-	    _this = _super.call(this, app, options);
-	    _this.renderType = 'alipayMini';
-	    return _this;
-	  }
-
-	  return AlipayMiniRenderer;
-	}(CanvasRenderer);
-
-	function autoRenderer(app, opt) {
-	  var _renderer; //opt.renderer 支持cavnas alipayMini webGl(暂时弃用)
-
-
-	  if (opt.renderer == 'alipayMini') {
-	    _renderer = new AlipayMiniRenderer(app, opt);
-	  } else {
-	    _renderer = new CanvasRenderer(app, opt);
-	  }
-
-	  return _renderer;
+	function autoRenderer(app, options) {
+	  return new CanvasRenderer(app, options);
 	  /*
 	     if (app.webGL && utils.isWebGLSupported())
 	     {
@@ -4827,55 +4805,53 @@ var chartx = (function () {
 	     */
 	}
 
-	function _createSuper$6(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct$6(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-	function _isNativeReflectConstruct$6() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
-
-	var Application = /*#__PURE__*/function (_DisplayObjectContain) {
-	  _inherits(Application, _DisplayObjectContain);
-
-	  var _super = _createSuper$6(Application);
+	var Application =
+	/*#__PURE__*/
+	function (_DisplayObjectContain) {
+	  inherits(Application, _DisplayObjectContain);
 
 	  function Application(opt) {
 	    var _this;
 
-	    _classCallCheck(this, Application);
+	    var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
+	    classCallCheck(this, Application);
 
 	    opt.type = "canvax";
-	    _this = _super.call(this, opt);
-	    _this.uid = opt.uid || new Date().getTime() + "_" + Math.floor(Math.random() * 100);
-	    Settings.RESOLUTION = opt.devicePixelRatio || (typeof window !== 'undefined' ? window.devicePixelRatio : 1);
-	    _this.el = $.query(opt.el); //优先使用外部传入的width
+	    _this = possibleConstructorReturn(this, getPrototypeOf(Application).call(this, opt));
+	    _this._cid = new Date().getTime() + "_" + Math.floor(Math.random() * 100);
+	    _this.el = $.query(opt.el);
+	    _this.width = parseInt("width" in opt || _this.el.offsetWidth, 10);
+	    _this.height = parseInt("height" in opt || _this.el.offsetHeight, 10);
+	    var viewObj = $.createView(_this.width, _this.height, _this._cid);
+	    _this.view = viewObj.view;
+	    _this.stageView = viewObj.stageView;
+	    _this.domView = viewObj.domView;
+	    _this.el.innerHTML = "";
 
-	    _this.width = opt.width || parseInt("width" in opt || _this.el.offsetWidth, 10);
-	    _this.height = opt.height || parseInt("height" in opt || _this.el.offsetHeight, 10); //小程序的话 没有el， 也就么有domview了
+	    _this.el.appendChild(_this.view);
 
-	    if (_this.el) {
-	      var viewObj = $.createView(_this.width, _this.height, _this.uid);
-	      _this.view = viewObj.view;
-	      _this.stageView = viewObj.stageView;
-	      _this.domView = viewObj.domView;
-	      _this.el.innerHTML = "";
-
-	      _this.el.appendChild(_this.view);
-	    }
-	    _this.viewOffset = opt.viewOffset || $.offset(_this.view);
+	    _this.viewOffset = $.offset(_this.view);
 	    _this.lastGetRO = 0; //最后一次获取 viewOffset 的时间
 
-	    _this.renderer = autoRenderer(_assertThisInitialized(_this), opt);
+	    _this.webGL = opt.webGL;
+	    _this.renderer = autoRenderer(assertThisInitialized(_this), options);
 	    _this.event = null; //该属性在systenRender里面操作，每帧由心跳上报的 需要重绘的stages 列表
 
 	    _this.convertStages = {};
 	    _this.context.$model.width = _this.width;
 	    _this.context.$model.height = _this.height; //然后创建一个用于绘制激活 shape 的 stage 到activation
 
-	    _this._bufferStage = _this._creatHoverStage(opt); //设置一个默认的matrix做为app的世界根节点坐标
+	    _this._bufferStage = null;
+
+	    _this._creatHoverStage(); //设置一个默认的matrix做为app的世界根节点坐标
+
 
 	    _this.worldTransform = new Matrix().identity();
 	    return _this;
 	  }
 
-	  _createClass(Application, [{
+	  createClass(Application, [{
 	    key: "registEvent",
 	    value: function registEvent(opt) {
 	      //初始化事件委托到root元素上面
@@ -4900,7 +4876,7 @@ var chartx = (function () {
 	        this.view.removeChild(this.domView);
 	        this.el.removeChild(this.view);
 	      } catch (e) {}
-	      this.el && (this.el.innerHTML = "");
+	      this.el.innerHTML = "";
 	      this.event = null;
 	      this._bufferStage = null;
 	    }
@@ -4913,9 +4889,7 @@ var chartx = (function () {
 	      //this.view.style.width  = this.width +"px";
 	      //this.view.style.height = this.height+"px";
 
-	      if (this.view) {
-	        this.viewOffset = $.offset(this.view);
-	      }
+	      this.viewOffset = $.offset(this.view);
 	      this.context.$model.width = this.width;
 	      this.context.$model.height = this.height;
 	      var me = this;
@@ -4923,8 +4897,8 @@ var chartx = (function () {
 	      var reSizeCanvas = function reSizeCanvas(canvas) {
 	        canvas.style.width = me.width + "px";
 	        canvas.style.height = me.height + "px";
-	        canvas.setAttribute("width", me.width * Settings.RESOLUTION);
-	        canvas.setAttribute("height", me.height * Settings.RESOLUTION);
+	        canvas.setAttribute("width", me.width * Utils._devicePixelRatio);
+	        canvas.setAttribute("height", me.height * Utils._devicePixelRatio);
 	      };
 
 	      _.each(this.children, function (s, i) {
@@ -4946,25 +4920,26 @@ var chartx = (function () {
 	    }
 	  }, {
 	    key: "_creatHoverStage",
-	    value: function _creatHoverStage(opt) {
+	    value: function _creatHoverStage() {
 	      //TODO:创建stage的时候一定要传入width height  两个参数
 	      this._bufferStage = new Stage({
 	        id: "activCanvas" + new Date().getTime(),
-	        ctx: opt.activCanvas || null
+	        context: {
+	          width: this.context.$model.width,
+	          height: this.context.$model.height
+	        }
 	      }); //该stage不参与事件检测
 
 	      this._bufferStage._eventEnabled = false;
 	      this.addChild(this._bufferStage);
-	      return this._bufferStage;
-	    } //小程序等不支持dom获取的地址需要手动调用下updateViewOffset()
-
+	    }
 	  }, {
 	    key: "updateViewOffset",
-	    value: function updateViewOffset(viewOffset) {
+	    value: function updateViewOffset() {
 	      var now = new Date().getTime();
 
 	      if (now - this.lastGetRO > 1000) {
-	        this.viewOffset = viewOffset || $.offset(this.view);
+	        this.viewOffset = $.offset(this.view);
 	        this.lastGetRO = now;
 	      }
 	    }
@@ -4979,20 +4954,18 @@ var chartx = (function () {
 	        canvas = stage.canvas;
 	      }
 
-	      if (this.stageView) {
-	        if (this.children.length == 1) {
-	          this.stageView.appendChild(canvas);
-	        } else if (this.children.length > 1) {
-	          if (index === undefined) {
-	            //如果没有指定位置，那么就放到 _bufferStage 的下面。
-	            this.stageView.insertBefore(canvas, this._bufferStage.canvas);
+	      if (this.children.length == 1) {
+	        this.stageView.appendChild(canvas);
+	      } else if (this.children.length > 1) {
+	        if (index === undefined) {
+	          //如果没有指定位置，那么就放到 _bufferStage 的下面。
+	          this.stageView.insertBefore(canvas, this._bufferStage.canvas);
+	        } else {
+	          //如果有指定的位置，那么就指定的位置来
+	          if (index >= this.children.length - 1) {
+	            this.stageView.appendChild(canvas);
 	          } else {
-	            //如果有指定的位置，那么就指定的位置来
-	            if (index >= this.children.length - 1) {
-	              this.stageView.appendChild(canvas);
-	            } else {
-	              this.stageView.insertBefore(canvas, this.children[index].canvas);
-	            }
+	            this.stageView.insertBefore(canvas, this.children[index].canvas);
 	          }
 	        }
 	      }
@@ -5003,7 +4976,7 @@ var chartx = (function () {
 	    key: "_afterDelChild",
 	    value: function _afterDelChild(stage) {
 	      try {
-	        this.stageView && stage.canvas && this.stageView.removeChild(stage.canvas);
+	        this.stageView.removeChild(stage.canvas);
 	      } catch (error) {}
 	    }
 	  }, {
@@ -5024,41 +4997,33 @@ var chartx = (function () {
 	      });
 
 	      return canvas.toDataURL();
-	    } //一些不能动态创建_pixelCtx用来做文本检测的环境，要支持可以从外面传一个ctx进来
-
-	  }, {
-	    key: "setPixelCtx",
-	    value: function setPixelCtx(ctx) {
-	      Utils._pixelCtx = ctx;
 	    }
 	  }]);
 
 	  return Application;
 	}(DisplayObjectContainer);
 
-	function _createSuper$7(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct$7(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-	function _isNativeReflectConstruct$7() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
-
-	var Sprite = /*#__PURE__*/function (_DisplayObjectContain) {
-	  _inherits(Sprite, _DisplayObjectContain);
-
-	  var _super = _createSuper$7(Sprite);
+	var Sprite =
+	/*#__PURE__*/
+	function (_DisplayObjectContain) {
+	  inherits(Sprite, _DisplayObjectContain);
 
 	  function Sprite(opt) {
-	    _classCallCheck(this, Sprite);
+	    classCallCheck(this, Sprite);
 
 	    opt = Utils.checkOpt(opt);
 	    opt.type = "sprite";
-	    return _super.call(this, opt);
+	    return possibleConstructorReturn(this, getPrototypeOf(Sprite).call(this, opt));
 	  }
 
 	  return Sprite;
 	}(DisplayObjectContainer);
 
-	var GraphicsData = /*#__PURE__*/function () {
+	var GraphicsData =
+	/*#__PURE__*/
+	function () {
 	  function GraphicsData(lineWidth, strokeStyle, strokeAlpha, fillStyle, fillAlpha, shadowOffsetX, shadowOffsetY, shadowBlur, shadowColor, shape) {
-	    _classCallCheck(this, GraphicsData);
+	    classCallCheck(this, GraphicsData);
 
 	    this.lineWidth = lineWidth;
 	    this.strokeStyle = strokeStyle;
@@ -5078,7 +5043,7 @@ var chartx = (function () {
 	    this.line = true;
 	  }
 
-	  _createClass(GraphicsData, [{
+	  createClass(GraphicsData, [{
 	    key: "clone",
 	    value: function clone() {
 	      var cloneGraphicsData = new GraphicsData(this.lineWidth, this.strokeStyle, this.strokeAlpha, this.fillStyle, this.fillAlpha, this.shadowOffsetX, this.shadowOffsetY, this.shadowBlur, this.shadowColor, this.shape);
@@ -5428,14 +5393,16 @@ var chartx = (function () {
 	  getBoundsOfArc: getBoundsOfArc
 	};
 
-	var Rectangle = /*#__PURE__*/function () {
+	var Rectangle =
+	/*#__PURE__*/
+	function () {
 	  function Rectangle() {
 	    var x = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 	    var y = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
 	    var width = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
 	    var height = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 0;
 
-	    _classCallCheck(this, Rectangle);
+	    classCallCheck(this, Rectangle);
 
 	    this.x = x;
 	    this.y = y;
@@ -5445,7 +5412,7 @@ var chartx = (function () {
 	    this.closed = true;
 	  }
 
-	  _createClass(Rectangle, [{
+	  createClass(Rectangle, [{
 	    key: "clone",
 	    value: function clone() {
 	      return new Rectangle(this.x, this.y, this.width, this.height);
@@ -5483,13 +5450,15 @@ var chartx = (function () {
 	  return Rectangle;
 	}();
 
-	var Circle = /*#__PURE__*/function () {
+	var Circle =
+	/*#__PURE__*/
+	function () {
 	  function Circle() {
 	    var x = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 	    var y = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
 	    var radius = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
 
-	    _classCallCheck(this, Circle);
+	    classCallCheck(this, Circle);
 
 	    this.x = x;
 	    this.y = y;
@@ -5498,7 +5467,7 @@ var chartx = (function () {
 	    this.closed = true;
 	  }
 
-	  _createClass(Circle, [{
+	  createClass(Circle, [{
 	    key: "clone",
 	    value: function clone() {
 	      return new Circle(this.x, this.y, this.radius);
@@ -5527,14 +5496,16 @@ var chartx = (function () {
 	  return Circle;
 	}();
 
-	var Ellipse = /*#__PURE__*/function () {
+	var Ellipse =
+	/*#__PURE__*/
+	function () {
 	  function Ellipse() {
 	    var x = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 	    var y = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
 	    var width = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
 	    var height = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 0;
 
-	    _classCallCheck(this, Ellipse);
+	    classCallCheck(this, Ellipse);
 
 	    this.x = x;
 	    this.y = y;
@@ -5544,7 +5515,7 @@ var chartx = (function () {
 	    this.closed = true;
 	  }
 
-	  _createClass(Ellipse, [{
+	  createClass(Ellipse, [{
 	    key: "clone",
 	    value: function clone() {
 	      return new Ellipse(this.x, this.y, this.width, this.height);
@@ -5572,13 +5543,15 @@ var chartx = (function () {
 	  return Ellipse;
 	}();
 
-	var Polygon = /*#__PURE__*/function () {
+	var Polygon =
+	/*#__PURE__*/
+	function () {
 	  function Polygon() {
 	    for (var _len = arguments.length, points = new Array(_len), _key = 0; _key < _len; _key++) {
 	      points[_key] = arguments[_key];
 	    }
 
-	    _classCallCheck(this, Polygon);
+	    classCallCheck(this, Polygon);
 
 	    var point_0 = points[0];
 
@@ -5601,7 +5574,7 @@ var chartx = (function () {
 	    this.type = SHAPES.POLY;
 	  }
 
-	  _createClass(Polygon, [{
+	  createClass(Polygon, [{
 	    key: "clone",
 	    value: function clone() {
 	      return new Polygon(this.points.slice());
@@ -5674,9 +5647,11 @@ var chartx = (function () {
 	  return path;
 	}
 
-	var Graphics = /*#__PURE__*/function () {
+	var Graphics =
+	/*#__PURE__*/
+	function () {
 	  function Graphics(shape) {
-	    _classCallCheck(this, Graphics);
+	    classCallCheck(this, Graphics);
 
 	    this.lineWidth = 1;
 	    this.strokeStyle = null;
@@ -5711,7 +5686,7 @@ var chartx = (function () {
 	    };
 	  }
 
-	  _createClass(Graphics, [{
+	  createClass(Graphics, [{
 	    key: "setStyle",
 	    value: function setStyle(context) {
 	      //从 shape 中把绘图需要的style属性同步过来
@@ -6158,19 +6133,15 @@ var chartx = (function () {
 	  return Graphics;
 	}();
 
-	function _createSuper$8(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct$8(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-	function _isNativeReflectConstruct$8() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
-
-	var Shape = /*#__PURE__*/function (_DisplayObject) {
-	  _inherits(Shape, _DisplayObject);
-
-	  var _super = _createSuper$8(Shape);
+	var Shape =
+	/*#__PURE__*/
+	function (_DisplayObject) {
+	  inherits(Shape, _DisplayObject);
 
 	  function Shape(opt) {
 	    var _this;
 
-	    _classCallCheck(this, Shape);
+	    classCallCheck(this, Shape);
 
 	    opt = Utils.checkOpt(opt);
 	    var styleContext = {
@@ -6209,7 +6180,7 @@ var chartx = (function () {
 	    if (opt.id === undefined && opt.type !== undefined) {
 	      opt.id = Utils.createId(opt.type);
 	    }
-	    _this = _super.call(this, opt); //over的时候如果有修改样式，就为true
+	    _this = possibleConstructorReturn(this, getPrototypeOf(Shape).call(this, opt)); //over的时候如果有修改样式，就为true
 
 	    _this._hoverClass = false;
 	    _this.hoverClone = true; //是否开启在hover的时候clone一份到active stage 中 
@@ -6239,7 +6210,7 @@ var chartx = (function () {
 	    return _this;
 	  }
 
-	  _createClass(Shape, [{
+	  createClass(Shape, [{
 	    key: "_draw",
 	    value: function _draw(graphics) {
 	      if (graphics.graphicsData.length == 0) {
@@ -6283,19 +6254,15 @@ var chartx = (function () {
 	  return Shape;
 	}(DisplayObject);
 
-	function _createSuper$9(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct$9(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-	function _isNativeReflectConstruct$9() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
-
-	var Text = /*#__PURE__*/function (_DisplayObject) {
-	  _inherits(Text, _DisplayObject);
-
-	  var _super = _createSuper$9(Text);
+	var Text =
+	/*#__PURE__*/
+	function (_DisplayObject) {
+	  inherits(Text, _DisplayObject);
 
 	  function Text(text, opt) {
 	    var _this;
 
-	    _classCallCheck(this, Text);
+	    classCallCheck(this, Text);
 
 	    opt.type = "text";
 
@@ -6318,7 +6285,7 @@ var chartx = (function () {
 	      backgroundColor: null,
 	      textBackgroundColor: null
 	    }, opt.context);
-	    _this = _super.call(this, opt);
+	    _this = possibleConstructorReturn(this, getPrototypeOf(Text).call(this, opt));
 	    _this._reNewline = /\r?\n/;
 	    _this.fontProperts = ["fontStyle", "fontVariant", "fontWeight", "fontSize", "fontFamily"];
 	    _this.context.font = _this._getFontDeclaration();
@@ -6328,7 +6295,7 @@ var chartx = (function () {
 	    return _this;
 	  }
 
-	  _createClass(Text, [{
+	  createClass(Text, [{
 	    key: "$watch",
 	    value: function $watch(name, value, preValue) {
 	      //context属性有变化的监听函数
@@ -6389,7 +6356,7 @@ var chartx = (function () {
 	  }, {
 	    key: "getTextHeight",
 	    value: function getTextHeight() {
-	      return this._getTextHeight(this._getTextLines());
+	      return this._getTextHeight(Utils._pixelCtx, this._getTextLines());
 	    }
 	  }, {
 	    key: "_getTextLines",
@@ -6531,7 +6498,7 @@ var chartx = (function () {
 	    }
 	  }, {
 	    key: "_getTextHeight",
-	    value: function _getTextHeight(textLines) {
+	    value: function _getTextHeight(ctx, textLines) {
 	      return this.context.$model.fontSize * textLines.length * this.context.$model.lineHeight;
 	    }
 	    /**
@@ -6869,19 +6836,15 @@ var chartx = (function () {
 	  isValibPoint: isValibPoint
 	};
 
-	function _createSuper$a(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct$a(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-	function _isNativeReflectConstruct$a() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
-
-	var BrokenLine = /*#__PURE__*/function (_Shape) {
-	  _inherits(BrokenLine, _Shape);
-
-	  var _super = _createSuper$a(BrokenLine);
+	var BrokenLine =
+	/*#__PURE__*/
+	function (_Shape) {
+	  inherits(BrokenLine, _Shape);
 
 	  function BrokenLine(opt) {
 	    var _this;
 
-	    _classCallCheck(this, BrokenLine);
+	    classCallCheck(this, BrokenLine);
 
 	    opt = Utils.checkOpt(opt);
 
@@ -6898,13 +6861,13 @@ var chartx = (function () {
 	    }
 	    opt.context = _context;
 	    opt.type = "brokenline";
-	    _this = _super.call(this, opt); //保存好原始值
+	    _this = possibleConstructorReturn(this, getPrototypeOf(BrokenLine).call(this, opt)); //保存好原始值
 
 	    _this._pointList = _context.pointList;
 	    return _this;
 	  }
 
-	  _createClass(BrokenLine, [{
+	  createClass(BrokenLine, [{
 	    key: "watch",
 	    value: function watch(name, value, preValue) {
 	      if (name == "pointList" || name == "smooth" || name == "lineType") {
@@ -6954,17 +6917,13 @@ var chartx = (function () {
 	  return BrokenLine;
 	}(Shape);
 
-	function _createSuper$b(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct$b(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-	function _isNativeReflectConstruct$b() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
-
-	var Circle$1 = /*#__PURE__*/function (_Shape) {
-	  _inherits(Circle, _Shape);
-
-	  var _super = _createSuper$b(Circle);
+	var Circle$1 =
+	/*#__PURE__*/
+	function (_Shape) {
+	  inherits(Circle, _Shape);
 
 	  function Circle(opt) {
-	    _classCallCheck(this, Circle);
+	    classCallCheck(this, Circle);
 
 	    opt = _.extend(true, {
 	      type: "circle",
@@ -6973,10 +6932,10 @@ var chartx = (function () {
 	        r: 0
 	      }
 	    }, Utils.checkOpt(opt));
-	    return _super.call(this, opt);
+	    return possibleConstructorReturn(this, getPrototypeOf(Circle).call(this, opt));
 	  }
 
-	  _createClass(Circle, [{
+	  createClass(Circle, [{
 	    key: "watch",
 	    value: function watch(name, value, preValue) {
 	      if (name == "r") {
@@ -6998,17 +6957,13 @@ var chartx = (function () {
 	  return Circle;
 	}(Shape);
 
-	function _createSuper$c(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct$c(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-	function _isNativeReflectConstruct$c() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
-
-	var Path = /*#__PURE__*/function (_Shape) {
-	  _inherits(Path, _Shape);
-
-	  var _super = _createSuper$c(Path);
+	var Path =
+	/*#__PURE__*/
+	function (_Shape) {
+	  inherits(Path, _Shape);
 
 	  function Path(opt) {
-	    _classCallCheck(this, Path);
+	    classCallCheck(this, Path);
 
 	    var _context = _.extend(true, {
 	      pointList: [],
@@ -7029,10 +6984,10 @@ var chartx = (function () {
 	    opt.context = _context;
 	    opt.__parsePathData = null;
 	    opt.type = "path";
-	    return _super.call(this, opt);
+	    return possibleConstructorReturn(this, getPrototypeOf(Path).call(this, opt));
 	  }
 
-	  _createClass(Path, [{
+	  createClass(Path, [{
 	    key: "watch",
 	    value: function watch(name, value, preValue) {
 	      if (name == "path") {
@@ -7367,19 +7322,15 @@ var chartx = (function () {
 	  return Path;
 	}(Shape);
 
-	function _createSuper$d(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct$d(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-	function _isNativeReflectConstruct$d() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
-
-	var Droplet = /*#__PURE__*/function (_Path) {
-	  _inherits(Droplet, _Path);
-
-	  var _super = _createSuper$d(Droplet);
+	var Droplet =
+	/*#__PURE__*/
+	function (_Path) {
+	  inherits(Droplet, _Path);
 
 	  function Droplet(opt) {
 	    var _this;
 
-	    _classCallCheck(this, Droplet);
+	    classCallCheck(this, Droplet);
 
 	    opt = _.extend(true, {
 	      type: "droplet",
@@ -7391,13 +7342,13 @@ var chartx = (function () {
 	      }
 	    }, Utils.checkOpt(opt));
 
-	    var my = _this = _super.call(this, opt);
+	    var my = _this = possibleConstructorReturn(this, getPrototypeOf(Droplet).call(this, opt));
 
 	    _this.context.$model.path = _this.createPath();
 	    return _this;
 	  }
 
-	  _createClass(Droplet, [{
+	  createClass(Droplet, [{
 	    key: "watch",
 	    value: function watch(name, value, preValue) {
 	      if (name == "hr" || name == "vr") {
@@ -7417,17 +7368,13 @@ var chartx = (function () {
 	  return Droplet;
 	}(Path);
 
-	function _createSuper$e(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct$e(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-	function _isNativeReflectConstruct$e() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
-
-	var Ellipse$1 = /*#__PURE__*/function (_Shape) {
-	  _inherits(Ellipse, _Shape);
-
-	  var _super = _createSuper$e(Ellipse);
+	var Ellipse$1 =
+	/*#__PURE__*/
+	function (_Shape) {
+	  inherits(Ellipse, _Shape);
 
 	  function Ellipse(opt) {
-	    _classCallCheck(this, Ellipse);
+	    classCallCheck(this, Ellipse);
 
 	    opt = _.extend(true, {
 	      type: "ellipse",
@@ -7438,10 +7385,10 @@ var chartx = (function () {
 
 	      }
 	    }, Utils.checkOpt(opt));
-	    return _super.call(this, opt);
+	    return possibleConstructorReturn(this, getPrototypeOf(Ellipse).call(this, opt));
 	  }
 
-	  _createClass(Ellipse, [{
+	  createClass(Ellipse, [{
 	    key: "watch",
 	    value: function watch(name, value, preValue) {
 	      if (name == "hr" || name == "vr") {
@@ -7458,17 +7405,13 @@ var chartx = (function () {
 	  return Ellipse;
 	}(Shape);
 
-	function _createSuper$f(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct$f(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-	function _isNativeReflectConstruct$f() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
-
-	var Polygon$1 = /*#__PURE__*/function (_Shape) {
-	  _inherits(Polygon, _Shape);
-
-	  var _super = _createSuper$f(Polygon);
+	var Polygon$1 =
+	/*#__PURE__*/
+	function (_Shape) {
+	  inherits(Polygon, _Shape);
 
 	  function Polygon(opt) {
-	    _classCallCheck(this, Polygon);
+	    classCallCheck(this, Polygon);
 
 	    var _context = _.extend(true, {
 	      lineType: null,
@@ -7491,10 +7434,10 @@ var chartx = (function () {
 	    }
 	    opt.context = _context;
 	    opt.type = "polygon";
-	    return _super.call(this, opt);
+	    return possibleConstructorReturn(this, getPrototypeOf(Polygon).call(this, opt));
 	  }
 
-	  _createClass(Polygon, [{
+	  createClass(Polygon, [{
 	    key: "watch",
 	    value: function watch(name, value, preValue) {
 	      //调用parent的setGraphics
@@ -7526,17 +7469,13 @@ var chartx = (function () {
 	  return Polygon;
 	}(Shape);
 
-	function _createSuper$g(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct$g(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-	function _isNativeReflectConstruct$g() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
-
-	var Isogon = /*#__PURE__*/function (_Polygon) {
-	  _inherits(Isogon, _Polygon);
-
-	  var _super = _createSuper$g(Isogon);
+	var Isogon =
+	/*#__PURE__*/
+	function (_Polygon) {
+	  inherits(Isogon, _Polygon);
 
 	  function Isogon(opt) {
-	    _classCallCheck(this, Isogon);
+	    classCallCheck(this, Isogon);
 
 	    var _context = _.extend(true, {
 	      pointList: [],
@@ -7550,10 +7489,10 @@ var chartx = (function () {
 	    _context.pointList = myMath.getIsgonPointList(_context.n, _context.r);
 	    opt.context = _context;
 	    opt.type = "isogon";
-	    return _super.call(this, opt);
+	    return possibleConstructorReturn(this, getPrototypeOf(Isogon).call(this, opt));
 	  }
 
-	  _createClass(Isogon, [{
+	  createClass(Isogon, [{
 	    key: "watch",
 	    value: function watch(name, value, preValue) {
 	      if (name == "r" || name == "n") {
@@ -7570,17 +7509,13 @@ var chartx = (function () {
 	  return Isogon;
 	}(Polygon$1);
 
-	function _createSuper$h(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct$h(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-	function _isNativeReflectConstruct$h() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
-
-	var Line = /*#__PURE__*/function (_Shape) {
-	  _inherits(Line, _Shape);
-
-	  var _super = _createSuper$h(Line);
+	var Line =
+	/*#__PURE__*/
+	function (_Shape) {
+	  inherits(Line, _Shape);
 
 	  function Line(opt) {
-	    _classCallCheck(this, Line);
+	    classCallCheck(this, Line);
 
 	    var _context = _.extend(true, {
 	      start: {
@@ -7599,10 +7534,10 @@ var chartx = (function () {
 
 	    opt.context = _context;
 	    opt.type = "line";
-	    return _super.call(this, opt);
+	    return possibleConstructorReturn(this, getPrototypeOf(Line).call(this, opt));
 	  }
 
-	  _createClass(Line, [{
+	  createClass(Line, [{
 	    key: "watch",
 	    value: function watch(name, value, preValue) {
 	      //并不清楚是start.x 还是end.x， 当然，这并不重要
@@ -7623,17 +7558,13 @@ var chartx = (function () {
 	  return Line;
 	}(Shape);
 
-	function _createSuper$i(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct$i(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-	function _isNativeReflectConstruct$i() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
-
-	var Rect = /*#__PURE__*/function (_Shape) {
-	  _inherits(Rect, _Shape);
-
-	  var _super = _createSuper$i(Rect);
+	var Rect =
+	/*#__PURE__*/
+	function (_Shape) {
+	  inherits(Rect, _Shape);
 
 	  function Rect(opt) {
-	    _classCallCheck(this, Rect);
+	    classCallCheck(this, Rect);
 
 	    var _context = _.extend(true, {
 	      width: 0,
@@ -7643,10 +7574,10 @@ var chartx = (function () {
 
 	    opt.context = _context;
 	    opt.type = "rect";
-	    return _super.call(this, opt);
+	    return possibleConstructorReturn(this, getPrototypeOf(Rect).call(this, opt));
 	  }
 
-	  _createClass(Rect, [{
+	  createClass(Rect, [{
 	    key: "watch",
 	    value: function watch(name, value, preValue) {
 	      if (name == "width" || name == "height" || name == "radius") {
@@ -7707,17 +7638,13 @@ var chartx = (function () {
 	  return Rect;
 	}(Shape);
 
-	function _createSuper$j(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct$j(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-	function _isNativeReflectConstruct$j() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
-
-	var Sector = /*#__PURE__*/function (_Shape) {
-	  _inherits(Sector, _Shape);
-
-	  var _super = _createSuper$j(Sector);
+	var Sector =
+	/*#__PURE__*/
+	function (_Shape) {
+	  inherits(Sector, _Shape);
 
 	  function Sector(opt) {
-	    _classCallCheck(this, Sector);
+	    classCallCheck(this, Sector);
 
 	    var _context = _.extend(true, {
 	      pointList: [],
@@ -7739,10 +7666,10 @@ var chartx = (function () {
 	    opt.isRing = false; //是否为一个圆环
 
 	    opt.type = "sector";
-	    return _super.call(this, opt);
+	    return possibleConstructorReturn(this, getPrototypeOf(Sector).call(this, opt));
 	  }
 
-	  _createClass(Sector, [{
+	  createClass(Sector, [{
 	    key: "watch",
 	    value: function watch(name, value, preValue) {
 	      if (name == "r0" || name == "r" || name == "startAngle" || name == "endAngle" || name == "clockwise") {
@@ -7836,17 +7763,13 @@ var chartx = (function () {
 	  return Sector;
 	}(Shape);
 
-	function _createSuper$k(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct$k(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-	function _isNativeReflectConstruct$k() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
-
-	var Arrow = /*#__PURE__*/function (_Shape) {
-	  _inherits(Arrow, _Shape);
-
-	  var _super = _createSuper$k(Arrow);
+	var Arrow =
+	/*#__PURE__*/
+	function (_Shape) {
+	  inherits(Arrow, _Shape);
 
 	  function Arrow(opt) {
-	    _classCallCheck(this, Arrow);
+	    classCallCheck(this, Arrow);
 
 	    var _context = _.extend(true, {
 	      control: {
@@ -7874,10 +7797,10 @@ var chartx = (function () {
 
 	    opt.context = _context;
 	    opt.type = "arrow";
-	    return _super.call(this, opt);
+	    return possibleConstructorReturn(this, getPrototypeOf(Arrow).call(this, opt));
 	  }
 
-	  _createClass(Arrow, [{
+	  createClass(Arrow, [{
 	    key: "watch",
 	    value: function watch(name, value, preValue) {
 	      //并不清楚是start.x 还是end.x， 当然，这并不重要
@@ -7918,17 +7841,13 @@ var chartx = (function () {
 	  return Arrow;
 	}(Shape);
 
-	function _createSuper$l(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct$l(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-	function _isNativeReflectConstruct$l() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
-
-	var Diamond = /*#__PURE__*/function (_Shape) {
-	  _inherits(Diamond, _Shape);
-
-	  var _super = _createSuper$l(Diamond);
+	var Diamond =
+	/*#__PURE__*/
+	function (_Shape) {
+	  inherits(Diamond, _Shape);
 
 	  function Diamond(opt) {
-	    _classCallCheck(this, Diamond);
+	    classCallCheck(this, Diamond);
 
 	    var _context = _.extend(true, {
 	      innerRect: {
@@ -7942,10 +7861,10 @@ var chartx = (function () {
 
 	    opt.context = _context;
 	    opt.type = "diamond";
-	    return _super.call(this, opt);
+	    return possibleConstructorReturn(this, getPrototypeOf(Diamond).call(this, opt));
 	  }
 
-	  _createClass(Diamond, [{
+	  createClass(Diamond, [{
 	    key: "watch",
 	    value: function watch(name, value, preValue) {
 	      //并不清楚是start.x 还是end.x， 当然，这并不重要
@@ -7979,7 +7898,7 @@ var chartx = (function () {
 	}(Shape);
 
 	var Canvax = {
-	  version: "2.0.74",
+	  version: "2.0.70",
 	  _: _,
 	  $: $,
 	  event: event,
@@ -8437,8 +8356,7 @@ var chartx = (function () {
 	  }
 	}
 
-	module.exports = _classCallCheck;
-	module.exports["default"] = module.exports, module.exports.__esModule = true;
+	module.exports = _classCallCheck, module.exports.__esModule = true, module.exports["default"] = module.exports;
 	});
 
 	unwrapExports(classCallCheck$1);
@@ -8457,11 +8375,13 @@ var chartx = (function () {
 	function _createClass(Constructor, protoProps, staticProps) {
 	  if (protoProps) _defineProperties(Constructor.prototype, protoProps);
 	  if (staticProps) _defineProperties(Constructor, staticProps);
+	  Object.defineProperty(Constructor, "prototype", {
+	    writable: false
+	  });
 	  return Constructor;
 	}
 
-	module.exports = _createClass;
-	module.exports["default"] = module.exports, module.exports.__esModule = true;
+	module.exports = _createClass, module.exports.__esModule = true, module.exports["default"] = module.exports;
 	});
 
 	unwrapExports(createClass$1);
@@ -8471,14 +8391,11 @@ var chartx = (function () {
 	  module.exports = _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) {
 	    o.__proto__ = p;
 	    return o;
-	  };
-
-	  module.exports["default"] = module.exports, module.exports.__esModule = true;
+	  }, module.exports.__esModule = true, module.exports["default"] = module.exports;
 	  return _setPrototypeOf(o, p);
 	}
 
-	module.exports = _setPrototypeOf;
-	module.exports["default"] = module.exports, module.exports.__esModule = true;
+	module.exports = _setPrototypeOf, module.exports.__esModule = true, module.exports["default"] = module.exports;
 	});
 
 	unwrapExports(setPrototypeOf$1);
@@ -8496,11 +8413,13 @@ var chartx = (function () {
 	      configurable: true
 	    }
 	  });
+	  Object.defineProperty(subClass, "prototype", {
+	    writable: false
+	  });
 	  if (superClass) setPrototypeOf$1(subClass, superClass);
 	}
 
-	module.exports = _inherits;
-	module.exports["default"] = module.exports, module.exports.__esModule = true;
+	module.exports = _inherits, module.exports.__esModule = true, module.exports["default"] = module.exports;
 	});
 
 	unwrapExports(inherits$1);
@@ -8509,25 +8428,14 @@ var chartx = (function () {
 	function _typeof(obj) {
 	  "@babel/helpers - typeof";
 
-	  if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
-	    module.exports = _typeof = function _typeof(obj) {
-	      return typeof obj;
-	    };
-
-	    module.exports["default"] = module.exports, module.exports.__esModule = true;
-	  } else {
-	    module.exports = _typeof = function _typeof(obj) {
-	      return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-	    };
-
-	    module.exports["default"] = module.exports, module.exports.__esModule = true;
-	  }
-
-	  return _typeof(obj);
+	  return (module.exports = _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) {
+	    return typeof obj;
+	  } : function (obj) {
+	    return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+	  }, module.exports.__esModule = true, module.exports["default"] = module.exports), _typeof(obj);
 	}
 
-	module.exports = _typeof;
-	module.exports["default"] = module.exports, module.exports.__esModule = true;
+	module.exports = _typeof, module.exports.__esModule = true, module.exports["default"] = module.exports;
 	});
 
 	unwrapExports(_typeof_1$1);
@@ -8541,8 +8449,7 @@ var chartx = (function () {
 	  return self;
 	}
 
-	module.exports = _assertThisInitialized;
-	module.exports["default"] = module.exports, module.exports.__esModule = true;
+	module.exports = _assertThisInitialized, module.exports.__esModule = true, module.exports["default"] = module.exports;
 	});
 
 	unwrapExports(assertThisInitialized$1);
@@ -8555,13 +8462,14 @@ var chartx = (function () {
 	function _possibleConstructorReturn(self, call) {
 	  if (call && (_typeof(call) === "object" || typeof call === "function")) {
 	    return call;
+	  } else if (call !== void 0) {
+	    throw new TypeError("Derived constructors may only return object or undefined");
 	  }
 
 	  return assertThisInitialized$1(self);
 	}
 
-	module.exports = _possibleConstructorReturn;
-	module.exports["default"] = module.exports, module.exports.__esModule = true;
+	module.exports = _possibleConstructorReturn, module.exports.__esModule = true, module.exports["default"] = module.exports;
 	});
 
 	unwrapExports(possibleConstructorReturn$1);
@@ -8570,13 +8478,11 @@ var chartx = (function () {
 	function _getPrototypeOf(o) {
 	  module.exports = _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) {
 	    return o.__proto__ || Object.getPrototypeOf(o);
-	  };
-	  module.exports["default"] = module.exports, module.exports.__esModule = true;
+	  }, module.exports.__esModule = true, module.exports["default"] = module.exports;
 	  return _getPrototypeOf(o);
 	}
 
-	module.exports = _getPrototypeOf;
-	module.exports["default"] = module.exports, module.exports.__esModule = true;
+	module.exports = _getPrototypeOf, module.exports.__esModule = true, module.exports["default"] = module.exports;
 	});
 
 	unwrapExports(getPrototypeOf$1);
@@ -9776,10 +9682,10 @@ var chartx = (function () {
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	exports.numAddSymbol = numAddSymbol;
+	exports.getDefaultProps = getDefaultProps;
 	exports.getDisMinATArr = getDisMinATArr;
 	exports.getPath = getPath;
-	exports.getDefaultProps = getDefaultProps;
+	exports.numAddSymbol = numAddSymbol;
 
 
 
@@ -9894,10 +9800,10 @@ var chartx = (function () {
 	});
 
 	unwrapExports(tools);
-	var tools_1 = tools.numAddSymbol;
+	var tools_1 = tools.getDefaultProps;
 	var tools_2 = tools.getDisMinATArr;
 	var tools_3 = tools.getPath;
-	var tools_4 = tools.getDefaultProps;
+	var tools_4 = tools.numAddSymbol;
 
 	var component = createCommonjsModule(function (module, exports) {
 
@@ -10104,7 +10010,7 @@ var chartx = (function () {
 	    key: "setFieldsMap",
 	    value: function setFieldsMap(axisExp) {
 	      var me = this;
-	      var fieldInd = 0;
+	      var ind = 0;
 	      var axisType = axisExp.type || "yAxis";
 	      var fieldsArr = [];
 
@@ -10114,6 +10020,8 @@ var chartx = (function () {
 	        }
 	      });
 
+	      var graphs = _.flatten([this.app._opt.graphs]);
+
 	      function _set(fields) {
 	        if (_.isString(fields)) {
 	          fields = [fields];
@@ -10122,22 +10030,51 @@ var chartx = (function () {
 	        var clone_fields = _.clone(fields);
 
 	        for (var i = 0, l = fields.length; i < l; i++) {
-	          if (_.isString(fields[i])) {
+	          var field = fields[i];
+
+	          if (_.isString(field)) {
+	            var color = me.app.getTheme(ind);
+	            var graph = void 0;
+	            var graphFieldInd = void 0;
+	            var graphColorProp = void 0; //graphs.find( graph => {_.flatten([graph.field]).indexOf( field )} ).color;
+
+	            for (var _i = 0, _l = graphs.length; _i < _l; _i++) {
+	              graph = graphs[i];
+	              graphFieldInd = _.flatten([graph.field]).indexOf(field);
+
+	              if (graphFieldInd > -1) {
+	                graphColorProp = graph.color;
+	                break;
+	              }
+	            }
+
+	            if (graphColorProp) {
+	              if (typeof graphColorProp == 'string') {
+	                color = graphColorProp;
+	              }
+
+	              if (Array.isArray(graphColorProp)) {
+	                color = graphColorProp[graphFieldInd];
+	              }
+
+	              if (typeof graphColorProp == 'function') {
+	                color = graphColorProp.apply(this.app, [graph]);
+	              }
+	            }
 	            clone_fields[i] = {
-	              field: fields[i],
+	              field: field,
 	              enabled: true,
-	              //yAxis : me.getAxis({type:'yAxis', field:fields[i] }),
-	              color: me.app.getTheme(fieldInd),
-	              ind: fieldInd++
+	              color: color,
+	              ind: ind++
 	            };
 	            clone_fields[i][axisType] = me.getAxis({
 	              type: axisType,
-	              field: fields[i]
+	              field: field
 	            });
 	          }
 
-	          if (_.isArray(fields[i])) {
-	            clone_fields[i] = _set(fields[i]);
+	          if (_.isArray(field)) {
+	            clone_fields[i] = _set(field);
 	          }
 	        }
 	        return clone_fields;
@@ -15320,7 +15257,11 @@ var chartx = (function () {
 	        },
 	        aniDuration: {
 	          detail: '动画时长',
-	          "default": 500
+	          "default": 600
+	        },
+	        color: {
+	          detail: 'line,area,node,label的抄底样式',
+	          "default": 'left'
 	        }
 	      };
 	    }
@@ -16592,8 +16533,7 @@ var chartx = (function () {
 	  return arr2;
 	}
 
-	module.exports = _arrayLikeToArray;
-	module.exports["default"] = module.exports, module.exports.__esModule = true;
+	module.exports = _arrayLikeToArray, module.exports.__esModule = true, module.exports["default"] = module.exports;
 	});
 
 	unwrapExports(arrayLikeToArray);
@@ -16603,8 +16543,7 @@ var chartx = (function () {
 	  if (Array.isArray(arr)) return arrayLikeToArray(arr);
 	}
 
-	module.exports = _arrayWithoutHoles;
-	module.exports["default"] = module.exports, module.exports.__esModule = true;
+	module.exports = _arrayWithoutHoles, module.exports.__esModule = true, module.exports["default"] = module.exports;
 	});
 
 	unwrapExports(arrayWithoutHoles);
@@ -16614,8 +16553,7 @@ var chartx = (function () {
 	  if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter);
 	}
 
-	module.exports = _iterableToArray;
-	module.exports["default"] = module.exports, module.exports.__esModule = true;
+	module.exports = _iterableToArray, module.exports.__esModule = true, module.exports["default"] = module.exports;
 	});
 
 	unwrapExports(iterableToArray);
@@ -16630,8 +16568,7 @@ var chartx = (function () {
 	  if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return arrayLikeToArray(o, minLen);
 	}
 
-	module.exports = _unsupportedIterableToArray;
-	module.exports["default"] = module.exports, module.exports.__esModule = true;
+	module.exports = _unsupportedIterableToArray, module.exports.__esModule = true, module.exports["default"] = module.exports;
 	});
 
 	unwrapExports(unsupportedIterableToArray);
@@ -16641,8 +16578,7 @@ var chartx = (function () {
 	  throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
 	}
 
-	module.exports = _nonIterableSpread;
-	module.exports["default"] = module.exports, module.exports.__esModule = true;
+	module.exports = _nonIterableSpread, module.exports.__esModule = true, module.exports["default"] = module.exports;
 	});
 
 	unwrapExports(nonIterableSpread);
@@ -16652,8 +16588,7 @@ var chartx = (function () {
 	  return arrayWithoutHoles(arr) || iterableToArray(arr) || unsupportedIterableToArray(arr) || nonIterableSpread();
 	}
 
-	module.exports = _toConsumableArray;
-	module.exports["default"] = module.exports, module.exports.__esModule = true;
+	module.exports = _toConsumableArray, module.exports.__esModule = true, module.exports["default"] = module.exports;
 	});
 
 	unwrapExports(toConsumableArray);
@@ -16663,8 +16598,7 @@ var chartx = (function () {
 	  if (Array.isArray(arr)) return arr;
 	}
 
-	module.exports = _arrayWithHoles;
-	module.exports["default"] = module.exports, module.exports.__esModule = true;
+	module.exports = _arrayWithHoles, module.exports.__esModule = true, module.exports["default"] = module.exports;
 	});
 
 	unwrapExports(arrayWithHoles);
@@ -16700,8 +16634,7 @@ var chartx = (function () {
 	  return _arr;
 	}
 
-	module.exports = _iterableToArrayLimit;
-	module.exports["default"] = module.exports, module.exports.__esModule = true;
+	module.exports = _iterableToArrayLimit, module.exports.__esModule = true, module.exports["default"] = module.exports;
 	});
 
 	unwrapExports(iterableToArrayLimit);
@@ -16711,8 +16644,7 @@ var chartx = (function () {
 	  throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
 	}
 
-	module.exports = _nonIterableRest;
-	module.exports["default"] = module.exports, module.exports.__esModule = true;
+	module.exports = _nonIterableRest, module.exports.__esModule = true, module.exports["default"] = module.exports;
 	});
 
 	unwrapExports(nonIterableRest);
@@ -16722,8 +16654,7 @@ var chartx = (function () {
 	  return arrayWithHoles(arr) || iterableToArrayLimit(arr, i) || unsupportedIterableToArray(arr, i) || nonIterableRest();
 	}
 
-	module.exports = _slicedToArray;
-	module.exports["default"] = module.exports, module.exports.__esModule = true;
+	module.exports = _slicedToArray, module.exports.__esModule = true, module.exports["default"] = module.exports;
 	});
 
 	unwrapExports(slicedToArray);
@@ -16737,10 +16668,10 @@ var chartx = (function () {
 	});
 	exports.colorRgb = colorRgb;
 	exports.colorRgba = colorRgba;
+	exports.gradient = gradient;
 	exports.hex2rgb = hex2rgb;
 	exports.rgb2hex = rgb2hex;
 	exports.rgba2rgb = rgba2rgb;
-	exports.gradient = gradient;
 
 	var _slicedToArray2 = interopRequireDefault(slicedToArray);
 
@@ -16840,10 +16771,10 @@ var chartx = (function () {
 	unwrapExports(color);
 	var color_1 = color.colorRgb;
 	var color_2 = color.colorRgba;
-	var color_3 = color.hex2rgb;
-	var color_4 = color.rgb2hex;
-	var color_5 = color.rgba2rgb;
-	var color_6 = color.gradient;
+	var color_3 = color.gradient;
+	var color_4 = color.hex2rgb;
+	var color_5 = color.rgb2hex;
+	var color_6 = color.rgba2rgb;
 
 	var group = createCommonjsModule(function (module, exports) {
 
@@ -16884,6 +16815,7 @@ var chartx = (function () {
 	var BrokenLine = _canvax["default"].Shapes.BrokenLine;
 	var Circle = _canvax["default"].Shapes.Circle;
 	var Isogon = _canvax["default"].Shapes.Isogon;
+	var Rect = _canvax["default"].Shapes.Rect;
 	var Path = _canvax["default"].Shapes.Path;
 
 	var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
@@ -16907,12 +16839,10 @@ var chartx = (function () {
 	    _this.w = w;
 	    _this.h = h;
 	    _this.y = 0;
-	    _this.line = {
-	      //线
-	      strokeStyle: fieldMap.color
-	    };
 	    _this.data = [];
 	    _this.sprite = null;
+	    _this.graphSprite = null; //line area放这里
+
 	    _this._pointList = []; //brokenline最终的状态
 
 	    _this._currPointList = []; //brokenline 动画中的当前状态
@@ -16925,6 +16855,9 @@ var chartx = (function () {
 
 	    _this.field = fieldMap.field; //iGroup 在yAxis.field中对应的值
 
+	    _this.clipRect = null;
+	    _this.__currFocusInd = -1;
+
 	    _this.init(opt);
 
 	    return _this;
@@ -16934,6 +16867,15 @@ var chartx = (function () {
 	    key: "init",
 	    value: function init() {
 	      this.sprite = new _canvax["default"].Display.Sprite();
+	      this.graphSprite = new _canvax["default"].Display.Sprite();
+	      this.sprite.addChild(this.graphSprite); //hover效果的node被添加到的容器
+
+	      this._focusNodes = new _canvax["default"].Display.Sprite({});
+	      this.sprite.addChild(this._focusNodes);
+	      this._nodes = new _canvax["default"].Display.Sprite({});
+	      this.sprite.addChild(this._nodes);
+	      this._labels = new _canvax["default"].Display.Sprite({});
+	      this.sprite.addChild(this._labels);
 	    }
 	  }, {
 	    key: "draw",
@@ -16974,7 +16916,7 @@ var chartx = (function () {
 
 	        if (!color || !_.isString(color)) {
 	          //那么最后，取this.fieldMap.color
-	          color = this.fieldMap.color;
+	          color = this.fieldMap.color; //this._getProp(this.color, iNode) //this.color会被写入到fieldMap.color
 	        }
 	      }
 	      return color;
@@ -17079,11 +17021,12 @@ var chartx = (function () {
 
 	      me._createTexts();
 
-	      me._grow();
-	    }
+	      me._transition();
+	    } //数据变化后的切换动画
+
 	  }, {
-	    key: "_grow",
-	    value: function _grow(callback) {
+	    key: "_transition",
+	    value: function _transition(callback) {
 	      var me = this;
 
 	      if (!me.data.length) {
@@ -17093,9 +17036,16 @@ var chartx = (function () {
 	      }
 
 	      function _update(list) {
+	        if (!me._bline) {
+	          me.sprite._removeTween(me._transitionTween);
+
+	          me._transitionTween = null;
+	          return;
+	        }
+
 	        if (me._bline.context) {
 	          me._bline.context.pointList = _.clone(list);
-	          me._bline.context.strokeStyle = me._getLineStrokeStyle(list);
+	          me._bline.context.strokeStyle = me._getLineStrokeStyle();
 	        }
 
 	        if (me._area.context) {
@@ -17131,7 +17081,7 @@ var chartx = (function () {
 	          }
 	        });
 	      }
-	      this._growTween = AnimationFrame.registTween({
+	      this._transitionTween = AnimationFrame.registTween({
 	        from: me._getPointPosStr(me._currPointList),
 	        to: me._getPointPosStr(me._pointList),
 	        desc: me.field,
@@ -17145,9 +17095,9 @@ var chartx = (function () {
 	          _update(me._currPointList);
 	        },
 	        onComplete: function onComplete() {
-	          me.sprite._removeTween(me._growTween);
+	          me.sprite._removeTween(me._transitionTween);
 
-	          me._growTween = null; //在动画结束后强制把目标状态绘制一次。
+	          me._transitionTween = null; //在动画结束后强制把目标状态绘制一次。
 	          //解决在onUpdate中可能出现的异常会导致绘制有问题。
 	          //这样的话，至少最后的结果会是对的。
 
@@ -17157,7 +17107,60 @@ var chartx = (function () {
 	        }
 	      });
 
-	      this.sprite._tweens.push(this._growTween);
+	      this.sprite._tweens.push(this._transitionTween);
+	    } //首次加载的进场动画
+
+	  }, {
+	    key: "_grow",
+	    value: function _grow(callback) {
+	      var _this2 = this;
+
+	      var _coord = this._graphs.app.getCoord();
+
+	      var width = _coord.width,
+	          height = _coord.height;
+	      this.clipRect = new Rect({
+	        context: {
+	          x: 0,
+	          //-100,
+	          y: -height,
+	          width: 0,
+	          height: height,
+	          fillStyle: 'blue'
+	        }
+	      });
+	      var growTo = {
+	        width: width
+	      };
+	      this.graphSprite.clipTo(this.clipRect);
+
+	      if (this.yAxisAlign == 'right') {
+	        this.clipRect.context.x = width;
+	        growTo.x = 0;
+	      }
+
+	      this.sprite.addChild(this.clipRect);
+	      this.clipRect.animate(growTo, {
+	        duration: this._graphs.aniDuration,
+	        onUpdate: function onUpdate() {
+	          var clipRectCtx = _this2.clipRect.context;
+
+	          _this2._nodes.children.concat(_this2._labels.children).forEach(function (el) {
+	            var _ctx = el.context;
+
+	            if (_ctx.globalAlpha == 0 && _ctx.x >= clipRectCtx.x && _ctx.x <= clipRectCtx.x + clipRectCtx.width) {
+	              el.animate({
+	                globalAlpha: 1
+	              }, {
+	                duration: 300
+	              });
+	            }
+	          });
+	        },
+	        onComplete: function onComplete() {
+	          callback && callback();
+	        }
+	      });
 	    }
 	  }, {
 	    key: "_getPointPosStr",
@@ -17191,27 +17194,28 @@ var chartx = (function () {
 	    key: "_widget",
 	    value: function _widget(opt) {
 	      var me = this;
-	      !opt && (opt = {});
 	      me._pointList = this._getPointList(me.data);
 
 	      if (me._pointList.length == 0) {
 	        //filter后，data可能length==0
 	        return;
 	      }
-	      var list = [];
+	      // let list = [];
+	      // if (opt.animation) {
+	      //     let firstNode = this._getFirstNode();
+	      //     let firstY = firstNode ? firstNode.y : undefined;
+	      //     for (let a = 0, al = me.data.length; a < al; a++) {
+	      //         let o = me.data[a];
+	      //         list.push([
+	      //             o.x,
+	      //             _.isNumber( o.y ) ? firstY : o.y
+	      //         ]);
+	      //     };
+	      // } else {
+	      //     list = me._pointList;
+	      // };
 
-	      if (opt.animation) {
-	        var firstNode = this._getFirstNode();
-
-	        var firstY = firstNode ? firstNode.y : undefined;
-
-	        for (var a = 0, al = me.data.length; a < al; a++) {
-	          var o = me.data[a];
-	          list.push([o.x, _.isNumber(o.y) ? firstY : o.y]);
-	        }
-	      } else {
-	        list = me._pointList;
-	      }
+	      var list = me._pointList;
 	      me._currPointList = list;
 	      var blineCtx = {
 	        pointList: list,
@@ -17247,7 +17251,7 @@ var chartx = (function () {
 	      if (!this.line.enabled) {
 	        bline.context.visible = false;
 	      }
-	      me.sprite.addChild(bline);
+	      me.graphSprite.addChild(bline);
 	      me._bline = bline;
 	      var area = new Path({
 	        //填充
@@ -17269,7 +17273,7 @@ var chartx = (function () {
 	      if (!this.area.enabled) {
 	        area.context.visible = false;
 	      }
-	      me.sprite.addChild(area);
+	      me.graphSprite.addChild(area);
 	      me._area = area;
 
 	      me._createNodes();
@@ -17285,12 +17289,12 @@ var chartx = (function () {
 	        var nodeData = this.data[i];
 
 	        if (_.isNumber(nodeData.y)) {
-	          if (_firstNode === null || this._yAxis.align == "right") {
+	          if (_firstNode === null || this.yAxisAlign == "right") {
 	            //_yAxis为右轴的话，
 	            _firstNode = nodeData;
 	          }
 
-	          if (this._yAxis.align !== "right" && _firstNode !== null) {
+	          if (this.yAxisAlign !== "right" && _firstNode !== null) {
 	            break;
 	          }
 	        }
@@ -17304,7 +17308,7 @@ var chartx = (function () {
 	      var me = this;
 	      var fill_gradient = null; // _fillStyle 可以 接受渐变色，可以不用_getColor， _getColor会过滤掉渐变色
 
-	      var _fillStyle = me._getProp(me.area.fillStyle) || me._getLineStrokeStyle(null, "fillStyle");
+	      var _fillStyle = me._getProp(me.area.fillStyle) || me._getLineStrokeStyle(null, "area");
 
 	      if (_.isArray(me.area.alpha) && !(_fillStyle instanceof CanvasGradient)) {
 	        var _me$ctx;
@@ -17321,7 +17325,7 @@ var chartx = (function () {
 	          me.area.alpha[1] = 0;
 	        }
 
-	        var lps = this._getLinearGradientPoints();
+	        var lps = this._getLinearGradientPoints('area');
 
 	        if (!lps) return; //创建一个线性渐变
 
@@ -17337,7 +17341,8 @@ var chartx = (function () {
 	    }
 	  }, {
 	    key: "_getLineStrokeStyle",
-	    value: function _getLineStrokeStyle(pointList, from) {
+	    value: function _getLineStrokeStyle(pointList) {
+	      var graphType = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'line';
 	      var me = this;
 
 	      var _style;
@@ -17346,56 +17351,40 @@ var chartx = (function () {
 	        //如果用户没有配置line.strokeStyle，那么就用默认的
 	        return this.line.strokeStyle;
 	      }
+	      var lineargradient = this._opt.line.strokeStyle.lineargradient;
 
-	      if (this._opt.line.strokeStyle.lineargradient) {
+	      if (lineargradient) {
 	        var _me$ctx2;
 
-	        //如果用户配置 填充是一个线性渐变
-	        //从bline中找到最高的点
-	        // !pointList && ( pointList = this._bline.context.pointList );
-	        // let topP = _.min(pointList, function(p) {
-	        //     return p[1];
-	        // });
-	        // let bottomP = _.max(pointList, function(p) {
-	        //     return p[1];
-	        // });
-	        // if( from == "fillStyle" ){
-	        //     bottomP = [ 0 , 0 ];
-	        // };
-	        // if( topP[0] === undefined || topP[1] === undefined || bottomP[1] === undefined ){
-	        //     return null;
-	        // };
-	        var lps = this._getLinearGradientPoints(this.line.lineargradientDriction);
+	        //如果是右轴的话，渐变色要对应的反转
+	        if (this.yAxisAlign == 'right') {
+	          lineargradient = lineargradient.reverse();
+	        }
+
+	        var lps = this._getLinearGradientPoints(graphType, pointList);
 
 	        if (!lps) return;
-	        debugger; //let bottomP = [ 0 , 0 ];
-	        //创建一个线性渐变
-	        //console.log( topP[0] + "|"+ topP[1]+ "|"+  topP[0]+ "|"+ bottomP[1] )
-	        //_style = me.ctx.createLinearGradient(topP[0], topP[1], topP[0], bottomP[1]);
-
 	        _style = (_me$ctx2 = me.ctx).createLinearGradient.apply(_me$ctx2, (0, _toConsumableArray2["default"])(lps));
 
-	        _.each(this._opt.line.strokeStyle.lineargradient, function (item) {
+	        _.each(lineargradient, function (item) {
 	          _style.addColorStop(item.position, item.color);
 	        });
 
 	        return _style;
 	      } else {
-	        //构造函数中执行的这个方法，还没有line属性
-	        //if( this.line && this.line.strokeStyle ){
-	        //    _style = this.line.strokeStyle
-	        //} else {
-	        _style = this._getColor(this._opt.line.strokeStyle); //}
-
+	        _style = this._getColor(this._opt.line.strokeStyle);
 	        return _style;
 	      }
 	    }
 	  }, {
 	    key: "_getLinearGradientPoints",
 	    value: function _getLinearGradientPoints() {
-	      var driction = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'topBottom';
+	      var graphType = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'line';
+	      var pointList = arguments.length > 1 ? arguments[1] : undefined;
+	      //如果graphType 传入的是area，并且，用户并没有配area.lineargradientDriction,那么就会默认和line.lineargradientDriction对齐
+	      var driction = this[graphType].lineargradientDriction || this.line.lineargradientDriction;
+	      !pointList && (pointList = this._bline.context.pointList);
 	      var linearPointStart, linearPointEnd;
-	      var pointList = this._bline.context.pointList;
 
 	      if (driction == 'topBottom') {
 	        //top -> bottom
@@ -17406,8 +17395,12 @@ var chartx = (function () {
 
 	        for (var i = 0, l = pointList.length; i < l; i++) {
 	          var point = pointList[i];
-	          topY = Math.min(point[1], topY);
-	          bottomY = Math.max(point[1], bottomY);
+	          var y = point[1];
+
+	          if (!isNaN(y)) {
+	            topY = Math.min(y, topY);
+	            bottomY = Math.max(y, bottomY);
+	          }
 	        }
 
 	        linearPointStart = {
@@ -17418,17 +17411,32 @@ var chartx = (function () {
 	          x: bottomX,
 	          y: bottomY
 	        };
+
+	        if (graphType == 'area') {
+	          //面积图的话，默认就需要一致绘制到底的x轴位置去了
+	          linearPointEnd.y = 0;
+	        }
 	      } else {
 	        //left->right
-	        var leftX = 0,
-	            rightX = 0,
+	        var leftX,
+	            rightX,
 	            leftY = 0,
 	            rightY = 0;
 
 	        for (var _i = 0, _l = pointList.length; _i < _l; _i++) {
 	          var _point2 = pointList[_i];
-	          leftX = Math.min(_point2[0], leftX);
-	          rightX = Math.max(_point2[0], rightX);
+	          var x = _point2[0];
+	          var _y = _point2[1];
+
+	          if (!isNaN(x) && !isNaN(_y)) {
+	            if (leftX == undefined) {
+	              leftX = x;
+	            } else {
+	              leftX = Math.min(x, leftX);
+	            }
+
+	            rightX = Math.max(x, leftX);
+	          }
 	        }
 	        linearPointStart = {
 	          x: leftX,
@@ -17450,16 +17458,11 @@ var chartx = (function () {
 	    key: "_createNodes",
 	    value: function _createNodes() {
 	      var me = this;
-	      var list = me._currPointList; //if ((me.node.enabled || list.length == 1) && !!me.line.lineWidth) { //拐角的圆点
-
-	      if (!this._nodes) {
-	        this._nodes = new _canvax["default"].Display.Sprite({});
-	        this.sprite.addChild(this._nodes);
-	      }
+	      var list = me._currPointList;
 	      var iNode = 0; //这里不能和下面的a对等，以为list中有很多无效的节点
 
 	      for (var a = 0, al = list.length; a < al; a++) {
-	        var _nodeColor = me._getColor(me.node.strokeStyle || me.line.strokeStyle, a);
+	        var _nodeColor = me._getColor(me.node.strokeStyle || me.color || me.line.strokeStyle, a);
 
 	        me.data[a].color = _nodeColor; //回写回data里，tips的是用的到
 
@@ -17467,26 +17470,38 @@ var chartx = (function () {
 
 	        if (list.length == 1 && !nodeEnabled) {
 	          nodeEnabled = true; //只有一个数据的时候， 强制显示node
-	        }
+	        } // if( !nodeEnabled ){
+	        //     //不能写return， 是因为每个data的color还是需要计算一遍
+	        //     continue;
+	        // };
 
-	        if (!nodeEnabled) {
-	          //不能写return， 是因为每个data的color还是需要计算一遍
-	          continue;
-	        }
+
 	        var _point = me._currPointList[a];
 
 	        if (!_point || !_.isNumber(_point[1])) {
 	          //折线图中有可能这个point为undefined
 	          continue;
 	        }
+	        var x = _point[0];
+	        var y = _point[1];
+	        var globalAlpha = 0;
+
+	        if (this.clipRect) {
+	          var clipRectCtx = this.clipRect.context;
+
+	          if (x >= clipRectCtx.x && x <= clipRectCtx.x + clipRectCtx.width) {
+	            globalAlpha = 1;
+	          }
+	        }
 	        var context = {
-	          x: _point[0],
-	          y: _point[1],
+	          x: x,
+	          y: y,
 	          r: me._getProp(me.node.radius, a),
 	          lineWidth: me._getProp(me.node.lineWidth, a) || 2,
 	          strokeStyle: _nodeColor,
-	          fillStyle: me._getProp(me.node.fillStyle, a),
-	          visible: !!me._getProp(me.node.visible, a)
+	          fillStyle: me._getProp(me.node.fillStyle, a) || _nodeColor,
+	          visible: nodeEnabled && !!me._getProp(me.node.visible, a),
+	          globalAlpha: globalAlpha
 	        };
 	        var nodeConstructor = Circle;
 
@@ -17525,16 +17540,17 @@ var chartx = (function () {
 
 	        if (me.node.corner) {
 	          //拐角才有节点
-	          var y = me._pointList[a][1];
+	          var _y2 = me._pointList[a][1];
 	          var pre = me._pointList[a - 1];
 	          var next = me._pointList[a + 1];
 
 	          if (pre && next) {
-	            if (y == pre[1] && y == next[1]) {
+	            if (_y2 == pre[1] && _y2 == next[1]) {
 	              nodeEl.context.visible = false;
 	            }
 	          }
 	        }
+	        me.data[a].nodeEl = nodeEl;
 	        iNode++;
 	      }
 
@@ -17555,11 +17571,6 @@ var chartx = (function () {
 
 	      if (me.label.enabled) {
 	        //节点上面的文本info
-	        if (!this._labels) {
-	          this._labels = new _canvax["default"].Display.Sprite({});
-	          this.sprite.addChild(this._labels);
-	        }
-
 	        var iNode = 0; //这里不能和下面的a对等，以为list中有很多无效的节点
 
 	        for (var a = 0, al = list.length; a < al; a++) {
@@ -17569,15 +17580,27 @@ var chartx = (function () {
 	            //折线图中有可能这个point为undefined
 	            continue;
 	          }
+	          var x = _point[0];
+	          var y = _point[1] - this.node.radius - 2;
+	          var globalAlpha = 0;
+
+	          if (this.clipRect) {
+	            var clipRectCtx = this.clipRect.context;
+
+	            if (x >= clipRectCtx.x && x <= clipRectCtx.x + clipRectCtx.width) {
+	              globalAlpha = 1;
+	            }
+	          }
 	          var context = {
-	            x: _point[0],
-	            y: _point[1] - 3 - 3,
+	            x: x,
+	            y: y,
 	            fontSize: this.label.fontSize,
 	            textAlign: this.label.textAlign,
 	            textBaseline: this.label.textBaseline,
 	            fillStyle: me._getColor(me.label.fontColor, a),
 	            lineWidth: 1,
-	            strokeStyle: "#ffffff"
+	            strokeStyle: "#ffffff",
+	            globalAlpha: globalAlpha
 	          };
 	          var value = me.data[a].value;
 
@@ -17748,6 +17771,80 @@ var chartx = (function () {
 	      };
 	      return node;
 	    }
+	  }, {
+	    key: "tipsPointerOf",
+	    value: function tipsPointerOf(e) {
+	      if (e.eventInfo) {
+	        var iNode = e.eventInfo.iNode;
+
+	        if (iNode != this.__currFocusInd && this.__currFocusInd != -1) {
+	          this.unfocusOf(this.__currFocusInd);
+	        }
+	        this.focusOf(e.eventInfo.iNode);
+	      }
+	    }
+	  }, {
+	    key: "tipsPointerHideOf",
+	    value: function tipsPointerHideOf(e) {
+	      if (e.eventInfo) {
+	        this.unfocusOf(e.eventInfo.iNode);
+	      }
+	    }
+	  }, {
+	    key: "focusOf",
+	    value: function focusOf(iNode) {
+	      var node = this.data[iNode];
+	      var _node = node.nodeEl;
+
+	      if (_node && !node.focused && this.__currFocusInd != iNode) {
+	        //console.log( 'focusOf' )
+	        _node._fillStyle = _node.context.fillStyle;
+	        _node.context.fillStyle = 'white';
+	        _node._visible = _node.context.visible;
+	        _node.context.visible = true;
+
+	        var _focusNode = _node.clone();
+
+	        this._focusNodes.addChild(_focusNode); //_focusNode.context.r += 6;
+
+
+	        _focusNode.context.visible = true;
+	        _focusNode.context.lineWidth = 0; //不需要描边
+
+	        _focusNode.context.fillStyle = _node.context.strokeStyle;
+	        _focusNode.context.globalAlpha = 0.5;
+
+	        _focusNode.animate({
+	          r: _focusNode.context.r + 6
+	        }, {
+	          duration: 300
+	        });
+
+	        this.__currFocusInd = iNode;
+	      }
+
+	      node.focused = true;
+	    }
+	  }, {
+	    key: "unfocusOf",
+	    value: function unfocusOf(iNode) {
+	      if (this.__currFocusInd > -1) {
+	        iNode = this.__currFocusInd;
+	      }
+	      var node = this.data[iNode];
+
+	      this._focusNodes.removeAllChildren();
+
+	      var _node = node.nodeEl;
+
+	      if (_node && node.focused) {
+	        //console.log('unfocus')
+	        _node.context.fillStyle = _node._fillStyle;
+	        _node.context.visible = _node._visible;
+	        node.focused = false;
+	        this.__currFocusInd = -1;
+	      }
+	    }
 	  }], [{
 	    key: "defaultProps",
 	    value: function defaultProps() {
@@ -17813,7 +17910,7 @@ var chartx = (function () {
 	            },
 	            fillStyle: {
 	              detail: '节点图形的背景色',
-	              "default": '#ffffff'
+	              "default": null
 	            },
 	            strokeStyle: {
 	              detail: '节点图形的描边色，默认和line.strokeStyle保持一致',
@@ -17858,7 +17955,7 @@ var chartx = (function () {
 	            },
 	            textBaseline: {
 	              detail: '垂直布局方式',
-	              "default": 'middle'
+	              "default": 'bottom'
 	            }
 	          }
 	        },
@@ -17880,7 +17977,7 @@ var chartx = (function () {
 	            },
 	            alpha: {
 	              detail: '面积透明度',
-	              "default": 0.2
+	              "default": 0.25
 	            }
 	          }
 	        }
@@ -18021,8 +18118,7 @@ var chartx = (function () {
 
 	        var _lineData = me.dataFrame.getFieldData(field);
 
-	        if (!_lineData) return; //console.log( JSON.stringify( _lineData ) )
-
+	        if (!_lineData) return;
 	        var _data = [];
 
 	        for (var b = 0, bl = _lineData.length; b < bl; b++) {
@@ -18083,22 +18179,28 @@ var chartx = (function () {
 	      });
 
 	      return this;
-	    }
+	    } //field 可以是单个 field 也可以是fields数组
+
 	  }, {
 	    key: "show",
 	    value: function show(field) {
-	      var me = this; //过渡优化，有field的状态变化，可能就y轴的数据区间都有了变化，这里的优化就成了bug，所有的field都需要绘制一次
+	      var _this2 = this;
+
+	      //过渡优化，有field的状态变化，可能就y轴的数据区间都有了变化，这里的优化就成了bug，所有的field都需要绘制一次
 	      //这个field不再这个graphs里面的，不相关
 	      // if( _.indexOf( _.flatten( [me.field] ), field ) == -1 ){
 	      //     return;
 	      // };
+	      this.data = this._trimGraphs(); //先把现有的group resetData
 
-	      this.data = this._trimGraphs();
+	      this.groups.forEach(function (g) {
+	        g.resetData(_this2.data[g.field].data);
+	      }); //然后把field添加到groups里面去
 
-	      this._setGroupsForYfield(this.data, field);
+	      var newGroups = this._setGroupsForYfield(this.data, field);
 
-	      Canvax._.each(this.groups, function (g) {
-	        g.resetData(me.data[g.field].data);
+	      newGroups.forEach(function (g) {
+	        g._grow();
 	      });
 	    }
 	  }, {
@@ -18149,6 +18251,8 @@ var chartx = (function () {
 
 	      var _flattenField = Canvax._.flatten([this.field]);
 
+	      var newGroups = [];
+
 	      Canvax._.each(data, function (g, field) {
 	        if (fields && Canvax._.indexOf(fields, field) == -1) {
 	          //如果有传入fields，但是当前field不在fields里面的话，不需要处理
@@ -18166,6 +18270,7 @@ var chartx = (function () {
 	        group.draw({
 	          animation: me.animation && !opt.resize
 	        }, g.data);
+	        newGroups.push(group);
 	        var insert = false; //在groups数组中插入到比自己_groupInd小的元素前面去
 
 	        for (var gi = 0, gl = me.groups.length; gi < gl; gi++) {
@@ -18182,6 +18287,8 @@ var chartx = (function () {
 	          me.sprite.addChild(group.sprite);
 	        }
 	      });
+
+	      return newGroups;
 	    }
 	  }, {
 	    key: "getNodesAt",
@@ -18207,6 +18314,20 @@ var chartx = (function () {
 
 	      return _nodesInfoList;
 	    }
+	  }, {
+	    key: "tipsPointerOf",
+	    value: function tipsPointerOf(e) {
+	      this.groups.forEach(function (group) {
+	        group.tipsPointerOf(e);
+	      });
+	    }
+	  }, {
+	    key: "tipsPointerHideOf",
+	    value: function tipsPointerHideOf(e) {
+	      this.groups.forEach(function (group) {
+	        group.tipsPointerHideOf(e);
+	      });
+	    }
 	  }], [{
 	    key: "defaultProps",
 	    value: function defaultProps() {
@@ -18218,6 +18339,11 @@ var chartx = (function () {
 	        yAxisAlign: {
 	          detail: '绘制在哪根y轴上面',
 	          "default": 'left'
+	        },
+	        aniDuration: {
+	          //覆盖基类中的设置，line的duration要1000
+	          detail: '动画时长',
+	          "default": 1200
 	        },
 	        _props: [_group["default"]]
 	      };
@@ -25242,13 +25368,13 @@ var chartx = (function () {
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	exports.intersectionArea = intersectionArea;
-	exports.containedInCircles = containedInCircles;
 	exports.circleArea = circleArea;
-	exports.distance = distance;
-	exports.circleOverlap = circleOverlap;
 	exports.circleCircleIntersection = circleCircleIntersection;
+	exports.circleOverlap = circleOverlap;
+	exports.containedInCircles = containedInCircles;
+	exports.distance = distance;
 	exports.getCenter = getCenter;
+	exports.intersectionArea = intersectionArea;
 	var SMALL = 1e-10;
 	/** Returns the intersection area of a bunch of circles (where each circle
 	 is an object having an x,y and radius property) */
@@ -25506,29 +25632,29 @@ var chartx = (function () {
 	});
 
 	unwrapExports(circleintersection);
-	var circleintersection_1 = circleintersection.intersectionArea;
-	var circleintersection_2 = circleintersection.containedInCircles;
-	var circleintersection_3 = circleintersection.circleArea;
-	var circleintersection_4 = circleintersection.distance;
-	var circleintersection_5 = circleintersection.circleOverlap;
-	var circleintersection_6 = circleintersection.circleCircleIntersection;
-	var circleintersection_7 = circleintersection.getCenter;
+	var circleintersection_1 = circleintersection.circleArea;
+	var circleintersection_2 = circleintersection.circleCircleIntersection;
+	var circleintersection_3 = circleintersection.circleOverlap;
+	var circleintersection_4 = circleintersection.containedInCircles;
+	var circleintersection_5 = circleintersection.distance;
+	var circleintersection_6 = circleintersection.getCenter;
+	var circleintersection_7 = circleintersection.intersectionArea;
 
 	var layout = createCommonjsModule(function (module, exports) {
 
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	exports.venn = venn;
-	exports.distanceFromIntersectArea = distanceFromIntersectArea;
-	exports.getDistanceMatrices = getDistanceMatrices;
 	exports.bestInitialLayout = bestInitialLayout;
 	exports.constrainedMDSLayout = constrainedMDSLayout;
+	exports.disjointCluster = disjointCluster;
+	exports.distanceFromIntersectArea = distanceFromIntersectArea;
+	exports.getDistanceMatrices = getDistanceMatrices;
 	exports.greedyLayout = greedyLayout;
 	exports.lossFunction = lossFunction;
-	exports.disjointCluster = disjointCluster;
 	exports.normalizeSolution = normalizeSolution;
 	exports.scaleSolution = scaleSolution;
+	exports.venn = venn;
 
 
 
@@ -26319,16 +26445,16 @@ var chartx = (function () {
 	});
 
 	unwrapExports(layout);
-	var layout_1 = layout.venn;
-	var layout_2 = layout.distanceFromIntersectArea;
-	var layout_3 = layout.getDistanceMatrices;
-	var layout_4 = layout.bestInitialLayout;
-	var layout_5 = layout.constrainedMDSLayout;
+	var layout_1 = layout.bestInitialLayout;
+	var layout_2 = layout.constrainedMDSLayout;
+	var layout_3 = layout.disjointCluster;
+	var layout_4 = layout.distanceFromIntersectArea;
+	var layout_5 = layout.getDistanceMatrices;
 	var layout_6 = layout.greedyLayout;
 	var layout_7 = layout.lossFunction;
-	var layout_8 = layout.disjointCluster;
-	var layout_9 = layout.normalizeSolution;
-	var layout_10 = layout.scaleSolution;
+	var layout_8 = layout.normalizeSolution;
+	var layout_9 = layout.scaleSolution;
+	var layout_10 = layout.venn;
 
 	var venn = createCommonjsModule(function (module, exports) {
 
@@ -29266,9 +29392,9 @@ var chartx = (function () {
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
+	exports.arrayToTreeJsonForRelation = arrayToTreeJsonForRelation;
 	exports.checkDataIsJson = checkDataIsJson;
 	exports.jsonToArrayForRelation = jsonToArrayForRelation;
-	exports.arrayToTreeJsonForRelation = arrayToTreeJsonForRelation;
 
 
 
@@ -29461,9 +29587,9 @@ var chartx = (function () {
 	});
 
 	unwrapExports(data);
-	var data_1 = data.checkDataIsJson;
-	var data_2 = data.jsonToArrayForRelation;
-	var data_3 = data.arrayToTreeJsonForRelation;
+	var data_1 = data.arrayToTreeJsonForRelation;
+	var data_2 = data.checkDataIsJson;
+	var data_3 = data.jsonToArrayForRelation;
 
 	var zoom = createCommonjsModule(function (module, exports) {
 
@@ -39920,8 +40046,8 @@ var chartx = (function () {
 	        if (string.charCodeAt(0) === 46
 	        /* . */
 	        ) {
-	            result.push("");
-	          }
+	          result.push("");
+	        }
 
 	        string.replace(rePropName, function (match, number, quote, subString) {
 	          result.push(quote ? subString.replace(reEscapeChar, "$1") : number || match);
@@ -44563,6 +44689,8 @@ var chartx = (function () {
 	});
 	exports["default"] = void 0;
 
+	var _createClass2 = interopRequireDefault(createClass$1);
+
 	var _classCallCheck2 = interopRequireDefault(classCallCheck$1);
 
 	/**
@@ -44571,13 +44699,12 @@ var chartx = (function () {
 	 * params属性则是这次trigger的一些动作参数
 	 * 目前legend和datazoom组件都有用到
 	 */
-	var Trigger = function Trigger(comp) {
+	var Trigger = /*#__PURE__*/(0, _createClass2["default"])(function Trigger(comp) {
 	  var params = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 	  (0, _classCallCheck2["default"])(this, Trigger);
 	  this.comp = comp;
 	  this.params = params;
-	};
-
+	});
 	exports["default"] = Trigger;
 	});
 
@@ -45024,10 +45151,10 @@ var chartx = (function () {
 	function tree_add(d) {
 	  const x = +this._x.call(null, d),
 	      y = +this._y.call(null, d);
-	  return add$1(this.cover(x, y), x, y, d);
+	  return add(this.cover(x, y), x, y, d);
 	}
 
-	function add$1(tree, x, y, d) {
+	function add(tree, x, y, d) {
 	  if (isNaN(x) || isNaN(y)) return tree; // ignore invalid points
 
 	  var parent,
@@ -45100,7 +45227,7 @@ var chartx = (function () {
 
 	  // Add the new points.
 	  for (i = 0; i < n; ++i) {
-	    add$1(this, xz[i], yz[i], data[i]);
+	    add(this, xz[i], yz[i], data[i]);
 	  }
 
 	  return this;
@@ -45299,7 +45426,7 @@ var chartx = (function () {
 	  return this;
 	}
 
-	function removeAll$1(data) {
+	function removeAll(data) {
 	  for (var i = 0, n = data.length; i < n; ++i) this.remove(data[i]);
 	  return this;
 	}
@@ -45420,7 +45547,7 @@ var chartx = (function () {
 	treeProto.extent = tree_extent;
 	treeProto.find = tree_find;
 	treeProto.remove = tree_remove;
-	treeProto.removeAll = removeAll$1;
+	treeProto.removeAll = removeAll;
 	treeProto.root = tree_root;
 	treeProto.size = tree_size;
 	treeProto.visit = tree_visit;
@@ -45745,7 +45872,7 @@ var chartx = (function () {
 	    clock = typeof performance === "object" && performance.now ? performance : Date,
 	    setFrame = typeof window === "object" && window.requestAnimationFrame ? window.requestAnimationFrame.bind(window) : function(f) { setTimeout(f, 17); };
 
-	function now$2() {
+	function now() {
 	  return clockNow || (setFrame(clearNow), clockNow = clock.now() + clockSkew);
 	}
 
@@ -45763,7 +45890,7 @@ var chartx = (function () {
 	  constructor: Timer,
 	  restart: function(callback, delay, time) {
 	    if (typeof callback !== "function") throw new TypeError("callback is not a function");
-	    time = (time == null ? now$2() : +time) + (delay == null ? 0 : +delay);
+	    time = (time == null ? now() : +time) + (delay == null ? 0 : +delay);
 	    if (!this._next && taskTail !== this) {
 	      if (taskTail) taskTail._next = this;
 	      else taskHead = this;
@@ -45789,7 +45916,7 @@ var chartx = (function () {
 	}
 
 	function timerFlush() {
-	  now$2(); // Get the current time, if not already set.
+	  now(); // Get the current time, if not already set.
 	  ++frame; // Pretend we’ve set an alarm, if we haven’t already.
 	  var t = taskHead, e;
 	  while (t) {
@@ -48107,25 +48234,25 @@ var chartx = (function () {
 	    if (nodeSize) _hierarchy["default"].layout_hierarchyVisitBefore(root0, sizeNode); // If a fixed tree size is specified, scale x and y based on the extent.
 	    // Compute the left-most, right-most, and depth-most nodes for extents.
 	    else {
-	        var left = root0,
-	            right = root0,
-	            bottom = root0;
+	      var left = root0,
+	          right = root0,
+	          bottom = root0;
 
-	        _hierarchy["default"].layout_hierarchyVisitBefore(root0, function (node) {
-	          if (node.x < left.x) left = node;
-	          if (node.x > right.x) right = node;
-	          if (node.depth > bottom.depth) bottom = node;
-	        });
+	      _hierarchy["default"].layout_hierarchyVisitBefore(root0, function (node) {
+	        if (node.x < left.x) left = node;
+	        if (node.x > right.x) right = node;
+	        if (node.depth > bottom.depth) bottom = node;
+	      });
 
-	        var tx = separation(left, right) / 2 - left.x,
-	            kx = size[0] / (right.x + separation(right, left) / 2 + tx),
-	            ky = size[1] / (bottom.depth || 1);
+	      var tx = separation(left, right) / 2 - left.x,
+	          kx = size[0] / (right.x + separation(right, left) / 2 + tx),
+	          ky = size[1] / (bottom.depth || 1);
 
-	        _hierarchy["default"].layout_hierarchyVisitBefore(root0, function (node) {
-	          node.x = (node.x + tx) * kx;
-	          node.y = node.depth * ky;
-	        });
-	      }
+	      _hierarchy["default"].layout_hierarchyVisitBefore(root0, function (node) {
+	        node.x = (node.x + tx) * kx;
+	        node.y = node.depth * ky;
+	      });
+	    }
 	    return nodes;
 	  }
 
@@ -50304,6 +50431,1016 @@ var chartx = (function () {
 
 	unwrapExports(markline);
 
+	var numeral = createCommonjsModule(function (module) {
+	/*! @preserve
+	 * numeral.js
+	 * version : 2.0.6
+	 * author : Adam Draper
+	 * license : MIT
+	 * http://adamwdraper.github.com/Numeral-js/
+	 */
+
+	(function (global, factory) {
+	    if ( module.exports) {
+	        module.exports = factory();
+	    } else {
+	        global.numeral = factory();
+	    }
+	}(commonjsGlobal, function () {
+	    /************************************
+	        Variables
+	    ************************************/
+
+	    var numeral,
+	        _,
+	        VERSION = '2.0.6',
+	        formats = {},
+	        locales = {},
+	        defaults = {
+	            currentLocale: 'en',
+	            zeroFormat: null,
+	            nullFormat: null,
+	            defaultFormat: '0,0',
+	            scalePercentBy100: true
+	        },
+	        options = {
+	            currentLocale: defaults.currentLocale,
+	            zeroFormat: defaults.zeroFormat,
+	            nullFormat: defaults.nullFormat,
+	            defaultFormat: defaults.defaultFormat,
+	            scalePercentBy100: defaults.scalePercentBy100
+	        };
+
+
+	    /************************************
+	        Constructors
+	    ************************************/
+
+	    // Numeral prototype object
+	    function Numeral(input, number) {
+	        this._input = input;
+
+	        this._value = number;
+	    }
+
+	    numeral = function(input) {
+	        var value,
+	            kind,
+	            unformatFunction,
+	            regexp;
+
+	        if (numeral.isNumeral(input)) {
+	            value = input.value();
+	        } else if (input === 0 || typeof input === 'undefined') {
+	            value = 0;
+	        } else if (input === null || _.isNaN(input)) {
+	            value = null;
+	        } else if (typeof input === 'string') {
+	            if (options.zeroFormat && input === options.zeroFormat) {
+	                value = 0;
+	            } else if (options.nullFormat && input === options.nullFormat || !input.replace(/[^0-9]+/g, '').length) {
+	                value = null;
+	            } else {
+	                for (kind in formats) {
+	                    regexp = typeof formats[kind].regexps.unformat === 'function' ? formats[kind].regexps.unformat() : formats[kind].regexps.unformat;
+
+	                    if (regexp && input.match(regexp)) {
+	                        unformatFunction = formats[kind].unformat;
+
+	                        break;
+	                    }
+	                }
+
+	                unformatFunction = unformatFunction || numeral._.stringToNumber;
+
+	                value = unformatFunction(input);
+	            }
+	        } else {
+	            value = Number(input)|| null;
+	        }
+
+	        return new Numeral(input, value);
+	    };
+
+	    // version number
+	    numeral.version = VERSION;
+
+	    // compare numeral object
+	    numeral.isNumeral = function(obj) {
+	        return obj instanceof Numeral;
+	    };
+
+	    // helper functions
+	    numeral._ = _ = {
+	        // formats numbers separators, decimals places, signs, abbreviations
+	        numberToFormat: function(value, format, roundingFunction) {
+	            var locale = locales[numeral.options.currentLocale],
+	                negP = false,
+	                optDec = false,
+	                leadingCount = 0,
+	                abbr = '',
+	                trillion = 1000000000000,
+	                billion = 1000000000,
+	                million = 1000000,
+	                thousand = 1000,
+	                decimal = '',
+	                neg = false,
+	                abbrForce, // force abbreviation
+	                abs,
+	                int,
+	                precision,
+	                signed,
+	                thousands,
+	                output;
+
+	            // make sure we never format a null value
+	            value = value || 0;
+
+	            abs = Math.abs(value);
+
+	            // see if we should use parentheses for negative number or if we should prefix with a sign
+	            // if both are present we default to parentheses
+	            if (numeral._.includes(format, '(')) {
+	                negP = true;
+	                format = format.replace(/[\(|\)]/g, '');
+	            } else if (numeral._.includes(format, '+') || numeral._.includes(format, '-')) {
+	                signed = numeral._.includes(format, '+') ? format.indexOf('+') : value < 0 ? format.indexOf('-') : -1;
+	                format = format.replace(/[\+|\-]/g, '');
+	            }
+
+	            // see if abbreviation is wanted
+	            if (numeral._.includes(format, 'a')) {
+	                abbrForce = format.match(/a(k|m|b|t)?/);
+
+	                abbrForce = abbrForce ? abbrForce[1] : false;
+
+	                // check for space before abbreviation
+	                if (numeral._.includes(format, ' a')) {
+	                    abbr = ' ';
+	                }
+
+	                format = format.replace(new RegExp(abbr + 'a[kmbt]?'), '');
+
+	                if (abs >= trillion && !abbrForce || abbrForce === 't') {
+	                    // trillion
+	                    abbr += locale.abbreviations.trillion;
+	                    value = value / trillion;
+	                } else if (abs < trillion && abs >= billion && !abbrForce || abbrForce === 'b') {
+	                    // billion
+	                    abbr += locale.abbreviations.billion;
+	                    value = value / billion;
+	                } else if (abs < billion && abs >= million && !abbrForce || abbrForce === 'm') {
+	                    // million
+	                    abbr += locale.abbreviations.million;
+	                    value = value / million;
+	                } else if (abs < million && abs >= thousand && !abbrForce || abbrForce === 'k') {
+	                    // thousand
+	                    abbr += locale.abbreviations.thousand;
+	                    value = value / thousand;
+	                }
+	            }
+
+	            // check for optional decimals
+	            if (numeral._.includes(format, '[.]')) {
+	                optDec = true;
+	                format = format.replace('[.]', '.');
+	            }
+
+	            // break number and format
+	            int = value.toString().split('.')[0];
+	            precision = format.split('.')[1];
+	            thousands = format.indexOf(',');
+	            leadingCount = (format.split('.')[0].split(',')[0].match(/0/g) || []).length;
+
+	            if (precision) {
+	                if (numeral._.includes(precision, '[')) {
+	                    precision = precision.replace(']', '');
+	                    precision = precision.split('[');
+	                    decimal = numeral._.toFixed(value, (precision[0].length + precision[1].length), roundingFunction, precision[1].length);
+	                } else {
+	                    decimal = numeral._.toFixed(value, precision.length, roundingFunction);
+	                }
+
+	                int = decimal.split('.')[0];
+
+	                if (numeral._.includes(decimal, '.')) {
+	                    decimal = locale.delimiters.decimal + decimal.split('.')[1];
+	                } else {
+	                    decimal = '';
+	                }
+
+	                if (optDec && Number(decimal.slice(1)) === 0) {
+	                    decimal = '';
+	                }
+	            } else {
+	                int = numeral._.toFixed(value, 0, roundingFunction);
+	            }
+
+	            // check abbreviation again after rounding
+	            if (abbr && !abbrForce && Number(int) >= 1000 && abbr !== locale.abbreviations.trillion) {
+	                int = String(Number(int) / 1000);
+
+	                switch (abbr) {
+	                    case locale.abbreviations.thousand:
+	                        abbr = locale.abbreviations.million;
+	                        break;
+	                    case locale.abbreviations.million:
+	                        abbr = locale.abbreviations.billion;
+	                        break;
+	                    case locale.abbreviations.billion:
+	                        abbr = locale.abbreviations.trillion;
+	                        break;
+	                }
+	            }
+
+
+	            // format number
+	            if (numeral._.includes(int, '-')) {
+	                int = int.slice(1);
+	                neg = true;
+	            }
+
+	            if (int.length < leadingCount) {
+	                for (var i = leadingCount - int.length; i > 0; i--) {
+	                    int = '0' + int;
+	                }
+	            }
+
+	            if (thousands > -1) {
+	                int = int.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1' + locale.delimiters.thousands);
+	            }
+
+	            if (format.indexOf('.') === 0) {
+	                int = '';
+	            }
+
+	            output = int + decimal + (abbr ? abbr : '');
+
+	            if (negP) {
+	                output = (negP && neg ? '(' : '') + output + (negP && neg ? ')' : '');
+	            } else {
+	                if (signed >= 0) {
+	                    output = signed === 0 ? (neg ? '-' : '+') + output : output + (neg ? '-' : '+');
+	                } else if (neg) {
+	                    output = '-' + output;
+	                }
+	            }
+
+	            return output;
+	        },
+	        // unformats numbers separators, decimals places, signs, abbreviations
+	        stringToNumber: function(string) {
+	            var locale = locales[options.currentLocale],
+	                stringOriginal = string,
+	                abbreviations = {
+	                    thousand: 3,
+	                    million: 6,
+	                    billion: 9,
+	                    trillion: 12
+	                },
+	                abbreviation,
+	                value,
+	                regexp;
+
+	            if (options.zeroFormat && string === options.zeroFormat) {
+	                value = 0;
+	            } else if (options.nullFormat && string === options.nullFormat || !string.replace(/[^0-9]+/g, '').length) {
+	                value = null;
+	            } else {
+	                value = 1;
+
+	                if (locale.delimiters.decimal !== '.') {
+	                    string = string.replace(/\./g, '').replace(locale.delimiters.decimal, '.');
+	                }
+
+	                for (abbreviation in abbreviations) {
+	                    regexp = new RegExp('[^a-zA-Z]' + locale.abbreviations[abbreviation] + '(?:\\)|(\\' + locale.currency.symbol + ')?(?:\\))?)?$');
+
+	                    if (stringOriginal.match(regexp)) {
+	                        value *= Math.pow(10, abbreviations[abbreviation]);
+	                        break;
+	                    }
+	                }
+
+	                // check for negative number
+	                value *= (string.split('-').length + Math.min(string.split('(').length - 1, string.split(')').length - 1)) % 2 ? 1 : -1;
+
+	                // remove non numbers
+	                string = string.replace(/[^0-9\.]+/g, '');
+
+	                value *= Number(string);
+	            }
+
+	            return value;
+	        },
+	        isNaN: function(value) {
+	            return typeof value === 'number' && isNaN(value);
+	        },
+	        includes: function(string, search) {
+	            return string.indexOf(search) !== -1;
+	        },
+	        insert: function(string, subString, start) {
+	            return string.slice(0, start) + subString + string.slice(start);
+	        },
+	        reduce: function(array, callback /*, initialValue*/) {
+	            if (this === null) {
+	                throw new TypeError('Array.prototype.reduce called on null or undefined');
+	            }
+
+	            if (typeof callback !== 'function') {
+	                throw new TypeError(callback + ' is not a function');
+	            }
+
+	            var t = Object(array),
+	                len = t.length >>> 0,
+	                k = 0,
+	                value;
+
+	            if (arguments.length === 3) {
+	                value = arguments[2];
+	            } else {
+	                while (k < len && !(k in t)) {
+	                    k++;
+	                }
+
+	                if (k >= len) {
+	                    throw new TypeError('Reduce of empty array with no initial value');
+	                }
+
+	                value = t[k++];
+	            }
+	            for (; k < len; k++) {
+	                if (k in t) {
+	                    value = callback(value, t[k], k, t);
+	                }
+	            }
+	            return value;
+	        },
+	        /**
+	         * Computes the multiplier necessary to make x >= 1,
+	         * effectively eliminating miscalculations caused by
+	         * finite precision.
+	         */
+	        multiplier: function (x) {
+	            var parts = x.toString().split('.');
+
+	            return parts.length < 2 ? 1 : Math.pow(10, parts[1].length);
+	        },
+	        /**
+	         * Given a variable number of arguments, returns the maximum
+	         * multiplier that must be used to normalize an operation involving
+	         * all of them.
+	         */
+	        correctionFactor: function () {
+	            var args = Array.prototype.slice.call(arguments);
+
+	            return args.reduce(function(accum, next) {
+	                var mn = _.multiplier(next);
+	                return accum > mn ? accum : mn;
+	            }, 1);
+	        },
+	        /**
+	         * Implementation of toFixed() that treats floats more like decimals
+	         *
+	         * Fixes binary rounding issues (eg. (0.615).toFixed(2) === '0.61') that present
+	         * problems for accounting- and finance-related software.
+	         */
+	        toFixed: function(value, maxDecimals, roundingFunction, optionals) {
+	            var splitValue = value.toString().split('.'),
+	                minDecimals = maxDecimals - (optionals || 0),
+	                boundedPrecision,
+	                optionalsRegExp,
+	                power,
+	                output;
+
+	            // Use the smallest precision value possible to avoid errors from floating point representation
+	            if (splitValue.length === 2) {
+	              boundedPrecision = Math.min(Math.max(splitValue[1].length, minDecimals), maxDecimals);
+	            } else {
+	              boundedPrecision = minDecimals;
+	            }
+
+	            power = Math.pow(10, boundedPrecision);
+
+	            // Multiply up by precision, round accurately, then divide and use native toFixed():
+	            output = (roundingFunction(value + 'e+' + boundedPrecision) / power).toFixed(boundedPrecision);
+
+	            if (optionals > maxDecimals - boundedPrecision) {
+	                optionalsRegExp = new RegExp('\\.?0{1,' + (optionals - (maxDecimals - boundedPrecision)) + '}$');
+	                output = output.replace(optionalsRegExp, '');
+	            }
+
+	            return output;
+	        }
+	    };
+
+	    // avaliable options
+	    numeral.options = options;
+
+	    // avaliable formats
+	    numeral.formats = formats;
+
+	    // avaliable formats
+	    numeral.locales = locales;
+
+	    // This function sets the current locale.  If
+	    // no arguments are passed in, it will simply return the current global
+	    // locale key.
+	    numeral.locale = function(key) {
+	        if (key) {
+	            options.currentLocale = key.toLowerCase();
+	        }
+
+	        return options.currentLocale;
+	    };
+
+	    // This function provides access to the loaded locale data.  If
+	    // no arguments are passed in, it will simply return the current
+	    // global locale object.
+	    numeral.localeData = function(key) {
+	        if (!key) {
+	            return locales[options.currentLocale];
+	        }
+
+	        key = key.toLowerCase();
+
+	        if (!locales[key]) {
+	            throw new Error('Unknown locale : ' + key);
+	        }
+
+	        return locales[key];
+	    };
+
+	    numeral.reset = function() {
+	        for (var property in defaults) {
+	            options[property] = defaults[property];
+	        }
+	    };
+
+	    numeral.zeroFormat = function(format) {
+	        options.zeroFormat = typeof(format) === 'string' ? format : null;
+	    };
+
+	    numeral.nullFormat = function (format) {
+	        options.nullFormat = typeof(format) === 'string' ? format : null;
+	    };
+
+	    numeral.defaultFormat = function(format) {
+	        options.defaultFormat = typeof(format) === 'string' ? format : '0.0';
+	    };
+
+	    numeral.register = function(type, name, format) {
+	        name = name.toLowerCase();
+
+	        if (this[type + 's'][name]) {
+	            throw new TypeError(name + ' ' + type + ' already registered.');
+	        }
+
+	        this[type + 's'][name] = format;
+
+	        return format;
+	    };
+
+
+	    numeral.validate = function(val, culture) {
+	        var _decimalSep,
+	            _thousandSep,
+	            _currSymbol,
+	            _valArray,
+	            _abbrObj,
+	            _thousandRegEx,
+	            localeData,
+	            temp;
+
+	        //coerce val to string
+	        if (typeof val !== 'string') {
+	            val += '';
+
+	            if (console.warn) {
+	                console.warn('Numeral.js: Value is not string. It has been co-erced to: ', val);
+	            }
+	        }
+
+	        //trim whitespaces from either sides
+	        val = val.trim();
+
+	        //if val is just digits return true
+	        if (!!val.match(/^\d+$/)) {
+	            return true;
+	        }
+
+	        //if val is empty return false
+	        if (val === '') {
+	            return false;
+	        }
+
+	        //get the decimal and thousands separator from numeral.localeData
+	        try {
+	            //check if the culture is understood by numeral. if not, default it to current locale
+	            localeData = numeral.localeData(culture);
+	        } catch (e) {
+	            localeData = numeral.localeData(numeral.locale());
+	        }
+
+	        //setup the delimiters and currency symbol based on culture/locale
+	        _currSymbol = localeData.currency.symbol;
+	        _abbrObj = localeData.abbreviations;
+	        _decimalSep = localeData.delimiters.decimal;
+	        if (localeData.delimiters.thousands === '.') {
+	            _thousandSep = '\\.';
+	        } else {
+	            _thousandSep = localeData.delimiters.thousands;
+	        }
+
+	        // validating currency symbol
+	        temp = val.match(/^[^\d]+/);
+	        if (temp !== null) {
+	            val = val.substr(1);
+	            if (temp[0] !== _currSymbol) {
+	                return false;
+	            }
+	        }
+
+	        //validating abbreviation symbol
+	        temp = val.match(/[^\d]+$/);
+	        if (temp !== null) {
+	            val = val.slice(0, -1);
+	            if (temp[0] !== _abbrObj.thousand && temp[0] !== _abbrObj.million && temp[0] !== _abbrObj.billion && temp[0] !== _abbrObj.trillion) {
+	                return false;
+	            }
+	        }
+
+	        _thousandRegEx = new RegExp(_thousandSep + '{2}');
+
+	        if (!val.match(/[^\d.,]/g)) {
+	            _valArray = val.split(_decimalSep);
+	            if (_valArray.length > 2) {
+	                return false;
+	            } else {
+	                if (_valArray.length < 2) {
+	                    return ( !! _valArray[0].match(/^\d+.*\d$/) && !_valArray[0].match(_thousandRegEx));
+	                } else {
+	                    if (_valArray[0].length === 1) {
+	                        return ( !! _valArray[0].match(/^\d+$/) && !_valArray[0].match(_thousandRegEx) && !! _valArray[1].match(/^\d+$/));
+	                    } else {
+	                        return ( !! _valArray[0].match(/^\d+.*\d$/) && !_valArray[0].match(_thousandRegEx) && !! _valArray[1].match(/^\d+$/));
+	                    }
+	                }
+	            }
+	        }
+
+	        return false;
+	    };
+
+
+	    /************************************
+	        Numeral Prototype
+	    ************************************/
+
+	    numeral.fn = Numeral.prototype = {
+	        clone: function() {
+	            return numeral(this);
+	        },
+	        format: function(inputString, roundingFunction) {
+	            var value = this._value,
+	                format = inputString || options.defaultFormat,
+	                kind,
+	                output,
+	                formatFunction;
+
+	            // make sure we have a roundingFunction
+	            roundingFunction = roundingFunction || Math.round;
+
+	            // format based on value
+	            if (value === 0 && options.zeroFormat !== null) {
+	                output = options.zeroFormat;
+	            } else if (value === null && options.nullFormat !== null) {
+	                output = options.nullFormat;
+	            } else {
+	                for (kind in formats) {
+	                    if (format.match(formats[kind].regexps.format)) {
+	                        formatFunction = formats[kind].format;
+
+	                        break;
+	                    }
+	                }
+
+	                formatFunction = formatFunction || numeral._.numberToFormat;
+
+	                output = formatFunction(value, format, roundingFunction);
+	            }
+
+	            return output;
+	        },
+	        value: function() {
+	            return this._value;
+	        },
+	        input: function() {
+	            return this._input;
+	        },
+	        set: function(value) {
+	            this._value = Number(value);
+
+	            return this;
+	        },
+	        add: function(value) {
+	            var corrFactor = _.correctionFactor.call(null, this._value, value);
+
+	            function cback(accum, curr, currI, O) {
+	                return accum + Math.round(corrFactor * curr);
+	            }
+
+	            this._value = _.reduce([this._value, value], cback, 0) / corrFactor;
+
+	            return this;
+	        },
+	        subtract: function(value) {
+	            var corrFactor = _.correctionFactor.call(null, this._value, value);
+
+	            function cback(accum, curr, currI, O) {
+	                return accum - Math.round(corrFactor * curr);
+	            }
+
+	            this._value = _.reduce([value], cback, Math.round(this._value * corrFactor)) / corrFactor;
+
+	            return this;
+	        },
+	        multiply: function(value) {
+	            function cback(accum, curr, currI, O) {
+	                var corrFactor = _.correctionFactor(accum, curr);
+	                return Math.round(accum * corrFactor) * Math.round(curr * corrFactor) / Math.round(corrFactor * corrFactor);
+	            }
+
+	            this._value = _.reduce([this._value, value], cback, 1);
+
+	            return this;
+	        },
+	        divide: function(value) {
+	            function cback(accum, curr, currI, O) {
+	                var corrFactor = _.correctionFactor(accum, curr);
+	                return Math.round(accum * corrFactor) / Math.round(curr * corrFactor);
+	            }
+
+	            this._value = _.reduce([this._value, value], cback);
+
+	            return this;
+	        },
+	        difference: function(value) {
+	            return Math.abs(numeral(this._value).subtract(value).value());
+	        }
+	    };
+
+	    /************************************
+	        Default Locale && Format
+	    ************************************/
+
+	    numeral.register('locale', 'en', {
+	        delimiters: {
+	            thousands: ',',
+	            decimal: '.'
+	        },
+	        abbreviations: {
+	            thousand: 'k',
+	            million: 'm',
+	            billion: 'b',
+	            trillion: 't'
+	        },
+	        ordinal: function(number) {
+	            var b = number % 10;
+	            return (~~(number % 100 / 10) === 1) ? 'th' :
+	                (b === 1) ? 'st' :
+	                (b === 2) ? 'nd' :
+	                (b === 3) ? 'rd' : 'th';
+	        },
+	        currency: {
+	            symbol: '$'
+	        }
+	    });
+
+	    
+
+	(function() {
+	        numeral.register('format', 'bps', {
+	            regexps: {
+	                format: /(BPS)/,
+	                unformat: /(BPS)/
+	            },
+	            format: function(value, format, roundingFunction) {
+	                var space = numeral._.includes(format, ' BPS') ? ' ' : '',
+	                    output;
+
+	                value = value * 10000;
+
+	                // check for space before BPS
+	                format = format.replace(/\s?BPS/, '');
+
+	                output = numeral._.numberToFormat(value, format, roundingFunction);
+
+	                if (numeral._.includes(output, ')')) {
+	                    output = output.split('');
+
+	                    output.splice(-1, 0, space + 'BPS');
+
+	                    output = output.join('');
+	                } else {
+	                    output = output + space + 'BPS';
+	                }
+
+	                return output;
+	            },
+	            unformat: function(string) {
+	                return +(numeral._.stringToNumber(string) * 0.0001).toFixed(15);
+	            }
+	        });
+	})();
+
+
+	(function() {
+	        var decimal = {
+	            base: 1000,
+	            suffixes: ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
+	        },
+	        binary = {
+	            base: 1024,
+	            suffixes: ['B', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB']
+	        };
+
+	    var allSuffixes =  decimal.suffixes.concat(binary.suffixes.filter(function (item) {
+	            return decimal.suffixes.indexOf(item) < 0;
+	        }));
+	        var unformatRegex = allSuffixes.join('|');
+	        // Allow support for BPS (http://www.investopedia.com/terms/b/basispoint.asp)
+	        unformatRegex = '(' + unformatRegex.replace('B', 'B(?!PS)') + ')';
+
+	    numeral.register('format', 'bytes', {
+	        regexps: {
+	            format: /([0\s]i?b)/,
+	            unformat: new RegExp(unformatRegex)
+	        },
+	        format: function(value, format, roundingFunction) {
+	            var output,
+	                bytes = numeral._.includes(format, 'ib') ? binary : decimal,
+	                suffix = numeral._.includes(format, ' b') || numeral._.includes(format, ' ib') ? ' ' : '',
+	                power,
+	                min,
+	                max;
+
+	            // check for space before
+	            format = format.replace(/\s?i?b/, '');
+
+	            for (power = 0; power <= bytes.suffixes.length; power++) {
+	                min = Math.pow(bytes.base, power);
+	                max = Math.pow(bytes.base, power + 1);
+
+	                if (value === null || value === 0 || value >= min && value < max) {
+	                    suffix += bytes.suffixes[power];
+
+	                    if (min > 0) {
+	                        value = value / min;
+	                    }
+
+	                    break;
+	                }
+	            }
+
+	            output = numeral._.numberToFormat(value, format, roundingFunction);
+
+	            return output + suffix;
+	        },
+	        unformat: function(string) {
+	            var value = numeral._.stringToNumber(string),
+	                power,
+	                bytesMultiplier;
+
+	            if (value) {
+	                for (power = decimal.suffixes.length - 1; power >= 0; power--) {
+	                    if (numeral._.includes(string, decimal.suffixes[power])) {
+	                        bytesMultiplier = Math.pow(decimal.base, power);
+
+	                        break;
+	                    }
+
+	                    if (numeral._.includes(string, binary.suffixes[power])) {
+	                        bytesMultiplier = Math.pow(binary.base, power);
+
+	                        break;
+	                    }
+	                }
+
+	                value *= (bytesMultiplier || 1);
+	            }
+
+	            return value;
+	        }
+	    });
+	})();
+
+
+	(function() {
+	        numeral.register('format', 'currency', {
+	        regexps: {
+	            format: /(\$)/
+	        },
+	        format: function(value, format, roundingFunction) {
+	            var locale = numeral.locales[numeral.options.currentLocale],
+	                symbols = {
+	                    before: format.match(/^([\+|\-|\(|\s|\$]*)/)[0],
+	                    after: format.match(/([\+|\-|\)|\s|\$]*)$/)[0]
+	                },
+	                output,
+	                symbol,
+	                i;
+
+	            // strip format of spaces and $
+	            format = format.replace(/\s?\$\s?/, '');
+
+	            // format the number
+	            output = numeral._.numberToFormat(value, format, roundingFunction);
+
+	            // update the before and after based on value
+	            if (value >= 0) {
+	                symbols.before = symbols.before.replace(/[\-\(]/, '');
+	                symbols.after = symbols.after.replace(/[\-\)]/, '');
+	            } else if (value < 0 && (!numeral._.includes(symbols.before, '-') && !numeral._.includes(symbols.before, '('))) {
+	                symbols.before = '-' + symbols.before;
+	            }
+
+	            // loop through each before symbol
+	            for (i = 0; i < symbols.before.length; i++) {
+	                symbol = symbols.before[i];
+
+	                switch (symbol) {
+	                    case '$':
+	                        output = numeral._.insert(output, locale.currency.symbol, i);
+	                        break;
+	                    case ' ':
+	                        output = numeral._.insert(output, ' ', i + locale.currency.symbol.length - 1);
+	                        break;
+	                }
+	            }
+
+	            // loop through each after symbol
+	            for (i = symbols.after.length - 1; i >= 0; i--) {
+	                symbol = symbols.after[i];
+
+	                switch (symbol) {
+	                    case '$':
+	                        output = i === symbols.after.length - 1 ? output + locale.currency.symbol : numeral._.insert(output, locale.currency.symbol, -(symbols.after.length - (1 + i)));
+	                        break;
+	                    case ' ':
+	                        output = i === symbols.after.length - 1 ? output + ' ' : numeral._.insert(output, ' ', -(symbols.after.length - (1 + i) + locale.currency.symbol.length - 1));
+	                        break;
+	                }
+	            }
+
+
+	            return output;
+	        }
+	    });
+	})();
+
+
+	(function() {
+	        numeral.register('format', 'exponential', {
+	        regexps: {
+	            format: /(e\+|e-)/,
+	            unformat: /(e\+|e-)/
+	        },
+	        format: function(value, format, roundingFunction) {
+	            var output,
+	                exponential = typeof value === 'number' && !numeral._.isNaN(value) ? value.toExponential() : '0e+0',
+	                parts = exponential.split('e');
+
+	            format = format.replace(/e[\+|\-]{1}0/, '');
+
+	            output = numeral._.numberToFormat(Number(parts[0]), format, roundingFunction);
+
+	            return output + 'e' + parts[1];
+	        },
+	        unformat: function(string) {
+	            var parts = numeral._.includes(string, 'e+') ? string.split('e+') : string.split('e-'),
+	                value = Number(parts[0]),
+	                power = Number(parts[1]);
+
+	            power = numeral._.includes(string, 'e-') ? power *= -1 : power;
+
+	            function cback(accum, curr, currI, O) {
+	                var corrFactor = numeral._.correctionFactor(accum, curr),
+	                    num = (accum * corrFactor) * (curr * corrFactor) / (corrFactor * corrFactor);
+	                return num;
+	            }
+
+	            return numeral._.reduce([value, Math.pow(10, power)], cback, 1);
+	        }
+	    });
+	})();
+
+
+	(function() {
+	        numeral.register('format', 'ordinal', {
+	        regexps: {
+	            format: /(o)/
+	        },
+	        format: function(value, format, roundingFunction) {
+	            var locale = numeral.locales[numeral.options.currentLocale],
+	                output,
+	                ordinal = numeral._.includes(format, ' o') ? ' ' : '';
+
+	            // check for space before
+	            format = format.replace(/\s?o/, '');
+
+	            ordinal += locale.ordinal(value);
+
+	            output = numeral._.numberToFormat(value, format, roundingFunction);
+
+	            return output + ordinal;
+	        }
+	    });
+	})();
+
+
+	(function() {
+	        numeral.register('format', 'percentage', {
+	        regexps: {
+	            format: /(%)/,
+	            unformat: /(%)/
+	        },
+	        format: function(value, format, roundingFunction) {
+	            var space = numeral._.includes(format, ' %') ? ' ' : '',
+	                output;
+
+	            if (numeral.options.scalePercentBy100) {
+	                value = value * 100;
+	            }
+
+	            // check for space before %
+	            format = format.replace(/\s?\%/, '');
+
+	            output = numeral._.numberToFormat(value, format, roundingFunction);
+
+	            if (numeral._.includes(output, ')')) {
+	                output = output.split('');
+
+	                output.splice(-1, 0, space + '%');
+
+	                output = output.join('');
+	            } else {
+	                output = output + space + '%';
+	            }
+
+	            return output;
+	        },
+	        unformat: function(string) {
+	            var number = numeral._.stringToNumber(string);
+	            if (numeral.options.scalePercentBy100) {
+	                return number * 0.01;
+	            }
+	            return number;
+	        }
+	    });
+	})();
+
+
+	(function() {
+	        numeral.register('format', 'time', {
+	        regexps: {
+	            format: /(:)/,
+	            unformat: /(:)/
+	        },
+	        format: function(value, format, roundingFunction) {
+	            var hours = Math.floor(value / 60 / 60),
+	                minutes = Math.floor((value - (hours * 60 * 60)) / 60),
+	                seconds = Math.round(value - (hours * 60 * 60) - (minutes * 60));
+
+	            return hours + ':' + (minutes < 10 ? '0' + minutes : minutes) + ':' + (seconds < 10 ? '0' + seconds : seconds);
+	        },
+	        unformat: function(string) {
+	            var timeArray = string.split(':'),
+	                seconds = 0;
+
+	            // turn hours and minutes into seconds and add them all up
+	            if (timeArray.length === 3) {
+	                // hours
+	                seconds = seconds + (Number(timeArray[0]) * 60 * 60);
+	                // minutes
+	                seconds = seconds + (Number(timeArray[1]) * 60);
+	                // seconds
+	                seconds = seconds + Number(timeArray[2]);
+	            } else if (timeArray.length === 2) {
+	                // minutes
+	                seconds = seconds + (Number(timeArray[0]) * 60);
+	                // seconds
+	                seconds = seconds + Number(timeArray[1]);
+	            }
+	            return Number(seconds);
+	        }
+	    });
+	})();
+
+	return numeral;
+	}));
+	});
+
 	var tips = createCommonjsModule(function (module, exports) {
 
 
@@ -50333,6 +51470,8 @@ var chartx = (function () {
 
 
 
+	var _numeral = interopRequireDefault(numeral);
+
 	function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
 
 	function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
@@ -50352,7 +51491,8 @@ var chartx = (function () {
 	    (0, _classCallCheck2["default"])(this, Tips);
 	    _this = _super.call(this, opt, app);
 	    _this.name = "tips";
-	    _this.tipDomContainer = _this.app.canvax.domView;
+	    _this.tipDomContainer = document.body; //this.app.canvax.domView;
+
 	    _this.cW = 0; //容器的width
 
 	    _this.cH = 0; //容器的height
@@ -50376,7 +51516,8 @@ var chartx = (function () {
 	    var me = (0, _assertThisInitialized2["default"])(_this);
 
 	    _this.sprite.on("destroy", function () {
-	      me._tipDom = null;
+	      //me._tipDom = null;
+	      me._removeContent();
 	    });
 
 	    _.extend(true, (0, _assertThisInitialized2["default"])(_this), (0, tools.getDefaultProps)(Tips.defaultProps()), opt);
@@ -50555,34 +51696,28 @@ var chartx = (function () {
 	      }
 
 	      if (info.nodes.length) {
+	        str += "<table >";
+
 	        if (info.title !== undefined && info.title !== null && info.title !== "") {
-	          str += "<div style='font-size:14px;border-bottom:1px solid #f0f0f0;padding:4px;margin-bottom:6px;'>" + info.title + "</div>";
+	          str += "<tr><td colspan='2' style='text-align:left'>";
+	          str += "<span style='font-size:12px;padding:4px;color:#333;'>" + info.title + "</span>";
+	          str += "</td></tr>";
 	        }
 
 	        _.each(info.nodes, function (node, i) {
-	          /*
 	          if (!node.value && node.value !== 0) {
-	              return;
-	          };
-	          */
+	            return;
+	          }
 	          var style = node.color || node.fillStyle || node.strokeStyle;
 	          var name = node.name || node.field || node.content || node.label;
-	          var value = (0, _typeof2["default"])(node.value) == "object" ? JSON.stringify(node.value) : (0, tools.numAddSymbol)(node.value);
-	          var hasVal = node.value || node.value == 0;
-	          str += "<div style='line-height:1.5;font-size:12px;padding:0 4px;'>";
-
-	          if (style) {
-	            str += "<span style='background:" + style + ";margin-right:8px;margin-top:7px;float:left;width:8px;height:8px;border-radius:4px;overflow:hidden;font-size:0;'></span>";
-	          }
-
-	          if (name) {
-	            str += "<span style='margin-right:5px;'>" + name;
-	            hasVal && (str += "：");
-	            str += "</span>";
-	          }
-	          hasVal && (str += value);
-	          str += "</div>";
+	          var value = (0, _typeof2["default"])(node.value) == "object" ? JSON.stringify(node.value) : (0, _numeral["default"])(node.value).format('0,0');
+	          str += "<tr>";
+	          str += "<td style='padding:0px 6px;color:#a0a0a0;'>" + name + "</td>";
+	          str += "<td style='padding:0px 6px;'><span style='color:" + style + "'>" + value + "</span></td>";
+	          str += "</tr>";
 	        });
+
+	        str += "</table>";
 	      }
 
 	      if (info.tipsContent) {
