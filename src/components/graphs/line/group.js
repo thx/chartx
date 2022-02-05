@@ -147,18 +147,18 @@ export default class LineGraphsGroup extends event.Dispatcher
         }
     }
 
-    constructor( fieldMap, iGroup, opt, ctx, h, w , _graphs)
+    constructor( fieldConfig, iGroup, opt, ctx, h, w , _graphs)
     {
         super();
 
         this._graphs = _graphs;
 
         this._opt = opt;
-        this.fieldMap = fieldMap;
+        this.fieldConfig = fieldConfig;
         this.field = null; //在extend之后要重新设置
         this.iGroup = iGroup;
         
-        this._yAxis = fieldMap.yAxis;
+        this._yAxis = fieldConfig.yAxis;
         
         this.ctx = ctx;
         this.w = w;
@@ -177,7 +177,7 @@ export default class LineGraphsGroup extends event.Dispatcher
 
         //TODO group中得field不能直接用opt中得field， 必须重新设置， 
         //group中得field只有一个值，代表一条折线, 后面要扩展extend方法，可以控制过滤哪些key值不做extend
-        this.field = fieldMap.field; //iGroup 在yAxis.field中对应的值
+        this.field = fieldConfig.field; //iGroup 在yAxis.field中对应的值
 
         this.clipRect = null;
 
@@ -239,8 +239,8 @@ export default class LineGraphsGroup extends event.Dispatcher
 
             //因为_getLineStrokeStyle返回的可能是个渐变对象，所以要用isString过滤掉
             if( !color || !_.isString( color ) ){
-                //那么最后，取this.fieldMap.color
-                color = this.fieldMap.color; //this._getProp(this.color, iNode) //this.color会被写入到fieldMap.color
+                //那么最后，取this.fieldConfig.color
+                color = this.fieldConfig.color; //this._getProp(this.color, iNode) //this.color会被写入到fieldMap.color
             }
         };
         return color;
@@ -506,7 +506,7 @@ export default class LineGraphsGroup extends event.Dispatcher
         !opt && (opt ={});
         
         me._pointList = this._getPointList(me.data);
-
+debugger
         if (me._pointList.length == 0) {
             //filter后，data可能length==0
             return;
@@ -1098,57 +1098,62 @@ export default class LineGraphsGroup extends event.Dispatcher
 
         let node = this.data[ iNode ];
 
-        let _node = node.nodeEl;
+        if(node){
+            let _node = node.nodeEl;
       
-        if( _node && !node.focused && this.__currFocusInd != iNode ){
-
-            //console.log( 'focusOf' )
-
-            _node._fillStyle = _node.context.fillStyle;
-            _node.context.fillStyle = 'white';
-            _node._visible = _node.context.visible;
-            _node.context.visible = true;
-
-
-
-            let _focusNode = _node.clone();
-            this._focusNodes.addChild( _focusNode );
-
-            //_focusNode.context.r += 6;
-            _focusNode.context.visible = true;
-            _focusNode.context.lineWidth = 0; //不需要描边
-            _focusNode.context.fillStyle = _node.context.strokeStyle;
-            _focusNode.context.globalAlpha = 0.5;
-
-            _focusNode.animate({
-                r : _focusNode.context.r + 6
-            }, {
-                duration: 300
-            })
-
-            this.__currFocusInd = iNode;
+            if( _node && !node.focused && this.__currFocusInd != iNode ){
+    
+                //console.log( 'focusOf' )
+    
+                _node._fillStyle = _node.context.fillStyle;
+                _node.context.fillStyle = 'white';
+                _node._visible = _node.context.visible;
+                _node.context.visible = true;
+    
+    
+    
+                let _focusNode = _node.clone();
+                this._focusNodes.addChild( _focusNode );
+    
+                //_focusNode.context.r += 6;
+                _focusNode.context.visible = true;
+                _focusNode.context.lineWidth = 0; //不需要描边
+                _focusNode.context.fillStyle = _node.context.strokeStyle;
+                _focusNode.context.globalAlpha = 0.5;
+    
+                _focusNode.animate({
+                    r : _focusNode.context.r + 6
+                }, {
+                    duration: 300
+                })
+    
+                this.__currFocusInd = iNode;
+            }
+            node.focused = true;
         }
-        node.focused = true;
+
     }
     unfocusOf( iNode )
     {
         if( this.__currFocusInd > -1 ){
             iNode = this.__currFocusInd;
         };
-        
+
         let node = this.data[ iNode ];
 
-        this._focusNodes.removeAllChildren();
+        if( node ){
+            this._focusNodes.removeAllChildren();
 
-        let _node = node.nodeEl;
-
-        if( _node && node.focused ){
-            //console.log('unfocus')
-            _node.context.fillStyle = _node._fillStyle;
-            _node.context.visible = _node._visible;
-            node.focused = false;
-            this.__currFocusInd = -1;
-        };
+            let _node = node.nodeEl;
+    
+            if( _node && node.focused ){
+                //console.log('unfocus')
+                _node.context.fillStyle = _node._fillStyle;
+                _node.context.visible = _node._visible;
+                node.focused = false;
+                this.__currFocusInd = -1;
+            };
+        }
 
     }
 }

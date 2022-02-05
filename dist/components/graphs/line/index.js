@@ -120,9 +120,9 @@ var LineGraphs = /*#__PURE__*/function (_GraphsBase) {
 
       _canvax._.each(_canvax._.flatten(me.enabledField), function (field, i) {
         //let maxValue = 0;
-        var fieldMap = me.app.getComponent({
+        var fieldConfig = me.app.getComponent({
           name: 'coord'
-        }).getFieldMapOf(field); //单条line的全部data数据
+        }).getFieldConfig(field); //单条line的全部data数据
 
         var _lineData = me.dataFrame.getFieldData(field);
 
@@ -149,7 +149,7 @@ var LineGraphs = /*#__PURE__*/function (_GraphsBase) {
             x: point.pos.x,
             y: point.pos.y,
             rowData: me.dataFrame.getRowDataAt(b),
-            color: fieldMap.color //默认设置皮肤颜色，动态的在group里面会被修改
+            color: fieldConfig.color //默认设置皮肤颜色，动态的在group里面会被修改
 
           };
 
@@ -158,7 +158,7 @@ var LineGraphs = /*#__PURE__*/function (_GraphsBase) {
 
         ;
         tmpData[field] = {
-          yAxis: fieldMap.yAxis,
+          yAxis: fieldConfig.yAxis,
           field: field,
           data: _data
         };
@@ -273,13 +273,13 @@ var LineGraphs = /*#__PURE__*/function (_GraphsBase) {
         }
 
         ;
-        var fieldMap = me.app.getComponent({
+        var fieldConfig = me.app.getComponent({
           name: 'coord'
-        }).getFieldMapOf(field); //iGroup 是这条group在本graphs中的ind，而要拿整个图表层级的index， 就是fieldMap.ind
+        }).getFieldConfig(field); //iGroup 是这条group在本graphs中的ind，而要拿整个图表层级的index， 就是fieldMap.ind
 
         var iGroup = _canvax._.indexOf(_flattenField, field);
 
-        var group = new _group["default"](fieldMap, iGroup, //不同于fieldMap.ind
+        var group = new _group["default"](fieldConfig, iGroup, //不同于fieldMap.ind
         me._opt, me.ctx, me.height, me.width, me);
         group.draw({
           animation: me.animation && !opt.resize

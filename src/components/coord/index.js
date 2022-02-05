@@ -1,6 +1,7 @@
 import Component from "../component"
 import Canvax from "canvax"
 import {getDefaultProps} from "../../utils/tools"
+import numeral from "numeral"
 
 let _ = Canvax._;
 
@@ -35,6 +36,10 @@ export default class coordBase extends Component
                         default : 0
                     }
                 }
+            },
+            fieldsConfig : {
+                detail: '字段的配置信息({uv:{name:"",format:""}})，包括中文名称和格式化单位，内部使用numeral做格式化',
+                default: {}
             }
         }
     }
@@ -105,7 +110,7 @@ export default class coordBase extends Component
                     let graphFieldInd;
                     let graphColorProp; //graphs.find( graph => {_.flatten([graph.field]).indexOf( field )} ).color;
                     for( let _i=0,_l=graphs.length; _i<_l; _i++ ){
-                        graph = graphs[i];
+                        graph = graphs[ _i ];
                         graphFieldInd = _.flatten([graph.field]).indexOf( field );
                         if( graphFieldInd >-1 ){
                             graphColorProp = graph.color;
@@ -120,18 +125,41 @@ export default class coordBase extends Component
                             color = graphColorProp[ graphFieldInd ]
                         }
                         if( typeof graphColorProp == 'function' ){
-                            color = graphColorProp.apply( this.app, [ graph ] )
+                            color = graphColorProp.apply( me.app, [ graph ] )
                         }
                     };
-                    
-                    clone_fields[i] = {
-                        field,
+
+                    let config = me.fieldsConfig[ field ]; 
+
+                    let fieldItem = {
+                        field, 
+                        name: field, //fieldConfig中可能会覆盖
                         enabled : true,
                         color,
-                        ind : ind++
+                        ind : ind++,
+                        ...(me.fieldsConfig[ field ] || {})
                     };
 
-                    clone_fields[i][ axisType ] = me.getAxis({ type:axisType, field:field })
+                    fieldItem.getFormatValue = ( value )=>{
+                        if( config && config.format ){
+                            if( typeof config.format == 'string' ){
+                                //如果传入的是 字符串，那么就认为是 numeral 的格式字符串
+                                value = numeral(value).format( config.format )
+                            }
+                            if( typeof config.format == 'function' ){
+                                //如果传入的是 字符串，那么就认为是 numeral 的格式字符串
+                                value = config.format.apply( me, { field, } )
+                            }
+                        } else {
+                            value = typeof(value) == "object" ? JSON.stringify(value) : numeral(value).format('0,0');
+                        };
+                        return value;
+                    };
+
+                    fieldItem[ axisType ] = me.getAxis({ type:axisType, field:field })
+                    
+                    clone_fields[i] = fieldItem;
+
                 };
                 if( _.isArray( field ) ){
                     clone_fields[i] = _set( field, ind );
@@ -160,22 +188,23 @@ export default class coordBase extends Component
         set( me.fieldsMap );
     }
 
-    getFieldMapOf( field )
+    //从FieldsMap中获取对应的config
+    getFieldConfig( field )
     {
         let me = this;
-        let fieldMap = null;
+        let fieldConfig = null;
         function get( maps ){
             _.each( maps , function( map ){
                 if( _.isArray( map ) ){
                     get( map )
                 } else if( map.field && map.field == field ) {
-                    fieldMap = map;
+                    fieldConfig = map;
                     return false;
                 }
             } );
         }
         get( me.fieldsMap );
-        return fieldMap;
+        return fieldConfig;
     }
 
     //从 fieldsMap 中过滤筛选出来一个一一对应的 enabled为true的对象结构
@@ -220,14 +249,14 @@ export default class coordBase extends Component
         if( !_.isArray( fields ) ) fields = [ fields ];
         _.each( fields, function( f ){
             if( !_.isArray( f ) ){
-                if( me.getFieldMapOf(f).enabled ){
+                if( me.getFieldConfig(f).enabled ){
                     arr.push( f );
                 }
             } else {
                 //如果这个是个纵向数据，说明就是堆叠配置
                 let varr = [];
                 _.each( f, function( v_f ){
-                    if( me.getFieldMapOf( v_f ).enabled ){
+                    if( me.getFieldConfig( v_f ).enabled ){
                         varr.push( v_f );
                     }
                 } );

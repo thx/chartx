@@ -144,7 +144,7 @@ var ScatGraphs = /*#__PURE__*/function (_GraphsBase) {
       for (var i = 0; i < dataLen; i++) {
         var rowData = this.dataFrame.getRowDataAt(i);
 
-        var fieldMap = _coord.getFieldMapOf(this.field);
+        var fieldConfig = _coord.getFieldConfig(this.field);
 
         var point = _coord.getPoint({
           iNode: i,
@@ -167,7 +167,7 @@ var ScatGraphs = /*#__PURE__*/function (_GraphsBase) {
           y: point.pos.y,
           value: point.value,
           field: this.field,
-          fieldColor: fieldMap.color,
+          fieldColor: fieldConfig.color,
           iNode: i,
           focused: false,
           selected: false,

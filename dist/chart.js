@@ -716,6 +716,8 @@ var Chart = /*#__PURE__*/function (_event$Dispatcher) {
         name: 'coord'
       });
 
+      debugger;
+
       _.each(_.flatten(_coord.fieldsMap), function (map, i) {
         //因为yAxis上面是可以单独自己配置field的，所以，这部分要过滤出 legend data
         var isGraphsField = false;

@@ -96,11 +96,11 @@ var RadarGraphs = /*#__PURE__*/function (_GraphsBase) {
           pointList.push([node.point.x, node.point.y]);
         });
 
-        var fieldMap = _coord.getFieldMapOf(field);
+        var fieldConfig = _coord.getFieldConfig(field);
 
-        var _strokeStyle = me._getStyle(me.line.strokeStyle, fieldMap, iGroup, fieldMap.color);
+        var _strokeStyle = me._getStyle(me.line.strokeStyle, fieldConfig, iGroup, fieldConfig.color);
 
-        var _lineType = me._getStyle(me.line.lineType, fieldMap, iGroup, fieldMap.color);
+        var _lineType = me._getStyle(me.line.lineType, fieldConfig, iGroup, fieldConfig.color);
 
         var polyCtx = {
           pointList: pointList,
@@ -116,8 +116,8 @@ var RadarGraphs = /*#__PURE__*/function (_GraphsBase) {
         ;
 
         if (me.area.enabled) {
-          polyCtx.fillStyle = me._getStyle(me.area.fillStyle, fieldMap, iGroup, fieldMap.color);
-          polyCtx.fillAlpha = me._getStyle(me.area.fillAlpha, fieldMap, iGroup, 1);
+          polyCtx.fillStyle = me._getStyle(me.area.fillStyle, fieldConfig, iGroup, fieldConfig.color);
+          polyCtx.fillAlpha = me._getStyle(me.area.fillAlpha, fieldConfig, iGroup, 1);
         }
 
         ;
@@ -308,7 +308,7 @@ var RadarGraphs = /*#__PURE__*/function (_GraphsBase) {
       _.each(this.enabledField, function (field) {
         var dataOrg = me.dataFrame.getFieldData(field);
 
-        var fieldMap = _coord.getFieldMapOf(field);
+        var fieldConfig = _coord.getFieldConfig(field);
 
         var arr = [];
 
@@ -326,7 +326,7 @@ var RadarGraphs = /*#__PURE__*/function (_GraphsBase) {
             focused: false,
             value: dataOrg[i],
             point: point,
-            color: fieldMap.color
+            color: fieldConfig.color
           });
         });
 
@@ -337,7 +337,7 @@ var RadarGraphs = /*#__PURE__*/function (_GraphsBase) {
     }
   }, {
     key: "_getStyle",
-    value: function _getStyle(style, fieldMap, iGroup, def) {
+    value: function _getStyle(style, fieldConfig, iGroup, def) {
       var _s = def;
 
       if (_.isString(style) || _.isNumber(style)) {
@@ -353,7 +353,7 @@ var RadarGraphs = /*#__PURE__*/function (_GraphsBase) {
       ;
 
       if (_.isFunction(style)) {
-        _s = style(iGroup, fieldMap);
+        _s = style(iGroup, fieldConfig);
       }
 
       ;

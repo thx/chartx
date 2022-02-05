@@ -107,7 +107,7 @@ class LineGraphs extends GraphsBase
         _.each( _.flatten( me.enabledField ) , function( field, i ){
             //let maxValue = 0;
 
-            let fieldMap = me.app.getComponent({name:'coord'}).getFieldMapOf( field );
+            let fieldConfig = me.app.getComponent({name:'coord'}).getFieldConfig( field );
 
             //单条line的全部data数据
             let _lineData = me.dataFrame.getFieldData(field);
@@ -137,14 +137,14 @@ class LineGraphs extends GraphsBase
                     x        : point.pos.x,
                     y        : point.pos.y,
                     rowData  : me.dataFrame.getRowDataAt( b ),
-                    color    : fieldMap.color //默认设置皮肤颜色，动态的在group里面会被修改
+                    color    : fieldConfig.color //默认设置皮肤颜色，动态的在group里面会被修改
                 };
 
                 _data.push( node );
             };
 
             tmpData[ field ] = {
-                yAxis : fieldMap.yAxis,
+                yAxis : fieldConfig.yAxis,
                 field : field,
                 data  : _data
             };
@@ -256,13 +256,13 @@ class LineGraphs extends GraphsBase
                 return;
             };
 
-            let fieldMap = me.app.getComponent({name:'coord'}).getFieldMapOf( field );
+            let fieldConfig = me.app.getComponent({name:'coord'}).getFieldConfig( field );
             
             //iGroup 是这条group在本graphs中的ind，而要拿整个图表层级的index， 就是fieldMap.ind
             let iGroup = _.indexOf( _flattenField, field );
 
             let group = new Group(
-                fieldMap,
+                fieldConfig,
                 iGroup, //不同于fieldMap.ind
                 me._opt,
                 me.ctx,

@@ -7,8 +7,6 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports["default"] = void 0;
 
-var _typeof2 = _interopRequireDefault(require("@babel/runtime/helpers/typeof"));
-
 var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
 var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
@@ -48,7 +46,7 @@ var Tips = /*#__PURE__*/function (_Component) {
     (0, _classCallCheck2["default"])(this, Tips);
     _this = _super.call(this, opt, app);
     _this.name = "tips";
-    _this.tipDomContainer = document.body; //this.app.canvax.domView;
+    _this.tipDomContainer = document ? document.body : null; //this.app.canvax.domView;
 
     _this.cW = 0; //容器的width
 
@@ -264,6 +262,10 @@ var Tips = /*#__PURE__*/function (_Component) {
   }, {
     key: "_getDefaultContent",
     value: function _getDefaultContent(info) {
+      var _coord = this.app.getComponent({
+        name: 'coord'
+      });
+
       var str = "";
 
       if (!info.nodes.length && !info.tipsContent) {
@@ -290,8 +292,12 @@ var Tips = /*#__PURE__*/function (_Component) {
 
           ;
           var style = node.color || node.fillStyle || node.strokeStyle;
-          var name = node.name || node.field || node.content || node.label;
-          var value = (0, _typeof2["default"])(node.value) == "object" ? JSON.stringify(node.value) : (0, _numeral["default"])(node.value).format('0,0');
+          var name, value;
+
+          var fieldConfig = _coord.getFieldConfig(node.field);
+
+          name = fieldConfig.name || node.name || node.field || node.content || node.label;
+          value = fieldConfig.getFormatValue(node.value);
           str += "<tr>";
           str += "<td style='padding:0px 6px;color:#a0a0a0;'>" + name + "</td>";
           str += "<td style='padding:0px 6px;'><span style='color:" + style + "'>" + value + "</span></td>";

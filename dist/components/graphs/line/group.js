@@ -45,18 +45,18 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
 
   var _super = _createSuper(LineGraphsGroup);
 
-  function LineGraphsGroup(fieldMap, iGroup, opt, ctx, h, w, _graphs) {
+  function LineGraphsGroup(fieldConfig, iGroup, opt, ctx, h, w, _graphs) {
     var _this;
 
     (0, _classCallCheck2["default"])(this, LineGraphsGroup);
     _this = _super.call(this);
     _this._graphs = _graphs;
     _this._opt = opt;
-    _this.fieldMap = fieldMap;
+    _this.fieldConfig = fieldConfig;
     _this.field = null; //在extend之后要重新设置
 
     _this.iGroup = iGroup;
-    _this._yAxis = fieldMap.yAxis;
+    _this._yAxis = fieldConfig.yAxis;
     _this.ctx = ctx;
     _this.w = w;
     _this.h = h;
@@ -75,7 +75,7 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
     //group中得field只有一个值，代表一条折线, 后面要扩展extend方法，可以控制过滤哪些key值不做extend
 
 
-    _this.field = fieldMap.field; //iGroup 在yAxis.field中对应的值
+    _this.field = fieldConfig.field; //iGroup 在yAxis.field中对应的值
 
     _this.clipRect = null;
     _this.__currFocusInd = -1;
@@ -139,8 +139,8 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
         ; //因为_getLineStrokeStyle返回的可能是个渐变对象，所以要用isString过滤掉
 
         if (!color || !_.isString(color)) {
-          //那么最后，取this.fieldMap.color
-          color = this.fieldMap.color; //this._getProp(this.color, iNode) //this.color会被写入到fieldMap.color
+          //那么最后，取this.fieldConfig.color
+          color = this.fieldConfig.color; //this._getProp(this.color, iNode) //this.color会被写入到fieldMap.color
         }
       }
 
@@ -456,6 +456,7 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
       var me = this;
       !opt && (opt = {});
       me._pointList = this._getPointList(me.data);
+      debugger;
 
       if (me._pointList.length == 0) {
         //filter后，data可能length==0
@@ -1121,36 +1122,39 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
     key: "focusOf",
     value: function focusOf(iNode) {
       var node = this.data[iNode];
-      var _node = node.nodeEl;
 
-      if (_node && !node.focused && this.__currFocusInd != iNode) {
-        //console.log( 'focusOf' )
-        _node._fillStyle = _node.context.fillStyle;
-        _node.context.fillStyle = 'white';
-        _node._visible = _node.context.visible;
-        _node.context.visible = true;
+      if (node) {
+        var _node = node.nodeEl;
 
-        var _focusNode = _node.clone();
+        if (_node && !node.focused && this.__currFocusInd != iNode) {
+          //console.log( 'focusOf' )
+          _node._fillStyle = _node.context.fillStyle;
+          _node.context.fillStyle = 'white';
+          _node._visible = _node.context.visible;
+          _node.context.visible = true;
 
-        this._focusNodes.addChild(_focusNode); //_focusNode.context.r += 6;
+          var _focusNode = _node.clone();
+
+          this._focusNodes.addChild(_focusNode); //_focusNode.context.r += 6;
 
 
-        _focusNode.context.visible = true;
-        _focusNode.context.lineWidth = 0; //不需要描边
+          _focusNode.context.visible = true;
+          _focusNode.context.lineWidth = 0; //不需要描边
 
-        _focusNode.context.fillStyle = _node.context.strokeStyle;
-        _focusNode.context.globalAlpha = 0.5;
+          _focusNode.context.fillStyle = _node.context.strokeStyle;
+          _focusNode.context.globalAlpha = 0.5;
 
-        _focusNode.animate({
-          r: _focusNode.context.r + 6
-        }, {
-          duration: 300
-        });
+          _focusNode.animate({
+            r: _focusNode.context.r + 6
+          }, {
+            duration: 300
+          });
 
-        this.__currFocusInd = iNode;
+          this.__currFocusInd = iNode;
+        }
+
+        node.focused = true;
       }
-
-      node.focused = true;
     }
   }, {
     key: "unfocusOf",
@@ -1162,19 +1166,21 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
       ;
       var node = this.data[iNode];
 
-      this._focusNodes.removeAllChildren();
+      if (node) {
+        this._focusNodes.removeAllChildren();
 
-      var _node = node.nodeEl;
+        var _node = node.nodeEl;
 
-      if (_node && node.focused) {
-        //console.log('unfocus')
-        _node.context.fillStyle = _node._fillStyle;
-        _node.context.visible = _node._visible;
-        node.focused = false;
-        this.__currFocusInd = -1;
+        if (_node && node.focused) {
+          //console.log('unfocus')
+          _node.context.fillStyle = _node._fillStyle;
+          _node.context.visible = _node._visible;
+          node.focused = false;
+          this.__currFocusInd = -1;
+        }
+
+        ;
       }
-
-      ;
     }
   }], [{
     key: "defaultProps",

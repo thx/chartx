@@ -581,6 +581,7 @@ class Chart extends event.Dispatcher
         //------------------------------------------------------------//
 
         let _coord = me.getComponent({name:'coord'});
+        debugger
         _.each( _.flatten( _coord.fieldsMap ) , function( map , i ){
             //因为yAxis上面是可以单独自己配置field的，所以，这部分要过滤出 legend data
             let isGraphsField = false;

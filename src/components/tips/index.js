@@ -60,6 +60,7 @@ class Tips extends Component {
                 detail: 'tips移动的时候，指针是否开启动画',
                 default: true
             },
+            
             onshow : {
                 detail: 'show的时候的事件',
                 default: function(){}
@@ -80,7 +81,7 @@ class Tips extends Component {
 
         this.name = "tips"
 
-        this.tipDomContainer = document.body; //this.app.canvax.domView;
+        this.tipDomContainer = document ? document.body : null; //this.app.canvax.domView;
         this.cW = 0;  //容器的width
         this.cH = 0;  //容器的height
 
@@ -262,6 +263,8 @@ class Tips extends Component {
     }
 
     _getDefaultContent(info) {
+
+        let _coord = this.app.getComponent({name:'coord'});
         
         let str = "";
         if( !info.nodes.length && !info.tipsContent ){
@@ -282,9 +285,11 @@ class Tips extends Component {
                 };
                 
                 let style = node.color || node.fillStyle || node.strokeStyle;
-                let name = node.name || node.field || node.content || node.label;
-                let value = typeof(node.value) == "object" ? JSON.stringify(node.value) : numeral(node.value).format('0,0');
-
+                let name,value;
+                let fieldConfig = _coord.getFieldConfig( node.field );
+                name = fieldConfig.name || node.name || node.field || node.content || node.label;
+                value = fieldConfig.getFormatValue( node.value );
+                
                 str += "<tr>"
                 str += "<td style='padding:0px 6px;color:#a0a0a0;'>"+name+"</td>"
                 str += "<td style='padding:0px 6px;'><span style='color:"+style+"'>"+value+"</span></td>"
