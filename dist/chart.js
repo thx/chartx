@@ -687,7 +687,6 @@ var Chart = /*#__PURE__*/function (_event$Dispatcher) {
     value: function getLegendData() {
       var me = this;
       var data = []; //这里涌来兼容pie等的图例，其实后续可以考虑后面所有的graphs都提供一个getLegendData的方法
-      //那么就可以统一用这个方法， 下面的代码就可以去掉了
 
       _.each(this.getComponents({
         name: 'graphs'
@@ -716,8 +715,6 @@ var Chart = /*#__PURE__*/function (_event$Dispatcher) {
         name: 'coord'
       });
 
-      debugger;
-
       _.each(_.flatten(_coord.fieldsMap), function (map, i) {
         //因为yAxis上面是可以单独自己配置field的，所以，这部分要过滤出 legend data
         var isGraphsField = false;
@@ -732,7 +729,7 @@ var Chart = /*#__PURE__*/function (_event$Dispatcher) {
         if (isGraphsField) {
           data.push({
             enabled: map.enabled,
-            name: map.field,
+            name: map.name || map.field,
             field: map.field,
             ind: map.ind,
             color: map.color,
@@ -782,55 +779,92 @@ var Chart = /*#__PURE__*/function (_event$Dispatcher) {
       this.componentsReset(trigger);
     }
   }, {
-    key: "_bindEvent",
-    value: function _bindEvent() {
-      var me = this;
-      if (this.__bindEvented) return;
-      this.on(event.types.get(), function (e) {
-        //触发每个graphs级别的事件，
-        //用户交互事件先执行，还可以修改e的内容修改tips内容
-        if (e.eventInfo) {
-          _.each(this.getGraphs(), function (graph) {
-            graph.triggerEvent(e);
-          });
+    key: "triggerEvent",
+    value: function triggerEvent(event) {
+      //触发每个graphs级别的事件（在 graph 上面 用 on 绑定的事件），
+      //用户交互事件先执行，还可以修改e的内容修改tips内容(e.eventInfo)
+      if (event.eventInfo) {
+        _.each(this.getGraphs(), function (graph) {
+          graph.triggerEvent(event);
+        });
+      }
+
+      ;
+
+      var _tips = this.getComponent({
+        name: 'tips'
+      });
+
+      var _coord = this.getComponent({
+        name: 'coord'
+      });
+
+      if (_tips) {
+        this._setGraphsTipsInfo.apply(this, [event]);
+
+        if (event.type == "mouseover" || event.type == "mousedown") {
+          _tips.show(event);
+
+          this._tipsPointerAtAllGraphs(event);
         }
 
         ;
 
-        var _tips = me.getComponent({
-          name: 'tips'
+        if (event.type == "mousemove") {
+          _tips.move(event);
+
+          this._tipsPointerAtAllGraphs(event);
+        }
+
+        ;
+
+        if (event.type == "mouseout" && !(event.toTarget && _coord && _coord.induce && _coord.induce.containsPoint(_coord.induce.globalToLocal(event.target.localToGlobal(event.point))))) {
+          _tips.hide(event);
+
+          this._tipsPointerHideAtAllGraphs(event);
+        }
+
+        ;
+      }
+
+      ;
+    }
+  }, {
+    key: "_bindEvent",
+    value: function _bindEvent() {
+      var _this3 = this;
+
+      if (this.__bindEvented) return;
+      this.on(event.types.get(), function (e) {
+        //先触发自己的事件
+        _this3.triggerEvent(e); //然后
+        //如果这个图表的tips组件有设置linkageName，
+        //那么就寻找到所有的图表实例中有相同linkageName的图表，执行相应的事件
+
+
+        var tipsComp = _this3.getComponent({
+          name: "tips"
         });
 
-        var _coord = me.getComponent({
-          name: 'coord'
-        });
+        if (tipsComp && tipsComp.linkageName) {
+          for (var c in _global["default"].instances) {
+            var linkageChart = _global["default"].instances[c];
+            if (linkageChart == _this3) continue;
+            var linkageChartTipsComp = linkageChart.getComponent({
+              name: "tips"
+            });
 
-        if (_tips) {
-          me._setGraphsTipsInfo.apply(me, [e]);
+            if (linkageChartTipsComp && linkageChartTipsComp.linkageName && linkageChartTipsComp.linkageName == tipsComp.linkageName) {
+              if (e.eventInfo && e.eventInfo.nodes) {
+                e.eventInfo.nodes = [];
+              }
 
-          if (e.type == "mouseover" || e.type == "mousedown") {
-            _tips.show(e);
+              ; //告诉tips的content这个是联动触发（被动）
 
-            me._tipsPointerAtAllGraphs(e);
+              e.eventInfo.isLinkageTrigger = true;
+              linkageChart.triggerEvent.apply(linkageChart, [e]);
+            }
           }
-
-          ;
-
-          if (e.type == "mousemove") {
-            _tips.move(e);
-
-            me._tipsPointerAtAllGraphs(e);
-          }
-
-          ;
-
-          if (e.type == "mouseout" && !(e.toTarget && _coord && _coord.induce && _coord.induce.containsPoint(_coord.induce.globalToLocal(e.target.localToGlobal(e.point))))) {
-            _tips.hide(e);
-
-            me._tipsPointerHideAtAllGraphs(e);
-          }
-
-          ;
         }
 
         ;

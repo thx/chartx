@@ -187,11 +187,14 @@ var Tips = /*#__PURE__*/function (_Component) {
     value: function _setPosition(e) {
       //tips直接修改为fixed，所以定位直接用e.x e.y 2020-02-27
       if (!this.enabled) return;
-      if (!this._tipDom) return;
+      if (!this._tipDom) return; //let x = this._checkX( e.clientX + this.offsetX);
+      //let y = this._checkY( e.clientY + this.offsetY);
 
-      var x = this._checkX(e.clientX + this.offsetX);
+      var domBounding = this.app.canvax.el.getBoundingClientRect();
 
-      var y = this._checkY(e.clientY + this.offsetY);
+      var x = this._checkX(e.offsetX + domBounding.x + this.offsetX);
+
+      var y = this._checkY(e.offsetY + domBounding.y + this.offsetY);
 
       this._tipDom.style.cssText += ";visibility:visible;left:" + x + "px;top:" + y + "px;";
 
@@ -286,11 +289,10 @@ var Tips = /*#__PURE__*/function (_Component) {
         ;
 
         _.each(info.nodes, function (node, i) {
-          if (!node.value && node.value !== 0) {
-            return;
-          }
-
-          ;
+          // if (!node.value && node.value !== 0) {
+          //     return;
+          // };
+          var hasValue = node.value || node.value === 0;
           var style = node.color || node.fillStyle || node.strokeStyle;
           var name, value;
 
@@ -298,8 +300,14 @@ var Tips = /*#__PURE__*/function (_Component) {
 
           name = fieldConfig.name || node.name || node.field || node.content || node.label;
           value = fieldConfig.getFormatValue(node.value);
+
+          if (!hasValue) {
+            style = "#ddd";
+            value = '--';
+          }
+
           str += "<tr>";
-          str += "<td style='padding:0px 6px;color:#a0a0a0;'>" + name + "</td>";
+          str += "<td style='padding:0px 6px;color:" + (!hasValue ? '#ddd' : '#a0a0a0;') + "'>" + name + "</td>";
           str += "<td style='padding:0px 6px;'><span style='color:" + style + "'>" + value + "</span></td>";
           str += "</tr>";
         });
@@ -587,6 +595,10 @@ var Tips = /*#__PURE__*/function (_Component) {
         pointerAnim: {
           detail: 'tips移动的时候，指针是否开启动画',
           "default": true
+        },
+        linkageName: {
+          detail: 'tips的多图表联动，相同的图表会执行事件联动，这个属性注意要保证y轴的width是一致的',
+          "default": null
         },
         onshow: {
           detail: 'show的时候的事件',

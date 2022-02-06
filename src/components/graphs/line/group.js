@@ -173,6 +173,11 @@ export default class LineGraphsGroup extends event.Dispatcher
         this._currPointList = []; //brokenline 动画中的当前状态
         this._bline = null;
 
+        //设置默认的line.strokStyle 为 fieldConfig.color
+        this.line = {
+            strokeStyle : fieldConfig.color
+        };
+
         _.extend(true, this, getDefaultProps( LineGraphsGroup.defaultProps() ), opt );
 
         //TODO group中得field不能直接用opt中得field， 必须重新设置， 
@@ -506,7 +511,7 @@ export default class LineGraphsGroup extends event.Dispatcher
         !opt && (opt ={});
         
         me._pointList = this._getPointList(me.data);
-debugger
+
         if (me._pointList.length == 0) {
             //filter后，data可能length==0
             return;
@@ -875,6 +880,8 @@ debugger
         let me = this;
         let list = me._currPointList;
 
+        let _coord = this._graphs.app.getCoord();
+
         if ( me.label.enabled ) { //节点上面的文本info
             
             let iNode = 0; //这里不能和下面的a对等，以为list中有很多无效的节点
@@ -908,9 +915,13 @@ debugger
 
                 let value = me.data[ a ].value;
                 if (_.isFunction(me.label.format)) {
+                    //如果有单独给label配置format，就用label上面的配置
                     value = (me.label.format(value, me.data[ a ]) || value );
+                } else {
+                    //否则用fieldConfig上面的
+                    let fieldConfig = _coord.getFieldConfig( this.field );
+                    value = fieldConfig.getFormatValue( value );
                 };
-
                 if( value == undefined || value == null ){
                     continue;
                 };

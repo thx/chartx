@@ -9472,7 +9472,6 @@ var Chart = /*#__PURE__*/function (_event$Dispatcher) {
     value: function getLegendData() {
       var me = this;
       var data = []; //这里涌来兼容pie等的图例，其实后续可以考虑后面所有的graphs都提供一个getLegendData的方法
-      //那么就可以统一用这个方法， 下面的代码就可以去掉了
 
       _.each(this.getComponents({
         name: 'graphs'
@@ -9499,8 +9498,6 @@ var Chart = /*#__PURE__*/function (_event$Dispatcher) {
         name: 'coord'
       });
 
-      debugger;
-
       _.each(_.flatten(_coord.fieldsMap), function (map, i) {
         //因为yAxis上面是可以单独自己配置field的，所以，这部分要过滤出 legend data
         var isGraphsField = false;
@@ -9515,7 +9512,7 @@ var Chart = /*#__PURE__*/function (_event$Dispatcher) {
         if (isGraphsField) {
           data.push({
             enabled: map.enabled,
-            name: map.field,
+            name: map.name || map.field,
             field: map.field,
             ind: map.ind,
             color: map.color,
@@ -9564,46 +9561,79 @@ var Chart = /*#__PURE__*/function (_event$Dispatcher) {
       this.componentsReset(trigger);
     }
   }, {
-    key: "_bindEvent",
-    value: function _bindEvent() {
-      var me = this;
-      if (this.__bindEvented) return;
-      this.on(event.types.get(), function (e) {
-        //触发每个graphs级别的事件，
-        //用户交互事件先执行，还可以修改e的内容修改tips内容
-        if (e.eventInfo) {
-          _.each(this.getGraphs(), function (graph) {
-            graph.triggerEvent(e);
-          });
+    key: "triggerEvent",
+    value: function triggerEvent(event) {
+      //触发每个graphs级别的事件（在 graph 上面 用 on 绑定的事件），
+      //用户交互事件先执行，还可以修改e的内容修改tips内容(e.eventInfo)
+      if (event.eventInfo) {
+        _.each(this.getGraphs(), function (graph) {
+          graph.triggerEvent(event);
+        });
+      }
+
+      var _tips = this.getComponent({
+        name: 'tips'
+      });
+
+      var _coord = this.getComponent({
+        name: 'coord'
+      });
+
+      if (_tips) {
+        this._setGraphsTipsInfo.apply(this, [event]);
+
+        if (event.type == "mouseover" || event.type == "mousedown") {
+          _tips.show(event);
+
+          this._tipsPointerAtAllGraphs(event);
         }
 
-        var _tips = me.getComponent({
-          name: 'tips'
+        if (event.type == "mousemove") {
+          _tips.move(event);
+
+          this._tipsPointerAtAllGraphs(event);
+        }
+
+        if (event.type == "mouseout" && !(event.toTarget && _coord && _coord.induce && _coord.induce.containsPoint(_coord.induce.globalToLocal(event.target.localToGlobal(event.point))))) {
+          _tips.hide(event);
+
+          this._tipsPointerHideAtAllGraphs(event);
+        }
+      }
+    }
+  }, {
+    key: "_bindEvent",
+    value: function _bindEvent() {
+      var _this3 = this;
+
+      if (this.__bindEvented) return;
+      this.on(event.types.get(), function (e) {
+        //先触发自己的事件
+        _this3.triggerEvent(e); //然后
+        //如果这个图表的tips组件有设置linkageName，
+        //那么就寻找到所有的图表实例中有相同linkageName的图表，执行相应的事件
+
+
+        var tipsComp = _this3.getComponent({
+          name: "tips"
         });
 
-        var _coord = me.getComponent({
-          name: 'coord'
-        });
+        if (tipsComp && tipsComp.linkageName) {
+          for (var c in _global["default"].instances) {
+            var linkageChart = _global["default"].instances[c];
+            if (linkageChart == _this3) continue;
+            var linkageChartTipsComp = linkageChart.getComponent({
+              name: "tips"
+            });
 
-        if (_tips) {
-          me._setGraphsTipsInfo.apply(me, [e]);
+            if (linkageChartTipsComp && linkageChartTipsComp.linkageName && linkageChartTipsComp.linkageName == tipsComp.linkageName) {
+              if (e.eventInfo && e.eventInfo.nodes) {
+                e.eventInfo.nodes = [];
+              }
 
-          if (e.type == "mouseover" || e.type == "mousedown") {
-            _tips.show(e);
-
-            me._tipsPointerAtAllGraphs(e);
-          }
-
-          if (e.type == "mousemove") {
-            _tips.move(e);
-
-            me._tipsPointerAtAllGraphs(e);
-          }
-
-          if (e.type == "mouseout" && !(e.toTarget && _coord && _coord.induce && _coord.induce.containsPoint(_coord.induce.globalToLocal(e.target.localToGlobal(e.point))))) {
-            _tips.hide(e);
-
-            me._tipsPointerHideAtAllGraphs(e);
+              e.eventInfo.isLinkageTrigger = true;
+              linkageChart.triggerEvent.apply(linkageChart, [e]);
+            }
           }
         }
       }); //一个项目只需要bind一次
@@ -17923,7 +17953,11 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
 
     _this._currPointList = []; //brokenline 动画中的当前状态
 
-    _this._bline = null;
+    _this._bline = null; //设置默认的line.strokStyle 为 fieldConfig.color
+
+    _this.line = {
+      strokeStyle: fieldConfig.color
+    };
 
     _.extend(true, (0, _assertThisInitialized2["default"])(_this), (0, tools.getDefaultProps)(LineGraphsGroup.defaultProps()), opt); //TODO group中得field不能直接用opt中得field， 必须重新设置， 
     //group中得field只有一个值，代表一条折线, 后面要扩展extend方法，可以控制过滤哪些key值不做extend
@@ -18271,7 +18305,6 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
     value: function _widget(opt) {
       var me = this;
       me._pointList = this._getPointList(me.data);
-      debugger;
 
       if (me._pointList.length == 0) {
         //filter后，data可能length==0
@@ -18646,6 +18679,8 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
       var me = this;
       var list = me._currPointList;
 
+      var _coord = this._graphs.app.getCoord();
+
       if (me.label.enabled) {
         //节点上面的文本info
         var iNode = 0; //这里不能和下面的a对等，以为list中有很多无效的节点
@@ -18682,7 +18717,13 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
           var value = me.data[a].value;
 
           if (_.isFunction(me.label.format)) {
+            //如果有单独给label配置format，就用label上面的配置
             value = me.label.format(value, me.data[a]) || value;
+          } else {
+            //否则用fieldConfig上面的
+            var fieldConfig = _coord.getFieldConfig(this.field);
+
+            value = fieldConfig.getFormatValue(value);
           }
 
           if (value == undefined || value == null) {
@@ -49843,9 +49884,9 @@ var Legend = /*#__PURE__*/function (_Component) {
             _icon.context.fillStyle = !obj.enabled ? "#ccc" : obj.color || "#999";
 
             if (obj.enabled) {
-              me.app.show(obj.name, new _trigger["default"](this, obj));
+              me.app.show(obj.field, new _trigger["default"](this, obj));
             } else {
-              me.app.hide(obj.name, new _trigger["default"](this, obj));
+              me.app.hide(obj.field, new _trigger["default"](this, obj));
             }
           }
 
@@ -49880,7 +49921,6 @@ var Legend = /*#__PURE__*/function (_Component) {
         triggerType: 'legend',
         trigger: this,
         tipsEnabled: this.tipsEnabled,
-        //title : data.name,
         nodes: [{
           name: data.name,
           fillStyle: data.color
@@ -51692,11 +51732,14 @@ var Tips = /*#__PURE__*/function (_Component) {
     value: function _setPosition(e) {
       //tips直接修改为fixed，所以定位直接用e.x e.y 2020-02-27
       if (!this.enabled) return;
-      if (!this._tipDom) return;
+      if (!this._tipDom) return; //let x = this._checkX( e.clientX + this.offsetX);
+      //let y = this._checkY( e.clientY + this.offsetY);
 
-      var x = this._checkX(e.clientX + this.offsetX);
+      var domBounding = this.app.canvax.el.getBoundingClientRect();
 
-      var y = this._checkY(e.clientY + this.offsetY);
+      var x = this._checkX(e.offsetX + domBounding.x + this.offsetX);
+
+      var y = this._checkY(e.offsetY + domBounding.y + this.offsetY);
 
       this._tipDom.style.cssText += ";visibility:visible;left:" + x + "px;top:" + y + "px;";
 
@@ -51779,9 +51822,10 @@ var Tips = /*#__PURE__*/function (_Component) {
         }
 
         _.each(info.nodes, function (node, i) {
-          if (!node.value && node.value !== 0) {
-            return;
-          }
+          // if (!node.value && node.value !== 0) {
+          //     return;
+          // };
+          var hasValue = node.value || node.value === 0;
           var style = node.color || node.fillStyle || node.strokeStyle;
           var name, value;
 
@@ -51789,8 +51833,14 @@ var Tips = /*#__PURE__*/function (_Component) {
 
           name = fieldConfig.name || node.name || node.field || node.content || node.label;
           value = fieldConfig.getFormatValue(node.value);
+
+          if (!hasValue) {
+            style = "#ddd";
+            value = '--';
+          }
+
           str += "<tr>";
-          str += "<td style='padding:0px 6px;color:#a0a0a0;'>" + name + "</td>";
+          str += "<td style='padding:0px 6px;color:" + (!hasValue ? '#ddd' : '#a0a0a0;') + "'>" + name + "</td>";
           str += "<td style='padding:0px 6px;'><span style='color:" + style + "'>" + value + "</span></td>";
           str += "</tr>";
         });
@@ -52060,6 +52110,10 @@ var Tips = /*#__PURE__*/function (_Component) {
         pointerAnim: {
           detail: 'tips移动的时候，指针是否开启动画',
           "default": true
+        },
+        linkageName: {
+          detail: 'tips的多图表联动，相同的图表会执行事件联动，这个属性注意要保证y轴的width是一致的',
+          "default": null
         },
         onshow: {
           detail: 'show的时候的事件',

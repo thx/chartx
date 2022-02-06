@@ -69,7 +69,11 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
 
     _this._currPointList = []; //brokenline 动画中的当前状态
 
-    _this._bline = null;
+    _this._bline = null; //设置默认的line.strokStyle 为 fieldConfig.color
+
+    _this.line = {
+      strokeStyle: fieldConfig.color
+    };
 
     _.extend(true, (0, _assertThisInitialized2["default"])(_this), (0, _tools.getDefaultProps)(LineGraphsGroup.defaultProps()), opt); //TODO group中得field不能直接用opt中得field， 必须重新设置， 
     //group中得field只有一个值，代表一条折线, 后面要扩展extend方法，可以控制过滤哪些key值不做extend
@@ -456,7 +460,6 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
       var me = this;
       !opt && (opt = {});
       me._pointList = this._getPointList(me.data);
-      debugger;
 
       if (me._pointList.length == 0) {
         //filter后，data可能length==0
@@ -869,6 +872,8 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
       var me = this;
       var list = me._currPointList;
 
+      var _coord = this._graphs.app.getCoord();
+
       if (me.label.enabled) {
         //节点上面的文本info
         var iNode = 0; //这里不能和下面的a对等，以为list中有很多无效的节点
@@ -909,7 +914,13 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
           var value = me.data[a].value;
 
           if (_.isFunction(me.label.format)) {
+            //如果有单独给label配置format，就用label上面的配置
             value = me.label.format(value, me.data[a]) || value;
+          } else {
+            //否则用fieldConfig上面的
+            var fieldConfig = _coord.getFieldConfig(this.field);
+
+            value = fieldConfig.getFormatValue(value);
           }
 
           ;

@@ -152,16 +152,113 @@ var options = {
         enabled: true
     },
     tips:{
-        
+        linkageName: 'linkage' //这个属性注意要保证y轴的width是一致的
+    }
+}
+
+
+var options1 = {
+    coord: {
+        type: "rect",
+        xAxis: {
+            field: "xfield",
+            label: {
+                rotation: 30
+            },
+            title: {
+                text: "我是xAxis"
+            }
+        },
+        fieldsConfig: {
+            click: {
+                name: '点击量',
+                format: '0.0a'
+            }
+        }
+    },
+    graphs: [
+    {
+        type: "line",
+        field: "uv",
+        color: 'rgba(56, 90, 204,  1)',
+        line: {
+            lineargradientDriction:"leftRight",
+            strokeStyle: {
+                lineargradient: [
+                {
+                    position: 0,
+                    color: 'rgba(56, 90, 204, 0.2)'
+                },
+                {
+                    position: 0.05,
+                    color: 'rgba(56, 90, 204,  1)'
+                },
+                {
+                    position: 0.95,
+                    color: 'rgba(56, 90, 204, 1)'
+                },
+                {
+                    position: 1,
+                    color: 'rgba(56, 90, 204, 0.2)'
+                }
+            ]
+            }
+        },
+        label: {
+            enabled: true
+        },
+        area: {
+            alpha:0.25
+        }
+    },
+    {
+        type: "line",
+        //animation: false,
+        field: "click",
+        yAxisAlign:'right',
+        color: 'rgba(56, 90, 204,  1)',
+        line: {
+            lineargradientDriction:"leftRight",
+            strokeStyle: {
+                lineargradient: [
+                {
+                    position: 0,
+                    color: 'rgba(56, 90, 204, 0.2)'
+                },
+                {
+                    position: 0.05,
+                    color: 'rgba(56, 90, 204,  1)'
+                },
+                {
+                    position: 0.95,
+                    color: 'rgba(56, 90, 204, 1)'
+                },
+                {
+                    position: 1,
+                    color: 'rgba(56, 90, 204, 0.2)'
+                }
+            ]
+            }
+        },
+        label: {
+            enabled: true
+        },
+        area: {
+            alpha:0.25
+        }
+    }
+    ],
+    legend: {
+        enabled: true
+    },
+    tips:{
+        linkageName: 'linkage'
     }
 }
 
 
 window.line = chartx.create("canvasTest" , data , options)
-
-
-
-
+window.line1 = chartx.create("canvasTest1" , data , options1)
 
             </textarea></form>
         </td>
@@ -176,7 +273,8 @@ window.line = chartx.create("canvasTest" , data , options)
                 </p>
             </div>
             <div  class="test-c">
-                <div id="canvasTest" style='width:100%;height:300px;position:relative;'></div>
+                <div id="canvasTest" style='width:900px;height:300px;position:relative;'></div>
+                <div id="canvasTest1" style='width:900px;height:300px;position:relative;'></div>
             </div>
 
             </div>
