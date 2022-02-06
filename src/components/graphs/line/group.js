@@ -7,6 +7,7 @@ let AnimationFrame = Canvax.AnimationFrame;
 let BrokenLine = Canvax.Shapes.BrokenLine;
 let Circle = Canvax.Shapes.Circle;
 let Isogon = Canvax.Shapes.Isogon;
+let Rect = Canvax.Shapes.Rect;
 let Path = Canvax.Shapes.Path;
  
 
@@ -24,6 +25,10 @@ export default class LineGraphsGroup extends event.Dispatcher
                     strokeStyle: {
                         detail: '线的颜色',
                         default: undefined //不会覆盖掉constructor中的定义
+                    },
+                    lineargradientDriction: {
+                        detail: '线的填充色是渐变对象的话，这里用来描述方向，默认从上到下（topBottom）,可选leftRight',
+                        default: 'topBottom' //可选 leftRight
                     },
                     lineWidth: {
                         detail: '线的宽度',
@@ -69,7 +74,7 @@ export default class LineGraphsGroup extends event.Dispatcher
                     },
                     fillStyle: {
                         detail: '节点图形的背景色',
-                        default: '#ffffff'
+                        default: null
                     },
                     strokeStyle: {
                         detail: '节点图形的描边色，默认和line.strokeStyle保持一致',
@@ -114,7 +119,7 @@ export default class LineGraphsGroup extends event.Dispatcher
                     },
                     textBaseline: {
                         detail: '垂直布局方式',
-                        default: 'middle'
+                        default: 'bottom'
                     }
                 }
             },
@@ -125,53 +130,63 @@ export default class LineGraphsGroup extends event.Dispatcher
                         detail: '是否开启',
                         default: true
                     },
+                    lineargradientDriction: {
+                        detail: '面积的填充色是渐变对象的话，这里用来描述方向，默认null(就会从line中取),从上到下（topBottom）,可选leftRight',
+                        default: null //默认null（就会和line保持一致），可选 topBottom leftRight
+                    },
                     fillStyle: {
                         detail: '面积背景色',
                         default: null
                     },
                     alpha: {
                         detail: '面积透明度',
-                        default: 0.2
+                        default: 0.25
                     }
                 }
             }
         }
     }
 
-    constructor( fieldMap, iGroup, opt, ctx, h, w , _graphs)
+    constructor( fieldConfig, iGroup, opt, ctx, h, w , _graphs)
     {
         super();
 
         this._graphs = _graphs;
 
         this._opt = opt;
-        this.fieldMap = fieldMap;
+        this.fieldConfig = fieldConfig;
         this.field = null; //在extend之后要重新设置
         this.iGroup = iGroup;
         
-        this._yAxis = fieldMap.yAxis;
+        this._yAxis = fieldConfig.yAxis;
         
         this.ctx = ctx;
         this.w = w;
         this.h = h;
         this.y = 0;
 
-        this.line = { //线
-            strokeStyle: fieldMap.color,
-        };
-
         this.data = []; 
         this.sprite = null;
+        this.graphSprite = null; //line area放这里
 
         this._pointList = []; //brokenline最终的状态
         this._currPointList = []; //brokenline 动画中的当前状态
         this._bline = null;
 
+        //设置默认的line.strokStyle 为 fieldConfig.color
+        this.line = {
+            strokeStyle : fieldConfig.color
+        };
+
         _.extend(true, this, getDefaultProps( LineGraphsGroup.defaultProps() ), opt );
 
         //TODO group中得field不能直接用opt中得field， 必须重新设置， 
         //group中得field只有一个值，代表一条折线, 后面要扩展extend方法，可以控制过滤哪些key值不做extend
-        this.field = fieldMap.field; //iGroup 在yAxis.field中对应的值
+        this.field = fieldConfig.field; //iGroup 在yAxis.field中对应的值
+
+        this.clipRect = null;
+
+        this.__currFocusInd = -1;
 
         this.init(opt)
     }
@@ -179,6 +194,18 @@ export default class LineGraphsGroup extends event.Dispatcher
     init()
     {
         this.sprite = new Canvax.Display.Sprite();
+        this.graphSprite = new Canvax.Display.Sprite();
+        this.sprite.addChild( this.graphSprite );
+
+        //hover效果的node被添加到的容器
+        this._focusNodes = new Canvax.Display.Sprite({});
+        this.sprite.addChild(this._focusNodes);
+
+        this._nodes = new Canvax.Display.Sprite({});
+        this.sprite.addChild(this._nodes);
+
+        this._labels = new Canvax.Display.Sprite({});
+        this.sprite.addChild(this._labels);
     }
 
     draw(opt, data)
@@ -217,8 +244,8 @@ export default class LineGraphsGroup extends event.Dispatcher
 
             //因为_getLineStrokeStyle返回的可能是个渐变对象，所以要用isString过滤掉
             if( !color || !_.isString( color ) ){
-                //那么最后，取this.fieldMap.color
-                color = this.fieldMap.color;
+                //那么最后，取this.fieldConfig.color
+                color = this.fieldConfig.color; //this._getProp(this.color, iNode) //this.color会被写入到fieldMap.color
             }
         };
         return color;
@@ -275,6 +302,7 @@ export default class LineGraphsGroup extends event.Dispatcher
      */
     resetData(data, dataTrigger)
     {
+       
         let me = this;
 
         if( data ){
@@ -315,10 +343,11 @@ export default class LineGraphsGroup extends event.Dispatcher
         me._createNodes();
         me._createTexts();
 
-        me._grow();
+        me._transition();
     }
 
-    _grow(callback)
+    //数据变化后的切换动画
+    _transition(callback)
     {
         let me = this;
 
@@ -329,10 +358,16 @@ export default class LineGraphsGroup extends event.Dispatcher
         };
 
         function _update( list ){
+
+            if( !me._bline ){
+                me.sprite._removeTween( me._transitionTween );
+                me._transitionTween = null;
+                return;
+            }
             
             if( me._bline.context ){
                 me._bline.context.pointList = _.clone( list );
-                me._bline.context.strokeStyle = me._getLineStrokeStyle( list );
+                me._bline.context.strokeStyle = me._getLineStrokeStyle();
             }
             
             if( me._area.context ){
@@ -364,7 +399,7 @@ export default class LineGraphsGroup extends event.Dispatcher
         };
 
 
-        this._growTween = AnimationFrame.registTween({
+        this._transitionTween = AnimationFrame.registTween({
             from: me._getPointPosStr(me._currPointList),
             to: me._getPointPosStr(me._pointList),
             desc: me.field,
@@ -378,9 +413,9 @@ export default class LineGraphsGroup extends event.Dispatcher
             },
             onComplete: function() {
                 
-                me.sprite._removeTween( me._growTween );
+                me.sprite._removeTween( me._transitionTween );
 
-                me._growTween = null;
+                me._transitionTween = null;
                 //在动画结束后强制把目标状态绘制一次。
                 //解决在onUpdate中可能出现的异常会导致绘制有问题。
                 //这样的话，至少最后的结果会是对的。
@@ -389,7 +424,57 @@ export default class LineGraphsGroup extends event.Dispatcher
             }
         });
 
-        this.sprite._tweens.push( this._growTween );
+        this.sprite._tweens.push( this._transitionTween );
+    }
+
+    //首次加载的进场动画
+    _grow(callback){
+        
+        let _coord = this._graphs.app.getCoord();
+        let {width,height} = _coord;
+        this.clipRect = new Rect({
+            context : {
+                x: 0, //-100,
+                y: -height,
+                width:0,
+                height,
+                fillStyle: 'blue'
+            }
+        });
+
+        let growTo = { width : width }
+
+        this.graphSprite.clipTo( this.clipRect );
+        if( this.yAxisAlign == 'right' ){
+            this.clipRect.context.x = width;
+            growTo.x = 0;
+        };
+
+        //TODO：理论上下面这句应该可以神略了才行
+        this.sprite.addChild( this.clipRect );
+
+        this.clipRect.animate( growTo , {
+            duration: this._graphs.aniDuration,
+            onUpdate: ()=>{
+
+                let clipRectCtx = this.clipRect.context
+                this._nodes.children.concat( this._labels.children ).forEach(el => {
+                    let _ctx = el.context;
+                    if( _ctx.globalAlpha == 0 && _ctx.x>=clipRectCtx.x && _ctx.x<=clipRectCtx.x+clipRectCtx.width){
+                        el.animate({
+                            globalAlpha: 1
+                        },{
+                            duration:300
+                        });
+                    }
+                });
+                
+                
+            },
+            onComplete: ()=>{
+                callback && callback()
+            }
+        });
     }
 
     _getPointPosStr(list)
@@ -431,20 +516,24 @@ export default class LineGraphsGroup extends event.Dispatcher
             //filter后，data可能length==0
             return;
         };
-        let list = [];
-        if (opt.animation) {
-            let firstNode = this._getFirstNode();
-            let firstY = firstNode ? firstNode.y : undefined;
-            for (let a = 0, al = me.data.length; a < al; a++) {
-                let o = me.data[a];
-                list.push([
-                    o.x,
-                    _.isNumber( o.y ) ? firstY : o.y
-                ]);
-            };
-        } else {
-            list = me._pointList;
-        };
+
+        // change log 入场动画修改为了从左到右的剪切显示
+        // let list = [];
+        // if (opt.animation) {
+        //     let firstNode = this._getFirstNode();
+        //     let firstY = firstNode ? firstNode.y : undefined;
+        //     for (let a = 0, al = me.data.length; a < al; a++) {
+        //         let o = me.data[a];
+        //         list.push([
+        //             o.x,
+        //             _.isNumber( o.y ) ? firstY : o.y
+        //         ]);
+        //     };
+        // } else {
+        //     list = me._pointList;
+        // };
+
+        let list = me._pointList;
         
         me._currPointList = list;
 
@@ -480,7 +569,7 @@ export default class LineGraphsGroup extends event.Dispatcher
         if (!this.line.enabled) {
             bline.context.visible = false
         };
-        me.sprite.addChild(bline);
+        me.graphSprite.addChild(bline);
         me._bline = bline;
 
         let area = new Path({ //填充
@@ -501,7 +590,7 @@ export default class LineGraphsGroup extends event.Dispatcher
         if( !this.area.enabled ){
             area.context.visible = false
         };
-        me.sprite.addChild(area);
+        me.graphSprite.addChild(area);
         me._area = area;
 
         me._createNodes();
@@ -514,11 +603,11 @@ export default class LineGraphsGroup extends event.Dispatcher
         for( let i=0,l=this.data.length; i<l; i++ ){
             let nodeData = this.data[i];
             if( _.isNumber( nodeData.y ) ){
-                if( _firstNode === null || ( this._yAxis.align == "right" ) ){
+                if( _firstNode === null || ( this.yAxisAlign == "right" ) ){
                     //_yAxis为右轴的话，
                     _firstNode = nodeData;
                 }
-                if( this._yAxis.align !== "right" && _firstNode !== null ){
+                if( this.yAxisAlign !== "right" && _firstNode !== null ){
                     break;
                 }
             };
@@ -534,7 +623,7 @@ export default class LineGraphsGroup extends event.Dispatcher
         let fill_gradient = null;
 
         // _fillStyle 可以 接受渐变色，可以不用_getColor， _getColor会过滤掉渐变色
-        let _fillStyle = me._getProp(me.area.fillStyle) || me._getLineStrokeStyle( null, "fillStyle" );
+        let _fillStyle = me._getProp(me.area.fillStyle) || me._getLineStrokeStyle( null, "area" );
 
         if (_.isArray(me.area.alpha) && !(_fillStyle instanceof CanvasGradient)) {
             //alpha如果是数组，那么就是渐变背景，那么就至少要有两个值
@@ -547,17 +636,11 @@ export default class LineGraphsGroup extends event.Dispatcher
                 me.area.alpha[1] = 0;
             };
 
-            //从bline中找到最高的点
-            let topP = _.min(me._bline.context.pointList, function(p) {
-                return p[1]
-            });
-
-            if( topP[0] === undefined || topP[1] === undefined ){
-                return null
-            };
+            let lps = this._getLinearGradientPoints( 'area' );
+            if(!lps) return;
 
             //创建一个线性渐变
-            fill_gradient = me.ctx.createLinearGradient(topP[0], topP[1], topP[0], 0);
+            fill_gradient = me.ctx.createLinearGradient( ...lps );
 
             let rgb = colorRgb( _fillStyle );
             let rgba0 = rgb.replace(')', ', ' + me._getProp(me.area.alpha[0]) + ')').replace('RGB', 'RGBA');
@@ -572,7 +655,7 @@ export default class LineGraphsGroup extends event.Dispatcher
         return _fillStyle;
     }
 
-    _getLineStrokeStyle( pointList, from )
+    _getLineStrokeStyle( pointList, graphType='line' )
     {
         let me = this;
         let _style
@@ -581,149 +664,214 @@ export default class LineGraphsGroup extends event.Dispatcher
             return this.line.strokeStyle;
         };
 
-        if( this._opt.line.strokeStyle.lineargradient ){
-            //如果用户配置 填充是一个线性渐变
-            //从bline中找到最高的点
-            !pointList && ( pointList = this._bline.context.pointList );
-            
-            let topP = _.min(pointList, function(p) {
-                return p[1];
-            });
-            let bottomP = _.max(pointList, function(p) {
-                return p[1];
-            });
-            if( from == "fillStyle" ){
-                bottomP = [ 0 , 0 ];
+        let lineargradient = this._opt.line.strokeStyle.lineargradient;
+        if( lineargradient ){
+
+            //如果是右轴的话，渐变色要对应的反转
+            if( this.yAxisAlign == 'right' ){
+                lineargradient = lineargradient.reverse();
             };
 
-            if( topP[0] === undefined || topP[1] === undefined || bottomP[1] === undefined ){
-                return null;
-            };
-       
-            //let bottomP = [ 0 , 0 ];
-            //创建一个线性渐变
-            //console.log( topP[0] + "|"+ topP[1]+ "|"+  topP[0]+ "|"+ bottomP[1] )
-            _style = me.ctx.createLinearGradient(topP[0], topP[1], topP[0], bottomP[1]);
-            _.each( this._opt.line.strokeStyle.lineargradient , function( item ){
+            //如果用户配置 填充是一个线性渐变
+            let lps = this._getLinearGradientPoints( graphType, pointList );
+            if( !lps ) return;
+
+            _style = me.ctx.createLinearGradient( ...lps );
+            _.each( lineargradient , function( item ){
                 _style.addColorStop( item.position , item.color);
             });
 
             return _style;
 
         } else {
-            //构造函数中执行的这个方法，还没有line属性
-            //if( this.line && this.line.strokeStyle ){
-            //    _style = this.line.strokeStyle
-            //} else {
-                _style = this._getColor( this._opt.line.strokeStyle );
-            //}
+            _style = this._getColor( this._opt.line.strokeStyle );
             return _style;
         }
         
     }
 
+    _getLinearGradientPoints( graphType='line', pointList ){
+
+        //如果graphType 传入的是area，并且，用户并没有配area.lineargradientDriction,那么就会默认和line.lineargradientDriction对齐
+        let driction = this[ graphType ].lineargradientDriction || this.line.lineargradientDriction;
+        
+        !pointList && ( pointList = this._bline.context.pointList );
+
+        let linearPointStart,linearPointEnd;
+
+        if( driction == 'topBottom' ){
+            //top -> bottom
+            let topX=0,topY=0,bottomX=0,bottomY=0;
+            for( let i=0,l=pointList.length; i<l; i++ ){
+                let point = pointList[i];
+                let y = point[1];
+                if( !isNaN(y) ){
+                    topY = Math.min( y, topY );
+                    bottomY = Math.max( y, bottomY );
+                }
+            }
+
+            linearPointStart = {
+                x: topX,
+                y: topY
+            }
+            linearPointEnd= {
+                x: bottomX,
+                y: bottomY
+            }
+
+            if( graphType == 'area' ){
+                //面积图的话，默认就需要一致绘制到底的x轴位置去了
+                linearPointEnd.y = 0;
+            }
+
+        } else {
+            //left->right
+            
+            let leftX,rightX,leftY=0,rightY=0;
+            for( let i=0,l= pointList.length; i<l; i++ ){
+                let point = pointList[i];
+                let x = point[0];
+                let y = point[1];
+                if(!isNaN(x) && !isNaN(y)){
+                    if( leftX == undefined ){
+                        leftX  = x;
+                    } else {
+                        leftX  = Math.min( x, leftX );
+                    }
+                    rightX = Math.max( x, leftX );
+                }
+            };
+            linearPointStart = {
+                x: leftX,
+                y: leftY
+            }
+            linearPointEnd= {
+                x: rightX,
+                y: rightY
+            }
+
+        }
+
+        if( linearPointStart.x == undefined || linearPointStart.y == undefined || linearPointEnd.x==undefined || linearPointEnd.y == undefined){
+            return null;
+        }
+
+        return [
+            linearPointStart.x, linearPointStart.y, 
+            linearPointEnd.x, linearPointEnd.y
+        ]
+    }
 
     _createNodes()
     {
+        
         let me = this;
         let list = me._currPointList;
 
-        //if ((me.node.enabled || list.length == 1) && !!me.line.lineWidth) { //拐角的圆点
-            if( !this._nodes ){
-                this._nodes = new Canvax.Display.Sprite({});
-                this.sprite.addChild(this._nodes);
+        let iNode = 0; //这里不能和下面的a对等，以为list中有很多无效的节点
+        for (let a = 0, al = list.length; a < al; a++) {
+
+            let _nodeColor = me._getColor( (me.node.strokeStyle || me.color || me.line.strokeStyle), a );
+            me.data[a].color = _nodeColor; //回写回data里，tips的是用的到
+
+            let nodeEnabled = me.node.enabled;
+            if( list.length == 1 && !nodeEnabled ){
+                nodeEnabled = true; //只有一个数据的时候， 强制显示node
+            }
+            // if( !nodeEnabled ){
+            //     //不能写return， 是因为每个data的color还是需要计算一遍
+            //     continue;
+            // };
+
+            let _point = me._currPointList[a];
+            if( !_point || !_.isNumber( _point[1] ) ){
+                //折线图中有可能这个point为undefined
+                continue;
             };
-            
-            let iNode = 0; //这里不能和下面的a对等，以为list中有很多无效的节点
-            for (let a = 0, al = list.length; a < al; a++) {
 
-                let _nodeColor = me._getColor( (me.node.strokeStyle || me.line.strokeStyle), a );
-                me.data[a].color = _nodeColor; //回写回data里，tips的是用的到
-                let nodeEnabled = me.node.enabled;
-                if( list.length == 1 && !nodeEnabled ){
-                    nodeEnabled = true; //只有一个数据的时候， 强制显示node
+            let x = _point[0];
+            let y = _point[1];
+            let globalAlpha = 0;
+            if( this.clipRect ){
+                let clipRectCtx = this.clipRect.context;
+                if( x >= clipRectCtx.x && x<= clipRectCtx.x+clipRectCtx.width ){
+                    globalAlpha = 1;
                 }
-                if( !nodeEnabled ){
-                    //不能写return， 是因为每个data的color还是需要计算一遍
-                    continue;
-                };
+            };
 
-                let _point = me._currPointList[a];
-                if( !_point || !_.isNumber( _point[1] ) ){
-                    //折线图中有可能这个point为undefined
-                    continue;
-                };
+            let context = {
+                x,y,
+                r: me._getProp(me.node.radius, a),
+                lineWidth: me._getProp(me.node.lineWidth, a) || 2,
+                strokeStyle: _nodeColor,
+                fillStyle: me._getProp(me.node.fillStyle, a) || _nodeColor,
+                visible : nodeEnabled && !!me._getProp(me.node.visible, a),
+                globalAlpha
+            };
 
-                let context = {
-                    x: _point[0],
-                    y: _point[1],
-                    r: me._getProp(me.node.radius, a),
-                    lineWidth: me._getProp(me.node.lineWidth, a) || 2,
-                    strokeStyle: _nodeColor,
-                    fillStyle: me._getProp(me.node.fillStyle,a),
-                    visible : !!me._getProp(me.node.visible, a)
-                };
+            
 
-                
+            let nodeConstructor = Circle;
 
-                let nodeConstructor = Circle;
+            let _shapeType = me._getProp(me.node.shapeType, a)
 
-                let _shapeType = me._getProp(me.node.shapeType, a)
+            if( _shapeType == "isogon" ){
+                nodeConstructor = Isogon;
+                context.n = me._getProp(me.node.isogonPointNum, a);
+            };
+            if( _shapeType == "path" ){
+                nodeConstructor = Path;
+                context.path = me._getProp( me.node.path, a );
+            };
 
-                if( _shapeType == "isogon" ){
-                    nodeConstructor = Isogon;
-                    context.n = me._getProp(me.node.isogonPointNum, a);
-                };
-                if( _shapeType == "path" ){
-                    nodeConstructor = Path;
-                    context.path = me._getProp( me.node.path, a );
-                };
+            let nodeEl = me._nodes.children[ iNode ];
 
-                let nodeEl = me._nodes.children[ iNode ];
-
-                //同一个元素，才能直接extend context
-                if( nodeEl ){
-                    if( nodeEl.type == _shapeType ){
-                        _.extend( nodeEl.context , context );
-                    } else {
-                        nodeEl.destroy();
-
-                        //重新创建一个新的元素放到相同位置
-                        nodeEl = new nodeConstructor({
-                            context: context
-                        });
-                        me._nodes.addChildAt(nodeEl, iNode);
-                    };
+            //同一个元素，才能直接extend context
+            if( nodeEl ){
+                if( nodeEl.type == _shapeType ){
+                    _.extend( nodeEl.context , context );
                 } else {
+                    nodeEl.destroy();
+
+                    //重新创建一个新的元素放到相同位置
                     nodeEl = new nodeConstructor({
                         context: context
                     });
-                    me._nodes.addChild(nodeEl);
+                    me._nodes.addChildAt(nodeEl, iNode);
                 };
-                 
-                if ( me.node.corner ) { //拐角才有节点
-                    let y = me._pointList[a][1];
-                    let pre = me._pointList[a - 1];
-                    let next = me._pointList[a + 1];
-                    if (pre && next) {
-                        if (y == pre[1] && y == next[1]) {
-                            nodeEl.context.visible = false;
-                        }
-                    }
-                };
-
-                iNode++;
+            } else {
+                nodeEl = new nodeConstructor({
+                    context: context
+                });
+                me._nodes.addChild(nodeEl);
             };
-
-            //把过多的circle节点删除了
-            if( me._nodes.children.length > iNode ){
-                for( let i = iNode,l=me._nodes.children.length; i<l; i++ ){
-                    me._nodes.children[i].destroy();
-                    i--;
-                    l--;
+                
+            if ( me.node.corner ) { //拐角才有节点
+                let y = me._pointList[a][1];
+                let pre = me._pointList[a - 1];
+                let next = me._pointList[a + 1];
+                if (pre && next) {
+                    if (y == pre[1] && y == next[1]) {
+                        nodeEl.context.visible = false;
+                    }
                 }
             };
-        //};
+
+            me.data[a].nodeEl = nodeEl;
+
+            iNode++;
+        };
+
+        //把过多的节点删除了
+        if( me._nodes.children.length > iNode ){
+            for( let i = iNode,l=me._nodes.children.length; i<l; i++ ){
+                me._nodes.children[i].destroy();
+                i--;
+                l--;
+            }
+        };
+       
     }
 
     _createTexts()
@@ -732,11 +880,9 @@ export default class LineGraphsGroup extends event.Dispatcher
         let me = this;
         let list = me._currPointList;
 
+        let _coord = this._graphs.app.getCoord();
+
         if ( me.label.enabled ) { //节点上面的文本info
-            if(!this._labels){
-                this._labels = new Canvax.Display.Sprite({});
-                this.sprite.addChild(this._labels);
-            }
             
             let iNode = 0; //这里不能和下面的a对等，以为list中有很多无效的节点
             for (let a = 0, al = list.length; a < al; a++) {
@@ -746,22 +892,36 @@ export default class LineGraphsGroup extends event.Dispatcher
                     continue;
                 };
 
+                let x = _point[0];
+                let y = _point[1] - this.node.radius - 2;
+                let globalAlpha = 0;
+                if( this.clipRect ){
+                    let clipRectCtx = this.clipRect.context;
+                    if( x >= clipRectCtx.x && x<= clipRectCtx.x+clipRectCtx.width ){
+                        globalAlpha = 1;
+                    }
+                };
+
                 let context = {
-                    x: _point[0],
-                    y: _point[1] - 3 - 3,
+                    x, y,
                     fontSize: this.label.fontSize,
                     textAlign: this.label.textAlign,
                     textBaseline: this.label.textBaseline,
                     fillStyle: me._getColor( me.label.fontColor, a ),
                     lineWidth:1,
-                    strokeStyle:"#ffffff"
+                    strokeStyle:"#ffffff",
+                    globalAlpha
                 };
 
                 let value = me.data[ a ].value;
                 if (_.isFunction(me.label.format)) {
+                    //如果有单独给label配置format，就用label上面的配置
                     value = (me.label.format(value, me.data[ a ]) || value );
+                } else {
+                    //否则用fieldConfig上面的
+                    let fieldConfig = _coord.getFieldConfig( this.field );
+                    value = fieldConfig.getFormatValue( value );
                 };
-
                 if( value == undefined || value == null ){
                     continue;
                 };
@@ -780,7 +940,7 @@ export default class LineGraphsGroup extends event.Dispatcher
                 iNode++;
             };
 
-            //把过多的circle节点删除了
+            //把过多的label节点删除了
             if( me._labels.children.length > iNode ){
                 for( let i = iNode,l=me._labels.children.length; i<l; i++ ){
                     me._labels.children[i].destroy();
@@ -924,5 +1084,87 @@ export default class LineGraphsGroup extends event.Dispatcher
         };
 
         return node;
+    }
+
+
+    tipsPointerOf( e )
+    {
+        if( e.eventInfo ){
+            let iNode = e.eventInfo.iNode;
+            if( iNode != this.__currFocusInd && this.__currFocusInd != -1 ){
+                this.unfocusOf( this.__currFocusInd );
+            };
+            this.focusOf( e.eventInfo.iNode );
+        }
+    }
+    tipsPointerHideOf( e )
+    {
+        if( e.eventInfo ){
+            this.unfocusOf( e.eventInfo.iNode );
+        }
+    }
+
+    focusOf( iNode )
+    {
+
+        let node = this.data[ iNode ];
+
+        if(node){
+            let _node = node.nodeEl;
+      
+            if( _node && !node.focused && this.__currFocusInd != iNode ){
+    
+                //console.log( 'focusOf' )
+    
+                _node._fillStyle = _node.context.fillStyle;
+                _node.context.fillStyle = 'white';
+                _node._visible = _node.context.visible;
+                _node.context.visible = true;
+    
+    
+    
+                let _focusNode = _node.clone();
+                this._focusNodes.addChild( _focusNode );
+    
+                //_focusNode.context.r += 6;
+                _focusNode.context.visible = true;
+                _focusNode.context.lineWidth = 0; //不需要描边
+                _focusNode.context.fillStyle = _node.context.strokeStyle;
+                _focusNode.context.globalAlpha = 0.5;
+    
+                _focusNode.animate({
+                    r : _focusNode.context.r + 6
+                }, {
+                    duration: 300
+                })
+    
+                this.__currFocusInd = iNode;
+            }
+            node.focused = true;
+        }
+
+    }
+    unfocusOf( iNode )
+    {
+        if( this.__currFocusInd > -1 ){
+            iNode = this.__currFocusInd;
+        };
+
+        let node = this.data[ iNode ];
+
+        if( node ){
+            this._focusNodes.removeAllChildren();
+
+            let _node = node.nodeEl;
+    
+            if( _node && node.focused ){
+                //console.log('unfocus')
+                _node.context.fillStyle = _node._fillStyle;
+                _node.context.visible = _node._visible;
+                node.focused = false;
+                this.__currFocusInd = -1;
+            };
+        }
+
     }
 }

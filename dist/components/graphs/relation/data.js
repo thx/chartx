@@ -3,9 +3,9 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.arrayToTreeJsonForRelation = arrayToTreeJsonForRelation;
 exports.checkDataIsJson = checkDataIsJson;
 exports.jsonToArrayForRelation = jsonToArrayForRelation;
-exports.arrayToTreeJsonForRelation = arrayToTreeJsonForRelation;
 
 var _canvax = require("canvax");
 

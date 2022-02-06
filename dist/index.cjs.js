@@ -9472,7 +9472,6 @@ var Chart = /*#__PURE__*/function (_event$Dispatcher) {
     value: function getLegendData() {
       var me = this;
       var data = []; //这里涌来兼容pie等的图例，其实后续可以考虑后面所有的graphs都提供一个getLegendData的方法
-      //那么就可以统一用这个方法， 下面的代码就可以去掉了
 
       _.each(this.getComponents({
         name: 'graphs'
@@ -9513,7 +9512,7 @@ var Chart = /*#__PURE__*/function (_event$Dispatcher) {
         if (isGraphsField) {
           data.push({
             enabled: map.enabled,
-            name: map.field,
+            name: map.name || map.field,
             field: map.field,
             ind: map.ind,
             color: map.color,
@@ -9562,46 +9561,79 @@ var Chart = /*#__PURE__*/function (_event$Dispatcher) {
       this.componentsReset(trigger);
     }
   }, {
-    key: "_bindEvent",
-    value: function _bindEvent() {
-      var me = this;
-      if (this.__bindEvented) return;
-      this.on(event.types.get(), function (e) {
-        //触发每个graphs级别的事件，
-        //用户交互事件先执行，还可以修改e的内容修改tips内容
-        if (e.eventInfo) {
-          _.each(this.getGraphs(), function (graph) {
-            graph.triggerEvent(e);
-          });
+    key: "triggerEvent",
+    value: function triggerEvent(event) {
+      //触发每个graphs级别的事件（在 graph 上面 用 on 绑定的事件），
+      //用户交互事件先执行，还可以修改e的内容修改tips内容(e.eventInfo)
+      if (event.eventInfo) {
+        _.each(this.getGraphs(), function (graph) {
+          graph.triggerEvent(event);
+        });
+      }
+
+      var _tips = this.getComponent({
+        name: 'tips'
+      });
+
+      var _coord = this.getComponent({
+        name: 'coord'
+      });
+
+      if (_tips) {
+        this._setGraphsTipsInfo.apply(this, [event]);
+
+        if (event.type == "mouseover" || event.type == "mousedown") {
+          _tips.show(event);
+
+          this._tipsPointerAtAllGraphs(event);
         }
 
-        var _tips = me.getComponent({
-          name: 'tips'
+        if (event.type == "mousemove") {
+          _tips.move(event);
+
+          this._tipsPointerAtAllGraphs(event);
+        }
+
+        if (event.type == "mouseout" && !(event.toTarget && _coord && _coord.induce && _coord.induce.containsPoint(_coord.induce.globalToLocal(event.target.localToGlobal(event.point))))) {
+          _tips.hide(event);
+
+          this._tipsPointerHideAtAllGraphs(event);
+        }
+      }
+    }
+  }, {
+    key: "_bindEvent",
+    value: function _bindEvent() {
+      var _this3 = this;
+
+      if (this.__bindEvented) return;
+      this.on(event.types.get(), function (e) {
+        //先触发自己的事件
+        _this3.triggerEvent(e); //然后
+        //如果这个图表的tips组件有设置linkageName，
+        //那么就寻找到所有的图表实例中有相同linkageName的图表，执行相应的事件
+
+
+        var tipsComp = _this3.getComponent({
+          name: "tips"
         });
 
-        var _coord = me.getComponent({
-          name: 'coord'
-        });
+        if (tipsComp && tipsComp.linkageName) {
+          for (var c in _global["default"].instances) {
+            var linkageChart = _global["default"].instances[c];
+            if (linkageChart == _this3) continue;
+            var linkageChartTipsComp = linkageChart.getComponent({
+              name: "tips"
+            });
 
-        if (_tips) {
-          me._setGraphsTipsInfo.apply(me, [e]);
+            if (linkageChartTipsComp && linkageChartTipsComp.linkageName && linkageChartTipsComp.linkageName == tipsComp.linkageName) {
+              if (e.eventInfo && e.eventInfo.nodes) {
+                e.eventInfo.nodes = [];
+              }
 
-          if (e.type == "mouseover" || e.type == "mousedown") {
-            _tips.show(e);
-
-            me._tipsPointerAtAllGraphs(e);
-          }
-
-          if (e.type == "mousemove") {
-            _tips.move(e);
-
-            me._tipsPointerAtAllGraphs(e);
-          }
-
-          if (e.type == "mouseout" && !(e.toTarget && _coord && _coord.induce && _coord.induce.containsPoint(_coord.induce.globalToLocal(e.target.localToGlobal(e.point))))) {
-            _tips.hide(e);
-
-            me._tipsPointerHideAtAllGraphs(e);
+              e.eventInfo.isLinkageTrigger = true;
+              linkageChart.triggerEvent.apply(linkageChart, [e]);
+            }
           }
         }
       }); //一个项目只需要bind一次
@@ -9676,15 +9708,36 @@ exports["default"] = _default;
 
 unwrapExports(chart);
 
+var defineProperty$1 = createCommonjsModule(function (module) {
+function _defineProperty(obj, key, value) {
+  if (key in obj) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+  } else {
+    obj[key] = value;
+  }
+
+  return obj;
+}
+
+module.exports = _defineProperty, module.exports.__esModule = true, module.exports["default"] = module.exports;
+});
+
+unwrapExports(defineProperty$1);
+
 var tools = createCommonjsModule(function (module, exports) {
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.numAddSymbol = numAddSymbol;
+exports.getDefaultProps = getDefaultProps;
 exports.getDisMinATArr = getDisMinATArr;
 exports.getPath = getPath;
-exports.getDefaultProps = getDefaultProps;
+exports.numAddSymbol = numAddSymbol;
 
 
 
@@ -9799,10 +9852,10 @@ function getDefaultProps(dProps) {
 });
 
 unwrapExports(tools);
-var tools_1 = tools.numAddSymbol;
+var tools_1 = tools.getDefaultProps;
 var tools_2 = tools.getDisMinATArr;
 var tools_3 = tools.getPath;
-var tools_4 = tools.getDefaultProps;
+var tools_4 = tools.numAddSymbol;
 
 var component = createCommonjsModule(function (module, exports) {
 
@@ -9933,6 +9986,1016 @@ exports["default"] = Component;
 
 unwrapExports(component);
 
+var numeral = createCommonjsModule(function (module) {
+/*! @preserve
+ * numeral.js
+ * version : 2.0.6
+ * author : Adam Draper
+ * license : MIT
+ * http://adamwdraper.github.com/Numeral-js/
+ */
+
+(function (global, factory) {
+    if ( module.exports) {
+        module.exports = factory();
+    } else {
+        global.numeral = factory();
+    }
+}(commonjsGlobal, function () {
+    /************************************
+        Variables
+    ************************************/
+
+    var numeral,
+        _,
+        VERSION = '2.0.6',
+        formats = {},
+        locales = {},
+        defaults = {
+            currentLocale: 'en',
+            zeroFormat: null,
+            nullFormat: null,
+            defaultFormat: '0,0',
+            scalePercentBy100: true
+        },
+        options = {
+            currentLocale: defaults.currentLocale,
+            zeroFormat: defaults.zeroFormat,
+            nullFormat: defaults.nullFormat,
+            defaultFormat: defaults.defaultFormat,
+            scalePercentBy100: defaults.scalePercentBy100
+        };
+
+
+    /************************************
+        Constructors
+    ************************************/
+
+    // Numeral prototype object
+    function Numeral(input, number) {
+        this._input = input;
+
+        this._value = number;
+    }
+
+    numeral = function(input) {
+        var value,
+            kind,
+            unformatFunction,
+            regexp;
+
+        if (numeral.isNumeral(input)) {
+            value = input.value();
+        } else if (input === 0 || typeof input === 'undefined') {
+            value = 0;
+        } else if (input === null || _.isNaN(input)) {
+            value = null;
+        } else if (typeof input === 'string') {
+            if (options.zeroFormat && input === options.zeroFormat) {
+                value = 0;
+            } else if (options.nullFormat && input === options.nullFormat || !input.replace(/[^0-9]+/g, '').length) {
+                value = null;
+            } else {
+                for (kind in formats) {
+                    regexp = typeof formats[kind].regexps.unformat === 'function' ? formats[kind].regexps.unformat() : formats[kind].regexps.unformat;
+
+                    if (regexp && input.match(regexp)) {
+                        unformatFunction = formats[kind].unformat;
+
+                        break;
+                    }
+                }
+
+                unformatFunction = unformatFunction || numeral._.stringToNumber;
+
+                value = unformatFunction(input);
+            }
+        } else {
+            value = Number(input)|| null;
+        }
+
+        return new Numeral(input, value);
+    };
+
+    // version number
+    numeral.version = VERSION;
+
+    // compare numeral object
+    numeral.isNumeral = function(obj) {
+        return obj instanceof Numeral;
+    };
+
+    // helper functions
+    numeral._ = _ = {
+        // formats numbers separators, decimals places, signs, abbreviations
+        numberToFormat: function(value, format, roundingFunction) {
+            var locale = locales[numeral.options.currentLocale],
+                negP = false,
+                optDec = false,
+                leadingCount = 0,
+                abbr = '',
+                trillion = 1000000000000,
+                billion = 1000000000,
+                million = 1000000,
+                thousand = 1000,
+                decimal = '',
+                neg = false,
+                abbrForce, // force abbreviation
+                abs,
+                int,
+                precision,
+                signed,
+                thousands,
+                output;
+
+            // make sure we never format a null value
+            value = value || 0;
+
+            abs = Math.abs(value);
+
+            // see if we should use parentheses for negative number or if we should prefix with a sign
+            // if both are present we default to parentheses
+            if (numeral._.includes(format, '(')) {
+                negP = true;
+                format = format.replace(/[\(|\)]/g, '');
+            } else if (numeral._.includes(format, '+') || numeral._.includes(format, '-')) {
+                signed = numeral._.includes(format, '+') ? format.indexOf('+') : value < 0 ? format.indexOf('-') : -1;
+                format = format.replace(/[\+|\-]/g, '');
+            }
+
+            // see if abbreviation is wanted
+            if (numeral._.includes(format, 'a')) {
+                abbrForce = format.match(/a(k|m|b|t)?/);
+
+                abbrForce = abbrForce ? abbrForce[1] : false;
+
+                // check for space before abbreviation
+                if (numeral._.includes(format, ' a')) {
+                    abbr = ' ';
+                }
+
+                format = format.replace(new RegExp(abbr + 'a[kmbt]?'), '');
+
+                if (abs >= trillion && !abbrForce || abbrForce === 't') {
+                    // trillion
+                    abbr += locale.abbreviations.trillion;
+                    value = value / trillion;
+                } else if (abs < trillion && abs >= billion && !abbrForce || abbrForce === 'b') {
+                    // billion
+                    abbr += locale.abbreviations.billion;
+                    value = value / billion;
+                } else if (abs < billion && abs >= million && !abbrForce || abbrForce === 'm') {
+                    // million
+                    abbr += locale.abbreviations.million;
+                    value = value / million;
+                } else if (abs < million && abs >= thousand && !abbrForce || abbrForce === 'k') {
+                    // thousand
+                    abbr += locale.abbreviations.thousand;
+                    value = value / thousand;
+                }
+            }
+
+            // check for optional decimals
+            if (numeral._.includes(format, '[.]')) {
+                optDec = true;
+                format = format.replace('[.]', '.');
+            }
+
+            // break number and format
+            int = value.toString().split('.')[0];
+            precision = format.split('.')[1];
+            thousands = format.indexOf(',');
+            leadingCount = (format.split('.')[0].split(',')[0].match(/0/g) || []).length;
+
+            if (precision) {
+                if (numeral._.includes(precision, '[')) {
+                    precision = precision.replace(']', '');
+                    precision = precision.split('[');
+                    decimal = numeral._.toFixed(value, (precision[0].length + precision[1].length), roundingFunction, precision[1].length);
+                } else {
+                    decimal = numeral._.toFixed(value, precision.length, roundingFunction);
+                }
+
+                int = decimal.split('.')[0];
+
+                if (numeral._.includes(decimal, '.')) {
+                    decimal = locale.delimiters.decimal + decimal.split('.')[1];
+                } else {
+                    decimal = '';
+                }
+
+                if (optDec && Number(decimal.slice(1)) === 0) {
+                    decimal = '';
+                }
+            } else {
+                int = numeral._.toFixed(value, 0, roundingFunction);
+            }
+
+            // check abbreviation again after rounding
+            if (abbr && !abbrForce && Number(int) >= 1000 && abbr !== locale.abbreviations.trillion) {
+                int = String(Number(int) / 1000);
+
+                switch (abbr) {
+                    case locale.abbreviations.thousand:
+                        abbr = locale.abbreviations.million;
+                        break;
+                    case locale.abbreviations.million:
+                        abbr = locale.abbreviations.billion;
+                        break;
+                    case locale.abbreviations.billion:
+                        abbr = locale.abbreviations.trillion;
+                        break;
+                }
+            }
+
+
+            // format number
+            if (numeral._.includes(int, '-')) {
+                int = int.slice(1);
+                neg = true;
+            }
+
+            if (int.length < leadingCount) {
+                for (var i = leadingCount - int.length; i > 0; i--) {
+                    int = '0' + int;
+                }
+            }
+
+            if (thousands > -1) {
+                int = int.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1' + locale.delimiters.thousands);
+            }
+
+            if (format.indexOf('.') === 0) {
+                int = '';
+            }
+
+            output = int + decimal + (abbr ? abbr : '');
+
+            if (negP) {
+                output = (negP && neg ? '(' : '') + output + (negP && neg ? ')' : '');
+            } else {
+                if (signed >= 0) {
+                    output = signed === 0 ? (neg ? '-' : '+') + output : output + (neg ? '-' : '+');
+                } else if (neg) {
+                    output = '-' + output;
+                }
+            }
+
+            return output;
+        },
+        // unformats numbers separators, decimals places, signs, abbreviations
+        stringToNumber: function(string) {
+            var locale = locales[options.currentLocale],
+                stringOriginal = string,
+                abbreviations = {
+                    thousand: 3,
+                    million: 6,
+                    billion: 9,
+                    trillion: 12
+                },
+                abbreviation,
+                value,
+                regexp;
+
+            if (options.zeroFormat && string === options.zeroFormat) {
+                value = 0;
+            } else if (options.nullFormat && string === options.nullFormat || !string.replace(/[^0-9]+/g, '').length) {
+                value = null;
+            } else {
+                value = 1;
+
+                if (locale.delimiters.decimal !== '.') {
+                    string = string.replace(/\./g, '').replace(locale.delimiters.decimal, '.');
+                }
+
+                for (abbreviation in abbreviations) {
+                    regexp = new RegExp('[^a-zA-Z]' + locale.abbreviations[abbreviation] + '(?:\\)|(\\' + locale.currency.symbol + ')?(?:\\))?)?$');
+
+                    if (stringOriginal.match(regexp)) {
+                        value *= Math.pow(10, abbreviations[abbreviation]);
+                        break;
+                    }
+                }
+
+                // check for negative number
+                value *= (string.split('-').length + Math.min(string.split('(').length - 1, string.split(')').length - 1)) % 2 ? 1 : -1;
+
+                // remove non numbers
+                string = string.replace(/[^0-9\.]+/g, '');
+
+                value *= Number(string);
+            }
+
+            return value;
+        },
+        isNaN: function(value) {
+            return typeof value === 'number' && isNaN(value);
+        },
+        includes: function(string, search) {
+            return string.indexOf(search) !== -1;
+        },
+        insert: function(string, subString, start) {
+            return string.slice(0, start) + subString + string.slice(start);
+        },
+        reduce: function(array, callback /*, initialValue*/) {
+            if (this === null) {
+                throw new TypeError('Array.prototype.reduce called on null or undefined');
+            }
+
+            if (typeof callback !== 'function') {
+                throw new TypeError(callback + ' is not a function');
+            }
+
+            var t = Object(array),
+                len = t.length >>> 0,
+                k = 0,
+                value;
+
+            if (arguments.length === 3) {
+                value = arguments[2];
+            } else {
+                while (k < len && !(k in t)) {
+                    k++;
+                }
+
+                if (k >= len) {
+                    throw new TypeError('Reduce of empty array with no initial value');
+                }
+
+                value = t[k++];
+            }
+            for (; k < len; k++) {
+                if (k in t) {
+                    value = callback(value, t[k], k, t);
+                }
+            }
+            return value;
+        },
+        /**
+         * Computes the multiplier necessary to make x >= 1,
+         * effectively eliminating miscalculations caused by
+         * finite precision.
+         */
+        multiplier: function (x) {
+            var parts = x.toString().split('.');
+
+            return parts.length < 2 ? 1 : Math.pow(10, parts[1].length);
+        },
+        /**
+         * Given a variable number of arguments, returns the maximum
+         * multiplier that must be used to normalize an operation involving
+         * all of them.
+         */
+        correctionFactor: function () {
+            var args = Array.prototype.slice.call(arguments);
+
+            return args.reduce(function(accum, next) {
+                var mn = _.multiplier(next);
+                return accum > mn ? accum : mn;
+            }, 1);
+        },
+        /**
+         * Implementation of toFixed() that treats floats more like decimals
+         *
+         * Fixes binary rounding issues (eg. (0.615).toFixed(2) === '0.61') that present
+         * problems for accounting- and finance-related software.
+         */
+        toFixed: function(value, maxDecimals, roundingFunction, optionals) {
+            var splitValue = value.toString().split('.'),
+                minDecimals = maxDecimals - (optionals || 0),
+                boundedPrecision,
+                optionalsRegExp,
+                power,
+                output;
+
+            // Use the smallest precision value possible to avoid errors from floating point representation
+            if (splitValue.length === 2) {
+              boundedPrecision = Math.min(Math.max(splitValue[1].length, minDecimals), maxDecimals);
+            } else {
+              boundedPrecision = minDecimals;
+            }
+
+            power = Math.pow(10, boundedPrecision);
+
+            // Multiply up by precision, round accurately, then divide and use native toFixed():
+            output = (roundingFunction(value + 'e+' + boundedPrecision) / power).toFixed(boundedPrecision);
+
+            if (optionals > maxDecimals - boundedPrecision) {
+                optionalsRegExp = new RegExp('\\.?0{1,' + (optionals - (maxDecimals - boundedPrecision)) + '}$');
+                output = output.replace(optionalsRegExp, '');
+            }
+
+            return output;
+        }
+    };
+
+    // avaliable options
+    numeral.options = options;
+
+    // avaliable formats
+    numeral.formats = formats;
+
+    // avaliable formats
+    numeral.locales = locales;
+
+    // This function sets the current locale.  If
+    // no arguments are passed in, it will simply return the current global
+    // locale key.
+    numeral.locale = function(key) {
+        if (key) {
+            options.currentLocale = key.toLowerCase();
+        }
+
+        return options.currentLocale;
+    };
+
+    // This function provides access to the loaded locale data.  If
+    // no arguments are passed in, it will simply return the current
+    // global locale object.
+    numeral.localeData = function(key) {
+        if (!key) {
+            return locales[options.currentLocale];
+        }
+
+        key = key.toLowerCase();
+
+        if (!locales[key]) {
+            throw new Error('Unknown locale : ' + key);
+        }
+
+        return locales[key];
+    };
+
+    numeral.reset = function() {
+        for (var property in defaults) {
+            options[property] = defaults[property];
+        }
+    };
+
+    numeral.zeroFormat = function(format) {
+        options.zeroFormat = typeof(format) === 'string' ? format : null;
+    };
+
+    numeral.nullFormat = function (format) {
+        options.nullFormat = typeof(format) === 'string' ? format : null;
+    };
+
+    numeral.defaultFormat = function(format) {
+        options.defaultFormat = typeof(format) === 'string' ? format : '0.0';
+    };
+
+    numeral.register = function(type, name, format) {
+        name = name.toLowerCase();
+
+        if (this[type + 's'][name]) {
+            throw new TypeError(name + ' ' + type + ' already registered.');
+        }
+
+        this[type + 's'][name] = format;
+
+        return format;
+    };
+
+
+    numeral.validate = function(val, culture) {
+        var _decimalSep,
+            _thousandSep,
+            _currSymbol,
+            _valArray,
+            _abbrObj,
+            _thousandRegEx,
+            localeData,
+            temp;
+
+        //coerce val to string
+        if (typeof val !== 'string') {
+            val += '';
+
+            if (console.warn) {
+                console.warn('Numeral.js: Value is not string. It has been co-erced to: ', val);
+            }
+        }
+
+        //trim whitespaces from either sides
+        val = val.trim();
+
+        //if val is just digits return true
+        if (!!val.match(/^\d+$/)) {
+            return true;
+        }
+
+        //if val is empty return false
+        if (val === '') {
+            return false;
+        }
+
+        //get the decimal and thousands separator from numeral.localeData
+        try {
+            //check if the culture is understood by numeral. if not, default it to current locale
+            localeData = numeral.localeData(culture);
+        } catch (e) {
+            localeData = numeral.localeData(numeral.locale());
+        }
+
+        //setup the delimiters and currency symbol based on culture/locale
+        _currSymbol = localeData.currency.symbol;
+        _abbrObj = localeData.abbreviations;
+        _decimalSep = localeData.delimiters.decimal;
+        if (localeData.delimiters.thousands === '.') {
+            _thousandSep = '\\.';
+        } else {
+            _thousandSep = localeData.delimiters.thousands;
+        }
+
+        // validating currency symbol
+        temp = val.match(/^[^\d]+/);
+        if (temp !== null) {
+            val = val.substr(1);
+            if (temp[0] !== _currSymbol) {
+                return false;
+            }
+        }
+
+        //validating abbreviation symbol
+        temp = val.match(/[^\d]+$/);
+        if (temp !== null) {
+            val = val.slice(0, -1);
+            if (temp[0] !== _abbrObj.thousand && temp[0] !== _abbrObj.million && temp[0] !== _abbrObj.billion && temp[0] !== _abbrObj.trillion) {
+                return false;
+            }
+        }
+
+        _thousandRegEx = new RegExp(_thousandSep + '{2}');
+
+        if (!val.match(/[^\d.,]/g)) {
+            _valArray = val.split(_decimalSep);
+            if (_valArray.length > 2) {
+                return false;
+            } else {
+                if (_valArray.length < 2) {
+                    return ( !! _valArray[0].match(/^\d+.*\d$/) && !_valArray[0].match(_thousandRegEx));
+                } else {
+                    if (_valArray[0].length === 1) {
+                        return ( !! _valArray[0].match(/^\d+$/) && !_valArray[0].match(_thousandRegEx) && !! _valArray[1].match(/^\d+$/));
+                    } else {
+                        return ( !! _valArray[0].match(/^\d+.*\d$/) && !_valArray[0].match(_thousandRegEx) && !! _valArray[1].match(/^\d+$/));
+                    }
+                }
+            }
+        }
+
+        return false;
+    };
+
+
+    /************************************
+        Numeral Prototype
+    ************************************/
+
+    numeral.fn = Numeral.prototype = {
+        clone: function() {
+            return numeral(this);
+        },
+        format: function(inputString, roundingFunction) {
+            var value = this._value,
+                format = inputString || options.defaultFormat,
+                kind,
+                output,
+                formatFunction;
+
+            // make sure we have a roundingFunction
+            roundingFunction = roundingFunction || Math.round;
+
+            // format based on value
+            if (value === 0 && options.zeroFormat !== null) {
+                output = options.zeroFormat;
+            } else if (value === null && options.nullFormat !== null) {
+                output = options.nullFormat;
+            } else {
+                for (kind in formats) {
+                    if (format.match(formats[kind].regexps.format)) {
+                        formatFunction = formats[kind].format;
+
+                        break;
+                    }
+                }
+
+                formatFunction = formatFunction || numeral._.numberToFormat;
+
+                output = formatFunction(value, format, roundingFunction);
+            }
+
+            return output;
+        },
+        value: function() {
+            return this._value;
+        },
+        input: function() {
+            return this._input;
+        },
+        set: function(value) {
+            this._value = Number(value);
+
+            return this;
+        },
+        add: function(value) {
+            var corrFactor = _.correctionFactor.call(null, this._value, value);
+
+            function cback(accum, curr, currI, O) {
+                return accum + Math.round(corrFactor * curr);
+            }
+
+            this._value = _.reduce([this._value, value], cback, 0) / corrFactor;
+
+            return this;
+        },
+        subtract: function(value) {
+            var corrFactor = _.correctionFactor.call(null, this._value, value);
+
+            function cback(accum, curr, currI, O) {
+                return accum - Math.round(corrFactor * curr);
+            }
+
+            this._value = _.reduce([value], cback, Math.round(this._value * corrFactor)) / corrFactor;
+
+            return this;
+        },
+        multiply: function(value) {
+            function cback(accum, curr, currI, O) {
+                var corrFactor = _.correctionFactor(accum, curr);
+                return Math.round(accum * corrFactor) * Math.round(curr * corrFactor) / Math.round(corrFactor * corrFactor);
+            }
+
+            this._value = _.reduce([this._value, value], cback, 1);
+
+            return this;
+        },
+        divide: function(value) {
+            function cback(accum, curr, currI, O) {
+                var corrFactor = _.correctionFactor(accum, curr);
+                return Math.round(accum * corrFactor) / Math.round(curr * corrFactor);
+            }
+
+            this._value = _.reduce([this._value, value], cback);
+
+            return this;
+        },
+        difference: function(value) {
+            return Math.abs(numeral(this._value).subtract(value).value());
+        }
+    };
+
+    /************************************
+        Default Locale && Format
+    ************************************/
+
+    numeral.register('locale', 'en', {
+        delimiters: {
+            thousands: ',',
+            decimal: '.'
+        },
+        abbreviations: {
+            thousand: 'k',
+            million: 'm',
+            billion: 'b',
+            trillion: 't'
+        },
+        ordinal: function(number) {
+            var b = number % 10;
+            return (~~(number % 100 / 10) === 1) ? 'th' :
+                (b === 1) ? 'st' :
+                (b === 2) ? 'nd' :
+                (b === 3) ? 'rd' : 'th';
+        },
+        currency: {
+            symbol: '$'
+        }
+    });
+
+    
+
+(function() {
+        numeral.register('format', 'bps', {
+            regexps: {
+                format: /(BPS)/,
+                unformat: /(BPS)/
+            },
+            format: function(value, format, roundingFunction) {
+                var space = numeral._.includes(format, ' BPS') ? ' ' : '',
+                    output;
+
+                value = value * 10000;
+
+                // check for space before BPS
+                format = format.replace(/\s?BPS/, '');
+
+                output = numeral._.numberToFormat(value, format, roundingFunction);
+
+                if (numeral._.includes(output, ')')) {
+                    output = output.split('');
+
+                    output.splice(-1, 0, space + 'BPS');
+
+                    output = output.join('');
+                } else {
+                    output = output + space + 'BPS';
+                }
+
+                return output;
+            },
+            unformat: function(string) {
+                return +(numeral._.stringToNumber(string) * 0.0001).toFixed(15);
+            }
+        });
+})();
+
+
+(function() {
+        var decimal = {
+            base: 1000,
+            suffixes: ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
+        },
+        binary = {
+            base: 1024,
+            suffixes: ['B', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB']
+        };
+
+    var allSuffixes =  decimal.suffixes.concat(binary.suffixes.filter(function (item) {
+            return decimal.suffixes.indexOf(item) < 0;
+        }));
+        var unformatRegex = allSuffixes.join('|');
+        // Allow support for BPS (http://www.investopedia.com/terms/b/basispoint.asp)
+        unformatRegex = '(' + unformatRegex.replace('B', 'B(?!PS)') + ')';
+
+    numeral.register('format', 'bytes', {
+        regexps: {
+            format: /([0\s]i?b)/,
+            unformat: new RegExp(unformatRegex)
+        },
+        format: function(value, format, roundingFunction) {
+            var output,
+                bytes = numeral._.includes(format, 'ib') ? binary : decimal,
+                suffix = numeral._.includes(format, ' b') || numeral._.includes(format, ' ib') ? ' ' : '',
+                power,
+                min,
+                max;
+
+            // check for space before
+            format = format.replace(/\s?i?b/, '');
+
+            for (power = 0; power <= bytes.suffixes.length; power++) {
+                min = Math.pow(bytes.base, power);
+                max = Math.pow(bytes.base, power + 1);
+
+                if (value === null || value === 0 || value >= min && value < max) {
+                    suffix += bytes.suffixes[power];
+
+                    if (min > 0) {
+                        value = value / min;
+                    }
+
+                    break;
+                }
+            }
+
+            output = numeral._.numberToFormat(value, format, roundingFunction);
+
+            return output + suffix;
+        },
+        unformat: function(string) {
+            var value = numeral._.stringToNumber(string),
+                power,
+                bytesMultiplier;
+
+            if (value) {
+                for (power = decimal.suffixes.length - 1; power >= 0; power--) {
+                    if (numeral._.includes(string, decimal.suffixes[power])) {
+                        bytesMultiplier = Math.pow(decimal.base, power);
+
+                        break;
+                    }
+
+                    if (numeral._.includes(string, binary.suffixes[power])) {
+                        bytesMultiplier = Math.pow(binary.base, power);
+
+                        break;
+                    }
+                }
+
+                value *= (bytesMultiplier || 1);
+            }
+
+            return value;
+        }
+    });
+})();
+
+
+(function() {
+        numeral.register('format', 'currency', {
+        regexps: {
+            format: /(\$)/
+        },
+        format: function(value, format, roundingFunction) {
+            var locale = numeral.locales[numeral.options.currentLocale],
+                symbols = {
+                    before: format.match(/^([\+|\-|\(|\s|\$]*)/)[0],
+                    after: format.match(/([\+|\-|\)|\s|\$]*)$/)[0]
+                },
+                output,
+                symbol,
+                i;
+
+            // strip format of spaces and $
+            format = format.replace(/\s?\$\s?/, '');
+
+            // format the number
+            output = numeral._.numberToFormat(value, format, roundingFunction);
+
+            // update the before and after based on value
+            if (value >= 0) {
+                symbols.before = symbols.before.replace(/[\-\(]/, '');
+                symbols.after = symbols.after.replace(/[\-\)]/, '');
+            } else if (value < 0 && (!numeral._.includes(symbols.before, '-') && !numeral._.includes(symbols.before, '('))) {
+                symbols.before = '-' + symbols.before;
+            }
+
+            // loop through each before symbol
+            for (i = 0; i < symbols.before.length; i++) {
+                symbol = symbols.before[i];
+
+                switch (symbol) {
+                    case '$':
+                        output = numeral._.insert(output, locale.currency.symbol, i);
+                        break;
+                    case ' ':
+                        output = numeral._.insert(output, ' ', i + locale.currency.symbol.length - 1);
+                        break;
+                }
+            }
+
+            // loop through each after symbol
+            for (i = symbols.after.length - 1; i >= 0; i--) {
+                symbol = symbols.after[i];
+
+                switch (symbol) {
+                    case '$':
+                        output = i === symbols.after.length - 1 ? output + locale.currency.symbol : numeral._.insert(output, locale.currency.symbol, -(symbols.after.length - (1 + i)));
+                        break;
+                    case ' ':
+                        output = i === symbols.after.length - 1 ? output + ' ' : numeral._.insert(output, ' ', -(symbols.after.length - (1 + i) + locale.currency.symbol.length - 1));
+                        break;
+                }
+            }
+
+
+            return output;
+        }
+    });
+})();
+
+
+(function() {
+        numeral.register('format', 'exponential', {
+        regexps: {
+            format: /(e\+|e-)/,
+            unformat: /(e\+|e-)/
+        },
+        format: function(value, format, roundingFunction) {
+            var output,
+                exponential = typeof value === 'number' && !numeral._.isNaN(value) ? value.toExponential() : '0e+0',
+                parts = exponential.split('e');
+
+            format = format.replace(/e[\+|\-]{1}0/, '');
+
+            output = numeral._.numberToFormat(Number(parts[0]), format, roundingFunction);
+
+            return output + 'e' + parts[1];
+        },
+        unformat: function(string) {
+            var parts = numeral._.includes(string, 'e+') ? string.split('e+') : string.split('e-'),
+                value = Number(parts[0]),
+                power = Number(parts[1]);
+
+            power = numeral._.includes(string, 'e-') ? power *= -1 : power;
+
+            function cback(accum, curr, currI, O) {
+                var corrFactor = numeral._.correctionFactor(accum, curr),
+                    num = (accum * corrFactor) * (curr * corrFactor) / (corrFactor * corrFactor);
+                return num;
+            }
+
+            return numeral._.reduce([value, Math.pow(10, power)], cback, 1);
+        }
+    });
+})();
+
+
+(function() {
+        numeral.register('format', 'ordinal', {
+        regexps: {
+            format: /(o)/
+        },
+        format: function(value, format, roundingFunction) {
+            var locale = numeral.locales[numeral.options.currentLocale],
+                output,
+                ordinal = numeral._.includes(format, ' o') ? ' ' : '';
+
+            // check for space before
+            format = format.replace(/\s?o/, '');
+
+            ordinal += locale.ordinal(value);
+
+            output = numeral._.numberToFormat(value, format, roundingFunction);
+
+            return output + ordinal;
+        }
+    });
+})();
+
+
+(function() {
+        numeral.register('format', 'percentage', {
+        regexps: {
+            format: /(%)/,
+            unformat: /(%)/
+        },
+        format: function(value, format, roundingFunction) {
+            var space = numeral._.includes(format, ' %') ? ' ' : '',
+                output;
+
+            if (numeral.options.scalePercentBy100) {
+                value = value * 100;
+            }
+
+            // check for space before %
+            format = format.replace(/\s?\%/, '');
+
+            output = numeral._.numberToFormat(value, format, roundingFunction);
+
+            if (numeral._.includes(output, ')')) {
+                output = output.split('');
+
+                output.splice(-1, 0, space + '%');
+
+                output = output.join('');
+            } else {
+                output = output + space + '%';
+            }
+
+            return output;
+        },
+        unformat: function(string) {
+            var number = numeral._.stringToNumber(string);
+            if (numeral.options.scalePercentBy100) {
+                return number * 0.01;
+            }
+            return number;
+        }
+    });
+})();
+
+
+(function() {
+        numeral.register('format', 'time', {
+        regexps: {
+            format: /(:)/,
+            unformat: /(:)/
+        },
+        format: function(value, format, roundingFunction) {
+            var hours = Math.floor(value / 60 / 60),
+                minutes = Math.floor((value - (hours * 60 * 60)) / 60),
+                seconds = Math.round(value - (hours * 60 * 60) - (minutes * 60));
+
+            return hours + ':' + (minutes < 10 ? '0' + minutes : minutes) + ':' + (seconds < 10 ? '0' + seconds : seconds);
+        },
+        unformat: function(string) {
+            var timeArray = string.split(':'),
+                seconds = 0;
+
+            // turn hours and minutes into seconds and add them all up
+            if (timeArray.length === 3) {
+                // hours
+                seconds = seconds + (Number(timeArray[0]) * 60 * 60);
+                // minutes
+                seconds = seconds + (Number(timeArray[1]) * 60);
+                // seconds
+                seconds = seconds + Number(timeArray[2]);
+            } else if (timeArray.length === 2) {
+                // minutes
+                seconds = seconds + (Number(timeArray[0]) * 60);
+                // seconds
+                seconds = seconds + Number(timeArray[1]);
+            }
+            return Number(seconds);
+        }
+    });
+})();
+
+return numeral;
+}));
+});
+
 var coord = createCommonjsModule(function (module, exports) {
 
 
@@ -9941,6 +11004,10 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = void 0;
+
+var _typeof2 = interopRequireDefault(_typeof_1$1);
+
+var _defineProperty2 = interopRequireDefault(defineProperty$1);
 
 var _classCallCheck2 = interopRequireDefault(classCallCheck$1);
 
@@ -9959,6 +11026,12 @@ var _component = interopRequireDefault(component);
 var _canvax = interopRequireDefault(Canvax);
 
 
+
+var _numeral = interopRequireDefault(numeral);
+
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { (0, _defineProperty2["default"])(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
 
 function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
 
@@ -10009,7 +11082,7 @@ var coordBase = /*#__PURE__*/function (_Component) {
     key: "setFieldsMap",
     value: function setFieldsMap(axisExp) {
       var me = this;
-      var fieldInd = 0;
+      var ind = 0;
       var axisType = axisExp.type || "yAxis";
       var fieldsArr = [];
 
@@ -10019,6 +11092,8 @@ var coordBase = /*#__PURE__*/function (_Component) {
         }
       });
 
+      var graphs = _.flatten([this.app._opt.graphs]);
+
       function _set(fields) {
         if (_.isString(fields)) {
           fields = [fields];
@@ -10026,24 +11101,82 @@ var coordBase = /*#__PURE__*/function (_Component) {
 
         var clone_fields = _.clone(fields);
 
-        for (var i = 0, l = fields.length; i < l; i++) {
-          if (_.isString(fields[i])) {
-            clone_fields[i] = {
-              field: fields[i],
+        var _loop = function _loop(i, l) {
+          var field = fields[i];
+
+          if (_.isString(field)) {
+            var color = me.app.getTheme(ind);
+            var graph;
+            var graphFieldInd;
+            var graphColorProp; //graphs.find( graph => {_.flatten([graph.field]).indexOf( field )} ).color;
+
+            for (var _i = 0, _l = graphs.length; _i < _l; _i++) {
+              graph = graphs[_i];
+              graphFieldInd = _.flatten([graph.field]).indexOf(field);
+
+              if (graphFieldInd > -1) {
+                graphColorProp = graph.color;
+                break;
+              }
+            }
+
+            if (graphColorProp) {
+              if (typeof graphColorProp == 'string') {
+                color = graphColorProp;
+              }
+
+              if (Array.isArray(graphColorProp)) {
+                color = graphColorProp[graphFieldInd];
+              }
+
+              if (typeof graphColorProp == 'function') {
+                color = graphColorProp.apply(me.app, [graph]);
+              }
+            }
+            var config = me.fieldsConfig[field];
+
+            var fieldItem = _objectSpread({
+              field: field,
+              name: field,
+              //fieldConfig中可能会覆盖
               enabled: true,
-              //yAxis : me.getAxis({type:'yAxis', field:fields[i] }),
-              color: me.app.getTheme(fieldInd),
-              ind: fieldInd++
+              color: color,
+              ind: ind++
+            }, me.fieldsConfig[field] || {});
+
+            fieldItem.getFormatValue = function (value) {
+              if (config && config.format) {
+                if (typeof config.format == 'string') {
+                  //如果传入的是 字符串，那么就认为是 numeral 的格式字符串
+                  value = (0, _numeral["default"])(value).format(config.format);
+                }
+
+                if (typeof config.format == 'function') {
+                  //如果传入的是 字符串，那么就认为是 numeral 的格式字符串
+                  value = config.format.apply(me, {
+                    field: field
+                  });
+                }
+              } else {
+                value = (0, _typeof2["default"])(value) == "object" ? JSON.stringify(value) : (0, _numeral["default"])(value).format('0,0');
+              }
+              return value;
             };
-            clone_fields[i][axisType] = me.getAxis({
+
+            fieldItem[axisType] = me.getAxis({
               type: axisType,
-              field: fields[i]
+              field: field
             });
+            clone_fields[i] = fieldItem;
           }
 
-          if (_.isArray(fields[i])) {
-            clone_fields[i] = _set(fields[i]);
+          if (_.isArray(field)) {
+            clone_fields[i] = _set(field);
           }
+        };
+
+        for (var i = 0, l = fields.length; i < l; i++) {
+          _loop(i);
         }
         return clone_fields;
       }
@@ -10066,26 +11199,27 @@ var coordBase = /*#__PURE__*/function (_Component) {
       }
 
       set(me.fieldsMap);
-    }
+    } //从FieldsMap中获取对应的config
+
   }, {
-    key: "getFieldMapOf",
-    value: function getFieldMapOf(field) {
+    key: "getFieldConfig",
+    value: function getFieldConfig(field) {
       var me = this;
-      var fieldMap = null;
+      var fieldConfig = null;
 
       function get(maps) {
         _.each(maps, function (map) {
           if (_.isArray(map)) {
             get(map);
           } else if (map.field && map.field == field) {
-            fieldMap = map;
+            fieldConfig = map;
             return false;
           }
         });
       }
 
       get(me.fieldsMap);
-      return fieldMap;
+      return fieldConfig;
     } //从 fieldsMap 中过滤筛选出来一个一一对应的 enabled为true的对象结构
     //这个方法还必须要返回的数据里描述出来多y轴的结构。否则外面拿到数据后并不好处理那个数据对应哪个轴
 
@@ -10128,7 +11262,7 @@ var coordBase = /*#__PURE__*/function (_Component) {
 
       _.each(fields, function (f) {
         if (!_.isArray(f)) {
-          if (me.getFieldMapOf(f).enabled) {
+          if (me.getFieldConfig(f).enabled) {
             arr.push(f);
           }
         } else {
@@ -10136,7 +11270,7 @@ var coordBase = /*#__PURE__*/function (_Component) {
           var varr = [];
 
           _.each(f, function (v_f) {
-            if (me.getFieldMapOf(v_f).enabled) {
+            if (me.getFieldConfig(v_f).enabled) {
               varr.push(v_f);
             }
           });
@@ -10279,6 +11413,10 @@ var coordBase = /*#__PURE__*/function (_Component) {
               "default": 0
             }
           }
+        },
+        fieldsConfig: {
+          detail: '字段的配置信息({uv:{name:"",format:""}})，包括中文名称和格式化单位，内部使用numeral做格式化',
+          "default": {}
         }
       };
     }
@@ -13666,11 +14804,11 @@ var Rect = /*#__PURE__*/function (_coordBase) {
     key: "changeFieldEnabled",
     value: function changeFieldEnabled(field) {
       this.setFieldEnabled(field);
-      var fieldMap = this.getFieldMapOf(field);
+      var fieldConfig = this.getFieldConfig(field);
 
-      var _axis = fieldMap.yAxis || fieldMap.rAxis;
+      var _axis = fieldConfig.yAxis || fieldConfig.rAxis;
 
-      var enabledFields = this.getEnabledFieldsOf(_axis); //[ fieldMap.yAxis.align ];
+      var enabledFields = this.getEnabledFieldsOf(_axis); //[ fieldConfig.yAxis.align ];
 
       _axis.resetData(this.getAxisDataFrame(enabledFields));
 
@@ -15225,7 +16363,11 @@ var GraphsBase = /*#__PURE__*/function (_Component) {
         },
         aniDuration: {
           detail: '动画时长',
-          "default": 500
+          "default": 600
+        },
+        color: {
+          detail: 'line,area,node,label的抄底样式',
+          "default": 'left'
         }
       };
     }
@@ -15364,9 +16506,9 @@ var BarGraphs = /*#__PURE__*/function (_GraphsBase) {
 
       var _flattenField = _.flatten([this.field]);
 
-      var fieldMap = this.app.getComponent({
+      var fieldConfig = this.app.getComponent({
         name: 'coord'
-      }).getFieldMapOf(field);
+      }).getFieldConfig(field);
 
       if (_.isFunction(color)) {
         color = color.apply(this, [nodeData]);
@@ -15395,7 +16537,7 @@ var BarGraphs = /*#__PURE__*/function (_GraphsBase) {
       if (color === undefined || color === null) {
         //只有undefined(用户配置了function),null才会认为需要还原皮肤色
         //“”都会认为是用户主动想要设置的，就为是用户不想他显示
-        color = fieldMap.color;
+        color = fieldConfig.color;
       }
       return color;
     }
@@ -16486,6 +17628,77 @@ exports["default"] = _default;
 
 unwrapExports(bar);
 
+var arrayLikeToArray = createCommonjsModule(function (module) {
+function _arrayLikeToArray(arr, len) {
+  if (len == null || len > arr.length) len = arr.length;
+
+  for (var i = 0, arr2 = new Array(len); i < len; i++) {
+    arr2[i] = arr[i];
+  }
+
+  return arr2;
+}
+
+module.exports = _arrayLikeToArray, module.exports.__esModule = true, module.exports["default"] = module.exports;
+});
+
+unwrapExports(arrayLikeToArray);
+
+var arrayWithoutHoles = createCommonjsModule(function (module) {
+function _arrayWithoutHoles(arr) {
+  if (Array.isArray(arr)) return arrayLikeToArray(arr);
+}
+
+module.exports = _arrayWithoutHoles, module.exports.__esModule = true, module.exports["default"] = module.exports;
+});
+
+unwrapExports(arrayWithoutHoles);
+
+var iterableToArray = createCommonjsModule(function (module) {
+function _iterableToArray(iter) {
+  if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter);
+}
+
+module.exports = _iterableToArray, module.exports.__esModule = true, module.exports["default"] = module.exports;
+});
+
+unwrapExports(iterableToArray);
+
+var unsupportedIterableToArray = createCommonjsModule(function (module) {
+function _unsupportedIterableToArray(o, minLen) {
+  if (!o) return;
+  if (typeof o === "string") return arrayLikeToArray(o, minLen);
+  var n = Object.prototype.toString.call(o).slice(8, -1);
+  if (n === "Object" && o.constructor) n = o.constructor.name;
+  if (n === "Map" || n === "Set") return Array.from(o);
+  if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return arrayLikeToArray(o, minLen);
+}
+
+module.exports = _unsupportedIterableToArray, module.exports.__esModule = true, module.exports["default"] = module.exports;
+});
+
+unwrapExports(unsupportedIterableToArray);
+
+var nonIterableSpread = createCommonjsModule(function (module) {
+function _nonIterableSpread() {
+  throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+}
+
+module.exports = _nonIterableSpread, module.exports.__esModule = true, module.exports["default"] = module.exports;
+});
+
+unwrapExports(nonIterableSpread);
+
+var toConsumableArray = createCommonjsModule(function (module) {
+function _toConsumableArray(arr) {
+  return arrayWithoutHoles(arr) || iterableToArray(arr) || unsupportedIterableToArray(arr) || nonIterableSpread();
+}
+
+module.exports = _toConsumableArray, module.exports.__esModule = true, module.exports["default"] = module.exports;
+});
+
+unwrapExports(toConsumableArray);
+
 var arrayWithHoles = createCommonjsModule(function (module) {
 function _arrayWithHoles(arr) {
   if (Array.isArray(arr)) return arr;
@@ -16532,37 +17745,6 @@ module.exports = _iterableToArrayLimit, module.exports.__esModule = true, module
 
 unwrapExports(iterableToArrayLimit);
 
-var arrayLikeToArray = createCommonjsModule(function (module) {
-function _arrayLikeToArray(arr, len) {
-  if (len == null || len > arr.length) len = arr.length;
-
-  for (var i = 0, arr2 = new Array(len); i < len; i++) {
-    arr2[i] = arr[i];
-  }
-
-  return arr2;
-}
-
-module.exports = _arrayLikeToArray, module.exports.__esModule = true, module.exports["default"] = module.exports;
-});
-
-unwrapExports(arrayLikeToArray);
-
-var unsupportedIterableToArray = createCommonjsModule(function (module) {
-function _unsupportedIterableToArray(o, minLen) {
-  if (!o) return;
-  if (typeof o === "string") return arrayLikeToArray(o, minLen);
-  var n = Object.prototype.toString.call(o).slice(8, -1);
-  if (n === "Object" && o.constructor) n = o.constructor.name;
-  if (n === "Map" || n === "Set") return Array.from(o);
-  if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return arrayLikeToArray(o, minLen);
-}
-
-module.exports = _unsupportedIterableToArray, module.exports.__esModule = true, module.exports["default"] = module.exports;
-});
-
-unwrapExports(unsupportedIterableToArray);
-
 var nonIterableRest = createCommonjsModule(function (module) {
 function _nonIterableRest() {
   throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
@@ -16592,10 +17774,10 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.colorRgb = colorRgb;
 exports.colorRgba = colorRgba;
+exports.gradient = gradient;
 exports.hex2rgb = hex2rgb;
 exports.rgb2hex = rgb2hex;
 exports.rgba2rgb = rgba2rgb;
-exports.gradient = gradient;
 
 var _slicedToArray2 = interopRequireDefault(slicedToArray);
 
@@ -16695,10 +17877,10 @@ function gradient(startColor, endColor) {
 unwrapExports(color);
 var color_1 = color.colorRgb;
 var color_2 = color.colorRgba;
-var color_3 = color.hex2rgb;
-var color_4 = color.rgb2hex;
-var color_5 = color.rgba2rgb;
-var color_6 = color.gradient;
+var color_3 = color.gradient;
+var color_4 = color.hex2rgb;
+var color_5 = color.rgb2hex;
+var color_6 = color.rgba2rgb;
 
 var group = createCommonjsModule(function (module, exports) {
 
@@ -16708,6 +17890,8 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = void 0;
+
+var _toConsumableArray2 = interopRequireDefault(toConsumableArray);
 
 var _classCallCheck2 = interopRequireDefault(classCallCheck$1);
 
@@ -16737,6 +17921,7 @@ var AnimationFrame = _canvax["default"].AnimationFrame;
 var BrokenLine = _canvax["default"].Shapes.BrokenLine;
 var Circle = _canvax["default"].Shapes.Circle;
 var Isogon = _canvax["default"].Shapes.Isogon;
+var Rect = _canvax["default"].Shapes.Rect;
 var Path = _canvax["default"].Shapes.Path;
 
 var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
@@ -16744,39 +17929,44 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
 
   var _super = _createSuper(LineGraphsGroup);
 
-  function LineGraphsGroup(fieldMap, iGroup, opt, ctx, h, w, _graphs) {
+  function LineGraphsGroup(fieldConfig, iGroup, opt, ctx, h, w, _graphs) {
     var _this;
 
     (0, _classCallCheck2["default"])(this, LineGraphsGroup);
     _this = _super.call(this);
     _this._graphs = _graphs;
     _this._opt = opt;
-    _this.fieldMap = fieldMap;
+    _this.fieldConfig = fieldConfig;
     _this.field = null; //在extend之后要重新设置
 
     _this.iGroup = iGroup;
-    _this._yAxis = fieldMap.yAxis;
+    _this._yAxis = fieldConfig.yAxis;
     _this.ctx = ctx;
     _this.w = w;
     _this.h = h;
     _this.y = 0;
-    _this.line = {
-      //线
-      strokeStyle: fieldMap.color
-    };
     _this.data = [];
     _this.sprite = null;
+    _this.graphSprite = null; //line area放这里
+
     _this._pointList = []; //brokenline最终的状态
 
     _this._currPointList = []; //brokenline 动画中的当前状态
 
-    _this._bline = null;
+    _this._bline = null; //设置默认的line.strokStyle 为 fieldConfig.color
+
+    _this.line = {
+      strokeStyle: fieldConfig.color
+    };
 
     _.extend(true, (0, _assertThisInitialized2["default"])(_this), (0, tools.getDefaultProps)(LineGraphsGroup.defaultProps()), opt); //TODO group中得field不能直接用opt中得field， 必须重新设置， 
     //group中得field只有一个值，代表一条折线, 后面要扩展extend方法，可以控制过滤哪些key值不做extend
 
 
-    _this.field = fieldMap.field; //iGroup 在yAxis.field中对应的值
+    _this.field = fieldConfig.field; //iGroup 在yAxis.field中对应的值
+
+    _this.clipRect = null;
+    _this.__currFocusInd = -1;
 
     _this.init(opt);
 
@@ -16787,6 +17977,15 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
     key: "init",
     value: function init() {
       this.sprite = new _canvax["default"].Display.Sprite();
+      this.graphSprite = new _canvax["default"].Display.Sprite();
+      this.sprite.addChild(this.graphSprite); //hover效果的node被添加到的容器
+
+      this._focusNodes = new _canvax["default"].Display.Sprite({});
+      this.sprite.addChild(this._focusNodes);
+      this._nodes = new _canvax["default"].Display.Sprite({});
+      this.sprite.addChild(this._nodes);
+      this._labels = new _canvax["default"].Display.Sprite({});
+      this.sprite.addChild(this._labels);
     }
   }, {
     key: "draw",
@@ -16826,8 +18025,8 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
         }
 
         if (!color || !_.isString(color)) {
-          //那么最后，取this.fieldMap.color
-          color = this.fieldMap.color;
+          //那么最后，取this.fieldConfig.color
+          color = this.fieldConfig.color; //this._getProp(this.color, iNode) //this.color会被写入到fieldMap.color
         }
       }
       return color;
@@ -16932,11 +18131,12 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
 
       me._createTexts();
 
-      me._grow();
-    }
+      me._transition();
+    } //数据变化后的切换动画
+
   }, {
-    key: "_grow",
-    value: function _grow(callback) {
+    key: "_transition",
+    value: function _transition(callback) {
       var me = this;
 
       if (!me.data.length) {
@@ -16946,9 +18146,16 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
       }
 
       function _update(list) {
+        if (!me._bline) {
+          me.sprite._removeTween(me._transitionTween);
+
+          me._transitionTween = null;
+          return;
+        }
+
         if (me._bline.context) {
           me._bline.context.pointList = _.clone(list);
-          me._bline.context.strokeStyle = me._getLineStrokeStyle(list);
+          me._bline.context.strokeStyle = me._getLineStrokeStyle();
         }
 
         if (me._area.context) {
@@ -16984,7 +18191,7 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
           }
         });
       }
-      this._growTween = AnimationFrame.registTween({
+      this._transitionTween = AnimationFrame.registTween({
         from: me._getPointPosStr(me._currPointList),
         to: me._getPointPosStr(me._pointList),
         desc: me.field,
@@ -16998,9 +18205,9 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
           _update(me._currPointList);
         },
         onComplete: function onComplete() {
-          me.sprite._removeTween(me._growTween);
+          me.sprite._removeTween(me._transitionTween);
 
-          me._growTween = null; //在动画结束后强制把目标状态绘制一次。
+          me._transitionTween = null; //在动画结束后强制把目标状态绘制一次。
           //解决在onUpdate中可能出现的异常会导致绘制有问题。
           //这样的话，至少最后的结果会是对的。
 
@@ -17010,7 +18217,60 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
         }
       });
 
-      this.sprite._tweens.push(this._growTween);
+      this.sprite._tweens.push(this._transitionTween);
+    } //首次加载的进场动画
+
+  }, {
+    key: "_grow",
+    value: function _grow(callback) {
+      var _this2 = this;
+
+      var _coord = this._graphs.app.getCoord();
+
+      var width = _coord.width,
+          height = _coord.height;
+      this.clipRect = new Rect({
+        context: {
+          x: 0,
+          //-100,
+          y: -height,
+          width: 0,
+          height: height,
+          fillStyle: 'blue'
+        }
+      });
+      var growTo = {
+        width: width
+      };
+      this.graphSprite.clipTo(this.clipRect);
+
+      if (this.yAxisAlign == 'right') {
+        this.clipRect.context.x = width;
+        growTo.x = 0;
+      }
+
+      this.sprite.addChild(this.clipRect);
+      this.clipRect.animate(growTo, {
+        duration: this._graphs.aniDuration,
+        onUpdate: function onUpdate() {
+          var clipRectCtx = _this2.clipRect.context;
+
+          _this2._nodes.children.concat(_this2._labels.children).forEach(function (el) {
+            var _ctx = el.context;
+
+            if (_ctx.globalAlpha == 0 && _ctx.x >= clipRectCtx.x && _ctx.x <= clipRectCtx.x + clipRectCtx.width) {
+              el.animate({
+                globalAlpha: 1
+              }, {
+                duration: 300
+              });
+            }
+          });
+        },
+        onComplete: function onComplete() {
+          callback && callback();
+        }
+      });
     }
   }, {
     key: "_getPointPosStr",
@@ -17044,27 +18304,28 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
     key: "_widget",
     value: function _widget(opt) {
       var me = this;
-      !opt && (opt = {});
       me._pointList = this._getPointList(me.data);
 
       if (me._pointList.length == 0) {
         //filter后，data可能length==0
         return;
       }
-      var list = [];
+      // let list = [];
+      // if (opt.animation) {
+      //     let firstNode = this._getFirstNode();
+      //     let firstY = firstNode ? firstNode.y : undefined;
+      //     for (let a = 0, al = me.data.length; a < al; a++) {
+      //         let o = me.data[a];
+      //         list.push([
+      //             o.x,
+      //             _.isNumber( o.y ) ? firstY : o.y
+      //         ]);
+      //     };
+      // } else {
+      //     list = me._pointList;
+      // };
 
-      if (opt.animation) {
-        var firstNode = this._getFirstNode();
-
-        var firstY = firstNode ? firstNode.y : undefined;
-
-        for (var a = 0, al = me.data.length; a < al; a++) {
-          var o = me.data[a];
-          list.push([o.x, _.isNumber(o.y) ? firstY : o.y]);
-        }
-      } else {
-        list = me._pointList;
-      }
+      var list = me._pointList;
       me._currPointList = list;
       var blineCtx = {
         pointList: list,
@@ -17100,7 +18361,7 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
       if (!this.line.enabled) {
         bline.context.visible = false;
       }
-      me.sprite.addChild(bline);
+      me.graphSprite.addChild(bline);
       me._bline = bline;
       var area = new Path({
         //填充
@@ -17122,7 +18383,7 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
       if (!this.area.enabled) {
         area.context.visible = false;
       }
-      me.sprite.addChild(area);
+      me.graphSprite.addChild(area);
       me._area = area;
 
       me._createNodes();
@@ -17138,12 +18399,12 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
         var nodeData = this.data[i];
 
         if (_.isNumber(nodeData.y)) {
-          if (_firstNode === null || this._yAxis.align == "right") {
+          if (_firstNode === null || this.yAxisAlign == "right") {
             //_yAxis为右轴的话，
             _firstNode = nodeData;
           }
 
-          if (this._yAxis.align !== "right" && _firstNode !== null) {
+          if (this.yAxisAlign !== "right" && _firstNode !== null) {
             break;
           }
         }
@@ -17157,9 +18418,11 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
       var me = this;
       var fill_gradient = null; // _fillStyle 可以 接受渐变色，可以不用_getColor， _getColor会过滤掉渐变色
 
-      var _fillStyle = me._getProp(me.area.fillStyle) || me._getLineStrokeStyle(null, "fillStyle");
+      var _fillStyle = me._getProp(me.area.fillStyle) || me._getLineStrokeStyle(null, "area");
 
       if (_.isArray(me.area.alpha) && !(_fillStyle instanceof CanvasGradient)) {
+        var _me$ctx;
+
         //alpha如果是数组，那么就是渐变背景，那么就至少要有两个值
         //如果拿回来的style已经是个gradient了，那么就不管了
         me.area.alpha.length = 2;
@@ -17172,15 +18435,11 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
           me.area.alpha[1] = 0;
         }
 
-        var topP = _.min(me._bline.context.pointList, function (p) {
-          return p[1];
-        });
+        var lps = this._getLinearGradientPoints('area');
 
-        if (topP[0] === undefined || topP[1] === undefined) {
-          return null;
-        }
+        if (!lps) return; //创建一个线性渐变
 
-        fill_gradient = me.ctx.createLinearGradient(topP[0], topP[1], topP[0], 0);
+        fill_gradient = (_me$ctx = me.ctx).createLinearGradient.apply(_me$ctx, (0, _toConsumableArray2["default"])(lps));
         var rgb = (0, color.colorRgb)(_fillStyle);
         var rgba0 = rgb.replace(')', ', ' + me._getProp(me.area.alpha[0]) + ')').replace('RGB', 'RGBA');
         fill_gradient.addColorStop(0, rgba0);
@@ -17192,7 +18451,8 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
     }
   }, {
     key: "_getLineStrokeStyle",
-    value: function _getLineStrokeStyle(pointList, from) {
+    value: function _getLineStrokeStyle(pointList) {
+      var graphType = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'line';
       var me = this;
 
       var _style;
@@ -17201,61 +18461,118 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
         //如果用户没有配置line.strokeStyle，那么就用默认的
         return this.line.strokeStyle;
       }
+      var lineargradient = this._opt.line.strokeStyle.lineargradient;
 
-      if (this._opt.line.strokeStyle.lineargradient) {
-        //如果用户配置 填充是一个线性渐变
-        //从bline中找到最高的点
-        !pointList && (pointList = this._bline.context.pointList);
+      if (lineargradient) {
+        var _me$ctx2;
 
-        var topP = _.min(pointList, function (p) {
-          return p[1];
-        });
-
-        var bottomP = _.max(pointList, function (p) {
-          return p[1];
-        });
-
-        if (from == "fillStyle") {
-          bottomP = [0, 0];
+        //如果是右轴的话，渐变色要对应的反转
+        if (this.yAxisAlign == 'right') {
+          lineargradient = lineargradient.reverse();
         }
 
-        if (topP[0] === undefined || topP[1] === undefined || bottomP[1] === undefined) {
-          return null;
-        }
-        //创建一个线性渐变
-        //console.log( topP[0] + "|"+ topP[1]+ "|"+  topP[0]+ "|"+ bottomP[1] )
+        var lps = this._getLinearGradientPoints(graphType, pointList);
 
-        _style = me.ctx.createLinearGradient(topP[0], topP[1], topP[0], bottomP[1]);
+        if (!lps) return;
+        _style = (_me$ctx2 = me.ctx).createLinearGradient.apply(_me$ctx2, (0, _toConsumableArray2["default"])(lps));
 
-        _.each(this._opt.line.strokeStyle.lineargradient, function (item) {
+        _.each(lineargradient, function (item) {
           _style.addColorStop(item.position, item.color);
         });
 
         return _style;
       } else {
-        //构造函数中执行的这个方法，还没有line属性
-        //if( this.line && this.line.strokeStyle ){
-        //    _style = this.line.strokeStyle
-        //} else {
-        _style = this._getColor(this._opt.line.strokeStyle); //}
-
+        _style = this._getColor(this._opt.line.strokeStyle);
         return _style;
       }
+    }
+  }, {
+    key: "_getLinearGradientPoints",
+    value: function _getLinearGradientPoints() {
+      var graphType = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'line';
+      var pointList = arguments.length > 1 ? arguments[1] : undefined;
+      //如果graphType 传入的是area，并且，用户并没有配area.lineargradientDriction,那么就会默认和line.lineargradientDriction对齐
+      var driction = this[graphType].lineargradientDriction || this.line.lineargradientDriction;
+      !pointList && (pointList = this._bline.context.pointList);
+      var linearPointStart, linearPointEnd;
+
+      if (driction == 'topBottom') {
+        //top -> bottom
+        var topX = 0,
+            topY = 0,
+            bottomX = 0,
+            bottomY = 0;
+
+        for (var i = 0, l = pointList.length; i < l; i++) {
+          var point = pointList[i];
+          var y = point[1];
+
+          if (!isNaN(y)) {
+            topY = Math.min(y, topY);
+            bottomY = Math.max(y, bottomY);
+          }
+        }
+
+        linearPointStart = {
+          x: topX,
+          y: topY
+        };
+        linearPointEnd = {
+          x: bottomX,
+          y: bottomY
+        };
+
+        if (graphType == 'area') {
+          //面积图的话，默认就需要一致绘制到底的x轴位置去了
+          linearPointEnd.y = 0;
+        }
+      } else {
+        //left->right
+        var leftX,
+            rightX,
+            leftY = 0,
+            rightY = 0;
+
+        for (var _i = 0, _l = pointList.length; _i < _l; _i++) {
+          var _point2 = pointList[_i];
+          var x = _point2[0];
+          var _y = _point2[1];
+
+          if (!isNaN(x) && !isNaN(_y)) {
+            if (leftX == undefined) {
+              leftX = x;
+            } else {
+              leftX = Math.min(x, leftX);
+            }
+
+            rightX = Math.max(x, leftX);
+          }
+        }
+        linearPointStart = {
+          x: leftX,
+          y: leftY
+        };
+        linearPointEnd = {
+          x: rightX,
+          y: rightY
+        };
+      }
+
+      if (linearPointStart.x == undefined || linearPointStart.y == undefined || linearPointEnd.x == undefined || linearPointEnd.y == undefined) {
+        return null;
+      }
+
+      return [linearPointStart.x, linearPointStart.y, linearPointEnd.x, linearPointEnd.y];
     }
   }, {
     key: "_createNodes",
     value: function _createNodes() {
       var me = this;
-      var list = me._currPointList; //if ((me.node.enabled || list.length == 1) && !!me.line.lineWidth) { //拐角的圆点
-
-      if (!this._nodes) {
-        this._nodes = new _canvax["default"].Display.Sprite({});
-        this.sprite.addChild(this._nodes);
-      }
+      var list = me._currPointList;
       var iNode = 0; //这里不能和下面的a对等，以为list中有很多无效的节点
 
       for (var a = 0, al = list.length; a < al; a++) {
-        var _nodeColor = me._getColor(me.node.strokeStyle || me.line.strokeStyle, a);
+        var _nodeColor = me._getColor(me.node.strokeStyle || me.color || me.line.strokeStyle, a);
 
         me.data[a].color = _nodeColor; //回写回data里，tips的是用的到
 
@@ -17263,26 +18580,38 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
 
         if (list.length == 1 && !nodeEnabled) {
           nodeEnabled = true; //只有一个数据的时候， 强制显示node
-        }
+        } // if( !nodeEnabled ){
+        //     //不能写return， 是因为每个data的color还是需要计算一遍
+        //     continue;
+        // };
 
-        if (!nodeEnabled) {
-          //不能写return， 是因为每个data的color还是需要计算一遍
-          continue;
-        }
+
         var _point = me._currPointList[a];
 
         if (!_point || !_.isNumber(_point[1])) {
           //折线图中有可能这个point为undefined
           continue;
         }
+        var x = _point[0];
+        var y = _point[1];
+        var globalAlpha = 0;
+
+        if (this.clipRect) {
+          var clipRectCtx = this.clipRect.context;
+
+          if (x >= clipRectCtx.x && x <= clipRectCtx.x + clipRectCtx.width) {
+            globalAlpha = 1;
+          }
+        }
         var context = {
-          x: _point[0],
-          y: _point[1],
+          x: x,
+          y: y,
           r: me._getProp(me.node.radius, a),
           lineWidth: me._getProp(me.node.lineWidth, a) || 2,
           strokeStyle: _nodeColor,
-          fillStyle: me._getProp(me.node.fillStyle, a),
-          visible: !!me._getProp(me.node.visible, a)
+          fillStyle: me._getProp(me.node.fillStyle, a) || _nodeColor,
+          visible: nodeEnabled && !!me._getProp(me.node.visible, a),
+          globalAlpha: globalAlpha
         };
         var nodeConstructor = Circle;
 
@@ -17321,16 +18650,17 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
 
         if (me.node.corner) {
           //拐角才有节点
-          var y = me._pointList[a][1];
+          var _y2 = me._pointList[a][1];
           var pre = me._pointList[a - 1];
           var next = me._pointList[a + 1];
 
           if (pre && next) {
-            if (y == pre[1] && y == next[1]) {
+            if (_y2 == pre[1] && _y2 == next[1]) {
               nodeEl.context.visible = false;
             }
           }
         }
+        me.data[a].nodeEl = nodeEl;
         iNode++;
       }
 
@@ -17349,13 +18679,10 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
       var me = this;
       var list = me._currPointList;
 
+      var _coord = this._graphs.app.getCoord();
+
       if (me.label.enabled) {
         //节点上面的文本info
-        if (!this._labels) {
-          this._labels = new _canvax["default"].Display.Sprite({});
-          this.sprite.addChild(this._labels);
-        }
-
         var iNode = 0; //这里不能和下面的a对等，以为list中有很多无效的节点
 
         for (var a = 0, al = list.length; a < al; a++) {
@@ -17365,20 +18692,38 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
             //折线图中有可能这个point为undefined
             continue;
           }
+          var x = _point[0];
+          var y = _point[1] - this.node.radius - 2;
+          var globalAlpha = 0;
+
+          if (this.clipRect) {
+            var clipRectCtx = this.clipRect.context;
+
+            if (x >= clipRectCtx.x && x <= clipRectCtx.x + clipRectCtx.width) {
+              globalAlpha = 1;
+            }
+          }
           var context = {
-            x: _point[0],
-            y: _point[1] - 3 - 3,
+            x: x,
+            y: y,
             fontSize: this.label.fontSize,
             textAlign: this.label.textAlign,
             textBaseline: this.label.textBaseline,
             fillStyle: me._getColor(me.label.fontColor, a),
             lineWidth: 1,
-            strokeStyle: "#ffffff"
+            strokeStyle: "#ffffff",
+            globalAlpha: globalAlpha
           };
           var value = me.data[a].value;
 
           if (_.isFunction(me.label.format)) {
+            //如果有单独给label配置format，就用label上面的配置
             value = me.label.format(value, me.data[a]) || value;
+          } else {
+            //否则用fieldConfig上面的
+            var fieldConfig = _coord.getFieldConfig(this.field);
+
+            value = fieldConfig.getFormatValue(value);
           }
 
           if (value == undefined || value == null) {
@@ -17544,6 +18889,85 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
       };
       return node;
     }
+  }, {
+    key: "tipsPointerOf",
+    value: function tipsPointerOf(e) {
+      if (e.eventInfo) {
+        var iNode = e.eventInfo.iNode;
+
+        if (iNode != this.__currFocusInd && this.__currFocusInd != -1) {
+          this.unfocusOf(this.__currFocusInd);
+        }
+        this.focusOf(e.eventInfo.iNode);
+      }
+    }
+  }, {
+    key: "tipsPointerHideOf",
+    value: function tipsPointerHideOf(e) {
+      if (e.eventInfo) {
+        this.unfocusOf(e.eventInfo.iNode);
+      }
+    }
+  }, {
+    key: "focusOf",
+    value: function focusOf(iNode) {
+      var node = this.data[iNode];
+
+      if (node) {
+        var _node = node.nodeEl;
+
+        if (_node && !node.focused && this.__currFocusInd != iNode) {
+          //console.log( 'focusOf' )
+          _node._fillStyle = _node.context.fillStyle;
+          _node.context.fillStyle = 'white';
+          _node._visible = _node.context.visible;
+          _node.context.visible = true;
+
+          var _focusNode = _node.clone();
+
+          this._focusNodes.addChild(_focusNode); //_focusNode.context.r += 6;
+
+
+          _focusNode.context.visible = true;
+          _focusNode.context.lineWidth = 0; //不需要描边
+
+          _focusNode.context.fillStyle = _node.context.strokeStyle;
+          _focusNode.context.globalAlpha = 0.5;
+
+          _focusNode.animate({
+            r: _focusNode.context.r + 6
+          }, {
+            duration: 300
+          });
+
+          this.__currFocusInd = iNode;
+        }
+
+        node.focused = true;
+      }
+    }
+  }, {
+    key: "unfocusOf",
+    value: function unfocusOf(iNode) {
+      if (this.__currFocusInd > -1) {
+        iNode = this.__currFocusInd;
+      }
+      var node = this.data[iNode];
+
+      if (node) {
+        this._focusNodes.removeAllChildren();
+
+        var _node = node.nodeEl;
+
+        if (_node && node.focused) {
+          //console.log('unfocus')
+          _node.context.fillStyle = _node._fillStyle;
+          _node.context.visible = _node._visible;
+          node.focused = false;
+          this.__currFocusInd = -1;
+        }
+      }
+    }
   }], [{
     key: "defaultProps",
     value: function defaultProps() {
@@ -17558,6 +18982,11 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
             strokeStyle: {
               detail: '线的颜色',
               "default": undefined //不会覆盖掉constructor中的定义
+
+            },
+            lineargradientDriction: {
+              detail: '线的填充色是渐变对象的话，这里用来描述方向，默认从上到下（topBottom）,可选leftRight',
+              "default": 'topBottom' //可选 leftRight
 
             },
             lineWidth: {
@@ -17604,7 +19033,7 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
             },
             fillStyle: {
               detail: '节点图形的背景色',
-              "default": '#ffffff'
+              "default": null
             },
             strokeStyle: {
               detail: '节点图形的描边色，默认和line.strokeStyle保持一致',
@@ -17649,7 +19078,7 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
             },
             textBaseline: {
               detail: '垂直布局方式',
-              "default": 'middle'
+              "default": 'bottom'
             }
           }
         },
@@ -17660,13 +19089,18 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
               detail: '是否开启',
               "default": true
             },
+            lineargradientDriction: {
+              detail: '面积的填充色是渐变对象的话，这里用来描述方向，默认null(就会从line中取),从上到下（topBottom）,可选leftRight',
+              "default": null //默认null（就会和line保持一致），可选 topBottom leftRight
+
+            },
             fillStyle: {
               detail: '面积背景色',
               "default": null
             },
             alpha: {
               detail: '面积透明度',
-              "default": 0.2
+              "default": 0.25
             }
           }
         }
@@ -17801,14 +19235,13 @@ var LineGraphs = /*#__PURE__*/function (_GraphsBase) {
 
       Canvax._.each(Canvax._.flatten(me.enabledField), function (field, i) {
         //let maxValue = 0;
-        var fieldMap = me.app.getComponent({
+        var fieldConfig = me.app.getComponent({
           name: 'coord'
-        }).getFieldMapOf(field); //单条line的全部data数据
+        }).getFieldConfig(field); //单条line的全部data数据
 
         var _lineData = me.dataFrame.getFieldData(field);
 
-        if (!_lineData) return; //console.log( JSON.stringify( _lineData ) )
-
+        if (!_lineData) return;
         var _data = [];
 
         for (var b = 0, bl = _lineData.length; b < bl; b++) {
@@ -17831,14 +19264,14 @@ var LineGraphs = /*#__PURE__*/function (_GraphsBase) {
             x: point.pos.x,
             y: point.pos.y,
             rowData: me.dataFrame.getRowDataAt(b),
-            color: fieldMap.color //默认设置皮肤颜色，动态的在group里面会被修改
+            color: fieldConfig.color //默认设置皮肤颜色，动态的在group里面会被修改
 
           };
 
           _data.push(node);
         }
         tmpData[field] = {
-          yAxis: fieldMap.yAxis,
+          yAxis: fieldConfig.yAxis,
           field: field,
           data: _data
         };
@@ -17869,22 +19302,28 @@ var LineGraphs = /*#__PURE__*/function (_GraphsBase) {
       });
 
       return this;
-    }
+    } //field 可以是单个 field 也可以是fields数组
+
   }, {
     key: "show",
     value: function show(field) {
-      var me = this; //过渡优化，有field的状态变化，可能就y轴的数据区间都有了变化，这里的优化就成了bug，所有的field都需要绘制一次
+      var _this2 = this;
+
+      //过渡优化，有field的状态变化，可能就y轴的数据区间都有了变化，这里的优化就成了bug，所有的field都需要绘制一次
       //这个field不再这个graphs里面的，不相关
       // if( _.indexOf( _.flatten( [me.field] ), field ) == -1 ){
       //     return;
       // };
+      this.data = this._trimGraphs(); //先把现有的group resetData
 
-      this.data = this._trimGraphs();
+      this.groups.forEach(function (g) {
+        g.resetData(_this2.data[g.field].data);
+      }); //然后把field添加到groups里面去
 
-      this._setGroupsForYfield(this.data, field);
+      var newGroups = this._setGroupsForYfield(this.data, field);
 
-      Canvax._.each(this.groups, function (g) {
-        g.resetData(me.data[g.field].data);
+      newGroups.forEach(function (g) {
+        g._grow();
       });
     }
   }, {
@@ -17935,23 +19374,26 @@ var LineGraphs = /*#__PURE__*/function (_GraphsBase) {
 
       var _flattenField = Canvax._.flatten([this.field]);
 
+      var newGroups = [];
+
       Canvax._.each(data, function (g, field) {
         if (fields && Canvax._.indexOf(fields, field) == -1) {
           //如果有传入fields，但是当前field不在fields里面的话，不需要处理
           //说明该group已经在graphs里面了
           return;
         }
-        var fieldMap = me.app.getComponent({
+        var fieldConfig = me.app.getComponent({
           name: 'coord'
-        }).getFieldMapOf(field); //iGroup 是这条group在本graphs中的ind，而要拿整个图表层级的index， 就是fieldMap.ind
+        }).getFieldConfig(field); //iGroup 是这条group在本graphs中的ind，而要拿整个图表层级的index， 就是fieldMap.ind
 
         var iGroup = Canvax._.indexOf(_flattenField, field);
 
-        var group = new _group["default"](fieldMap, iGroup, //不同于fieldMap.ind
+        var group = new _group["default"](fieldConfig, iGroup, //不同于fieldMap.ind
         me._opt, me.ctx, me.height, me.width, me);
         group.draw({
           animation: me.animation && !opt.resize
         }, g.data);
+        newGroups.push(group);
         var insert = false; //在groups数组中插入到比自己_groupInd小的元素前面去
 
         for (var gi = 0, gl = me.groups.length; gi < gl; gi++) {
@@ -17968,6 +19410,8 @@ var LineGraphs = /*#__PURE__*/function (_GraphsBase) {
           me.sprite.addChild(group.sprite);
         }
       });
+
+      return newGroups;
     }
   }, {
     key: "getNodesAt",
@@ -17993,6 +19437,20 @@ var LineGraphs = /*#__PURE__*/function (_GraphsBase) {
 
       return _nodesInfoList;
     }
+  }, {
+    key: "tipsPointerOf",
+    value: function tipsPointerOf(e) {
+      this.groups.forEach(function (group) {
+        group.tipsPointerOf(e);
+      });
+    }
+  }, {
+    key: "tipsPointerHideOf",
+    value: function tipsPointerHideOf(e) {
+      this.groups.forEach(function (group) {
+        group.tipsPointerHideOf(e);
+      });
+    }
   }], [{
     key: "defaultProps",
     value: function defaultProps() {
@@ -18004,6 +19462,11 @@ var LineGraphs = /*#__PURE__*/function (_GraphsBase) {
         yAxisAlign: {
           detail: '绘制在哪根y轴上面',
           "default": 'left'
+        },
+        aniDuration: {
+          //覆盖基类中的设置，line的duration要1000
+          detail: '动画时长',
+          "default": 1200
         },
         _props: [_group["default"]]
       };
@@ -18595,7 +20058,7 @@ var ScatGraphs = /*#__PURE__*/function (_GraphsBase) {
       for (var i = 0; i < dataLen; i++) {
         var rowData = this.dataFrame.getRowDataAt(i);
 
-        var fieldMap = _coord.getFieldMapOf(this.field);
+        var fieldConfig = _coord.getFieldConfig(this.field);
 
         var point = _coord.getPoint({
           iNode: i,
@@ -18616,7 +20079,7 @@ var ScatGraphs = /*#__PURE__*/function (_GraphsBase) {
           y: point.pos.y,
           value: point.value,
           field: this.field,
-          fieldColor: fieldMap.color,
+          fieldColor: fieldConfig.color,
           iNode: i,
           focused: false,
           selected: false,
@@ -20869,11 +22332,11 @@ var RadarGraphs = /*#__PURE__*/function (_GraphsBase) {
           pointList.push([node.point.x, node.point.y]);
         });
 
-        var fieldMap = _coord.getFieldMapOf(field);
+        var fieldConfig = _coord.getFieldConfig(field);
 
-        var _strokeStyle = me._getStyle(me.line.strokeStyle, fieldMap, iGroup, fieldMap.color);
+        var _strokeStyle = me._getStyle(me.line.strokeStyle, fieldConfig, iGroup, fieldConfig.color);
 
-        var _lineType = me._getStyle(me.line.lineType, fieldMap, iGroup, fieldMap.color);
+        var _lineType = me._getStyle(me.line.lineType, fieldConfig, iGroup, fieldConfig.color);
 
         var polyCtx = {
           pointList: pointList,
@@ -20887,8 +22350,8 @@ var RadarGraphs = /*#__PURE__*/function (_GraphsBase) {
         }
 
         if (me.area.enabled) {
-          polyCtx.fillStyle = me._getStyle(me.area.fillStyle, fieldMap, iGroup, fieldMap.color);
-          polyCtx.fillAlpha = me._getStyle(me.area.fillAlpha, fieldMap, iGroup, 1);
+          polyCtx.fillStyle = me._getStyle(me.area.fillStyle, fieldConfig, iGroup, fieldConfig.color);
+          polyCtx.fillAlpha = me._getStyle(me.area.fillAlpha, fieldConfig, iGroup, 1);
         }
 
         var _poly = new Polygon({
@@ -21069,7 +22532,7 @@ var RadarGraphs = /*#__PURE__*/function (_GraphsBase) {
       _.each(this.enabledField, function (field) {
         var dataOrg = me.dataFrame.getFieldData(field);
 
-        var fieldMap = _coord.getFieldMapOf(field);
+        var fieldConfig = _coord.getFieldConfig(field);
 
         var arr = [];
 
@@ -21087,7 +22550,7 @@ var RadarGraphs = /*#__PURE__*/function (_GraphsBase) {
             focused: false,
             value: dataOrg[i],
             point: point,
-            color: fieldMap.color
+            color: fieldConfig.color
           });
         });
 
@@ -21098,7 +22561,7 @@ var RadarGraphs = /*#__PURE__*/function (_GraphsBase) {
     }
   }, {
     key: "_getStyle",
-    value: function _getStyle(style, fieldMap, iGroup, def) {
+    value: function _getStyle(style, fieldConfig, iGroup, def) {
       var _s = def;
 
       if (_.isString(style) || _.isNumber(style)) {
@@ -21110,7 +22573,7 @@ var RadarGraphs = /*#__PURE__*/function (_GraphsBase) {
       }
 
       if (_.isFunction(style)) {
-        _s = style(iGroup, fieldMap);
+        _s = style(iGroup, fieldConfig);
       }
 
       if (_s === undefined || _s === null) {
@@ -25028,13 +26491,13 @@ var circleintersection = createCommonjsModule(function (module, exports) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.intersectionArea = intersectionArea;
-exports.containedInCircles = containedInCircles;
 exports.circleArea = circleArea;
-exports.distance = distance;
-exports.circleOverlap = circleOverlap;
 exports.circleCircleIntersection = circleCircleIntersection;
+exports.circleOverlap = circleOverlap;
+exports.containedInCircles = containedInCircles;
+exports.distance = distance;
 exports.getCenter = getCenter;
+exports.intersectionArea = intersectionArea;
 var SMALL = 1e-10;
 /** Returns the intersection area of a bunch of circles (where each circle
  is an object having an x,y and radius property) */
@@ -25292,29 +26755,29 @@ function getCenter(points) {
 });
 
 unwrapExports(circleintersection);
-var circleintersection_1 = circleintersection.intersectionArea;
-var circleintersection_2 = circleintersection.containedInCircles;
-var circleintersection_3 = circleintersection.circleArea;
-var circleintersection_4 = circleintersection.distance;
-var circleintersection_5 = circleintersection.circleOverlap;
-var circleintersection_6 = circleintersection.circleCircleIntersection;
-var circleintersection_7 = circleintersection.getCenter;
+var circleintersection_1 = circleintersection.circleArea;
+var circleintersection_2 = circleintersection.circleCircleIntersection;
+var circleintersection_3 = circleintersection.circleOverlap;
+var circleintersection_4 = circleintersection.containedInCircles;
+var circleintersection_5 = circleintersection.distance;
+var circleintersection_6 = circleintersection.getCenter;
+var circleintersection_7 = circleintersection.intersectionArea;
 
 var layout = createCommonjsModule(function (module, exports) {
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.venn = venn;
-exports.distanceFromIntersectArea = distanceFromIntersectArea;
-exports.getDistanceMatrices = getDistanceMatrices;
 exports.bestInitialLayout = bestInitialLayout;
 exports.constrainedMDSLayout = constrainedMDSLayout;
+exports.disjointCluster = disjointCluster;
+exports.distanceFromIntersectArea = distanceFromIntersectArea;
+exports.getDistanceMatrices = getDistanceMatrices;
 exports.greedyLayout = greedyLayout;
 exports.lossFunction = lossFunction;
-exports.disjointCluster = disjointCluster;
 exports.normalizeSolution = normalizeSolution;
 exports.scaleSolution = scaleSolution;
+exports.venn = venn;
 
 
 
@@ -26105,16 +27568,16 @@ function scaleSolution(solution, width, height, padding) {
 });
 
 unwrapExports(layout);
-var layout_1 = layout.venn;
-var layout_2 = layout.distanceFromIntersectArea;
-var layout_3 = layout.getDistanceMatrices;
-var layout_4 = layout.bestInitialLayout;
-var layout_5 = layout.constrainedMDSLayout;
+var layout_1 = layout.bestInitialLayout;
+var layout_2 = layout.constrainedMDSLayout;
+var layout_3 = layout.disjointCluster;
+var layout_4 = layout.distanceFromIntersectArea;
+var layout_5 = layout.getDistanceMatrices;
 var layout_6 = layout.greedyLayout;
 var layout_7 = layout.lossFunction;
-var layout_8 = layout.disjointCluster;
-var layout_9 = layout.normalizeSolution;
-var layout_10 = layout.scaleSolution;
+var layout_8 = layout.normalizeSolution;
+var layout_9 = layout.scaleSolution;
+var layout_10 = layout.venn;
 
 var venn = createCommonjsModule(function (module, exports) {
 
@@ -28879,9 +30342,9 @@ var Progress = /*#__PURE__*/function (_GraphsBase) {
         name: 'coord'
       });
 
-      var fieldMap = _coord.getFieldMapOf(nodeData.field);
+      var fieldConfig = _coord.getFieldConfig(nodeData.field);
 
-      def = def || (fieldMap ? fieldMap.color : "#171717");
+      def = def || (fieldConfig ? fieldConfig.color : "#171717");
       var style;
 
       if (prop) {
@@ -29047,54 +30510,14 @@ exports["default"] = _default2;
 
 unwrapExports(progress);
 
-var arrayWithoutHoles = createCommonjsModule(function (module) {
-function _arrayWithoutHoles(arr) {
-  if (Array.isArray(arr)) return arrayLikeToArray(arr);
-}
-
-module.exports = _arrayWithoutHoles, module.exports.__esModule = true, module.exports["default"] = module.exports;
-});
-
-unwrapExports(arrayWithoutHoles);
-
-var iterableToArray = createCommonjsModule(function (module) {
-function _iterableToArray(iter) {
-  if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter);
-}
-
-module.exports = _iterableToArray, module.exports.__esModule = true, module.exports["default"] = module.exports;
-});
-
-unwrapExports(iterableToArray);
-
-var nonIterableSpread = createCommonjsModule(function (module) {
-function _nonIterableSpread() {
-  throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-}
-
-module.exports = _nonIterableSpread, module.exports.__esModule = true, module.exports["default"] = module.exports;
-});
-
-unwrapExports(nonIterableSpread);
-
-var toConsumableArray = createCommonjsModule(function (module) {
-function _toConsumableArray(arr) {
-  return arrayWithoutHoles(arr) || iterableToArray(arr) || unsupportedIterableToArray(arr) || nonIterableSpread();
-}
-
-module.exports = _toConsumableArray, module.exports.__esModule = true, module.exports["default"] = module.exports;
-});
-
-unwrapExports(toConsumableArray);
-
 var data = createCommonjsModule(function (module, exports) {
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.arrayToTreeJsonForRelation = arrayToTreeJsonForRelation;
 exports.checkDataIsJson = checkDataIsJson;
 exports.jsonToArrayForRelation = jsonToArrayForRelation;
-exports.arrayToTreeJsonForRelation = arrayToTreeJsonForRelation;
 
 
 
@@ -29287,9 +30710,9 @@ function arrayToTreeJsonForRelation(data, options) {
 });
 
 unwrapExports(data);
-var data_1 = data.checkDataIsJson;
-var data_2 = data.jsonToArrayForRelation;
-var data_3 = data.arrayToTreeJsonForRelation;
+var data_1 = data.arrayToTreeJsonForRelation;
+var data_2 = data.checkDataIsJson;
+var data_3 = data.jsonToArrayForRelation;
 
 var zoom = createCommonjsModule(function (module, exports) {
 
@@ -39746,8 +41169,8 @@ var _typeof2 = interopRequireDefault(_typeof_1$1);
         if (string.charCodeAt(0) === 46
         /* . */
         ) {
-            result.push("");
-          }
+          result.push("");
+        }
 
         string.replace(rePropName, function (match, number, quote, subString) {
           result.push(quote ? subString.replace(reEscapeChar, "$1") : number || match);
@@ -44389,6 +45812,8 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports["default"] = void 0;
 
+var _createClass2 = interopRequireDefault(createClass$1);
+
 var _classCallCheck2 = interopRequireDefault(classCallCheck$1);
 
 /**
@@ -44397,13 +45822,12 @@ var _classCallCheck2 = interopRequireDefault(classCallCheck$1);
  * params属性则是这次trigger的一些动作参数
  * 目前legend和datazoom组件都有用到
  */
-var Trigger = function Trigger(comp) {
+var Trigger = /*#__PURE__*/(0, _createClass2["default"])(function Trigger(comp) {
   var params = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
   (0, _classCallCheck2["default"])(this, Trigger);
   this.comp = comp;
   this.params = params;
-};
-
+});
 exports["default"] = Trigger;
 });
 
@@ -47933,25 +49357,25 @@ var TREE = function TREE() {
     if (nodeSize) _hierarchy["default"].layout_hierarchyVisitBefore(root0, sizeNode); // If a fixed tree size is specified, scale x and y based on the extent.
     // Compute the left-most, right-most, and depth-most nodes for extents.
     else {
-        var left = root0,
-            right = root0,
-            bottom = root0;
+      var left = root0,
+          right = root0,
+          bottom = root0;
 
-        _hierarchy["default"].layout_hierarchyVisitBefore(root0, function (node) {
-          if (node.x < left.x) left = node;
-          if (node.x > right.x) right = node;
-          if (node.depth > bottom.depth) bottom = node;
-        });
+      _hierarchy["default"].layout_hierarchyVisitBefore(root0, function (node) {
+        if (node.x < left.x) left = node;
+        if (node.x > right.x) right = node;
+        if (node.depth > bottom.depth) bottom = node;
+      });
 
-        var tx = separation(left, right) / 2 - left.x,
-            kx = size[0] / (right.x + separation(right, left) / 2 + tx),
-            ky = size[1] / (bottom.depth || 1);
+      var tx = separation(left, right) / 2 - left.x,
+          kx = size[0] / (right.x + separation(right, left) / 2 + tx),
+          ky = size[1] / (bottom.depth || 1);
 
-        _hierarchy["default"].layout_hierarchyVisitBefore(root0, function (node) {
-          node.x = (node.x + tx) * kx;
-          node.y = node.depth * ky;
-        });
-      }
+      _hierarchy["default"].layout_hierarchyVisitBefore(root0, function (node) {
+        node.x = (node.x + tx) * kx;
+        node.y = node.depth * ky;
+      });
+    }
     return nodes;
   }
 
@@ -48460,9 +49884,9 @@ var Legend = /*#__PURE__*/function (_Component) {
             _icon.context.fillStyle = !obj.enabled ? "#ccc" : obj.color || "#999";
 
             if (obj.enabled) {
-              me.app.show(obj.name, new _trigger["default"](this, obj));
+              me.app.show(obj.field, new _trigger["default"](this, obj));
             } else {
-              me.app.hide(obj.name, new _trigger["default"](this, obj));
+              me.app.hide(obj.field, new _trigger["default"](this, obj));
             }
           }
 
@@ -48497,7 +49921,6 @@ var Legend = /*#__PURE__*/function (_Component) {
         triggerType: 'legend',
         trigger: this,
         tipsEnabled: this.tipsEnabled,
-        //title : data.name,
         nodes: [{
           name: data.name,
           fillStyle: data.color
@@ -49907,10 +51330,10 @@ var MarkLine = /*#__PURE__*/function (_Component) {
       }
       var _fstyle = "#777";
 
-      var fieldMap = _coord.getFieldMapOf(field);
+      var fieldConfig = _coord.getFieldConfig(field);
 
-      if (fieldMap) {
-        _fstyle = fieldMap.color;
+      if (fieldConfig) {
+        _fstyle = fieldConfig.color;
       }
       var lineStrokeStyle = opt.line && opt.line.strokeStyle || _fstyle;
       var textFillStyle = opt.label && opt.label.fontColor || _fstyle; //开始计算赋值到属性上面
@@ -50139,8 +51562,6 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports["default"] = void 0;
 
-var _typeof2 = interopRequireDefault(_typeof_1$1);
-
 var _classCallCheck2 = interopRequireDefault(classCallCheck$1);
 
 var _createClass2 = interopRequireDefault(createClass$1);
@@ -50158,6 +51579,8 @@ var _component = interopRequireDefault(component);
 var _canvax = interopRequireDefault(Canvax);
 
 
+
+var _numeral = interopRequireDefault(numeral);
 
 function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
 
@@ -50178,7 +51601,8 @@ var Tips = /*#__PURE__*/function (_Component) {
     (0, _classCallCheck2["default"])(this, Tips);
     _this = _super.call(this, opt, app);
     _this.name = "tips";
-    _this.tipDomContainer = _this.app.canvax.domView;
+    _this.tipDomContainer = document ? document.body : null; //this.app.canvax.domView;
+
     _this.cW = 0; //容器的width
 
     _this.cH = 0; //容器的height
@@ -50202,7 +51626,8 @@ var Tips = /*#__PURE__*/function (_Component) {
     var me = (0, _assertThisInitialized2["default"])(_this);
 
     _this.sprite.on("destroy", function () {
-      me._tipDom = null;
+      //me._tipDom = null;
+      me._removeContent();
     });
 
     _.extend(true, (0, _assertThisInitialized2["default"])(_this), (0, tools.getDefaultProps)(Tips.defaultProps()), opt);
@@ -50307,11 +51732,14 @@ var Tips = /*#__PURE__*/function (_Component) {
     value: function _setPosition(e) {
       //tips直接修改为fixed，所以定位直接用e.x e.y 2020-02-27
       if (!this.enabled) return;
-      if (!this._tipDom) return;
+      if (!this._tipDom) return; //let x = this._checkX( e.clientX + this.offsetX);
+      //let y = this._checkY( e.clientY + this.offsetY);
 
-      var x = this._checkX(e.clientX + this.offsetX);
+      var domBounding = this.app.canvax.el.getBoundingClientRect();
 
-      var y = this._checkY(e.clientY + this.offsetY);
+      var x = this._checkX(e.offsetX + domBounding.x + this.offsetX);
+
+      var y = this._checkY(e.offsetY + domBounding.y + this.offsetY);
 
       this._tipDom.style.cssText += ";visibility:visible;left:" + x + "px;top:" + y + "px;";
 
@@ -50374,6 +51802,10 @@ var Tips = /*#__PURE__*/function (_Component) {
   }, {
     key: "_getDefaultContent",
     value: function _getDefaultContent(info) {
+      var _coord = this.app.getComponent({
+        name: 'coord'
+      });
+
       var str = "";
 
       if (!info.nodes.length && !info.tipsContent) {
@@ -50381,34 +51813,39 @@ var Tips = /*#__PURE__*/function (_Component) {
       }
 
       if (info.nodes.length) {
+        str += "<table >";
+
         if (info.title !== undefined && info.title !== null && info.title !== "") {
-          str += "<div style='font-size:14px;border-bottom:1px solid #f0f0f0;padding:4px;margin-bottom:6px;'>" + info.title + "</div>";
+          str += "<tr><td colspan='2' style='text-align:left'>";
+          str += "<span style='font-size:12px;padding:4px;color:#333;'>" + info.title + "</span>";
+          str += "</td></tr>";
         }
 
         _.each(info.nodes, function (node, i) {
-          /*
-          if (!node.value && node.value !== 0) {
-              return;
-          };
-          */
+          // if (!node.value && node.value !== 0) {
+          //     return;
+          // };
+          var hasValue = node.value || node.value === 0;
           var style = node.color || node.fillStyle || node.strokeStyle;
-          var name = node.name || node.field || node.content || node.label;
-          var value = (0, _typeof2["default"])(node.value) == "object" ? JSON.stringify(node.value) : (0, tools.numAddSymbol)(node.value);
-          var hasVal = node.value || node.value == 0;
-          str += "<div style='line-height:1.5;font-size:12px;padding:0 4px;'>";
+          var name, value;
 
-          if (style) {
-            str += "<span style='background:" + style + ";margin-right:8px;margin-top:7px;float:left;width:8px;height:8px;border-radius:4px;overflow:hidden;font-size:0;'></span>";
+          var fieldConfig = _coord.getFieldConfig(node.field);
+
+          name = fieldConfig.name || node.name || node.field || node.content || node.label;
+          value = fieldConfig.getFormatValue(node.value);
+
+          if (!hasValue) {
+            style = "#ddd";
+            value = '--';
           }
 
-          if (name) {
-            str += "<span style='margin-right:5px;'>" + name;
-            hasVal && (str += "：");
-            str += "</span>";
-          }
-          hasVal && (str += value);
-          str += "</div>";
+          str += "<tr>";
+          str += "<td style='padding:0px 6px;color:" + (!hasValue ? '#ddd' : '#a0a0a0;') + "'>" + name + "</td>";
+          str += "<td style='padding:0px 6px;'><span style='color:" + style + "'>" + value + "</span></td>";
+          str += "</tr>";
         });
+
+        str += "</table>";
       }
 
       if (info.tipsContent) {
@@ -50673,6 +52110,10 @@ var Tips = /*#__PURE__*/function (_Component) {
         pointerAnim: {
           detail: 'tips移动的时候，指针是否开启动画',
           "default": true
+        },
+        linkageName: {
+          detail: 'tips的多图表联动，相同的图表会执行事件联动，这个属性注意要保证y轴的width是一致的',
+          "default": null
         },
         onshow: {
           detail: 'show的时候的事件',

@@ -399,8 +399,8 @@ class Progress extends GraphsBase
     _getStyle( nodeData, prop, def ){
         let me = this;
         let _coord = this.app.getComponent({name:'coord'});
-        let fieldMap = _coord.getFieldMapOf( nodeData.field );
-        def = def || (fieldMap ? fieldMap.color : "#171717");
+        let fieldConfig = _coord.getFieldConfig( nodeData.field );
+        def = def || (fieldConfig ? fieldConfig.color : "#171717");
 
         let style;
         if( prop ){

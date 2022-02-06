@@ -7,8 +7,6 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports["default"] = void 0;
 
-var _typeof2 = _interopRequireDefault(require("@babel/runtime/helpers/typeof"));
-
 var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
 var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
@@ -26,6 +24,8 @@ var _component = _interopRequireDefault(require("../component"));
 var _canvax = _interopRequireDefault(require("canvax"));
 
 var _tools = require("../../utils/tools");
+
+var _numeral = _interopRequireDefault(require("numeral"));
 
 function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
 
@@ -46,7 +46,8 @@ var Tips = /*#__PURE__*/function (_Component) {
     (0, _classCallCheck2["default"])(this, Tips);
     _this = _super.call(this, opt, app);
     _this.name = "tips";
-    _this.tipDomContainer = _this.app.canvax.domView;
+    _this.tipDomContainer = document ? document.body : null; //this.app.canvax.domView;
+
     _this.cW = 0; //容器的width
 
     _this.cH = 0; //容器的height
@@ -70,7 +71,8 @@ var Tips = /*#__PURE__*/function (_Component) {
     var me = (0, _assertThisInitialized2["default"])(_this);
 
     _this.sprite.on("destroy", function () {
-      me._tipDom = null;
+      //me._tipDom = null;
+      me._removeContent();
     });
 
     _.extend(true, (0, _assertThisInitialized2["default"])(_this), (0, _tools.getDefaultProps)(Tips.defaultProps()), opt);
@@ -185,11 +187,14 @@ var Tips = /*#__PURE__*/function (_Component) {
     value: function _setPosition(e) {
       //tips直接修改为fixed，所以定位直接用e.x e.y 2020-02-27
       if (!this.enabled) return;
-      if (!this._tipDom) return;
+      if (!this._tipDom) return; //let x = this._checkX( e.clientX + this.offsetX);
+      //let y = this._checkY( e.clientY + this.offsetY);
 
-      var x = this._checkX(e.clientX + this.offsetX);
+      var domBounding = this.app.canvax.el.getBoundingClientRect();
 
-      var y = this._checkY(e.clientY + this.offsetY);
+      var x = this._checkX(e.offsetX + domBounding.x + this.offsetX);
+
+      var y = this._checkY(e.offsetY + domBounding.y + this.offsetY);
 
       this._tipDom.style.cssText += ";visibility:visible;left:" + x + "px;top:" + y + "px;";
 
@@ -260,6 +265,10 @@ var Tips = /*#__PURE__*/function (_Component) {
   }, {
     key: "_getDefaultContent",
     value: function _getDefaultContent(info) {
+      var _coord = this.app.getComponent({
+        name: 'coord'
+      });
+
       var str = "";
 
       if (!info.nodes.length && !info.tipsContent) {
@@ -269,40 +278,41 @@ var Tips = /*#__PURE__*/function (_Component) {
       ;
 
       if (info.nodes.length) {
+        str += "<table >";
+
         if (info.title !== undefined && info.title !== null && info.title !== "") {
-          str += "<div style='font-size:14px;border-bottom:1px solid #f0f0f0;padding:4px;margin-bottom:6px;'>" + info.title + "</div>";
+          str += "<tr><td colspan='2' style='text-align:left'>";
+          str += "<span style='font-size:12px;padding:4px;color:#333;'>" + info.title + "</span>";
+          str += "</td></tr>";
         }
 
         ;
 
         _.each(info.nodes, function (node, i) {
-          /*
-          if (!node.value && node.value !== 0) {
-              return;
-          };
-          */
+          // if (!node.value && node.value !== 0) {
+          //     return;
+          // };
+          var hasValue = node.value || node.value === 0;
           var style = node.color || node.fillStyle || node.strokeStyle;
-          var name = node.name || node.field || node.content || node.label;
-          var value = (0, _typeof2["default"])(node.value) == "object" ? JSON.stringify(node.value) : (0, _tools.numAddSymbol)(node.value);
-          var hasVal = node.value || node.value == 0;
-          str += "<div style='line-height:1.5;font-size:12px;padding:0 4px;'>";
+          var name, value;
 
-          if (style) {
-            str += "<span style='background:" + style + ";margin-right:8px;margin-top:7px;float:left;width:8px;height:8px;border-radius:4px;overflow:hidden;font-size:0;'></span>";
+          var fieldConfig = _coord.getFieldConfig(node.field);
+
+          name = fieldConfig.name || node.name || node.field || node.content || node.label;
+          value = fieldConfig.getFormatValue(node.value);
+
+          if (!hasValue) {
+            style = "#ddd";
+            value = '--';
           }
 
-          ;
-
-          if (name) {
-            str += "<span style='margin-right:5px;'>" + name;
-            hasVal && (str += "：");
-            str += "</span>";
-          }
-
-          ;
-          hasVal && (str += value);
-          str += "</div>";
+          str += "<tr>";
+          str += "<td style='padding:0px 6px;color:" + (!hasValue ? '#ddd' : '#a0a0a0;') + "'>" + name + "</td>";
+          str += "<td style='padding:0px 6px;'><span style='color:" + style + "'>" + value + "</span></td>";
+          str += "</tr>";
         });
+
+        str += "</table>";
       }
 
       if (info.tipsContent) {
@@ -585,6 +595,10 @@ var Tips = /*#__PURE__*/function (_Component) {
         pointerAnim: {
           detail: 'tips移动的时候，指针是否开启动画',
           "default": true
+        },
+        linkageName: {
+          detail: 'tips的多图表联动，相同的图表会执行事件联动，这个属性注意要保证y轴的width是一致的',
+          "default": null
         },
         onshow: {
           detail: 'show的时候的事件',

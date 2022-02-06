@@ -10346,8 +10346,8 @@ var _typeof2 = _interopRequireDefault(require("@babel/runtime/helpers/typeof"));
         if (string.charCodeAt(0) === 46
         /* . */
         ) {
-            result.push("");
-          }
+          result.push("");
+        }
 
         string.replace(rePropName, function (match, number, quote, subString) {
           result.push(quote ? subString.replace(reEscapeChar, "$1") : number || match);

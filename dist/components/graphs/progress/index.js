@@ -344,9 +344,9 @@ var Progress = /*#__PURE__*/function (_GraphsBase) {
         name: 'coord'
       });
 
-      var fieldMap = _coord.getFieldMapOf(nodeData.field);
+      var fieldConfig = _coord.getFieldConfig(nodeData.field);
 
-      def = def || (fieldMap ? fieldMap.color : "#171717");
+      def = def || (fieldConfig ? fieldConfig.color : "#171717");
       var style;
 
       if (prop) {

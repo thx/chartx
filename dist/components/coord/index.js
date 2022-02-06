@@ -7,6 +7,10 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports["default"] = void 0;
 
+var _typeof2 = _interopRequireDefault(require("@babel/runtime/helpers/typeof"));
+
+var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
+
 var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
 var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
@@ -24,6 +28,12 @@ var _component = _interopRequireDefault(require("../component"));
 var _canvax = _interopRequireDefault(require("canvax"));
 
 var _tools = require("../../utils/tools");
+
+var _numeral = _interopRequireDefault(require("numeral"));
+
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { (0, _defineProperty2["default"])(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
 
 function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
 
@@ -74,7 +84,7 @@ var coordBase = /*#__PURE__*/function (_Component) {
     key: "setFieldsMap",
     value: function setFieldsMap(axisExp) {
       var me = this;
-      var fieldInd = 0;
+      var ind = 0;
       var axisType = axisExp.type || "yAxis";
       var fieldsArr = [];
 
@@ -86,6 +96,8 @@ var coordBase = /*#__PURE__*/function (_Component) {
         ;
       });
 
+      var graphs = _.flatten([this.app._opt.graphs]);
+
       function _set(fields) {
         if (_.isString(fields)) {
           fields = [fields];
@@ -95,28 +107,92 @@ var coordBase = /*#__PURE__*/function (_Component) {
 
         var clone_fields = _.clone(fields);
 
-        for (var i = 0, l = fields.length; i < l; i++) {
-          if (_.isString(fields[i])) {
-            clone_fields[i] = {
-              field: fields[i],
+        var _loop = function _loop(i, l) {
+          var field = fields[i];
+
+          if (_.isString(field)) {
+            var color = me.app.getTheme(ind);
+            var graph;
+            var graphFieldInd;
+            var graphColorProp; //graphs.find( graph => {_.flatten([graph.field]).indexOf( field )} ).color;
+
+            for (var _i = 0, _l = graphs.length; _i < _l; _i++) {
+              graph = graphs[_i];
+              graphFieldInd = _.flatten([graph.field]).indexOf(field);
+
+              if (graphFieldInd > -1) {
+                graphColorProp = graph.color;
+                break;
+              }
+            }
+
+            ;
+
+            if (graphColorProp) {
+              if (typeof graphColorProp == 'string') {
+                color = graphColorProp;
+              }
+
+              if (Array.isArray(graphColorProp)) {
+                color = graphColorProp[graphFieldInd];
+              }
+
+              if (typeof graphColorProp == 'function') {
+                color = graphColorProp.apply(me.app, [graph]);
+              }
+            }
+
+            ;
+            var config = me.fieldsConfig[field];
+
+            var fieldItem = _objectSpread({
+              field: field,
+              name: field,
+              //fieldConfig中可能会覆盖
               enabled: true,
-              //yAxis : me.getAxis({type:'yAxis', field:fields[i] }),
-              color: me.app.getTheme(fieldInd),
-              ind: fieldInd++
+              color: color,
+              ind: ind++
+            }, me.fieldsConfig[field] || {});
+
+            fieldItem.getFormatValue = function (value) {
+              if (config && config.format) {
+                if (typeof config.format == 'string') {
+                  //如果传入的是 字符串，那么就认为是 numeral 的格式字符串
+                  value = (0, _numeral["default"])(value).format(config.format);
+                }
+
+                if (typeof config.format == 'function') {
+                  //如果传入的是 字符串，那么就认为是 numeral 的格式字符串
+                  value = config.format.apply(me, {
+                    field: field
+                  });
+                }
+              } else {
+                value = (0, _typeof2["default"])(value) == "object" ? JSON.stringify(value) : (0, _numeral["default"])(value).format('0,0');
+              }
+
+              ;
+              return value;
             };
-            clone_fields[i][axisType] = me.getAxis({
+
+            fieldItem[axisType] = me.getAxis({
               type: axisType,
-              field: fields[i]
+              field: field
             });
+            clone_fields[i] = fieldItem;
           }
 
           ;
 
-          if (_.isArray(fields[i])) {
-            clone_fields[i] = _set(fields[i], fieldInd);
+          if (_.isArray(field)) {
+            clone_fields[i] = _set(field, ind);
           }
 
           ;
+        };
+
+        for (var i = 0, l = fields.length; i < l; i++) {
+          _loop(i, l);
         }
 
         ;
@@ -143,26 +219,27 @@ var coordBase = /*#__PURE__*/function (_Component) {
       }
 
       set(me.fieldsMap);
-    }
+    } //从FieldsMap中获取对应的config
+
   }, {
-    key: "getFieldMapOf",
-    value: function getFieldMapOf(field) {
+    key: "getFieldConfig",
+    value: function getFieldConfig(field) {
       var me = this;
-      var fieldMap = null;
+      var fieldConfig = null;
 
       function get(maps) {
         _.each(maps, function (map) {
           if (_.isArray(map)) {
             get(map);
           } else if (map.field && map.field == field) {
-            fieldMap = map;
+            fieldConfig = map;
             return false;
           }
         });
       }
 
       get(me.fieldsMap);
-      return fieldMap;
+      return fieldConfig;
     } //从 fieldsMap 中过滤筛选出来一个一一对应的 enabled为true的对象结构
     //这个方法还必须要返回的数据里描述出来多y轴的结构。否则外面拿到数据后并不好处理那个数据对应哪个轴
 
@@ -207,7 +284,7 @@ var coordBase = /*#__PURE__*/function (_Component) {
 
       _.each(fields, function (f) {
         if (!_.isArray(f)) {
-          if (me.getFieldMapOf(f).enabled) {
+          if (me.getFieldConfig(f).enabled) {
             arr.push(f);
           }
         } else {
@@ -215,7 +292,7 @@ var coordBase = /*#__PURE__*/function (_Component) {
           var varr = [];
 
           _.each(f, function (v_f) {
-            if (me.getFieldMapOf(v_f).enabled) {
+            if (me.getFieldConfig(v_f).enabled) {
               varr.push(v_f);
             }
           });
@@ -368,6 +445,10 @@ var coordBase = /*#__PURE__*/function (_Component) {
               "default": 0
             }
           }
+        },
+        fieldsConfig: {
+          detail: '字段的配置信息({uv:{name:"",format:""}})，包括中文名称和格式化单位，内部使用numeral做格式化',
+          "default": {}
         }
       };
     }

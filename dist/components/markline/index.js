@@ -145,10 +145,10 @@ var MarkLine = /*#__PURE__*/function (_Component) {
       ;
       var _fstyle = "#777";
 
-      var fieldMap = _coord.getFieldMapOf(field);
+      var fieldConfig = _coord.getFieldConfig(field);
 
-      if (fieldMap) {
-        _fstyle = fieldMap.color;
+      if (fieldConfig) {
+        _fstyle = fieldConfig.color;
       }
 
       ;

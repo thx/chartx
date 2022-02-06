@@ -7,6 +7,8 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports["default"] = void 0;
 
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
+
 var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
 /**
@@ -15,11 +17,10 @@ var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/cl
  * params属性则是这次trigger的一些动作参数
  * 目前legend和datazoom组件都有用到
  */
-var Trigger = function Trigger(comp) {
+var Trigger = /*#__PURE__*/(0, _createClass2["default"])(function Trigger(comp) {
   var params = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
   (0, _classCallCheck2["default"])(this, Trigger);
   this.comp = comp;
   this.params = params;
-};
-
+});
 exports["default"] = Trigger;

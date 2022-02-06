@@ -1,6 +1,7 @@
 import Component from "../component"
 import Canvax from "canvax"
-import { numAddSymbol,getDefaultProps } from "../../utils/tools"
+import { getDefaultProps } from "../../utils/tools"
+import numeral from "numeral"
 
 let _ = Canvax._;
 let Rect = Canvax.Shapes.Rect;
@@ -59,6 +60,11 @@ class Tips extends Component {
                 detail: 'tips移动的时候，指针是否开启动画',
                 default: true
             },
+            linkageName : {
+                detail: 'tips的多图表联动，相同的图表会执行事件联动，这个属性注意要保证y轴的width是一致的',
+                default: null
+            },
+            
             onshow : {
                 detail: 'show的时候的事件',
                 default: function(){}
@@ -79,13 +85,12 @@ class Tips extends Component {
 
         this.name = "tips"
 
-        this.tipDomContainer = this.app.canvax.domView;
+        this.tipDomContainer = document ? document.body : null; //this.app.canvax.domView;
         this.cW = 0;  //容器的width
         this.cH = 0;  //容器的height
 
         this.dW = 0;  //html的tips内容width
         this.dH = 0;  //html的tips内容Height
-
 
         this._tipDom = null;
         this._tipsPointer = null;
@@ -102,7 +107,8 @@ class Tips extends Component {
 
         let me = this;
         this.sprite.on("destroy", function() {
-            me._tipDom = null;
+            //me._tipDom = null;
+            me._removeContent();
         });
 
         _.extend(true, this, getDefaultProps( Tips.defaultProps() ), opt);
@@ -199,9 +205,13 @@ class Tips extends Component {
         //tips直接修改为fixed，所以定位直接用e.x e.y 2020-02-27
         if (!this.enabled) return;
         if (!this._tipDom) return;
+        
+        //let x = this._checkX( e.clientX + this.offsetX);
+        //let y = this._checkY( e.clientY + this.offsetY);
+        var domBounding = this.app.canvax.el.getBoundingClientRect();
 
-        let x = this._checkX( e.clientX + this.offsetX);
-        let y = this._checkY( e.clientY + this.offsetY);
+        let x = this._checkX( e.offsetX + domBounding.x + this.offsetX);
+        let y = this._checkY( e.offsetY + domBounding.y + this.offsetY);
 
         this._tipDom.style.cssText += ";visibility:visible;left:" + x + "px;top:" + y + "px;";
 
@@ -261,6 +271,8 @@ class Tips extends Component {
     }
 
     _getDefaultContent(info) {
+
+        let _coord = this.app.getComponent({name:'coord'});
         
         let str = "";
         if( !info.nodes.length && !info.tipsContent ){
@@ -268,32 +280,38 @@ class Tips extends Component {
         };
 
         if( info.nodes.length ){
+            str += "<table >"
             if (info.title !== undefined && info.title !== null && info.title !== "") {
-                str += "<div style='font-size:14px;border-bottom:1px solid #f0f0f0;padding:4px;margin-bottom:6px;'>" + info.title + "</div>";
+                str += "<tr><td colspan='2' style='text-align:left'>"
+                str += "<span style='font-size:12px;padding:4px;color:#333;'>" + info.title + "</span>";
+                str += "</td></tr>"
             }; 
             _.each(info.nodes, function (node, i) {
-                /*
-                if (!node.value && node.value !== 0) {
-                    return;
-                };
-                */
-                let style = node.color || node.fillStyle || node.strokeStyle;
-                let name = node.name || node.field || node.content || node.label;
-                let value = typeof(node.value) == "object" ? JSON.stringify(node.value) : numAddSymbol(node.value);
-                let hasVal = node.value || node.value == 0
+                
+                // if (!node.value && node.value !== 0) {
+                //     return;
+                // };
 
-                str += "<div style='line-height:1.5;font-size:12px;padding:0 4px;'>"
-                if( style ){
-                    str += "<span style='background:" + style + ";margin-right:8px;margin-top:7px;float:left;width:8px;height:8px;border-radius:4px;overflow:hidden;font-size:0;'></span>";
-                };
-                if( name ){
-                    str += "<span style='margin-right:5px;'>"+name;
-                    hasVal && (str += "：");
-                    str += "</span>";
-                };
-                hasVal && (str += value);
-                str += "</div>";
+                let hasValue = node.value || node.value === 0;
+                
+                let style = node.color || node.fillStyle || node.strokeStyle;
+                let name,value;
+                let fieldConfig = _coord.getFieldConfig( node.field );
+                name = fieldConfig.name || node.name || node.field || node.content || node.label;
+                value = fieldConfig.getFormatValue( node.value );
+
+                if( !hasValue ){
+                    style = "#ddd";
+                    value = '--'
+                }
+                
+                str += "<tr>"
+                str += "<td style='padding:0px 6px;color:" + (!hasValue ? '#ddd' : '#a0a0a0;') + "'>"+name+"</td>"
+                str += "<td style='padding:0px 6px;'><span style='color:"+style+"'>"+value+"</span></td>"
+                str += "</tr>";
+
             });
+            str += "</table>"
         }
         if( info.tipsContent ){
             str += info.tipsContent;

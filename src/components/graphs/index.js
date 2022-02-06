@@ -21,7 +21,11 @@ export default class GraphsBase extends Component
             },
             aniDuration: {
                 detail: '动画时长',
-                default: 500
+                default: 600
+            },
+            color: {
+                detail : 'line,area,node,label的抄底样式',
+                default: 'left'
             }
         }
     }
