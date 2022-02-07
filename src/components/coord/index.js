@@ -134,6 +134,7 @@ export default class coordBase extends Component
                     let fieldItem = {
                         field, 
                         name: field, //fieldConfig中可能会覆盖
+                        type: graph.type,
                         enabled : true,
                         color,
                         ind : ind++,

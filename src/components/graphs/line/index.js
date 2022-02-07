@@ -61,7 +61,6 @@ class LineGraphs extends GraphsBase
 
         this._setGroupsForYfield( this.data , null, opt );
 
-        //this.grow();
         if( this.animation && !opt.resize ){
             this.grow();
         } else {
@@ -272,7 +271,8 @@ class LineGraphs extends GraphsBase
             );
 
             group.draw( {
-                animation : me.animation && !opt.resize
+                animation : me.animation,
+                isResize: opt.resize
             }, g.data );
 
             newGroups.push( group );

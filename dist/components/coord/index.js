@@ -149,6 +149,7 @@ var coordBase = /*#__PURE__*/function (_Component) {
               field: field,
               name: field,
               //fieldConfig中可能会覆盖
+              type: graph.type,
               enabled: true,
               color: color,
               ind: ind++
