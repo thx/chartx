@@ -1155,10 +1155,10 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
           _focusNode.context.lineWidth = 0; //不需要描边
 
           _focusNode.context.fillStyle = _node.context.strokeStyle;
-          _focusNode.context.globalAlpha = 0.5;
+          _focusNode.context.globalAlpha = this.node.focus.alpha;
 
           _focusNode.animate({
-            r: _focusNode.context.r + 6
+            r: _focusNode.context.r + this.node.focus.radiusDiff
           }, {
             duration: 300
           });
@@ -1273,6 +1273,19 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
             visible: {
               detail: '节点是否显示,支持函数',
               "default": true
+            },
+            focus: {
+              detail: "节点hover态设置",
+              propertys: {
+                radiusDiff: {
+                  detail: 'hover后的背景节点半径相差，正数为变大值,默认为4',
+                  "default": 4
+                },
+                alpha: {
+                  detail: 'hover后的背景节点透明度，默认为0.5',
+                  "default": 0.5
+                }
+              }
             }
           }
         },

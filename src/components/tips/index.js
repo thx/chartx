@@ -56,6 +56,18 @@ class Tips extends Component {
                 default: 'line',
                 documentation: 'tips的指针,默认为直线，可选为："line" | "region"(柱状图中一般用region)'
             },
+            pointerColor : {
+                detail: 'tips指针样式的颜色',
+                default: "#ccc"
+            },
+            pointerLineWidth: {
+                detail: 'pointer为line的时候，设置指针line的线宽，默认1.5',
+                default: 1
+            },
+            pointerRegionAlpha: {
+                detail: 'pointer为region的时候，设置指针region的透明度',
+                default: 0.25
+            },
             pointerAnim : {
                 detail: 'tips移动的时候，指针是否开启动画',
                 default: true
@@ -393,8 +405,8 @@ class Tips extends Component {
                             x: 0,
                             y: _coord.height
                         },
-                        lineWidth: 1,
-                        strokeStyle: "#cccccc"
+                        lineWidth: this.pointerLineWidth,
+                        strokeStyle: this.pointerColor
                     }
                 });
             };
@@ -407,8 +419,8 @@ class Tips extends Component {
                         height: _coord.height,
                         x: x,
                         y: y,
-                        fillStyle: "#cccccc",
-                        globalAlpha: 0.3
+                        fillStyle: this.pointerColor,
+                        globalAlpha: this.pointerRegionAlpha
                     }
                 });
             };

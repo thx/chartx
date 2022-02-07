@@ -18938,10 +18938,10 @@ var chartx = (function () {
 	          _focusNode.context.lineWidth = 0; //不需要描边
 
 	          _focusNode.context.fillStyle = _node.context.strokeStyle;
-	          _focusNode.context.globalAlpha = 0.5;
+	          _focusNode.context.globalAlpha = this.node.focus.alpha;
 
 	          _focusNode.animate({
-	            r: _focusNode.context.r + 6
+	            r: _focusNode.context.r + this.node.focus.radiusDiff
 	          }, {
 	            duration: 300
 	          });
@@ -19052,6 +19052,19 @@ var chartx = (function () {
 	            visible: {
 	              detail: '节点是否显示,支持函数',
 	              "default": true
+	            },
+	            focus: {
+	              detail: "节点hover态设置",
+	              propertys: {
+	                radiusDiff: {
+	                  detail: 'hover后的背景节点半径相差，正数为变大值,默认为4',
+	                  "default": 4
+	                },
+	                alpha: {
+	                  detail: 'hover后的背景节点透明度，默认为0.5',
+	                  "default": 0.5
+	                }
+	              }
 	            }
 	          }
 	        },
@@ -51985,8 +51998,8 @@ var chartx = (function () {
 	                x: 0,
 	                y: _coord.height
 	              },
-	              lineWidth: 1,
-	              strokeStyle: "#cccccc"
+	              lineWidth: this.pointerLineWidth,
+	              strokeStyle: this.pointerColor
 	            }
 	          });
 	        }
@@ -52001,8 +52014,8 @@ var chartx = (function () {
 	              height: _coord.height,
 	              x: x,
 	              y: y,
-	              fillStyle: "#cccccc",
-	              globalAlpha: 0.3
+	              fillStyle: this.pointerColor,
+	              globalAlpha: this.pointerRegionAlpha
 	            }
 	          });
 	        }
@@ -52148,6 +52161,18 @@ var chartx = (function () {
 	          detail: '触发tips的时候的指针样式',
 	          "default": 'line',
 	          documentation: 'tips的指针,默认为直线，可选为："line" | "region"(柱状图中一般用region)'
+	        },
+	        pointerColor: {
+	          detail: 'tips指针样式的颜色',
+	          "default": "#ccc"
+	        },
+	        pointerLineWidth: {
+	          detail: 'pointer为line的时候，设置指针line的线宽，默认1.5',
+	          "default": 1
+	        },
+	        pointerRegionAlpha: {
+	          detail: 'pointer为region的时候，设置指针region的透明度',
+	          "default": 0.25
 	        },
 	        pointerAnim: {
 	          detail: 'tips移动的时候，指针是否开启动画',
