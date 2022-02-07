@@ -7,10 +7,10 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.colorRgb = colorRgb;
 exports.colorRgba = colorRgba;
+exports.gradient = gradient;
 exports.hex2rgb = hex2rgb;
 exports.rgb2hex = rgb2hex;
 exports.rgba2rgb = rgba2rgb;
-exports.gradient = gradient;
 
 var _slicedToArray2 = _interopRequireDefault(require("@babel/runtime/helpers/slicedToArray"));
 

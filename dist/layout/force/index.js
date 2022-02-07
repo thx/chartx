@@ -151,36 +151,36 @@ function tree_cover(x, y) {
     y1 = (y0 = Math.floor(y)) + 1;
   } // Otherwise, double repeatedly to cover.
   else {
-      var z = x1 - x0,
-          node = this._root,
-          parent,
-          i;
+    var z = x1 - x0,
+        node = this._root,
+        parent,
+        i;
 
-      while (x0 > x || x >= x1 || y0 > y || y >= y1) {
-        i = (y < y0) << 1 | x < x0;
-        parent = new Array(4), parent[i] = node, node = parent, z *= 2;
+    while (x0 > x || x >= x1 || y0 > y || y >= y1) {
+      i = (y < y0) << 1 | x < x0;
+      parent = new Array(4), parent[i] = node, node = parent, z *= 2;
 
-        switch (i) {
-          case 0:
-            x1 = x0 + z, y1 = y0 + z;
-            break;
+      switch (i) {
+        case 0:
+          x1 = x0 + z, y1 = y0 + z;
+          break;
 
-          case 1:
-            x0 = x1 - z, y1 = y0 + z;
-            break;
+        case 1:
+          x0 = x1 - z, y1 = y0 + z;
+          break;
 
-          case 2:
-            x1 = x0 + z, y0 = y1 - z;
-            break;
+        case 2:
+          x1 = x0 + z, y0 = y1 - z;
+          break;
 
-          case 3:
-            x0 = x1 - z, y0 = y1 - z;
-            break;
-        }
+        case 3:
+          x0 = x1 - z, y0 = y1 - z;
+          break;
       }
-
-      if (this._root && this._root.length) this._root = node;
     }
+
+    if (this._root && this._root.length) this._root = node;
+  }
 
   this._x0 = x0;
   this._y0 = y0;
@@ -248,17 +248,17 @@ function tree_find(x, y, radius) {
       }
     } // Visit this point. (Visiting coincident points isn’t necessary!)
     else {
-        var dx = x - +this._x.call(null, node.data),
-            dy = y - +this._y.call(null, node.data),
-            d2 = dx * dx + dy * dy;
+      var dx = x - +this._x.call(null, node.data),
+          dy = y - +this._y.call(null, node.data),
+          d2 = dx * dx + dy * dy;
 
-        if (d2 < radius) {
-          var d = Math.sqrt(radius = d2);
-          x0 = x - d, y0 = y - d;
-          x3 = x + d, y3 = y + d;
-          data = node.data;
-        }
+      if (d2 < radius) {
+        var d = Math.sqrt(radius = d2);
+        x0 = x - d, y0 = y - d;
+        x3 = x + d, y3 = y + d;
+        data = node.data;
       }
+    }
   }
 
   return data;
@@ -1144,14 +1144,14 @@ function manyBody() {
       quad.y = y / weight;
     } // For leaf nodes, accumulate forces from coincident quadrants.
     else {
-        q = quad;
-        q.x = q.data.x;
-        q.y = q.data.y;
+      q = quad;
+      q.x = q.data.x;
+      q.y = q.data.y;
 
-        do {
-          strength += strengths[q.data.index];
-        } while (q = q.next);
-      }
+      do {
+        strength += strengths[q.data.index];
+      } while (q = q.next);
+    }
 
     quad.value = strength;
   }

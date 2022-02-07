@@ -131,10 +131,10 @@ class RadarGraphs extends GraphsBase
                 pointList.push([ node.point.x, node.point.y ]);
             } );
 
-            let fieldMap = _coord.getFieldMapOf( field );
+            let fieldConfig = _coord.getFieldConfig( field );
 
-            let _strokeStyle = me._getStyle( me.line.strokeStyle , fieldMap, iGroup, fieldMap.color );            
-            let _lineType    = me._getStyle( me.line.lineType    , fieldMap, iGroup, fieldMap.color );
+            let _strokeStyle = me._getStyle( me.line.strokeStyle , fieldConfig, iGroup, fieldConfig.color );            
+            let _lineType    = me._getStyle( me.line.lineType    , fieldConfig, iGroup, fieldConfig.color );
 
             let polyCtx = {
                 pointList : pointList,
@@ -147,8 +147,8 @@ class RadarGraphs extends GraphsBase
                 polyCtx.lineType = _lineType;
             };
             if( me.area.enabled ){
-                polyCtx.fillStyle = me._getStyle( me.area.fillStyle , fieldMap, iGroup, fieldMap.color );
-                polyCtx.fillAlpha = me._getStyle( me.area.fillAlpha , fieldMap, iGroup, 1 );
+                polyCtx.fillStyle = me._getStyle( me.area.fillStyle , fieldConfig, iGroup, fieldConfig.color );
+                polyCtx.fillAlpha = me._getStyle( me.area.fillAlpha , fieldConfig, iGroup, 1 );
             };
 
             let _poly = new Polygon({
@@ -310,7 +310,7 @@ class RadarGraphs extends GraphsBase
         let data = {}
         _.each( this.enabledField, function( field ){
             let dataOrg = me.dataFrame.getFieldData(field);
-            let fieldMap = _coord.getFieldMapOf( field );
+            let fieldConfig = _coord.getFieldConfig( field );
             let arr = [];
 
             _.each( _coord.aAxis.angleList , function( _a , i ){
@@ -325,7 +325,7 @@ class RadarGraphs extends GraphsBase
                     focused : false,
                     value   : dataOrg[i],
                     point   : point,
-                    color   : fieldMap.color
+                    color   : fieldConfig.color
                 } );
             } );
             data[ field ] = arr;
@@ -333,7 +333,7 @@ class RadarGraphs extends GraphsBase
         return data;
     }
 
-    _getStyle( style, fieldMap, iGroup ,def )
+    _getStyle( style, fieldConfig, iGroup ,def )
     {
         let _s = def;
         if( _.isString( style ) || _.isNumber( style ) ){
@@ -343,7 +343,7 @@ class RadarGraphs extends GraphsBase
             _s = style[ iGroup ];
         };
         if( _.isFunction( style ) ){
-            _s = style( iGroup, fieldMap );
+            _s = style( iGroup, fieldConfig );
         };
         if( _s === undefined || _s === null ){
             //只有undefined(用户配置了function),null才会认为需要还原皮肤色

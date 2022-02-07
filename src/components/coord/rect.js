@@ -451,10 +451,10 @@ class Rect extends coordBase
         
         this.setFieldEnabled( field );
         
-        let fieldMap = this.getFieldMapOf(field);
-        let _axis = fieldMap.yAxis || fieldMap.rAxis;
+        let fieldConfig = this.getFieldConfig(field);
+        let _axis = fieldConfig.yAxis || fieldConfig.rAxis;
         
-        let enabledFields = this.getEnabledFieldsOf( _axis )//[ fieldMap.yAxis.align ];
+        let enabledFields = this.getEnabledFieldsOf( _axis )//[ fieldConfig.yAxis.align ];
         
         _axis.resetData( this.getAxisDataFrame( enabledFields ) );
         this._resetXY_axisLine_pos();

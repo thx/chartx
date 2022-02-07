@@ -205,7 +205,11 @@ var GraphsBase = /*#__PURE__*/function (_Component) {
         },
         aniDuration: {
           detail: '动画时长',
-          "default": 500
+          "default": 600
+        },
+        color: {
+          detail: 'line,area,node,label的抄底样式',
+          "default": 'left'
         }
       };
     }

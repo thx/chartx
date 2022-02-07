@@ -313,9 +313,9 @@ var Legend = /*#__PURE__*/function (_Component) {
             _icon.context.fillStyle = !obj.enabled ? "#ccc" : obj.color || "#999";
 
             if (obj.enabled) {
-              me.app.show(obj.name, new _trigger["default"](this, obj));
+              me.app.show(obj.field, new _trigger["default"](this, obj));
             } else {
-              me.app.hide(obj.name, new _trigger["default"](this, obj));
+              me.app.hide(obj.field, new _trigger["default"](this, obj));
             }
 
             ;
@@ -360,7 +360,6 @@ var Legend = /*#__PURE__*/function (_Component) {
         triggerType: 'legend',
         trigger: this,
         tipsEnabled: this.tipsEnabled,
-        //title : data.name,
         nodes: [{
           name: data.name,
           fillStyle: data.color

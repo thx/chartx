@@ -32,25 +32,25 @@ var TREE = function TREE() {
     if (nodeSize) _hierarchy["default"].layout_hierarchyVisitBefore(root0, sizeNode); // If a fixed tree size is specified, scale x and y based on the extent.
     // Compute the left-most, right-most, and depth-most nodes for extents.
     else {
-        var left = root0,
-            right = root0,
-            bottom = root0;
+      var left = root0,
+          right = root0,
+          bottom = root0;
 
-        _hierarchy["default"].layout_hierarchyVisitBefore(root0, function (node) {
-          if (node.x < left.x) left = node;
-          if (node.x > right.x) right = node;
-          if (node.depth > bottom.depth) bottom = node;
-        });
+      _hierarchy["default"].layout_hierarchyVisitBefore(root0, function (node) {
+        if (node.x < left.x) left = node;
+        if (node.x > right.x) right = node;
+        if (node.depth > bottom.depth) bottom = node;
+      });
 
-        var tx = separation(left, right) / 2 - left.x,
-            kx = size[0] / (right.x + separation(right, left) / 2 + tx),
-            ky = size[1] / (bottom.depth || 1);
+      var tx = separation(left, right) / 2 - left.x,
+          kx = size[0] / (right.x + separation(right, left) / 2 + tx),
+          ky = size[1] / (bottom.depth || 1);
 
-        _hierarchy["default"].layout_hierarchyVisitBefore(root0, function (node) {
-          node.x = (node.x + tx) * kx;
-          node.y = node.depth * ky;
-        });
-      }
+      _hierarchy["default"].layout_hierarchyVisitBefore(root0, function (node) {
+        node.x = (node.x + tx) * kx;
+        node.y = node.depth * ky;
+      });
+    }
     return nodes;
   }
 

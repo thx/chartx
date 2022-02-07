@@ -509,11 +509,11 @@ var Rect = /*#__PURE__*/function (_coordBase) {
     key: "changeFieldEnabled",
     value: function changeFieldEnabled(field) {
       this.setFieldEnabled(field);
-      var fieldMap = this.getFieldMapOf(field);
+      var fieldConfig = this.getFieldConfig(field);
 
-      var _axis = fieldMap.yAxis || fieldMap.rAxis;
+      var _axis = fieldConfig.yAxis || fieldConfig.rAxis;
 
-      var enabledFields = this.getEnabledFieldsOf(_axis); //[ fieldMap.yAxis.align ];
+      var enabledFields = this.getEnabledFieldsOf(_axis); //[ fieldConfig.yAxis.align ];
 
       _axis.resetData(this.getAxisDataFrame(enabledFields));
 

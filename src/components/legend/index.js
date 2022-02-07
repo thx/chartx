@@ -353,9 +353,9 @@ class Legend extends Component
                     obj.enabled = !obj.enabled;
                     _icon.context.fillStyle = !obj.enabled ? "#ccc" : (obj.color || "#999");
                     if( obj.enabled ){
-                        me.app.show( obj.name , new Trigger( this, obj ) );
+                        me.app.show( obj.field , new Trigger( this, obj ) );
                     } else {
-                        me.app.hide( obj.name , new Trigger( this, obj ));
+                        me.app.hide( obj.field , new Trigger( this, obj ));
                     };
                 };
 
@@ -391,7 +391,6 @@ class Legend extends Component
             triggerType : 'legend',
             trigger : this,
             tipsEnabled : this.tipsEnabled,
-            //title : data.name,
             nodes : [
                 {
                     name : data.name,

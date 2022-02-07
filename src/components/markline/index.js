@@ -158,9 +158,9 @@ class MarkLine extends Component
         };
 
         let _fstyle = "#777";
-        let fieldMap = _coord.getFieldMapOf( field );
-        if( fieldMap ){
-            _fstyle = fieldMap.color;
+        let fieldConfig = _coord.getFieldConfig( field );
+        if( fieldConfig ){
+            _fstyle = fieldConfig.color;
         };
         let lineStrokeStyle =  opt.line && opt.line.strokeStyle || _fstyle;
         let textFillStyle = opt.label && opt.label.fontColor || _fstyle;

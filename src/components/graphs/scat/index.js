@@ -345,7 +345,7 @@ class ScatGraphs extends GraphsBase
         for( let i=0; i<dataLen; i++ ){
             
             let rowData = this.dataFrame.getRowDataAt(i);
-            let fieldMap = _coord.getFieldMapOf( this.field );
+            let fieldConfig = _coord.getFieldConfig( this.field );
 
             let point = _coord.getPoint( {
                 iNode : i,
@@ -367,7 +367,7 @@ class ScatGraphs extends GraphsBase
                 y          : point.pos.y,
                 value      : point.value,
                 field      : this.field,
-                fieldColor : fieldMap.color,
+                fieldColor : fieldConfig.color,
                 iNode      : i,
 
                 focused    : false,
