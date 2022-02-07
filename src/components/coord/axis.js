@@ -121,7 +121,7 @@ export default class Axis extends baseAxis
                     },
                     fontColor: {
                         detail: '文本颜色',
-                        default: '#ccc',
+                        default: '#999',
                     },
                     fontSize: {
                         detail: '字体大小',
