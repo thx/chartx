@@ -429,7 +429,6 @@ export default class LineGraphsGroup extends event.Dispatcher
 
     //首次加载的进场动画
     _grow(callback){
-        
         let _coord = this._graphs.app.getCoord();
         let {width,height} = _coord;
         this.clipRect = new Rect({
@@ -593,8 +592,8 @@ export default class LineGraphsGroup extends event.Dispatcher
         me.graphSprite.addChild(area);
         me._area = area;
 
-        me._createNodes();
-        me._createTexts();
+        me._createNodes( opt );
+        me._createTexts( opt );
     }
 
     _getFirstNode()
@@ -764,7 +763,7 @@ export default class LineGraphsGroup extends event.Dispatcher
         ]
     }
 
-    _createNodes()
+    _createNodes( opt={} )
     {
         
         let me = this;
@@ -793,8 +792,8 @@ export default class LineGraphsGroup extends event.Dispatcher
 
             let x = _point[0];
             let y = _point[1];
-            let globalAlpha = 0;
-            if( this.clipRect ){
+            let globalAlpha = opt.isResize ? 1 : 0;
+            if( this.clipRect && !opt.isResize ){
                 let clipRectCtx = this.clipRect.context;
                 if( x >= clipRectCtx.x && x<= clipRectCtx.x+clipRectCtx.width ){
                     globalAlpha = 1;
@@ -875,7 +874,7 @@ export default class LineGraphsGroup extends event.Dispatcher
        
     }
 
-    _createTexts()
+    _createTexts(opt={})
     {
         
         let me = this;
@@ -895,8 +894,8 @@ export default class LineGraphsGroup extends event.Dispatcher
 
                 let x = _point[0];
                 let y = _point[1] - this.node.radius - 2;
-                let globalAlpha = 0;
-                if( this.clipRect ){
+                let globalAlpha = opt.isResize ? 1 : 0;
+                if( this.clipRect && !opt.isResize ){
                     let clipRectCtx = this.clipRect.context;
                     if( x >= clipRectCtx.x && x<= clipRectCtx.x+clipRectCtx.width ){
                         globalAlpha = 1;

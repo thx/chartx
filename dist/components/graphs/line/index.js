@@ -68,8 +68,7 @@ var LineGraphs = /*#__PURE__*/function (_GraphsBase) {
       this.sprite.context.y = this.origin.y;
       this.data = this._trimGraphs();
 
-      this._setGroupsForYfield(this.data, null, opt); //this.grow();
-
+      this._setGroupsForYfield(this.data, null, opt);
 
       if (this.animation && !opt.resize) {
         this.grow();
@@ -282,7 +281,8 @@ var LineGraphs = /*#__PURE__*/function (_GraphsBase) {
         var group = new _group["default"](fieldConfig, iGroup, //不同于fieldMap.ind
         me._opt, me.ctx, me.height, me.width, me);
         group.draw({
-          animation: me.animation && !opt.resize
+          animation: me.animation,
+          isResize: opt.resize
         }, g.data);
         newGroups.push(group);
         var insert = false; //在groups数组中插入到比自己_groupInd小的元素前面去

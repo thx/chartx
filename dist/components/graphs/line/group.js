@@ -547,9 +547,9 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
       me.graphSprite.addChild(area);
       me._area = area;
 
-      me._createNodes();
+      me._createNodes(opt);
 
-      me._createTexts();
+      me._createTexts(opt);
     }
   }, {
     key: "_getFirstNode",
@@ -743,6 +743,7 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
   }, {
     key: "_createNodes",
     value: function _createNodes() {
+      var opt = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
       var me = this;
       var list = me._currPointList;
       var iNode = 0; //这里不能和下面的a对等，以为list中有很多无效的节点
@@ -772,9 +773,9 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
         ;
         var x = _point[0];
         var y = _point[1];
-        var globalAlpha = 0;
+        var globalAlpha = opt.isResize ? 1 : 0;
 
-        if (this.clipRect) {
+        if (this.clipRect && !opt.isResize) {
           var clipRectCtx = this.clipRect.context;
 
           if (x >= clipRectCtx.x && x <= clipRectCtx.x + clipRectCtx.width) {
@@ -870,6 +871,7 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
   }, {
     key: "_createTexts",
     value: function _createTexts() {
+      var opt = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
       var me = this;
       var list = me._currPointList;
 
@@ -890,9 +892,9 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
           ;
           var x = _point[0];
           var y = _point[1] - this.node.radius - 2;
-          var globalAlpha = 0;
+          var globalAlpha = opt.isResize ? 1 : 0;
 
-          if (this.clipRect) {
+          if (this.clipRect && !opt.isResize) {
             var clipRectCtx = this.clipRect.context;
 
             if (x >= clipRectCtx.x && x <= clipRectCtx.x + clipRectCtx.width) {

@@ -741,6 +741,7 @@ var Chart = /*#__PURE__*/function (_event$Dispatcher) {
             field: map.field,
             ind: map.ind,
             color: map.color,
+            type: map.type,
             yAxis: map.yAxis
           });
         }

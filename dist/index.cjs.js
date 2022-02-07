@@ -9543,6 +9543,7 @@ var Chart = /*#__PURE__*/function (_event$Dispatcher) {
             field: map.field,
             ind: map.ind,
             color: map.color,
+            type: map.type,
             yAxis: map.yAxis
           });
         }
@@ -11166,6 +11167,7 @@ var coordBase = /*#__PURE__*/function (_Component) {
               field: field,
               name: field,
               //fieldConfig中可能会覆盖
+              type: graph.type,
               enabled: true,
               color: color,
               ind: ind++
@@ -18329,6 +18331,7 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
     key: "_widget",
     value: function _widget(opt) {
       var me = this;
+      !opt && (opt = {});
       me._pointList = this._getPointList(me.data);
 
       if (me._pointList.length == 0) {
@@ -18411,9 +18414,9 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
       me.graphSprite.addChild(area);
       me._area = area;
 
-      me._createNodes();
+      me._createNodes(opt);
 
-      me._createTexts();
+      me._createTexts(opt);
     }
   }, {
     key: "_getFirstNode",
@@ -18593,6 +18596,7 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
   }, {
     key: "_createNodes",
     value: function _createNodes() {
+      var opt = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
       var me = this;
       var list = me._currPointList;
       var iNode = 0; //这里不能和下面的a对等，以为list中有很多无效的节点
@@ -18620,9 +18624,9 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
         }
         var x = _point[0];
         var y = _point[1];
-        var globalAlpha = 0;
+        var globalAlpha = opt.isResize ? 1 : 0;
 
-        if (this.clipRect) {
+        if (this.clipRect && !opt.isResize) {
           var clipRectCtx = this.clipRect.context;
 
           if (x >= clipRectCtx.x && x <= clipRectCtx.x + clipRectCtx.width) {
@@ -18702,6 +18706,7 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
   }, {
     key: "_createTexts",
     value: function _createTexts() {
+      var opt = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
       var me = this;
       var list = me._currPointList;
 
@@ -18720,9 +18725,9 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
           }
           var x = _point[0];
           var y = _point[1] - this.node.radius - 2;
-          var globalAlpha = 0;
+          var globalAlpha = opt.isResize ? 1 : 0;
 
-          if (this.clipRect) {
+          if (this.clipRect && !opt.isResize) {
             var clipRectCtx = this.clipRect.context;
 
             if (x >= clipRectCtx.x && x <= clipRectCtx.x + clipRectCtx.width) {
@@ -19211,8 +19216,7 @@ var LineGraphs = /*#__PURE__*/function (_GraphsBase) {
       this.sprite.context.y = this.origin.y;
       this.data = this._trimGraphs();
 
-      this._setGroupsForYfield(this.data, null, opt); //this.grow();
-
+      this._setGroupsForYfield(this.data, null, opt);
 
       if (this.animation && !opt.resize) {
         this.grow();
@@ -19417,7 +19421,8 @@ var LineGraphs = /*#__PURE__*/function (_GraphsBase) {
         var group = new _group["default"](fieldConfig, iGroup, //不同于fieldMap.ind
         me._opt, me.ctx, me.height, me.width, me);
         group.draw({
-          animation: me.animation && !opt.resize
+          animation: me.animation,
+          isResize: opt.resize
         }, g.data);
         newGroups.push(group);
         var insert = false; //在groups数组中插入到比自己_groupInd小的元素前面去
@@ -49667,6 +49672,7 @@ function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Re
 var _ = _canvax["default"]._,
     event = _canvax["default"].event;
 var Circle = _canvax["default"].Shapes.Circle;
+var Rect = _canvax["default"].Shapes.Rect;
 
 var Legend = /*#__PURE__*/function (_Component) {
   (0, _inherits2["default"])(Legend, _Component);
@@ -49807,26 +49813,8 @@ var Legend = /*#__PURE__*/function (_Component) {
 
       _.each(this.data, function (obj, i) {
         if (isOver) return;
-        var fillStyle = !obj.enabled ? "#ccc" : obj.color || "#999";
 
-        if (me.icon.fillStyle) {
-          var _fillStyle = me._getProp(me.icon.fillStyle, obj);
-
-          if (_fillStyle) {
-            fillStyle = _fillStyle;
-          }
-        }
-
-        var _icon = new Circle({
-          id: "legend_field_icon_" + i,
-          context: {
-            x: 0,
-            y: me.icon.height / 3,
-            fillStyle: fillStyle,
-            r: me.icon.radius,
-            cursor: "pointer"
-          }
-        });
+        var _icon = me._getIconNodeEl(obj, i);
 
         _icon.on(event.types.get(), function (e) {//... 代理到sprit上面处理
         });
@@ -49938,6 +49926,59 @@ var Legend = /*#__PURE__*/function (_Component) {
       } //me.width = me.sprite.context.width  = width;
       //me.height = me.sprite.context.height = height;
 
+    }
+  }, {
+    key: "_getIconNodeEl",
+    value: function _getIconNodeEl(obj, i) {
+      var fillStyle = !obj.enabled ? "#ccc" : obj.color || "#999";
+
+      if (this.icon.fillStyle) {
+        var _fillStyle = this._getProp(this.icon.fillStyle, obj);
+
+        if (_fillStyle) {
+          fillStyle = _fillStyle;
+        }
+      }
+      var el;
+
+      if (obj.type == 'line') {
+        el = new Rect({
+          id: "legend_field_icon_" + i,
+          context: {
+            x: -this.icon.radius,
+            y: this.icon.height / 3 - 1,
+            fillStyle: fillStyle,
+            width: this.icon.radius * 2,
+            height: 2,
+            cursor: "pointer"
+          }
+        });
+      } else if (obj.type == 'bar') {
+        el = new Rect({
+          id: "legend_field_icon_" + i,
+          context: {
+            x: -this.icon.radius,
+            y: this.icon.height / 3 - this.icon.radius,
+            fillStyle: fillStyle,
+            width: this.icon.radius * 2,
+            height: this.icon.radius * 2,
+            radius: [3, 3, 3, 3],
+            cursor: "pointer"
+          }
+        });
+      } else {
+        el = new Circle({
+          id: "legend_field_icon_" + i,
+          context: {
+            x: 0,
+            y: this.icon.height / 3,
+            fillStyle: fillStyle,
+            r: this.icon.radius,
+            cursor: "pointer"
+          }
+        });
+      }
+      return el;
     }
   }, {
     key: "_getInfoHandler",

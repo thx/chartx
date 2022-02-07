@@ -5,6 +5,7 @@ import {getDefaultProps} from "../../utils/tools"
 
 let { _,event} = Canvax;
 let Circle = Canvax.Shapes.Circle;
+let Rect = Canvax.Shapes.Rect;
 
 class Legend extends Component
 {
@@ -247,25 +248,7 @@ class Legend extends Component
 
             if( isOver ) return;
 
-            let fillStyle = !obj.enabled ? "#ccc" : (obj.color || "#999");
-            if( me.icon.fillStyle ){
-                let _fillStyle = me._getProp( me.icon.fillStyle, obj );
-                if( _fillStyle ){
-                    fillStyle = _fillStyle;
-                }
-            };
-            
-            let _icon = new Circle({
-                id : "legend_field_icon_"+i,
-                context : {
-                    x     : 0,
-                    y     : me.icon.height/3 ,
-                    fillStyle : fillStyle,
-                    r : me.icon.radius,
-                    cursor: "pointer"
-                }
-            });
-            
+            let _icon = me._getIconNodeEl(obj, i);
             _icon.on( event.types.get() , function(e){
                 //... 代理到sprit上面处理
             });
@@ -382,6 +365,58 @@ class Legend extends Component
         }
         //me.width = me.sprite.context.width  = width;
         //me.height = me.sprite.context.height = height;
+    }
+
+    _getIconNodeEl(obj, i){
+        let fillStyle = !obj.enabled ? "#ccc" : (obj.color || "#999");
+        if( this.icon.fillStyle ){
+            let _fillStyle = this._getProp( this.icon.fillStyle, obj );
+            if( _fillStyle ){
+                fillStyle = _fillStyle;
+            }
+        };
+
+        let el;
+
+        if( obj.type == 'line' ){
+            el = new Rect({
+                id : "legend_field_icon_"+i,
+                context : {
+                    x     : -this.icon.radius,
+                    y     : this.icon.height / 3 - 1 ,
+                    fillStyle : fillStyle,
+                    width : this.icon.radius*2,
+                    height: 2,
+                    cursor: "pointer"
+                }
+            });
+        } else if( obj.type == 'bar' ){
+            el = new Rect({
+                id : "legend_field_icon_"+i,
+                context : {
+                    x     : -this.icon.radius,
+                    y     : this.icon.height / 3 - this.icon.radius ,
+                    fillStyle : fillStyle,
+                    width : this.icon.radius*2,
+                    height: this.icon.radius*2,
+                    radius: [3,3,3,3],
+                    cursor: "pointer"
+                }
+            });
+        } else {
+            el = new Circle({
+                id : "legend_field_icon_"+i,
+                context : {
+                    x     : 0,
+                    y     : this.icon.height / 3 ,
+                    fillStyle : fillStyle,
+                    r : this.icon.radius,
+                    cursor: "pointer"
+                }
+            });
+        };
+        
+        return el;
     }
 
     _getInfoHandler(e , data)
