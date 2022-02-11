@@ -25,6 +25,8 @@ var _tools = require("../../utils/tools");
 
 var _axis = _interopRequireDefault(require("./axis"));
 
+var _numeral = _interopRequireDefault(require("numeral"));
+
 function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
 
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
@@ -227,20 +229,7 @@ var yAxis = /*#__PURE__*/function (_Axis) {
           text: ""
         }; //把format提前
 
-        var text = layoutData.value;
-
-        if (_.isFunction(me.label.format)) {
-          text = me.label.format.apply(this, [text, i]);
-        }
-
-        ;
-
-        if ((text === undefined || text === null) && me.layoutType == "proportion") {
-          text = (0, _tools.numAddSymbol)(layoutData.value);
-        }
-
-        ;
-        layoutData.text = text;
+        layoutData.text = me._getFormatText(layoutData.value, i);
         tmpData.push(layoutData);
       }
 
@@ -276,6 +265,41 @@ var yAxis = /*#__PURE__*/function (_Axis) {
       }
 
       ;
+    }
+  }, {
+    key: "_getFormatText",
+    value: function _getFormatText(value, i) {
+      if (this.label.format) {
+        //如果有单独给label配置format，就用label上面的配置
+        if (_.isFunction(this.label.format)) {
+          value = this.label.format.apply(this, arguments);
+        }
+
+        if (typeof this.label.format == 'string') {
+          value = (0, _numeral["default"])(value).format(this.label.format);
+        }
+      } else {
+        //否则用fieldConfig上面的, 因为y轴上面可能会汇集了多个field，那么只取在fieldsConfig上面配置过的第一个field即可
+        var config;
+
+        var _fields = _.flatten([this.field]);
+
+        for (var _i = 0, l = _fields.length; _i < l; _i++) {
+          config = this._coord.fieldsConfig[_fields[_i]];
+          if (config) break;
+        }
+
+        ;
+
+        if (config) {
+          value = this._coord.getFormatValue(value, config, i);
+        }
+
+        ;
+      }
+
+      ;
+      return value;
     }
   }, {
     key: "_getYAxisDisLine",

@@ -279,9 +279,10 @@ var Tips = /*#__PURE__*/function (_Component) {
 
       if (info.nodes.length) {
         str += "<table >";
+        debugger;
 
         if (info.title !== undefined && info.title !== null && info.title !== "") {
-          str += "<tr><td colspan='2' style='text-align:left'>";
+          str += "<tr><td colspan='2' style='text-align:left;padding-left:3px;'>";
           str += "<span style='font-size:12px;padding:4px;color:#333;'>" + info.title + "</span>";
           str += "</td></tr>";
         }
@@ -602,7 +603,7 @@ var Tips = /*#__PURE__*/function (_Component) {
         },
         pointerRegionAlpha: {
           detail: 'pointer为region的时候，设置指针region的透明度',
-          "default": 0.25
+          "default": 0.38
         },
         pointerAnim: {
           detail: 'tips移动的时候，指针是否开启动画',

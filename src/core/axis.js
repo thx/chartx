@@ -24,11 +24,12 @@ class axis {
                 detail : '自定义dataSection的计算公式',
                 default: null
             },
-            waterLine : {
-                detail: '水位线',
-                default: null,
-                documentation : '水位data，需要混入 计算 dataSection， 如果有设置waterLine， dataSection的最高水位不会低于这个值'
+
+            verniers:{
+                detail : '设定的游标，dataSection的区间一定会覆盖这些值',
+                default: []
             },
+
             middleWeight : {
                 detail : '区间分隔线',
                 default: null,
@@ -175,26 +176,27 @@ class axis {
         //对外返回的dataSection
         return this.dataSection;
     }
-    setDataSection(_dataSection) {
-        let me = this;
+    setDataSection() {
 
-        //如果用户没有配置dataSection，或者用户传了，但是传了个空数组，则自己组装dataSection
-        if (_.isEmpty(_dataSection) && _.isEmpty(this._opt.dataSection)) {
+        if( Array.isArray(this._opt.dataSection) && this._opt.dataSection.length ){
+            this.dataSection = this._opt.dataSection;
+            this._dataSectionGroup = [this.dataSection];
+        } else {
             if (this.layoutType == "proportion") {
 
                 let arr = this._getDataSection();
 
-                if ("origin" in me._opt) {
-                    arr.push(me._opt.origin);
-                };
+                if ("origin" in this._opt) {
+                    arr.push(this._opt.origin);
+                }
 
                 if (arr.length == 1) {
                     arr.push(arr[0] * .5);
-                };
-                
-                if (this.waterLine) {
-                    arr.push(this.waterLine);
-                };
+                }
+
+                if( Array.isArray( this.verniers ) && this.verniers.length ){
+                    arr = arr.concat( this.verniers )
+                }
 
                 if (this.symmetric) {
                     //如果需要处理为对称数据
@@ -205,7 +207,7 @@ class axis {
                     } else {
                         arr.push(-Math.abs(_max));
                     };
-                };
+                }
 
                 for (let ai = 0, al = arr.length; ai < al; ai++) {
                     arr[ai] = Number(arr[ai]);
@@ -214,15 +216,15 @@ class axis {
                         ai--;
                         al--;
                     };
-                };
+                }
 
                 if( _.isFunction( this.sectionHandler ) ){
                     this.dataSection = this.sectionHandler( arr );
-                };
+                }
 
                 if( !this.dataSection || !this.dataSection.length ){
                     this.dataSection = dataSection.section(arr, 3);
-                };
+                }
 
                 if (this.symmetric) {
                     //可能得到的区间是偶数， 非对称，强行补上
@@ -233,12 +235,12 @@ class axis {
                     } else {
                         this.dataSection.unshift(-Math.abs(_max));
                     };
-                };
+                }
 
                 //如果还是0
                 if (this.dataSection.length == 0) {
                     this.dataSection = [0];
-                };
+                }
 
                 //如果有 middleWeight 设置，就会重新设置dataSectionGroup
                 this._dataSectionGroup = [_.clone(this.dataSection)];
@@ -254,9 +256,6 @@ class axis {
                 this._dataSectionGroup = [this.dataSection];
 
             };
-        } else {
-            this.dataSection = _dataSection || this._opt.dataSection;
-            this._dataSectionGroup = [this.dataSection];
         };
 
         //middleWeightPos在最后设定
@@ -346,14 +345,16 @@ class axis {
 
     //val 要被push到datasection 中去的 值
     //主要是用在markline等组件中，当自己的y值超出了yaxis的范围
-    setWaterLine(val) {
-        if (val <= this.waterLine) return;
-        this.waterLine = val;
-        if (val < _.min(this.dataSection) || val > _.max(this.dataSection)) {
-            //waterLine不再当前section的区间内，需要重新计算整个datasection    
-            this.setDataSection();
-            this.calculateProps();
-        };
+    _addValToSection(val) {
+        this.addVerniers(val)
+        this.setDataSection();
+        this.calculateProps();
+    }
+
+    addVerniers( val ){
+        if( this.verniers.indexOf(val) == -1 ){
+            this.verniers.push( val )
+        }
     }
 
     _sort() {

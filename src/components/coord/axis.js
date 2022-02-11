@@ -172,7 +172,7 @@ export default class Axis extends baseAxis
         _.extend( true, this, getDefaultProps( Axis.defaultProps() ) );
     }
 
-    drawWaterLine(y)
+    addValToSection(y)
     {
         //如果y在现有的数据区间里面， 就不需要重新计算和绘制了
         if( this.layoutType == "proportion" ){
@@ -180,10 +180,15 @@ export default class Axis extends baseAxis
                 return;
             }
         };
+
+        //如果y不在当前datasection范围内，那么就要重新绘制
         this.dataSection = [];
-        this.setWaterLine( y );
+        this._addValToSection( y );
         this._initHandle();
         this.draw();
+
+        //然后要检测下依附于这个轴的所有graphs，都要重新绘制
+        this._coord.resetGraphsOfAxis( this );
     }
     
 }

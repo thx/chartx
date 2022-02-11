@@ -13,7 +13,7 @@ var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/creat
 
 var _canvax = require("canvax");
 
-var _dataSection2 = _interopRequireDefault(require("./dataSection"));
+var _dataSection = _interopRequireDefault(require("./dataSection"));
 
 var _tools = require("../utils/tools");
 
@@ -140,30 +140,25 @@ var axis = /*#__PURE__*/function () {
     }
   }, {
     key: "setDataSection",
-    value: function setDataSection(_dataSection) {
-      var me = this; //如果用户没有配置dataSection，或者用户传了，但是传了个空数组，则自己组装dataSection
-
-      if (_canvax._.isEmpty(_dataSection) && _canvax._.isEmpty(this._opt.dataSection)) {
+    value: function setDataSection() {
+      if (Array.isArray(this._opt.dataSection) && this._opt.dataSection.length) {
+        this.dataSection = this._opt.dataSection;
+        this._dataSectionGroup = [this.dataSection];
+      } else {
         if (this.layoutType == "proportion") {
           var arr = this._getDataSection();
 
-          if ("origin" in me._opt) {
-            arr.push(me._opt.origin);
+          if ("origin" in this._opt) {
+            arr.push(this._opt.origin);
           }
-
-          ;
 
           if (arr.length == 1) {
             arr.push(arr[0] * .5);
           }
 
-          ;
-
-          if (this.waterLine) {
-            arr.push(this.waterLine);
+          if (Array.isArray(this.verniers) && this.verniers.length) {
+            arr = arr.concat(this.verniers);
           }
-
-          ;
 
           if (this.symmetric) {
             //如果需要处理为对称数据
@@ -180,8 +175,6 @@ var axis = /*#__PURE__*/function () {
             ;
           }
 
-          ;
-
           for (var ai = 0, al = arr.length; ai < al; ai++) {
             arr[ai] = Number(arr[ai]);
 
@@ -194,19 +187,13 @@ var axis = /*#__PURE__*/function () {
             ;
           }
 
-          ;
-
           if (_canvax._.isFunction(this.sectionHandler)) {
             this.dataSection = this.sectionHandler(arr);
           }
 
-          ;
-
           if (!this.dataSection || !this.dataSection.length) {
-            this.dataSection = _dataSection2["default"].section(arr, 3);
+            this.dataSection = _dataSection["default"].section(arr, 3);
           }
-
-          ;
 
           if (this.symmetric) {
             //可能得到的区间是偶数， 非对称，强行补上
@@ -221,15 +208,13 @@ var axis = /*#__PURE__*/function () {
             }
 
             ;
-          }
+          } //如果还是0
 
-          ; //如果还是0
 
           if (this.dataSection.length == 0) {
             this.dataSection = [0];
-          }
+          } //如果有 middleWeight 设置，就会重新设置dataSectionGroup
 
-          ; //如果有 middleWeight 设置，就会重新设置dataSectionGroup
 
           this._dataSectionGroup = [_canvax._.clone(this.dataSection)];
 
@@ -245,9 +230,6 @@ var axis = /*#__PURE__*/function () {
         }
 
         ;
-      } else {
-        this.dataSection = _dataSection || this._opt.dataSection;
-        this._dataSectionGroup = [this.dataSection];
       }
 
       ; //middleWeightPos在最后设定
@@ -356,18 +338,18 @@ var axis = /*#__PURE__*/function () {
     //主要是用在markline等组件中，当自己的y值超出了yaxis的范围
 
   }, {
-    key: "setWaterLine",
-    value: function setWaterLine(val) {
-      if (val <= this.waterLine) return;
-      this.waterLine = val;
-
-      if (val < _canvax._.min(this.dataSection) || val > _canvax._.max(this.dataSection)) {
-        //waterLine不再当前section的区间内，需要重新计算整个datasection    
-        this.setDataSection();
-        this.calculateProps();
+    key: "_addValToSection",
+    value: function _addValToSection(val) {
+      this.addVerniers(val);
+      this.setDataSection();
+      this.calculateProps();
+    }
+  }, {
+    key: "addVerniers",
+    value: function addVerniers(val) {
+      if (this.verniers.indexOf(val) == -1) {
+        this.verniers.push(val);
       }
-
-      ;
     }
   }, {
     key: "_sort",
@@ -1010,10 +992,9 @@ var axis = /*#__PURE__*/function () {
           detail: '自定义dataSection的计算公式',
           "default": null
         },
-        waterLine: {
-          detail: '水位线',
-          "default": null,
-          documentation: '水位data，需要混入 计算 dataSection， 如果有设置waterLine， dataSection的最高水位不会低于这个值'
+        verniers: {
+          detail: '设定的游标，dataSection的区间一定会覆盖这些值',
+          "default": []
         },
         middleWeight: {
           detail: '区间分隔线',

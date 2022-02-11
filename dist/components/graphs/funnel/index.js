@@ -27,6 +27,8 @@ var _tools = require("../../../utils/tools");
 
 var _color = require("../../../utils/color");
 
+var _numeral = _interopRequireDefault(require("numeral"));
+
 function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
 
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
@@ -119,6 +121,7 @@ var FunnelGraphs = /*#__PURE__*/function (_GraphsBase) {
   }, {
     key: "draw",
     value: function draw(opt) {
+      debugger;
       !opt && (opt = {}); //第二个data参数去掉，直接trimgraphs获取最新的data
 
       _.extend(true, this, opt); //let me = this;
@@ -141,6 +144,8 @@ var FunnelGraphs = /*#__PURE__*/function (_GraphsBase) {
       var me = this; //let dataOrg = _.clone( this.dataOrg );
 
       var layoutData = [];
+
+      var _coord = this.app.getCoord();
 
       _.each(this.dataOrg, function (num, i) {
         var ld = {
@@ -175,8 +180,34 @@ var FunnelGraphs = /*#__PURE__*/function (_GraphsBase) {
       ;
 
       _.each(layoutData, function (ld, i) {
-        ld.iNode = i;
-        ld.label = me.label.format(ld.value, ld);
+        ld.iNode = i; //ld.label = me.label.format( ld.value , ld );
+
+        var value = ld.value;
+
+        if (me.label.format) {
+          if (_.isFunction(me.label.format)) {
+            var _formatc = me.label.format.apply(me, [value, ld]);
+
+            ; //me.label.format(value, nodeData);
+
+            if (_formatc !== undefined || _formatc !== null) {
+              value = _formatc;
+            }
+          }
+
+          if (typeof me.label.format == 'string') {
+            value = (0, _numeral["default"])(value).format(me.label.format);
+          }
+        } else {
+          //否则用fieldConfig上面的
+          var fieldConfig = _coord.getFieldConfig(me.field);
+
+          if (fieldConfig) {
+            value = fieldConfig.getFormatValue(value);
+          }
+        }
+
+        ld.label = value;
       });
 
       _.each(layoutData, function (ld, i) {
@@ -252,6 +283,12 @@ var FunnelGraphs = /*#__PURE__*/function (_GraphsBase) {
     value: function _drawGraphs() {
       var me = this;
 
+      var _coord = this.app.getCoord();
+
+      var fieldConfig = _coord.getFieldConfig(me.field);
+
+      var title = fieldConfig.name || this.field;
+
       _.each(this.data, function (ld) {
         //let fillStyle   = this._getProp(this.node, "fillStyle", geoGraph);
         var fillAlpha = me._getProp(me.node, "fillAlpha", ld);
@@ -286,9 +323,10 @@ var FunnelGraphs = /*#__PURE__*/function (_GraphsBase) {
         _polygon.nodeData = ld;
 
         _polygon.on(event.types.get(), function (e) {
+          debugger;
           e.eventInfo = {
             trigger: me.node,
-            title: me.field,
+            title: title,
             nodes: [this.nodeData]
           };
 
@@ -453,6 +491,10 @@ var FunnelGraphs = /*#__PURE__*/function (_GraphsBase) {
           detail: '字段配置',
           "default": null
         },
+        textFiled: {
+          detail: 'field字段每行数据对应的text名称字段配置',
+          "default": null
+        },
         sort: {
           detail: '排序规则',
           "default": null
@@ -612,9 +654,7 @@ var FunnelGraphs = /*#__PURE__*/function (_GraphsBase) {
             },
             format: {
               detail: '文本格式化处理函数',
-              "default": function _default(num) {
-                return (0, _tools.numAddSymbol)(num);
-              }
+              "default": null
             },
             fontSize: {
               detail: '文本字体大小',

@@ -27,6 +27,8 @@ var _tools = require("../../../utils/tools");
 
 var _color = require("../../../utils/color");
 
+var _numeral = _interopRequireDefault(require("numeral"));
+
 function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
 
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
@@ -337,6 +339,16 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
       }
 
       ;
+
+      if (!this._growed) {
+        //如果还在入场中
+        me._currPointList = me._pointList;
+
+        _update(me._currPointList);
+
+        return;
+      }
+
       this._transitionTween = AnimationFrame.registTween({
         from: me._getPointPosStr(me._currPointList),
         to: me._getPointPosStr(me._pointList),
@@ -381,9 +393,9 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
         context: {
           x: 0,
           //-100,
-          y: -height,
+          y: -height - 3,
           width: 0,
-          height: height,
+          height: height + 6,
           fillStyle: 'blue'
         }
       });
@@ -418,6 +430,7 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
           });
         },
         onComplete: function onComplete() {
+          _this2._growed = true;
           callback && callback();
         }
       });
@@ -579,11 +592,12 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
     key: "_getFillStyle",
     value: function _getFillStyle() {
       var me = this;
-      var fill_gradient = null; // _fillStyle 可以 接受渐变色，可以不用_getColor， _getColor会过滤掉渐变色
+      var fill_gradient = null;
 
-      var _fillStyle = me._getProp(me.area.fillStyle) || me._getLineStrokeStyle(null, "area");
+      var _fillStyle; //fillStyle可以通过alpha来设置渐变
 
-      if (_.isArray(me.area.alpha) && !(_fillStyle instanceof CanvasGradient)) {
+
+      if (Array.isArray(me.area.alpha)) {
         var _me$ctx;
 
         //alpha如果是数组，那么就是渐变背景，那么就至少要有两个值
@@ -615,7 +629,36 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
         _fillStyle = fill_gradient;
       }
 
-      ;
+      ; //也可以传入一个线性渐变
+
+      if (this.area.fillStyle && this.area.fillStyle.lineargradient) {
+        var _me$ctx2;
+
+        var lineargradient = this.area.fillStyle.lineargradient; //如果是右轴的话，渐变色要对应的反转
+
+        if (this.yAxisAlign == 'right') {
+          lineargradient = lineargradient.reverse();
+        }
+
+        ; //如果用户配置 填充是一个线性渐变
+
+        var _lps = this._getLinearGradientPoints('area');
+
+        if (!_lps) return;
+        fill_gradient = (_me$ctx2 = me.ctx).createLinearGradient.apply(_me$ctx2, (0, _toConsumableArray2["default"])(_lps));
+
+        _.each(lineargradient, function (item) {
+          fill_gradient.addColorStop(item.position, item.color);
+        });
+
+        _fillStyle = fill_gradient;
+      }
+
+      if (!_fillStyle) {
+        // _fillStyle 可以 接受渐变色，可以不用_getColor， _getColor会过滤掉渐变色
+        _fillStyle = me._getProp(me.area.fillStyle) || me._getLineStrokeStyle(null, "area");
+      }
+
       return _fillStyle;
     }
   }, {
@@ -635,7 +678,7 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
       var lineargradient = this._opt.line.strokeStyle.lineargradient;
 
       if (lineargradient) {
-        var _me$ctx2;
+        var _me$ctx3;
 
         //如果是右轴的话，渐变色要对应的反转
         if (this.yAxisAlign == 'right') {
@@ -647,7 +690,7 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
         var lps = this._getLinearGradientPoints(graphType, pointList);
 
         if (!lps) return;
-        _style = (_me$ctx2 = me.ctx).createLinearGradient.apply(_me$ctx2, (0, _toConsumableArray2["default"])(lps));
+        _style = (_me$ctx3 = me.ctx).createLinearGradient.apply(_me$ctx3, (0, _toConsumableArray2["default"])(lps));
 
         _.each(lineargradient, function (item) {
           _style.addColorStop(item.position, item.color);
@@ -913,16 +956,27 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
             strokeStyle: "#ffffff",
             globalAlpha: globalAlpha
           };
-          var value = me.data[a].value;
+          var nodeData = me.data[a];
+          var value = nodeData.value;
 
-          if (_.isFunction(me.label.format)) {
+          if (me.label.format) {
             //如果有单独给label配置format，就用label上面的配置
-            value = me.label.format(value, me.data[a]) || value;
+            if (_.isFunction(me.label.format)) {
+              value = me.label.format.apply(me, [value, nodeData]);
+            }
+
+            if (typeof me.label.format == 'string') {
+              value = (0, _numeral["default"])(value).format(me.label.format);
+            }
           } else {
             //否则用fieldConfig上面的
             var fieldConfig = _coord.getFieldConfig(this.field);
 
-            value = fieldConfig.getFormatValue(value);
+            if (fieldConfig) {
+              value = fieldConfig.getFormatValue(value);
+            }
+
+            ;
           }
 
           ;

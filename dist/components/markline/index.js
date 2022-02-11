@@ -72,7 +72,6 @@ var MarkLine = /*#__PURE__*/function (_Component) {
   }, {
     key: "_calculateProps",
     value: function _calculateProps() {
-      var me = this;
       var opt = this._opt; //如果markline有target配置，那么只现在target配置里的字段的 markline, 推荐
 
       var field = opt.markTo;
@@ -137,9 +136,7 @@ var MarkLine = /*#__PURE__*/function (_Component) {
 
       if (!isNaN(y)) {
         //如果y是个function说明是均值，自动实时计算的，而且不会超过ydatasection的范围
-        //_yAxis.setWaterLine( y );
-        //_yAxis.draw();
-        _yAxis.drawWaterLine(y);
+        _yAxis.addValToSection(y);
       }
 
       ;

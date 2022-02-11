@@ -8850,866 +8850,6 @@ var chartx = (function () {
 
 	unwrapExports(dataFrame);
 
-	var chart = createCommonjsModule(function (module, exports) {
-
-
-
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	exports["default"] = void 0;
-
-	var _classCallCheck2 = interopRequireDefault(classCallCheck$1);
-
-	var _createClass2 = interopRequireDefault(createClass$1);
-
-	var _inherits2 = interopRequireDefault(inherits$1);
-
-	var _possibleConstructorReturn2 = interopRequireDefault(possibleConstructorReturn$1);
-
-	var _getPrototypeOf2 = interopRequireDefault(getPrototypeOf$1);
-
-	var _global = interopRequireDefault(global$1);
-
-	var _canvax = interopRequireDefault(Canvax);
-
-	var _dataFrame = interopRequireDefault(dataFrame);
-
-	function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
-
-	function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
-
-	var _ = _canvax["default"]._,
-	    $ = _canvax["default"].$,
-	    event = _canvax["default"].event;
-	var _padding = 20;
-
-	var Chart = /*#__PURE__*/function (_event$Dispatcher) {
-	  (0, _inherits2["default"])(Chart, _event$Dispatcher);
-
-	  var _super = _createSuper(Chart);
-
-	  function Chart(node, data, opt, componentModules) {
-	    var _this;
-
-	    (0, _classCallCheck2["default"])(this, Chart);
-	    _this = _super.call(this);
-	    _this.componentModules = componentModules;
-	    _this._node = node;
-	    _this._data = data;
-	    _this._opt = opt;
-	    _this.dataFrame = _this.initData(data, opt);
-	    _this.el = $.query(node); //chart 在页面里面的容器节点，也就是要把这个chart放在哪个节点里
-
-	    _this.width = parseInt(_this.el.offsetWidth); //图表区域宽
-
-	    _this.height = parseInt(_this.el.offsetHeight); //图表区域高
-	    //legend如果在top，就会把图表的padding.top修改，减去legend的height
-
-	    _this.padding = null; //Canvax实例
-
-	    _this.canvax = new _canvax["default"].App({
-	      el: _this.el,
-	      webGL: false
-	    });
-
-	    _this.canvax.registEvent();
-
-	    _this.id = "chartx_" + _this.canvax.id;
-
-	    _this.el.setAttribute("chart_id", _this.id);
-
-	    _this.el.setAttribute("chartx_version", "2.0"); //设置stage ---------------------------------------------------------begin
-
-
-	    _this.stage = new _canvax["default"].Display.Stage({
-	      id: "main-chart-stage"
-	    });
-
-	    _this.canvax.addChild(_this.stage); //设置stage ---------------------------------------------------------end
-	    //构件好coord 和 graphs 的根容器
-
-
-	    _this.setCoord_Graphs_Sp(); //这三类组件是优先级最高的组件，所有的组件的模块化和绘制，都要一次在这三个完成后实现
-
-
-	    _this.__highModules = ["theme", "coord", "graphs"]; //组件管理机制,所有的组件都绘制在这个地方
-
-	    _this.components = [];
-	    _this.inited = false;
-
-	    _this.init();
-
-	    return _this;
-	  }
-
-	  (0, _createClass2["default"])(Chart, [{
-	    key: "init",
-	    value: function init() {
-	      var _this2 = this;
-
-	      var me = this; //init全部用 this._opt
-
-	      var opt = this._opt; //padding数据也要重置为起始值
-
-	      this.padding = this._getPadding(); //先依次init 处理 "theme", "coord", "graphs" 三个优先级最高的模块
-
-	      _.each(this.__highModules, function (compName) {
-	        if (!opt[compName]) return;
-
-	        var comps = _.flatten([opt[compName]]); //them是一个数组的组件。so特殊处理
-
-
-	        if (compName == "theme") {
-	          comps = [comps];
-	        }
-
-	        _.each(comps, function (comp) {
-	          if ( //没有type的coord和没有field(or keyField)的graphs，都无效，不要创建该组件
-	          //关系图中是keyField
-	          compName == "coord" && !comp.type || compName == "graphs" && !comp.field && !comp.keyField && !comp.adcode && !comp.geoJson && !comp.geoJsonUrl //地图的话只要有个adcode就可以了
-	          ) return;
-	          var compModule = me.componentModules.get(compName, comp.type);
-
-	          if (compModule) {
-	            var _comp = new compModule(comp, me);
-
-	            me.components.push(_comp);
-	          }
-	        });
-	      }); //PS: theme 组件优先级最高，在registerComponents之前已经加载过
-
-
-	      var _loop = function _loop(_p) {
-	        //非coord graphs theme，其实后面也可以统一的
-	        if (_.indexOf(_this2.__highModules, _p) == -1) {
-	          var comps = _this2._opt[_p]; //所有的组件都按照数组方式处理，这里，组件里面就不需要再这样处理了
-
-	          if (!_.isArray(comps)) {
-	            comps = [comps];
-	          }
-
-	          _.each(comps, function (comp) {
-	            var compModule = me.componentModules.get(_p, comp.type);
-
-	            if (compModule) {
-	              var _comp = new compModule(comp, me);
-
-	              me.components.push(_comp);
-	            }
-	          });
-	        }
-	      };
-
-	      for (var _p in this._opt) {
-	        _loop(_p);
-	      }
-	    }
-	  }, {
-	    key: "draw",
-	    value: function draw(opt) {
-	      var me = this;
-	      !opt && (opt = {});
-
-	      var _coord = this.getComponent({
-	        name: 'coord'
-	      });
-
-	      if (_coord && _coord.horizontal) {
-	        this._drawBeginHorizontal();
-	      }
-	      var width = this.width - this.padding.left - this.padding.right;
-	      var height = this.height - this.padding.top - this.padding.bottom;
-	      var origin = {
-	        x: this.padding.left,
-	        y: this.padding.top
-	      };
-
-	      if (_coord) {
-	        //先绘制好坐标系统
-	        _coord.draw(opt);
-
-	        width = _coord.width;
-	        height = _coord.height;
-	        origin = _coord.origin;
-	      }
-	      //如果没有数据，不需要绘制graphs
-	      //me.fire("complete");
-	      //return;
-	      //};
-
-	      var _graphs = this.getComponents({
-	        name: 'graphs'
-	      });
-
-	      var graphsCount = _graphs.length;
-	      var completeNum = 0;
-	      opt = _.extend(opt, {
-	        width: width,
-	        height: height,
-	        origin: origin
-	      }); //没有数据的时候可以不绘制graphs，但是下面的其他components还是需要绘制的，比如图例
-
-	      if (this.dataFrame.length > 0) {
-	        _.each(_graphs, function (_g) {
-	          _g.on("complete", function (g) {
-	            completeNum++;
-
-	            if (completeNum == graphsCount) {
-	              me.fire("complete");
-	            }
-	            _g.inited = true;
-	          });
-
-	          _g.draw(opt);
-	        });
-	      }
-
-	      for (var i = 0, l = this.components.length; i < l; i++) {
-	        var p = this.components[i];
-
-	        if (_.indexOf(this.__highModules, p.name) == -1) {
-	          p.draw(opt);
-	        }
-	      }
-
-	      this._bindEvent();
-
-	      if (_coord && _coord.horizontal) {
-	        this._drawEndHorizontal();
-	      }
-	    }
-	  }, {
-	    key: "_drawBeginHorizontal",
-	    value: function _drawBeginHorizontal() {
-	      //横向了之后， 要把4个padding值轮换一下
-	      //top,right 对调 ， bottom,left 对调
-	      var padding = this.padding;
-	      var num = padding.top;
-	      padding.top = padding.right;
-	      padding.right = padding.bottom;
-	      padding.bottom = padding.left;
-	      padding.left = num;
-	    } //绘制完毕后的横向处理
-
-	  }, {
-	    key: "_drawEndHorizontal",
-	    value: function _drawEndHorizontal() {
-	      var ctx = this.graphsSprite.context;
-	      ctx.x += (this.width - this.height) / 2;
-	      ctx.y += (this.height - this.width) / 2;
-	      ctx.rotation = 90;
-	      ctx.rotateOrigin = {
-	        x: this.height / 2,
-	        y: this.width / 2
-	      };
-
-	      this._horizontalGraphsText();
-	    }
-	  }, {
-	    key: "_horizontalGraphsText",
-	    value: function _horizontalGraphsText() {
-	      var me = this;
-
-	      function _horizontalText(el) {
-	        if (el.children) {
-	          _.each(el.children, function (_el) {
-	            _horizontalText(_el);
-	          });
-	        }
-
-	        if (el.type == "text" && !el.__horizontal) {
-	          var ctx = el.context;
-	          var w = ctx.width;
-	          var h = ctx.height;
-	          ctx.rotation = ctx.rotation - 90;
-	          el.__horizontal = true;
-	        }
-	      }
-
-	      _.each(me.getComponents({
-	        name: 'graphs'
-	      }), function (_graphs) {
-	        _horizontalText(_graphs.sprite);
-	      });
-	    }
-	  }, {
-	    key: "_getPadding",
-	    value: function _getPadding() {
-	      var paddingVal = _padding;
-
-	      if (this._opt.coord && "padding" in this._opt.coord) {
-	        if (!_.isObject(this._opt.coord.padding)) {
-	          paddingVal = this._opt.coord.padding;
-	        }
-	      }
-	      var paddingObj = {
-	        top: paddingVal,
-	        right: paddingVal,
-	        bottom: paddingVal,
-	        left: paddingVal
-	      };
-
-	      if (this._opt.coord && "padding" in this._opt.coord) {
-	        if (_.isObject(this._opt.coord.padding)) {
-	          paddingObj = _.extend(paddingObj, this._opt.coord.padding);
-	        }
-	      }
-	      return paddingObj;
-	    } //ind 如果有就获取对应索引的具体颜色值
-
-	  }, {
-	    key: "getTheme",
-	    value: function getTheme(ind) {
-	      var colors = _global["default"].getGlobalTheme();
-
-	      var _theme = this.getComponent({
-	        name: 'theme'
-	      });
-
-	      if (_theme) {
-	        colors = _theme.get();
-	      }
-
-	      if (ind != undefined) {
-	        return colors[ind % colors.length] || "#ccc";
-	      }
-	      return colors;
-	    }
-	  }, {
-	    key: "setCoord_Graphs_Sp",
-	    value: function setCoord_Graphs_Sp() {
-	      //坐标系存放的容器
-	      this.coordSprite = new _canvax["default"].Display.Sprite({
-	        id: 'coordSprite'
-	      });
-	      this.stage.addChild(this.coordSprite); //graphs管理
-
-	      this.graphsSprite = new _canvax["default"].Display.Sprite({
-	        id: 'graphsSprite'
-	      });
-	      this.stage.addChild(this.graphsSprite);
-	    }
-	    /*
-	     * chart的销毁
-	     */
-
-	  }, {
-	    key: "destroy",
-	    value: function destroy() {
-	      this.clean();
-
-	      if (this.el) {
-	        this.el.removeAttribute("chart_id");
-	        this.el.removeAttribute("chartx_version");
-	        this.canvax.destroy();
-	        this.el = null;
-	      }
-	      this._destroy && this._destroy();
-	      this.fire("destroy");
-	    }
-	    /*
-	     * 清除整个图表
-	     **/
-
-	  }, {
-	    key: "clean",
-	    value: function clean() {
-	      //保留所有的stage，stage下面得元素全部 destroy 掉
-	      for (var i = 0, l = this.canvax.children.length; i < l; i++) {
-	        var stage = this.canvax.getChildAt(i);
-
-	        for (var s = 0, sl = stage.children.length; s < sl; s++) {
-	          stage.getChildAt(s).destroy();
-	          s--;
-	          sl--;
-	        }
-	      }
-	      //所以要重新设置一遍准备好。
-
-	      this.setCoord_Graphs_Sp();
-	      this.components = []; //组件清空
-
-	      this.canvax.domView && (this.canvax.domView.innerHTML = ""); //清空事件的当前状态
-
-	      if (this.canvax.event) {
-	        this.canvax.event.curPointsTarget = [];
-	      }
-	    }
-	    /**
-	     * 容器的尺寸改变重新绘制
-	     */
-
-	  }, {
-	    key: "resize",
-	    value: function resize() {
-	      var _w = parseInt(this.el.offsetWidth);
-
-	      var _h = parseInt(this.el.offsetHeight);
-
-	      if (_w == this.width && _h == this.height) return;
-	      this.width = _w;
-	      this.height = _h;
-	      this.canvax.resize();
-	      this.inited = false;
-	      this.clean();
-	      this.init();
-	      this.draw({
-	        resize: true
-	      });
-	      this.inited = true;
-	    }
-	    /**
-	     * reset 其实就是重新绘制整个图表，不再做详细的拆分opts中有哪些变化，来做对应的细致的变化，简单粗暴的全部重新创立
-	     * opt 必须全量options，不在支持局部opt传递，所以对opt的处理不再支持extend
-	     */
-
-	  }, {
-	    key: "reset",
-	    value: function reset(opt, data) {
-	      opt && (this._opt = opt);
-	      /* 不能 extend opt 
-	      !opt && (opt={});
-	      _.extend(this._opt, opt);
-	      */
-
-	      data && (this._data = data);
-	      this.dataFrame = this.initData(this._data, opt);
-	      this.clean();
-	      this.init();
-	      this.draw();
-	    }
-	    /*
-	     * 只响应数据的变化，不涉及配置变化
-	     * 
-	     * @trigger 一般是触发这个data reset的一些场景数据，内部触发才会有，比如datazoom， tree的收缩节点
-	     * 外部调用resetData的时候，是只会传递第一个data数据的
-	     * 比如如果是 datazoom 触发的， 就会有 trigger数据{ name:'datazoom', left:1,right:1 }
-	     */
-
-	  }, {
-	    key: "resetData",
-	    value: function resetData(data, trigger) {
-	      var me = this;
-	      var preDataLenth = this.dataFrame.org.length;
-
-	      if (!trigger || !trigger.comp) {
-	        //只有非内部trigger的的resetData，才会有原数据的改变
-	        if (!data) {
-	          data = [];
-	        }
-
-	        if (!data.length) {
-	          this.clean();
-	        }
-	        this._data = data; //注意，resetData不能为null，必须是 数组格式
-
-	        this.dataFrame.resetData(data);
-	      } else {
-	        //内部组件trigger的话，比如datazoom
-	        this.dataFrame.resetData();
-	      }
-
-	      var graphsList = this.getComponents({
-	        name: 'graphs'
-	      });
-	      var allGraphsHasResetData = true;
-
-	      _.each(graphsList, function (_g) {
-	        if (!_g.resetData && allGraphsHasResetData) {
-	          allGraphsHasResetData = false;
-	          return false;
-	        }
-	      });
-
-	      if (!preDataLenth || !allGraphsHasResetData) {
-	        //如果之前的数据为空， 那么我们应该这里就直接重绘吧
-	        //如果有其中一个graphs没实现resetData 也 重绘
-	        this.clean();
-	        this.init();
-	        this.draw(this._opt);
-	        return;
-	      }
-
-	      var _coord = this.getComponent({
-	        name: 'coord'
-	      });
-
-	      if (_coord) {
-	        _coord.resetData(this.dataFrame, trigger);
-	      }
-
-	      _.each(graphsList, function (_g) {
-	        _g.resetData(me.dataFrame, trigger);
-	      });
-
-	      this.componentsReset(trigger);
-
-	      if (_coord && _coord.horizontal) {
-	        this._horizontalGraphsText();
-	      }
-	      this.fire("resetData");
-	    }
-	  }, {
-	    key: "initData",
-	    value: function initData() {
-	      return _dataFrame["default"].apply(this, arguments);
-	    }
-	  }, {
-	    key: "componentsReset",
-	    value: function componentsReset(trigger) {
-	      var me = this;
-
-	      _.each(this.components, function (p, i) {
-	        //theme coord graphs额外处理
-	        if (_.indexOf(me.__highModules, p.name) != -1) {
-	          return;
-	        }
-
-	        if (trigger && trigger.comp && trigger.comp.__cid == p.__cid) {
-	          //如果这次reset就是由自己触发的，那么自己这个components不需要reset，负责观察就好
-	          return;
-	        }
-	        p.reset && p.reset(me[p.type] || {}, me.dataFrame);
-	      });
-	    }
-	  }, {
-	    key: "getComponentById",
-	    value: function getComponentById(id) {
-	      var comp;
-
-	      _.each(this.components, function (c) {
-	        if (c.id && c.id == id) {
-	          comp = c;
-	          return false;
-	        }
-	      });
-
-	      return comp;
-	    }
-	  }, {
-	    key: "getComponent",
-	    value: function getComponent(opt) {
-	      return this.getComponents(opt)[0];
-	    }
-	  }, {
-	    key: "getComponents",
-	    value: function getComponents(opt, components) {
-	      var arr = [];
-	      var expCount = 0;
-
-	      if (!components) {
-	        components = this.components;
-	      }
-
-	      for (var p in opt) {
-	        expCount++;
-	      }
-
-	      if (!expCount) {
-	        return components;
-	      }
-
-	      _.each(components, function (comp) {
-	        var i = 0;
-
-	        for (var _p2 in opt) {
-	          if (JSON.stringify(comp[_p2]) == JSON.stringify(opt[_p2])) {
-	            i++;
-	          }
-	        }
-
-	        if (expCount == i) {
-	          arr.push(comp);
-	        }
-	      });
-
-	      return arr;
-	    } //从graphs里面去根据opt做一一对比，比对成功为true
-	    //count为要查询的数量， 如果为1，则
-
-	  }, {
-	    key: "getGraph",
-	    value: function getGraph(opt) {
-	      var graphs = this.getGraphs(opt);
-	      return graphs[0];
-	    }
-	  }, {
-	    key: "getGraphs",
-	    value: function getGraphs(opt) {
-	      return this.getComponents(opt, this.getComponents({
-	        name: 'graphs'
-	      }));
-	    } //获取graphs根据id
-
-	  }, {
-	    key: "getGraphById",
-	    value: function getGraphById(id) {
-	      var _g;
-
-	      _.each(this.getComponents({
-	        name: 'graphs'
-	      }), function (g) {
-	        if (g.id == id) {
-	          _g = g;
-	          return false;
-	        }
-	      });
-
-	      return _g;
-	    } //从coord里面去根据opt做一一对比，比对成功为true
-	    //目前没有多个坐标系的图表，所以不需要 getCoords 
-
-	  }, {
-	    key: "getCoord",
-	    value: function getCoord(opt) {
-	      return this.getComponent(_.extend(true, {
-	        name: 'coord'
-	      }, opt));
-	    } //只有field为多组数据的时候才需要legend，给到legend组件来调用
-
-	  }, {
-	    key: "getLegendData",
-	    value: function getLegendData() {
-	      var me = this;
-	      var data = []; //这里涌来兼容pie等的图例，其实后续可以考虑后面所有的graphs都提供一个getLegendData的方法
-
-	      _.each(this.getComponents({
-	        name: 'graphs'
-	      }), function (_g) {
-	        _.each(_g.getLegendData(), function (item) {
-	          if (_.find(data, function (d) {
-	            return d.name == item.name;
-	          })) return;
-
-	          var legendItem = _.extend(true, {
-	            enabled: true
-	          }, item);
-
-	          legendItem.color = item.fillStyle || item.color || item.style;
-	          data.push(legendItem);
-	        });
-	      });
-
-	      if (data.length) {
-	        return data;
-	      }
-
-	      var _coord = me.getComponent({
-	        name: 'coord'
-	      });
-
-	      _.each(_.flatten(_coord.fieldsMap), function (map, i) {
-	        //因为yAxis上面是可以单独自己配置field的，所以，这部分要过滤出 legend data
-	        var isGraphsField = false;
-
-	        _.each(me._opt.graphs, function (gopt) {
-	          if (_.indexOf(_.flatten([gopt.field]), map.field) > -1) {
-	            isGraphsField = true;
-	            return false;
-	          }
-	        });
-
-	        if (isGraphsField) {
-	          data.push({
-	            enabled: map.enabled,
-	            name: map.name || map.field,
-	            field: map.field,
-	            ind: map.ind,
-	            color: map.color,
-	            type: map.type,
-	            yAxis: map.yAxis
-	          });
-	        }
-	      });
-
-	      return data;
-	    }
-	  }, {
-	    key: "show",
-	    value: function show(field, trigger) {
-
-	      var _coord = this.getComponent({
-	        name: 'coord'
-	      });
-
-	      _coord && _coord.show(field, trigger);
-
-	      _.each(this.getComponents({
-	        name: 'graphs'
-	      }), function (_g) {
-	        _g.show(field, trigger);
-	      });
-
-	      this.componentsReset(trigger);
-	    }
-	  }, {
-	    key: "hide",
-	    value: function hide(field, trigger) {
-	      var me = this;
-
-	      var _coord = me.getComponent({
-	        name: 'coord'
-	      });
-
-	      _coord && _coord.hide(field, trigger);
-
-	      _.each(this.getComponents({
-	        name: 'graphs'
-	      }), function (_g) {
-	        _g.hide(field, trigger);
-	      });
-
-	      this.componentsReset(trigger);
-	    }
-	  }, {
-	    key: "triggerEvent",
-	    value: function triggerEvent(event) {
-	      //触发每个graphs级别的事件（在 graph 上面 用 on 绑定的事件），
-	      //用户交互事件先执行，还可以修改e的内容修改tips内容(e.eventInfo)
-	      if (event.eventInfo) {
-	        _.each(this.getGraphs(), function (graph) {
-	          graph.triggerEvent(event);
-	        });
-	      }
-
-	      var _tips = this.getComponent({
-	        name: 'tips'
-	      });
-
-	      var _coord = this.getComponent({
-	        name: 'coord'
-	      });
-
-	      if (_tips) {
-	        this._setGraphsTipsInfo.apply(this, [event]);
-
-	        if (event.type == "mouseover" || event.type == "mousedown") {
-	          _tips.show(event);
-
-	          this._tipsPointerAtAllGraphs(event);
-	        }
-
-	        if (event.type == "mousemove") {
-	          _tips.move(event);
-
-	          this._tipsPointerAtAllGraphs(event);
-	        }
-
-	        if (event.type == "mouseout" && !(event.toTarget && _coord && _coord.induce && _coord.induce.containsPoint(_coord.induce.globalToLocal(event.target.localToGlobal(event.point))))) {
-	          _tips.hide(event);
-
-	          this._tipsPointerHideAtAllGraphs(event);
-	        }
-	      }
-	    }
-	  }, {
-	    key: "_bindEvent",
-	    value: function _bindEvent() {
-	      var _this3 = this;
-
-	      if (this.__bindEvented) return;
-	      this.on(event.types.get(), function (e) {
-	        //先触发自己的事件
-	        _this3.triggerEvent(e); //然后
-	        //如果这个图表的tips组件有设置linkageName，
-	        //那么就寻找到所有的图表实例中有相同linkageName的图表，执行相应的事件
-
-
-	        var tipsComp = _this3.getComponent({
-	          name: "tips"
-	        });
-
-	        if (tipsComp && tipsComp.linkageName) {
-	          for (var c in _global["default"].instances) {
-	            var linkageChart = _global["default"].instances[c];
-	            if (linkageChart == _this3) continue;
-	            var linkageChartTipsComp = linkageChart.getComponent({
-	              name: "tips"
-	            });
-
-	            if (linkageChartTipsComp && linkageChartTipsComp.linkageName && linkageChartTipsComp.linkageName == tipsComp.linkageName) {
-	              if (e.eventInfo && e.eventInfo.nodes) {
-	                e.eventInfo.nodes = [];
-	              }
-
-	              e.eventInfo.isLinkageTrigger = true;
-	              linkageChart.triggerEvent.apply(linkageChart, [e]);
-	            }
-	          }
-	        }
-	      }); //一个项目只需要bind一次
-
-	      this.__bindEvented = true;
-	    } //默认的基本tipsinfo处理，极坐标和笛卡尔坐标系统会覆盖
-
-	  }, {
-	    key: "_setGraphsTipsInfo",
-	    value: function _setGraphsTipsInfo(e) {
-	      if (!e.eventInfo) {
-	        e.eventInfo = {};
-	      }
-
-	      var _coord = this.getComponent({
-	        name: 'coord'
-	      });
-
-	      if (_coord) {
-	        e.eventInfo = _coord.getTipsInfoHandler(e);
-	      }
-
-	      if (!("tipsEnabled" in e.eventInfo)) {
-	        e.eventInfo.tipsEnabled = true; //默认都开始tips
-	      }
-	      //比如鼠标移动到多柱子组合的具体某根bar上面，e.eventInfo.nodes = [ {bardata} ] 就有了这个bar的数据
-	      //那么tips就只显示这个bardata的数据
-
-	      if (!e.eventInfo.nodes || !e.eventInfo.nodes.length) {
-	        var nodes = [];
-	        var iNode = e.eventInfo.iNode;
-
-	        _.each(this.getComponents({
-	          name: 'graphs'
-	        }), function (_g) {
-	          if (_g.getNodesAt && iNode !== undefined) {
-	            nodes = nodes.concat(_g.getNodesAt(iNode, e));
-	          }
-	        });
-
-	        e.eventInfo.nodes = nodes;
-	      }
-	    } //把这个point拿来给每一个graphs执行一次测试，给graphs上面的shape触发激活样式
-
-	  }, {
-	    key: "_tipsPointerAtAllGraphs",
-	    value: function _tipsPointerAtAllGraphs(e) {
-	      _.each(this.getComponents({
-	        name: 'graphs'
-	      }), function (_g) {
-	        _g.tipsPointerOf(e);
-	      });
-	    }
-	  }, {
-	    key: "_tipsPointerHideAtAllGraphs",
-	    value: function _tipsPointerHideAtAllGraphs(e) {
-	      _.each(this.getComponents({
-	        name: 'graphs'
-	      }), function (_g) {
-	        _g.tipsPointerHideOf(e);
-	      });
-	    }
-	  }]);
-	  return Chart;
-	}(event.Dispatcher);
-
-	_global["default"].registerComponent(Chart, 'chart');
-
-	var _default = Chart;
-	exports["default"] = _default;
-	});
-
-	unwrapExports(chart);
-
 	var defineProperty$1 = createCommonjsModule(function (module) {
 	function _defineProperty(obj, key, value) {
 	  if (key in obj) {
@@ -9739,33 +8879,10 @@ var chartx = (function () {
 	exports.getDefaultProps = getDefaultProps;
 	exports.getDisMinATArr = getDisMinATArr;
 	exports.getPath = getPath;
-	exports.numAddSymbol = numAddSymbol;
 
 
 
-	/**
-	 * 数字千分位加','号
-	 * @param  {[Number]} $n [数字]
-	 * @param  {[type]} $s [千分位上的符号]
-	 * @return {[String]}    [根据$s提供的值 对千分位进行分隔 并且小数点上自动加上'.'号  组合成字符串]
-	 */
-	function numAddSymbol($n, $s) {
-	  var s = Number($n);
-	  var symbol = $s ? $s : ',';
-
-	  if (!s) {
-	    return String($n);
-	  }
-
-	  if (s >= 1000) {
-	    var num = parseInt(s / 1000);
-	    return String($n.toString().replace(num, num + symbol));
-	  } else {
-	    return String($n);
-	  }
-	} //在一个数组中 返回比对$arr中的值离$n最近的值的索引
-
-
+	//在一个数组中 返回比对$arr中的值离$n最近的值的索引
 	function getDisMinATArr($n, $arr) {
 	  var index = 0;
 	  var n = Math.abs($n - $arr[0]);
@@ -9857,7 +8974,6 @@ var chartx = (function () {
 	var tools_1 = tools.getDefaultProps;
 	var tools_2 = tools.getDisMinATArr;
 	var tools_3 = tools.getPath;
-	var tools_4 = tools.numAddSymbol;
 
 	var component = createCommonjsModule(function (module, exports) {
 
@@ -11072,29 +10188,60 @@ var chartx = (function () {
 	    */
 
 
-	    _this.fieldsMap = null;
+	    _this.graphsFieldsMap = null;
 	    _this.induce = null;
 	    _this._axiss = []; //所有轴的集合
+	    //DOTO：注意，这里不能调用init 因为在rect polar等派生自这个空坐标系的组件里就会有问题
+	    //只能在用到空坐标组件的时候手动init()执行一下
+	    //this.init()
 
 	    return _this;
-	  } //和原始field结构保持一致，但是对应的field换成 {field: , enabled:...}结构
+	  } //空坐标系的init，在rect polar中会被覆盖
 
 
 	  (0, _createClass2["default"])(coordBase, [{
-	    key: "setFieldsMap",
-	    value: function setFieldsMap(axisExp) {
+	    key: "init",
+	    value: function init() {
+	      //this._initModules();
+	      //创建好了坐标系统后，设置 _fieldsDisplayMap 的值，
+	      // _fieldsDisplayMap 的结构里包含每个字段是否在显示状态的enabled 和 这个字段属于哪个yAxis
+	      this.graphsFieldsMap = this.setGraphsFieldsMap();
+	    } //空坐标系的draw，在rect polar中会被覆盖
+
+	  }, {
+	    key: "draw",
+	    value: function draw() {
+	      var _padding = this.app.padding;
+	      this.width = this.app.width - _padding.left - _padding.right;
+	      this.height = this.app.height - _padding.top - _padding.bottom;
+	      this.origin.x = _padding.left;
+	      this.origin.y = _padding.top;
+	    } //和原始field结构保持一致，但是对应的field换成 {field: , enabled:...}结构
+
+	  }, {
+	    key: "setGraphsFieldsMap",
+	    value: function setGraphsFieldsMap(axisExp) {
 	      var me = this;
 	      var ind = 0;
-	      var axisType = axisExp.type || "yAxis";
 	      var fieldsArr = [];
 
-	      _.each(this.getAxiss(axisExp), function (_axis) {
-	        if (_axis.field) {
-	          fieldsArr = fieldsArr.concat(_axis.field);
-	        }
-	      });
+	      if (axisExp) {
+	        _.each(this.getAxiss(axisExp), function (_axis) {
+	          if (_axis.field) {
+	            fieldsArr = fieldsArr.concat(_axis.field);
+	          }
+	        });
+	      }
 
 	      var graphs = _.flatten([this.app._opt.graphs]);
+
+	      graphs.forEach(function (graph) {
+	        var graphFields = _.flatten([graph.field]);
+
+	        if (graphFields.length && _.flatten(fieldsArr).indexOf(graphFields[0]) == -1) {
+	          fieldsArr = fieldsArr.concat(graph.field);
+	        }
+	      });
 
 	      function _set(fields) {
 	        if (_.isString(fields)) {
@@ -11103,88 +10250,93 @@ var chartx = (function () {
 
 	        var clone_fields = _.clone(fields);
 
-	        var _loop = function _loop(i, l) {
+	        for (var i = 0, l = fields.length; i < l; i++) {
 	          var field = fields[i];
 
 	          if (_.isString(field)) {
-	            var color = me.app.getTheme(ind);
-	            var graph;
-	            var graphFieldInd;
-	            var graphColorProp; //graphs.find( graph => {_.flatten([graph.field]).indexOf( field )} ).color;
+	            (function () {
+	              var color = me.app.getTheme(ind);
+	              var graph = void 0;
+	              var graphFieldInd = void 0;
+	              var graphColorProp = void 0; //graphs.find( graph => {_.flatten([graph.field]).indexOf( field )} ).color;
 
-	            for (var _i = 0, _l = graphs.length; _i < _l; _i++) {
-	              graph = graphs[_i];
-	              graphFieldInd = _.flatten([graph.field]).indexOf(field);
+	              for (var _i = 0, _l = graphs.length; _i < _l; _i++) {
+	                graph = graphs[_i];
+	                graphFieldInd = _.flatten([graph.field]).indexOf(field);
 
-	              if (graphFieldInd > -1) {
-	                graphColorProp = graph.color;
-	                break;
-	              }
-	            }
-
-	            if (graphColorProp) {
-	              if (typeof graphColorProp == 'string') {
-	                color = graphColorProp;
+	                if (graphFieldInd > -1) {
+	                  graphColorProp = graph.color;
+	                  break;
+	                }
 	              }
 
-	              if (Array.isArray(graphColorProp)) {
-	                color = graphColorProp[graphFieldInd];
-	              }
-
-	              if (typeof graphColorProp == 'function') {
-	                color = graphColorProp.apply(me.app, [graph]);
-	              }
-	            }
-	            var config = me.fieldsConfig[field];
-
-	            var fieldItem = _objectSpread({
-	              field: field,
-	              name: field,
-	              //fieldConfig中可能会覆盖
-	              type: graph.type,
-	              enabled: true,
-	              color: color,
-	              ind: ind++
-	            }, me.fieldsConfig[field] || {});
-
-	            fieldItem.getFormatValue = function (value) {
-	              if (config && config.format) {
-	                if (typeof config.format == 'string') {
-	                  //如果传入的是 字符串，那么就认为是 numeral 的格式字符串
-	                  value = (0, _numeral["default"])(value).format(config.format);
+	              if (graphColorProp) {
+	                if (typeof graphColorProp == 'string') {
+	                  color = graphColorProp;
 	                }
 
-	                if (typeof config.format == 'function') {
-	                  //如果传入的是 字符串，那么就认为是 numeral 的格式字符串
-	                  value = config.format.apply(me, {
-	                    field: field
-	                  });
+	                if (Array.isArray(graphColorProp)) {
+	                  color = graphColorProp[graphFieldInd];
 	                }
-	              } else {
-	                value = (0, _typeof2["default"])(value) == "object" ? JSON.stringify(value) : (0, _numeral["default"])(value).format('0,0');
-	              }
-	              return value;
-	            };
 
-	            fieldItem[axisType] = me.getAxis({
-	              type: axisType,
-	              field: field
-	            });
-	            clone_fields[i] = fieldItem;
+	                if (typeof graphColorProp == 'function') {
+	                  color = graphColorProp.apply(me.app, [graph]);
+	                }
+	              }
+	              var config = me.fieldsConfig[field];
+
+	              var fieldItem = _objectSpread({
+	                field: field,
+	                name: field,
+	                //fieldConfig中可能会覆盖
+	                type: graph.type,
+	                enabled: true,
+	                color: color,
+	                ind: ind++
+	              }, me.fieldsConfig[field] || {});
+
+	              fieldItem.getFormatValue = function (value) {
+	                return me.getFormatValue(value, config, fieldItem);
+	              };
+
+	              var axisType = axisExp ? axisExp.type || "yAxis" : null;
+
+	              if (axisType) {
+	                fieldItem[axisType] = me.getAxis({
+	                  type: axisType,
+	                  field: field
+	                });
+	              }
+	              clone_fields[i] = fieldItem;
+	            })();
 	          }
 
 	          if (_.isArray(field)) {
 	            clone_fields[i] = _set(field);
 	          }
-	        };
-
-	        for (var i = 0, l = fields.length; i < l; i++) {
-	          _loop(i);
 	        }
 	        return clone_fields;
 	      }
 	      return _set(fieldsArr);
-	    } //设置 fieldsMap 中对应field 的 enabled状态
+	    }
+	  }, {
+	    key: "getFormatValue",
+	    value: function getFormatValue(value, config) {
+	      if (config && config.format) {
+	        if (typeof config.format == 'string') {
+	          //如果传入的是 字符串，那么就认为是 numeral 的格式字符串
+	          value = (0, _numeral["default"])(value).format(config.format);
+	        }
+
+	        if (typeof config.format == 'function') {
+	          //如果传入的是函数
+	          value = config.format.apply(this, arguments);
+	        }
+	      } else {
+	        value = (0, _typeof2["default"])(value) == "object" ? JSON.stringify(value) : (0, _numeral["default"])(value).format('0,0');
+	      }
+	      return value;
+	    } //设置 graphsFieldsMap 中对应field 的 enabled状态
 
 	  }, {
 	    key: "setFieldEnabled",
@@ -11201,7 +10353,7 @@ var chartx = (function () {
 	        });
 	      }
 
-	      set(me.fieldsMap);
+	      set(me.graphsFieldsMap);
 	    } //从FieldsMap中获取对应的config
 
 	  }, {
@@ -11221,9 +10373,9 @@ var chartx = (function () {
 	        });
 	      }
 
-	      get(me.fieldsMap);
+	      get(me.graphsFieldsMap);
 	      return fieldConfig;
-	    } //从 fieldsMap 中过滤筛选出来一个一一对应的 enabled为true的对象结构
+	    } //从 graphsFieldsMap 中过滤筛选出来一个一一对应的 enabled为true的对象结构
 	    //这个方法还必须要返回的数据里描述出来多y轴的结构。否则外面拿到数据后并不好处理那个数据对应哪个轴
 
 	  }, {
@@ -11232,7 +10384,7 @@ var chartx = (function () {
 	      var enabledFields = [];
 	      var axisType = axis ? axis.type : "yAxis";
 
-	      _.each(this.fieldsMap, function (bamboo) {
+	      _.each(this.graphsFieldsMap, function (bamboo) {
 	        if (_.isArray(bamboo)) {
 	          //多节竹子，堆叠
 	          var fields = []; //设置完fields后，返回这个group属于left还是right的axis
@@ -11299,6 +10451,20 @@ var chartx = (function () {
 	          return isNaN(Number(val)) ? val : Number(val);
 	        })
 	      };
+	    } //空坐标系的getTipsInfoHandler，在rect polar中会被覆盖
+
+	  }, {
+	    key: "getTipsInfoHandler",
+	    value: function getTipsInfoHandler(e) {
+	      var obj = {
+	        nodes: [//遍历_graphs 去拿东西
+	        ]
+	      };
+
+	      if (e.eventInfo) {
+	        _.extend(true, obj, e.eventInfo);
+	      }
+	      return obj;
 	    }
 	  }, {
 	    key: "hide",
@@ -11384,6 +10550,12 @@ var chartx = (function () {
 	      });
 
 	      return arr;
+	    } //某axis变化了后，对应的依附于该axis的graphs都要重新reset
+
+	  }, {
+	    key: "resetGraphsOfAxis",
+	    value: function resetGraphsOfAxis(axis) {
+	      var graphs = this.app.getGraphs();
 	    }
 	  }], [{
 	    key: "defaultProps",
@@ -11427,10 +10599,886 @@ var chartx = (function () {
 	  return coordBase;
 	}(_component["default"]);
 
-	exports["default"] = coordBase;
+	_component["default"].registerComponent(coordBase, 'coord');
+
+	var _default = coordBase;
+	exports["default"] = _default;
 	});
 
 	unwrapExports(coord);
+
+	var chart = createCommonjsModule(function (module, exports) {
+
+
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports["default"] = void 0;
+
+	var _classCallCheck2 = interopRequireDefault(classCallCheck$1);
+
+	var _createClass2 = interopRequireDefault(createClass$1);
+
+	var _inherits2 = interopRequireDefault(inherits$1);
+
+	var _possibleConstructorReturn2 = interopRequireDefault(possibleConstructorReturn$1);
+
+	var _getPrototypeOf2 = interopRequireDefault(getPrototypeOf$1);
+
+	var _global = interopRequireDefault(global$1);
+
+	var _canvax = interopRequireDefault(Canvax);
+
+	var _dataFrame = interopRequireDefault(dataFrame);
+
+	var _index = interopRequireDefault(coord);
+
+	function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
+
+	function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
+	var _ = _canvax["default"]._,
+	    $ = _canvax["default"].$,
+	    event = _canvax["default"].event;
+	var _padding = 20;
+
+	var Chart = /*#__PURE__*/function (_event$Dispatcher) {
+	  (0, _inherits2["default"])(Chart, _event$Dispatcher);
+
+	  var _super = _createSuper(Chart);
+
+	  function Chart(node, data, opt, componentModules) {
+	    var _this;
+
+	    (0, _classCallCheck2["default"])(this, Chart);
+	    _this = _super.call(this);
+	    _this.componentModules = componentModules;
+	    _this._node = node;
+	    _this._data = data;
+	    _this._opt = opt;
+	    _this.dataFrame = _this.initData(data, opt);
+	    _this.el = $.query(node); //chart 在页面里面的容器节点，也就是要把这个chart放在哪个节点里
+
+	    _this.width = parseInt(_this.el.offsetWidth); //图表区域宽
+
+	    _this.height = parseInt(_this.el.offsetHeight); //图表区域高
+	    //legend如果在top，就会把图表的padding.top修改，减去legend的height
+
+	    _this.padding = null; //Canvax实例
+
+	    _this.canvax = new _canvax["default"].App({
+	      el: _this.el,
+	      webGL: false
+	    });
+
+	    _this.canvax.registEvent();
+
+	    _this.id = "chartx_" + _this.canvax.id;
+
+	    _this.el.setAttribute("chart_id", _this.id);
+
+	    _this.el.setAttribute("chartx_version", "2.0"); //设置stage ---------------------------------------------------------begin
+
+
+	    _this.stage = new _canvax["default"].Display.Stage({
+	      id: "main-chart-stage"
+	    });
+
+	    _this.canvax.addChild(_this.stage); //设置stage ---------------------------------------------------------end
+	    //构件好coord 和 graphs 的根容器
+
+
+	    _this.setCoord_Graphs_Sp(); //这三类组件是优先级最高的组件，所有的组件的模块化和绘制，都要一次在这三个完成后实现
+
+
+	    _this.__highModules = ["theme", "coord", "graphs"]; //组件管理机制,所有的组件都绘制在这个地方
+
+	    _this.components = [];
+	    _this.inited = false;
+
+	    _this.init();
+
+	    return _this;
+	  }
+
+	  (0, _createClass2["default"])(Chart, [{
+	    key: "init",
+	    value: function init() {
+	      var _this2 = this;
+
+	      var me = this; //init全部用 this._opt
+
+	      var opt = this._opt; //padding数据也要重置为起始值
+
+	      this.padding = this._getPadding(); //首先判断如果没有coord配置，那么就配置一个空坐标系，所有的图表都会依赖一个坐标系， 哪怕是个空坐标系
+
+	      if (!opt.coord) {
+	        var _coord = new _index["default"]({}, me);
+
+	        _coord.init();
+
+	        me.components.push(_coord);
+	      } //先依次init 处理 "theme", "coord", "graphs" 三个优先级最高的模块
+
+
+	      _.each(this.__highModules, function (compName) {
+	        if (!opt[compName]) return;
+
+	        var comps = _.flatten([opt[compName]]); //them是一个数组的组件。so特殊处理
+
+
+	        if (compName == "theme") {
+	          comps = [comps];
+	        }
+
+	        _.each(comps, function (comp) {
+	          if ( //没有type的coord和没有field(or keyField)的graphs，都无效，不要创建该组件
+	          //关系图中是keyField
+	          //(compName == "coord" && !comp.type ) || 
+	          compName == "graphs" && !comp.field && !comp.keyField && !comp.adcode && !comp.geoJson && !comp.geoJsonUrl //地图的话只要有个adcode就可以了
+	          ) return;
+	          var compModule = me.componentModules.get(compName, comp.type);
+
+	          if (compModule) {
+	            var _comp = new compModule(comp, me); //可能用户配置了一个空的coord坐标系，没有type，里面配置了一些fieldsConfig之类的全局配置的时候
+	            //就要手动init一下这个空坐标系
+
+
+	            if (compName == 'coord' && !comp.type) {
+	              //空坐标组件， 就要手动调用一下组件的init()
+	              _comp.init();
+	            }
+	            me.components.push(_comp);
+	          }
+	        });
+	      }); //PS: theme 组件优先级最高，在registerComponents之前已经加载过
+
+
+	      var _loop = function _loop(_p) {
+	        //非coord graphs theme，其实后面也可以统一的
+	        if (_.indexOf(_this2.__highModules, _p) == -1) {
+	          var comps = _this2._opt[_p]; //所有的组件都按照数组方式处理，这里，组件里面就不需要再这样处理了
+
+	          if (!_.isArray(comps)) {
+	            comps = [comps];
+	          }
+
+	          _.each(comps, function (comp) {
+	            var compModule = me.componentModules.get(_p, comp.type);
+
+	            if (compModule) {
+	              var _comp = new compModule(comp, me);
+
+	              me.components.push(_comp);
+	            }
+	          });
+	        }
+	      };
+
+	      for (var _p in this._opt) {
+	        _loop(_p);
+	      }
+	    }
+	  }, {
+	    key: "draw",
+	    value: function draw(opt) {
+	      var me = this;
+	      !opt && (opt = {});
+
+	      var _coord = this.getComponent({
+	        name: 'coord'
+	      });
+
+	      if (_coord && _coord.horizontal) {
+	        this._drawBeginHorizontal();
+	      }
+	      var width = this.width - this.padding.left - this.padding.right;
+	      var height = this.height - this.padding.top - this.padding.bottom;
+	      var origin = {
+	        x: this.padding.left,
+	        y: this.padding.top
+	      };
+
+	      if (_coord) {
+	        //先绘制好坐标系统
+	        _coord.draw(opt);
+
+	        width = _coord.width;
+	        height = _coord.height;
+	        origin = _coord.origin;
+	      }
+	      //如果没有数据，不需要绘制graphs
+	      //me.fire("complete");
+	      //return;
+	      //};
+
+	      var _graphs = this.getComponents({
+	        name: 'graphs'
+	      });
+
+	      var graphsCount = _graphs.length;
+	      var completeNum = 0;
+	      opt = _.extend(opt, {
+	        width: width,
+	        height: height,
+	        origin: origin
+	      }); //没有数据的时候可以不绘制graphs，但是下面的其他components还是需要绘制的，比如图例
+
+	      if (this.dataFrame.length > 0) {
+	        _.each(_graphs, function (_g) {
+	          _g.on("complete", function (g) {
+	            completeNum++;
+
+	            if (completeNum == graphsCount) {
+	              me.fire("complete");
+	            }
+	            _g.inited = true;
+	          });
+
+	          _g.draw(opt);
+	        });
+	      }
+
+	      for (var i = 0, l = this.components.length; i < l; i++) {
+	        var p = this.components[i];
+
+	        if (_.indexOf(this.__highModules, p.name) == -1) {
+	          p.draw(opt);
+	        }
+	      }
+
+	      this._bindEvent();
+
+	      if (_coord && _coord.horizontal) {
+	        this._drawEndHorizontal();
+	      }
+	    }
+	  }, {
+	    key: "_drawBeginHorizontal",
+	    value: function _drawBeginHorizontal() {
+	      //横向了之后， 要把4个padding值轮换一下
+	      //top,right 对调 ， bottom,left 对调
+	      var padding = this.padding;
+	      var num = padding.top;
+	      padding.top = padding.right;
+	      padding.right = padding.bottom;
+	      padding.bottom = padding.left;
+	      padding.left = num;
+	    } //绘制完毕后的横向处理
+
+	  }, {
+	    key: "_drawEndHorizontal",
+	    value: function _drawEndHorizontal() {
+	      var ctx = this.graphsSprite.context;
+	      ctx.x += (this.width - this.height) / 2;
+	      ctx.y += (this.height - this.width) / 2;
+	      ctx.rotation = 90;
+	      ctx.rotateOrigin = {
+	        x: this.height / 2,
+	        y: this.width / 2
+	      };
+
+	      this._horizontalGraphsText();
+	    }
+	  }, {
+	    key: "_horizontalGraphsText",
+	    value: function _horizontalGraphsText() {
+	      var me = this;
+
+	      function _horizontalText(el) {
+	        if (el.children) {
+	          _.each(el.children, function (_el) {
+	            _horizontalText(_el);
+	          });
+	        }
+
+	        if (el.type == "text" && !el.__horizontal) {
+	          var ctx = el.context;
+	          ctx.rotation = ctx.rotation - 90;
+	          el.__horizontal = true;
+	        }
+	      }
+
+	      _.each(me.getComponents({
+	        name: 'graphs'
+	      }), function (_graphs) {
+	        _horizontalText(_graphs.sprite);
+	      });
+	    }
+	  }, {
+	    key: "_getPadding",
+	    value: function _getPadding() {
+	      var paddingVal = _padding;
+
+	      if (this._opt.coord && "padding" in this._opt.coord) {
+	        if (!_.isObject(this._opt.coord.padding)) {
+	          paddingVal = this._opt.coord.padding;
+	        }
+	      }
+	      var paddingObj = {
+	        top: paddingVal,
+	        right: paddingVal,
+	        bottom: paddingVal,
+	        left: paddingVal
+	      };
+
+	      if (this._opt.coord && "padding" in this._opt.coord) {
+	        if (_.isObject(this._opt.coord.padding)) {
+	          paddingObj = _.extend(paddingObj, this._opt.coord.padding);
+	        }
+	      }
+	      return paddingObj;
+	    } //ind 如果有就获取对应索引的具体颜色值
+
+	  }, {
+	    key: "getTheme",
+	    value: function getTheme(ind) {
+	      var colors = _global["default"].getGlobalTheme();
+
+	      var _theme = this.getComponent({
+	        name: 'theme'
+	      });
+
+	      if (_theme) {
+	        colors = _theme.get();
+	      }
+
+	      if (ind != undefined) {
+	        return colors[ind % colors.length] || "#ccc";
+	      }
+	      return colors;
+	    }
+	  }, {
+	    key: "setCoord_Graphs_Sp",
+	    value: function setCoord_Graphs_Sp() {
+	      //坐标系存放的容器
+	      this.coordSprite = new _canvax["default"].Display.Sprite({
+	        id: 'coordSprite'
+	      });
+	      this.stage.addChild(this.coordSprite); //graphs管理
+
+	      this.graphsSprite = new _canvax["default"].Display.Sprite({
+	        id: 'graphsSprite'
+	      });
+	      this.stage.addChild(this.graphsSprite);
+	    }
+	    /*
+	     * chart的销毁
+	     */
+
+	  }, {
+	    key: "destroy",
+	    value: function destroy() {
+	      this.clean();
+
+	      if (this.el) {
+	        this.el.removeAttribute("chart_id");
+	        this.el.removeAttribute("chartx_version");
+	        this.canvax.destroy();
+	        this.el = null;
+	      }
+	      this._destroy && this._destroy();
+	      this.fire("destroy");
+	    }
+	    /*
+	     * 清除整个图表
+	     **/
+
+	  }, {
+	    key: "clean",
+	    value: function clean() {
+	      //保留所有的stage，stage下面得元素全部 destroy 掉
+	      for (var i = 0, l = this.canvax.children.length; i < l; i++) {
+	        var stage = this.canvax.getChildAt(i);
+
+	        for (var s = 0, sl = stage.children.length; s < sl; s++) {
+	          stage.getChildAt(s).destroy();
+	          s--;
+	          sl--;
+	        }
+	      }
+	      //所以要重新设置一遍准备好。
+
+	      this.setCoord_Graphs_Sp();
+	      this.components = []; //组件清空
+
+	      this.canvax.domView && (this.canvax.domView.innerHTML = ""); //清空事件的当前状态
+
+	      if (this.canvax.event) {
+	        this.canvax.event.curPointsTarget = [];
+	      }
+	    }
+	    /**
+	     * 容器的尺寸改变重新绘制
+	     */
+
+	  }, {
+	    key: "resize",
+	    value: function resize() {
+	      var _w = parseInt(this.el.offsetWidth);
+
+	      var _h = parseInt(this.el.offsetHeight);
+
+	      if (_w == this.width && _h == this.height) return;
+	      this.width = _w;
+	      this.height = _h;
+	      this.canvax.resize();
+	      this.inited = false;
+	      this.clean();
+	      this.init();
+	      this.draw({
+	        resize: true
+	      });
+	      this.inited = true;
+	    }
+	    /**
+	     * reset 其实就是重新绘制整个图表，不再做详细的拆分opts中有哪些变化，来做对应的细致的变化，简单粗暴的全部重新创立
+	     * opt 必须全量options，不在支持局部opt传递，所以对opt的处理不再支持extend
+	     */
+
+	  }, {
+	    key: "reset",
+	    value: function reset(opt, data) {
+	      opt && (this._opt = opt);
+	      /* 不能 extend opt 
+	      !opt && (opt={});
+	      _.extend(this._opt, opt);
+	      */
+
+	      data && (this._data = data);
+	      this.dataFrame = this.initData(this._data, opt);
+	      this.clean();
+	      this.init();
+	      this.draw();
+	    }
+	    /*
+	     * 只响应数据的变化，不涉及配置变化
+	     * 
+	     * @trigger 一般是触发这个data reset的一些场景数据，内部触发才会有，比如datazoom， tree的收缩节点
+	     * 外部调用resetData的时候，是只会传递第一个data数据的
+	     * 比如如果是 datazoom 触发的， 就会有 trigger数据{ name:'datazoom', left:1,right:1 }
+	     */
+
+	  }, {
+	    key: "resetData",
+	    value: function resetData(data, trigger) {
+	      var me = this;
+	      var preDataLenth = this.dataFrame.org.length;
+
+	      if (!trigger || !trigger.comp) {
+	        //只有非内部trigger的的resetData，才会有原数据的改变
+	        if (!data) {
+	          data = [];
+	        }
+
+	        if (!data.length) {
+	          this.clean();
+	        }
+	        this._data = data; //注意，resetData不能为null，必须是 数组格式
+
+	        this.dataFrame.resetData(data);
+	      } else {
+	        //内部组件trigger的话，比如datazoom
+	        this.dataFrame.resetData();
+	      }
+
+	      var graphsList = this.getComponents({
+	        name: 'graphs'
+	      });
+	      var allGraphsHasResetData = true;
+
+	      _.each(graphsList, function (_g) {
+	        if (!_g.resetData && allGraphsHasResetData) {
+	          allGraphsHasResetData = false;
+	          return false;
+	        }
+	      });
+
+	      if (!preDataLenth || !allGraphsHasResetData) {
+	        //如果之前的数据为空， 那么我们应该这里就直接重绘吧
+	        //如果有其中一个graphs没实现resetData 也 重绘
+	        this.clean();
+	        this.init();
+	        this.draw(this._opt);
+	        return;
+	      }
+
+	      var _coord = this.getComponent({
+	        name: 'coord'
+	      });
+
+	      if (_coord) {
+	        _coord.resetData(this.dataFrame, trigger);
+	      }
+
+	      _.each(graphsList, function (_g) {
+	        _g.resetData(me.dataFrame, trigger);
+	      });
+
+	      this.componentsReset(trigger);
+
+	      if (_coord && _coord.horizontal) {
+	        this._horizontalGraphsText();
+	      }
+	      this.fire("resetData");
+	    }
+	  }, {
+	    key: "initData",
+	    value: function initData() {
+	      return _dataFrame["default"].apply(this, arguments);
+	    }
+	  }, {
+	    key: "componentsReset",
+	    value: function componentsReset(trigger) {
+	      var me = this;
+
+	      _.each(this.components, function (p, i) {
+	        //theme coord graphs额外处理
+	        if (_.indexOf(me.__highModules, p.name) != -1) {
+	          return;
+	        }
+
+	        if (trigger && trigger.comp && trigger.comp.__cid == p.__cid) {
+	          //如果这次reset就是由自己触发的，那么自己这个components不需要reset，负责观察就好
+	          return;
+	        }
+	        p.reset && p.reset(me[p.type] || {}, me.dataFrame);
+	      });
+	    }
+	  }, {
+	    key: "getComponentById",
+	    value: function getComponentById(id) {
+	      var comp;
+
+	      _.each(this.components, function (c) {
+	        if (c.id && c.id == id) {
+	          comp = c;
+	          return false;
+	        }
+	      });
+
+	      return comp;
+	    }
+	  }, {
+	    key: "getComponent",
+	    value: function getComponent(opt) {
+	      return this.getComponents(opt)[0];
+	    }
+	  }, {
+	    key: "getComponents",
+	    value: function getComponents(opt, components) {
+	      var arr = [];
+	      var expCount = 0;
+
+	      if (!components) {
+	        components = this.components;
+	      }
+
+	      for (var p in opt) {
+	        expCount++;
+	      }
+
+	      if (!expCount) {
+	        return components;
+	      }
+
+	      _.each(components, function (comp) {
+	        var i = 0;
+
+	        for (var _p2 in opt) {
+	          if (JSON.stringify(comp[_p2]) == JSON.stringify(opt[_p2])) {
+	            i++;
+	          }
+	        }
+
+	        if (expCount == i) {
+	          arr.push(comp);
+	        }
+	      });
+
+	      return arr;
+	    } //从graphs里面去根据opt做一一对比，比对成功为true
+	    //count为要查询的数量， 如果为1，则
+
+	  }, {
+	    key: "getGraph",
+	    value: function getGraph(opt) {
+	      var graphs = this.getGraphs(opt);
+	      return graphs[0];
+	    }
+	  }, {
+	    key: "getGraphs",
+	    value: function getGraphs(opt) {
+	      return this.getComponents(opt, this.getComponents({
+	        name: 'graphs'
+	      }));
+	    } //获取graphs根据id
+
+	  }, {
+	    key: "getGraphById",
+	    value: function getGraphById(id) {
+	      var _g;
+
+	      _.each(this.getComponents({
+	        name: 'graphs'
+	      }), function (g) {
+	        if (g.id == id) {
+	          _g = g;
+	          return false;
+	        }
+	      });
+
+	      return _g;
+	    } //从coord里面去根据opt做一一对比，比对成功为true
+	    //目前没有多个坐标系的图表，所以不需要 getCoords 
+
+	  }, {
+	    key: "getCoord",
+	    value: function getCoord(opt) {
+	      return this.getComponent(_.extend(true, {
+	        name: 'coord'
+	      }, opt));
+	    } //只有field为多组数据的时候才需要legend，给到legend组件来调用
+
+	  }, {
+	    key: "getLegendData",
+	    value: function getLegendData() {
+	      var me = this;
+	      var data = []; //这里涌来兼容pie等的图例，其实后续可以考虑后面所有的graphs都提供一个getLegendData的方法
+
+	      _.each(this.getComponents({
+	        name: 'graphs'
+	      }), function (_g) {
+	        _.each(_g.getLegendData(), function (item) {
+	          if (_.find(data, function (d) {
+	            return d.name == item.name;
+	          })) return;
+
+	          var legendItem = _.extend(true, {
+	            enabled: true
+	          }, item);
+
+	          legendItem.color = item.fillStyle || item.color || item.style;
+	          data.push(legendItem);
+	        });
+	      });
+
+	      if (data.length) {
+	        return data;
+	      }
+
+	      var _coord = me.getComponent({
+	        name: 'coord'
+	      });
+
+	      _.each(_.flatten(_coord.graphsFieldsMap), function (map, i) {
+	        //因为yAxis上面是可以单独自己配置field的，所以，这部分要过滤出 legend data
+	        var isGraphsField = false;
+
+	        _.each(me._opt.graphs, function (gopt) {
+	          if (_.indexOf(_.flatten([gopt.field]), map.field) > -1) {
+	            isGraphsField = true;
+	            return false;
+	          }
+	        });
+
+	        if (isGraphsField) {
+	          data.push({
+	            enabled: map.enabled,
+	            name: map.name || map.field,
+	            field: map.field,
+	            ind: map.ind,
+	            color: map.color,
+	            type: map.type,
+	            yAxis: map.yAxis
+	          });
+	        }
+	      });
+
+	      return data;
+	    }
+	  }, {
+	    key: "show",
+	    value: function show(field, trigger) {
+	      var _coord = this.getComponent({
+	        name: 'coord'
+	      });
+
+	      _coord && _coord.show(field, trigger);
+
+	      _.each(this.getComponents({
+	        name: 'graphs'
+	      }), function (_g) {
+	        _g.show(field, trigger);
+	      });
+
+	      this.componentsReset(trigger);
+	    }
+	  }, {
+	    key: "hide",
+	    value: function hide(field, trigger) {
+	      var _coord = this.getComponent({
+	        name: 'coord'
+	      });
+
+	      _coord && _coord.hide(field, trigger);
+
+	      _.each(this.getComponents({
+	        name: 'graphs'
+	      }), function (_g) {
+	        _g.hide(field, trigger);
+	      });
+
+	      this.componentsReset(trigger);
+	    }
+	  }, {
+	    key: "triggerEvent",
+	    value: function triggerEvent(event) {
+	      //触发每个graphs级别的事件（在 graph 上面 用 on 绑定的事件），
+	      //用户交互事件先执行，还可以修改e的内容修改tips内容(e.eventInfo)
+	      if (event.eventInfo) {
+	        _.each(this.getGraphs(), function (graph) {
+	          graph.triggerEvent(event);
+	        });
+	      }
+
+	      var _tips = this.getComponent({
+	        name: 'tips'
+	      });
+
+	      var _coord = this.getComponent({
+	        name: 'coord'
+	      });
+
+	      if (_tips) {
+	        this._setGraphsTipsInfo.apply(this, [event]);
+
+	        if (event.type == "mouseover" || event.type == "mousedown") {
+	          _tips.show(event);
+
+	          this._tipsPointerAtAllGraphs(event);
+	        }
+
+	        if (event.type == "mousemove") {
+	          _tips.move(event);
+
+	          this._tipsPointerAtAllGraphs(event);
+	        }
+
+	        if (event.type == "mouseout" && !(event.toTarget && _coord && _coord.induce && _coord.induce.containsPoint(_coord.induce.globalToLocal(event.target.localToGlobal(event.point))))) {
+	          _tips.hide(event);
+
+	          this._tipsPointerHideAtAllGraphs(event);
+	        }
+	      }
+	    }
+	  }, {
+	    key: "_bindEvent",
+	    value: function _bindEvent() {
+	      var _this3 = this;
+
+	      if (this.__bindEvented) return;
+	      this.on(event.types.get(), function (e) {
+	        //先触发自己的事件
+	        _this3.triggerEvent(e); //然后
+	        //如果这个图表的tips组件有设置linkageName，
+	        //那么就寻找到所有的图表实例中有相同linkageName的图表，执行相应的事件
+
+
+	        var tipsComp = _this3.getComponent({
+	          name: "tips"
+	        });
+
+	        if (tipsComp && tipsComp.linkageName) {
+	          for (var c in _global["default"].instances) {
+	            var linkageChart = _global["default"].instances[c];
+	            if (linkageChart == _this3) continue;
+	            var linkageChartTipsComp = linkageChart.getComponent({
+	              name: "tips"
+	            });
+
+	            if (linkageChartTipsComp && linkageChartTipsComp.linkageName && linkageChartTipsComp.linkageName == tipsComp.linkageName) {
+	              if (e.eventInfo && e.eventInfo.nodes) {
+	                e.eventInfo.nodes = [];
+	              }
+
+	              e.eventInfo.isLinkageTrigger = true;
+	              linkageChart.triggerEvent.apply(linkageChart, [e]);
+	            }
+	          }
+	        }
+	      }); //一个项目只需要bind一次
+
+	      this.__bindEvented = true;
+	    } //默认的基本tipsinfo处理，极坐标和笛卡尔坐标系统会覆盖
+
+	  }, {
+	    key: "_setGraphsTipsInfo",
+	    value: function _setGraphsTipsInfo(e) {
+	      if (!e.eventInfo) {
+	        e.eventInfo = {};
+	      }
+
+	      var _coord = this.getComponent({
+	        name: 'coord'
+	      });
+
+	      if (_coord) {
+	        e.eventInfo = _coord.getTipsInfoHandler(e);
+	      }
+
+	      if (!("tipsEnabled" in e.eventInfo)) {
+	        e.eventInfo.tipsEnabled = true; //默认都开始tips
+	      }
+	      //比如鼠标移动到多柱子组合的具体某根bar上面，e.eventInfo.nodes = [ {bardata} ] 就有了这个bar的数据
+	      //那么tips就只显示这个bardata的数据
+
+	      if (!e.eventInfo.nodes || !e.eventInfo.nodes.length) {
+	        var nodes = [];
+	        var iNode = e.eventInfo.iNode;
+
+	        _.each(this.getComponents({
+	          name: 'graphs'
+	        }), function (_g) {
+	          if (_g.getNodesAt && iNode !== undefined) {
+	            nodes = nodes.concat(_g.getNodesAt(iNode, e));
+	          }
+	        });
+
+	        e.eventInfo.nodes = nodes;
+	      }
+	    } //把这个point拿来给每一个graphs执行一次测试，给graphs上面的shape触发激活样式
+
+	  }, {
+	    key: "_tipsPointerAtAllGraphs",
+	    value: function _tipsPointerAtAllGraphs(e) {
+	      _.each(this.getComponents({
+	        name: 'graphs'
+	      }), function (_g) {
+	        _g.tipsPointerOf(e);
+	      });
+	    }
+	  }, {
+	    key: "_tipsPointerHideAtAllGraphs",
+	    value: function _tipsPointerHideAtAllGraphs(e) {
+	      _.each(this.getComponents({
+	        name: 'graphs'
+	      }), function (_g) {
+	        _g.tipsPointerHideOf(e);
+	      });
+	    }
+	  }]);
+	  return Chart;
+	}(event.Dispatcher);
+
+	_global["default"].registerComponent(Chart, 'chart');
+
+	var _default = Chart;
+	exports["default"] = _default;
+	});
+
+	unwrapExports(chart);
 
 	var dataSection_1 = createCommonjsModule(function (module, exports) {
 
@@ -11575,7 +11623,7 @@ var chartx = (function () {
 
 
 
-	var _dataSection2 = interopRequireDefault(dataSection_1);
+	var _dataSection = interopRequireDefault(dataSection_1);
 
 
 
@@ -11688,23 +11736,24 @@ var chartx = (function () {
 	    }
 	  }, {
 	    key: "setDataSection",
-	    value: function setDataSection(_dataSection) {
-	      var me = this; //如果用户没有配置dataSection，或者用户传了，但是传了个空数组，则自己组装dataSection
-
-	      if (Canvax._.isEmpty(_dataSection) && Canvax._.isEmpty(this._opt.dataSection)) {
+	    value: function setDataSection() {
+	      if (Array.isArray(this._opt.dataSection) && this._opt.dataSection.length) {
+	        this.dataSection = this._opt.dataSection;
+	        this._dataSectionGroup = [this.dataSection];
+	      } else {
 	        if (this.layoutType == "proportion") {
 	          var arr = this._getDataSection();
 
-	          if ("origin" in me._opt) {
-	            arr.push(me._opt.origin);
+	          if ("origin" in this._opt) {
+	            arr.push(this._opt.origin);
 	          }
 
 	          if (arr.length == 1) {
 	            arr.push(arr[0] * .5);
 	          }
 
-	          if (this.waterLine) {
-	            arr.push(this.waterLine);
+	          if (Array.isArray(this.verniers) && this.verniers.length) {
+	            arr = arr.concat(this.verniers);
 	          }
 
 	          if (this.symmetric) {
@@ -11735,7 +11784,7 @@ var chartx = (function () {
 	          }
 
 	          if (!this.dataSection || !this.dataSection.length) {
-	            this.dataSection = _dataSection2["default"].section(arr, 3);
+	            this.dataSection = _dataSection["default"].section(arr, 3);
 	          }
 
 	          if (this.symmetric) {
@@ -11749,11 +11798,13 @@ var chartx = (function () {
 	            } else {
 	              this.dataSection.unshift(-Math.abs(_max2));
 	            }
-	          }
+	          } //如果还是0
+
 
 	          if (this.dataSection.length == 0) {
 	            this.dataSection = [0];
-	          }
+	          } //如果有 middleWeight 设置，就会重新设置dataSectionGroup
+
 
 	          this._dataSectionGroup = [Canvax._.clone(this.dataSection)];
 
@@ -11767,9 +11818,6 @@ var chartx = (function () {
 
 	          this._dataSectionGroup = [this.dataSection];
 	        }
-	      } else {
-	        this.dataSection = _dataSection || this._opt.dataSection;
-	        this._dataSectionGroup = [this.dataSection];
 	      }
 
 	      this._middleWeightPos();
@@ -11862,15 +11910,17 @@ var chartx = (function () {
 	    //主要是用在markline等组件中，当自己的y值超出了yaxis的范围
 
 	  }, {
-	    key: "setWaterLine",
-	    value: function setWaterLine(val) {
-	      if (val <= this.waterLine) return;
-	      this.waterLine = val;
-
-	      if (val < Canvax._.min(this.dataSection) || val > Canvax._.max(this.dataSection)) {
-	        //waterLine不再当前section的区间内，需要重新计算整个datasection    
-	        this.setDataSection();
-	        this.calculateProps();
+	    key: "_addValToSection",
+	    value: function _addValToSection(val) {
+	      this.addVerniers(val);
+	      this.setDataSection();
+	      this.calculateProps();
+	    }
+	  }, {
+	    key: "addVerniers",
+	    value: function addVerniers(val) {
+	      if (this.verniers.indexOf(val) == -1) {
+	        this.verniers.push(val);
 	      }
 	    }
 	  }, {
@@ -12415,10 +12465,9 @@ var chartx = (function () {
 	          detail: '自定义dataSection的计算公式',
 	          "default": null
 	        },
-	        waterLine: {
-	          detail: '水位线',
-	          "default": null,
-	          documentation: '水位data，需要混入 计算 dataSection， 如果有设置waterLine， dataSection的最高水位不会低于这个值'
+	        verniers: {
+	          detail: '设定的游标，dataSection的区间一定会覆盖这些值',
+	          "default": []
 	        },
 	        middleWeight: {
 	          detail: '区间分隔线',
@@ -12513,20 +12562,24 @@ var chartx = (function () {
 	  }
 
 	  (0, _createClass2["default"])(Axis, [{
-	    key: "drawWaterLine",
-	    value: function drawWaterLine(y) {
+	    key: "addValToSection",
+	    value: function addValToSection(y) {
 	      //如果y在现有的数据区间里面， 就不需要重新计算和绘制了
 	      if (this.layoutType == "proportion") {
 	        if (y >= this._min && y <= this._max) {
 	          return;
 	        }
 	      }
+
 	      this.dataSection = [];
-	      this.setWaterLine(y);
+
+	      this._addValToSection(y);
 
 	      this._initHandle();
 
-	      this.draw();
+	      this.draw(); //然后要检测下依附于这个轴的所有graphs，都要重新绘制
+
+	      this._coord.resetGraphsOfAxis(this);
 	    }
 	  }], [{
 	    key: "defaultProps",
@@ -12723,9 +12776,11 @@ var chartx = (function () {
 
 	var _canvax = interopRequireDefault(Canvax);
 
-
+	var _numeral = interopRequireDefault(numeral);
 
 	var _axis = interopRequireDefault(axis);
+
+
 
 	function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
 
@@ -12999,17 +13054,25 @@ var chartx = (function () {
 	    }
 	  }, {
 	    key: "_getFormatText",
-	    value: function _getFormatText(val) {
-	      var res = val;
+	    value: function _getFormatText(value, i) {
+	      if (this.label.format) {
+	        //如果有单独给label配置format，就用label上面的配置
+	        if (_.isFunction(this.label.format)) {
+	          value = this.label.format.apply(this, arguments);
+	        }
 
-	      if (_.isFunction(this.label.format)) {
-	        res = this.label.format.apply(this, arguments);
-	      }
+	        if (typeof this.label.format == 'string') {
+	          value = (0, _numeral["default"])(value).format(this.label.format);
+	        }
+	      } else {
+	        //否则用fieldConfig上面的
+	        var config = this._coord.fieldsConfig[this.field];
 
-	      if (_.isNumber(res) && this.layoutType == "proportion") {
-	        res = (0, tools.numAddSymbol)(res);
+	        if (config) {
+	          value = this._coord.getFormatValue(value, config, i);
+	        }
 	      }
-	      return res;
+	      return value;
 	    }
 	  }, {
 	    key: "_widget",
@@ -13349,6 +13412,8 @@ var chartx = (function () {
 
 	var _axis = interopRequireDefault(axis);
 
+	var _numeral = interopRequireDefault(numeral);
+
 	function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
 
 	function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
@@ -13539,16 +13604,7 @@ var chartx = (function () {
 	          text: ""
 	        }; //把format提前
 
-	        var text = layoutData.value;
-
-	        if (_.isFunction(me.label.format)) {
-	          text = me.label.format.apply(this, [text, i]);
-	        }
-
-	        if ((text === undefined || text === null) && me.layoutType == "proportion") {
-	          text = (0, tools.numAddSymbol)(layoutData.value);
-	        }
-	        layoutData.text = text;
+	        layoutData.text = me._getFormatText(layoutData.value, i);
 	        tmpData.push(layoutData);
 	      }
 
@@ -13580,6 +13636,35 @@ var chartx = (function () {
 	        //trimLayout就事把arr种的每个元素的visible设置为true和false的过程
 	        this.trimLayout(tmpData);
 	      }
+	    }
+	  }, {
+	    key: "_getFormatText",
+	    value: function _getFormatText(value, i) {
+	      if (this.label.format) {
+	        //如果有单独给label配置format，就用label上面的配置
+	        if (_.isFunction(this.label.format)) {
+	          value = this.label.format.apply(this, arguments);
+	        }
+
+	        if (typeof this.label.format == 'string') {
+	          value = (0, _numeral["default"])(value).format(this.label.format);
+	        }
+	      } else {
+	        //否则用fieldConfig上面的, 因为y轴上面可能会汇集了多个field，那么只取在fieldsConfig上面配置过的第一个field即可
+	        var config;
+
+	        var _fields = _.flatten([this.field]);
+
+	        for (var _i = 0, l = _fields.length; _i < l; _i++) {
+	          config = this._coord.fieldsConfig[_fields[_i]];
+	          if (config) break;
+	        }
+
+	        if (config) {
+	          value = this._coord.getFormatValue(value, config, i);
+	        }
+	      }
+	      return value;
 	    }
 	  }, {
 	    key: "_getYAxisDisLine",
@@ -14536,7 +14621,7 @@ var chartx = (function () {
 	      // _fieldsDisplayMap 的结构里包含每个字段是否在显示状态的enabled 和 这个字段属于哪个yAxis
 
 
-	      this.fieldsMap = this.setFieldsMap({
+	      this.graphsFieldsMap = this.setGraphsFieldsMap({
 	        type: "yAxis"
 	      });
 	    }
@@ -14956,6 +15041,20 @@ var chartx = (function () {
 	        x: _xAxis.originPos,
 	        y: -_yAxis.originPos
 	      };
+	    } //某axis变化了后，对应的依附于该axis的graphs都要重新reset
+
+	  }, {
+	    key: "resetGraphsOfAxis",
+	    value: function resetGraphsOfAxis(axis) {
+	      var graphs = this.app.getGraphs();
+
+	      if (axis.type == 'yAxis') {
+	        graphs.forEach(function (graph) {
+	          if (graph.yAxisAlign == axis.align) {
+	            graph.resetData();
+	          }
+	        });
+	      }
 	    }
 	  }], [{
 	    key: "defaultProps",
@@ -15339,7 +15438,7 @@ var chartx = (function () {
 	      // _fieldsDisplayMap 的结构里包含每个字段是否在显示状态的enabled 和 这个字段属于哪个yAxis
 
 
-	      this.fieldsMap = this.setFieldsMap({
+	      this.graphsFieldsMap = this.setGraphsFieldsMap({
 	        type: "rAxis"
 	      });
 	    }
@@ -16057,6 +16156,12 @@ var chartx = (function () {
 	      }
 
 	      return res;
+	    } //某axis变化了后，对应的依附于该axis的graphs都要重新reset
+
+	  }, {
+	    key: "resetGraphsOfAxis",
+	    value: function resetGraphsOfAxis(axis) {
+	      var graphs = this.app.getGraphs();
 	    }
 	  }], [{
 	    key: "defaultProps",
@@ -16410,6 +16515,8 @@ var chartx = (function () {
 
 	var _index2 = interopRequireDefault(graphs);
 
+	var _numeral = interopRequireDefault(numeral);
+
 	function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
 
 	function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
@@ -16593,7 +16700,9 @@ var chartx = (function () {
 	  }, {
 	    key: "resetData",
 	    value: function resetData(dataFrame) {
-	      this.dataFrame = dataFrame;
+	      if (dataFrame) {
+	        this.dataFrame = dataFrame;
+	      }
 	      this.draw();
 	    }
 	  }, {
@@ -16637,6 +16746,10 @@ var chartx = (function () {
 	        if (graph == me) {
 	          preGraphs = i;
 	        }
+	      });
+
+	      var _coord = this.app.getComponent({
+	        name: 'coord'
 	      });
 
 	      _.each(this.enabledField, function (h_group, i) {
@@ -16872,20 +16985,29 @@ var chartx = (function () {
 	            if (me.label.enabled) {
 	              var value = nodeData.value;
 
-	              if (_.isFunction(me.label.format)) {
-	                var _formatc = me.label.format(value, nodeData);
+	              if (me.label.format) {
+	                if (_.isFunction(me.label.format)) {
+	                  var _formatc = me.label.format.apply(me, [value, nodeData]);
 
-	                if (_formatc !== undefined || _formatc !== null) {
-	                  value = _formatc;
+	                  if (_formatc !== undefined || _formatc !== null) {
+	                    value = _formatc;
+	                  }
+	                }
+
+	                if (typeof me.label.format == 'string') {
+	                  value = (0, _numeral["default"])(value).format(me.label.format);
+	                }
+	              } else {
+	                //否则用fieldConfig上面的
+	                var fieldConfig = _coord.getFieldConfig(nodeData.field);
+
+	                if (fieldConfig) {
+	                  value = fieldConfig.getFormatValue(value);
 	                }
 	              }
 
 	              if (value === undefined || value === null || value === "") {
 	                continue;
-	              }
-
-	              if (_.isNumber(value)) {
-	                value = (0, tools.numAddSymbol)(value);
 	              }
 	              var textCtx = {
 	                fillStyle: me.label.fontColor || finalPos.fillStyle,
@@ -17914,6 +18036,8 @@ var chartx = (function () {
 
 
 
+	var _numeral = interopRequireDefault(numeral);
+
 	function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
 
 	function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
@@ -18194,6 +18318,16 @@ var chartx = (function () {
 	          }
 	        });
 	      }
+
+	      if (!this._growed) {
+	        //如果还在入场中
+	        me._currPointList = me._pointList;
+
+	        _update(me._currPointList);
+
+	        return;
+	      }
+
 	      this._transitionTween = AnimationFrame.registTween({
 	        from: me._getPointPosStr(me._currPointList),
 	        to: me._getPointPosStr(me._pointList),
@@ -18236,9 +18370,9 @@ var chartx = (function () {
 	        context: {
 	          x: 0,
 	          //-100,
-	          y: -height,
+	          y: -height - 3,
 	          width: 0,
-	          height: height,
+	          height: height + 6,
 	          fillStyle: 'blue'
 	        }
 	      });
@@ -18271,6 +18405,7 @@ var chartx = (function () {
 	          });
 	        },
 	        onComplete: function onComplete() {
+	          _this2._growed = true;
 	          callback && callback();
 	        }
 	      });
@@ -18420,11 +18555,12 @@ var chartx = (function () {
 	    key: "_getFillStyle",
 	    value: function _getFillStyle() {
 	      var me = this;
-	      var fill_gradient = null; // _fillStyle 可以 接受渐变色，可以不用_getColor， _getColor会过滤掉渐变色
+	      var fill_gradient = null;
 
-	      var _fillStyle = me._getProp(me.area.fillStyle) || me._getLineStrokeStyle(null, "area");
+	      var _fillStyle; //fillStyle可以通过alpha来设置渐变
 
-	      if (_.isArray(me.area.alpha) && !(_fillStyle instanceof CanvasGradient)) {
+
+	      if (Array.isArray(me.area.alpha)) {
 	        var _me$ctx;
 
 	        //alpha如果是数组，那么就是渐变背景，那么就至少要有两个值
@@ -18451,6 +18587,33 @@ var chartx = (function () {
 	        fill_gradient.addColorStop(1, rgba1);
 	        _fillStyle = fill_gradient;
 	      }
+
+	      if (this.area.fillStyle && this.area.fillStyle.lineargradient) {
+	        var _me$ctx2;
+
+	        var lineargradient = this.area.fillStyle.lineargradient; //如果是右轴的话，渐变色要对应的反转
+
+	        if (this.yAxisAlign == 'right') {
+	          lineargradient = lineargradient.reverse();
+	        }
+
+	        var _lps = this._getLinearGradientPoints('area');
+
+	        if (!_lps) return;
+	        fill_gradient = (_me$ctx2 = me.ctx).createLinearGradient.apply(_me$ctx2, (0, _toConsumableArray2["default"])(_lps));
+
+	        _.each(lineargradient, function (item) {
+	          fill_gradient.addColorStop(item.position, item.color);
+	        });
+
+	        _fillStyle = fill_gradient;
+	      }
+
+	      if (!_fillStyle) {
+	        // _fillStyle 可以 接受渐变色，可以不用_getColor， _getColor会过滤掉渐变色
+	        _fillStyle = me._getProp(me.area.fillStyle) || me._getLineStrokeStyle(null, "area");
+	      }
+
 	      return _fillStyle;
 	    }
 	  }, {
@@ -18468,7 +18631,7 @@ var chartx = (function () {
 	      var lineargradient = this._opt.line.strokeStyle.lineargradient;
 
 	      if (lineargradient) {
-	        var _me$ctx2;
+	        var _me$ctx3;
 
 	        //如果是右轴的话，渐变色要对应的反转
 	        if (this.yAxisAlign == 'right') {
@@ -18478,7 +18641,7 @@ var chartx = (function () {
 	        var lps = this._getLinearGradientPoints(graphType, pointList);
 
 	        if (!lps) return;
-	        _style = (_me$ctx2 = me.ctx).createLinearGradient.apply(_me$ctx2, (0, _toConsumableArray2["default"])(lps));
+	        _style = (_me$ctx3 = me.ctx).createLinearGradient.apply(_me$ctx3, (0, _toConsumableArray2["default"])(lps));
 
 	        _.each(lineargradient, function (item) {
 	          _style.addColorStop(item.position, item.color);
@@ -18720,16 +18883,25 @@ var chartx = (function () {
 	            strokeStyle: "#ffffff",
 	            globalAlpha: globalAlpha
 	          };
-	          var value = me.data[a].value;
+	          var nodeData = me.data[a];
+	          var value = nodeData.value;
 
-	          if (_.isFunction(me.label.format)) {
+	          if (me.label.format) {
 	            //如果有单独给label配置format，就用label上面的配置
-	            value = me.label.format(value, me.data[a]) || value;
+	            if (_.isFunction(me.label.format)) {
+	              value = me.label.format.apply(me, [value, nodeData]);
+	            }
+
+	            if (typeof me.label.format == 'string') {
+	              value = (0, _numeral["default"])(value).format(me.label.format);
+	            }
 	          } else {
 	            //否则用fieldConfig上面的
 	            var fieldConfig = _coord.getFieldConfig(this.field);
 
-	            value = fieldConfig.getFormatValue(value);
+	            if (fieldConfig) {
+	              value = fieldConfig.getFormatValue(value);
+	            }
 	          }
 
 	          if (value == undefined || value == null) {
@@ -19221,8 +19393,8 @@ var chartx = (function () {
 
 	      if (dataFrame) {
 	        me.dataFrame = dataFrame;
-	        me.data = me._trimGraphs();
 	      }
+	      me.data = me._trimGraphs();
 
 	      Canvax._.each(me.groups, function (g) {
 	        g.resetData(me.data[g.field].data, dataTrigger);
@@ -25484,6 +25656,8 @@ var chartx = (function () {
 
 
 
+	var _numeral = interopRequireDefault(numeral);
+
 	function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
 
 	function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
@@ -25566,6 +25740,7 @@ var chartx = (function () {
 	  }, {
 	    key: "draw",
 	    value: function draw(opt) {
+	      debugger;
 	      !opt && (opt = {}); //第二个data参数去掉，直接trimgraphs获取最新的data
 
 	      _.extend(true, this, opt); //let me = this;
@@ -25588,6 +25763,8 @@ var chartx = (function () {
 	      var me = this; //let dataOrg = _.clone( this.dataOrg );
 
 	      var layoutData = [];
+
+	      var _coord = this.app.getCoord();
 
 	      _.each(this.dataOrg, function (num, i) {
 	        var ld = {
@@ -25620,8 +25797,32 @@ var chartx = (function () {
 	      }
 
 	      _.each(layoutData, function (ld, i) {
-	        ld.iNode = i;
-	        ld.label = me.label.format(ld.value, ld);
+	        ld.iNode = i; //ld.label = me.label.format( ld.value , ld );
+
+	        var value = ld.value;
+
+	        if (me.label.format) {
+	          if (_.isFunction(me.label.format)) {
+	            var _formatc = me.label.format.apply(me, [value, ld]);
+
+	            if (_formatc !== undefined || _formatc !== null) {
+	              value = _formatc;
+	            }
+	          }
+
+	          if (typeof me.label.format == 'string') {
+	            value = (0, _numeral["default"])(value).format(me.label.format);
+	          }
+	        } else {
+	          //否则用fieldConfig上面的
+	          var fieldConfig = _coord.getFieldConfig(me.field);
+
+	          if (fieldConfig) {
+	            value = fieldConfig.getFormatValue(value);
+	          }
+	        }
+
+	        ld.label = value;
 	      });
 
 	      _.each(layoutData, function (ld, i) {
@@ -25695,6 +25896,12 @@ var chartx = (function () {
 	    value: function _drawGraphs() {
 	      var me = this;
 
+	      var _coord = this.app.getCoord();
+
+	      var fieldConfig = _coord.getFieldConfig(me.field);
+
+	      var title = fieldConfig.name || this.field;
+
 	      _.each(this.data, function (ld) {
 	        //let fillStyle   = this._getProp(this.node, "fillStyle", geoGraph);
 	        var fillAlpha = me._getProp(me.node, "fillAlpha", ld);
@@ -25729,9 +25936,10 @@ var chartx = (function () {
 	        _polygon.nodeData = ld;
 
 	        _polygon.on(event.types.get(), function (e) {
+	          debugger;
 	          e.eventInfo = {
 	            trigger: me.node,
-	            title: me.field,
+	            title: title,
 	            nodes: [this.nodeData]
 	          };
 
@@ -25882,6 +26090,10 @@ var chartx = (function () {
 	      return {
 	        field: {
 	          detail: '字段配置',
+	          "default": null
+	        },
+	        textFiled: {
+	          detail: 'field字段每行数据对应的text名称字段配置',
 	          "default": null
 	        },
 	        sort: {
@@ -26043,9 +26255,7 @@ var chartx = (function () {
 	            },
 	            format: {
 	              detail: '文本格式化处理函数',
-	              "default": function _default(num) {
-	                return (0, tools.numAddSymbol)(num);
-	              }
+	              "default": null
 	            },
 	            fontSize: {
 	              detail: '文本字体大小',
@@ -51379,9 +51589,7 @@ var chartx = (function () {
 
 	      if (!isNaN(y)) {
 	        //如果y是个function说明是均值，自动实时计算的，而且不会超过ydatasection的范围
-	        //_yAxis.setWaterLine( y );
-	        //_yAxis.draw();
-	        _yAxis.drawWaterLine(y);
+	        _yAxis.addValToSection(y);
 	      }
 	      var _fstyle = "#777";
 
@@ -51869,9 +52077,10 @@ var chartx = (function () {
 
 	      if (info.nodes.length) {
 	        str += "<table >";
+	        debugger;
 
 	        if (info.title !== undefined && info.title !== null && info.title !== "") {
-	          str += "<tr><td colspan='2' style='text-align:left'>";
+	          str += "<tr><td colspan='2' style='text-align:left;padding-left:3px;'>";
 	          str += "<span style='font-size:12px;padding:4px;color:#333;'>" + info.title + "</span>";
 	          str += "</td></tr>";
 	        }
@@ -52172,7 +52381,7 @@ var chartx = (function () {
 	        },
 	        pointerRegionAlpha: {
 	          detail: 'pointer为region的时候，设置指针region的透明度',
-	          "default": 0.25
+	          "default": 0.38
 	        },
 	        pointerAnim: {
 	          detail: 'tips移动的时候，指针是否开启动画',
@@ -54930,7 +55139,7 @@ var chartx = (function () {
 	}
 
 	var chartx = {
-	  version: '1.1.60',
+	  version: '1.1.64',
 	  options: {}
 	};
 

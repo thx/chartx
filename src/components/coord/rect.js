@@ -179,13 +179,12 @@ class Rect extends coordBase
 
     init()
     {
-
         this._initModules();
         //创建好了坐标系统后，设置 _fieldsDisplayMap 的值，
         // _fieldsDisplayMap 的结构里包含每个字段是否在显示状态的enabled 和 这个字段属于哪个yAxis
-        this.fieldsMap = this.setFieldsMap( {type: "yAxis"} );
+        this.graphsFieldsMap = this.setGraphsFieldsMap( {type: "yAxis"} );
     }
-
+ 
     resetData( dataFrame )
     {
         let me = this;
@@ -597,6 +596,18 @@ class Rect extends coordBase
         return {
             x : _xAxis.originPos,
             y : -_yAxis.originPos
+        }
+    }
+
+    //某axis变化了后，对应的依附于该axis的graphs都要重新reset
+    resetGraphsOfAxis( axis ){
+        let graphs = this.app.getGraphs();
+        if( axis.type == 'yAxis' ){
+            graphs.forEach( graph => {
+                if( graph.yAxisAlign == axis.align ){
+                    graph.resetData();
+                }
+            });
         }
     }
 

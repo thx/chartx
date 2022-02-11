@@ -85,10 +85,10 @@ var LineGraphs = /*#__PURE__*/function (_GraphsBase) {
 
       if (dataFrame) {
         me.dataFrame = dataFrame;
-        me.data = me._trimGraphs();
       }
 
       ;
+      me.data = me._trimGraphs();
 
       _canvax._.each(me.groups, function (g) {
         g.resetData(me.data[g.field].data, dataTrigger);

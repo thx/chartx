@@ -78,8 +78,10 @@ class LineGraphs extends GraphsBase
         
         if( dataFrame ){
             me.dataFrame = dataFrame;
-            me.data = me._trimGraphs();
         };
+
+        me.data = me._trimGraphs();
+
         _.each( me.groups, function(g){
             g.resetData( me.data[ g.field ].data , dataTrigger );
         } );
@@ -90,7 +92,7 @@ class LineGraphs extends GraphsBase
         //要根据自己的 field，从enabledFields中根据enabled数据，计算一个 enabled版本的field子集
         this.enabledField = this.app.getComponent({name:'coord'}).filterEnabledFields( this.field );
     }
-
+ 
     //dataFrame
     _trimGraphs()
     {

@@ -105,7 +105,20 @@ var options = {
             enabled: true
         },
         area: {
-            alpha:0.25
+            alpha:0.5,
+            lineargradientDriction:"topBottom",
+            fillStyle: {
+                lineargradient: [
+                    {
+                        position: 0,
+                        color: 'rgba(56, 90, 204, 1)'
+                    },
+                    {
+                        position: 1,
+                        color: 'rgba(56, 90, 204, 0)'
+                    }
+                ]
+            }
         },
         node: {
             enabled: false

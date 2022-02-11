@@ -115,7 +115,7 @@ var Polar = /*#__PURE__*/function (_coordBase) {
       // _fieldsDisplayMap 的结构里包含每个字段是否在显示状态的enabled 和 这个字段属于哪个yAxis
 
 
-      this.fieldsMap = this.setFieldsMap({
+      this.graphsFieldsMap = this.setGraphsFieldsMap({
         type: "rAxis"
       });
     }
@@ -918,6 +918,12 @@ var Polar = /*#__PURE__*/function (_coordBase) {
       }
 
       return res;
+    } //某axis变化了后，对应的依附于该axis的graphs都要重新reset
+
+  }, {
+    key: "resetGraphsOfAxis",
+    value: function resetGraphsOfAxis(axis) {
+      var graphs = this.app.getGraphs();
     }
   }], [{
     key: "defaultProps",
