@@ -18479,7 +18479,10 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
             rp[1] = -me.h;
           }
         },
-        lineCap: "round"
+        lineCap: "round",
+        shadowBlur: me.line.shadowBlur,
+        shadowColor: me.line.shadowColor,
+        shadowOffsetY: me.line.shadowOffsetY
       };
       var bline = new BrokenLine({
         //线条
@@ -19095,6 +19098,7 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
           //console.log( 'focusOf' )
           _node._fillStyle = _node.context.fillStyle;
           _node.context.fillStyle = 'white';
+          _node.context.r += _node.context.lineWidth / 2;
           _node._visible = _node.context.visible;
           _node.context.visible = true;
 
@@ -19137,6 +19141,7 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
         if (_node && node.focused) {
           //console.log('unfocus')
           _node.context.fillStyle = _node._fillStyle;
+          _node.context.r -= _node.context.lineWidth / 2;
           _node.context.visible = _node._visible;
           node.focused = false;
           this.__currFocusInd = -1;
@@ -19175,6 +19180,18 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
             smooth: {
               detail: '是否平滑处理',
               "default": true
+            },
+            shadowOffsetY: {
+              detail: '折线的向下阴影偏移量',
+              "default": 2
+            },
+            shadowBlur: {
+              detail: '折线的阴影模糊效果',
+              "default": 8
+            },
+            shadowColor: {
+              detail: '折线的阴影颜色',
+              "default": 'rgba(0,0,0,0.5)'
             }
           }
         },
@@ -25737,7 +25754,6 @@ var FunnelGraphs = /*#__PURE__*/function (_GraphsBase) {
   }, {
     key: "draw",
     value: function draw(opt) {
-      debugger;
       !opt && (opt = {}); //第二个data参数去掉，直接trimgraphs获取最新的data
 
       _.extend(true, this, opt); //let me = this;
@@ -25764,11 +25780,13 @@ var FunnelGraphs = /*#__PURE__*/function (_GraphsBase) {
       var _coord = this.app.getCoord();
 
       _.each(this.dataOrg, function (num, i) {
+        var rowData = me.dataFrame.getRowDataAt(i);
         var ld = {
           type: "funnel",
           field: me.field,
-          rowData: me.dataFrame.getRowDataAt(i),
+          rowData: rowData,
           value: num,
+          name: me.nameField ? rowData[me.nameField] : i + 1,
           width: me._getNodeWidth(num),
           color: '',
           //me.app.getTheme(i),//默认从皮肤中获取
@@ -25933,7 +25951,6 @@ var FunnelGraphs = /*#__PURE__*/function (_GraphsBase) {
         _polygon.nodeData = ld;
 
         _polygon.on(event.types.get(), function (e) {
-          debugger;
           e.eventInfo = {
             trigger: me.node,
             title: title,
@@ -26089,8 +26106,8 @@ var FunnelGraphs = /*#__PURE__*/function (_GraphsBase) {
           detail: '字段配置',
           "default": null
         },
-        textFiled: {
-          detail: 'field字段每行数据对应的text名称字段配置',
+        nameFiled: {
+          detail: 'field字段每行数据对应的name名称字段配置',
           "default": null
         },
         sort: {
@@ -52074,7 +52091,6 @@ var Tips = /*#__PURE__*/function (_Component) {
 
       if (info.nodes.length) {
         str += "<table >";
-        debugger;
 
         if (info.title !== undefined && info.title !== null && info.title !== "") {
           str += "<tr><td colspan='2' style='text-align:left;padding-left:3px;'>";
@@ -52090,9 +52106,10 @@ var Tips = /*#__PURE__*/function (_Component) {
           var style = node.color || node.fillStyle || node.strokeStyle;
           var name, value;
 
-          var fieldConfig = _coord.getFieldConfig(node.field);
+          var fieldConfig = _coord.getFieldConfig(node.field); //node.name优先级最高，是因为像 pie funnel 等一维图表，会有name属性
 
-          name = fieldConfig.name || node.name || node.field || node.content || node.label;
+
+          name = node.name || fieldConfig.name || node.field;
           value = fieldConfig.getFormatValue(node.value);
 
           if (!hasValue) {
@@ -55136,7 +55153,7 @@ if (projectTheme && projectTheme.length) {
 }
 
 var chartx = {
-  version: '1.1.64',
+  version: '1.1.65',
   options: {}
 };
 

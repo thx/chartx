@@ -279,7 +279,6 @@ var Tips = /*#__PURE__*/function (_Component) {
 
       if (info.nodes.length) {
         str += "<table >";
-        debugger;
 
         if (info.title !== undefined && info.title !== null && info.title !== "") {
           str += "<tr><td colspan='2' style='text-align:left;padding-left:3px;'>";
@@ -297,9 +296,10 @@ var Tips = /*#__PURE__*/function (_Component) {
           var style = node.color || node.fillStyle || node.strokeStyle;
           var name, value;
 
-          var fieldConfig = _coord.getFieldConfig(node.field);
+          var fieldConfig = _coord.getFieldConfig(node.field); //node.name优先级最高，是因为像 pie funnel 等一维图表，会有name属性
 
-          name = fieldConfig.name || node.name || node.field || node.content || node.label;
+
+          name = node.name || fieldConfig.name || node.field;
           value = fieldConfig.getFormatValue(node.value);
 
           if (!hasValue) {

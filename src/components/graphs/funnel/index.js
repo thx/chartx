@@ -16,8 +16,8 @@ class FunnelGraphs extends GraphsBase
                 detail : '字段配置',
                 default: null
             },
-            textFiled: {
-                detail : 'field字段每行数据对应的text名称字段配置',
+            nameFiled: {
+                detail : 'field字段每行数据对应的name名称字段配置',
                 default: null
             },
             sort: {
@@ -275,7 +275,7 @@ class FunnelGraphs extends GraphsBase
 
     draw( opt )
     {
-        debugger
+        
         !opt && (opt ={});
         
         //第二个data参数去掉，直接trimgraphs获取最新的data
@@ -308,11 +308,14 @@ class FunnelGraphs extends GraphsBase
 
         _.each( this.dataOrg, function( num , i ){
 
+            let rowData = me.dataFrame.getRowDataAt(i);
+
             let ld = {
                 type    : "funnel",
                 field   : me.field,
-                rowData : me.dataFrame.getRowDataAt(i),
+                rowData,
                 value   : num,
+                name    : me.nameField ? rowData[ me.nameField ] : i+1,
                 width   : me._getNodeWidth( num ),
                 color   : '', //me.app.getTheme(i),//默认从皮肤中获取
                 cursor  : "pointer",
@@ -462,7 +465,6 @@ class FunnelGraphs extends GraphsBase
             me._nodesp.addChild( _polygon );
             _polygon.nodeData = ld;
             _polygon.on( event.types.get() , function(e) {
-                debugger
                 e.eventInfo = {
                     trigger : me.node,
                     title   : title,

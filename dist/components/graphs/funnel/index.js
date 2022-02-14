@@ -121,7 +121,6 @@ var FunnelGraphs = /*#__PURE__*/function (_GraphsBase) {
   }, {
     key: "draw",
     value: function draw(opt) {
-      debugger;
       !opt && (opt = {}); //第二个data参数去掉，直接trimgraphs获取最新的data
 
       _.extend(true, this, opt); //let me = this;
@@ -148,11 +147,13 @@ var FunnelGraphs = /*#__PURE__*/function (_GraphsBase) {
       var _coord = this.app.getCoord();
 
       _.each(this.dataOrg, function (num, i) {
+        var rowData = me.dataFrame.getRowDataAt(i);
         var ld = {
           type: "funnel",
           field: me.field,
-          rowData: me.dataFrame.getRowDataAt(i),
+          rowData: rowData,
           value: num,
+          name: me.nameField ? rowData[me.nameField] : i + 1,
           width: me._getNodeWidth(num),
           color: '',
           //me.app.getTheme(i),//默认从皮肤中获取
@@ -323,7 +324,6 @@ var FunnelGraphs = /*#__PURE__*/function (_GraphsBase) {
         _polygon.nodeData = ld;
 
         _polygon.on(event.types.get(), function (e) {
-          debugger;
           e.eventInfo = {
             trigger: me.node,
             title: title,
@@ -491,8 +491,8 @@ var FunnelGraphs = /*#__PURE__*/function (_GraphsBase) {
           detail: '字段配置',
           "default": null
         },
-        textFiled: {
-          detail: 'field字段每行数据对应的text名称字段配置',
+        nameFiled: {
+          detail: 'field字段每行数据对应的name名称字段配置',
           "default": null
         },
         sort: {

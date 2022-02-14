@@ -513,7 +513,10 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
             rp[1] = -me.h;
           }
         },
-        lineCap: "round"
+        lineCap: "round",
+        shadowBlur: me.line.shadowBlur,
+        shadowColor: me.line.shadowColor,
+        shadowOffsetY: me.line.shadowOffsetY
       };
       var bline = new BrokenLine({
         //线条
@@ -1197,6 +1200,7 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
           //console.log( 'focusOf' )
           _node._fillStyle = _node.context.fillStyle;
           _node.context.fillStyle = 'white';
+          _node.context.r += _node.context.lineWidth / 2;
           _node._visible = _node.context.visible;
           _node.context.visible = true;
 
@@ -1241,6 +1245,7 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
         if (_node && node.focused) {
           //console.log('unfocus')
           _node.context.fillStyle = _node._fillStyle;
+          _node.context.r -= _node.context.lineWidth / 2;
           _node.context.visible = _node._visible;
           node.focused = false;
           this.__currFocusInd = -1;
@@ -1281,6 +1286,18 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
             smooth: {
               detail: '是否平滑处理',
               "default": true
+            },
+            shadowOffsetY: {
+              detail: '折线的向下阴影偏移量',
+              "default": 2
+            },
+            shadowBlur: {
+              detail: '折线的阴影模糊效果',
+              "default": 8
+            },
+            shadowColor: {
+              detail: '折线的阴影颜色',
+              "default": 'rgba(0,0,0,0.5)'
             }
           }
         },
