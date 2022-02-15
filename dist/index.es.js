@@ -18557,8 +18557,9 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
       var me = this;
       var fill_gradient = null;
 
-      var _fillStyle; //fillStyle可以通过alpha来设置渐变
+      var _fillStyle;
 
+      debugger; //fillStyle可以通过alpha来设置渐变
 
       if (Array.isArray(me.area.alpha)) {
         var _me$ctx;
@@ -55153,7 +55154,7 @@ if (projectTheme && projectTheme.length) {
 }
 
 var chartx = {
-  version: '1.1.65',
+  version: '1.1.66',
   options: {}
 };
 

@@ -94,8 +94,8 @@ export default class LineGraphsGroup extends event.Dispatcher
                         default: null
                     },
                     lineWidth: {
-                        detail: '节点图形边宽大小',
-                        default: 2
+                        detail: '节点图形边宽大小,默认跟随line.lineWidth',
+                        default: null
                     },
                     visible: {
                         detail: '节点是否显示,支持函数',
@@ -860,10 +860,11 @@ export default class LineGraphsGroup extends event.Dispatcher
                 }
             };
 
+            let lineWidth = me.node.lineWidth || me.line.lineWidth;
             let context = {
                 x,y,
                 r: me._getProp(me.node.radius, a),
-                lineWidth: me._getProp(me.node.lineWidth, a) || 2,
+                lineWidth: me._getProp( lineWidth, a) || 2,
                 strokeStyle: _nodeColor,
                 fillStyle: me._getProp(me.node.fillStyle, a) || _nodeColor,
                 visible : nodeEnabled && !!me._getProp(me.node.visible, a),
