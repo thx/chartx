@@ -178,7 +178,7 @@ export default class Axis extends baseAxis
         if( this.layoutType == "proportion" ){
             if( y >= this._min && y<= this._max ){
                 return;
-            }
+            } 
         };
         this.dataSection = [];
         this.setWaterLine( y );
