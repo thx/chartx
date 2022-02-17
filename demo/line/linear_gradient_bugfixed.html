@@ -34,22 +34,34 @@
 
 //chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
 //第一行是表头。
-var data= [
-    ["xfield" , "uv" ,"pv","click"],
-    [ "1月1号" , null , undefined , null    ],
-    [ "1月2号" , 0   , "" , ""    ],
-    [ "1月3号" , -23   , 15 , undefined    ],
-    [ "1月4号" , -32  , 135 , 121212    ],
-    [ "1月5号" , 0  , 173 , 123231    ],
-    [ "1月6号" , 0  , 154 , 131239    ],
-    [ "1月7号" , 0  , 168 , null    ],
-    [ "1月8号" , 66   ,183 , 152311    ],
-    [ "1月9号" , 132   , 145 , 112123    ],
-    [ "1月10号", 158  , 85 , 123232    ],
-    [ "1月11号", 79  , 53 , 271212    ],
-    [ "1月12号", 188  , 104 , 123239    ],
-    [ "1月13号", 55  , 168 , 161235    ],
-    [ "1月14号", undefined   ,183 , 123231    ]
+var data = [
+    {"xfield":"2022/1/17","曝光量":46.04,"消耗":27437},
+    {"xfield":"2022/1/18","曝光量":3.96,"消耗":702},
+    {"xfield":"2022/1/19","曝光量":6.73,"消耗":2673},
+    {"xfield":"2022/1/20","曝光量":3.78,"消耗":10516},
+    {"xfield":"2022/1/21","曝光量":17.73,"消耗":3100},
+    {"xfield":"2022/1/22","曝光量":18.2,"消耗":19010},
+    {"xfield":"2022/1/23","曝光量":19.6,"消耗":9076},
+    {"xfield":"2022/1/24","曝光量":88.15,"消耗":18111},
+    {"xfield":"2022/1/25","曝光量":0.61,"消耗":911},
+    {"xfield":"2022/1/26","曝光量":9.32,"消耗":3733},
+    {"xfield":"2022/1/27","曝光量":21.83,"消耗":12867},
+    {"xfield":"2022/1/28","曝光量":20.83,"消耗":4455},
+    {"xfield":"2022/1/29","曝光量":29.82,"消耗":6490},
+    {"xfield":"2022/1/30","曝光量":36.26,"消耗":3004},
+    {"xfield":"2022/1/31","曝光量":53.54,"消耗":2788},
+    {"xfield":"2022/2/1","曝光量":56.12,"消耗":3460},
+    {"xfield":"2022/2/2","曝光量":55.14,"消耗":4544},
+    {"xfield":"2022/2/3","曝光量":57.2,"消耗":5063},
+    {"xfield":"2022/2/4","曝光量":52.61,"消耗":2436},
+    {"xfield":"2022/2/7","曝光量":26.38,"消耗":1934},
+    {"xfield":"2022/2/8","曝光量":51.81,"消耗":3861},
+    {"xfield":"2022/2/9","曝光量":51.7,"消耗":128013},
+    {"xfield":"2022/2/10","曝光量":51.75,"消耗":3555},
+    {"xfield":"2022/2/11","曝光量":20.19,"消耗":576483},
+    {"xfield":"2022/2/12","曝光量":0.32,"消耗":5327},
+    {"xfield":"2022/2/13","曝光量":0.19,"消耗":3820},
+    {"xfield":"2022/2/14","曝光量":12.43,"消耗":11878}
 ];
 
 
@@ -59,55 +71,58 @@ var options = {
         xAxis: {
             field: "xfield",
             label: {
-                rotation: 30
+                rotation: 0
             },
             title: {
-                text: "我是xAxis"
+                text: " "
             }
         },
         fieldsConfig: {
             click: {
-                name: '点击量',
+                name: '消耗',
                 format: '0.0a'
+            }
+        }
+        ,grid:{
+            line:{
+                xDimension:{
+                    strokeStyle:"rgba(230,230,230,0.4)"
+                }
             }
         }
     },
     graphs: [
-    
     {
         type: "line",
         //animation: false,
-        field: "click",
-        yAxisAlign:'right',
-        color: 'rgba(234, 60, 60, 1)',
+        field: "曝光量",
+        color: 'rgba(56, 90, 204,  1)',
         line: {
+            lineWidth:2.5,
             lineargradientDriction:"leftRight",
             strokeStyle: {
                 lineargradient: [
-                {
-                    position: 0,
-                    color: 'rgba(234, 60, 60, 0.2)'
-                },
-                {
-                    position: 0.05,
-                    color: 'rgba(234, 60, 60, 1)'
-                },
-                {
-                    position: 0.95,
-                    color: 'rgba(234, 60, 60, 1)'
-                },
-                {
-                    position: 1,
-                    color: 'rgba(234, 60, 60, 0.2)'
-                }
-            ]
-            },
-            shadowOffsetY:3,
-            shadowBlur:10,
-            shadowColor:'rgba(234, 60, 60, 0.5)'
+                    {
+                        position: 0,
+                        color: 'rgba(56, 90, 204, 0.2)'
+                    },
+                    {
+                        position: 0.05,
+                        color: 'rgba(56, 90, 204,  1)'
+                    },
+                    {
+                        position: 0.95,
+                        color: 'rgba(56, 90, 204, 1)'
+                    },
+                    {
+                        position: 1,
+                        color: 'rgba(56, 90, 204, 0.2)'
+                    }
+                ]
+            }
         },
         label: {
-            enabled: true
+            enabled: false
         },
         area: {
             alpha:0.5,
@@ -116,22 +131,73 @@ var options = {
                 lineargradient: [
                     {
                         position: 0,
-                        color: 'rgba(234, 60, 60, 1)'
+                        color: 'rgba(56, 90, 204, 1)'
                     },
                     {
                         position: 1,
-                        color: 'rgba(234, 60, 60, 0)'
+                        color: 'rgba(56, 90, 204, 0)'
+                    }
+                ]
+            }
+        },
+        node: {
+            focus:{
+                alpha:0.5
+                ,radiusDiff:8
+            },
+            enabled: false
+        }
+    },
+    {
+        type: "line",
+        //animation: false,
+        field: "消耗",
+        yAxisAlign:'right',
+        color: 'rgba(252, 81, 31, 1)',
+        line: {
+            lineWidth:2.5,
+            lineargradientDriction:"leftRight",
+            strokeStyle: {
+                lineargradient: [
+                {
+                    position: 0,
+                    color: 'rgba(252, 81, 31, 0.2)'
+                },
+                {
+                    position: 0.05,
+                    color: 'rgba(252, 81, 31, 1)'
+                },
+                {
+                    position: 0.95,
+                    color: 'rgba(252, 81, 31, 1)'
+                },
+                {
+                    position: 1,
+                    color: 'rgba(252, 81, 31, 0.2)'
+                }
+            ]
+            }
+        },
+        label: {
+            enabled: false
+        },
+        area: {
+            alpha:0.5,
+            lineargradientDriction:"topBottom",
+            fillStyle: {
+                lineargradient: [
+                    {
+                        position: 0,
+                        color: 'rgba(252, 81, 31, 1)'
+                    },
+                    {
+                        position: 1,
+                        color: 'rgba(252, 81, 31, 0)'
                     }
                     ]
             }
         },
-        label: {
-            enabled: true
-        },
-        area: {
-            alpha:0.40
-        }
-        ,node:{
+        node:{
             focus:{
                 alpha:0.5
                 ,radiusDiff:8
@@ -143,107 +209,9 @@ var options = {
         enabled: true
     },
     tips:{
+        pointerColor:"#999",
+        pointerLineWidth:1.5,
         linkageName: 'linkage' //这个属性注意要保证y轴的width是一致的
-    }
-}
-
-
-var options1 = {
-    coord: {
-        type: "rect",
-        xAxis: {
-            field: "xfield",
-            label: {
-                rotation: 30
-            },
-            title: {
-                text: "我是xAxis"
-            }
-        },
-        fieldsConfig: {
-            click: {
-                name: '点击量',
-                format: '0.0a'
-            }
-        }
-    },
-    graphs: [
-    {
-        type: "line",
-        field: "uv",
-        color: 'rgba(56, 90, 204,  1)',
-        line: {
-            lineargradientDriction:"leftRight",
-            strokeStyle: {
-                lineargradient: [
-                {
-                    position: 0,
-                    color: 'rgba(56, 90, 204, 0.2)'
-                },
-                {
-                    position: 0.05,
-                    color: 'rgba(56, 90, 204,  1)'
-                },
-                {
-                    position: 0.95,
-                    color: 'rgba(56, 90, 204, 1)'
-                },
-                {
-                    position: 1,
-                    color: 'rgba(56, 90, 204, 0.2)'
-                }
-            ]
-            }
-        },
-        label: {
-            enabled: true
-        },
-        area: {
-            alpha:0.25
-        }
-    },
-    {
-        type: "line",
-        //animation: false,
-        field: "click",
-        yAxisAlign:'right',
-        color: 'rgba(56, 90, 204,  1)',
-        line: {
-            lineargradientDriction:"leftRight",
-            strokeStyle: {
-                lineargradient: [
-                {
-                    position: 0,
-                    color: 'rgba(56, 90, 204, 0.2)'
-                },
-                {
-                    position: 0.05,
-                    color: 'rgba(56, 90, 204,  1)'
-                },
-                {
-                    position: 0.95,
-                    color: 'rgba(56, 90, 204, 1)'
-                },
-                {
-                    position: 1,
-                    color: 'rgba(56, 90, 204, 0.2)'
-                }
-            ]
-            }
-        },
-        label: {
-            enabled: true
-        },
-        area: {
-            alpha:0.25
-        }
-    }
-    ],
-    legend: {
-        enabled: true
-    },
-    tips:{
-        linkageName: 'linkage'
     }
 }
 

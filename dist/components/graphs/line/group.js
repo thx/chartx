@@ -65,8 +65,6 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
     _this.y = 0;
     _this.data = [];
     _this.sprite = null;
-    _this.graphSprite = null; //line area放这里
-
     _this._pointList = []; //brokenline最终的状态
 
     _this._currPointList = []; //brokenline 动画中的当前状态
@@ -96,7 +94,9 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
     value: function init() {
       this.sprite = new _canvax["default"].Display.Sprite();
       this.graphSprite = new _canvax["default"].Display.Sprite();
-      this.sprite.addChild(this.graphSprite); //hover效果的node被添加到的容器
+      this.sprite.addChild(this.graphSprite);
+      this.lineSprite = new _canvax["default"].Display.Sprite();
+      this.graphSprite.addChild(this.lineSprite); //hover效果的node被添加到的容器
 
       this._focusNodes = new _canvax["default"].Display.Sprite({});
       this.sprite.addChild(this._focusNodes);
@@ -396,22 +396,18 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
           y: -height - 3,
           width: 0,
           height: height + 6,
-          fillStyle: 'blue'
+          fillStyle: 'green'
         }
       });
       var growTo = {
         width: width
       };
-      this.graphSprite.clipTo(this.clipRect);
+      this.lineSprite.clipTo(this.clipRect);
+      this.graphSprite.addChild(this.clipRect); // if( this.yAxisAlign == 'right' ){
+      //     this.clipRect.context.x = width;
+      //     growTo.x = 0;
+      // };
 
-      if (this.yAxisAlign == 'right') {
-        this.clipRect.context.x = width;
-        growTo.x = 0;
-      }
-
-      ; //TODO：理论上下面这句应该可以神略了才行
-
-      this.sprite.addChild(this.clipRect);
       this.clipRect.animate(growTo, {
         duration: this._graphs.aniDuration,
         onUpdate: function onUpdate() {
@@ -497,12 +493,15 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
 
       var list = me._pointList;
       me._currPointList = list;
+
+      var strokeStyle = me._getLineStrokeStyle(list); //_getLineStrokeStyle 在配置线性渐变的情况下会需要
+
+
       var blineCtx = {
         pointList: list,
         lineWidth: me.line.lineWidth,
         y: me.y,
-        strokeStyle: me._getLineStrokeStyle(list),
-        //_getLineStrokeStyle 在配置线性渐变的情况下会需要
+        strokeStyle: strokeStyle,
         smooth: me.line.smooth,
         lineType: me._getProp(me.line.lineType),
         smoothFilter: function smoothFilter(rp) {
@@ -513,11 +512,14 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
             rp[1] = -me.h;
           }
         },
-        lineCap: "round",
-        shadowBlur: me.line.shadowBlur,
-        shadowColor: me.line.shadowColor,
-        shadowOffsetY: me.line.shadowOffsetY
+        lineCap: "round"
       };
+
+      if (me.line.shadowBlur) {
+        blineCtx.shadowBlur = me.line.shadowBlur, blineCtx.shadowColor = me.line.shadowColor || strokeStyle, blineCtx.shadowOffsetY = me.line.shadowOffsetY;
+      }
+
+      ;
       var bline = new BrokenLine({
         //线条
         context: blineCtx
@@ -536,7 +538,7 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
       }
 
       ;
-      me.graphSprite.addChild(bline);
+      me.lineSprite.addChild(bline);
       me._bline = bline;
       var area = new Path({
         //填充
@@ -560,7 +562,7 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
       }
 
       ;
-      me.graphSprite.addChild(area);
+      me.lineSprite.addChild(area);
       me._area = area;
 
       me._createNodes(opt);
@@ -597,9 +599,8 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
       var me = this;
       var fill_gradient = null;
 
-      var _fillStyle;
+      var _fillStyle; //fillStyle可以通过alpha来设置渐变
 
-      debugger; //fillStyle可以通过alpha来设置渐变
 
       if (Array.isArray(me.area.alpha)) {
         var _me$ctx;
@@ -830,11 +831,12 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
         }
 
         ;
+        var lineWidth = me.node.lineWidth || me.line.lineWidth;
         var context = {
           x: x,
           y: y,
           r: me._getProp(me.node.radius, a),
-          lineWidth: me._getProp(me.node.lineWidth, a) || 2,
+          lineWidth: me._getProp(lineWidth, a) || 2,
           strokeStyle: _nodeColor,
           fillStyle: me._getProp(me.node.fillStyle, a) || _nodeColor,
           visible: nodeEnabled && !!me._getProp(me.node.visible, a),
@@ -1290,11 +1292,11 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
             },
             shadowOffsetY: {
               detail: '折线的向下阴影偏移量',
-              "default": 2
+              "default": 3
             },
             shadowBlur: {
               detail: '折线的阴影模糊效果',
-              "default": 8
+              "default": 0
             },
             shadowColor: {
               detail: '折线的阴影颜色',
@@ -1339,8 +1341,8 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
               "default": null
             },
             lineWidth: {
-              detail: '节点图形边宽大小',
-              "default": 2
+              detail: '节点图形边宽大小,默认跟随line.lineWidth',
+              "default": null
             },
             visible: {
               detail: '节点是否显示,支持函数',

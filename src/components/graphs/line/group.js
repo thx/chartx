@@ -45,11 +45,11 @@ export default class LineGraphsGroup extends event.Dispatcher
                     },
                     shadowOffsetY: {
                         detail: '折线的向下阴影偏移量',
-                        default: 2
+                        default: 3
                     },
                     shadowBlur: {
                         detail: '折线的阴影模糊效果',
-                        default: 8
+                        default: 0
                     },
                     shadowColor: {
                         detail: '折线的阴影颜色',
@@ -193,7 +193,6 @@ export default class LineGraphsGroup extends event.Dispatcher
 
         this.data = []; 
         this.sprite = null;
-        this.graphSprite = null; //line area放这里
 
         this._pointList = []; //brokenline最终的状态
         this._currPointList = []; //brokenline 动画中的当前状态
@@ -222,6 +221,10 @@ export default class LineGraphsGroup extends event.Dispatcher
         this.sprite = new Canvax.Display.Sprite();
         this.graphSprite = new Canvax.Display.Sprite();
         this.sprite.addChild( this.graphSprite );
+
+        this.lineSprite = new Canvax.Display.Sprite();
+        this.graphSprite.addChild( this.lineSprite );
+        
 
         //hover效果的node被添加到的容器
         this._focusNodes = new Canvax.Display.Sprite({});
@@ -469,20 +472,20 @@ export default class LineGraphsGroup extends event.Dispatcher
                 y: -height-3,
                 width:0,
                 height:height+6,
-                fillStyle: 'blue'
+                fillStyle: 'green'
             }
         });
 
         let growTo = { width : width }
 
-        this.graphSprite.clipTo( this.clipRect );
-        if( this.yAxisAlign == 'right' ){
-            this.clipRect.context.x = width;
-            growTo.x = 0;
-        };
+        this.lineSprite.clipTo( this.clipRect );
+        this.graphSprite.addChild( this.clipRect );
+        
 
-        //TODO：理论上下面这句应该可以神略了才行
-        this.sprite.addChild( this.clipRect );
+        // if( this.yAxisAlign == 'right' ){
+        //     this.clipRect.context.x = width;
+        //     growTo.x = 0;
+        // };
 
         this.clipRect.animate( growTo , {
             duration: this._graphs.aniDuration,
@@ -569,11 +572,13 @@ export default class LineGraphsGroup extends event.Dispatcher
         
         me._currPointList = list;
 
+        let strokeStyle = me._getLineStrokeStyle( list ); //_getLineStrokeStyle 在配置线性渐变的情况下会需要
+
         let blineCtx = {
             pointList: list,
             lineWidth: me.line.lineWidth,
             y: me.y,
-            strokeStyle : me._getLineStrokeStyle( list ), //_getLineStrokeStyle 在配置线性渐变的情况下会需要
+            strokeStyle, 
             smooth: me.line.smooth,
             lineType: me._getProp(me.line.lineType),
             smoothFilter: function(rp) {
@@ -584,11 +589,15 @@ export default class LineGraphsGroup extends event.Dispatcher
                     rp[1] = -me.h;
                 }
             },
-            lineCap: "round",
-            shadowBlur: me.line.shadowBlur,
-            shadowColor: me.line.shadowColor,
-            shadowOffsetY: me.line.shadowOffsetY
+            lineCap: "round"
         };
+
+        if( me.line.shadowBlur ){
+            blineCtx.shadowBlur = me.line.shadowBlur,
+            blineCtx.shadowColor = me.line.shadowColor || strokeStyle,
+            blineCtx.shadowOffsetY = me.line.shadowOffsetY
+        };
+
         let bline = new BrokenLine({ //线条
             context: blineCtx
         });
@@ -604,7 +613,7 @@ export default class LineGraphsGroup extends event.Dispatcher
         if (!this.line.enabled) {
             bline.context.visible = false
         };
-        me.graphSprite.addChild(bline);
+        me.lineSprite.addChild(bline);
         me._bline = bline;
 
         let area = new Path({ //填充
@@ -625,7 +634,7 @@ export default class LineGraphsGroup extends event.Dispatcher
         if( !this.area.enabled ){
             area.context.visible = false
         };
-        me.graphSprite.addChild(area);
+        me.lineSprite.addChild(area);
         me._area = area;
 
         me._createNodes( opt );
@@ -1003,7 +1012,7 @@ export default class LineGraphsGroup extends event.Dispatcher
                     _label =  new Canvax.Display.Text( value , {
                         context: context
                     });
-                    me._labels.addChild(_label);
+                    me._labels.addChild( _label );
                     me._checkTextPos( _label , a );
                 }
                 iNode++;
