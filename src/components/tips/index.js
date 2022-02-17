@@ -56,6 +56,18 @@ class Tips extends Component {
                 default: 'line',
                 documentation: 'tips的指针,默认为直线，可选为："line" | "region"(柱状图中一般用region)'
             },
+            pointerColor : {
+                detail: 'tips指针样式的颜色',
+                default: "#ccc"
+            },
+            pointerLineWidth: {
+                detail: 'pointer为line的时候，设置指针line的线宽，默认1.5',
+                default: 1
+            },
+            pointerRegionAlpha: {
+                detail: 'pointer为region的时候，设置指针region的透明度',
+                default: 0.38
+            },
             pointerAnim : {
                 detail: 'tips移动的时候，指针是否开启动画',
                 default: true
@@ -279,8 +291,9 @@ class Tips extends Component {
 
         if( info.nodes.length ){
             str += "<table >"
+            
             if (info.title !== undefined && info.title !== null && info.title !== "") {
-                str += "<tr><td colspan='2' style='text-align:left'>"
+                str += "<tr><td colspan='2' style='text-align:left;padding-left:3px;'>"
                 str += "<span style='font-size:12px;padding:4px;color:#333;'>" + info.title + "</span>";
                 str += "</td></tr>"
             }; 
@@ -295,7 +308,9 @@ class Tips extends Component {
                 let style = node.color || node.fillStyle || node.strokeStyle;
                 let name,value;
                 let fieldConfig = _coord.getFieldConfig( node.field );
-                name = fieldConfig.name || node.name || node.field || node.content || node.label;
+
+                //node.name优先级最高，是因为像 pie funnel 等一维图表，会有name属性
+                name = node.name || fieldConfig.name || node.field;
                 value = fieldConfig.getFormatValue( node.value );
 
                 if( !hasValue ){
@@ -398,8 +413,8 @@ class Tips extends Component {
                             x: 0,
                             y: _coord.height
                         },
-                        lineWidth: 1,
-                        strokeStyle: "#cccccc"
+                        lineWidth: this.pointerLineWidth,
+                        strokeStyle: this.pointerColor
                     }
                 });
             };
@@ -412,8 +427,8 @@ class Tips extends Component {
                         height: _coord.height,
                         x: x,
                         y: y,
-                        fillStyle: "#cccccc",
-                        globalAlpha: 0.3
+                        fillStyle: this.pointerColor,
+                        globalAlpha: this.pointerRegionAlpha
                     }
                 });
             };

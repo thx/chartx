@@ -46,8 +46,8 @@ var Axis = /*#__PURE__*/function (_baseAxis) {
   }
 
   (0, _createClass2["default"])(Axis, [{
-    key: "drawWaterLine",
-    value: function drawWaterLine(y) {
+    key: "addValToSection",
+    value: function addValToSection(y) {
       //如果y在现有的数据区间里面， 就不需要重新计算和绘制了
       if (this.layoutType == "proportion") {
         if (y >= this._min && y <= this._max) {
@@ -55,13 +55,17 @@ var Axis = /*#__PURE__*/function (_baseAxis) {
         }
       }
 
-      ;
+      ; //如果y不在当前datasection范围内，那么就要重新绘制
+
       this.dataSection = [];
-      this.setWaterLine(y);
+
+      this._addValToSection(y);
 
       this._initHandle();
 
-      this.draw();
+      this.draw(); //然后要检测下依附于这个轴的所有graphs，都要重新绘制
+
+      this._coord.resetGraphsOfAxis(this);
     }
   }], [{
     key: "defaultProps",
@@ -182,7 +186,7 @@ var Axis = /*#__PURE__*/function (_baseAxis) {
             },
             fontColor: {
               detail: '文本颜色',
-              "default": '#ccc'
+              "default": '#999'
             },
             fontSize: {
               detail: '字体大小',

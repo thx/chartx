@@ -1,6 +1,7 @@
 import Canvax from "canvax"
-import {numAddSymbol,getDefaultProps} from "../../../utils/tools"
+import {getDefaultProps} from "../../../utils/tools"
 import GraphsBase from "../index"
+import numeral from "numeral"
 
 let { _, event } = Canvax;
 let AnimationFrame = Canvax.AnimationFrame;
@@ -330,7 +331,9 @@ class BarGraphs extends GraphsBase
 
     resetData( dataFrame )
     {
-        this.dataFrame = dataFrame;
+        if( dataFrame ){
+            this.dataFrame = dataFrame;
+        };
         this.draw();
     }
 
@@ -379,6 +382,7 @@ class BarGraphs extends GraphsBase
         } );
         
 
+        let _coord = this.app.getComponent({name:'coord'});
         _.each( this.enabledField , function(h_group, i) {
             
             h_group = _.flatten([ h_group ]);
@@ -631,19 +635,27 @@ class BarGraphs extends GraphsBase
                     if ( me.label.enabled ) {
 
                         let value = nodeData.value;
-                        if ( _.isFunction(me.label.format) ) {
-                            let _formatc = me.label.format(value, nodeData);
-                            if( _formatc !== undefined || _formatc !== null ){
-                                value = _formatc
+                        if ( me.label.format ) {
+                            if( _.isFunction(me.label.format) ){
+                                let _formatc = me.label.format.apply( me, [value, nodeData] );;//me.label.format(value, nodeData);
+                                if( _formatc !== undefined || _formatc !== null ){
+                                    value = _formatc
+                                }
                             }
+                            if( typeof me.label.format == 'string' ){
+                                value = numeral( value ).format( me.label.format )
+                            }
+                            
+                        } else {
+                            //否则用fieldConfig上面的
+                            let fieldConfig = _coord.getFieldConfig( nodeData.field );
+                            if(fieldConfig ){
+                                value = fieldConfig.getFormatValue( value );
+                            };
                         };
 
                         if( value === undefined || value === null || value === "" ){
                             continue;
-                        };
-
-                        if ( _.isNumber(value) ) {
-                            value = numAddSymbol(value);
                         };
                         
                         let textCtx = {

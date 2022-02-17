@@ -25,6 +25,8 @@ var _tools = require("../../../utils/tools");
 
 var _index2 = _interopRequireDefault(require("../index"));
 
+var _numeral = _interopRequireDefault(require("numeral"));
+
 function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
 
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
@@ -229,7 +231,11 @@ var BarGraphs = /*#__PURE__*/function (_GraphsBase) {
   }, {
     key: "resetData",
     value: function resetData(dataFrame) {
-      this.dataFrame = dataFrame;
+      if (dataFrame) {
+        this.dataFrame = dataFrame;
+      }
+
+      ;
       this.draw();
     }
   }, {
@@ -279,6 +285,10 @@ var BarGraphs = /*#__PURE__*/function (_GraphsBase) {
         }
 
         ;
+      });
+
+      var _coord = this.app.getComponent({
+        name: 'coord'
       });
 
       _.each(this.enabledField, function (h_group, i) {
@@ -534,24 +544,35 @@ var BarGraphs = /*#__PURE__*/function (_GraphsBase) {
             if (me.label.enabled) {
               var value = nodeData.value;
 
-              if (_.isFunction(me.label.format)) {
-                var _formatc = me.label.format(value, nodeData);
+              if (me.label.format) {
+                if (_.isFunction(me.label.format)) {
+                  var _formatc = me.label.format.apply(me, [value, nodeData]);
 
-                if (_formatc !== undefined || _formatc !== null) {
-                  value = _formatc;
+                  ; //me.label.format(value, nodeData);
+
+                  if (_formatc !== undefined || _formatc !== null) {
+                    value = _formatc;
+                  }
                 }
+
+                if (typeof me.label.format == 'string') {
+                  value = (0, _numeral["default"])(value).format(me.label.format);
+                }
+              } else {
+                //否则用fieldConfig上面的
+                var fieldConfig = _coord.getFieldConfig(nodeData.field);
+
+                if (fieldConfig) {
+                  value = fieldConfig.getFormatValue(value);
+                }
+
+                ;
               }
 
               ;
 
               if (value === undefined || value === null || value === "") {
                 continue;
-              }
-
-              ;
-
-              if (_.isNumber(value)) {
-                value = (0, _tools.numAddSymbol)(value);
               }
 
               ;

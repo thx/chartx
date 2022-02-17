@@ -1,7 +1,8 @@
 import Canvax from "canvax"
 import GraphsBase from "../index"
-import {numAddSymbol,getDefaultProps} from "../../../utils/tools"
+import {getDefaultProps} from "../../../utils/tools"
 import { colorRgba } from "../../../utils/color"
+import numeral from "numeral"
 
 let {_,event} = Canvax;
 let Text = Canvax.Display.Text;
@@ -13,6 +14,10 @@ class FunnelGraphs extends GraphsBase
         return {
             field : {
                 detail : '字段配置',
+                default: null
+            },
+            nameFiled: {
+                detail : 'field字段每行数据对应的name名称字段配置',
                 default: null
             },
             sort: {
@@ -179,9 +184,7 @@ class FunnelGraphs extends GraphsBase
                     },
                     format : {
                         detail: '文本格式化处理函数',
-                        default: function( num ){ 
-                            return numAddSymbol( num );
-                        }
+                        default: null
                     },
                     fontSize: {
                         detail: '文本字体大小',
@@ -272,6 +275,7 @@ class FunnelGraphs extends GraphsBase
 
     draw( opt )
     {
+        
         !opt && (opt ={});
         
         //第二个data参数去掉，直接trimgraphs获取最新的data
@@ -300,13 +304,18 @@ class FunnelGraphs extends GraphsBase
 
         let layoutData = [];
 
+        let _coord = this.app.getCoord();
+
         _.each( this.dataOrg, function( num , i ){
+
+            let rowData = me.dataFrame.getRowDataAt(i);
 
             let ld = {
                 type    : "funnel",
                 field   : me.field,
-                rowData : me.dataFrame.getRowDataAt(i),
+                rowData,
                 value   : num,
+                name    : me.nameField ? rowData[ me.nameField ] : i+1,
                 width   : me._getNodeWidth( num ),
                 color   : '', //me.app.getTheme(i),//默认从皮肤中获取
                 cursor  : "pointer",
@@ -336,7 +345,30 @@ class FunnelGraphs extends GraphsBase
 
         _.each( layoutData, function( ld , i){
             ld.iNode = i;
-            ld.label = me.label.format( ld.value , ld );
+            //ld.label = me.label.format( ld.value , ld );
+
+            let value = ld.value;
+            if ( me.label.format ) {
+                if( _.isFunction(me.label.format) ){
+                    let _formatc = me.label.format.apply( me, [value, ld] );;//me.label.format(value, nodeData);
+                    if( _formatc !== undefined || _formatc !== null ){
+                        value = _formatc
+                    }
+                }
+                if( typeof me.label.format == 'string' ){
+                    value = numeral( value ).format( me.label.format )
+                }
+                
+            } else {
+                //否则用fieldConfig上面的
+                let fieldConfig = _coord.getFieldConfig( me.field );
+                if( fieldConfig ){
+                    value = fieldConfig.getFormatValue( value );
+                }
+            }
+
+            ld.label = value;
+
         } );
         _.each( layoutData, function( ld , i){
             ld.points = me._getPoints(ld , layoutData[i+1], layoutData[i-1]);
@@ -404,6 +436,10 @@ class FunnelGraphs extends GraphsBase
     _drawGraphs()
     {
         let me = this;
+        let _coord = this.app.getCoord();
+        let fieldConfig = _coord.getFieldConfig( me.field );
+        let title = fieldConfig.name || this.field;
+
         _.each( this.data , function( ld ){
 
             //let fillStyle   = this._getProp(this.node, "fillStyle", geoGraph);
@@ -429,10 +465,9 @@ class FunnelGraphs extends GraphsBase
             me._nodesp.addChild( _polygon );
             _polygon.nodeData = ld;
             _polygon.on( event.types.get() , function(e) {
-                
                 e.eventInfo = {
                     trigger : me.node,
-                    title   : me.field,
+                    title   : title,
                     nodes   : [ this.nodeData ]
                 };
 

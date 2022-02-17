@@ -284,7 +284,7 @@ var Tips = /*#__PURE__*/function (_Component) {
         str += "<table >";
 
         if (info.title !== undefined && info.title !== null && info.title !== "") {
-          str += "<tr><td colspan='2' style='text-align:left'>";
+          str += "<tr><td colspan='2' style='text-align:left;padding-left:3px;'>";
           str += "<span style='font-size:12px;padding:4px;color:#333;'>" + info.title + "</span>";
           str += "</td></tr>";
         }
@@ -299,9 +299,10 @@ var Tips = /*#__PURE__*/function (_Component) {
           var style = node.color || node.fillStyle || node.strokeStyle;
           var name, value;
 
-          var fieldConfig = _coord.getFieldConfig(node.field);
+          var fieldConfig = _coord.getFieldConfig(node.field); //node.name优先级最高，是因为像 pie funnel 等一维图表，会有name属性
 
-          name = fieldConfig.name || node.name || node.field || node.content || node.label;
+
+          name = node.name || fieldConfig.name || node.field;
           value = fieldConfig.getFormatValue(node.value);
 
           if (!hasValue) {
@@ -423,8 +424,8 @@ var Tips = /*#__PURE__*/function (_Component) {
                 x: 0,
                 y: _coord.height
               },
-              lineWidth: 1,
-              strokeStyle: "#cccccc"
+              lineWidth: this.pointerLineWidth,
+              strokeStyle: this.pointerColor
             }
           });
         }
@@ -441,8 +442,8 @@ var Tips = /*#__PURE__*/function (_Component) {
               height: _coord.height,
               x: x,
               y: y,
-              fillStyle: "#cccccc",
-              globalAlpha: 0.3
+              fillStyle: this.pointerColor,
+              globalAlpha: this.pointerRegionAlpha
             }
           });
         }
@@ -602,6 +603,18 @@ var Tips = /*#__PURE__*/function (_Component) {
           detail: '触发tips的时候的指针样式',
           "default": 'line',
           documentation: 'tips的指针,默认为直线，可选为："line" | "region"(柱状图中一般用region)'
+        },
+        pointerColor: {
+          detail: 'tips指针样式的颜色',
+          "default": "#ccc"
+        },
+        pointerLineWidth: {
+          detail: 'pointer为line的时候，设置指针line的线宽，默认1.5',
+          "default": 1
+        },
+        pointerRegionAlpha: {
+          detail: 'pointer为region的时候，设置指针region的透明度',
+          "default": 0.38
         },
         pointerAnim: {
           detail: 'tips移动的时候，指针是否开启动画',

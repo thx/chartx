@@ -21,9 +21,11 @@ var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/ge
 
 var _canvax = _interopRequireDefault(require("canvax"));
 
-var _tools = require("../../utils/tools");
+var _numeral = _interopRequireDefault(require("numeral"));
 
 var _axis = _interopRequireDefault(require("./axis"));
+
+var _tools = require("../../utils/tools");
 
 function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
 
@@ -315,21 +317,27 @@ var xAxis = /*#__PURE__*/function (_Axis) {
     }
   }, {
     key: "_getFormatText",
-    value: function _getFormatText(val) {
-      var res = val;
+    value: function _getFormatText(value, i) {
+      if (this.label.format) {
+        //如果有单独给label配置format，就用label上面的配置
+        if (_.isFunction(this.label.format)) {
+          value = this.label.format.apply(this, arguments);
+        }
 
-      if (_.isFunction(this.label.format)) {
-        res = this.label.format.apply(this, arguments);
+        if (typeof this.label.format == 'string') {
+          value = (0, _numeral["default"])(value).format(this.label.format);
+        }
+      } else {
+        //否则用fieldConfig上面的
+        var config = this._coord.fieldsConfig[this.field];
+
+        if (config) {
+          value = this._coord.getFormatValue(value, config, i);
+        }
       }
 
       ;
-
-      if (_.isNumber(res) && this.layoutType == "proportion") {
-        res = (0, _tools.numAddSymbol)(res);
-      }
-
-      ;
-      return res;
+      return value;
     }
   }, {
     key: "_widget",

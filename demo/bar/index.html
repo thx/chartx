@@ -58,10 +58,35 @@
                             text: "right"
                         }
                     }
-                ]
+                ],
+                fieldsConfig:{
+                    click: {
+                        name:'点击率',
+                        format:'0.0$'
+                    },
+                    xfield: {
+                        name: '维度',
+                        format: '0.0%'
+                    }
+                }
             },
             legend: {},
             tips: {
+<<<<<<< HEAD
+=======
+                pointer: "region",
+                positionOfPoint: "left",
+             
+                onshow: function(e){
+                    console.log('show',e)
+                },
+                onmove: function(e){
+                    console.log('move',e)
+                },
+                onhide: function(e){
+                    console.log('hide',e)
+                }
+>>>>>>> master
             },
             graphs: [
                 {

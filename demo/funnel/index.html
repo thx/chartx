@@ -42,10 +42,19 @@ var data= [
 ];
 
 var options = {
+    coord:{
+        fieldsConfig:{
+            val:{
+                name: 'val1',
+                format: '0.0'
+            }
+        }
+    },
     graphs : [
         {
             type : "funnel",
             field : "val",
+            nameField: 'name',
             node: {
                 //minWidth: 100,
                 maxFillStyle: "#6178e7",

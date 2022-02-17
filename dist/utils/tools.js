@@ -6,35 +6,10 @@ Object.defineProperty(exports, "__esModule", {
 exports.getDefaultProps = getDefaultProps;
 exports.getDisMinATArr = getDisMinATArr;
 exports.getPath = getPath;
-exports.numAddSymbol = numAddSymbol;
 
 var _canvax = require("canvax");
 
-/**
- * 数字千分位加','号
- * @param  {[Number]} $n [数字]
- * @param  {[type]} $s [千分位上的符号]
- * @return {[String]}    [根据$s提供的值 对千分位进行分隔 并且小数点上自动加上'.'号  组合成字符串]
- */
-function numAddSymbol($n, $s) {
-  var s = Number($n);
-  var symbol = $s ? $s : ',';
-
-  if (!s) {
-    return String($n);
-  }
-
-  ;
-
-  if (s >= 1000) {
-    var num = parseInt(s / 1000);
-    return String($n.toString().replace(num, num + symbol));
-  } else {
-    return String($n);
-  }
-} //在一个数组中 返回比对$arr中的值离$n最近的值的索引
-
-
+//在一个数组中 返回比对$arr中的值离$n最近的值的索引
 function getDisMinATArr($n, $arr) {
   var index = 0;
   var n = Math.abs($n - $arr[0]);

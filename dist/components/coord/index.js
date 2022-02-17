@@ -72,31 +72,64 @@ var coordBase = /*#__PURE__*/function (_Component) {
     */
 
 
-    _this.fieldsMap = null;
+    _this.graphsFieldsMap = null;
     _this.induce = null;
     _this._axiss = []; //所有轴的集合
+    //DOTO：注意，这里不能调用init 因为在rect polar等派生自这个空坐标系的组件里就会有问题
+    //只能在用到空坐标组件的时候手动init()执行一下
+    //this.init()
 
     return _this;
-  } //和原始field结构保持一致，但是对应的field换成 {field: , enabled:...}结构
+  } //空坐标系的init，在rect polar中会被覆盖
 
 
   (0, _createClass2["default"])(coordBase, [{
-    key: "setFieldsMap",
-    value: function setFieldsMap(axisExp) {
+    key: "init",
+    value: function init() {
+      //this._initModules();
+      //创建好了坐标系统后，设置 _fieldsDisplayMap 的值，
+      // _fieldsDisplayMap 的结构里包含每个字段是否在显示状态的enabled 和 这个字段属于哪个yAxis
+      this.graphsFieldsMap = this.setGraphsFieldsMap();
+    } //空坐标系的draw，在rect polar中会被覆盖
+
+  }, {
+    key: "draw",
+    value: function draw() {
+      var _padding = this.app.padding;
+      this.width = this.app.width - _padding.left - _padding.right;
+      this.height = this.app.height - _padding.top - _padding.bottom;
+      this.origin.x = _padding.left;
+      this.origin.y = _padding.top;
+    } //和原始field结构保持一致，但是对应的field换成 {field: , enabled:...}结构
+
+  }, {
+    key: "setGraphsFieldsMap",
+    value: function setGraphsFieldsMap(axisExp) {
       var me = this;
       var ind = 0;
-      var axisType = axisExp.type || "yAxis";
       var fieldsArr = [];
 
-      _.each(this.getAxiss(axisExp), function (_axis) {
-        if (_axis.field) {
-          fieldsArr = fieldsArr.concat(_axis.field);
-        }
+      if (axisExp) {
+        _.each(this.getAxiss(axisExp), function (_axis) {
+          if (_axis.field) {
+            fieldsArr = fieldsArr.concat(_axis.field);
+          }
 
-        ;
-      });
+          ;
+        });
+      }
+
+      ;
 
       var graphs = _.flatten([this.app._opt.graphs]);
+
+      graphs.forEach(function (graph) {
+        var graphFields = _.flatten([graph.field]);
+
+        if (graphFields.length && _.flatten(fieldsArr).indexOf(graphFields[0]) == -1) {
+          fieldsArr = fieldsArr.concat(graph.field);
+        }
+      });
 
       function _set(fields) {
         if (_.isString(fields)) {
@@ -107,80 +140,71 @@ var coordBase = /*#__PURE__*/function (_Component) {
 
         var clone_fields = _.clone(fields);
 
-        var _loop = function _loop(i, l) {
+        for (var i = 0, l = fields.length; i < l; i++) {
           var field = fields[i];
 
           if (_.isString(field)) {
-            var color = me.app.getTheme(ind);
-            var graph;
-            var graphFieldInd;
-            var graphColorProp; //graphs.find( graph => {_.flatten([graph.field]).indexOf( field )} ).color;
+            (function () {
+              var color = me.app.getTheme(ind);
+              var graph = void 0;
+              var graphFieldInd = void 0;
+              var graphColorProp = void 0; //graphs.find( graph => {_.flatten([graph.field]).indexOf( field )} ).color;
 
-            for (var _i = 0, _l = graphs.length; _i < _l; _i++) {
-              graph = graphs[_i];
-              graphFieldInd = _.flatten([graph.field]).indexOf(field);
+              for (var _i = 0, _l = graphs.length; _i < _l; _i++) {
+                graph = graphs[_i];
+                graphFieldInd = _.flatten([graph.field]).indexOf(field);
 
-              if (graphFieldInd > -1) {
-                graphColorProp = graph.color;
-                break;
-              }
-            }
-
-            ;
-
-            if (graphColorProp) {
-              if (typeof graphColorProp == 'string') {
-                color = graphColorProp;
-              }
-
-              if (Array.isArray(graphColorProp)) {
-                color = graphColorProp[graphFieldInd];
-              }
-
-              if (typeof graphColorProp == 'function') {
-                color = graphColorProp.apply(me.app, [graph]);
-              }
-            }
-
-            ;
-            var config = me.fieldsConfig[field];
-
-            var fieldItem = _objectSpread({
-              field: field,
-              name: field,
-              //fieldConfig中可能会覆盖
-              type: graph.type,
-              enabled: true,
-              color: color,
-              ind: ind++
-            }, me.fieldsConfig[field] || {});
-
-            fieldItem.getFormatValue = function (value) {
-              if (config && config.format) {
-                if (typeof config.format == 'string') {
-                  //如果传入的是 字符串，那么就认为是 numeral 的格式字符串
-                  value = (0, _numeral["default"])(value).format(config.format);
+                if (graphFieldInd > -1) {
+                  graphColorProp = graph.color;
+                  break;
                 }
-
-                if (typeof config.format == 'function') {
-                  //如果传入的是 字符串，那么就认为是 numeral 的格式字符串
-                  value = config.format.apply(me, {
-                    field: field
-                  });
-                }
-              } else {
-                value = (0, _typeof2["default"])(value) == "object" ? JSON.stringify(value) : (0, _numeral["default"])(value).format('0,0');
               }
 
               ;
-              return value;
-            };
 
-            fieldItem[axisType] = me.getAxis({
-              type: axisType,
-              field: field
-            });
-            clone_fields[i] = fieldItem;
+              if (graphColorProp) {
+                if (typeof graphColorProp == 'string') {
+                  color = graphColorProp;
+                }
+
+                if (Array.isArray(graphColorProp)) {
+                  color = graphColorProp[graphFieldInd];
+                }
+
+                if (typeof graphColorProp == 'function') {
+                  color = graphColorProp.apply(me.app, [graph]);
+                }
+              }
+
+              ;
+              var config = me.fieldsConfig[field];
+
+              var fieldItem = _objectSpread({
+                field: field,
+                name: field,
+                //fieldConfig中可能会覆盖
+                type: graph.type,
+                enabled: true,
+                color: color,
+                ind: ind++
+              }, me.fieldsConfig[field] || {});
+
+              fieldItem.getFormatValue = function (value) {
+                return me.getFormatValue(value, config, fieldItem);
+              };
+
+              var axisType = axisExp ? axisExp.type || "yAxis" : null;
+
+              if (axisType) {
+                fieldItem[axisType] = me.getAxis({
+                  type: axisType,
+                  field: field
+                });
+              }
+
+              ;
+              clone_fields[i] = fieldItem;
+            })();
           }
 
           ;
@@ -190,10 +214,6 @@ var coordBase = /*#__PURE__*/function (_Component) {
           }
 
           ;
-        };
-
-        for (var i = 0, l = fields.length; i < l; i++) {
-          _loop(i, l);
         }
 
         ;
@@ -202,7 +222,27 @@ var coordBase = /*#__PURE__*/function (_Component) {
 
       ;
       return _set(fieldsArr);
-    } //设置 fieldsMap 中对应field 的 enabled状态
+    }
+  }, {
+    key: "getFormatValue",
+    value: function getFormatValue(value, config) {
+      if (config && config.format) {
+        if (typeof config.format == 'string') {
+          //如果传入的是 字符串，那么就认为是 numeral 的格式字符串
+          value = (0, _numeral["default"])(value).format(config.format);
+        }
+
+        if (typeof config.format == 'function') {
+          //如果传入的是函数
+          value = config.format.apply(this, arguments);
+        }
+      } else {
+        value = (0, _typeof2["default"])(value) == "object" ? JSON.stringify(value) : (0, _numeral["default"])(value).format('0,0');
+      }
+
+      ;
+      return value;
+    } //设置 graphsFieldsMap 中对应field 的 enabled状态
 
   }, {
     key: "setFieldEnabled",
@@ -219,7 +259,7 @@ var coordBase = /*#__PURE__*/function (_Component) {
         });
       }
 
-      set(me.fieldsMap);
+      set(me.graphsFieldsMap);
     } //从FieldsMap中获取对应的config
 
   }, {
@@ -239,9 +279,9 @@ var coordBase = /*#__PURE__*/function (_Component) {
         });
       }
 
-      get(me.fieldsMap);
+      get(me.graphsFieldsMap);
       return fieldConfig;
-    } //从 fieldsMap 中过滤筛选出来一个一一对应的 enabled为true的对象结构
+    } //从 graphsFieldsMap 中过滤筛选出来一个一一对应的 enabled为true的对象结构
     //这个方法还必须要返回的数据里描述出来多y轴的结构。否则外面拿到数据后并不好处理那个数据对应哪个轴
 
   }, {
@@ -250,7 +290,7 @@ var coordBase = /*#__PURE__*/function (_Component) {
       var enabledFields = [];
       var axisType = axis ? axis.type : "yAxis";
 
-      _.each(this.fieldsMap, function (bamboo) {
+      _.each(this.graphsFieldsMap, function (bamboo) {
         if (_.isArray(bamboo)) {
           //多节竹子，堆叠
           var fields = []; //设置完fields后，返回这个group属于left还是right的axis
@@ -319,6 +359,22 @@ var coordBase = /*#__PURE__*/function (_Component) {
           return isNaN(Number(val)) ? val : Number(val);
         })
       };
+    } //空坐标系的getTipsInfoHandler，在rect polar中会被覆盖
+
+  }, {
+    key: "getTipsInfoHandler",
+    value: function getTipsInfoHandler(e) {
+      var obj = {
+        nodes: [//遍历_graphs 去拿东西
+        ]
+      };
+
+      if (e.eventInfo) {
+        _.extend(true, obj, e.eventInfo);
+      }
+
+      ;
+      return obj;
     }
   }, {
     key: "hide",
@@ -414,6 +470,12 @@ var coordBase = /*#__PURE__*/function (_Component) {
       });
 
       return arr;
+    } //某axis变化了后，对应的依附于该axis的graphs都要重新reset
+
+  }, {
+    key: "resetGraphsOfAxis",
+    value: function resetGraphsOfAxis(axis) {
+      var graphs = this.app.getGraphs();
     }
   }], [{
     key: "defaultProps",
@@ -457,4 +519,7 @@ var coordBase = /*#__PURE__*/function (_Component) {
   return coordBase;
 }(_component["default"]);
 
-exports["default"] = coordBase;
+_component["default"].registerComponent(coordBase, 'coord');
+
+var _default = coordBase;
+exports["default"] = _default;

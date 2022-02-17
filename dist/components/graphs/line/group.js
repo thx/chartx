@@ -27,6 +27,8 @@ var _tools = require("../../../utils/tools");
 
 var _color = require("../../../utils/color");
 
+var _numeral = _interopRequireDefault(require("numeral"));
+
 function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
 
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
@@ -63,8 +65,6 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
     _this.y = 0;
     _this.data = [];
     _this.sprite = null;
-    _this.graphSprite = null; //line area放这里
-
     _this._pointList = []; //brokenline最终的状态
 
     _this._currPointList = []; //brokenline 动画中的当前状态
@@ -94,7 +94,9 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
     value: function init() {
       this.sprite = new _canvax["default"].Display.Sprite();
       this.graphSprite = new _canvax["default"].Display.Sprite();
-      this.sprite.addChild(this.graphSprite); //hover效果的node被添加到的容器
+      this.sprite.addChild(this.graphSprite);
+      this.lineSprite = new _canvax["default"].Display.Sprite();
+      this.graphSprite.addChild(this.lineSprite); //hover效果的node被添加到的容器
 
       this._focusNodes = new _canvax["default"].Display.Sprite({});
       this.sprite.addChild(this._focusNodes);
@@ -337,6 +339,16 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
       }
 
       ;
+
+      if (!this._growed) {
+        //如果还在入场中
+        me._currPointList = me._pointList;
+
+        _update(me._currPointList);
+
+        return;
+      }
+
       this._transitionTween = AnimationFrame.registTween({
         from: me._getPointPosStr(me._currPointList),
         to: me._getPointPosStr(me._pointList),
@@ -381,25 +393,21 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
         context: {
           x: 0,
           //-100,
-          y: -height,
+          y: -height - 3,
           width: 0,
-          height: height,
-          fillStyle: 'blue'
+          height: height + 6,
+          fillStyle: 'green'
         }
       });
       var growTo = {
         width: width
       };
-      this.graphSprite.clipTo(this.clipRect);
+      this.lineSprite.clipTo(this.clipRect);
+      this.graphSprite.addChild(this.clipRect); // if( this.yAxisAlign == 'right' ){
+      //     this.clipRect.context.x = width;
+      //     growTo.x = 0;
+      // };
 
-      if (this.yAxisAlign == 'right') {
-        this.clipRect.context.x = width;
-        growTo.x = 0;
-      }
-
-      ; //TODO：理论上下面这句应该可以神略了才行
-
-      this.sprite.addChild(this.clipRect);
       this.clipRect.animate(growTo, {
         duration: this._graphs.aniDuration,
         onUpdate: function onUpdate() {
@@ -418,6 +426,7 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
           });
         },
         onComplete: function onComplete() {
+          _this2._growed = true;
           callback && callback();
         }
       });
@@ -484,12 +493,15 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
 
       var list = me._pointList;
       me._currPointList = list;
+
+      var strokeStyle = me._getLineStrokeStyle(list); //_getLineStrokeStyle 在配置线性渐变的情况下会需要
+
+
       var blineCtx = {
         pointList: list,
         lineWidth: me.line.lineWidth,
         y: me.y,
-        strokeStyle: me._getLineStrokeStyle(list),
-        //_getLineStrokeStyle 在配置线性渐变的情况下会需要
+        strokeStyle: strokeStyle,
         smooth: me.line.smooth,
         lineType: me._getProp(me.line.lineType),
         smoothFilter: function smoothFilter(rp) {
@@ -502,6 +514,12 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
         },
         lineCap: "round"
       };
+
+      if (me.line.shadowBlur) {
+        blineCtx.shadowBlur = me.line.shadowBlur, blineCtx.shadowColor = me.line.shadowColor || strokeStyle, blineCtx.shadowOffsetY = me.line.shadowOffsetY;
+      }
+
+      ;
       var bline = new BrokenLine({
         //线条
         context: blineCtx
@@ -520,7 +538,7 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
       }
 
       ;
-      me.graphSprite.addChild(bline);
+      me.lineSprite.addChild(bline);
       me._bline = bline;
       var area = new Path({
         //填充
@@ -544,7 +562,7 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
       }
 
       ;
-      me.graphSprite.addChild(area);
+      me.lineSprite.addChild(area);
       me._area = area;
 
       me._createNodes(opt);
@@ -579,9 +597,9 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
     key: "_getFillStyle",
     value: function _getFillStyle() {
       var me = this;
-      var fill_gradient = null; // _fillStyle 可以 接受渐变色，可以不用_getColor， _getColor会过滤掉渐变色
+      var fill_gradient = null;
 
-      var _fillStyle = me._getProp(me.area.fillStyle) || me._getLineStrokeStyle(null, "area"); //fillStyle instanceof CanvasGradient 在小程序里会出错。改用fillStyle.addColorStop来嗅探
+      var _fillStyle; //fillStyle instanceof CanvasGradient 在小程序里会出错。改用fillStyle.addColorStop来嗅探
 
 
       if (_.isArray(me.area.alpha) && !_fillStyle.addColorStop) {
@@ -616,7 +634,36 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
         _fillStyle = fill_gradient;
       }
 
-      ;
+      ; //也可以传入一个线性渐变
+
+      if (this.area.fillStyle && this.area.fillStyle.lineargradient) {
+        var _me$ctx2;
+
+        var lineargradient = this.area.fillStyle.lineargradient; //如果是右轴的话，渐变色要对应的反转
+
+        if (this.yAxisAlign == 'right') {
+          lineargradient = lineargradient.reverse();
+        }
+
+        ; //如果用户配置 填充是一个线性渐变
+
+        var _lps = this._getLinearGradientPoints('area');
+
+        if (!_lps) return;
+        fill_gradient = (_me$ctx2 = me.ctx).createLinearGradient.apply(_me$ctx2, (0, _toConsumableArray2["default"])(_lps));
+
+        _.each(lineargradient, function (item) {
+          fill_gradient.addColorStop(item.position, item.color);
+        });
+
+        _fillStyle = fill_gradient;
+      }
+
+      if (!_fillStyle) {
+        // _fillStyle 可以 接受渐变色，可以不用_getColor， _getColor会过滤掉渐变色
+        _fillStyle = me._getProp(me.area.fillStyle) || me._getLineStrokeStyle(null, "area");
+      }
+
       return _fillStyle;
     }
   }, {
@@ -636,7 +683,7 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
       var lineargradient = this._opt.line.strokeStyle.lineargradient;
 
       if (lineargradient) {
-        var _me$ctx2;
+        var _me$ctx3;
 
         //如果是右轴的话，渐变色要对应的反转
         if (this.yAxisAlign == 'right') {
@@ -648,7 +695,7 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
         var lps = this._getLinearGradientPoints(graphType, pointList);
 
         if (!lps) return;
-        _style = (_me$ctx2 = me.ctx).createLinearGradient.apply(_me$ctx2, (0, _toConsumableArray2["default"])(lps));
+        _style = (_me$ctx3 = me.ctx).createLinearGradient.apply(_me$ctx3, (0, _toConsumableArray2["default"])(lps));
 
         _.each(lineargradient, function (item) {
           _style.addColorStop(item.position, item.color);
@@ -784,11 +831,12 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
         }
 
         ;
+        var lineWidth = me.node.lineWidth || me.line.lineWidth;
         var context = {
           x: x,
           y: y,
           r: me._getProp(me.node.radius, a),
-          lineWidth: me._getProp(me.node.lineWidth, a) || 2,
+          lineWidth: me._getProp(lineWidth, a) || 2,
           strokeStyle: _nodeColor,
           fillStyle: me._getProp(me.node.fillStyle, a) || _nodeColor,
           visible: nodeEnabled && !!me._getProp(me.node.visible, a),
@@ -914,16 +962,27 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
             strokeStyle: "#ffffff",
             globalAlpha: globalAlpha
           };
-          var value = me.data[a].value;
+          var nodeData = me.data[a];
+          var value = nodeData.value;
 
-          if (_.isFunction(me.label.format)) {
+          if (me.label.format) {
             //如果有单独给label配置format，就用label上面的配置
-            value = me.label.format(value, me.data[a]) || value;
+            if (_.isFunction(me.label.format)) {
+              value = me.label.format.apply(me, [value, nodeData]);
+            }
+
+            if (typeof me.label.format == 'string') {
+              value = (0, _numeral["default"])(value).format(me.label.format);
+            }
           } else {
             //否则用fieldConfig上面的
             var fieldConfig = _coord.getFieldConfig(this.field);
 
-            value = fieldConfig.getFormatValue(value);
+            if (fieldConfig) {
+              value = fieldConfig.getFormatValue(value);
+            }
+
+            ;
           }
 
           ;
@@ -1144,6 +1203,7 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
           //console.log( 'focusOf' )
           _node._fillStyle = _node.context.fillStyle;
           _node.context.fillStyle = 'white';
+          _node.context.r += _node.context.lineWidth / 2;
           _node._visible = _node.context.visible;
           _node.context.visible = true;
 
@@ -1156,10 +1216,10 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
           _focusNode.context.lineWidth = 0; //不需要描边
 
           _focusNode.context.fillStyle = _node.context.strokeStyle;
-          _focusNode.context.globalAlpha = 0.5;
+          _focusNode.context.globalAlpha = this.node.focus.alpha;
 
           _focusNode.animate({
-            r: _focusNode.context.r + 6
+            r: _focusNode.context.r + this.node.focus.radiusDiff
           }, {
             duration: 300
           });
@@ -1188,6 +1248,7 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
         if (_node && node.focused) {
           //console.log('unfocus')
           _node.context.fillStyle = _node._fillStyle;
+          _node.context.r -= _node.context.lineWidth / 2;
           _node.context.visible = _node._visible;
           node.focused = false;
           this.__currFocusInd = -1;
@@ -1228,6 +1289,18 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
             smooth: {
               detail: '是否平滑处理',
               "default": true
+            },
+            shadowOffsetY: {
+              detail: '折线的向下阴影偏移量',
+              "default": 3
+            },
+            shadowBlur: {
+              detail: '折线的阴影模糊效果',
+              "default": 0
+            },
+            shadowColor: {
+              detail: '折线的阴影颜色',
+              "default": 'rgba(0,0,0,0.5)'
             }
           }
         },
@@ -1268,12 +1341,25 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
               "default": null
             },
             lineWidth: {
-              detail: '节点图形边宽大小',
-              "default": 2
+              detail: '节点图形边宽大小,默认跟随line.lineWidth',
+              "default": null
             },
             visible: {
               detail: '节点是否显示,支持函数',
               "default": true
+            },
+            focus: {
+              detail: "节点hover态设置",
+              propertys: {
+                radiusDiff: {
+                  detail: 'hover后的背景节点半径相差，正数为变大值,默认为4',
+                  "default": 4
+                },
+                alpha: {
+                  detail: 'hover后的背景节点透明度，默认为0.5',
+                  "default": 0.5
+                }
+              }
             }
           }
         },

@@ -1,6 +1,7 @@
 import Canvax from "canvax"
 import {getPath,getDefaultProps} from "../../../utils/tools"
 import { colorRgb } from "../../../utils/color"
+import numeral from "numeral"
 
 let { _, event } = Canvax;
 let AnimationFrame = Canvax.AnimationFrame;
@@ -41,6 +42,18 @@ export default class LineGraphsGroup extends event.Dispatcher
                     smooth: {
                         detail: '是否平滑处理',
                         default: true
+                    },
+                    shadowOffsetY: {
+                        detail: '折线的向下阴影偏移量',
+                        default: 3
+                    },
+                    shadowBlur: {
+                        detail: '折线的阴影模糊效果',
+                        default: 0
+                    },
+                    shadowColor: {
+                        detail: '折线的阴影颜色',
+                        default: 'rgba(0,0,0,0.5)'
                     }
                 }
             },
@@ -81,12 +94,25 @@ export default class LineGraphsGroup extends event.Dispatcher
                         default: null
                     },
                     lineWidth: {
-                        detail: '节点图形边宽大小',
-                        default: 2
+                        detail: '节点图形边宽大小,默认跟随line.lineWidth',
+                        default: null
                     },
                     visible: {
                         detail: '节点是否显示,支持函数',
                         default: true
+                    },
+                    focus: {
+                        detail: "节点hover态设置",
+                        propertys: {
+                            radiusDiff: {
+                                detail: 'hover后的背景节点半径相差，正数为变大值,默认为4',
+                                default: 4
+                            },
+                            alpha: {
+                                detail: 'hover后的背景节点透明度，默认为0.5',
+                                default: 0.5
+                            }
+                        }
                     }
                 }
             },
@@ -167,7 +193,6 @@ export default class LineGraphsGroup extends event.Dispatcher
 
         this.data = []; 
         this.sprite = null;
-        this.graphSprite = null; //line area放这里
 
         this._pointList = []; //brokenline最终的状态
         this._currPointList = []; //brokenline 动画中的当前状态
@@ -196,6 +221,10 @@ export default class LineGraphsGroup extends event.Dispatcher
         this.sprite = new Canvax.Display.Sprite();
         this.graphSprite = new Canvax.Display.Sprite();
         this.sprite.addChild( this.graphSprite );
+
+        this.lineSprite = new Canvax.Display.Sprite();
+        this.graphSprite.addChild( this.lineSprite );
+        
 
         //hover效果的node被添加到的容器
         this._focusNodes = new Canvax.Display.Sprite({});
@@ -398,6 +427,12 @@ export default class LineGraphsGroup extends event.Dispatcher
             } );
         };
 
+        if( !this._growed ){
+            //如果还在入场中
+            me._currPointList = me._pointList;
+            _update( me._currPointList );
+            return;
+        }
 
         this._transitionTween = AnimationFrame.registTween({
             from: me._getPointPosStr(me._currPointList),
@@ -434,23 +469,23 @@ export default class LineGraphsGroup extends event.Dispatcher
         this.clipRect = new Rect({
             context : {
                 x: 0, //-100,
-                y: -height,
+                y: -height-3,
                 width:0,
-                height,
-                fillStyle: 'blue'
+                height:height+6,
+                fillStyle: 'green'
             }
         });
 
         let growTo = { width : width }
 
-        this.graphSprite.clipTo( this.clipRect );
-        if( this.yAxisAlign == 'right' ){
-            this.clipRect.context.x = width;
-            growTo.x = 0;
-        };
+        this.lineSprite.clipTo( this.clipRect );
+        this.graphSprite.addChild( this.clipRect );
+        
 
-        //TODO：理论上下面这句应该可以神略了才行
-        this.sprite.addChild( this.clipRect );
+        // if( this.yAxisAlign == 'right' ){
+        //     this.clipRect.context.x = width;
+        //     growTo.x = 0;
+        // };
 
         this.clipRect.animate( growTo , {
             duration: this._graphs.aniDuration,
@@ -471,6 +506,7 @@ export default class LineGraphsGroup extends event.Dispatcher
                 
             },
             onComplete: ()=>{
+                this._growed = true;
                 callback && callback()
             }
         });
@@ -536,11 +572,13 @@ export default class LineGraphsGroup extends event.Dispatcher
         
         me._currPointList = list;
 
+        let strokeStyle = me._getLineStrokeStyle( list ); //_getLineStrokeStyle 在配置线性渐变的情况下会需要
+
         let blineCtx = {
             pointList: list,
             lineWidth: me.line.lineWidth,
             y: me.y,
-            strokeStyle : me._getLineStrokeStyle( list ), //_getLineStrokeStyle 在配置线性渐变的情况下会需要
+            strokeStyle, 
             smooth: me.line.smooth,
             lineType: me._getProp(me.line.lineType),
             smoothFilter: function(rp) {
@@ -553,6 +591,13 @@ export default class LineGraphsGroup extends event.Dispatcher
             },
             lineCap: "round"
         };
+
+        if( me.line.shadowBlur ){
+            blineCtx.shadowBlur = me.line.shadowBlur,
+            blineCtx.shadowColor = me.line.shadowColor || strokeStyle,
+            blineCtx.shadowOffsetY = me.line.shadowOffsetY
+        };
+
         let bline = new BrokenLine({ //线条
             context: blineCtx
         });
@@ -568,7 +613,7 @@ export default class LineGraphsGroup extends event.Dispatcher
         if (!this.line.enabled) {
             bline.context.visible = false
         };
-        me.graphSprite.addChild(bline);
+        me.lineSprite.addChild(bline);
         me._bline = bline;
 
         let area = new Path({ //填充
@@ -589,7 +634,7 @@ export default class LineGraphsGroup extends event.Dispatcher
         if( !this.area.enabled ){
             area.context.visible = false
         };
-        me.graphSprite.addChild(area);
+        me.lineSprite.addChild(area);
         me._area = area;
 
         me._createNodes( opt );
@@ -621,8 +666,7 @@ export default class LineGraphsGroup extends event.Dispatcher
     
         let fill_gradient = null;
 
-        // _fillStyle 可以 接受渐变色，可以不用_getColor， _getColor会过滤掉渐变色
-        let _fillStyle = me._getProp(me.area.fillStyle) || me._getLineStrokeStyle( null, "area" );
+        let _fillStyle;
 
         //fillStyle instanceof CanvasGradient 在小程序里会出错。改用fillStyle.addColorStop来嗅探
         if (_.isArray(me.area.alpha) && !(_fillStyle.addColorStop)) {
@@ -651,6 +695,31 @@ export default class LineGraphsGroup extends event.Dispatcher
 
             _fillStyle = fill_gradient;
         };
+
+        //也可以传入一个线性渐变
+        if( this.area.fillStyle && this.area.fillStyle.lineargradient ){
+
+            let lineargradient = this.area.fillStyle.lineargradient;
+            //如果是右轴的话，渐变色要对应的反转
+            if( this.yAxisAlign == 'right' ){
+                lineargradient = lineargradient.reverse();
+            };
+
+            //如果用户配置 填充是一个线性渐变
+            let lps = this._getLinearGradientPoints( 'area' );
+            if( !lps ) return;
+
+            fill_gradient = me.ctx.createLinearGradient( ...lps );
+            _.each( lineargradient , function( item ){
+                fill_gradient.addColorStop( item.position , item.color);
+            });
+            _fillStyle = fill_gradient
+        }
+
+        if( !_fillStyle ){
+            // _fillStyle 可以 接受渐变色，可以不用_getColor， _getColor会过滤掉渐变色
+            _fillStyle = me._getProp(me.area.fillStyle) || me._getLineStrokeStyle( null, "area" );
+        }
     
         return _fillStyle;
     }
@@ -800,10 +869,11 @@ export default class LineGraphsGroup extends event.Dispatcher
                 }
             };
 
+            let lineWidth = me.node.lineWidth || me.line.lineWidth;
             let context = {
                 x,y,
                 r: me._getProp(me.node.radius, a),
-                lineWidth: me._getProp(me.node.lineWidth, a) || 2,
+                lineWidth: me._getProp( lineWidth, a) || 2,
                 strokeStyle: _nodeColor,
                 fillStyle: me._getProp(me.node.fillStyle, a) || _nodeColor,
                 visible : nodeEnabled && !!me._getProp(me.node.visible, a),
@@ -913,14 +983,22 @@ export default class LineGraphsGroup extends event.Dispatcher
                     globalAlpha
                 };
 
-                let value = me.data[ a ].value;
-                if (_.isFunction(me.label.format)) {
+                let nodeData = me.data[ a ];
+                let value = nodeData.value;
+                if ( me.label.format ) {
                     //如果有单独给label配置format，就用label上面的配置
-                    value = (me.label.format(value, me.data[ a ]) || value );
+                    if( _.isFunction(me.label.format) ){
+                        value = me.label.format.apply( me, [value, nodeData] );
+                    }
+                    if( typeof me.label.format == 'string' ){
+                        value = numeral( value ).format( me.label.format )
+                    }
                 } else {
                     //否则用fieldConfig上面的
                     let fieldConfig = _coord.getFieldConfig( this.field );
-                    value = fieldConfig.getFormatValue( value );
+                    if(fieldConfig){
+                        value = fieldConfig.getFormatValue( value );
+                    };
                 };
                 if( value == undefined || value == null ){
                     continue;
@@ -934,7 +1012,7 @@ export default class LineGraphsGroup extends event.Dispatcher
                     _label =  new Canvax.Display.Text( value , {
                         context: context
                     });
-                    me._labels.addChild(_label);
+                    me._labels.addChild( _label );
                     me._checkTextPos( _label , a );
                 }
                 iNode++;
@@ -1118,6 +1196,8 @@ export default class LineGraphsGroup extends event.Dispatcher
     
                 _node._fillStyle = _node.context.fillStyle;
                 _node.context.fillStyle = 'white';
+            
+                _node.context.r += _node.context.lineWidth/2;
                 _node._visible = _node.context.visible;
                 _node.context.visible = true;
     
@@ -1130,10 +1210,10 @@ export default class LineGraphsGroup extends event.Dispatcher
                 _focusNode.context.visible = true;
                 _focusNode.context.lineWidth = 0; //不需要描边
                 _focusNode.context.fillStyle = _node.context.strokeStyle;
-                _focusNode.context.globalAlpha = 0.5;
+                _focusNode.context.globalAlpha = this.node.focus.alpha;
     
                 _focusNode.animate({
-                    r : _focusNode.context.r + 6
+                    r : _focusNode.context.r + this.node.focus.radiusDiff
                 }, {
                     duration: 300
                 })
@@ -1160,6 +1240,7 @@ export default class LineGraphsGroup extends event.Dispatcher
             if( _node && node.focused ){
                 //console.log('unfocus')
                 _node.context.fillStyle = _node._fillStyle;
+                _node.context.r  -= _node.context.lineWidth/2;
                 _node.context.visible = _node._visible;
                 node.focused = false;
                 this.__currFocusInd = -1;

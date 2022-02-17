@@ -231,7 +231,7 @@ class PieGraphs extends GraphsBase
                 color         : null, //加个color属性是为了给tips用
 
                 value         : rowData[ me.field ],
-                label         : rowData[  me.groupField || me.label.field || me.field ],
+                label         : rowData[ me.groupField || me.label.field || me.field ],
                 labelText     : null, //绘制的时候再设置,label format后的数据
                 iNode         : i
             };

@@ -1,5 +1,5 @@
 import Canvax from "canvax"
-import {numAddSymbol} from "../../utils/tools"
+import numeral from "numeral"
 import Axis from "./axis"
 import {getDefaultProps} from "../../utils/tools"
 
@@ -263,16 +263,25 @@ export default class xAxis extends Axis
         return tmpData;
     }
 
-    _getFormatText( val )
+    _getFormatText( value, i )
     {
-        let res = val;
-        if ( _.isFunction(this.label.format) ) {
-            res = this.label.format.apply( this, arguments );
+        if ( this.label.format ) {
+            //如果有单独给label配置format，就用label上面的配置
+            if( _.isFunction(this.label.format) ){
+                value = this.label.format.apply( this, arguments );
+            }
+            if( typeof this.label.format == 'string' ){
+                value = numeral( value ).format( this.label.format )
+            }
+        } else {
+            //否则用fieldConfig上面的
+            let config = this._coord.fieldsConfig[ this.field ];
+            if( config ){
+                value = this._coord.getFormatValue(value, config, i )
+            }
         };
-        if ( _.isNumber(res) && this.layoutType == "proportion"  ) {
-            res = numAddSymbol(res);
-        };
-        return res;
+
+        return value;
     }
 
     _widget( opt )

@@ -2,6 +2,7 @@ import global from "./global"
 import Canvax from "canvax"
 import dataFrame from "./core/dataFrame"
 import setting from './setting';
+import Coord from "./components/coord/index"
 
 let { _ , $ , event } = Canvax;
 
@@ -79,6 +80,13 @@ class Chart extends event.Dispatcher
         //padding数据也要重置为起始值
         this.padding = this._getPadding();
 
+        //首先判断如果没有coord配置，那么就配置一个空坐标系，所有的图表都会依赖一个坐标系， 哪怕是个空坐标系
+        if( !opt.coord ){
+            let _coord = new Coord( {}, me );
+            _coord.init();
+            me.components.push( _coord );
+        }
+
         //先依次init 处理 "theme", "coord", "graphs" 三个优先级最高的模块
         _.each( this.__highModules, function( compName ){
             if( !opt[compName] ) return;
@@ -92,12 +100,21 @@ class Chart extends event.Dispatcher
             _.each( comps, function( comp ){
                 if( //没有type的coord和没有field(or keyField)的graphs，都无效，不要创建该组件
                     //关系图中是keyField
-                    (compName == "coord" && !comp.type ) || 
+                    //(compName == "coord" && !comp.type ) || 
                     (compName == "graphs" && !comp.field && !comp.keyField && !comp.adcode && !comp.geoJson && !comp.geoJsonUrl  ) //地图的话只要有个adcode就可以了
                 ) return; 
+                
                 let compModule = me.componentModules.get(compName, comp.type);
                 if( compModule ){
                     let _comp = new compModule( comp, me );
+
+                    //可能用户配置了一个空的coord坐标系，没有type，里面配置了一些fieldsConfig之类的全局配置的时候
+                    //就要手动init一下这个空坐标系
+                    if( compName == 'coord' && !comp.type ){
+                        //空坐标组件， 就要手动调用一下组件的init()
+                        _comp.init();
+                    };
+
                     me.components.push( _comp );
                 };
             } );
@@ -231,11 +248,7 @@ class Chart extends event.Dispatcher
             if( el.type == "text" && !el.__horizontal ){
                 
                 let ctx = el.context;
-                let w = ctx.width;
-                let h = ctx.height;
-
                 ctx.rotation = ctx.rotation - 90;
-
                 el.__horizontal = true;
                 
             };
@@ -591,8 +604,8 @@ class Chart extends event.Dispatcher
         //------------------------------------------------------------//
 
         let _coord = me.getComponent({name:'coord'});
-        
-        _.each( _.flatten( _coord.fieldsMap ) , function( map , i ){
+         
+        _.each( _.flatten( _coord.graphsFieldsMap ) , function( map , i ){
             //因为yAxis上面是可以单独自己配置field的，所以，这部分要过滤出 legend data
             let isGraphsField = false;
             _.each( me._opt.graphs, function( gopt ){
@@ -620,8 +633,6 @@ class Chart extends event.Dispatcher
 
     show( field , trigger )
     {
-        let me = this;
-        
         let _coord = this.getComponent({name:'coord'});
         _coord && _coord.show( field, trigger );
         _.each( this.getComponents({name:'graphs'}), function( _g ){
@@ -632,8 +643,7 @@ class Chart extends event.Dispatcher
 
     hide( field , trigger)
     {
-        let me = this;
-        let _coord = me.getComponent({name:'coord'});
+        let _coord = this.getComponent({name:'coord'});
         _coord && _coord.hide( field ,trigger );
         _.each( this.getComponents({name:'graphs'}), function( _g ){
             _g.hide( field , trigger );

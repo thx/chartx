@@ -5,7 +5,7 @@ import numeral from "numeral"
 
 let _ = Canvax._;
 
-export default class coordBase extends Component
+class coordBase extends Component
 {
     static defaultProps(){
         return {
@@ -44,7 +44,6 @@ export default class coordBase extends Component
         }
     }
     
-
 	constructor(opt, app){
         
         super(opt, app);
@@ -69,29 +68,58 @@ export default class coordBase extends Component
             ...
         ]
         */
-        this.fieldsMap = null;
+        this.graphsFieldsMap = null;
         this.induce = null;
-
+ 
         this._axiss = [];//所有轴的集合
+
+        //DOTO：注意，这里不能调用init 因为在rect polar等派生自这个空坐标系的组件里就会有问题
+        //只能在用到空坐标组件的时候手动init()执行一下
+        //this.init()
+
     }
     
+    //空坐标系的init，在rect polar中会被覆盖
+    init()
+    {
+        //this._initModules();
+        //创建好了坐标系统后，设置 _fieldsDisplayMap 的值，
+        // _fieldsDisplayMap 的结构里包含每个字段是否在显示状态的enabled 和 这个字段属于哪个yAxis
+        this.graphsFieldsMap = this.setGraphsFieldsMap( );
+    }
+
+    //空坐标系的draw，在rect polar中会被覆盖
+    draw(){
+        let _padding = this.app.padding;
+        this.width = this.app.width - _padding.left - _padding.right;
+        this.height = this.app.height - _padding.top - _padding.bottom;
+        this.origin.x = _padding.left;
+        this.origin.y = _padding.top;
+    }
 
     //和原始field结构保持一致，但是对应的field换成 {field: , enabled:...}结构
-    setFieldsMap( axisExp )
+    setGraphsFieldsMap( axisExp )
     {
+        
         let me = this;
-        let ind = 0;
-
-        let axisType = axisExp.type || "yAxis";
-
+        let ind = 0; 
+        
         let fieldsArr = [];
-        _.each( this.getAxiss( axisExp ), function( _axis ){
-            if( _axis.field ){
-                fieldsArr = fieldsArr.concat( _axis.field );
-            };
-        } );
-
+        if( axisExp ){
+            _.each( this.getAxiss( axisExp ), function( _axis ){
+                if( _axis.field ){
+                    fieldsArr = fieldsArr.concat( _axis.field );
+                };
+            } );
+        };
+        
         let graphs = _.flatten( [this.app._opt.graphs] );
+        graphs.forEach( graph => {
+            let graphFields = _.flatten( [graph.field] );
+            if( graphFields.length && _.flatten(fieldsArr).indexOf( graphFields[0] ) == -1  ){
+                fieldsArr = fieldsArr.concat( graph.field );
+            }
+        }); 
         
         function _set( fields ){
     
@@ -142,22 +170,13 @@ export default class coordBase extends Component
                     };
 
                     fieldItem.getFormatValue = ( value )=>{
-                        if( config && config.format ){
-                            if( typeof config.format == 'string' ){
-                                //如果传入的是 字符串，那么就认为是 numeral 的格式字符串
-                                value = numeral(value).format( config.format )
-                            }
-                            if( typeof config.format == 'function' ){
-                                //如果传入的是 字符串，那么就认为是 numeral 的格式字符串
-                                value = config.format.apply( me, { field, } )
-                            }
-                        } else {
-                            value = typeof(value) == "object" ? JSON.stringify(value) : numeral(value).format('0,0');
-                        };
-                        return value;
+                        return me.getFormatValue( value, config, fieldItem );
                     };
 
-                    fieldItem[ axisType ] = me.getAxis({ type:axisType, field:field })
+                    let axisType = axisExp ? (axisExp.type || "yAxis") : null;
+                    if(axisType){
+                        fieldItem[ axisType ] = me.getAxis({ type:axisType, field:field });
+                    };
                     
                     clone_fields[i] = fieldItem;
 
@@ -173,7 +192,23 @@ export default class coordBase extends Component
         return _set( fieldsArr );
     }
 
-    //设置 fieldsMap 中对应field 的 enabled状态
+    getFormatValue( value, config ){
+        if( config && config.format ){
+            if( typeof config.format == 'string' ){
+                //如果传入的是 字符串，那么就认为是 numeral 的格式字符串
+                value = numeral(value).format( config.format )
+            }
+            if( typeof config.format == 'function' ){
+                //如果传入的是函数
+                value = config.format.apply( this, arguments )
+            }
+        } else {
+            value = typeof(value) == "object" ? JSON.stringify(value) : numeral(value).format('0,0');
+        };
+        return value;
+    }
+
+    //设置 graphsFieldsMap 中对应field 的 enabled状态
     setFieldEnabled( field )
     {
         let me = this;
@@ -186,7 +221,7 @@ export default class coordBase extends Component
                 }
             } );
         }
-        set( me.fieldsMap );
+        set( me.graphsFieldsMap );
     }
 
     //从FieldsMap中获取对应的config
@@ -204,11 +239,11 @@ export default class coordBase extends Component
                 }
             } );
         }
-        get( me.fieldsMap );
+        get( me.graphsFieldsMap );
         return fieldConfig;
     }
 
-    //从 fieldsMap 中过滤筛选出来一个一一对应的 enabled为true的对象结构
+    //从 graphsFieldsMap 中过滤筛选出来一个一一对应的 enabled为true的对象结构
     //这个方法还必须要返回的数据里描述出来多y轴的结构。否则外面拿到数据后并不好处理那个数据对应哪个轴
     getEnabledFieldsOf( axis )
     {
@@ -216,7 +251,7 @@ export default class coordBase extends Component
         let enabledFields = [];
         let axisType = axis ? axis.type : "yAxis";
 
-        _.each( this.fieldsMap, function( bamboo ){
+        _.each( this.graphsFieldsMap, function( bamboo ){
             if( _.isArray( bamboo ) ){
                 //多节竹子，堆叠
 
@@ -280,6 +315,22 @@ export default class coordBase extends Component
                 return (isNaN(Number( val )) ? val : Number( val ))
             })
         }
+    }
+
+    //空坐标系的getTipsInfoHandler，在rect polar中会被覆盖
+    getTipsInfoHandler( e )
+    {   
+        let obj = {
+            nodes : [
+                //遍历_graphs 去拿东西
+            ]
+        };
+
+        if( e.eventInfo ){
+            _.extend(true, obj, e.eventInfo);
+        };
+
+        return obj;
     }
 
     hide( field )
@@ -361,4 +412,13 @@ export default class coordBase extends Component
         
         return arr;
     }
+
+    //某axis变化了后，对应的依附于该axis的graphs都要重新reset
+    resetGraphsOfAxis( axis ){
+        let graphs = this.app.getGraphs();
+    }
 }
+
+Component.registerComponent( coordBase, 'coord' );
+
+export default coordBase

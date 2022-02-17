@@ -25,6 +25,8 @@ var _dataFrame = _interopRequireDefault(require("./core/dataFrame"));
 
 var _setting = _interopRequireDefault(require("./setting"));
 
+var _index = _interopRequireDefault(require("./components/coord/index"));
+
 function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
 
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
@@ -108,7 +110,16 @@ var Chart = /*#__PURE__*/function (_event$Dispatcher) {
 
       var opt = this._opt; //padding数据也要重置为起始值
 
-      this.padding = this._getPadding(); //先依次init 处理 "theme", "coord", "graphs" 三个优先级最高的模块
+      this.padding = this._getPadding(); //首先判断如果没有coord配置，那么就配置一个空坐标系，所有的图表都会依赖一个坐标系， 哪怕是个空坐标系
+
+      if (!opt.coord) {
+        var _coord = new _index["default"]({}, me);
+
+        _coord.init();
+
+        me.components.push(_coord);
+      } //先依次init 处理 "theme", "coord", "graphs" 三个优先级最高的模块
+
 
       _.each(this.__highModules, function (compName) {
         if (!opt[compName]) return;
@@ -125,13 +136,22 @@ var Chart = /*#__PURE__*/function (_event$Dispatcher) {
         _.each(comps, function (comp) {
           if ( //没有type的coord和没有field(or keyField)的graphs，都无效，不要创建该组件
           //关系图中是keyField
-          compName == "coord" && !comp.type || compName == "graphs" && !comp.field && !comp.keyField && !comp.adcode && !comp.geoJson && !comp.geoJsonUrl //地图的话只要有个adcode就可以了
+          //(compName == "coord" && !comp.type ) || 
+          compName == "graphs" && !comp.field && !comp.keyField && !comp.adcode && !comp.geoJson && !comp.geoJsonUrl //地图的话只要有个adcode就可以了
           ) return;
           var compModule = me.componentModules.get(compName, comp.type);
 
           if (compModule) {
-            var _comp = new compModule(comp, me);
+            var _comp = new compModule(comp, me); //可能用户配置了一个空的coord坐标系，没有type，里面配置了一些fieldsConfig之类的全局配置的时候
+            //就要手动init一下这个空坐标系
 
+
+            if (compName == 'coord' && !comp.type) {
+              //空坐标组件， 就要手动调用一下组件的init()
+              _comp.init();
+            }
+
+            ;
             me.components.push(_comp);
           }
 
@@ -300,8 +320,6 @@ var Chart = /*#__PURE__*/function (_event$Dispatcher) {
 
         if (el.type == "text" && !el.__horizontal) {
           var ctx = el.context;
-          var w = ctx.width;
-          var h = ctx.height;
           ctx.rotation = ctx.rotation - 90;
           el.__horizontal = true;
         }
@@ -723,7 +741,7 @@ var Chart = /*#__PURE__*/function (_event$Dispatcher) {
         name: 'coord'
       });
 
-      _.each(_.flatten(_coord.fieldsMap), function (map, i) {
+      _.each(_.flatten(_coord.graphsFieldsMap), function (map, i) {
         //因为yAxis上面是可以单独自己配置field的，所以，这部分要过滤出 legend data
         var isGraphsField = false;
 
@@ -752,8 +770,6 @@ var Chart = /*#__PURE__*/function (_event$Dispatcher) {
   }, {
     key: "show",
     value: function show(field, trigger) {
-      var me = this;
-
       var _coord = this.getComponent({
         name: 'coord'
       });
@@ -771,9 +787,7 @@ var Chart = /*#__PURE__*/function (_event$Dispatcher) {
   }, {
     key: "hide",
     value: function hide(field, trigger) {
-      var me = this;
-
-      var _coord = me.getComponent({
+      var _coord = this.getComponent({
         name: 'coord'
       });
 

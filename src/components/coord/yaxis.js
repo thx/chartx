@@ -1,6 +1,7 @@
 import Canvax from "canvax"
-import {numAddSymbol,getDefaultProps} from "../../utils/tools"
+import {getDefaultProps} from "../../utils/tools"
 import Axis from "./axis"
+import numeral from "numeral"
 
 let _ = Canvax._;
 let Line = Canvax.Shapes.Line;
@@ -194,14 +195,7 @@ export default class yAxis extends Axis
             };
 
             //把format提前
-            let text = layoutData.value;
-            if (_.isFunction(me.label.format)) {
-                text = me.label.format.apply(this, [text, i ]);
-            };
-            if( (text === undefined || text === null) && me.layoutType == "proportion" ){
-                text = numAddSymbol( layoutData.value );
-            };  
-            layoutData.text = text;
+            layoutData.text = me._getFormatText( layoutData.value, i );
 
             tmpData.push( layoutData );
 
@@ -235,6 +229,34 @@ export default class yAxis extends Axis
             //trimLayout就事把arr种的每个元素的visible设置为true和false的过程
             this.trimLayout( tmpData );
         };
+    }
+
+    _getFormatText( value, i )
+    {
+        if ( this.label.format ) {
+            //如果有单独给label配置format，就用label上面的配置
+            if( _.isFunction(this.label.format) ){
+                value = this.label.format.apply( this, arguments );
+            }
+            if( typeof this.label.format == 'string' ){
+                value = numeral( value ).format( this.label.format )
+            }
+        } else {
+            
+            //否则用fieldConfig上面的, 因为y轴上面可能会汇集了多个field，那么只取在fieldsConfig上面配置过的第一个field即可
+            let config;
+            let _fields = _.flatten([this.field]);
+            for( let i=0,l=_fields.length; i<l; i++ ){
+                config = this._coord.fieldsConfig[ _fields[i] ];
+                if( config ) break;
+            };
+           
+            if( config ){
+                value = this._coord.getFormatValue(value, config, i )
+            };
+        };
+
+        return value;
     }
 
     _getYAxisDisLine() 

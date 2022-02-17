@@ -181,10 +181,10 @@ class Polar extends coordBase
 
         //创建好了坐标系统后，设置 _fieldsDisplayMap 的值，
         // _fieldsDisplayMap 的结构里包含每个字段是否在显示状态的enabled 和 这个字段属于哪个yAxis
-        this.fieldsMap = this.setFieldsMap({type : "rAxis"});
-        
+        this.graphsFieldsMap = this.setGraphsFieldsMap({type : "rAxis"});
+         
     }
-
+ 
 
     _initModules()
     {
@@ -880,6 +880,11 @@ class Polar extends coordBase
         }
 
         return res
+    }
+
+    //某axis变化了后，对应的依附于该axis的graphs都要重新reset
+    resetGraphsOfAxis( axis ){
+        let graphs = this.app.getGraphs();
     }
 }
 
