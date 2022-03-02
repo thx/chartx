@@ -102,7 +102,7 @@ class chartxReact extends React.Component {
 
     this.chart = Chartx.create( dom, data, options );
 
-    if( !Chartx._registWindowOnResize ){
+    if( !Chartx._registWindowOnResize && window && window.addEventListener ){
         //整个Chartx只需要注册一次window.onresize就够了
         window.addEventListener("resize", (e)=>{
             Chartx.resize();

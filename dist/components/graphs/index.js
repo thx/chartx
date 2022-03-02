@@ -49,7 +49,7 @@ var GraphsBase = /*#__PURE__*/function (_Component) {
 
     _this._opt = opt || {};
     _this.app = app;
-    _this.ctx = app.stage.canvas.getContext("2d");
+    _this.ctx = app.stage.ctx || app.stage.canvas.getContext("2d");
     _this.dataFrame = app.dataFrame; //app.dataFrame的引用
 
     _this.data = null; //没个graphs中自己_trimGraphs的数据

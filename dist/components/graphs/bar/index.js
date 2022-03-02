@@ -312,7 +312,7 @@ var BarGraphs = /*#__PURE__*/function (_GraphsBase) {
         me._barsLen = me._dataLen * groupsLen; // this bind到了 对应的元素上面
 
         function barGroupSectedHandle(e) {
-          if (me.select.enabled && e.type == me.select.triggerEventType) {
+          if (me.select.enabled && me.select.triggerEventType.indexOf(e.type) > -1) {
             //如果开启了图表的选中交互
             var ind = me.dataFrame.range.start + this.iNode; //region触发的selected，需要把所有的graphs都执行一遍
 
@@ -451,8 +451,9 @@ var BarGraphs = /*#__PURE__*/function (_GraphsBase) {
             var fillStyle = me._getColor(me.node.fillStyle, nodeData);
 
             nodeData.color = fillStyle; //如果用户配置了渐变， 那么tips里面就取对应的中间位置的颜色
+            //fillStyle instanceof CanvasGradient 在小程序里会出错。改用fillStyle.addColorStop来嗅探
 
-            if (fillStyle instanceof CanvasGradient) {
+            if (fillStyle.addColorStop) {
               if (me.node.fillStyle.lineargradient) {
                 var _middleStyle = me.node.fillStyle.lineargradient[parseInt(me.node.fillStyle.lineargradient.length / 2)];
 
@@ -518,31 +519,18 @@ var BarGraphs = /*#__PURE__*/function (_GraphsBase) {
                 context: rectCtx
               });
               rectEl.field = nodeData.field;
-              groupH.addChild(rectEl);
-              rectEl.on(event.types.get(), function (e) {
-                e.eventInfo = {
-                  trigger: me.node,
-                  nodes: [this.nodeData]
-                };
-                barGroupSectedHandle.bind(this)(e); //如果开启了分组的选中，如果后续实现了单个bar的选中，那么就要和分组的选中区分开来，单个选中优先
-                // if( me.select.enabled && e.type == me.select.triggerEventType ){
-                //     //如果开启了图表的选中交互
-                //     let ind = me.dataFrame.range.start + this.iNode;
-                //     //region触发的selected，需要把所有的graphs都执行一遍
-                //     if( _.indexOf( me.select.inds, ind ) > -1 ){
-                //         //说明已经选中了
-                //         _.each( barGraphs, function( barGraph ){
-                //             barGraph.unselectAt( ind );
-                //         })
-                //     } else {
-                //         _.each( barGraphs, function( barGraph ){
-                //             barGraph.selectAt( ind );
-                //         })
-                //     };
-                // };
+              groupH.addChild(rectEl); //是否在单个柱子上面启动事件监听
 
-                me.app.fire(e.type, e);
-              });
+              if (me.node.eventEnabled) {
+                rectEl.on(event.types.get(), function (e) {
+                  e.eventInfo = {
+                    trigger: me.node,
+                    nodes: [this.nodeData]
+                  };
+                  barGroupSectedHandle.bind(this)(e);
+                  me.app.fire(e.type, e);
+                });
+              }
             }
 
             ;
@@ -1298,6 +1286,10 @@ var BarGraphs = /*#__PURE__*/function (_GraphsBase) {
             filter: {
               detail: 'bar过滤处理器',
               "default": null
+            },
+            eventEnabled: {
+              detail: '是否在单个柱子上面启动事件的监听',
+              "default": true
             }
           }
         },
@@ -1387,7 +1379,7 @@ var BarGraphs = /*#__PURE__*/function (_GraphsBase) {
             },
             triggerEventType: {
               detail: '触发选中效果的事件',
-              "default": 'click'
+              "default": 'click,tap'
             }
           }
         }

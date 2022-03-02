@@ -244,8 +244,7 @@ var Rect = /*#__PURE__*/function (_coordBase) {
         _yAxis.resetData(yAxisDataFrame);
       });
 
-      this._resetXY_axisLine_pos(); //let _yAxis = this._yAxisLeft || this._yAxisRight;
-
+      this._resetXY_axisLine_pos();
 
       this._grid.reset({
         animation: false

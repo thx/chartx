@@ -368,6 +368,10 @@ class coordBase extends Component
     getOriginPos(){
 
     }
+
+    resetData(){
+        
+    }
     
 
     //获取对应轴的接口

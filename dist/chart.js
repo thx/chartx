@@ -23,6 +23,8 @@ var _canvax = _interopRequireDefault(require("canvax"));
 
 var _dataFrame = _interopRequireDefault(require("./core/dataFrame"));
 
+var _setting = _interopRequireDefault(require("./setting"));
+
 var _index = _interopRequireDefault(require("./components/coord/index"));
 
 function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
@@ -32,13 +34,14 @@ function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Re
 var _ = _canvax["default"]._,
     $ = _canvax["default"].$,
     event = _canvax["default"].event;
-var _padding = 20;
 
 var Chart = /*#__PURE__*/function (_event$Dispatcher) {
   (0, _inherits2["default"])(Chart, _event$Dispatcher);
 
   var _super = _createSuper(Chart);
 
+  //node 为外部宿主的id 或者 dom节点
+  //也可能就是外部已经创建好的 canvax对象 { canvax（实例）, stage, width, height }
   function Chart(node, data, opt, componentModules) {
     var _this;
 
@@ -48,37 +51,42 @@ var Chart = /*#__PURE__*/function (_event$Dispatcher) {
     _this._node = node;
     _this._data = data;
     _this._opt = opt;
-    _this.dataFrame = _this.initData(data, opt);
+    _this.dataFrame = _this.initData(data, opt); //legend如果在top，就会把图表的padding.top修改，减去legend的height
+
+    _this.padding = null; //node可能是意外外面一件准备好了canvax对象， 包括 stage  width height 等
+
     _this.el = $.query(node); //chart 在页面里面的容器节点，也就是要把这个chart放在哪个节点里
 
-    _this.width = parseInt(_this.el.offsetWidth); //图表区域宽
+    _this.width = node.width || parseInt(_this.el.offsetWidth); //图表区域宽
 
-    _this.height = parseInt(_this.el.offsetHeight); //图表区域高
-    //legend如果在top，就会把图表的padding.top修改，减去legend的height
+    _this.height = node.height || parseInt(_this.el.offsetHeight); //图表区域高
+    //Canvax实例
 
-    _this.padding = null; //Canvax实例
+    if (!node.canvax) {
+      _this.canvax = new _canvax["default"].App({
+        el: _this.el,
+        webGL: false
+      });
 
-    _this.canvax = new _canvax["default"].App({
-      el: _this.el,
-      webGL: false
-    });
+      _this.canvax.registEvent();
 
-    _this.canvax.registEvent();
+      _this.id = "chartx_" + _this.canvax.id;
 
-    _this.id = "chartx_" + _this.canvax.id;
-
-    _this.el.setAttribute("chart_id", _this.id);
-
-    _this.el.setAttribute("chartx_version", "2.0"); //设置stage ---------------------------------------------------------begin
+      _this.el.setAttribute("chart_id", _this.id); //设置stage ---------------------------------------------------------begin
 
 
-    _this.stage = new _canvax["default"].Display.Stage({
-      id: "main-chart-stage"
-    });
+      _this.stage = new _canvax["default"].Display.Stage({
+        id: "main-chart-stage"
+      });
 
-    _this.canvax.addChild(_this.stage); //设置stage ---------------------------------------------------------end
-    //构件好coord 和 graphs 的根容器
+      _this.canvax.addChild(_this.stage); //设置stage ---------------------------------------------------------end
 
+    } else {
+      _this.canvax = node.canvax;
+      _this.stage = node.stage;
+    }
+
+    ; //构件好coord 和 graphs 的根容器
 
     _this.setCoord_Graphs_Sp(); //这三类组件是优先级最高的组件，所有的组件的模块化和绘制，都要一次在这三个完成后实现
 
@@ -328,7 +336,7 @@ var Chart = /*#__PURE__*/function (_event$Dispatcher) {
   }, {
     key: "_getPadding",
     value: function _getPadding() {
-      var paddingVal = _padding;
+      var paddingVal = _setting["default"].padding;
 
       if (this._opt.coord && "padding" in this._opt.coord) {
         if (!_.isObject(this._opt.coord.padding)) {
@@ -817,7 +825,7 @@ var Chart = /*#__PURE__*/function (_event$Dispatcher) {
       if (_tips) {
         this._setGraphsTipsInfo.apply(this, [event]);
 
-        if (event.type == "mouseover" || event.type == "mousedown") {
+        if ('mouseover,mousedown,tap,longTap'.indexOf(event.type) > -1) {
           _tips.show(event);
 
           this._tipsPointerAtAllGraphs(event);
@@ -825,7 +833,7 @@ var Chart = /*#__PURE__*/function (_event$Dispatcher) {
 
         ;
 
-        if (event.type == "mousemove") {
+        if ('mousemove,touchMove'.indexOf(event.type) > -1) {
           _tips.move(event);
 
           this._tipsPointerAtAllGraphs(event);
@@ -833,7 +841,7 @@ var Chart = /*#__PURE__*/function (_event$Dispatcher) {
 
         ;
 
-        if (event.type == "mouseout" && !(event.toTarget && _coord && _coord.induce && _coord.induce.containsPoint(_coord.induce.globalToLocal(event.target.localToGlobal(event.point))))) {
+        if ('mouseout'.indexOf(event.type) > -1 && !(event.toTarget && _coord && _coord.induce && _coord.induce.containsPoint(_coord.induce.globalToLocal(event.target.localToGlobal(event.point))))) {
           _tips.hide(event);
 
           this._tipsPointerHideAtAllGraphs(event);

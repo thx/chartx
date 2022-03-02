@@ -11,6 +11,8 @@ var _canvax = _interopRequireDefault(require("canvax"));
 
 var _parse = _interopRequireDefault(require("./core/parse"));
 
+var _setting = _interopRequireDefault(require("./setting"));
+
 //图表皮肤
 var _ = _canvax["default"]._,
     $ = _canvax["default"].$,
@@ -51,9 +53,10 @@ var _default = {
       me.instances[chart.id] = null;
       delete me.instances[chart.id];
     }; //这个el如果之前有绘制过图表，那么就要在instances中找到图表实例，然后销毁
+    //小程序版本中外面会带id过来
 
 
-    var chart_id = $.query(el).getAttribute("chart_id");
+    var chart_id = el.id || $.query(el).getAttribute("chart_id");
 
     if (chart_id != undefined) {
       var _chart = me.instances[chart_id];
@@ -417,6 +420,9 @@ var _default = {
     this.props = allProps; //计算全量的 props 属性用来提供智能提示 begin
 
     return this.props;
+  },
+  setPadding: function setPadding(padding) {
+    _setting["default"].padding = padding;
   },
   //兼容有的地方已经用了Chartx.Canvax
   canvax: _canvax["default"]

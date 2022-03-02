@@ -23,6 +23,10 @@ export default class LineGraphsGroup extends event.Dispatcher
                         detail: '是否开启',
                         default: true
                     },
+                    growDriction:{
+                        detail: '生长动画的方向，默认为从左到右（leftRgiht）,可选rightLeft',
+                        default: 'leftRight'
+                    },
                     strokeStyle: {
                         detail: '线的颜色',
                         default: undefined //不会覆盖掉constructor中的定义
@@ -43,17 +47,21 @@ export default class LineGraphsGroup extends event.Dispatcher
                         detail: '是否平滑处理',
                         default: true
                     },
+                    shadowOffsetX: {
+                        detail: '折线的X方向阴影偏移量',
+                        default: 0
+                    },
                     shadowOffsetY: {
-                        detail: '折线的向下阴影偏移量',
-                        default: 3
+                        detail: '折线的Y方向阴影偏移量',
+                        default: 4
                     },
                     shadowBlur: {
                         detail: '折线的阴影模糊效果',
                         default: 0
                     },
                     shadowColor: {
-                        detail: '折线的阴影颜色',
-                        default: 'rgba(0,0,0,0.5)'
+                        detail: '折线的阴影颜色，默认和折线的strokeStyle同步， 如果strokeStyle是一个渐变色，那么shadowColor就会失效，变成默认的黑色，需要手动设置该shadowColor',
+                        default: null
                     }
                 }
             },
@@ -481,11 +489,10 @@ export default class LineGraphsGroup extends event.Dispatcher
         this.lineSprite.clipTo( this.clipRect );
         this.graphSprite.addChild( this.clipRect );
         
-
-        // if( this.yAxisAlign == 'right' ){
-        //     this.clipRect.context.x = width;
-        //     growTo.x = 0;
-        // };
+        if( this.line.growDriction == 'rightLeft' ){
+            this.clipRect.context.x = width;
+            growTo.x = 0;
+        };
 
         this.clipRect.animate( growTo , {
             duration: this._graphs.aniDuration,
@@ -596,6 +603,7 @@ export default class LineGraphsGroup extends event.Dispatcher
             blineCtx.shadowBlur = me.line.shadowBlur,
             blineCtx.shadowColor = me.line.shadowColor || strokeStyle,
             blineCtx.shadowOffsetY = me.line.shadowOffsetY
+            blineCtx.shadowOffsetX = me.line.shadowOffsetX
         };
 
         let bline = new BrokenLine({ //线条
@@ -668,8 +676,10 @@ export default class LineGraphsGroup extends event.Dispatcher
 
         let _fillStyle;
 
-        //fillStyle可以通过alpha来设置渐变
-        if ( Array.isArray(me.area.alpha) ) {
+        
+
+        if ( _.isArray(me.area.alpha) ) {
+            
             //alpha如果是数组，那么就是渐变背景，那么就至少要有两个值
             //如果拿回来的style已经是个gradient了，那么就不管了
             me.area.alpha.length = 2;
@@ -686,7 +696,8 @@ export default class LineGraphsGroup extends event.Dispatcher
             //创建一个线性渐变
             fill_gradient = me.ctx.createLinearGradient( ...lps );
 
-            let rgb = colorRgb( _fillStyle );
+            let areaStyle = me.area.fillStyle || me.color || me.line.strokeStyle;
+            let rgb = colorRgb( areaStyle );
             let rgba0 = rgb.replace(')', ', ' + me._getProp(me.area.alpha[0]) + ')').replace('RGB', 'RGBA');
             fill_gradient.addColorStop(0, rgba0);
 
@@ -718,7 +729,7 @@ export default class LineGraphsGroup extends event.Dispatcher
 
         if( !_fillStyle ){
             // _fillStyle 可以 接受渐变色，可以不用_getColor， _getColor会过滤掉渐变色
-            _fillStyle = me._getProp(me.area.fillStyle) || me._getLineStrokeStyle( null, "area" );
+            _fillStyle = me._getProp( me.area.fillStyle ) || me._getLineStrokeStyle( null, "area" );
         }
     
         return _fillStyle;
@@ -774,7 +785,7 @@ export default class LineGraphsGroup extends event.Dispatcher
             for( let i=0,l=pointList.length; i<l; i++ ){
                 let point = pointList[i];
                 let y = point[1];
-                if( !isNaN(y) ){
+                if( !isNaN(y) ){ 
                     topY = Math.min( y, topY );
                     bottomY = Math.max( y, bottomY );
                 }

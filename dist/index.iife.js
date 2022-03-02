@@ -8045,7 +8045,6 @@ var chartx = (function () {
 	      var codeWithoutVariables = code.slice(0, range[0]) + code.slice(range[1]);
 	      return this._eval(codeWithoutVariables, 'options', 'variables', variables);
 	    } catch (e) {
-	      console.log('parse error');
 	      return {};
 	    }
 	  }
@@ -8054,6 +8053,21 @@ var chartx = (function () {
 	});
 
 	unwrapExports(parse);
+
+	var setting = createCommonjsModule(function (module, exports) {
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports["default"] = void 0;
+	var _default = {
+	  //设备分辨率
+	  padding: 20
+	};
+	exports["default"] = _default;
+	});
+
+	unwrapExports(setting);
 
 	var global$1 = createCommonjsModule(function (module, exports) {
 
@@ -8067,6 +8081,8 @@ var chartx = (function () {
 	var _canvax = interopRequireDefault(Canvax);
 
 	var _parse = interopRequireDefault(parse);
+
+	var _setting = interopRequireDefault(setting);
 
 	//图表皮肤
 	var _ = _canvax["default"]._,
@@ -8108,9 +8124,10 @@ var chartx = (function () {
 	      me.instances[chart.id] = null;
 	      delete me.instances[chart.id];
 	    }; //这个el如果之前有绘制过图表，那么就要在instances中找到图表实例，然后销毁
+	    //小程序版本中外面会带id过来
 
 
-	    var chart_id = $.query(el).getAttribute("chart_id");
+	    var chart_id = el.id || $.query(el).getAttribute("chart_id");
 
 	    if (chart_id != undefined) {
 	      var _chart = me.instances[chart_id];
@@ -8417,6 +8434,9 @@ var chartx = (function () {
 	    this.props = allProps; //计算全量的 props 属性用来提供智能提示 begin
 
 	    return this.props;
+	  },
+	  setPadding: function setPadding(padding) {
+	    _setting["default"].padding = padding;
 	  },
 	  //兼容有的地方已经用了Chartx.Canvax
 	  canvax: _canvax["default"]
@@ -9665,10 +9685,6 @@ var chartx = (function () {
 	        //coerce val to string
 	        if (typeof val !== 'string') {
 	            val += '';
-
-	            if (console.warn) {
-	                console.warn('Numeral.js: Value is not string. It has been co-erced to: ', val);
-	            }
 	        }
 
 	        //trim whitespaces from either sides
@@ -10576,7 +10592,10 @@ var chartx = (function () {
 	    value: function getAxisOriginPoint() {}
 	  }, {
 	    key: "getOriginPos",
-	    value: function getOriginPos() {} //获取对应轴的接口
+	    value: function getOriginPos() {}
+	  }, {
+	    key: "resetData",
+	    value: function resetData() {} //获取对应轴的接口
 
 	  }, {
 	    key: "getAxis",
@@ -10709,6 +10728,8 @@ var chartx = (function () {
 
 	var _dataFrame = interopRequireDefault(dataFrame);
 
+	var _setting = interopRequireDefault(setting);
+
 	var _index = interopRequireDefault(coord);
 
 	function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
@@ -10718,13 +10739,14 @@ var chartx = (function () {
 	var _ = _canvax["default"]._,
 	    $ = _canvax["default"].$,
 	    event = _canvax["default"].event;
-	var _padding = 20;
 
 	var Chart = /*#__PURE__*/function (_event$Dispatcher) {
 	  (0, _inherits2["default"])(Chart, _event$Dispatcher);
 
 	  var _super = _createSuper(Chart);
 
+	  //node 为外部宿主的id 或者 dom节点
+	  //也可能就是外部已经创建好的 canvax对象 { canvax（实例）, stage, width, height }
 	  function Chart(node, data, opt, componentModules) {
 	    var _this;
 
@@ -10734,37 +10756,40 @@ var chartx = (function () {
 	    _this._node = node;
 	    _this._data = data;
 	    _this._opt = opt;
-	    _this.dataFrame = _this.initData(data, opt);
+	    _this.dataFrame = _this.initData(data, opt); //legend如果在top，就会把图表的padding.top修改，减去legend的height
+
+	    _this.padding = null; //node可能是意外外面一件准备好了canvax对象， 包括 stage  width height 等
+
 	    _this.el = $.query(node); //chart 在页面里面的容器节点，也就是要把这个chart放在哪个节点里
 
-	    _this.width = parseInt(_this.el.offsetWidth); //图表区域宽
+	    _this.width = node.width || parseInt(_this.el.offsetWidth); //图表区域宽
 
-	    _this.height = parseInt(_this.el.offsetHeight); //图表区域高
-	    //legend如果在top，就会把图表的padding.top修改，减去legend的height
+	    _this.height = node.height || parseInt(_this.el.offsetHeight); //图表区域高
+	    //Canvax实例
 
-	    _this.padding = null; //Canvax实例
+	    if (!node.canvax) {
+	      _this.canvax = new _canvax["default"].App({
+	        el: _this.el,
+	        webGL: false
+	      });
 
-	    _this.canvax = new _canvax["default"].App({
-	      el: _this.el,
-	      webGL: false
-	    });
+	      _this.canvax.registEvent();
 
-	    _this.canvax.registEvent();
+	      _this.id = "chartx_" + _this.canvax.id;
 
-	    _this.id = "chartx_" + _this.canvax.id;
-
-	    _this.el.setAttribute("chart_id", _this.id);
-
-	    _this.el.setAttribute("chartx_version", "2.0"); //设置stage ---------------------------------------------------------begin
+	      _this.el.setAttribute("chart_id", _this.id); //设置stage ---------------------------------------------------------begin
 
 
-	    _this.stage = new _canvax["default"].Display.Stage({
-	      id: "main-chart-stage"
-	    });
+	      _this.stage = new _canvax["default"].Display.Stage({
+	        id: "main-chart-stage"
+	      });
 
-	    _this.canvax.addChild(_this.stage); //设置stage ---------------------------------------------------------end
-	    //构件好coord 和 graphs 的根容器
+	      _this.canvax.addChild(_this.stage); //设置stage ---------------------------------------------------------end
 
+	    } else {
+	      _this.canvax = node.canvax;
+	      _this.stage = node.stage;
+	    }
 
 	    _this.setCoord_Graphs_Sp(); //这三类组件是优先级最高的组件，所有的组件的模块化和绘制，都要一次在这三个完成后实现
 
@@ -10986,7 +11011,7 @@ var chartx = (function () {
 	  }, {
 	    key: "_getPadding",
 	    value: function _getPadding() {
-	      var paddingVal = _padding;
+	      var paddingVal = _setting["default"].padding;
 
 	      if (this._opt.coord && "padding" in this._opt.coord) {
 	        if (!_.isObject(this._opt.coord.padding)) {
@@ -11431,19 +11456,19 @@ var chartx = (function () {
 	      if (_tips) {
 	        this._setGraphsTipsInfo.apply(this, [event]);
 
-	        if (event.type == "mouseover" || event.type == "mousedown") {
+	        if ('mouseover,mousedown,tap,longTap'.indexOf(event.type) > -1) {
 	          _tips.show(event);
 
 	          this._tipsPointerAtAllGraphs(event);
 	        }
 
-	        if (event.type == "mousemove") {
+	        if ('mousemove,touchMove'.indexOf(event.type) > -1) {
 	          _tips.move(event);
 
 	          this._tipsPointerAtAllGraphs(event);
 	        }
 
-	        if (event.type == "mouseout" && !(event.toTarget && _coord && _coord.induce && _coord.induce.containsPoint(_coord.induce.globalToLocal(event.target.localToGlobal(event.point))))) {
+	        if ('mouseout'.indexOf(event.type) > -1 && !(event.toTarget && _coord && _coord.induce && _coord.induce.containsPoint(_coord.induce.globalToLocal(event.target.localToGlobal(event.point))))) {
 	          _tips.hide(event);
 
 	          this._tipsPointerHideAtAllGraphs(event);
@@ -13605,6 +13630,11 @@ var chartx = (function () {
 	  }, {
 	    key: "resetData",
 	    value: function resetData(dataFrame) {
+	      //如果用户没有指定width，那么resetData的时候需要清空一下width，用新的数据重新设置
+	      if (!('width' in this._opt)) {
+	        this.width = 0;
+	      }
+
 	      this._setField(dataFrame.field);
 
 	      this.resetDataOrg(dataFrame.org);
@@ -13897,12 +13927,6 @@ var chartx = (function () {
 
 	            _node.addChild(_node._txt);
 
-	            if (me.label.rotation == 90 || me.label.rotation == -90) {
-	              me.maxW = Math.max(me.maxW, _node._txt.getTextHeight());
-	            } else {
-	              me.maxW = Math.max(me.maxW, _node._txt.getTextWidth());
-	            }
-
 	            if (me.animation && !opt.resize) {
 	              _node._txt.context.y = y + aniFrom;
 	              _node._txt.context.globalAlpha = 0;
@@ -13917,6 +13941,14 @@ var chartx = (function () {
 	            }
 	          }
 	          me.rulesSprite.addChild(_node);
+	        }
+
+	        if (me.label.enabled) {
+	          if (me.label.rotation == 90 || me.label.rotation == -90) {
+	            me.maxW = Math.max(me.maxW, _node._txt.getTextHeight());
+	          } else {
+	            me.maxW = Math.max(me.maxW, _node._txt.getTextWidth());
+	          }
 	        }
 	        visibleInd++;
 	      }
@@ -14719,8 +14751,7 @@ var chartx = (function () {
 	        _yAxis.resetData(yAxisDataFrame);
 	      });
 
-	      this._resetXY_axisLine_pos(); //let _yAxis = this._yAxisLeft || this._yAxisRight;
-
+	      this._resetXY_axisLine_pos();
 
 	      this._grid.reset({
 	        animation: false
@@ -16400,7 +16431,7 @@ var chartx = (function () {
 
 	    _this._opt = opt || {};
 	    _this.app = app;
-	    _this.ctx = app.stage.canvas.getContext("2d");
+	    _this.ctx = app.stage.ctx || app.stage.canvas.getContext("2d");
 	    _this.dataFrame = app.dataFrame; //app.dataFrame的引用
 
 	    _this.data = null; //没个graphs中自己_trimGraphs的数据
@@ -16850,7 +16881,7 @@ var chartx = (function () {
 	        me._barsLen = me._dataLen * groupsLen; // this bind到了 对应的元素上面
 
 	        function barGroupSectedHandle(e) {
-	          if (me.select.enabled && e.type == me.select.triggerEventType) {
+	          if (me.select.enabled && me.select.triggerEventType.indexOf(e.type) > -1) {
 	            //如果开启了图表的选中交互
 	            var ind = me.dataFrame.range.start + this.iNode; //region触发的selected，需要把所有的graphs都执行一遍
 
@@ -16969,8 +17000,9 @@ var chartx = (function () {
 	            var fillStyle = me._getColor(me.node.fillStyle, nodeData);
 
 	            nodeData.color = fillStyle; //如果用户配置了渐变， 那么tips里面就取对应的中间位置的颜色
+	            //fillStyle instanceof CanvasGradient 在小程序里会出错。改用fillStyle.addColorStop来嗅探
 
-	            if (fillStyle instanceof CanvasGradient) {
+	            if (fillStyle.addColorStop) {
 	              if (me.node.fillStyle.lineargradient) {
 	                var _middleStyle = me.node.fillStyle.lineargradient[parseInt(me.node.fillStyle.lineargradient.length / 2)];
 
@@ -17026,31 +17058,18 @@ var chartx = (function () {
 	                context: rectCtx
 	              });
 	              rectEl.field = nodeData.field;
-	              groupH.addChild(rectEl);
-	              rectEl.on(event.types.get(), function (e) {
-	                e.eventInfo = {
-	                  trigger: me.node,
-	                  nodes: [this.nodeData]
-	                };
-	                barGroupSectedHandle.bind(this)(e); //如果开启了分组的选中，如果后续实现了单个bar的选中，那么就要和分组的选中区分开来，单个选中优先
-	                // if( me.select.enabled && e.type == me.select.triggerEventType ){
-	                //     //如果开启了图表的选中交互
-	                //     let ind = me.dataFrame.range.start + this.iNode;
-	                //     //region触发的selected，需要把所有的graphs都执行一遍
-	                //     if( _.indexOf( me.select.inds, ind ) > -1 ){
-	                //         //说明已经选中了
-	                //         _.each( barGraphs, function( barGraph ){
-	                //             barGraph.unselectAt( ind );
-	                //         })
-	                //     } else {
-	                //         _.each( barGraphs, function( barGraph ){
-	                //             barGraph.selectAt( ind );
-	                //         })
-	                //     };
-	                // };
+	              groupH.addChild(rectEl); //是否在单个柱子上面启动事件监听
 
-	                me.app.fire(e.type, e);
-	              });
+	              if (me.node.eventEnabled) {
+	                rectEl.on(event.types.get(), function (e) {
+	                  e.eventInfo = {
+	                    trigger: me.node,
+	                    nodes: [this.nodeData]
+	                  };
+	                  barGroupSectedHandle.bind(this)(e);
+	                  me.app.fire(e.type, e);
+	                });
+	              }
 	            }
 	            rectEl.finalPos = finalPos;
 	            rectEl.iGroup = i, rectEl.iNode = h, rectEl.iLay = v; //nodeData, nodeElement ， data和图形之间互相引用的属性约定
@@ -17723,6 +17742,10 @@ var chartx = (function () {
 	            filter: {
 	              detail: 'bar过滤处理器',
 	              "default": null
+	            },
+	            eventEnabled: {
+	              detail: '是否在单个柱子上面启动事件的监听',
+	              "default": true
 	            }
 	          }
 	        },
@@ -17812,7 +17835,7 @@ var chartx = (function () {
 	            },
 	            triggerEventType: {
 	              detail: '触发选中效果的事件',
-	              "default": 'click'
+	              "default": 'click,tap'
 	            }
 	          }
 	        }
@@ -18457,11 +18480,12 @@ var chartx = (function () {
 	        width: width
 	      };
 	      this.lineSprite.clipTo(this.clipRect);
-	      this.graphSprite.addChild(this.clipRect); // if( this.yAxisAlign == 'right' ){
-	      //     this.clipRect.context.x = width;
-	      //     growTo.x = 0;
-	      // };
+	      this.graphSprite.addChild(this.clipRect);
 
+	      if (this.line.growDriction == 'rightLeft') {
+	        this.clipRect.context.x = width;
+	        growTo.x = 0;
+	      }
 	      this.clipRect.animate(growTo, {
 	        duration: this._graphs.aniDuration,
 	        onUpdate: function onUpdate() {
@@ -18565,6 +18589,7 @@ var chartx = (function () {
 
 	      if (me.line.shadowBlur) {
 	        blineCtx.shadowBlur = me.line.shadowBlur, blineCtx.shadowColor = me.line.shadowColor || strokeStyle, blineCtx.shadowOffsetY = me.line.shadowOffsetY;
+	        blineCtx.shadowOffsetX = me.line.shadowOffsetX;
 	      }
 	      var bline = new BrokenLine({
 	        //线条
@@ -18639,10 +18664,9 @@ var chartx = (function () {
 	      var me = this;
 	      var fill_gradient = null;
 
-	      var _fillStyle; //fillStyle可以通过alpha来设置渐变
+	      var _fillStyle;
 
-
-	      if (Array.isArray(me.area.alpha)) {
+	      if (_.isArray(me.area.alpha)) {
 	        var _me$ctx;
 
 	        //alpha如果是数组，那么就是渐变背景，那么就至少要有两个值
@@ -18662,7 +18686,8 @@ var chartx = (function () {
 	        if (!lps) return; //创建一个线性渐变
 
 	        fill_gradient = (_me$ctx = me.ctx).createLinearGradient.apply(_me$ctx, (0, _toConsumableArray2["default"])(lps));
-	        var rgb = (0, color.colorRgb)(_fillStyle);
+	        var areaStyle = me.area.fillStyle || me.color || me.line.strokeStyle;
+	        var rgb = (0, color.colorRgb)(areaStyle);
 	        var rgba0 = rgb.replace(')', ', ' + me._getProp(me.area.alpha[0]) + ')').replace('RGB', 'RGBA');
 	        fill_gradient.addColorStop(0, rgba0);
 	        var rgba1 = rgb.replace(')', ', ' + me.area.alpha[1] + ')').replace('RGB', 'RGBA');
@@ -19242,6 +19267,10 @@ var chartx = (function () {
 	              detail: '是否开启',
 	              "default": true
 	            },
+	            growDriction: {
+	              detail: '生长动画的方向，默认为从左到右（leftRgiht）,可选rightLeft',
+	              "default": 'leftRight'
+	            },
 	            strokeStyle: {
 	              detail: '线的颜色',
 	              "default": undefined //不会覆盖掉constructor中的定义
@@ -19264,17 +19293,21 @@ var chartx = (function () {
 	              detail: '是否平滑处理',
 	              "default": true
 	            },
+	            shadowOffsetX: {
+	              detail: '折线的X方向阴影偏移量',
+	              "default": 0
+	            },
 	            shadowOffsetY: {
-	              detail: '折线的向下阴影偏移量',
-	              "default": 3
+	              detail: '折线的Y方向阴影偏移量',
+	              "default": 4
 	            },
 	            shadowBlur: {
 	              detail: '折线的阴影模糊效果',
 	              "default": 0
 	            },
 	            shadowColor: {
-	              detail: '折线的阴影颜色',
-	              "default": 'rgba(0,0,0,0.5)'
+	              detail: '折线的阴影颜色，默认和折线的strokeStyle同步， 如果strokeStyle是一个渐变色，那么shadowColor就会失效，变成默认的黑色，需要手动设置该shadowColor',
+	              "default": null
 	            }
 	          }
 	        },
@@ -24367,7 +24400,7 @@ var chartx = (function () {
 	              }
 	            }
 
-	            if (me.node.select.enabled && e.type == me.node.select.triggerEventType) {
+	            if (me.node.select.enabled && me.node.select.triggerEventType.indexOf(e.type) > -1) {
 	              //如果开启了图表的选中交互
 	              //TODO:这里不能
 	              var onbefore = me.node.select.onbefore;
@@ -24722,7 +24755,7 @@ var chartx = (function () {
 	                },
 	                triggerEventType: {
 	                  detail: '触发事件',
-	                  "default": 'click'
+	                  "default": 'click,tap'
 	                },
 	                onbefore: {
 	                  detail: '执行select处理函数的前处理函数，返回false则取消执行select',
@@ -27868,7 +27901,6 @@ var chartx = (function () {
 	      yRange = bounds.yRange;
 
 	  if (xRange.max == xRange.min || yRange.max == yRange.min) {
-	    console.log("not scaling solution: zero size detected");
 	    return solution;
 	  }
 
@@ -28515,9 +28547,7 @@ var chartx = (function () {
 	    var centre = computeTextCentre(interior, exterior);
 	    ret[area] = centre;
 
-	    if (centre.disjoint && areas[i].size > 0) {
-	      console.log("WARNING: area " + area + " not represented on screen");
-	    }
+	    if (centre.disjoint && areas[i].size > 0) ;
 	  }
 
 	  return ret;
@@ -30897,7 +30927,6 @@ var chartx = (function () {
 	  var label = options.node && options.node.content && options.node.content.field;
 
 	  if (!checkDataIsJson(data, key, childrenKey)) {
-	    console.error('该数据不能正确绘制，请提供数组对象形式的数据！');
 	    return result;
 	  }
 	  var childrens = [];
@@ -34675,7 +34704,6 @@ var chartx = (function () {
 	        try {
 	          return fn();
 	        } finally {
-	          console.log(name + " time: " + (_.now() - start) + "ms");
 	        }
 	      }
 
@@ -44451,7 +44479,6 @@ var chartx = (function () {
 	          }
 
 	          if (e.type == "wheel") {
-	            console.log(_deltaY, e.deltaY);
 
 	            if (Math.abs(e.deltaY) > Math.abs(_deltaY)) {
 	              _deltaY = e.deltaY;
@@ -44851,7 +44878,6 @@ var chartx = (function () {
 	      var me = this;
 
 	      _.each(this.data.edges, function (edge) {
-	        console.log(edge.points);
 	        var key = edge.key.join('_');
 
 	        if (me.line.isTree && edge.points.length == 3) {
@@ -45213,7 +45239,7 @@ var chartx = (function () {
 	            }
 	          }
 
-	          if (me.node.select.enabled && e.type == me.node.select.triggerEventType) {
+	          if (me.node.select.enabled && me.node.select.triggerEventType.indexOf(e.type) > -1) {
 	            //如果开启了图表的选中交互
 	            //TODO:这里不能
 	            var onbefore = me.node.select.onbefore;
@@ -45823,7 +45849,7 @@ var chartx = (function () {
 	                },
 	                triggerEventType: {
 	                  detail: '触发事件',
-	                  "default": 'click'
+	                  "default": 'click,tap'
 	                },
 	                shadow: {
 	                  detail: '选中效果的阴影设置',
@@ -46414,21 +46440,17 @@ var chartx = (function () {
 	                  tipsContent: tipsContent,
 	                  nodes: [] //node
 
-	                };
+	                }; //下面的这个就只在鼠标环境下有就好了
 
 	                if (e.type == 'mousedown') {
-	                  _shrinkIconBack.context.r += 1; //_shrinkIcon.context.fontSize += 1;
-	                  //_shrinkIcon.context.x += 1;
-	                  //_shrinkIcon.context.y += .5;
+	                  _shrinkIconBack.context.r += 1;
 	                }
 
 	                if (e.type == 'mouseup') {
-	                  _shrinkIconBack.context.r -= 1; //_shrinkIcon.context.fontSize -= 1;
-	                  //_shrinkIcon.context.x -= 1;
-	                  //_shrinkIcon.context.y -= .5;
+	                  _shrinkIconBack.context.r -= 1;
 	                }
 
-	                if (e.type == 'click') {
+	                if (_this3.node.shrink.triggerEventType.indexOf(e.type) > -1) {
 	                  if (_this3.shrinked.indexOf(node.key) == -1) {
 	                    _this3.shrinked.push(node.key);
 	                  } else {
@@ -46493,6 +46515,10 @@ var chartx = (function () {
 	                enabled: {
 	                  detail: "是否开启",
 	                  "default": true
+	                },
+	                triggerEventType: {
+	                  detail: '触发事件',
+	                  "default": 'click,tap'
 	                },
 	                openCharCode: {
 	                  detail: "点击后触发展开的icon chartCode，当前状态为收缩",
@@ -49275,7 +49301,6 @@ var chartx = (function () {
 	      this._setNodeStyle(_path, 'select');
 
 	      nodeData.selected = true;
-	      console.log("select:true");
 	    }
 	  }, {
 	    key: "unselectAt",
@@ -49289,7 +49314,6 @@ var chartx = (function () {
 	      this._setNodeStyle(_path);
 
 	      geoGraph.selected = false;
-	      console.log("select:false");
 
 	      if (geoGraph.focused) {
 	        this.focusAt(adcode);
@@ -50180,7 +50204,7 @@ var chartx = (function () {
 	        sprite.context.width = itemW;
 	        me.sprite.addChild(sprite);
 	        sprite.on(event.types.get(), function (e) {
-	          if (e.type == "click" && me.activeEnabled) {
+	          if (me.triggerEventType.indexOf(e.type) > -1 && me.activeEnabled) {
 	            //只有一个field的时候，不支持取消
 	            if (_.filter(me.data, function (obj) {
 	              return obj.enabled;
@@ -50390,8 +50414,12 @@ var chartx = (function () {
 	            }
 	          }
 	        },
+	        triggerEventType: {
+	          detail: '触发事件',
+	          "default": 'click,tap'
+	        },
 	        activeEnabled: {
-	          detail: '是否启动图例的',
+	          detail: '是否启动图例的交互事件',
 	          "default": true
 	        },
 	        tipsEnabled: {
@@ -50717,7 +50745,6 @@ var chartx = (function () {
 
 	            _.extend(app.dataFrame.range, range);
 	          }
-	          console.log(range);
 	          app.resetData(null, trigger);
 	          app.fire("dataZoomDragIng");
 	        },
@@ -52020,12 +52047,12 @@ var chartx = (function () {
 	        if (content) {
 	          this._setPosition(e);
 
-	          this.sprite.toFront(); //比如散点图，没有hover到点的时候，也要显示，所有放到最下面
-	          //反之，如果只有hover到点的时候才显示point，那么就放这里
-	          //this._tipsPointerShow(e);
+	          this.sprite.toFront();
 	        } else {
-	          this._hide(e);
+	          this._hideDialogTips(e);
 	        }
+	      } else {
+	        this._hideDialogTips(e);
 	      }
 
 	      this._tipsPointerShow(e);
@@ -52043,10 +52070,7 @@ var chartx = (function () {
 	        var content = this._setContent(e);
 
 	        if (content) {
-	          this._setPosition(e); //比如散点图，没有hover到点的时候，也要显示，所有放到最下面
-	          //反之，如果只有hover到点的时候才显示point，那么就放这里
-	          //this._tipsPointerMove(e)
-
+	          this._setPosition(e);
 	        } else {
 	          //move的时候hide的只有dialogTips, pointer不想要隐藏
 	          this._hideDialogTips();
@@ -52060,6 +52084,7 @@ var chartx = (function () {
 	  }, {
 	    key: "hide",
 	    value: function hide(e) {
+
 	      this._hide(e);
 
 	      this.onhide.apply(this, [e]);
@@ -52114,14 +52139,17 @@ var chartx = (function () {
 	  }, {
 	    key: "_creatTipDom",
 	    value: function _creatTipDom(e) {
-	      this._tipDom = document.createElement("div");
-	      this._tipDom.className = "chart-tips";
-	      this._tipDom.style.cssText += "; border-radius:" + this.borderRadius + "px;background:" + this.fillStyle + ";border:1px solid " + this.strokeStyle + ";visibility:hidden;position:fixed;z-index:99999;enabled:inline-block;*enabled:inline;*zoom:1;padding:6px;color:" + this.fontColor + ";line-height:1.5";
-	      this._tipDom.style.cssText += "; box-shadow:1px 1px 3px " + this.strokeStyle + ";";
-	      this._tipDom.style.cssText += "; border:none;white-space:nowrap;word-wrap:normal;";
-	      this._tipDom.style.cssText += "; text-align:left;pointer-events:none;";
-	      this._tipDom.style.cssText += "; -webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;";
-	      this.tipDomContainer && this.tipDomContainer.appendChild(this._tipDom);
+	      if (document) {
+	        this._tipDom = document.createElement("div");
+	        this._tipDom.className = "chart-tips";
+	        this._tipDom.style.cssText += "; border-radius:" + this.borderRadius + "px;background:" + this.fillStyle + ";border:1px solid " + this.strokeStyle + ";visibility:hidden;position:fixed;z-index:99999;enabled:inline-block;*enabled:inline;*zoom:1;padding:6px;color:" + this.fontColor + ";line-height:1.5";
+	        this._tipDom.style.cssText += "; box-shadow:1px 1px 3px " + this.strokeStyle + ";";
+	        this._tipDom.style.cssText += "; border:none;white-space:nowrap;word-wrap:normal;";
+	        this._tipDom.style.cssText += "; text-align:left;pointer-events:none;";
+	        this._tipDom.style.cssText += "; -webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;";
+	        this.tipDomContainer && this.tipDomContainer.appendChild(this._tipDom);
+	        return this._tipDom;
+	      }
 	    }
 	  }, {
 	    key: "_removeContent",
@@ -52140,11 +52168,14 @@ var chartx = (function () {
 	      }
 
 	      if (!this._tipDom) {
-	        this._creatTipDom(e);
+	        this._tipDom = this._creatTipDom(e);
 	      }
-	      this._tipDom.innerHTML = tipxContent;
-	      this.dW = this._tipDom.offsetWidth;
-	      this.dH = this._tipDom.offsetHeight;
+
+	      if (this._tipDom) {
+	        this._tipDom.innerHTML = tipxContent;
+	        this.dW = this._tipDom.offsetWidth;
+	        this.dH = this._tipDom.offsetHeight;
+	      }
 	      return tipxContent;
 	    }
 	  }, {
@@ -52202,7 +52233,7 @@ var chartx = (function () {
 
 	          str += "<tr>";
 	          str += "<td style='padding:0px 6px;color:" + (!hasValue ? '#ddd' : '#a0a0a0;') + "'>" + name + "</td>";
-	          str += "<td style='padding:0px 6px;'><span style='color:" + style + "'>" + value + "</span></td>";
+	          str += "<td style='padding:0px 6px;font-weight:bold;'><span style='color:" + style + "'>" + value + "</span></td>";
 	          str += "</tr>";
 	        });
 
@@ -52258,6 +52289,8 @@ var chartx = (function () {
 	  }, {
 	    key: "_tipsPointerShow",
 	    value: function _tipsPointerShow(e) {
+	      var _this2 = this;
+
 	      //legend等组件上面的tips是没有xAxis等轴信息的
 	      if (!e.eventInfo || !e.eventInfo.xAxis) {
 	        return;
@@ -52269,7 +52302,13 @@ var chartx = (function () {
 
 
 	      if (!_coord || _coord.type != 'rect') return;
-	      if (!this.pointer) return;
+	      if (!this.pointer) return; //自动检测到如果数据里有一个柱状图的数据， 那么就启用region的pointer
+
+	      e.eventInfo.nodes.forEach(function (node) {
+	        if (node.type == "bar") {
+	          _this2.pointer = "region";
+	        }
+	      });
 	      var el = this._tipsPointer;
 	      var y = _coord.origin.y - _coord.height;
 	      var x = 0;
@@ -55236,7 +55275,7 @@ var chartx = (function () {
 	}
 
 	var chartx = {
-	  version: '1.1.66',
+	  version: '1.1.67',
 	  options: {}
 	};
 

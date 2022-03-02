@@ -409,7 +409,10 @@ var coordBase = /*#__PURE__*/function (_Component) {
     value: function getAxisOriginPoint() {}
   }, {
     key: "getOriginPos",
-    value: function getOriginPos() {} //获取对应轴的接口
+    value: function getOriginPos() {}
+  }, {
+    key: "resetData",
+    value: function resetData() {} //获取对应轴的接口
 
   }, {
     key: "getAxis",

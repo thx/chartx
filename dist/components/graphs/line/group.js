@@ -403,11 +403,14 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
         width: width
       };
       this.lineSprite.clipTo(this.clipRect);
-      this.graphSprite.addChild(this.clipRect); // if( this.yAxisAlign == 'right' ){
-      //     this.clipRect.context.x = width;
-      //     growTo.x = 0;
-      // };
+      this.graphSprite.addChild(this.clipRect);
 
+      if (this.line.growDriction == 'rightLeft') {
+        this.clipRect.context.x = width;
+        growTo.x = 0;
+      }
+
+      ;
       this.clipRect.animate(growTo, {
         duration: this._graphs.aniDuration,
         onUpdate: function onUpdate() {
@@ -517,6 +520,7 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
 
       if (me.line.shadowBlur) {
         blineCtx.shadowBlur = me.line.shadowBlur, blineCtx.shadowColor = me.line.shadowColor || strokeStyle, blineCtx.shadowOffsetY = me.line.shadowOffsetY;
+        blineCtx.shadowOffsetX = me.line.shadowOffsetX;
       }
 
       ;
@@ -599,10 +603,9 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
       var me = this;
       var fill_gradient = null;
 
-      var _fillStyle; //fillStyle可以通过alpha来设置渐变
+      var _fillStyle;
 
-
-      if (Array.isArray(me.area.alpha)) {
+      if (_.isArray(me.area.alpha)) {
         var _me$ctx;
 
         //alpha如果是数组，那么就是渐变背景，那么就至少要有两个值
@@ -626,7 +629,8 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
         if (!lps) return; //创建一个线性渐变
 
         fill_gradient = (_me$ctx = me.ctx).createLinearGradient.apply(_me$ctx, (0, _toConsumableArray2["default"])(lps));
-        var rgb = (0, _color.colorRgb)(_fillStyle);
+        var areaStyle = me.area.fillStyle || me.color || me.line.strokeStyle;
+        var rgb = (0, _color.colorRgb)(areaStyle);
         var rgba0 = rgb.replace(')', ', ' + me._getProp(me.area.alpha[0]) + ')').replace('RGB', 'RGBA');
         fill_gradient.addColorStop(0, rgba0);
         var rgba1 = rgb.replace(')', ', ' + me.area.alpha[1] + ')').replace('RGB', 'RGBA');
@@ -1268,6 +1272,10 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
               detail: '是否开启',
               "default": true
             },
+            growDriction: {
+              detail: '生长动画的方向，默认为从左到右（leftRgiht）,可选rightLeft',
+              "default": 'leftRight'
+            },
             strokeStyle: {
               detail: '线的颜色',
               "default": undefined //不会覆盖掉constructor中的定义
@@ -1290,17 +1298,21 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
               detail: '是否平滑处理',
               "default": true
             },
+            shadowOffsetX: {
+              detail: '折线的X方向阴影偏移量',
+              "default": 0
+            },
             shadowOffsetY: {
-              detail: '折线的向下阴影偏移量',
-              "default": 3
+              detail: '折线的Y方向阴影偏移量',
+              "default": 4
             },
             shadowBlur: {
               detail: '折线的阴影模糊效果',
               "default": 0
             },
             shadowColor: {
-              detail: '折线的阴影颜色',
-              "default": 'rgba(0,0,0,0.5)'
+              detail: '折线的阴影颜色，默认和折线的strokeStyle同步， 如果strokeStyle是一个渐变色，那么shadowColor就会失效，变成默认的黑色，需要手动设置该shadowColor',
+              "default": null
             }
           }
         },

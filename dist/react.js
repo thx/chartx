@@ -131,7 +131,7 @@ var chartxReact = /*#__PURE__*/function (_React$Component) {
     value: function createChart(dom, data, options) {
       this.chart = _index["default"].create(dom, data, options);
 
-      if (!_index["default"]._registWindowOnResize) {
+      if (!_index["default"]._registWindowOnResize && window && window.addEventListener) {
         //整个Chartx只需要注册一次window.onresize就够了
         window.addEventListener("resize", function (e) {
           _index["default"].resize();

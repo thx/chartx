@@ -120,7 +120,7 @@ class Relation extends GraphsBase {
                             },
                             triggerEventType: {
                                 detail: '触发事件',
-                                default:'click'
+                                default:'click,tap'
                             },
                             shadow: {
                                 detail: '选中效果的阴影设置',
@@ -1267,7 +1267,7 @@ class Relation extends GraphsBase {
                     }
                 };
         
-                if( me.node.select.enabled && e.type == me.node.select.triggerEventType ){
+                if( me.node.select.enabled && me.node.select.triggerEventType.indexOf(e.type) > -1 ){
                     //如果开启了图表的选中交互
                     //TODO:这里不能
                     let onbefore = me.node.select.onbefore;

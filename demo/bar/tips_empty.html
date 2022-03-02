@@ -58,23 +58,15 @@
                             text: "right"
                         }
                     }
-                ],
-                fieldsConfig:{
-                    click: {
-                        name:'点击率',
-                        format:'0.0$'
-                    },
-                    xfield: {
-                        name: '维度',
-                        format: '0.0%'
-                    }
-                }
+                ]
             },
             legend: {},
             tips: {
                 pointer: "region",
                 positionOfPoint: "left",
-             
+                content: function(e){
+                   return ''
+                },
                 onshow: function(e){
                     console.log('show',e)
                 },
@@ -90,9 +82,6 @@
                     type: "bar",
                     field: "click",
                     yAxisAlign: "left",
-                    node: {
-                        eventEnabled: false
-                    },
                     label: {
                         enabled: true
                     }

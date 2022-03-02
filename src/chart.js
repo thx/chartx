@@ -1,13 +1,16 @@
 import global from "./global"
 import Canvax from "canvax"
 import dataFrame from "./core/dataFrame"
+import setting from './setting';
 import Coord from "./components/coord/index"
 
 let { _ , $ , event } = Canvax;
-const _padding = 20;
+
 
 class Chart extends event.Dispatcher
 {
+    //node 为外部宿主的id 或者 dom节点
+    //也可能就是外部已经创建好的 canvax对象 { canvax（实例）, stage, width, height }
     constructor( node, data, opt, componentModules )
     {
         super();
@@ -20,30 +23,38 @@ class Chart extends event.Dispatcher
   
         this.dataFrame = this.initData( data , opt );
 
-        this.el = $.query(node) //chart 在页面里面的容器节点，也就是要把这个chart放在哪个节点里
-        this.width = parseInt(this.el.offsetWidth) //图表区域宽
-        this.height = parseInt(this.el.offsetHeight) //图表区域高
-
         //legend如果在top，就会把图表的padding.top修改，减去legend的height
         this.padding = null;
 
+        //node可能是意外外面一件准备好了canvax对象， 包括 stage  width height 等
+        this.el = $.query(node) //chart 在页面里面的容器节点，也就是要把这个chart放在哪个节点里
+        this.width = node.width || parseInt(this.el.offsetWidth) //图表区域宽
+        this.height = node.height || parseInt(this.el.offsetHeight) //图表区域高
+
         //Canvax实例
-		this.canvax = new Canvax.App({
-            el : this.el,
-            webGL : false
-		});
-        this.canvax.registEvent();
 
-        this.id = "chartx_"+this.canvax.id;
-        this.el.setAttribute("chart_id" , this.id);
-        this.el.setAttribute("chartx_version", "2.0");
+        if( !node.canvax ){
+        
+            this.canvax = new Canvax.App({
+                el : this.el,
+                webGL : false
+            });
+            this.canvax.registEvent();
 
-        //设置stage ---------------------------------------------------------begin
-		this.stage = new Canvax.Display.Stage({
-            id: "main-chart-stage"
-		});
-        this.canvax.addChild( this.stage );
-        //设置stage ---------------------------------------------------------end
+            this.id = "chartx_"+this.canvax.id;
+            this.el.setAttribute("chart_id" , this.id);
+
+            //设置stage ---------------------------------------------------------begin
+            this.stage = new Canvax.Display.Stage({
+                id: "main-chart-stage"
+            });
+            this.canvax.addChild( this.stage );
+            //设置stage ---------------------------------------------------------end
+
+        } else {
+            this.canvax = node.canvax;
+            this.stage  = node.stage;
+        };
 
         //构件好coord 和 graphs 的根容器
         this.setCoord_Graphs_Sp();
@@ -117,7 +128,7 @@ class Chart extends event.Dispatcher
                 //所有的组件都按照数组方式处理，这里，组件里面就不需要再这样处理了
                 if( ! _.isArray( comps ) ){
                     comps = [ comps ];
-                };
+                }; 
                 _.each( comps, function( comp ){
                     let compModule = me.componentModules.get( _p, comp.type );
                     if( compModule ){
@@ -250,7 +261,7 @@ class Chart extends event.Dispatcher
 
     _getPadding(){
         
-        let paddingVal = _padding;
+        let paddingVal = setting.padding;
 
         if( this._opt.coord && "padding" in this._opt.coord ){
             if( !_.isObject(this._opt.coord.padding) ){
@@ -656,15 +667,15 @@ class Chart extends event.Dispatcher
             
             this._setGraphsTipsInfo.apply(this, [event]);
 
-            if( event.type == "mouseover" || event.type == "mousedown" ){
+            if( 'mouseover,mousedown,tap,longTap'.indexOf( event.type ) > -1 ){
                 _tips.show(event);
                 this._tipsPointerAtAllGraphs( event );
             };
-            if( event.type == "mousemove" ){
+            if( 'mousemove,touchMove'.indexOf( event.type ) > -1 ){
                 _tips.move(event);
                 this._tipsPointerAtAllGraphs( event );
             };
-            if( event.type == "mouseout" && !( event.toTarget && _coord && _coord.induce && _coord.induce.containsPoint( _coord.induce.globalToLocal(event.target.localToGlobal(event.point) )) ) ){
+            if( 'mouseout'.indexOf( event.type ) > -1 && !( event.toTarget && _coord && _coord.induce && _coord.induce.containsPoint( _coord.induce.globalToLocal(event.target.localToGlobal(event.point) )) ) ){
                 _tips.hide(event);
                 this._tipsPointerHideAtAllGraphs( event );
             };
@@ -674,11 +685,9 @@ class Chart extends event.Dispatcher
 
 
     _bindEvent()
-    {
+    { 
         if( this.__bindEvented ) return;
-
         this.on(event.types.get() , (e)=>{
-
             //先触发自己的事件
             this.triggerEvent( e );
 

@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
+<title>xChart demo -- bar</title>
+
+<script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
+<script type="text/javascript" src="../../dist/index.iife.js"></script>
+<!-- codemirror -->
+<script type="text/javascript" src="../../lib/codemirror/codemirror.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/active-line.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/javascript.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/matchbrackets.js"></script>
+<link rel="stylesheet" href="../../lib/codemirror/codemirror.css">
+<link rel="stylesheet" href="../../lib/codemirror/zenburn.css">
+<link rel="stylesheet" href="../../lib/codemirror/docs.css">
+<!-- codemirror end -->
+<!--bootstrap-->
+<script type="text/javascript" src="../../lib/bootstrap/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap-theme.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/docs.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap.min.css">
+<!--bootstrap end-->
+<script type="text/javascript" src="../../lib/demo.js"></script>
+<link rel="stylesheet" href="../../lib/demo.css">
+</head>
+<body >
+
+<table>
+    <tr>
+        <td id="td-vl">
+            <form><textarea id="code" name="code">
+
+//chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
+//第一行是表头。
+var data= [
+{"xfield":"1月23日","uv":"","pv":"","click":2690},
+{"xfield":"1月24日","uv":"","pv":"","click":3635},
+{"xfield":"1月25日","uv":"","pv":"","click":3370},
+{"xfield":"1月26日","uv":"","pv":"","click":3472},
+{"xfield":"1月27日","uv":"","pv":"","click":3160},
+{"xfield":"1月28日","uv":"","pv":"","click":3766},
+{"xfield":"1月29日","uv":"","pv":"","click":3630},
+{"xfield":"1月30日","uv":"","pv":"","click":3094},
+{"xfield":"1月31日","uv":"","pv":"","click":2585},
+{"xfield":"2月1日","uv":"","pv":"","click":3991},
+{"xfield":"2月2日","uv":"","pv":"","click":4535},
+{"xfield":"2月3日","uv":"","pv":"","click":4932},
+{"xfield":"2月4日","uv":"","pv":"","click":4462},
+{"xfield":"2月5日","uv":"","pv":"","click":3794},
+{"xfield":"2月6日","uv":"","pv":"","click":3696},
+{"xfield":"2月7日","uv":"","pv":"","click":2978},
+{"xfield":"2月8日","uv":"","pv":"","click":3106},
+{"xfield":"2月9日","uv":"","pv":null,"click":3085},
+{"xfield":"2月10日","uv":"","pv":null,"click":3080},
+{"xfield":"2月11日","uv":"","pv":null,"click":3099},
+{"xfield":"2月12日","uv":"","pv":null,"click":3582},
+{"xfield":"2月13日","uv":"","pv":null,"click":3566},
+{"xfield":"2月14日","uv":"","pv":null,"click":2642},
+{"xfield":"2月15日","uv":"","pv":null,"click":2562},
+{"xfield":"2月16日","uv":"","pv":null,"click":2329},
+{"xfield":"2月17日","uv":"","pv":null,"click":2584},
+{"xfield":"2月18日","uv":"","pv":null,"click":2593},
+{"xfield":"2月19日","uv":"","pv":null,"click":3551},
+{"xfield":"2月20日","uv":"","pv":null,"click":2572},
+{"xfield":"2月21日","uv":"","pv":null,"click":2150}
+];
+
+
+
+var options = {
+    coord: {
+        type: "rect",
+        xAxis: {
+            field: "xfield",
+            label: {
+                rotation: 30
+            },
+            title: {
+                text: " "
+            }
+        },
+        fieldsConfig: {
+            click: {
+                name: '点击量',
+                format: '0.0a'
+            }
+        }
+        ,grid:{
+            line:{
+                xDimension:{
+                    strokeStyle:"rgba(230,230,230,0.4)"
+                }
+            }
+        }
+    },
+    graphs: [
+    {
+        type: "line",
+        //animation: false,
+        field: "click",
+        yAxisAlign:'right',
+        color: 'rgba(56, 90, 204, 1)',
+        line: {
+            lineWidth:2.5,
+            lineargradientDriction:"leftRight",
+            strokeStyle: {
+                lineargradient: [
+                {
+                    position: 0,
+                    color: 'rgba(56, 90, 204, 0.2)'
+                },
+                {
+                    position: 0.05,
+                    color: 'rgba(56, 90, 204,1)'
+                },
+                {
+                    position: 0.95,
+                    color: 'rgba(56, 90, 204, 1)'
+                },
+                {
+                    position: 1,
+                    color: 'rgba(56, 90, 204, 0.2)'
+                }
+            ]
+            },
+            shadowOffsetY:2,
+            shadowBlur:8,
+            shadowColor:'rgba(56, 90, 204, 0.4)'
+        },
+        label: {
+            enabled: false
+        },
+        area: {
+            alpha:0.4,
+            lineargradientDriction:"topBottom",
+            fillStyle: {
+                lineargradient: [
+                    {
+                        position: 0,
+                        color: 'rgba(56, 90, 204, 1)'
+                    },
+                    {
+                        position: 1,
+                        color: 'rgba(56, 90, 204, 0)'
+                    }
+                    ]
+            }
+        },
+        label: {
+            enabled: false
+        },
+        node:{
+            enabled:false,
+            focus:{
+                alpha:0.5
+                ,radiusDiff:8
+            }
+        }
+    }
+    ],
+    legend: {
+        enabled: false
+    },
+    tips:{
+        pointerColor:"#999",
+        pointerLineWidth:1.5,
+        linkageName: 'linkage' //这个属性注意要保证y轴的width是一致的
+    }
+}
+
+try {
+    window.line = chartx.create("canvasTest" , data , options)
+} catch(e){
+
+}
+
+
+setTimeout( function(){
+    return;
+    chartx.create("canvasTest" , data , options)
+} , 3000)
+
+            </textarea></form>
+        </td>
+        <td style="padding:0 10px;" id="td-vr">
+            <div id="chartdemo-r">
+            <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
+                <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
+
+                <h4>折线图（bar chart）</h4>
+                <p>
+                    联系人：@释剑
+                </p>
+            </div>
+            <div  class="test-c">
+                <div id="canvasTest" style='width:1146px;height:210px;position:relative;'></div>
+            </div>
+
+            </div>
+        </td>
+    </tr>
+</table>
+
+
+</body> 
+</html>
+
+

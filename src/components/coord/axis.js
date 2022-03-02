@@ -178,7 +178,7 @@ export default class Axis extends baseAxis
         if( this.layoutType == "proportion" ){
             if( y >= this._min && y<= this._max ){
                 return;
-            }
+            } 
         };
 
         //如果y不在当前datasection范围内，那么就要重新绘制
