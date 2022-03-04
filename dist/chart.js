@@ -50,7 +50,7 @@ var Chart = /*#__PURE__*/function (_event$Dispatcher) {
     _this.componentModules = componentModules;
     _this._node = node;
     _this._data = data;
-    _this._opt = opt;
+    _this._opt = _this.polyfill(opt);
     _this.dataFrame = _this.initData(data, opt); //legend如果在top，就会把图表的padding.top修改，减去legend的height
 
     _this.padding = null; //node可能是意外外面一件准备好了canvax对象， 包括 stage  width height 等
@@ -102,9 +102,30 @@ var Chart = /*#__PURE__*/function (_event$Dispatcher) {
   }
 
   (0, _createClass2["default"])(Chart, [{
+    key: "polyfill",
+    value: function polyfill(opt) {
+      var _this2 = this;
+
+      var _loop = function _loop(compName) {
+        var comps = _.flatten([opt[compName]]);
+
+        comps.forEach(function (comp) {
+          var compModule = _this2.componentModules.get(compName, comp.type);
+
+          compModule.polyfill(comp);
+        });
+      };
+
+      for (var compName in opt) {
+        _loop(compName);
+      }
+
+      return opt;
+    }
+  }, {
     key: "init",
     value: function init() {
-      var _this2 = this;
+      var _this3 = this;
 
       var me = this; //init全部用 this._opt
 
@@ -118,8 +139,9 @@ var Chart = /*#__PURE__*/function (_event$Dispatcher) {
         _coord.init();
 
         me.components.push(_coord);
-      } //先依次init 处理 "theme", "coord", "graphs" 三个优先级最高的模块
+      }
 
+      ; //先依次init 处理 "theme", "coord", "graphs" 三个优先级最高的模块
 
       _.each(this.__highModules, function (compName) {
         if (!opt[compName]) return;
@@ -160,10 +182,10 @@ var Chart = /*#__PURE__*/function (_event$Dispatcher) {
       }); //PS: theme 组件优先级最高，在registerComponents之前已经加载过
 
 
-      var _loop = function _loop(_p) {
+      var _loop2 = function _loop2(_p) {
         //非coord graphs theme，其实后面也可以统一的
-        if (_.indexOf(_this2.__highModules, _p) == -1) {
-          var comps = _this2._opt[_p]; //所有的组件都按照数组方式处理，这里，组件里面就不需要再这样处理了
+        if (_.indexOf(_this3.__highModules, _p) == -1) {
+          var comps = _this3._opt[_p]; //所有的组件都按照数组方式处理，这里，组件里面就不需要再这样处理了
 
           if (!_.isArray(comps)) {
             comps = [comps];
@@ -184,7 +206,7 @@ var Chart = /*#__PURE__*/function (_event$Dispatcher) {
       };
 
       for (var _p in this._opt) {
-        _loop(_p);
+        _loop2(_p);
       }
 
       ;
@@ -855,24 +877,24 @@ var Chart = /*#__PURE__*/function (_event$Dispatcher) {
   }, {
     key: "_bindEvent",
     value: function _bindEvent() {
-      var _this3 = this;
+      var _this4 = this;
 
       if (this.__bindEvented) return;
       this.on(event.types.get(), function (e) {
         //先触发自己的事件
-        _this3.triggerEvent(e); //然后
+        _this4.triggerEvent(e); //然后
         //如果这个图表的tips组件有设置linkageName，
         //那么就寻找到所有的图表实例中有相同linkageName的图表，执行相应的事件
 
 
-        var tipsComp = _this3.getComponent({
+        var tipsComp = _this4.getComponent({
           name: "tips"
         });
 
         if (tipsComp && tipsComp.linkageName) {
           for (var c in _global["default"].instances) {
             var linkageChart = _global["default"].instances[c];
-            if (linkageChart == _this3) continue;
+            if (linkageChart == _this4) continue;
             var linkageChartTipsComp = linkageChart.getComponent({
               name: "tips"
             });

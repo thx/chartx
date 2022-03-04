@@ -111,15 +111,22 @@ var Component = /*#__PURE__*/function (_event$Dispatcher) {
     key: "registerComponent",
     value: function registerComponent(compModule, name, type) {
       return _global["default"].registerComponent(compModule, name, type);
-    } //global.getProps 中会用到
-
+    }
   }, {
     key: "_isComponentRoot",
     value: function _isComponentRoot() {
       return true;
+    } //global.getProps 中会用到
+
+  }, {
+    key: "polyfill",
+    value: function polyfill(opt) {
+      //所有组件可以提供一个静态方法， 就是用来做配置变动的向下兼容
+      return opt;
     }
   }]);
   return Component;
 }(event.Dispatcher);
 
-exports["default"] = Component;
+var _default = Component;
+exports["default"] = _default;

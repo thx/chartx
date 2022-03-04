@@ -335,6 +335,11 @@ var Tree = /*#__PURE__*/function (_GraphsBase) {
     key: "defaultProps",
     value: function defaultProps() {
       return {
+        field: {
+          detail: 'key字段设置',
+          documentation: '',
+          "default": null
+        },
         node: {
           detail: '单个节点的配置',
           propertys: {

@@ -15,11 +15,11 @@ class Force extends GraphsBase {
         return {
             keyField: {
                 detail: 'key字段',
-                default: 'key'
+                default: ''
             },
-            valueField: {
+            field: {
                 detail: 'value字段，node，link都公用这个字段',
-                default: 'value'
+                default: ''
             },
             node: {
                 detail: '单个节点的配置',
@@ -127,6 +127,15 @@ class Force extends GraphsBase {
         }
     }
 
+    static polyfill( opt ){
+        if( opt.valueField ){ 
+            //20220304 所有的graph都统一一个field
+            opt.field = opt.valueField;
+            delete opt.valueField;
+        }
+        return opt
+    }
+
     constructor(opt, app) {
         super(opt, app);
         this.type = "force";
@@ -184,7 +193,7 @@ class Force extends GraphsBase {
             let label  = this._getContent(rowData);
             let key = fields.length == 1 ? fields[0] : fields;
             
-            let value = rowData[ this.valueField ];
+            let value = rowData[ this.field ];
             
 
             let element = new Canvax.Display.Sprite({
@@ -194,6 +203,7 @@ class Force extends GraphsBase {
 
             let node = {
                 type: "force",
+                field: this.field,
                 iNode: i,
                 rowData: rowData,
                 key: key,
@@ -285,13 +295,13 @@ class Force extends GraphsBase {
         let me = this;
 
         let keyField   = this.keyField;
-        let valueField = this.valueField;
+        let field = this.field;
         let links = this.data.edges.map(d => {
             //source: "Napoleon", target: "Myriel", value: 1
             return {
                 source: d.source[ keyField ], 
                 target: d.target[ keyField ], 
-                value: d.rowData[ valueField ],
+                value: d.rowData[ field ],
                 nodeData : d
             }
         });

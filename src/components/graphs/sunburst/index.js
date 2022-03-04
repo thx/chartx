@@ -15,15 +15,15 @@ class sunburstGraphs extends GraphsBase
         return {
             keyField: {
                 detail: 'key字段',
-                default: 'name'
+                default: ''
             },
-            valueField: {
+            field: {
                 detail: 'value字段',
-                default: 'value'
+                default: ''
             },
-            parentField: {
+            parentKeyField: {
                 detail: 'parent字段',
-                default: 'parent'
+                default: ''
             },
             node: {
                 detail: '单个节点图形设置',
@@ -56,6 +56,10 @@ class sunburstGraphs extends GraphsBase
                 }
             }
         }
+    }
+
+    static polyfill( opt ){
+        return opt
     }
 
     constructor(opt, app)
@@ -102,13 +106,17 @@ class sunburstGraphs extends GraphsBase
             .size([2 * Math.PI, radius * radius])
             .value(function(d) {
                 //return 1; 
-                return  d[ me.valueField ] //d.size
+                return  d[ me.field ] //d.size
             });
 
 
         //安装深度分组
         let _treeData = this._tansTreeData();
         this.data = partition( _treeData , 0 );
+        
+        this.data.forEach( item => {
+            item.field = this.field;
+        });
 
         return this.data;
     }
@@ -136,8 +144,8 @@ class sunburstGraphs extends GraphsBase
         let treeData = {};
 
         let keyData = dataFrame.getFieldData( this.keyField );
-        let valueData = dataFrame.getFieldData( this.valueField );
-        let parentData = dataFrame.getFieldData( this.parentField ); //用parentField去找index
+        let valueData = dataFrame.getFieldData( this.field );
+        let parentData = dataFrame.getFieldData( this.parentKeyField ); //用parentField去找index
 
         function findChild( obj, parent , ki ){
             let parentKey = parent ? parent.name : undefined;

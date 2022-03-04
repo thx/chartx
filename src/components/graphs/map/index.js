@@ -424,7 +424,7 @@ class Map extends GraphsBase {
         let geoGraphs = trans(geoData, graphBBox, this.specialArea );
         geoGraphs.forEach(nodeData => {
 
-            let rowData = this.dataFrame.getRowDataOf({ adcode: nodeData.adcode });
+            let rowData = this.dataFrame.getRowDataOf({ adcode: nodeData[ this.field ] });
             if (rowData.length) {
                 nodeData.rowData = rowData[0];
             };
@@ -442,7 +442,7 @@ class Map extends GraphsBase {
                 path : nodeData.path
             };
             let nodePath = new Path({
-                id: 'path_' + nodeData.adcode,
+                id: 'path_' + nodeData[ this.field ],
                 hoverClone: false,
                 context: pathCtx
             });
@@ -491,10 +491,10 @@ class Map extends GraphsBase {
                     };
     
                     if ( e.type == 'mouseover' ) {
-                        me.focusAt( this.nodeData.adcode );
+                        me.focusAt( this.nodeData[ me.field ] );
                     };
                     if ( e.type == 'mouseout' ) {
-                        me.unfocusAt( this.nodeData.adcode );
+                        me.unfocusAt( this.nodeData[ me.field ] );
                     };
     
                     me.app.fire(e.type, e);

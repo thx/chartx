@@ -118,13 +118,14 @@ var Force = /*#__PURE__*/function (_GraphsBase) {
         var label = this._getContent(rowData);
 
         var key = fields.length == 1 ? fields[0] : fields;
-        var value = rowData[this.valueField];
+        var value = rowData[this.field];
         var element = new _canvax["default"].Display.Sprite({
           id: "nodeSp_" + key
         });
         this.graphsSp.addChild(element);
         var node = {
           type: "force",
+          field: this.field,
           iNode: i,
           rowData: rowData,
           key: key,
@@ -219,13 +220,13 @@ var Force = /*#__PURE__*/function (_GraphsBase) {
 
       var me = this;
       var keyField = this.keyField;
-      var valueField = this.valueField;
+      var field = this.field;
       var links = this.data.edges.map(function (d) {
         //source: "Napoleon", target: "Myriel", value: 1
         return {
           source: d.source[keyField],
           target: d.target[keyField],
-          value: d.rowData[valueField],
+          value: d.rowData[field],
           nodeData: d
         };
       });
@@ -422,11 +423,11 @@ var Force = /*#__PURE__*/function (_GraphsBase) {
       return {
         keyField: {
           detail: 'key字段',
-          "default": 'key'
+          "default": ''
         },
-        valueField: {
+        field: {
           detail: 'value字段，node，link都公用这个字段',
-          "default": 'value'
+          "default": ''
         },
         node: {
           detail: '单个节点的配置',
@@ -532,6 +533,17 @@ var Force = /*#__PURE__*/function (_GraphsBase) {
           }
         }
       };
+    }
+  }, {
+    key: "polyfill",
+    value: function polyfill(opt) {
+      if (opt.valueField) {
+        //20220304 所有的graph都统一一个field
+        opt.field = opt.valueField;
+        delete opt.valueField;
+      }
+
+      return opt;
     }
   }]);
   return Force;

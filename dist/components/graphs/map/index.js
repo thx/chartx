@@ -245,7 +245,7 @@ var Map = /*#__PURE__*/function (_GraphsBase) {
       var geoGraphs = (0, _trans["default"])(geoData, graphBBox, this.specialArea);
       geoGraphs.forEach(function (nodeData) {
         var rowData = _this3.dataFrame.getRowDataOf({
-          adcode: nodeData.adcode
+          adcode: nodeData[_this3.field]
         });
 
         if (rowData.length) {
@@ -265,7 +265,7 @@ var Map = /*#__PURE__*/function (_GraphsBase) {
           path: nodeData.path
         };
         var nodePath = new Path({
-          id: 'path_' + nodeData.adcode,
+          id: 'path_' + nodeData[_this3.field],
           hoverClone: false,
           context: pathCtx
         });
@@ -312,13 +312,13 @@ var Map = /*#__PURE__*/function (_GraphsBase) {
             };
 
             if (e.type == 'mouseover') {
-              me.focusAt(this.nodeData.adcode);
+              me.focusAt(this.nodeData[me.field]);
             }
 
             ;
 
             if (e.type == 'mouseout') {
-              me.unfocusAt(this.nodeData.adcode);
+              me.unfocusAt(this.nodeData[me.field]);
             }
 
             ;

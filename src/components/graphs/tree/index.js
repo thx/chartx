@@ -20,6 +20,11 @@ let Arrow   = Canvax.Shapes.Arrow;
 class Tree extends GraphsBase {
     static defaultProps() {
         return {
+            field: {
+                detail: 'key字段设置',
+                documentation: '',
+                default: null
+            },
             node: {
                 detail: '单个节点的配置',
                 propertys: {

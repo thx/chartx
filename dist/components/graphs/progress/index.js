@@ -389,6 +389,10 @@ var Progress = /*#__PURE__*/function (_GraphsBase) {
     key: "defaultProps",
     value: function defaultProps() {
       return {
+        field: {
+          detail: '字段配置',
+          "default": null
+        },
         node: {
           detail: '进度条设置',
           propertys: {

@@ -18,7 +18,7 @@ class sankeyGraphs extends GraphsBase
                 detail: 'key字段',
                 default: null
             },
-            valueField: {
+            field: {
                 detail: 'value字段',
                 default: 'value'
             },
@@ -98,6 +98,16 @@ class sankeyGraphs extends GraphsBase
             }
         }
     }
+
+    static polyfill( opt ){
+        if( opt.valueField ){ 
+            //20220304 所有的graph都统一一个field
+            opt.field = opt.valueField;
+            delete opt.valueField;
+        }
+        return opt
+    }
+
     constructor(opt, app)
     {
         super( opt, app );
@@ -142,7 +152,7 @@ class sankeyGraphs extends GraphsBase
         let nodes = [];
         let links = [];
         let keyDatas = me.dataFrame.getFieldData( me.keyField );
-        let valueDatas = me.dataFrame.getFieldData( me.valueField );
+        let valueDatas = me.dataFrame.getFieldData( me.field );
         let parentFields = me.dataFrame.getFieldData( me.parentField );
 
         let nodeMap = {}; //name:ind
@@ -218,6 +228,8 @@ class sankeyGraphs extends GraphsBase
         let nodes = this.data.nodes();
         let me = this;
         _.each(nodes, function(node, i) {
+
+            node.field = me.field;
            
             let nodeColor = me._getColor( me.node.fillStyle, node, i );
             let nodeEl = new Rect({
@@ -240,6 +252,9 @@ class sankeyGraphs extends GraphsBase
         let links = this.data.links();
         let me = this;
         _.each(links, function(link, i) {
+
+            
+
             let linkColor = me._getColor( me.line.strokeStyle, link , i);
             let d = me.data.link()(link);
         
@@ -273,10 +288,12 @@ class sankeyGraphs extends GraphsBase
 
                 //type给tips用
                 linkData.type = "sankey";
+                link.field = me.field;
+                link.name  = '__no__name'
 
                 e.eventInfo = {
                     trigger : me.node,
-                    title : linkData.source.name+" --<span style='position:relative;top:-0.5px;font-size:16px;left:-3px;'>></span> "+linkData.target.name,
+                    title : linkData.source.name+" <span style='display:inline-block;margin-left:4px;position:relative;top:-0.5px;font-size:16px;left:-3px;'>></span> "+linkData.target.name,
                     nodes : [ linkData ]
                 };
     

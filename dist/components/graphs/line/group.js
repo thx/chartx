@@ -69,11 +69,9 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
 
     _this._currPointList = []; //brokenline 动画中的当前状态
 
-    _this._bline = null; //设置默认的line.strokStyle 为 fieldConfig.color
+    _this._bline = null; //设置默认的color 为 fieldConfig.color
 
-    _this.line = {
-      strokeStyle: fieldConfig.color
-    };
+    _this.color = fieldConfig.color;
 
     _.extend(true, (0, _assertThisInitialized2["default"])(_this), (0, _tools.getDefaultProps)(LineGraphsGroup.defaultProps()), opt); //TODO group中得field不能直接用opt中得field， 必须重新设置， 
     //group中得field只有一个值，代表一条折线, 后面要扩展extend方法，可以控制过滤哪些key值不做extend
@@ -629,7 +627,7 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
         if (!lps) return; //创建一个线性渐变
 
         fill_gradient = (_me$ctx = me.ctx).createLinearGradient.apply(_me$ctx, (0, _toConsumableArray2["default"])(lps));
-        var areaStyle = me.area.fillStyle || me.color || me.line.strokeStyle;
+        var areaStyle = me.area.fillStyle || me.line.strokeStyle || me.color;
         var rgb = (0, _color.colorRgb)(areaStyle);
         var rgba0 = rgb.replace(')', ', ' + me._getProp(me.area.alpha[0]) + ')').replace('RGB', 'RGBA');
         fill_gradient.addColorStop(0, rgba0);
@@ -680,7 +678,7 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
 
       if (!this._opt.line || !this._opt.line.strokeStyle) {
         //如果用户没有配置line.strokeStyle，那么就用默认的
-        return this.line.strokeStyle;
+        return this.color;
       }
 
       ;
@@ -800,7 +798,7 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
       var iNode = 0; //这里不能和下面的a对等，以为list中有很多无效的节点
 
       for (var a = 0, al = list.length; a < al; a++) {
-        var _nodeColor = me._getColor(me.node.strokeStyle || me.color || me.line.strokeStyle, a);
+        var _nodeColor = me._getColor(me.node.strokeStyle || me.color, a);
 
         me.data[a].color = _nodeColor; //回写回data里，tips的是用的到
 

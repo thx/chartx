@@ -8045,6 +8045,7 @@ var chartx = (function () {
 	      var codeWithoutVariables = code.slice(0, range[0]) + code.slice(range[1]);
 	      return this._eval(codeWithoutVariables, 'options', 'variables', variables);
 	    } catch (e) {
+	      console.log('parse error');
 	      return {};
 	    }
 	  }
@@ -9185,18 +9186,25 @@ var chartx = (function () {
 	    key: "registerComponent",
 	    value: function registerComponent(compModule, name, type) {
 	      return _global["default"].registerComponent(compModule, name, type);
-	    } //global.getProps 中会用到
-
+	    }
 	  }, {
 	    key: "_isComponentRoot",
 	    value: function _isComponentRoot() {
 	      return true;
+	    } //global.getProps 中会用到
+
+	  }, {
+	    key: "polyfill",
+	    value: function polyfill(opt) {
+	      //所有组件可以提供一个静态方法， 就是用来做配置变动的向下兼容
+	      return opt;
 	    }
 	  }]);
 	  return Component;
 	}(event.Dispatcher);
 
-	exports["default"] = Component;
+	var _default = Component;
+	exports["default"] = _default;
 	});
 
 	unwrapExports(component);
@@ -9685,6 +9693,10 @@ var chartx = (function () {
 	        //coerce val to string
 	        if (typeof val !== 'string') {
 	            val += '';
+
+	            if (console.warn) {
+	                console.warn('Numeral.js: Value is not string. It has been co-erced to: ', val);
+	            }
 	        }
 
 	        //trim whitespaces from either sides
@@ -10329,10 +10341,12 @@ var chartx = (function () {
 	      var graphs = _.flatten([this.app._opt.graphs]);
 
 	      graphs.forEach(function (graph) {
-	        var graphFields = _.flatten([graph.field]);
+	        if (graph.field) {
+	          var graphFields = _.flatten([graph.field]);
 
-	        if (graphFields.length && _.flatten(fieldsArr).indexOf(graphFields[0]) == -1) {
-	          fieldsArr = fieldsArr.concat(graph.field);
+	          if (graphFields.length && _.flatten(fieldsArr).indexOf(graphFields[0]) == -1) {
+	            fieldsArr = fieldsArr.concat(graph.field);
+	          }
 	        }
 	      });
 
@@ -10755,7 +10769,7 @@ var chartx = (function () {
 	    _this.componentModules = componentModules;
 	    _this._node = node;
 	    _this._data = data;
-	    _this._opt = opt;
+	    _this._opt = _this.polyfill(opt);
 	    _this.dataFrame = _this.initData(data, opt); //legend如果在top，就会把图表的padding.top修改，减去legend的height
 
 	    _this.padding = null; //node可能是意外外面一件准备好了canvax对象， 包括 stage  width height 等
@@ -10805,9 +10819,30 @@ var chartx = (function () {
 	  }
 
 	  (0, _createClass2["default"])(Chart, [{
+	    key: "polyfill",
+	    value: function polyfill(opt) {
+	      var _this2 = this;
+
+	      var _loop = function _loop(compName) {
+	        var comps = _.flatten([opt[compName]]);
+
+	        comps.forEach(function (comp) {
+	          var compModule = _this2.componentModules.get(compName, comp.type);
+
+	          compModule.polyfill(comp);
+	        });
+	      };
+
+	      for (var compName in opt) {
+	        _loop(compName);
+	      }
+
+	      return opt;
+	    }
+	  }, {
 	    key: "init",
 	    value: function init() {
-	      var _this2 = this;
+	      var _this3 = this;
 
 	      var me = this; //init全部用 this._opt
 
@@ -10821,8 +10856,7 @@ var chartx = (function () {
 	        _coord.init();
 
 	        me.components.push(_coord);
-	      } //先依次init 处理 "theme", "coord", "graphs" 三个优先级最高的模块
-
+	      }
 
 	      _.each(this.__highModules, function (compName) {
 	        if (!opt[compName]) return;
@@ -10857,10 +10891,10 @@ var chartx = (function () {
 	      }); //PS: theme 组件优先级最高，在registerComponents之前已经加载过
 
 
-	      var _loop = function _loop(_p) {
+	      var _loop2 = function _loop2(_p) {
 	        //非coord graphs theme，其实后面也可以统一的
-	        if (_.indexOf(_this2.__highModules, _p) == -1) {
-	          var comps = _this2._opt[_p]; //所有的组件都按照数组方式处理，这里，组件里面就不需要再这样处理了
+	        if (_.indexOf(_this3.__highModules, _p) == -1) {
+	          var comps = _this3._opt[_p]; //所有的组件都按照数组方式处理，这里，组件里面就不需要再这样处理了
 
 	          if (!_.isArray(comps)) {
 	            comps = [comps];
@@ -10879,7 +10913,7 @@ var chartx = (function () {
 	      };
 
 	      for (var _p in this._opt) {
-	        _loop(_p);
+	        _loop2(_p);
 	      }
 	    }
 	  }, {
@@ -11478,24 +11512,24 @@ var chartx = (function () {
 	  }, {
 	    key: "_bindEvent",
 	    value: function _bindEvent() {
-	      var _this3 = this;
+	      var _this4 = this;
 
 	      if (this.__bindEvented) return;
 	      this.on(event.types.get(), function (e) {
 	        //先触发自己的事件
-	        _this3.triggerEvent(e); //然后
+	        _this4.triggerEvent(e); //然后
 	        //如果这个图表的tips组件有设置linkageName，
 	        //那么就寻找到所有的图表实例中有相同linkageName的图表，执行相应的事件
 
 
-	        var tipsComp = _this3.getComponent({
+	        var tipsComp = _this4.getComponent({
 	          name: "tips"
 	        });
 
 	        if (tipsComp && tipsComp.linkageName) {
 	          for (var c in _global["default"].instances) {
 	            var linkageChart = _global["default"].instances[c];
-	            if (linkageChart == _this3) continue;
+	            if (linkageChart == _this4) continue;
 	            var linkageChartTipsComp = linkageChart.getComponent({
 	              name: "tips"
 	            });
@@ -18178,11 +18212,9 @@ var chartx = (function () {
 
 	    _this._currPointList = []; //brokenline 动画中的当前状态
 
-	    _this._bline = null; //设置默认的line.strokStyle 为 fieldConfig.color
+	    _this._bline = null; //设置默认的color 为 fieldConfig.color
 
-	    _this.line = {
-	      strokeStyle: fieldConfig.color
-	    };
+	    _this.color = fieldConfig.color;
 
 	    _.extend(true, (0, _assertThisInitialized2["default"])(_this), (0, tools.getDefaultProps)(LineGraphsGroup.defaultProps()), opt); //TODO group中得field不能直接用opt中得field， 必须重新设置， 
 	    //group中得field只有一个值，代表一条折线, 后面要扩展extend方法，可以控制过滤哪些key值不做extend
@@ -18686,7 +18718,7 @@ var chartx = (function () {
 	        if (!lps) return; //创建一个线性渐变
 
 	        fill_gradient = (_me$ctx = me.ctx).createLinearGradient.apply(_me$ctx, (0, _toConsumableArray2["default"])(lps));
-	        var areaStyle = me.area.fillStyle || me.color || me.line.strokeStyle;
+	        var areaStyle = me.area.fillStyle || me.line.strokeStyle || me.color;
 	        var rgb = (0, color.colorRgb)(areaStyle);
 	        var rgba0 = rgb.replace(')', ', ' + me._getProp(me.area.alpha[0]) + ')').replace('RGB', 'RGBA');
 	        fill_gradient.addColorStop(0, rgba0);
@@ -18733,7 +18765,7 @@ var chartx = (function () {
 
 	      if (!this._opt.line || !this._opt.line.strokeStyle) {
 	        //如果用户没有配置line.strokeStyle，那么就用默认的
-	        return this.line.strokeStyle;
+	        return this.color;
 	      }
 	      var lineargradient = this._opt.line.strokeStyle.lineargradient;
 
@@ -18847,7 +18879,7 @@ var chartx = (function () {
 	      var iNode = 0; //这里不能和下面的a对等，以为list中有很多无效的节点
 
 	      for (var a = 0, al = list.length; a < al; a++) {
-	        var _nodeColor = me._getColor(me.node.strokeStyle || me.color || me.line.strokeStyle, a);
+	        var _nodeColor = me._getColor(me.node.strokeStyle || me.color, a);
 
 	        me.data[a].color = _nodeColor; //回写回data里，tips的是用的到
 
@@ -27901,6 +27933,7 @@ var chartx = (function () {
 	      yRange = bounds.yRange;
 
 	  if (xRange.max == xRange.min || yRange.max == yRange.min) {
+	    console.log("not scaling solution: zero size detected");
 	    return solution;
 	  }
 
@@ -28117,6 +28150,7 @@ var chartx = (function () {
 	        var rowData = me.dataFrame.getRowDataAt(i);
 	        var obj = {
 	          type: "venn",
+	          field: me.field,
 	          iNode: i,
 	          nodeId: null,
 	          rowData: rowData,
@@ -28149,7 +28183,7 @@ var chartx = (function () {
 	            }
 	          }
 
-	          if (p == me.valueField) {
+	          if (p == me.field) {
 	            obj.size = val;
 	            obj.value = val;
 	          }
@@ -28393,13 +28427,13 @@ var chartx = (function () {
 	    key: "defaultProps",
 	    value: function defaultProps() {
 	      return {
+	        field: {
+	          detail: 'value字段',
+	          "default": 'value'
+	        },
 	        keyField: {
 	          detail: 'key字段',
 	          "default": 'name'
-	        },
-	        valueField: {
-	          detail: 'value字段',
-	          "default": 'value'
 	        },
 	        node: {
 	          detail: '单个节点配置',
@@ -28483,6 +28517,17 @@ var chartx = (function () {
 	        }
 	      };
 	    }
+	  }, {
+	    key: "polyfill",
+	    value: function polyfill(opt) {
+	      if (opt.valueField) {
+	        //20220304 所有的graph都统一一个field
+	        opt.field = opt.valueField;
+	        delete opt.valueField;
+	      }
+
+	      return opt;
+	    }
 	  }]);
 	  return VennGraphs;
 	}(_index["default"]); //venn computeTextCentres 需要的相关代码 begin
@@ -28547,7 +28592,9 @@ var chartx = (function () {
 	    var centre = computeTextCentre(interior, exterior);
 	    ret[area] = centre;
 
-	    if (centre.disjoint && areas[i].size > 0) ;
+	    if (centre.disjoint && areas[i].size > 0) {
+	      console.log("WARNING: area " + area + " not represented on screen");
+	    }
 	  }
 
 	  return ret;
@@ -29138,16 +29185,21 @@ var chartx = (function () {
 	  }, {
 	    key: "_trimGraphs",
 	    value: function _trimGraphs() {
+	      var _this2 = this;
+
 	      var me = this;
 	      var radius = parseInt(Math.min(this.width, this.height) / 2);
 	      var partition = (0, _partition["default"])().sort(null).size([2 * Math.PI, radius * radius]).value(function (d) {
 	        //return 1; 
-	        return d[me.valueField]; //d.size
+	        return d[me.field]; //d.size
 	      }); //安装深度分组
 
 	      var _treeData = this._tansTreeData();
 
 	      this.data = partition(_treeData, 0);
+	      this.data.forEach(function (item) {
+	        item.field = _this2.field;
+	      });
 	      return this.data;
 	    }
 	  }, {
@@ -29177,8 +29229,8 @@ var chartx = (function () {
 	      var dataFrame = this.dataFrame;
 	      var treeData = {};
 	      var keyData = dataFrame.getFieldData(this.keyField);
-	      var valueData = dataFrame.getFieldData(this.valueField);
-	      var parentData = dataFrame.getFieldData(this.parentField); //用parentField去找index
+	      var valueData = dataFrame.getFieldData(this.field);
+	      var parentData = dataFrame.getFieldData(this.parentKeyField); //用parentField去找index
 
 	      function findChild(obj, parent, ki) {
 	        var parentKey = parent ? parent.name : undefined;
@@ -29362,15 +29414,15 @@ var chartx = (function () {
 	      return {
 	        keyField: {
 	          detail: 'key字段',
-	          "default": 'name'
+	          "default": ''
 	        },
-	        valueField: {
+	        field: {
 	          detail: 'value字段',
-	          "default": 'value'
+	          "default": ''
 	        },
-	        parentField: {
+	        parentKeyField: {
 	          detail: 'parent字段',
-	          "default": 'parent'
+	          "default": ''
 	        },
 	        node: {
 	          detail: '单个节点图形设置',
@@ -29403,6 +29455,11 @@ var chartx = (function () {
 	          }
 	        }
 	      };
+	    }
+	  }, {
+	    key: "polyfill",
+	    value: function polyfill(opt) {
+	      return opt;
 	    }
 	  }]);
 	  return sunburstGraphs;
@@ -30093,7 +30150,7 @@ var chartx = (function () {
 	      var nodes = [];
 	      var links = [];
 	      var keyDatas = me.dataFrame.getFieldData(me.keyField);
-	      var valueDatas = me.dataFrame.getFieldData(me.valueField);
+	      var valueDatas = me.dataFrame.getFieldData(me.field);
 	      var parentFields = me.dataFrame.getFieldData(me.parentField);
 	      var nodeMap = {}; //name:ind
 
@@ -30171,6 +30228,8 @@ var chartx = (function () {
 	      var me = this;
 
 	      _.each(nodes, function (node, i) {
+	        node.field = me.field;
+
 	        var nodeColor = me._getColor(me.node.fillStyle, node, i);
 
 	        var nodeEl = new Rect({
@@ -30226,9 +30285,11 @@ var chartx = (function () {
 	          var linkData = this.link; //type给tips用
 
 	          linkData.type = "sankey";
+	          link.field = me.field;
+	          link.name = '__no__name';
 	          e.eventInfo = {
 	            trigger: me.node,
-	            title: linkData.source.name + " --<span style='position:relative;top:-0.5px;font-size:16px;left:-3px;'>></span> " + linkData.target.name,
+	            title: linkData.source.name + " <span style='display:inline-block;margin-left:4px;position:relative;top:-0.5px;font-size:16px;left:-3px;'>></span> " + linkData.target.name,
 	            nodes: [linkData]
 	          }; //fire到root上面去的是为了让root去处理tips
 
@@ -30285,7 +30346,7 @@ var chartx = (function () {
 	          detail: 'key字段',
 	          "default": null
 	        },
-	        valueField: {
+	        field: {
 	          detail: 'value字段',
 	          "default": 'value'
 	        },
@@ -30364,6 +30425,17 @@ var chartx = (function () {
 	          }
 	        }
 	      };
+	    }
+	  }, {
+	    key: "polyfill",
+	    value: function polyfill(opt) {
+	      if (opt.valueField) {
+	        //20220304 所有的graph都统一一个field
+	        opt.field = opt.valueField;
+	        delete opt.valueField;
+	      }
+
+	      return opt;
 	    }
 	  }]);
 	  return sankeyGraphs;
@@ -30735,6 +30807,10 @@ var chartx = (function () {
 	    key: "defaultProps",
 	    value: function defaultProps() {
 	      return {
+	        field: {
+	          detail: '字段配置',
+	          "default": null
+	        },
 	        node: {
 	          detail: '进度条设置',
 	          propertys: {
@@ -30927,6 +31003,7 @@ var chartx = (function () {
 	  var label = options.node && options.node.content && options.node.content.field;
 
 	  if (!checkDataIsJson(data, key, childrenKey)) {
+	    console.error('该数据不能正确绘制，请提供数组对象形式的数据！');
 	    return result;
 	  }
 	  var childrens = [];
@@ -34704,6 +34781,7 @@ var chartx = (function () {
 	        try {
 	          return fn();
 	        } finally {
+	          console.log(name + " time: " + (_.now() - start) + "ms");
 	        }
 	      }
 
@@ -44479,6 +44557,7 @@ var chartx = (function () {
 	          }
 
 	          if (e.type == "wheel") {
+	            console.log(_deltaY, e.deltaY);
 
 	            if (Math.abs(e.deltaY) > Math.abs(_deltaY)) {
 	              _deltaY = e.deltaY;
@@ -44878,6 +44957,7 @@ var chartx = (function () {
 	      var me = this;
 
 	      _.each(this.data.edges, function (edge) {
+	        console.log(edge.points);
 	        var key = edge.key.join('_');
 
 	        if (me.line.isTree && edge.points.length == 3) {
@@ -46506,6 +46586,11 @@ var chartx = (function () {
 	    key: "defaultProps",
 	    value: function defaultProps() {
 	      return {
+	        field: {
+	          detail: 'key字段设置',
+	          documentation: '',
+	          "default": null
+	        },
 	        node: {
 	          detail: '单个节点的配置',
 	          propertys: {
@@ -47991,13 +48076,14 @@ var chartx = (function () {
 	        var label = this._getContent(rowData);
 
 	        var key = fields.length == 1 ? fields[0] : fields;
-	        var value = rowData[this.valueField];
+	        var value = rowData[this.field];
 	        var element = new _canvax["default"].Display.Sprite({
 	          id: "nodeSp_" + key
 	        });
 	        this.graphsSp.addChild(element);
 	        var node = {
 	          type: "force",
+	          field: this.field,
 	          iNode: i,
 	          rowData: rowData,
 	          key: key,
@@ -48088,13 +48174,13 @@ var chartx = (function () {
 
 	      var me = this;
 	      var keyField = this.keyField;
-	      var valueField = this.valueField;
+	      var field = this.field;
 	      var links = this.data.edges.map(function (d) {
 	        //source: "Napoleon", target: "Myriel", value: 1
 	        return {
 	          source: d.source[keyField],
 	          target: d.target[keyField],
-	          value: d.rowData[valueField],
+	          value: d.rowData[field],
 	          nodeData: d
 	        };
 	      });
@@ -48277,11 +48363,11 @@ var chartx = (function () {
 	      return {
 	        keyField: {
 	          detail: 'key字段',
-	          "default": 'key'
+	          "default": ''
 	        },
-	        valueField: {
+	        field: {
 	          detail: 'value字段，node，link都公用这个字段',
-	          "default": 'value'
+	          "default": ''
 	        },
 	        node: {
 	          detail: '单个节点的配置',
@@ -48387,6 +48473,17 @@ var chartx = (function () {
 	          }
 	        }
 	      };
+	    }
+	  }, {
+	    key: "polyfill",
+	    value: function polyfill(opt) {
+	      if (opt.valueField) {
+	        //20220304 所有的graph都统一一个field
+	        opt.field = opt.valueField;
+	        delete opt.valueField;
+	      }
+
+	      return opt;
 	    }
 	  }]);
 	  return Force;
@@ -49133,7 +49230,7 @@ var chartx = (function () {
 	      var geoGraphs = (0, _trans["default"])(geoData, graphBBox, this.specialArea);
 	      geoGraphs.forEach(function (nodeData) {
 	        var rowData = _this3.dataFrame.getRowDataOf({
-	          adcode: nodeData.adcode
+	          adcode: nodeData[_this3.field]
 	        });
 
 	        if (rowData.length) {
@@ -49151,7 +49248,7 @@ var chartx = (function () {
 	          path: nodeData.path
 	        };
 	        var nodePath = new Path({
-	          id: 'path_' + nodeData.adcode,
+	          id: 'path_' + nodeData[_this3.field],
 	          hoverClone: false,
 	          context: pathCtx
 	        });
@@ -49198,11 +49295,11 @@ var chartx = (function () {
 	            };
 
 	            if (e.type == 'mouseover') {
-	              me.focusAt(this.nodeData.adcode);
+	              me.focusAt(this.nodeData[me.field]);
 	            }
 
 	            if (e.type == 'mouseout') {
-	              me.unfocusAt(this.nodeData.adcode);
+	              me.unfocusAt(this.nodeData[me.field]);
 	            }
 	            me.app.fire(e.type, e);
 	          });
@@ -49301,6 +49398,7 @@ var chartx = (function () {
 	      this._setNodeStyle(_path, 'select');
 
 	      nodeData.selected = true;
+	      console.log("select:true");
 	    }
 	  }, {
 	    key: "unselectAt",
@@ -49314,6 +49412,7 @@ var chartx = (function () {
 	      this._setNodeStyle(_path);
 
 	      geoGraph.selected = false;
+	      console.log("select:false");
 
 	      if (geoGraph.focused) {
 	        this.focusAt(adcode);
@@ -50745,6 +50844,7 @@ var chartx = (function () {
 
 	            _.extend(app.dataFrame.range, range);
 	          }
+	          console.log(range);
 	          app.resetData(null, trigger);
 	          app.fire("dataZoomDragIng");
 	        },
@@ -52025,6 +52125,7 @@ var chartx = (function () {
 	  (0, _createClass2["default"])(Tips, [{
 	    key: "show",
 	    value: function show(e) {
+	      console.log('tips show');
 	      if (!this.enabled) return;
 
 	      if (e.eventInfo) {
@@ -52062,6 +52163,7 @@ var chartx = (function () {
 	  }, {
 	    key: "move",
 	    value: function move(e) {
+	      console.log('tips move');
 	      if (!this.enabled) return;
 
 	      if (e.eventInfo) {
@@ -52084,6 +52186,7 @@ var chartx = (function () {
 	  }, {
 	    key: "hide",
 	    value: function hide(e) {
+	      console.log('tips hide');
 
 	      this._hide(e);
 
@@ -52223,7 +52326,7 @@ var chartx = (function () {
 	          var fieldConfig = _coord.getFieldConfig(node.field); //node.name优先级最高，是因为像 pie funnel 等一维图表，会有name属性
 
 
-	          name = node.name || fieldConfig.name || node.field;
+	          name = node.name || node.label || fieldConfig.name || node.field;
 	          value = fieldConfig.getFormatValue(node.value);
 
 	          if (!hasValue) {
@@ -52232,7 +52335,11 @@ var chartx = (function () {
 	          }
 
 	          str += "<tr>";
-	          str += "<td style='padding:0px 6px;color:" + (!hasValue ? '#ddd' : '#a0a0a0;') + "'>" + name + "</td>";
+
+	          if (name != '__no__name') {
+	            str += "<td style='padding:0px 6px;color:" + (!hasValue ? '#ddd' : '#a0a0a0;') + "'>" + name + "</td>";
+	          }
+
 	          str += "<td style='padding:0px 6px;font-weight:bold;'><span style='color:" + style + "'>" + value + "</span></td>";
 	          str += "</tr>";
 	        });
@@ -55275,7 +55382,7 @@ var chartx = (function () {
 	}
 
 	var chartx = {
-	  version: '1.1.67',
+	  version: '1.1.68',
 	  options: {}
 	};
 

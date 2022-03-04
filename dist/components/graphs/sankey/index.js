@@ -87,7 +87,7 @@ var sankeyGraphs = /*#__PURE__*/function (_GraphsBase) {
       var nodes = [];
       var links = [];
       var keyDatas = me.dataFrame.getFieldData(me.keyField);
-      var valueDatas = me.dataFrame.getFieldData(me.valueField);
+      var valueDatas = me.dataFrame.getFieldData(me.field);
       var parentFields = me.dataFrame.getFieldData(me.parentField);
       var nodeMap = {}; //name:ind
 
@@ -169,6 +169,8 @@ var sankeyGraphs = /*#__PURE__*/function (_GraphsBase) {
       var me = this;
 
       _.each(nodes, function (node, i) {
+        node.field = me.field;
+
         var nodeColor = me._getColor(me.node.fillStyle, node, i);
 
         var nodeEl = new Rect({
@@ -230,9 +232,11 @@ var sankeyGraphs = /*#__PURE__*/function (_GraphsBase) {
           var linkData = this.link; //type给tips用
 
           linkData.type = "sankey";
+          link.field = me.field;
+          link.name = '__no__name';
           e.eventInfo = {
             trigger: me.node,
-            title: linkData.source.name + " --<span style='position:relative;top:-0.5px;font-size:16px;left:-3px;'>></span> " + linkData.target.name,
+            title: linkData.source.name + " <span style='display:inline-block;margin-left:4px;position:relative;top:-0.5px;font-size:16px;left:-3px;'>></span> " + linkData.target.name,
             nodes: [linkData]
           }; //fire到root上面去的是为了让root去处理tips
 
@@ -291,7 +295,7 @@ var sankeyGraphs = /*#__PURE__*/function (_GraphsBase) {
           detail: 'key字段',
           "default": null
         },
-        valueField: {
+        field: {
           detail: 'value字段',
           "default": 'value'
         },
@@ -370,6 +374,17 @@ var sankeyGraphs = /*#__PURE__*/function (_GraphsBase) {
           }
         }
       };
+    }
+  }, {
+    key: "polyfill",
+    value: function polyfill(opt) {
+      if (opt.valueField) {
+        //20220304 所有的graph都统一一个field
+        opt.field = opt.valueField;
+        delete opt.valueField;
+      }
+
+      return opt;
     }
   }]);
   return sankeyGraphs;

@@ -5,7 +5,7 @@ import {getDefaultProps} from "../utils/tools"
 let { event, _ } = Canvax;
 
 
-export default class Component extends event.Dispatcher
+class Component extends event.Dispatcher
 {
     static defaultProps(){
         return {
@@ -20,8 +20,11 @@ export default class Component extends event.Dispatcher
         return global.registerComponent( compModule, name, type );
     }
 
-    //global.getProps 中会用到
-    static _isComponentRoot(){ return true }
+    static _isComponentRoot(){ return true } //global.getProps 中会用到
+
+    static polyfill( opt ){//所有组件可以提供一个静态方法， 就是用来做配置变动的向下兼容
+         return opt 
+    } 
 
     constructor(opt, app)
     {
@@ -50,41 +53,27 @@ export default class Component extends event.Dispatcher
         
     }
 
-    init( opt, data )
-    {
-              
-    }
+    init( opt, data ){}
 
-    draw()
-    {
-
-    }
+    draw(){}
 
     //组件的销毁
-    destroy()
-    {
+    destroy(){}
 
-    }
-
-    reset()
-    {
-        
-    }
+    reset(){}
 
     // resetData(){
     //     console.log( ( this.type || '' ) + '暂无resetData的实现' );
     // }
 
-    setPosition( pos )
-    {
+    setPosition( pos ){
         !pos && ( pos = this.pos );
         pos.x && (this.sprite.context.x = pos.x);
         pos.y && (this.sprite.context.y = pos.y);
     }
 
-    layout()
-    {
-
-    }
+    layout(){}
     
 }
+
+export default Component

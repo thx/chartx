@@ -206,10 +206,8 @@ export default class LineGraphsGroup extends event.Dispatcher
         this._currPointList = []; //brokenline 动画中的当前状态
         this._bline = null;
 
-        //设置默认的line.strokStyle 为 fieldConfig.color
-        this.line = {
-            strokeStyle : fieldConfig.color
-        };
+        //设置默认的color 为 fieldConfig.color
+        this.color = fieldConfig.color;
 
         _.extend(true, this, getDefaultProps( LineGraphsGroup.defaultProps() ), opt );
 
@@ -676,8 +674,6 @@ export default class LineGraphsGroup extends event.Dispatcher
 
         let _fillStyle;
 
-        
-
         if ( _.isArray(me.area.alpha) ) {
             
             //alpha如果是数组，那么就是渐变背景，那么就至少要有两个值
@@ -696,7 +692,7 @@ export default class LineGraphsGroup extends event.Dispatcher
             //创建一个线性渐变
             fill_gradient = me.ctx.createLinearGradient( ...lps );
 
-            let areaStyle = me.area.fillStyle || me.color || me.line.strokeStyle;
+            let areaStyle = me.area.fillStyle || me.line.strokeStyle || me.color;
             let rgb = colorRgb( areaStyle );
             let rgba0 = rgb.replace(')', ', ' + me._getProp(me.area.alpha[0]) + ')').replace('RGB', 'RGBA');
             fill_gradient.addColorStop(0, rgba0);
@@ -741,7 +737,7 @@ export default class LineGraphsGroup extends event.Dispatcher
         let _style
         if( !this._opt.line || !this._opt.line.strokeStyle ){
             //如果用户没有配置line.strokeStyle，那么就用默认的
-            return this.line.strokeStyle;
+            return this.color;
         };
 
         let lineargradient = this._opt.line.strokeStyle.lineargradient;
@@ -852,7 +848,7 @@ export default class LineGraphsGroup extends event.Dispatcher
         let iNode = 0; //这里不能和下面的a对等，以为list中有很多无效的节点
         for (let a = 0, al = list.length; a < al; a++) {
 
-            let _nodeColor = me._getColor( (me.node.strokeStyle || me.color || me.line.strokeStyle), a );
+            let _nodeColor = me._getColor( (me.node.strokeStyle || me.color), a );
             me.data[a].color = _nodeColor; //回写回data里，tips的是用的到
 
             let nodeEnabled = me.node.enabled;

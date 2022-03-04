@@ -187,6 +187,7 @@ var VennGraphs = /*#__PURE__*/function (_GraphsBase) {
         var rowData = me.dataFrame.getRowDataAt(i);
         var obj = {
           type: "venn",
+          field: me.field,
           iNode: i,
           nodeId: null,
           rowData: rowData,
@@ -225,7 +226,7 @@ var VennGraphs = /*#__PURE__*/function (_GraphsBase) {
 
           ;
 
-          if (p == me.valueField) {
+          if (p == me.field) {
             obj.size = val;
             obj.value = val;
           }
@@ -489,13 +490,13 @@ var VennGraphs = /*#__PURE__*/function (_GraphsBase) {
     key: "defaultProps",
     value: function defaultProps() {
       return {
+        field: {
+          detail: 'value字段',
+          "default": 'value'
+        },
         keyField: {
           detail: 'key字段',
           "default": 'name'
-        },
-        valueField: {
-          detail: 'value字段',
-          "default": 'value'
         },
         node: {
           detail: '单个节点配置',
@@ -578,6 +579,17 @@ var VennGraphs = /*#__PURE__*/function (_GraphsBase) {
           }
         }
       };
+    }
+  }, {
+    key: "polyfill",
+    value: function polyfill(opt) {
+      if (opt.valueField) {
+        //20220304 所有的graph都统一一个field
+        opt.field = opt.valueField;
+        delete opt.valueField;
+      }
+
+      return opt;
     }
   }]);
   return VennGraphs;

@@ -115,9 +115,11 @@ class coordBase extends Component
         
         let graphs = _.flatten( [this.app._opt.graphs] );
         graphs.forEach( graph => {
-            let graphFields = _.flatten( [graph.field] );
-            if( graphFields.length && _.flatten(fieldsArr).indexOf( graphFields[0] ) == -1  ){
-                fieldsArr = fieldsArr.concat( graph.field );
+            if( graph.field ){
+                let graphFields = _.flatten( [graph.field] );
+                if( graphFields.length && _.flatten(fieldsArr).indexOf( graphFields[0] ) == -1  ){
+                    fieldsArr = fieldsArr.concat( graph.field );
+                }
             }
         }); 
         

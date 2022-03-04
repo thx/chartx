@@ -124,10 +124,12 @@ var coordBase = /*#__PURE__*/function (_Component) {
       var graphs = _.flatten([this.app._opt.graphs]);
 
       graphs.forEach(function (graph) {
-        var graphFields = _.flatten([graph.field]);
+        if (graph.field) {
+          var graphFields = _.flatten([graph.field]);
 
-        if (graphFields.length && _.flatten(fieldsArr).indexOf(graphFields[0]) == -1) {
-          fieldsArr = fieldsArr.concat(graph.field);
+          if (graphFields.length && _.flatten(fieldsArr).indexOf(graphFields[0]) == -1) {
+            fieldsArr = fieldsArr.concat(graph.field);
+          }
         }
       });
 

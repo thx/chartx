@@ -80,16 +80,21 @@ var sunburstGraphs = /*#__PURE__*/function (_GraphsBase) {
   }, {
     key: "_trimGraphs",
     value: function _trimGraphs() {
+      var _this2 = this;
+
       var me = this;
       var radius = parseInt(Math.min(this.width, this.height) / 2);
       var partition = (0, _partition["default"])().sort(null).size([2 * Math.PI, radius * radius]).value(function (d) {
         //return 1; 
-        return d[me.valueField]; //d.size
+        return d[me.field]; //d.size
       }); //安装深度分组
 
       var _treeData = this._tansTreeData();
 
       this.data = partition(_treeData, 0);
+      this.data.forEach(function (item) {
+        item.field = _this2.field;
+      });
       return this.data;
     }
   }, {
@@ -119,8 +124,8 @@ var sunburstGraphs = /*#__PURE__*/function (_GraphsBase) {
       var dataFrame = this.dataFrame;
       var treeData = {};
       var keyData = dataFrame.getFieldData(this.keyField);
-      var valueData = dataFrame.getFieldData(this.valueField);
-      var parentData = dataFrame.getFieldData(this.parentField); //用parentField去找index
+      var valueData = dataFrame.getFieldData(this.field);
+      var parentData = dataFrame.getFieldData(this.parentKeyField); //用parentField去找index
 
       function findChild(obj, parent, ki) {
         var parentKey = parent ? parent.name : undefined;
@@ -320,15 +325,15 @@ var sunburstGraphs = /*#__PURE__*/function (_GraphsBase) {
       return {
         keyField: {
           detail: 'key字段',
-          "default": 'name'
+          "default": ''
         },
-        valueField: {
+        field: {
           detail: 'value字段',
-          "default": 'value'
+          "default": ''
         },
-        parentField: {
+        parentKeyField: {
           detail: 'parent字段',
-          "default": 'parent'
+          "default": ''
         },
         node: {
           detail: '单个节点图形设置',
@@ -361,6 +366,11 @@ var sunburstGraphs = /*#__PURE__*/function (_GraphsBase) {
           }
         }
       };
+    }
+  }, {
+    key: "polyfill",
+    value: function polyfill(opt) {
+      return opt;
     }
   }]);
   return sunburstGraphs;

@@ -136,7 +136,9 @@ var data = [
 var options = {
     graphs : {
         type  : "sunburst",
-        keyField : "name"
+        field:  "value",
+        keyField : "name",
+        parentKeyField: "parent"
     },
     tips : {}
 };

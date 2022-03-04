@@ -306,7 +306,7 @@ var Tips = /*#__PURE__*/function (_Component) {
           var fieldConfig = _coord.getFieldConfig(node.field); //node.name优先级最高，是因为像 pie funnel 等一维图表，会有name属性
 
 
-          name = node.name || fieldConfig.name || node.field;
+          name = node.name || node.label || fieldConfig.name || node.field;
           value = fieldConfig.getFormatValue(node.value);
 
           if (!hasValue) {
@@ -315,7 +315,11 @@ var Tips = /*#__PURE__*/function (_Component) {
           }
 
           str += "<tr>";
-          str += "<td style='padding:0px 6px;color:" + (!hasValue ? '#ddd' : '#a0a0a0;') + "'>" + name + "</td>";
+
+          if (name != '__no__name') {
+            str += "<td style='padding:0px 6px;color:" + (!hasValue ? '#ddd' : '#a0a0a0;') + "'>" + name + "</td>";
+          }
+
           str += "<td style='padding:0px 6px;font-weight:bold;'><span style='color:" + style + "'>" + value + "</span></td>";
           str += "</tr>";
         });

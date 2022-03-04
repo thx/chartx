@@ -19,7 +19,7 @@ class Chart extends event.Dispatcher
      
         this._node = node;
         this._data = data;
-        this._opt = opt;
+        this._opt = this.polyfill(opt);
   
         this.dataFrame = this.initData( data , opt );
 
@@ -70,6 +70,18 @@ class Chart extends event.Dispatcher
         this.init();
     }
 
+    polyfill( opt ){
+        for( let compName in opt ){
+            let comps = _.flatten([ opt[compName] ]);
+            comps.forEach( comp => {
+                let compModule = this.componentModules.get(compName, comp.type);
+                compModule.polyfill( comp );
+            });
+        }
+        
+        return opt;
+    }
+
     init()
     {
         let me = this;
@@ -85,7 +97,7 @@ class Chart extends event.Dispatcher
             let _coord = new Coord( {}, me );
             _coord.init();
             me.components.push( _coord );
-        }
+        };
 
         //先依次init 处理 "theme", "coord", "graphs" 三个优先级最高的模块
         _.each( this.__highModules, function( compName ){
@@ -98,14 +110,21 @@ class Chart extends event.Dispatcher
             };
             
             _.each( comps, function( comp ){
+            
                 if( //没有type的coord和没有field(or keyField)的graphs，都无效，不要创建该组件
                     //关系图中是keyField
                     //(compName == "coord" && !comp.type ) || 
-                    (compName == "graphs" && !comp.field && !comp.keyField && !comp.adcode && !comp.geoJson && !comp.geoJsonUrl  ) //地图的话只要有个adcode就可以了
+                    compName == "graphs" && 
+                    !comp.field && 
+                    !comp.keyField && 
+                    !comp.adcode && 
+                    !comp.geoJson && 
+                    !comp.geoJsonUrl  //地图的话只要有个adcode就可以了
                 ) return; 
                 
                 let compModule = me.componentModules.get(compName, comp.type);
                 if( compModule ){
+
                     let _comp = new compModule( comp, me );
 
                     //可能用户配置了一个空的coord坐标系，没有type，里面配置了一些fieldsConfig之类的全局配置的时候
