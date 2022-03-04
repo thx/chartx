@@ -219,6 +219,8 @@ export default class LineGraphsGroup extends event.Dispatcher
 
         this.__currFocusInd = -1;
 
+        this._growed = false;
+
         this.init(opt)
     }
 
@@ -231,7 +233,6 @@ export default class LineGraphsGroup extends event.Dispatcher
         this.lineSprite = new Canvax.Display.Sprite();
         this.graphSprite.addChild( this.lineSprite );
         
-
         //hover效果的node被添加到的容器
         this._focusNodes = new Canvax.Display.Sprite({});
         this.sprite.addChild(this._focusNodes);
@@ -243,6 +244,15 @@ export default class LineGraphsGroup extends event.Dispatcher
         this.sprite.addChild(this._labels);
     }
 
+    _clean(){
+        this.lineSprite.removeAllChildren();
+        this._focusNodes.removeAllChildren();
+        this._nodes.removeAllChildren();
+        this._labels.removeAllChildren();
+        this._bline = null;
+        this._area = null;
+    }
+
     draw(opt, data)
     {
         _.extend(true, this, opt);
@@ -250,6 +260,7 @@ export default class LineGraphsGroup extends event.Dispatcher
         this._widget( opt );
     }
 
+   
 
     //自我销毁
     destroy()
@@ -337,57 +348,73 @@ export default class LineGraphsGroup extends event.Dispatcher
      */
     resetData(data, dataTrigger)
     {
-       
         let me = this;
-
         if( data ){
             this.data = data;
         };
 
-        me._pointList = this._getPointList( this.data );
+        if( !dataTrigger || !dataTrigger.comp ){
+            //如果是系统级别的调用，需要从新执行绘制
+            me._growed = false;
+            if(me.clipRect){
+                me.clipRect.destroy();
+                me.clipRect = null;
+            };
+            me._widget( this );
+            me._grow();
+        } else {
+
+            me._pointList = this._getPointList( this.data );
         
-        let plen = me._pointList.length;
-        let cplen = me._currPointList.length;
+            let plen = me._pointList.length;
+            let cplen = me._currPointList.length;
 
-        let params = {
-            left : 0, //默认左边数据没变
-            right : plen - cplen
-        };
-        if( dataTrigger ){
-            _.extend( params, dataTrigger.params );
-        };
+            let params = {
+                left : 0, //默认左边数据没变
+                right : plen - cplen
+            };
+            if( dataTrigger && dataTrigger.params ){
+                _.extend( params, dataTrigger.params );
+            };
 
-        if( params.left ){
-            if( params.left > 0 ){
-                this._currPointList = this._pointList.slice(0, params.left ).concat( this._currPointList )
-            }
-            if( params.left < 0 ){
-                this._currPointList.splice( 0, Math.abs( params.left ) );
-            }
-        };
+            if( params.left ){
+                if( params.left > 0 ){
+                    this._currPointList = this._pointList.slice(0, params.left ).concat( this._currPointList )
+                }
+                if( params.left < 0 ){
+                    this._currPointList.splice( 0, Math.abs( params.left ) );
+                }
+            };
 
-        if( params.right ){
-            if( params.right > 0 ){
-                this._currPointList = this._currPointList.concat( this._pointList.slice( -params.right ) );
-            }
-            if( params.right < 0 ){
-                this._currPointList.splice( this._currPointList.length - Math.abs( params.right ) );
-            }
-        };
+            if( params.right ){
+                if( params.right > 0 ){
+                    this._currPointList = this._currPointList.concat( this._pointList.slice( -params.right ) );
+                }
+                if( params.right < 0 ){
+                    this._currPointList.splice( this._currPointList.length - Math.abs( params.right ) );
+                }
+            };
 
-        me._createNodes();
-        me._createTexts();
-
-        me._transition();
+            me._createNodes();
+            me._createTexts();
+            me._transition();
+        }
     }
 
     //数据变化后的切换动画
     _transition(callback)
     {
+        
         let me = this;
 
         if( !me.data.length ){
             //因为在index中有调用
+            if( me._bline.context ){
+                me._bline.context.pointList = [];
+            };
+            if( me._area.context ){
+                me._area.context.path = '';
+            };
             callback && callback( me );
             return;
         };
@@ -549,6 +576,13 @@ export default class LineGraphsGroup extends event.Dispatcher
     {
         let me = this;
         !opt && (opt ={});
+
+        if( opt.isResize ){
+            me._growed = true;
+        };
+
+        //绘制之前先自清空
+        me._clean();
         
         me._pointList = this._getPointList(me.data);
 
@@ -868,8 +902,8 @@ export default class LineGraphsGroup extends event.Dispatcher
 
             let x = _point[0];
             let y = _point[1];
-            let globalAlpha = opt.isResize ? 1 : 0;
-            if( this.clipRect && !opt.isResize ){
+            let globalAlpha = 0;
+            if( this.clipRect && me._growed ){
                 let clipRectCtx = this.clipRect.context;
                 if( x >= clipRectCtx.x && x<= clipRectCtx.x+clipRectCtx.width ){
                     globalAlpha = 1;
@@ -971,8 +1005,8 @@ export default class LineGraphsGroup extends event.Dispatcher
 
                 let x = _point[0];
                 let y = _point[1] - this.node.radius - 2;
-                let globalAlpha = opt.isResize ? 1 : 0;
-                if( this.clipRect && !opt.isResize ){
+                let globalAlpha = 0;
+                if( this.clipRect && opt._growed ){
                     let clipRectCtx = this.clipRect.context;
                     if( x >= clipRectCtx.x && x<= clipRectCtx.x+clipRectCtx.width ){
                         globalAlpha = 1;

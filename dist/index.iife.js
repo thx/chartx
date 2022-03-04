@@ -10829,7 +10829,7 @@ var chartx = (function () {
 	        comps.forEach(function (comp) {
 	          var compModule = _this2.componentModules.get(compName, comp.type);
 
-	          compModule.polyfill(comp);
+	          compModule && compModule.polyfill(comp);
 	        });
 	      };
 
@@ -10848,7 +10848,8 @@ var chartx = (function () {
 
 	      var opt = this._opt; //padding数据也要重置为起始值
 
-	      this.padding = this._getPadding(); //首先判断如果没有coord配置，那么就配置一个空坐标系，所有的图表都会依赖一个坐标系， 哪怕是个空坐标系
+	      this.padding = this._getPadding();
+	      this._initPadding = JSON.parse(JSON.stringify(this.padding)); //首先判断如果没有coord配置，那么就配置一个空坐标系，所有的图表都会依赖一个坐标系， 哪怕是个空坐标系
 
 	      if (!opt.coord) {
 	        var _coord = new _index["default"]({}, me);
@@ -10918,9 +10919,9 @@ var chartx = (function () {
 	    }
 	  }, {
 	    key: "draw",
-	    value: function draw(opt) {
+	    value: function draw(_opt) {
 	      var me = this;
-	      !opt && (opt = {});
+	      var opt = Object.assign({}, _opt || {});
 
 	      var _coord = this.getComponent({
 	        name: 'coord'
@@ -11144,6 +11145,8 @@ var chartx = (function () {
 	      if (this.canvax.event) {
 	        this.canvax.event.curPointsTarget = [];
 	      }
+
+	      this.padding = this._initPadding;
 	    }
 	    /**
 	     * 容器的尺寸改变重新绘制
@@ -11203,17 +11206,21 @@ var chartx = (function () {
 	      var preDataLenth = this.dataFrame.org.length;
 
 	      if (!trigger || !trigger.comp) {
-	        //只有非内部trigger的的resetData，才会有原数据的改变
+	        //直接chart级别的resetData调用
+	        //只有非内部trigger的的resetData，才会有原数据的改变， 
 	        if (!data) {
 	          data = [];
 	        }
-
-	        if (!data.length) {
-	          this.clean();
-	        }
 	        this._data = data; //注意，resetData不能为null，必须是 数组格式
 
-	        this.dataFrame.resetData(data);
+	        this.dataFrame.resetData(data); // if( !data.length ){
+	        //     debugger
+	        //     this.clean();
+	        //     this.init();
+	        //     this.draw( this._opt );
+	        //     this.fire("resetData");
+	        //     return;
+	        // };
 	      } else {
 	        //内部组件trigger的话，比如datazoom
 	        this.dataFrame.resetData();
@@ -11237,6 +11244,7 @@ var chartx = (function () {
 	        this.clean();
 	        this.init();
 	        this.draw(this._opt);
+	        this.fire("resetData");
 	        return;
 	      }
 
@@ -18224,6 +18232,7 @@ var chartx = (function () {
 
 	    _this.clipRect = null;
 	    _this.__currFocusInd = -1;
+	    _this._growed = false;
 
 	    _this.init(opt);
 
@@ -18245,6 +18254,20 @@ var chartx = (function () {
 	      this.sprite.addChild(this._nodes);
 	      this._labels = new _canvax["default"].Display.Sprite({});
 	      this.sprite.addChild(this._labels);
+	    }
+	  }, {
+	    key: "_clean",
+	    value: function _clean() {
+	      this.lineSprite.removeAllChildren();
+
+	      this._focusNodes.removeAllChildren();
+
+	      this._nodes.removeAllChildren();
+
+	      this._labels.removeAllChildren();
+
+	      this._bline = null;
+	      this._area = null;
 	    }
 	  }, {
 	    key: "draw",
@@ -18353,44 +18376,59 @@ var chartx = (function () {
 	      if (data) {
 	        this.data = data;
 	      }
-	      me._pointList = this._getPointList(this.data);
-	      var plen = me._pointList.length;
-	      var cplen = me._currPointList.length;
-	      var params = {
-	        left: 0,
-	        //默认左边数据没变
-	        right: plen - cplen
-	      };
 
-	      if (dataTrigger) {
-	        _.extend(params, dataTrigger.params);
+	      if (!dataTrigger || !dataTrigger.comp) {
+	        //如果是系统级别的调用，需要从新执行绘制
+	        me._growed = false;
+
+	        if (me.clipRect) {
+	          me.clipRect.destroy();
+	          me.clipRect = null;
+	        }
+
+	        me._widget(this);
+
+	        me._grow();
+	      } else {
+	        me._pointList = this._getPointList(this.data);
+	        var plen = me._pointList.length;
+	        var cplen = me._currPointList.length;
+	        var params = {
+	          left: 0,
+	          //默认左边数据没变
+	          right: plen - cplen
+	        };
+
+	        if (dataTrigger && dataTrigger.params) {
+	          _.extend(params, dataTrigger.params);
+	        }
+
+	        if (params.left) {
+	          if (params.left > 0) {
+	            this._currPointList = this._pointList.slice(0, params.left).concat(this._currPointList);
+	          }
+
+	          if (params.left < 0) {
+	            this._currPointList.splice(0, Math.abs(params.left));
+	          }
+	        }
+
+	        if (params.right) {
+	          if (params.right > 0) {
+	            this._currPointList = this._currPointList.concat(this._pointList.slice(-params.right));
+	          }
+
+	          if (params.right < 0) {
+	            this._currPointList.splice(this._currPointList.length - Math.abs(params.right));
+	          }
+	        }
+
+	        me._createNodes();
+
+	        me._createTexts();
+
+	        me._transition();
 	      }
-
-	      if (params.left) {
-	        if (params.left > 0) {
-	          this._currPointList = this._pointList.slice(0, params.left).concat(this._currPointList);
-	        }
-
-	        if (params.left < 0) {
-	          this._currPointList.splice(0, Math.abs(params.left));
-	        }
-	      }
-
-	      if (params.right) {
-	        if (params.right > 0) {
-	          this._currPointList = this._currPointList.concat(this._pointList.slice(-params.right));
-	        }
-
-	        if (params.right < 0) {
-	          this._currPointList.splice(this._currPointList.length - Math.abs(params.right));
-	        }
-	      }
-
-	      me._createNodes();
-
-	      me._createTexts();
-
-	      me._transition();
 	    } //数据变化后的切换动画
 
 	  }, {
@@ -18400,6 +18438,13 @@ var chartx = (function () {
 
 	      if (!me.data.length) {
 	        //因为在index中有调用
+	        if (me._bline.context) {
+	          me._bline.context.pointList = [];
+	        }
+
+	        if (me._area.context) {
+	          me._area.context.path = '';
+	        }
 	        callback && callback(me);
 	        return;
 	      }
@@ -18574,6 +18619,13 @@ var chartx = (function () {
 	    value: function _widget(opt) {
 	      var me = this;
 	      !opt && (opt = {});
+
+	      if (opt.isResize) {
+	        me._growed = true;
+	      }
+
+	      me._clean();
+
 	      me._pointList = this._getPointList(me.data);
 
 	      if (me._pointList.length == 0) {
@@ -18873,7 +18925,6 @@ var chartx = (function () {
 	  }, {
 	    key: "_createNodes",
 	    value: function _createNodes() {
-	      var opt = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 	      var me = this;
 	      var list = me._currPointList;
 	      var iNode = 0; //这里不能和下面的a对等，以为list中有很多无效的节点
@@ -18901,9 +18952,9 @@ var chartx = (function () {
 	        }
 	        var x = _point[0];
 	        var y = _point[1];
-	        var globalAlpha = opt.isResize ? 1 : 0;
+	        var globalAlpha = 0;
 
-	        if (this.clipRect && !opt.isResize) {
+	        if (this.clipRect && me._growed) {
 	          var clipRectCtx = this.clipRect.context;
 
 	          if (x >= clipRectCtx.x && x <= clipRectCtx.x + clipRectCtx.width) {
@@ -19003,9 +19054,9 @@ var chartx = (function () {
 	          }
 	          var x = _point[0];
 	          var y = _point[1] - this.node.radius - 2;
-	          var globalAlpha = opt.isResize ? 1 : 0;
+	          var globalAlpha = 0;
 
-	          if (this.clipRect && !opt.isResize) {
+	          if (this.clipRect && opt._growed) {
 	            var clipRectCtx = this.clipRect.context;
 
 	            if (x >= clipRectCtx.x && x <= clipRectCtx.x + clipRectCtx.width) {
@@ -19557,8 +19608,7 @@ var chartx = (function () {
 	        me.dataFrame = dataFrame;
 	      }
 	      me.data = me._trimGraphs();
-
-	      Canvax._.each(me.groups, function (g) {
+	      me.groups.forEach(function (g) {
 	        g.resetData(me.data[g.field].data, dataTrigger);
 	      });
 	    }
@@ -19759,6 +19809,15 @@ var chartx = (function () {
 	        }
 
 	        if (!insert) {
+	          var preGroup = me.groups.find(function (g) {
+	            return g.field == group.field;
+	          });
+
+	          if (preGroup) {
+	            me.groups.splice(me.groups.indexOf(preGroup), 1);
+	            preGroup.destroy();
+	          }
+
 	          me.groups.push(group);
 	          me.sprite.addChild(group.sprite);
 	        }

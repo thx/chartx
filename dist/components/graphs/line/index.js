@@ -89,8 +89,7 @@ var LineGraphs = /*#__PURE__*/function (_GraphsBase) {
 
       ;
       me.data = me._trimGraphs();
-
-      _canvax._.each(me.groups, function (g) {
+      me.groups.forEach(function (g) {
         g.resetData(me.data[g.field].data, dataTrigger);
       });
     }
@@ -299,6 +298,15 @@ var LineGraphs = /*#__PURE__*/function (_GraphsBase) {
         ; //否则就只需要直接push就好了
 
         if (!insert) {
+          var preGroup = me.groups.find(function (g) {
+            return g.field == group.field;
+          });
+
+          if (preGroup) {
+            me.groups.splice(me.groups.indexOf(preGroup), 1);
+            preGroup.destroy();
+          }
+
           me.groups.push(group);
           me.sprite.addChild(group.sprite);
         }

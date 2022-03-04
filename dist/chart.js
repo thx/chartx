@@ -112,7 +112,7 @@ var Chart = /*#__PURE__*/function (_event$Dispatcher) {
         comps.forEach(function (comp) {
           var compModule = _this2.componentModules.get(compName, comp.type);
 
-          compModule.polyfill(comp);
+          compModule && compModule.polyfill(comp);
         });
       };
 
@@ -131,7 +131,8 @@ var Chart = /*#__PURE__*/function (_event$Dispatcher) {
 
       var opt = this._opt; //padding数据也要重置为起始值
 
-      this.padding = this._getPadding(); //首先判断如果没有coord配置，那么就配置一个空坐标系，所有的图表都会依赖一个坐标系， 哪怕是个空坐标系
+      this.padding = this._getPadding();
+      this._initPadding = JSON.parse(JSON.stringify(this.padding)); //首先判断如果没有coord配置，那么就配置一个空坐标系，所有的图表都会依赖一个坐标系， 哪怕是个空坐标系
 
       if (!opt.coord) {
         var _coord = new _index["default"]({}, me);
@@ -213,9 +214,9 @@ var Chart = /*#__PURE__*/function (_event$Dispatcher) {
     }
   }, {
     key: "draw",
-    value: function draw(opt) {
+    value: function draw(_opt) {
       var me = this;
-      !opt && (opt = {});
+      var opt = Object.assign({}, _opt || {});
 
       var _coord = this.getComponent({
         name: 'coord'
@@ -469,6 +470,8 @@ var Chart = /*#__PURE__*/function (_event$Dispatcher) {
       if (this.canvax.event) {
         this.canvax.event.curPointsTarget = [];
       }
+
+      this.padding = this._initPadding;
     }
     /**
      * 容器的尺寸改变重新绘制
@@ -528,21 +531,23 @@ var Chart = /*#__PURE__*/function (_event$Dispatcher) {
       var preDataLenth = this.dataFrame.org.length;
 
       if (!trigger || !trigger.comp) {
-        //只有非内部trigger的的resetData，才会有原数据的改变
+        //直接chart级别的resetData调用
+        //只有非内部trigger的的resetData，才会有原数据的改变， 
         if (!data) {
           data = [];
         }
 
         ;
-
-        if (!data.length) {
-          this.clean();
-        }
-
-        ;
         this._data = data; //注意，resetData不能为null，必须是 数组格式
 
-        this.dataFrame.resetData(data);
+        this.dataFrame.resetData(data); // if( !data.length ){
+        //     debugger
+        //     this.clean();
+        //     this.init();
+        //     this.draw( this._opt );
+        //     this.fire("resetData");
+        //     return;
+        // };
       } else {
         //内部组件trigger的话，比如datazoom
         this.dataFrame.resetData();
@@ -568,6 +573,7 @@ var Chart = /*#__PURE__*/function (_event$Dispatcher) {
         this.clean();
         this.init();
         this.draw(this._opt);
+        this.fire("resetData");
         return;
       }
 

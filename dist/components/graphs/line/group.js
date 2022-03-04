@@ -81,6 +81,7 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
 
     _this.clipRect = null;
     _this.__currFocusInd = -1;
+    _this._growed = false;
 
     _this.init(opt);
 
@@ -102,6 +103,20 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
       this.sprite.addChild(this._nodes);
       this._labels = new _canvax["default"].Display.Sprite({});
       this.sprite.addChild(this._labels);
+    }
+  }, {
+    key: "_clean",
+    value: function _clean() {
+      this.lineSprite.removeAllChildren();
+
+      this._focusNodes.removeAllChildren();
+
+      this._nodes.removeAllChildren();
+
+      this._labels.removeAllChildren();
+
+      this._bline = null;
+      this._area = null;
     }
   }, {
     key: "draw",
@@ -230,50 +245,67 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
       }
 
       ;
-      me._pointList = this._getPointList(this.data);
-      var plen = me._pointList.length;
-      var cplen = me._currPointList.length;
-      var params = {
-        left: 0,
-        //默认左边数据没变
-        right: plen - cplen
-      };
 
-      if (dataTrigger) {
-        _.extend(params, dataTrigger.params);
+      if (!dataTrigger || !dataTrigger.comp) {
+        //如果是系统级别的调用，需要从新执行绘制
+        me._growed = false;
+
+        if (me.clipRect) {
+          me.clipRect.destroy();
+          me.clipRect = null;
+        }
+
+        ;
+
+        me._widget(this);
+
+        me._grow();
+      } else {
+        me._pointList = this._getPointList(this.data);
+        var plen = me._pointList.length;
+        var cplen = me._currPointList.length;
+        var params = {
+          left: 0,
+          //默认左边数据没变
+          right: plen - cplen
+        };
+
+        if (dataTrigger && dataTrigger.params) {
+          _.extend(params, dataTrigger.params);
+        }
+
+        ;
+
+        if (params.left) {
+          if (params.left > 0) {
+            this._currPointList = this._pointList.slice(0, params.left).concat(this._currPointList);
+          }
+
+          if (params.left < 0) {
+            this._currPointList.splice(0, Math.abs(params.left));
+          }
+        }
+
+        ;
+
+        if (params.right) {
+          if (params.right > 0) {
+            this._currPointList = this._currPointList.concat(this._pointList.slice(-params.right));
+          }
+
+          if (params.right < 0) {
+            this._currPointList.splice(this._currPointList.length - Math.abs(params.right));
+          }
+        }
+
+        ;
+
+        me._createNodes();
+
+        me._createTexts();
+
+        me._transition();
       }
-
-      ;
-
-      if (params.left) {
-        if (params.left > 0) {
-          this._currPointList = this._pointList.slice(0, params.left).concat(this._currPointList);
-        }
-
-        if (params.left < 0) {
-          this._currPointList.splice(0, Math.abs(params.left));
-        }
-      }
-
-      ;
-
-      if (params.right) {
-        if (params.right > 0) {
-          this._currPointList = this._currPointList.concat(this._pointList.slice(-params.right));
-        }
-
-        if (params.right < 0) {
-          this._currPointList.splice(this._currPointList.length - Math.abs(params.right));
-        }
-      }
-
-      ;
-
-      me._createNodes();
-
-      me._createTexts();
-
-      me._transition();
     } //数据变化后的切换动画
 
   }, {
@@ -283,6 +315,17 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
 
       if (!me.data.length) {
         //因为在index中有调用
+        if (me._bline.context) {
+          me._bline.context.pointList = [];
+        }
+
+        ;
+
+        if (me._area.context) {
+          me._area.context.path = '';
+        }
+
+        ;
         callback && callback(me);
         return;
       }
@@ -469,6 +512,15 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
     value: function _widget(opt) {
       var me = this;
       !opt && (opt = {});
+
+      if (opt.isResize) {
+        me._growed = true;
+      }
+
+      ; //绘制之前先自清空
+
+      me._clean();
+
       me._pointList = this._getPointList(me.data);
 
       if (me._pointList.length == 0) {
@@ -822,9 +874,9 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
         ;
         var x = _point[0];
         var y = _point[1];
-        var globalAlpha = opt.isResize ? 1 : 0;
+        var globalAlpha = 0;
 
-        if (this.clipRect && !opt.isResize) {
+        if (this.clipRect && me._growed) {
           var clipRectCtx = this.clipRect.context;
 
           if (x >= clipRectCtx.x && x <= clipRectCtx.x + clipRectCtx.width) {
@@ -942,9 +994,9 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
           ;
           var x = _point[0];
           var y = _point[1] - this.node.radius - 2;
-          var globalAlpha = opt.isResize ? 1 : 0;
+          var globalAlpha = 0;
 
-          if (this.clipRect && !opt.isResize) {
+          if (this.clipRect && opt._growed) {
             var clipRectCtx = this.clipRect.context;
 
             if (x >= clipRectCtx.x && x <= clipRectCtx.x + clipRectCtx.width) {

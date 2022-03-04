@@ -81,10 +81,9 @@ class LineGraphs extends GraphsBase
         };
 
         me.data = me._trimGraphs();
-
-        _.each( me.groups, function(g){
+        me.groups.forEach(g => {
             g.resetData( me.data[ g.field ].data , dataTrigger );
-        } );
+        });
     }
 
     setEnabledField()
@@ -293,6 +292,12 @@ class LineGraphs extends GraphsBase
             };
             //否则就只需要直接push就好了
             if( !insert ){
+                let preGroup = me.groups.find( g => g.field == group.field );
+                if( preGroup ){
+                    me.groups.splice( me.groups.indexOf(preGroup), 1 );
+                    preGroup.destroy();
+                }
+                
                 me.groups.push(group);
                 me.sprite.addChild(group.sprite);
             };
