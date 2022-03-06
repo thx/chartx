@@ -239,7 +239,13 @@ var coordBase = /*#__PURE__*/function (_Component) {
           value = config.format.apply(this, arguments);
         }
       } else {
-        value = (0, _typeof2["default"])(value) == "object" ? JSON.stringify(value) : (0, _numeral["default"])(value).format('0,0');
+        if ((0, _typeof2["default"])(value) == "object") {
+          value = JSON.stringify(value);
+        } else if (!isNaN(value) && value !== "" && value !== null) {
+          //可以转换为number的， 就用 numeral 来格式化一下
+          value = (0, _numeral["default"])(value).format('0,0');
+        } //value = typeof(value) == "object" ? JSON.stringify(value) : numeral(value).format('0,0');
+
       }
 
       ;
@@ -282,6 +288,21 @@ var coordBase = /*#__PURE__*/function (_Component) {
       }
 
       get(me.graphsFieldsMap);
+
+      if (!fieldConfig) {
+        //如果再graphsFieldsMap中找不到， 也可能是传入的keyField parentKeyField 等
+        //从opt中找一次
+        var config = (this._opt.fieldsConfig || {})[field];
+
+        if (config) {
+          config.getFormatValue = function (value) {
+            return me.getFormatValue(value, config, config);
+          };
+
+          fieldConfig = config;
+        }
+      }
+
       return fieldConfig;
     } //从 graphsFieldsMap 中过滤筛选出来一个一一对应的 enabled为true的对象结构
     //这个方法还必须要返回的数据里描述出来多y轴的结构。否则外面拿到数据后并不好处理那个数据对应哪个轴

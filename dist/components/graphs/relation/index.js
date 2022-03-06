@@ -343,30 +343,36 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
             }
           });
 
-          _this4.widget(); //钉住某个node为参考点（不移动)
+          _this4.widget();
 
+          if (dataTrigger) {
+            var origin = dataTrigger.origin || (dataTrigger.params || {}).origin; //兼容老的配置里面没有params，直接传origin的情况
+            //钉住某个node为参考点（不移动)
 
-          if (dataTrigger && dataTrigger.origin) {
-            var preOriginNode = _.find(_this4._preData.nodes, function (node) {
-              return node.key == dataTrigger.origin;
-            });
+            if (origin != undefined) {
+              var preOriginNode = _.find(_this4._preData.nodes, function (node) {
+                return node.key == origin;
+              });
 
-            var originNode = _.find(_this4.data.nodes, function (node) {
-              return node.key == dataTrigger.origin;
-            });
+              var originNode = _.find(_this4.data.nodes, function (node) {
+                return node.key == origin;
+              });
 
-            if (preOriginNode && originNode) {
-              var offsetPos = {
-                x: parseInt(preOriginNode.x) - parseInt(originNode.x),
-                y: parseInt(preOriginNode.y) - parseInt(originNode.y)
-              };
+              if (preOriginNode && originNode) {
+                var offsetPos = {
+                  x: parseInt(preOriginNode.x) - parseInt(originNode.x),
+                  y: parseInt(preOriginNode.y) - parseInt(originNode.y)
+                };
 
-              var _this4$zoom$offset = _this4.zoom.offset(offsetPos),
-                  x = _this4$zoom$offset.x,
-                  y = _this4$zoom$offset.y;
+                var _this4$zoom$offset = _this4.zoom.offset(offsetPos),
+                    x = _this4$zoom$offset.x,
+                    y = _this4$zoom$offset.y;
 
-              me.graphsView.context.x = parseInt(x);
-              me.graphsView.context.y = parseInt(y);
+                me.graphsView.context.x = parseInt(x);
+                me.graphsView.context.y = parseInt(y);
+              }
+
+              ;
             }
 
             ;
@@ -673,9 +679,11 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
           });
 
           _path.on(event.types.get(), function (e) {
+            var node = this.nodeData;
+            node.__no_value = true;
             e.eventInfo = {
               trigger: me.line,
-              nodes: [this.nodeData]
+              nodes: [node]
             };
             me.app.fire(e.type, e);
           });
@@ -757,9 +765,11 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
             });
 
             _edgeLabel.on(event.types.get(), function (e) {
+              var node = this.nodeData;
+              node.__no_value = true;
               e.eventInfo = {
                 trigger: me.line,
-                nodes: [this.nodeData]
+                nodes: [node]
               };
               me.app.fire(e.type, e);
             });
@@ -865,6 +875,8 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
               });
 
               _edgeIcon.on(event.types.get(), function (e) {
+                var node = this.nodeData;
+                node.__no_value = true;
                 var trigger = me.line;
 
                 if (me.line.icon['on' + e.type]) {
@@ -874,7 +886,7 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
                 ;
                 e.eventInfo = {
                   trigger: trigger,
-                  nodes: [this.nodeData]
+                  nodes: [node]
                 };
                 me.app.fire(e.type, e);
               });
@@ -1006,9 +1018,11 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
         me.nodesSp.addChild(_boxShape);
 
         _boxShape.on(event.types.get(), function (e) {
+          var node = this.nodeData;
+          node.__no_value = true;
           e.eventInfo = {
             trigger: me.node,
-            nodes: [this.nodeData]
+            nodes: [node]
           };
 
           if (me.node.focus.enabled) {
@@ -1363,17 +1377,31 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
       var _c; //this.node.content;
 
 
-      if (this._isField(this.node.content.field)) {
-        _c = rowData[this.node.content.field];
+      var field = this.node.content.field;
+
+      if (this._isField(field)) {
+        _c = rowData[field];
       }
 
       ;
 
       if (me.node.content.format && _.isFunction(me.node.content.format)) {
         _c = me.node.content.format.apply(this, [_c, rowData]);
+      } else {
+        //否则用fieldConfig上面的
+        var _coord = me.app.getComponent({
+          name: 'coord'
+        });
+
+        var fieldConfig = _coord.getFieldConfig(field);
+
+        if (fieldConfig) {
+          _c = fieldConfig.getFormatValue(_c);
+        }
+
+        ;
       }
 
-      ;
       return _c;
     }
   }, {

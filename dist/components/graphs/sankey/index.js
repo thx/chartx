@@ -233,7 +233,7 @@ var sankeyGraphs = /*#__PURE__*/function (_GraphsBase) {
 
           linkData.type = "sankey";
           link.field = me.field;
-          link.name = '__no__name';
+          link.__no__name = true;
           e.eventInfo = {
             trigger: me.node,
             title: linkData.source.name + " <span style='display:inline-block;margin-left:4px;position:relative;top:-0.5px;font-size:16px;left:-3px;'>></span> " + linkData.target.name,

@@ -216,8 +216,10 @@ console.log('tips show')
         //let y = this._checkY( e.clientY + this.offsetY);
         var domBounding = this.app.canvax.el.getBoundingClientRect();
 
-        let x = this._checkX( e.offsetX + domBounding.x + this.offsetX);
-        let y = this._checkY( e.offsetY + domBounding.y + this.offsetY);
+        let globalPoint = e.target.localToGlobal( e.point );
+
+        let x = this._checkX( globalPoint.x + domBounding.x + this.offsetX);
+        let y = this._checkY( globalPoint.y + domBounding.y + this.offsetY);
 
         this._tipDom.style.cssText += ";visibility:visible;left:" + x + "px;top:" + y + "px;";
 
@@ -291,13 +293,16 @@ console.log('tips show')
             return str;
         };
 
+        let hasNodesContent = false;
+
         if( info.nodes.length ){
             str += "<table >"
             
             if (info.title !== undefined && info.title !== null && info.title !== "") {
                 str += "<tr><td colspan='2' style='text-align:left;padding-left:3px;'>"
                 str += "<span style='font-size:12px;padding:4px;color:#333;'>" + info.title + "</span>";
-                str += "</td></tr>"
+                str += "</td></tr>";
+                hasNodesContent = true;
             }; 
             _.each(info.nodes, function (node, i) {
                 
@@ -305,30 +310,45 @@ console.log('tips show')
                 //     return;
                 // };
 
-                let hasValue = node.value || node.value === 0;
+                
                 
                 let style = node.color || node.fillStyle || node.strokeStyle;
                 let name,value;
                 let fieldConfig = _coord.getFieldConfig( node.field  );
 
-                //node.name优先级最高，是因为像 pie funnel 等一维图表，会有name属性
-                name = node.name || node.label || fieldConfig.name || node.field;
-                value = fieldConfig.getFormatValue( node.value );
+                //node.name优先级最高，是因为像 pie funnel cloud 等一维图表，会有name属性
+                //关系图中会有content
+                name = node.name || node.label || ( (fieldConfig || {}).name) || node.content || node.field || '';
+                value = fieldConfig ? fieldConfig.getFormatValue( node.value ) : node.value;
 
-                if( !hasValue ){
+                let hasValue = node.value || node.value === 0;
+
+                if( !hasValue && !node.__no_value ){
                     style = "#ddd";
                     value = '--'
                 }
                 
                 str += "<tr>"
-                if( name != '__no__name' ){
-                    str += "<td style='padding:0px 6px;color:" + (!hasValue ? '#ddd' : '#a0a0a0;') + "'>"+name+"</td>"
+                if( !node.__no__name ){
+                    str += "<td style='padding:0px 6px;color:" + ( (!hasValue && !node.__no_value) ? '#ddd' : '#a0a0a0;') + "'>"+name+"</td>";
+                    hasNodesContent = true;
                 }
-                str += "<td style='padding:0px 6px;font-weight:bold;'><span style='color:"+style+"'>"+value+"</span></td>"
+                if( !node.__no_value ){
+                    str += "<td style='padding:0px 6px;font-weight:bold;'>";
+                    str += "<span style='color:"+style+"'>"+value+"</span>";
+                    if( node.subValue ){
+                        str +="<span style='padding-left:6px;font-weight:normal;'>"+ node.subValue +"</span>";
+                        hasNodesContent = true;
+                    };
+                    str += "</td>"
+                }
                 str += "</tr>";
 
             });
             str += "</table>"
+        }
+        if( !hasNodesContent ){
+            str = "";
         }
         if( info.tipsContent ){
             str += info.tipsContent;

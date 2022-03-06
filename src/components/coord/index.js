@@ -205,7 +205,13 @@ class coordBase extends Component
                 value = config.format.apply( this, arguments )
             }
         } else {
-            value = typeof(value) == "object" ? JSON.stringify(value) : numeral(value).format('0,0');
+            if( typeof(value) == "object" ){
+                value = JSON.stringify(value);
+            } else if( !isNaN( value ) && value !== "" && value !== null ){
+                //可以转换为number的， 就用 numeral 来格式化一下
+                value = numeral(value).format('0,0')
+            }
+            //value = typeof(value) == "object" ? JSON.stringify(value) : numeral(value).format('0,0');
         };
         return value;
     }
@@ -242,6 +248,19 @@ class coordBase extends Component
             } );
         }
         get( me.graphsFieldsMap );
+
+        if( !fieldConfig ){
+            //如果再graphsFieldsMap中找不到， 也可能是传入的keyField parentKeyField 等
+            //从opt中找一次
+            let config = (this._opt.fieldsConfig || {})[ field ];
+            if( config ){
+                config.getFormatValue = ( value )=>{
+                    return me.getFormatValue( value, config, config );
+                };
+                fieldConfig = config;
+            }
+        }
+
         return fieldConfig;
     }
 

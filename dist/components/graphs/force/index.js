@@ -285,7 +285,7 @@ var Force = /*#__PURE__*/function (_GraphsBase) {
         var labelTextBaseline = me.getProp(me.label.textBaseline, node.nodeData);
         var labelTextAlign = me.getProp(me.label.textAlign, node.nodeData);
 
-        var _label = new Text(node.nodeData.rowData.label, {
+        var _label = new Text(node.nodeData.label, {
           context: {
             fontSize: labelFontSize,
             fillStyle: labelFontColor,
@@ -378,8 +378,23 @@ var Force = /*#__PURE__*/function (_GraphsBase) {
 
       ;
 
-      if (me.label.format && _.isFunction(me.label.format)) {
-        _c = me.label.format.apply(this, [_c, rowData]);
+      if (me.label.format) {
+        if (_.isFunction(me.label.format)) {
+          _c = me.label.format.apply(this, [_c, rowData]);
+        }
+      } else {
+        //否则用fieldConfig上面的
+        var _coord = me.app.getComponent({
+          name: 'coord'
+        });
+
+        var fieldConfig = _coord.getFieldConfig(me.keyField);
+
+        if (fieldConfig) {
+          _c = fieldConfig.getFormatValue(_c);
+        }
+
+        ;
       }
 
       ;

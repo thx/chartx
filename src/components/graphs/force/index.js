@@ -370,7 +370,8 @@ class Force extends GraphsBase {
             let labelTextBaseline = me.getProp( me.label.textBaseline , node.nodeData);
             let labelTextAlign    = me.getProp( me.label.textAlign , node.nodeData);
 
-            let _label = new Text( node.nodeData.rowData.label, {
+            
+            let _label = new Text( node.nodeData.label, {
                 context: {
                     fontSize     : labelFontSize,
                     fillStyle    : labelFontColor,
@@ -448,8 +449,17 @@ class Force extends GraphsBase {
         if (this._isField(this.label.field)) {
             _c = rowData[ this.label.field ];
         };
-        if (me.label.format && _.isFunction(me.label.format)) {
-            _c = me.label.format.apply(this, [ _c, rowData ]);
+        if (me.label.format) {
+            if(  _.isFunction(me.label.format) ){
+                _c = me.label.format.apply(this, [ _c, rowData ]);
+            }
+        } else {
+            //否则用fieldConfig上面的
+            let _coord = me.app.getComponent({name:'coord'});
+            let fieldConfig = _coord.getFieldConfig( me.keyField );
+            if(fieldConfig ){
+                _c = fieldConfig.getFormatValue( _c );
+            };
         };
         return _c;
     }

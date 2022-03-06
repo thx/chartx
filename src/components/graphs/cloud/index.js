@@ -205,26 +205,36 @@ class CloudGraphs extends GraphsBase
 
         let layout = cloudLayout()
             .size([me.width, me.height])
-            .words(me.dataFrame.getFieldData( me.field ).map(function(d, ind) {
-                let rowData  = me.app.dataFrame.getRowDataAt( me.getDaraFrameIndOfVal( d ) );//这里不能直接用i去从dataFrame里查询,因为cloud layout后，可能会扔掉渲染不下的部分
+            .words(me.dataFrame.getFieldData( me.field ).map(function( txt, ind) {
+                //这里不能直接用i去从dataFrame里查询,因为cloud layout后，可能会扔掉渲染不下的部分
+                let rowData  = me.app.dataFrame.getRowDataAt( me.getDaraFrameIndOfVal( txt ) );
                 let tag = {
-                    type    : "cloud",
-                    rowData : rowData,
-                    field   : me.field,
-                    value   : d,
-                    text    : null,
-                    size    : me._getFontSize( rowData, d ),
-                    iNode   : ind,
-                    color   : null //在绘制的时候统一设置
+                    type      : "cloud",
+                    rowData   : rowData,
+                    field     : me.field,
+                    name      : "", //tips中就不会显示name
+                    value     : txt,
+                    text      : null,
+                    size      : me._getFontSize( rowData, txt ),
+                    iNode     : ind,
+                    color     : null, //在绘制的时候统一设置
+                    __no__name: true
                 };
 
                 tag.fontColor = me._getFontColor( tag );
 
-                let _txt = d;
+                let _txt = txt;
                 if( me.node.format ){
-                    _txt = me.node.format( d, tag );
+                    _txt = me.node.format( txt, tag );
+                } else {
+                    //否则用fieldConfig上面的
+                    let _coord = me.app.getComponent({name:'coord'});
+                    let fieldConfig = _coord.getFieldConfig( me.field );
+                    if(fieldConfig ){
+                        _txt = fieldConfig.getFormatValue( txt );
+                    };
                 };
-                tag.text = _txt || d;
+                tag.text = _txt || txt;
 
                 return tag
             }))
@@ -285,7 +295,7 @@ class CloudGraphs extends GraphsBase
                         nodes : [ this.nodeData ]
                     };
                     if( this.nodeData.text ){
-                        e.eventInfo.title = this.nodeData.text;
+                        e.eventInfo.title = '';//this.nodeData.text;
                     };
     
                     //fire到root上面去的是为了让root去处理tips

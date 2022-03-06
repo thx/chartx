@@ -289,7 +289,7 @@ class sankeyGraphs extends GraphsBase
                 //type给tips用
                 linkData.type = "sankey";
                 link.field = me.field;
-                link.name  = '__no__name'
+                link.__no__name = true
 
                 e.eventInfo = {
                     trigger : me.node,

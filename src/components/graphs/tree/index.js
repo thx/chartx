@@ -263,6 +263,8 @@ class Tree extends GraphsBase {
 
                         this.labelsSp.addChild( _shrinkIconBack );
                         this.labelsSp.addChild( _shrinkIcon );
+
+                        _shrinkIcon._shrinkIconBack = _shrinkIconBack;
                         _shrinkIcon.on( event.types.get(), (e)=> {
                 
                             let trigger = this.node.shrink;
@@ -273,12 +275,14 @@ class Tree extends GraphsBase {
                             };
 
                             //下面的这个就只在鼠标环境下有就好了
-                            if( e.type == 'mousedown' ){
-                                _shrinkIconBack.context.r += 1;
-                            }
-                            if( e.type == 'mouseup' ){
-                                _shrinkIconBack.context.r -= 1;
-                            }
+                            if( _shrinkIconBack.context ){
+                                if( e.type == 'mousedown' ){
+                                    _shrinkIconBack.context.r += 1;
+                                }
+                                if( e.type == 'mouseup' ){
+                                    _shrinkIconBack.context.r -= 1;
+                                }
+                            };
                            
                             if( this.node.shrink.triggerEventType.indexOf( e.type ) > -1 ){
                                 if(this.shrinked.indexOf( node.key ) == -1){
@@ -330,8 +334,23 @@ class Tree extends GraphsBase {
         item.labelElement    && item.labelElement.destroy();
         item.arrowElement    && item.arrowElement.destroy();
         item.edgeIconElement && item.edgeIconElement.destroy();
+        item.edgeIconBack    && item.edgeIconBack.destroy();
+
+        //下面两个是tree中独有的
         item.shrinkIcon      && item.shrinkIcon.destroy();
         item.shrinkIconBack  && item.shrinkIconBack.destroy();
+
+        if( Array.isArray( item.key ) ){
+            //是个edge的话，要检查下源头是不是没有子节点了， 没有子节点了， 还要把shrinkIcon 都干掉
+            let sourceNode = item.source;
+            
+            if( !this.data.edges.find( item => item.key[0] == sourceNode.key ) ){
+                //如歌edges里面还有 targetNode.key 开头的，targetNode 还有子节点, 否则就可以把 targetNode的shrinkIcon去掉
+                sourceNode.shrinkIcon && sourceNode.shrinkIcon.destroy();
+                sourceNode.shrinkIconBack  && sourceNode.shrinkIconBack.destroy();
+            }
+        }
+
     }
 
 

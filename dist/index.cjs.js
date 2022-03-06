@@ -8778,10 +8778,14 @@ function _default(dataOrg, opt) {
 
     var rows = _getValidRows(function (rowData) {
       Canvax._.each(dataFrame.fields, function (_field) {
-        var _val = rowData[_field]; //如果是可以转换为number的数据就尽量转换为number
+        var _val = rowData[_field];
 
-        if (!isNaN(_val) && _val !== "" && _val !== null) {
-          _val = Number(_val);
+        if (opt.coord && (opt.coord.xAxis && _field == opt.coord.xAxis.field && opt.coord.xAxis.layoutType != 'proportion' || opt.coord.aAxis && _field == opt.coord.aAxis.field)) ; else {
+          //其他数据都需要保证是number
+          //如果是可以转换为number的数据就尽量转换为number
+          if (!isNaN(_val) && _val !== "" && _val !== null) {
+            _val = Number(_val);
+          }
         }
 
         var gData = Canvax._.find(total, function (g) {
@@ -10439,7 +10443,13 @@ var coordBase = /*#__PURE__*/function (_Component) {
           value = config.format.apply(this, arguments);
         }
       } else {
-        value = (0, _typeof2["default"])(value) == "object" ? JSON.stringify(value) : (0, _numeral["default"])(value).format('0,0');
+        if ((0, _typeof2["default"])(value) == "object") {
+          value = JSON.stringify(value);
+        } else if (!isNaN(value) && value !== "" && value !== null) {
+          //可以转换为number的， 就用 numeral 来格式化一下
+          value = (0, _numeral["default"])(value).format('0,0');
+        } //value = typeof(value) == "object" ? JSON.stringify(value) : numeral(value).format('0,0');
+
       }
       return value;
     } //设置 graphsFieldsMap 中对应field 的 enabled状态
@@ -10480,6 +10490,21 @@ var coordBase = /*#__PURE__*/function (_Component) {
       }
 
       get(me.graphsFieldsMap);
+
+      if (!fieldConfig) {
+        //如果再graphsFieldsMap中找不到， 也可能是传入的keyField parentKeyField 等
+        //从opt中找一次
+        var config = (this._opt.fieldsConfig || {})[field];
+
+        if (config) {
+          config.getFormatValue = function (value) {
+            return me.getFormatValue(value, config, config);
+          };
+
+          fieldConfig = config;
+        }
+      }
+
       return fieldConfig;
     } //从 graphsFieldsMap 中过滤筛选出来一个一一对应的 enabled为true的对象结构
     //这个方法还必须要返回的数据里描述出来多y轴的结构。否则外面拿到数据后并不好处理那个数据对应哪个轴
@@ -22249,6 +22274,7 @@ var PieGraphs = /*#__PURE__*/function (_GraphsBase) {
         var rowData = dataFrame.getRowDataAt(i);
         var layoutData = {
           type: "pie",
+          field: me.field,
           rowData: rowData,
           //把这一行数据给到layoutData引用起来
           focused: false,
@@ -22265,7 +22291,7 @@ var PieGraphs = /*#__PURE__*/function (_GraphsBase) {
           color: null,
           //加个color属性是为了给tips用
           value: rowData[me.field],
-          label: rowData[me.groupField || me.label.field || me.field],
+          label: rowData[me.keyField || me.field],
           labelText: null,
           //绘制的时候再设置,label format后的数据
           iNode: i
@@ -22274,6 +22300,7 @@ var PieGraphs = /*#__PURE__*/function (_GraphsBase) {
         var color = me._getColor(me.node.fillStyle, layoutData);
 
         layoutData.fillStyle = layoutData.color = color;
+        debugger;
         data.push(layoutData);
       }
 
@@ -22415,6 +22442,7 @@ var PieGraphs = /*#__PURE__*/function (_GraphsBase) {
 
 
             data[j].labelText = me._getLabelText(data[j]);
+            data[j].subValue = fixedPercentage + "%";
             me.currentAngle += angle;
 
             if (me.currentAngle > limitAngle) {
@@ -22460,7 +22488,7 @@ var PieGraphs = /*#__PURE__*/function (_GraphsBase) {
             str = this.label.format(itemData.label, itemData);
           }
         } else {
-          var _field = this.label.field || this.groupField;
+          var _field = this.keyField;
 
           if (_field) {
             str = itemData.rowData[_field] + "：" + itemData.percentage + "%";
@@ -22539,10 +22567,10 @@ var PieGraphs = /*#__PURE__*/function (_GraphsBase) {
           detail: '字段配置',
           "default": null
         },
-        groupField: {
+        keyField: {
           detail: '分组字段',
           "default": null,
-          documentation: 'groupField主要是给legend用的， 所有在legend中需要显示的分组数据，都用groupField'
+          documentation: 'keyField主要是给legend用的， 所有在legend中需要显示的分组数据，都用keyField'
         },
         sort: {
           detail: '排序，默认不排序，可以配置为asc,desc',
@@ -22632,6 +22660,23 @@ var PieGraphs = /*#__PURE__*/function (_GraphsBase) {
           }
         }
       };
+    }
+  }, {
+    key: "polyfill",
+    value: function polyfill(opt) {
+      if (opt.groupField) {
+        //20220304 keyField 统一为keyField
+        opt.keyField = opt.groupField;
+        delete opt.groupField;
+      }
+
+      if (opt.label && opt.label.field) {
+        //已经移除，开始使用keyField
+        opt.keyField = opt.label.field;
+        delete opt.label.field;
+      }
+
+      return opt;
     }
   }]);
   return PieGraphs;
@@ -23848,27 +23893,41 @@ var CloudGraphs = /*#__PURE__*/function (_GraphsBase) {
         });
       }
 
-      var layout = (0, _cloud["default"])().size([me.width, me.height]).words(me.dataFrame.getFieldData(me.field).map(function (d, ind) {
-        var rowData = me.app.dataFrame.getRowDataAt(me.getDaraFrameIndOfVal(d)); //这里不能直接用i去从dataFrame里查询,因为cloud layout后，可能会扔掉渲染不下的部分
-
+      var layout = (0, _cloud["default"])().size([me.width, me.height]).words(me.dataFrame.getFieldData(me.field).map(function (txt, ind) {
+        //这里不能直接用i去从dataFrame里查询,因为cloud layout后，可能会扔掉渲染不下的部分
+        var rowData = me.app.dataFrame.getRowDataAt(me.getDaraFrameIndOfVal(txt));
         var tag = {
           type: "cloud",
           rowData: rowData,
           field: me.field,
-          value: d,
+          name: "",
+          //tips中就不会显示name
+          value: txt,
           text: null,
-          size: me._getFontSize(rowData, d),
+          size: me._getFontSize(rowData, txt),
           iNode: ind,
-          color: null //在绘制的时候统一设置
-
+          color: null,
+          //在绘制的时候统一设置
+          __no__name: true
         };
         tag.fontColor = me._getFontColor(tag);
-        var _txt = d;
+        var _txt = txt;
 
         if (me.node.format) {
-          _txt = me.node.format(d, tag);
+          _txt = me.node.format(txt, tag);
+        } else {
+          //否则用fieldConfig上面的
+          var _coord = me.app.getComponent({
+            name: 'coord'
+          });
+
+          var fieldConfig = _coord.getFieldConfig(me.field);
+
+          if (fieldConfig) {
+            _txt = fieldConfig.getFormatValue(txt);
+          }
         }
-        tag.text = _txt || d;
+        tag.text = _txt || txt;
         return tag;
       })).padding(me.node.padding).rotate(function (item, ind) {
         //return 0;
@@ -23917,7 +23976,7 @@ var CloudGraphs = /*#__PURE__*/function (_GraphsBase) {
             };
 
             if (this.nodeData.text) {
-              e.eventInfo.title = this.nodeData.text;
+              e.eventInfo.title = ''; //this.nodeData.text;
             }
 
             me.app.fire(e.type, e);
@@ -30344,7 +30403,7 @@ var sankeyGraphs = /*#__PURE__*/function (_GraphsBase) {
 
           linkData.type = "sankey";
           link.field = me.field;
-          link.name = '__no__name';
+          link.__no__name = true;
           e.eventInfo = {
             trigger: me.node,
             title: linkData.source.name + " <span style='display:inline-block;margin-left:4px;position:relative;top:-0.5px;font-size:16px;left:-3px;'>></span> " + linkData.target.name,
@@ -30683,8 +30742,23 @@ var Progress = /*#__PURE__*/function (_GraphsBase) {
       };
 
       if (field) {
-        if (me.label.format && _.isFunction(me.label.format)) {
-          nodeData.text = me.label.format.apply(this, [val, nodeData]);
+        if (me.label.format) {
+          if (_.isFunction(me.label.format)) {
+            nodeData.text = me.label.format.apply(this, [val, nodeData]);
+          }
+        } else {
+          //否则用fieldConfig上面的
+          var _coord2 = me.app.getComponent({
+            name: 'coord'
+          });
+
+          var fieldConfig = _coord2.getFieldConfig(field);
+
+          if (fieldConfig) {
+            nodeData.text = fieldConfig.getFormatValue(nodeData.value);
+          } else {
+            nodeData.text = nodeData.value.toFixed(this.label.fixNum);
+          }
         }
       }
       /*  样式的设置全部在外面处理
@@ -30922,9 +30996,7 @@ var Progress = /*#__PURE__*/function (_GraphsBase) {
             },
             format: {
               detail: 'label格式化处理函数',
-              "default": function _default(val) {
-                return val.toFixed(this.label.fixNum);
-              }
+              "default": null
             },
             lineWidth: {
               detail: 'label文本描边线宽',
@@ -30994,8 +31066,8 @@ var Progress = /*#__PURE__*/function (_GraphsBase) {
 
 _index["default"].registerComponent(Progress, 'graphs', 'progress');
 
-var _default2 = Progress;
-exports["default"] = _default2;
+var _default = Progress;
+exports["default"] = _default;
 });
 
 unwrapExports(progress);
@@ -44745,30 +44817,34 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
             }
           });
 
-          _this4.widget(); //钉住某个node为参考点（不移动)
+          _this4.widget();
 
+          if (dataTrigger) {
+            var origin = dataTrigger.origin || (dataTrigger.params || {}).origin; //兼容老的配置里面没有params，直接传origin的情况
+            //钉住某个node为参考点（不移动)
 
-          if (dataTrigger && dataTrigger.origin) {
-            var preOriginNode = _.find(_this4._preData.nodes, function (node) {
-              return node.key == dataTrigger.origin;
-            });
+            if (origin != undefined) {
+              var preOriginNode = _.find(_this4._preData.nodes, function (node) {
+                return node.key == origin;
+              });
 
-            var originNode = _.find(_this4.data.nodes, function (node) {
-              return node.key == dataTrigger.origin;
-            });
+              var originNode = _.find(_this4.data.nodes, function (node) {
+                return node.key == origin;
+              });
 
-            if (preOriginNode && originNode) {
-              var offsetPos = {
-                x: parseInt(preOriginNode.x) - parseInt(originNode.x),
-                y: parseInt(preOriginNode.y) - parseInt(originNode.y)
-              };
+              if (preOriginNode && originNode) {
+                var offsetPos = {
+                  x: parseInt(preOriginNode.x) - parseInt(originNode.x),
+                  y: parseInt(preOriginNode.y) - parseInt(originNode.y)
+                };
 
-              var _this4$zoom$offset = _this4.zoom.offset(offsetPos),
-                  x = _this4$zoom$offset.x,
-                  y = _this4$zoom$offset.y;
+                var _this4$zoom$offset = _this4.zoom.offset(offsetPos),
+                    x = _this4$zoom$offset.x,
+                    y = _this4$zoom$offset.y;
 
-              me.graphsView.context.x = parseInt(x);
-              me.graphsView.context.y = parseInt(y);
+                me.graphsView.context.x = parseInt(x);
+                me.graphsView.context.y = parseInt(y);
+              }
             }
           }
           resolve();
@@ -45051,9 +45127,11 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
           });
 
           _path.on(event.types.get(), function (e) {
+            var node = this.nodeData;
+            node.__no_value = true;
             e.eventInfo = {
               trigger: me.line,
-              nodes: [this.nodeData]
+              nodes: [node]
             };
             me.app.fire(e.type, e);
           });
@@ -45129,9 +45207,11 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
             });
 
             _edgeLabel.on(event.types.get(), function (e) {
+              var node = this.nodeData;
+              node.__no_value = true;
               e.eventInfo = {
                 trigger: me.line,
-                nodes: [this.nodeData]
+                nodes: [node]
               };
               me.app.fire(e.type, e);
             });
@@ -45231,6 +45311,8 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
               });
 
               _edgeIcon.on(event.types.get(), function (e) {
+                var node = this.nodeData;
+                node.__no_value = true;
                 var trigger = me.line;
 
                 if (me.line.icon['on' + e.type]) {
@@ -45238,7 +45320,7 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
                 }
                 e.eventInfo = {
                   trigger: trigger,
-                  nodes: [this.nodeData]
+                  nodes: [node]
                 };
                 me.app.fire(e.type, e);
               });
@@ -45362,9 +45444,11 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
         me.nodesSp.addChild(_boxShape);
 
         _boxShape.on(event.types.get(), function (e) {
+          var node = this.nodeData;
+          node.__no_value = true;
           e.eventInfo = {
             trigger: me.node,
-            nodes: [this.nodeData]
+            nodes: [node]
           };
 
           if (me.node.focus.enabled) {
@@ -45693,13 +45777,27 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
       var _c; //this.node.content;
 
 
-      if (this._isField(this.node.content.field)) {
-        _c = rowData[this.node.content.field];
+      var field = this.node.content.field;
+
+      if (this._isField(field)) {
+        _c = rowData[field];
       }
 
       if (me.node.content.format && _.isFunction(me.node.content.format)) {
         _c = me.node.content.format.apply(this, [_c, rowData]);
+      } else {
+        //否则用fieldConfig上面的
+        var _coord = me.app.getComponent({
+          name: 'coord'
+        });
+
+        var fieldConfig = _coord.getFieldConfig(field);
+
+        if (fieldConfig) {
+          _c = fieldConfig.getFormatValue(_c);
+        }
       }
+
       return _c;
     }
   }, {
@@ -46571,6 +46669,8 @@ var Tree = /*#__PURE__*/function (_GraphsBase) {
 
               _this3.labelsSp.addChild(_shrinkIcon);
 
+              _shrinkIcon._shrinkIconBack = _shrinkIconBack;
+
               _shrinkIcon.on(event.types.get(), function (e) {
                 var trigger = _this3.node.shrink;
                 e.eventInfo = {
@@ -46580,12 +46680,14 @@ var Tree = /*#__PURE__*/function (_GraphsBase) {
 
                 }; //下面的这个就只在鼠标环境下有就好了
 
-                if (e.type == 'mousedown') {
-                  _shrinkIconBack.context.r += 1;
-                }
+                if (_shrinkIconBack.context) {
+                  if (e.type == 'mousedown') {
+                    _shrinkIconBack.context.r += 1;
+                  }
 
-                if (e.type == 'mouseup') {
-                  _shrinkIconBack.context.r -= 1;
+                  if (e.type == 'mouseup') {
+                    _shrinkIconBack.context.r -= 1;
+                  }
                 }
 
                 if (_this3.node.shrink.triggerEventType.indexOf(e.type) > -1) {
@@ -46637,8 +46739,23 @@ var Tree = /*#__PURE__*/function (_GraphsBase) {
       item.labelElement && item.labelElement.destroy();
       item.arrowElement && item.arrowElement.destroy();
       item.edgeIconElement && item.edgeIconElement.destroy();
+      item.edgeIconBack && item.edgeIconBack.destroy(); //下面两个是tree中独有的
+
       item.shrinkIcon && item.shrinkIcon.destroy();
       item.shrinkIconBack && item.shrinkIconBack.destroy();
+
+      if (Array.isArray(item.key)) {
+        //是个edge的话，要检查下源头是不是没有子节点了， 没有子节点了， 还要把shrinkIcon 都干掉
+        var sourceNode = item.source;
+
+        if (!this.data.edges.find(function (item) {
+          return item.key[0] == sourceNode.key;
+        })) {
+          //如歌edges里面还有 targetNode.key 开头的，targetNode 还有子节点, 否则就可以把 targetNode的shrinkIcon去掉
+          sourceNode.shrinkIcon && sourceNode.shrinkIcon.destroy();
+          sourceNode.shrinkIconBack && sourceNode.shrinkIconBack.destroy();
+        }
+      }
     }
   }], [{
     key: "defaultProps",
@@ -48297,7 +48414,7 @@ var Force = /*#__PURE__*/function (_GraphsBase) {
         var labelTextBaseline = me.getProp(me.label.textBaseline, node.nodeData);
         var labelTextAlign = me.getProp(me.label.textAlign, node.nodeData);
 
-        var _label = new Text(node.nodeData.rowData.label, {
+        var _label = new Text(node.nodeData.label, {
           context: {
             fontSize: labelFontSize,
             fillStyle: labelFontColor,
@@ -48384,8 +48501,21 @@ var Force = /*#__PURE__*/function (_GraphsBase) {
         _c = rowData[this.label.field];
       }
 
-      if (me.label.format && _.isFunction(me.label.format)) {
-        _c = me.label.format.apply(this, [_c, rowData]);
+      if (me.label.format) {
+        if (_.isFunction(me.label.format)) {
+          _c = me.label.format.apply(this, [_c, rowData]);
+        }
+      } else {
+        //否则用fieldConfig上面的
+        var _coord = me.app.getComponent({
+          name: 'coord'
+        });
+
+        var fieldConfig = _coord.getFieldConfig(me.keyField);
+
+        if (fieldConfig) {
+          _c = fieldConfig.getFormatValue(_c);
+        }
       }
       return _c;
     }
@@ -52282,10 +52412,11 @@ var Tips = /*#__PURE__*/function (_Component) {
       //let y = this._checkY( e.clientY + this.offsetY);
 
       var domBounding = this.app.canvax.el.getBoundingClientRect();
+      var globalPoint = e.target.localToGlobal(e.point);
 
-      var x = this._checkX(e.offsetX + domBounding.x + this.offsetX);
+      var x = this._checkX(globalPoint.x + domBounding.x + this.offsetX);
 
-      var y = this._checkY(e.offsetY + domBounding.y + this.offsetY);
+      var y = this._checkY(globalPoint.y + domBounding.y + this.offsetY);
 
       this._tipDom.style.cssText += ";visibility:visible;left:" + x + "px;top:" + y + "px;";
 
@@ -52363,6 +52494,7 @@ var Tips = /*#__PURE__*/function (_Component) {
       if (!info.nodes.length && !info.tipsContent) {
         return str;
       }
+      var hasNodesContent = false;
 
       if (info.nodes.length) {
         str += "<table >";
@@ -52371,38 +52503,55 @@ var Tips = /*#__PURE__*/function (_Component) {
           str += "<tr><td colspan='2' style='text-align:left;padding-left:3px;'>";
           str += "<span style='font-size:12px;padding:4px;color:#333;'>" + info.title + "</span>";
           str += "</td></tr>";
+          hasNodesContent = true;
         }
 
         _.each(info.nodes, function (node, i) {
           // if (!node.value && node.value !== 0) {
           //     return;
           // };
-          var hasValue = node.value || node.value === 0;
           var style = node.color || node.fillStyle || node.strokeStyle;
           var name, value;
 
-          var fieldConfig = _coord.getFieldConfig(node.field); //node.name优先级最高，是因为像 pie funnel 等一维图表，会有name属性
+          var fieldConfig = _coord.getFieldConfig(node.field); //node.name优先级最高，是因为像 pie funnel cloud 等一维图表，会有name属性
+          //关系图中会有content
 
 
-          name = node.name || node.label || fieldConfig.name || node.field;
-          value = fieldConfig.getFormatValue(node.value);
+          name = node.name || node.label || (fieldConfig || {}).name || node.content || node.field || '';
+          value = fieldConfig ? fieldConfig.getFormatValue(node.value) : node.value;
+          var hasValue = node.value || node.value === 0;
 
-          if (!hasValue) {
+          if (!hasValue && !node.__no_value) {
             style = "#ddd";
             value = '--';
           }
 
           str += "<tr>";
 
-          if (name != '__no__name') {
-            str += "<td style='padding:0px 6px;color:" + (!hasValue ? '#ddd' : '#a0a0a0;') + "'>" + name + "</td>";
+          if (!node.__no__name) {
+            str += "<td style='padding:0px 6px;color:" + (!hasValue && !node.__no_value ? '#ddd' : '#a0a0a0;') + "'>" + name + "</td>";
+            hasNodesContent = true;
           }
 
-          str += "<td style='padding:0px 6px;font-weight:bold;'><span style='color:" + style + "'>" + value + "</span></td>";
+          if (!node.__no_value) {
+            str += "<td style='padding:0px 6px;font-weight:bold;'>";
+            str += "<span style='color:" + style + "'>" + value + "</span>";
+
+            if (node.subValue) {
+              str += "<span style='padding-left:6px;font-weight:normal;'>" + node.subValue + "</span>";
+              hasNodesContent = true;
+            }
+            str += "</td>";
+          }
+
           str += "</tr>";
         });
 
         str += "</table>";
+      }
+
+      if (!hasNodesContent) {
+        str = "";
       }
 
       if (info.tipsContent) {

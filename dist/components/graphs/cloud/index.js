@@ -169,29 +169,45 @@ var CloudGraphs = /*#__PURE__*/function (_GraphsBase) {
         });
       }
 
-      var layout = (0, _cloud["default"])().size([me.width, me.height]).words(me.dataFrame.getFieldData(me.field).map(function (d, ind) {
-        var rowData = me.app.dataFrame.getRowDataAt(me.getDaraFrameIndOfVal(d)); //这里不能直接用i去从dataFrame里查询,因为cloud layout后，可能会扔掉渲染不下的部分
-
+      var layout = (0, _cloud["default"])().size([me.width, me.height]).words(me.dataFrame.getFieldData(me.field).map(function (txt, ind) {
+        //这里不能直接用i去从dataFrame里查询,因为cloud layout后，可能会扔掉渲染不下的部分
+        var rowData = me.app.dataFrame.getRowDataAt(me.getDaraFrameIndOfVal(txt));
         var tag = {
           type: "cloud",
           rowData: rowData,
           field: me.field,
-          value: d,
+          name: "",
+          //tips中就不会显示name
+          value: txt,
           text: null,
-          size: me._getFontSize(rowData, d),
+          size: me._getFontSize(rowData, txt),
           iNode: ind,
-          color: null //在绘制的时候统一设置
-
+          color: null,
+          //在绘制的时候统一设置
+          __no__name: true
         };
         tag.fontColor = me._getFontColor(tag);
-        var _txt = d;
+        var _txt = txt;
 
         if (me.node.format) {
-          _txt = me.node.format(d, tag);
+          _txt = me.node.format(txt, tag);
+        } else {
+          //否则用fieldConfig上面的
+          var _coord = me.app.getComponent({
+            name: 'coord'
+          });
+
+          var fieldConfig = _coord.getFieldConfig(me.field);
+
+          if (fieldConfig) {
+            _txt = fieldConfig.getFormatValue(txt);
+          }
+
+          ;
         }
 
         ;
-        tag.text = _txt || d;
+        tag.text = _txt || txt;
         return tag;
       })).padding(me.node.padding).rotate(function (item, ind) {
         //return 0;
@@ -240,7 +256,7 @@ var CloudGraphs = /*#__PURE__*/function (_GraphsBase) {
             };
 
             if (this.nodeData.text) {
-              e.eventInfo.title = this.nodeData.text;
+              e.eventInfo.title = ''; //this.nodeData.text;
             }
 
             ; //fire到root上面去的是为了让root去处理tips

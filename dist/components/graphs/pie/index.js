@@ -163,6 +163,7 @@ var PieGraphs = /*#__PURE__*/function (_GraphsBase) {
         var rowData = dataFrame.getRowDataAt(i);
         var layoutData = {
           type: "pie",
+          field: me.field,
           rowData: rowData,
           //把这一行数据给到layoutData引用起来
           focused: false,
@@ -179,7 +180,7 @@ var PieGraphs = /*#__PURE__*/function (_GraphsBase) {
           color: null,
           //加个color属性是为了给tips用
           value: rowData[me.field],
-          label: rowData[me.groupField || me.label.field || me.field],
+          label: rowData[me.keyField || me.field],
           labelText: null,
           //绘制的时候再设置,label format后的数据
           iNode: i
@@ -188,6 +189,7 @@ var PieGraphs = /*#__PURE__*/function (_GraphsBase) {
         var color = me._getColor(me.node.fillStyle, layoutData);
 
         layoutData.fillStyle = layoutData.color = color;
+        debugger;
         data.push(layoutData);
       }
 
@@ -339,6 +341,7 @@ var PieGraphs = /*#__PURE__*/function (_GraphsBase) {
 
 
             data[j].labelText = me._getLabelText(data[j]);
+            data[j].subValue = fixedPercentage + "%";
             me.currentAngle += angle;
 
             if (me.currentAngle > limitAngle) {
@@ -392,7 +395,7 @@ var PieGraphs = /*#__PURE__*/function (_GraphsBase) {
             str = this.label.format(itemData.label, itemData);
           }
         } else {
-          var _field = this.label.field || this.groupField;
+          var _field = this.keyField;
 
           if (_field) {
             str = itemData.rowData[_field] + "：" + itemData.percentage + "%";
@@ -471,10 +474,10 @@ var PieGraphs = /*#__PURE__*/function (_GraphsBase) {
           detail: '字段配置',
           "default": null
         },
-        groupField: {
+        keyField: {
           detail: '分组字段',
           "default": null,
-          documentation: 'groupField主要是给legend用的， 所有在legend中需要显示的分组数据，都用groupField'
+          documentation: 'keyField主要是给legend用的， 所有在legend中需要显示的分组数据，都用keyField'
         },
         sort: {
           detail: '排序，默认不排序，可以配置为asc,desc',
@@ -564,6 +567,23 @@ var PieGraphs = /*#__PURE__*/function (_GraphsBase) {
           }
         }
       };
+    }
+  }, {
+    key: "polyfill",
+    value: function polyfill(opt) {
+      if (opt.groupField) {
+        //20220304 keyField 统一为keyField
+        opt.keyField = opt.groupField;
+        delete opt.groupField;
+      }
+
+      if (opt.label && opt.label.field) {
+        //已经移除，开始使用keyField
+        opt.keyField = opt.label.field;
+        delete opt.label.field;
+      }
+
+      return opt;
     }
   }]);
   return PieGraphs;

@@ -190,10 +190,11 @@ var Tips = /*#__PURE__*/function (_Component) {
       //let y = this._checkY( e.clientY + this.offsetY);
 
       var domBounding = this.app.canvax.el.getBoundingClientRect();
+      var globalPoint = e.target.localToGlobal(e.point);
 
-      var x = this._checkX(e.offsetX + domBounding.x + this.offsetX);
+      var x = this._checkX(globalPoint.x + domBounding.x + this.offsetX);
 
-      var y = this._checkY(e.offsetY + domBounding.y + this.offsetY);
+      var y = this._checkY(globalPoint.y + domBounding.y + this.offsetY);
 
       this._tipDom.style.cssText += ";visibility:visible;left:" + x + "px;top:" + y + "px;";
 
@@ -283,6 +284,7 @@ var Tips = /*#__PURE__*/function (_Component) {
       }
 
       ;
+      var hasNodesContent = false;
 
       if (info.nodes.length) {
         str += "<table >";
@@ -291,6 +293,7 @@ var Tips = /*#__PURE__*/function (_Component) {
           str += "<tr><td colspan='2' style='text-align:left;padding-left:3px;'>";
           str += "<span style='font-size:12px;padding:4px;color:#333;'>" + info.title + "</span>";
           str += "</td></tr>";
+          hasNodesContent = true;
         }
 
         ;
@@ -299,32 +302,50 @@ var Tips = /*#__PURE__*/function (_Component) {
           // if (!node.value && node.value !== 0) {
           //     return;
           // };
-          var hasValue = node.value || node.value === 0;
           var style = node.color || node.fillStyle || node.strokeStyle;
           var name, value;
 
-          var fieldConfig = _coord.getFieldConfig(node.field); //node.name优先级最高，是因为像 pie funnel 等一维图表，会有name属性
+          var fieldConfig = _coord.getFieldConfig(node.field); //node.name优先级最高，是因为像 pie funnel cloud 等一维图表，会有name属性
+          //关系图中会有content
 
 
-          name = node.name || node.label || fieldConfig.name || node.field;
-          value = fieldConfig.getFormatValue(node.value);
+          name = node.name || node.label || (fieldConfig || {}).name || node.content || node.field || '';
+          value = fieldConfig ? fieldConfig.getFormatValue(node.value) : node.value;
+          var hasValue = node.value || node.value === 0;
 
-          if (!hasValue) {
+          if (!hasValue && !node.__no_value) {
             style = "#ddd";
             value = '--';
           }
 
           str += "<tr>";
 
-          if (name != '__no__name') {
-            str += "<td style='padding:0px 6px;color:" + (!hasValue ? '#ddd' : '#a0a0a0;') + "'>" + name + "</td>";
+          if (!node.__no__name) {
+            str += "<td style='padding:0px 6px;color:" + (!hasValue && !node.__no_value ? '#ddd' : '#a0a0a0;') + "'>" + name + "</td>";
+            hasNodesContent = true;
           }
 
-          str += "<td style='padding:0px 6px;font-weight:bold;'><span style='color:" + style + "'>" + value + "</span></td>";
+          if (!node.__no_value) {
+            str += "<td style='padding:0px 6px;font-weight:bold;'>";
+            str += "<span style='color:" + style + "'>" + value + "</span>";
+
+            if (node.subValue) {
+              str += "<span style='padding-left:6px;font-weight:normal;'>" + node.subValue + "</span>";
+              hasNodesContent = true;
+            }
+
+            ;
+            str += "</td>";
+          }
+
           str += "</tr>";
         });
 
         str += "</table>";
+      }
+
+      if (!hasNodesContent) {
+        str = "";
       }
 
       if (info.tipsContent) {

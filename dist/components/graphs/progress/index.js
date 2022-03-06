@@ -176,11 +176,24 @@ var Progress = /*#__PURE__*/function (_GraphsBase) {
       };
 
       if (field) {
-        if (me.label.format && _.isFunction(me.label.format)) {
-          nodeData.text = me.label.format.apply(this, [val, nodeData]);
-        }
+        if (me.label.format) {
+          if (_.isFunction(me.label.format)) {
+            nodeData.text = me.label.format.apply(this, [val, nodeData]);
+          }
+        } else {
+          //否则用fieldConfig上面的
+          var _coord2 = me.app.getComponent({
+            name: 'coord'
+          });
 
-        ;
+          var fieldConfig = _coord2.getFieldConfig(field);
+
+          if (fieldConfig) {
+            nodeData.text = fieldConfig.getFormatValue(nodeData.value);
+          } else {
+            nodeData.text = nodeData.value.toFixed(this.label.fixNum);
+          }
+        }
       }
 
       ;
@@ -446,9 +459,7 @@ var Progress = /*#__PURE__*/function (_GraphsBase) {
             },
             format: {
               detail: 'label格式化处理函数',
-              "default": function _default(val) {
-                return val.toFixed(this.label.fixNum);
-              }
+              "default": null
             },
             lineWidth: {
               detail: 'label文本描边线宽',
@@ -518,5 +529,5 @@ var Progress = /*#__PURE__*/function (_GraphsBase) {
 
 _index["default"].registerComponent(Progress, 'graphs', 'progress');
 
-var _default2 = Progress;
-exports["default"] = _default2;
+var _default = Progress;
+exports["default"] = _default;

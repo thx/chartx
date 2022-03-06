@@ -11,10 +11,10 @@ class PieGraphs extends GraphsBase
                 detail: '字段配置',
                 default: null
             },
-            groupField: {
+            keyField: {
                 detail: '分组字段',
                 default: null,
-                documentation: 'groupField主要是给legend用的， 所有在legend中需要显示的分组数据，都用groupField'
+                documentation: 'keyField主要是给legend用的， 所有在legend中需要显示的分组数据，都用keyField'
             },
             sort : {
                 detail: '排序，默认不排序，可以配置为asc,desc',
@@ -104,6 +104,20 @@ class PieGraphs extends GraphsBase
                 }
             }
         }
+    }
+
+    static polyfill( opt ){
+        if( opt.groupField ){ 
+            //20220304 keyField 统一为keyField
+            opt.keyField = opt.groupField;
+            delete opt.groupField;
+        }
+        if( opt.label && opt.label.field ){
+            //已经移除，开始使用keyField
+            opt.keyField = opt.label.field;
+            delete opt.label.field;
+        }
+        return opt
     }
 
     constructor( opt, app )
@@ -217,6 +231,7 @@ class PieGraphs extends GraphsBase
 
             let layoutData = {
                 type          : "pie",
+                field         : me.field,
                 rowData       : rowData,//把这一行数据给到layoutData引用起来
                 focused       : false,  //是否获取焦点，外扩
                 focusEnabled  : me.node.focus.enabled,
@@ -231,7 +246,7 @@ class PieGraphs extends GraphsBase
                 color         : null, //加个color属性是为了给tips用
 
                 value         : rowData[ me.field ],
-                label         : rowData[ me.groupField || me.label.field || me.field ],
+                label         : rowData[ me.keyField || me.field ],
                 labelText     : null, //绘制的时候再设置,label format后的数据
                 iNode         : i
             };
@@ -239,7 +254,7 @@ class PieGraphs extends GraphsBase
             //设置颜色
             let color = me._getColor( me.node.fillStyle, layoutData );
             layoutData.fillStyle = layoutData.color = color;
-            
+            debugger
             data.push( layoutData );
         };
 
@@ -370,6 +385,7 @@ class PieGraphs extends GraphsBase
 
                         orginPercentage: percentage,
                         percentage: fixedPercentage,
+                        
                     
                         quadrant: quadrant, //象限
                         labelDirection: quadrant == 1 || quadrant == 4 ? 1 : 0,
@@ -378,6 +394,7 @@ class PieGraphs extends GraphsBase
 
                     //这个时候可以计算下label，因为很多时候外部label如果是配置的
                     data[j].labelText = me._getLabelText( data[j] );
+                    data[j].subValue  = fixedPercentage+"%";
                     
                     me.currentAngle += angle;
                     
@@ -422,7 +439,7 @@ class PieGraphs extends GraphsBase
                     str = this.label.format( itemData.label, itemData );
                 }
             } else {
-                let _field = this.label.field || this.groupField
+                let _field = this.keyField; 
                 if( _field ){
                     str = itemData.rowData[ _field ] + "：" + itemData.percentage + "%" 
                 } else {

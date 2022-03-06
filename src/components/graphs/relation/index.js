@@ -663,22 +663,24 @@ class Relation extends GraphsBase {
 
                 this.widget();
 
-                //钉住某个node为参考点（不移动)
-                if( dataTrigger && dataTrigger.origin ){
-                    
-                    let preOriginNode = _.find( this._preData.nodes, (node) => { return node.key == dataTrigger.origin } );
-                    let originNode = _.find( this.data.nodes, (node) => { return node.key == dataTrigger.origin } );
-                    
-                    if( preOriginNode && originNode ){
-                        let offsetPos = { 
-                            x: parseInt(preOriginNode.x)-parseInt(originNode.x), 
-                            y: parseInt(preOriginNode.y)-parseInt(originNode.y)
+                
+                if( dataTrigger ){
+                    let origin = dataTrigger.origin || (dataTrigger.params || {}).origin; //兼容老的配置里面没有params，直接传origin的情况
+                    //钉住某个node为参考点（不移动)
+                    if( origin != undefined ){
+                        let preOriginNode = _.find( this._preData.nodes, (node) => { return node.key == origin } );
+                        let originNode = _.find( this.data.nodes, (node) => { return node.key == origin } );
+                        
+                        if( preOriginNode && originNode ){
+                            let offsetPos = { 
+                                x: parseInt(preOriginNode.x)-parseInt(originNode.x), 
+                                y: parseInt(preOriginNode.y)-parseInt(originNode.y)
+                            };
+                            let { x, y } = this.zoom.offset( offsetPos );
+                            me.graphsView.context.x = parseInt(x);
+                            me.graphsView.context.y = parseInt(y);
                         };
-                        let { x, y } = this.zoom.offset( offsetPos );
-                        me.graphsView.context.x = parseInt(x);
-                        me.graphsView.context.y = parseInt(y);
                     };
-
                 };
 
                 resolve();
@@ -688,6 +690,7 @@ class Relation extends GraphsBase {
     }
 
     _destroy( item ){
+        
         item.shapeElement && item.shapeElement.destroy();
 
         if(item.contentElement.destroy){
@@ -970,9 +973,11 @@ class Relation extends GraphsBase {
                     }
                 });
                 _path.on(event.types.get(), function (e) {
+                    let node = this.nodeData;
+                    node.__no_value = true;
                     e.eventInfo = {
                         trigger: me.line,
-                        nodes: [ this.nodeData ]
+                        nodes: [ node ]
                     };
                     me.app.fire(e.type, e);
                 });
@@ -1042,9 +1047,11 @@ class Relation extends GraphsBase {
                         }
                     });
                     _edgeLabel.on(event.types.get(), function (e) {
+                        let node = this.nodeData;
+                        node.__no_value = true;
                         e.eventInfo = {
                             trigger: me.line,
-                            nodes: [ this.nodeData ]
+                            nodes: [ node ]
                         };
                         me.app.fire(e.type, e);
                     });
@@ -1134,14 +1141,15 @@ class Relation extends GraphsBase {
                             }
                         });
                         _edgeIcon.on(event.types.get(), function (e) {
-                            
+                            let node = this.nodeData;
+                            node.__no_value = true;
                             let trigger = me.line;
                             if( me.line.icon[ 'on'+e.type ] ){
                                 trigger = me.line.icon;
                             };
                             e.eventInfo = {
                                 trigger,
-                                nodes: [ this.nodeData ]
+                                nodes: [ node ]
                             };
                             me.app.fire(e.type, e);
 
@@ -1253,9 +1261,11 @@ class Relation extends GraphsBase {
             });
             me.nodesSp.addChild(_boxShape);
             _boxShape.on(event.types.get(), function (e) {
+                let node = this.nodeData;
+                node.__no_value = true;
                 e.eventInfo = {
                     trigger: me.node,
-                    nodes: [this.nodeData]
+                    nodes: [ node ]
                 };
 
                 if( me.node.focus.enabled ){
@@ -1532,12 +1542,20 @@ class Relation extends GraphsBase {
         let me = this;
 
         let _c; //this.node.content;
-        if (this._isField(this.node.content.field)) {
-            _c = rowData[ this.node.content.field ];
+        let field = this.node.content.field;
+        if (this._isField(field)) {
+            _c = rowData[ field ];
         };
         if (me.node.content.format && _.isFunction(me.node.content.format)) {
             _c = me.node.content.format.apply(this, [ _c, rowData ]);
-        };
+        } else {
+            //否则用fieldConfig上面的
+            let _coord = me.app.getComponent({name:'coord'});
+            let fieldConfig = _coord.getFieldConfig( field );
+            if(fieldConfig ){
+                _c = fieldConfig.getFormatValue( _c );
+            };
+        }
         return _c;
     }
 

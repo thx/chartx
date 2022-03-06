@@ -63,9 +63,7 @@ class Progress extends GraphsBase
                     },
                     format    : {
                         detail : 'label格式化处理函数',
-                        default: function(val){
-                            return val.toFixed( this.label.fixNum );
-                        }
+                        default: null
                     },
                     lineWidth : {
                         detail : 'label文本描边线宽',
@@ -256,9 +254,20 @@ class Progress extends GraphsBase
         };
 
         if( field ){
-            if( me.label.format && _.isFunction( me.label.format ) ){
-                nodeData.text = me.label.format.apply( this, [ val, nodeData ] );
-            };
+            if( me.label.format ){
+                if( _.isFunction( me.label.format ) ){
+                    nodeData.text = me.label.format.apply( this, [ val, nodeData ] );
+                }
+            } else {
+                //否则用fieldConfig上面的
+                let _coord = me.app.getComponent({name:'coord'});
+                let fieldConfig = _coord.getFieldConfig( field );
+                if(fieldConfig ){
+                    nodeData.text = fieldConfig.getFormatValue( nodeData.value );
+                } else {
+                    nodeData.text = nodeData.value.toFixed( this.label.fixNum );
+                }
+            }
         };
 
         /*  样式的设置全部在外面处理
