@@ -207,11 +207,13 @@ class coordBase extends Component
         } else {
             if( typeof(value) == "object" ){
                 value = JSON.stringify(value);
-            } else if( !isNaN( value ) && value !== "" && value !== null ){
+            } 
+
+            //太黑盒，不再做处理
+            //else if( !isNaN( value ) && value !== "" && value !== null ){
                 //可以转换为number的， 就用 numeral 来格式化一下
-                value = numeral(value).format('0,0')
-            }
-            //value = typeof(value) == "object" ? JSON.stringify(value) : numeral(value).format('0,0');
+                //value = numeral(value).format('0,0')  //太黑色
+            //}
         };
         return value;
     }

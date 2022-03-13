@@ -184,13 +184,14 @@ class axis {
         } else {
             if (this.layoutType == "proportion") {
 
+                //如果像柱状图中有堆叠的情况出现， arr中已经把堆叠的数据加起来了
                 let arr = this._getDataSection();
 
-                if ("origin" in this._opt) {
+                if ("origin" in this._opt){
                     arr.push(this._opt.origin);
                 }
 
-                if (arr.length == 1) {
+                if (arr.length == 1){
                     arr.push(arr[0] * .5);
                 }
 
@@ -198,7 +199,7 @@ class axis {
                     arr = arr.concat( this.verniers )
                 }
 
-                if (this.symmetric) {
+                if (this.symmetric){
                     //如果需要处理为对称数据
                     let _min = _.min(arr);
                     let _max = _.max(arr);
@@ -209,7 +210,7 @@ class axis {
                     };
                 }
 
-                for (let ai = 0, al = arr.length; ai < al; ai++) {
+                for (let ai = 0, al = arr.length; ai < al; ai++){
                     arr[ai] = Number(arr[ai]);
                     if (isNaN(arr[ai])) {
                         arr.splice(ai, 1);
@@ -595,6 +596,7 @@ class axis {
                 let max = _.max(ds);
                 let val = "val" in opt ? opt.val : this.getValOfInd(opt.ind);
                 if (val >= min && val <= max) {
+
                     let _origin = this.origin;
                     let origiInRange = !(_origin < min || _origin > max);
                     //如果 origin 并不在这个区间

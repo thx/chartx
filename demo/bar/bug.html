@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
+<title>xChart demo -- bar</title>
+
+<script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
+<script type="text/javascript" src="../../dist/index.iife.js"></script>
+<!-- codemirror -->
+<script type="text/javascript" src="../../lib/codemirror/codemirror.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/active-line.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/javascript.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/matchbrackets.js"></script>
+<link rel="stylesheet" href="../../lib/codemirror/codemirror.css">
+<link rel="stylesheet" href="../../lib/codemirror/zenburn.css">
+<link rel="stylesheet" href="../../lib/codemirror/docs.css">
+<!-- codemirror end -->
+<!--bootstrap-->
+<script type="text/javascript" src="../../lib/bootstrap/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap-theme.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/docs.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap.min.css">
+<!--bootstrap end-->
+<script type="text/javascript" src="../../lib/demo.js"></script>
+<link rel="stylesheet" href="../../lib/demo.css">
+</head>
+<body >
+
+<table>
+    <tr>
+        <td id="td-vl">
+            <form><textarea id="code" name="code">
+
+                //chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
+                //第一行是表头。
+                var data = [
+    {"diff":4,"bottom":2,"top":4.6,"time":"1","day":"今天","dayNum":2,"startTime":"00:00","maxTimeDiscount":100},
+    {"diff":2.85,"bottom":1.75,"top":4.6,"time":"2","day":"今天","dayNum":2,"startTime":"04:00","maxTimeDiscount":100},
+    {"diff":4.22,"bottom":1.75,"top":5.97,"time":"3","day":"今天","dayNum":2,"startTime":"08:00","maxTimeDiscount":130},
+    {"diff":4.22,"bottom":1.75,"top":5.97,"time":"4","day":"今天","dayNum":2,"startTime":"12:00","maxTimeDiscount":130},
+    {"diff":4.22,"bottom":1.75,"top":5.97,"time":"5","day":"今天","dayNum":2,"startTime":"16:00","maxTimeDiscount":130},
+    {"diff":2.85,"bottom":1.75,"top":4.6,"time":"6","day":"今天","dayNum":2,"startTime":"20:00","maxTimeDiscount":100},
+    {"diff":2.85,"bottom":1.75,"top":4.6,"time":"7","day":"周三","dayNum":3,"startTime":"00:00","maxTimeDiscount":100},
+    {"diff":2.85,"bottom":1.75,"top":4.6,"time":"8","day":"周三","dayNum":3,"startTime":"04:00","maxTimeDiscount":100},
+    {"diff":4.22,"bottom":1.75,"top":5.97,"time":"9","day":"周三","dayNum":3,"startTime":"08:00","maxTimeDiscount":130},
+    {"diff":4.22,"bottom":1.75,"top":5.97,"time":"10","day":"周三","dayNum":3,"startTime":"12:00","maxTimeDiscount":130},
+    {"diff":4.22,"bottom":1.75,"top":5.97,"time":"11","day":"周三","dayNum":3,"startTime":"16:00","maxTimeDiscount":130},
+    {"diff":2.85,"bottom":1.75,"top":4.6,"time":"12","day":"周三","dayNum":3,"startTime":"20:00","maxTimeDiscount":100},
+    {"diff":2.85,"bottom":1.75,"top":4.6,"time":"13","day":"周四","dayNum":4,"startTime":"00:00","maxTimeDiscount":100},
+    {"diff":2.85,"bottom":1.75,"top":4.6,"time":"14","day":"周四","dayNum":4,"startTime":"04:00","maxTimeDiscount":100},
+    {"diff":4.22,"bottom":1.75,"top":5.97,"time":"15","day":"周四","dayNum":4,"startTime":"08:00","maxTimeDiscount":130},
+    {"diff":4.22,"bottom":1.75,"top":5.97,"time":"16","day":"周四","dayNum":4,"startTime":"12:00","maxTimeDiscount":130},
+    {"diff":4.22,"bottom":1.75,"top":5.97,"time":"17","day":"周四","dayNum":4,"startTime":"16:00","maxTimeDiscount":130},
+    {"diff":2.85,"bottom":1.75,"top":4.6,"time":"18","day":"周四","dayNum":4,"startTime":"20:00","maxTimeDiscount":100},
+    {"diff":2.85,"bottom":1.75,"top":4.6,"time":"19","day":"周五","dayNum":5,"startTime":"00:00","maxTimeDiscount":100},
+    {"diff":2.85,"bottom":1.75,"top":4.6,"time":"20","day":"周五","dayNum":5,"startTime":"04:00","maxTimeDiscount":100},
+    {"diff":4.22,"bottom":1.75,"top":5.97,"time":"21","day":"周五","dayNum":5,"startTime":"08:00","maxTimeDiscount":130},
+    {"diff":4.22,"bottom":1.75,"top":5.97,"time":"22","day":"周五","dayNum":5,"startTime":"12:00","maxTimeDiscount":130},
+    {"diff":4.22,"bottom":1.75,"top":5.97,"time":"23","day":"周五","dayNum":5,"startTime":"16:00","maxTimeDiscount":130},
+    {"diff":2.85,"bottom":1.75,"top":4.6,"time":"24","day":"周五","dayNum":5,"startTime":"20:00","maxTimeDiscount":100},
+    {"diff":2.85,"bottom":1.75,"top":4.6,"time":"25","day":"周六","dayNum":6,"startTime":"00:00","maxTimeDiscount":100},
+    {"diff":2.85,"bottom":1.75,"top":4.6,"time":"26","day":"周六","dayNum":6,"startTime":"04:00","maxTimeDiscount":100},
+    {"diff":4.22,"bottom":1.75,"top":5.97,"time":"27","day":"周六","dayNum":6,"startTime":"08:00","maxTimeDiscount":130},
+    {"diff":4.22,"bottom":1.75,"top":5.97,"time":"28","day":"周六","dayNum":6,"startTime":"12:00","maxTimeDiscount":130},
+    {"diff":4.22,"bottom":1.75,"top":5.97,"time":"29","day":"周六","dayNum":6,"startTime":"16:00","maxTimeDiscount":130},
+    {"diff":2.85,"bottom":1.75,"top":4.6,"time":"30","day":"周六","dayNum":6,"startTime":"20:00","maxTimeDiscount":100},
+    {"diff":2.85,"bottom":1.75,"top":4.6,"time":"31","day":"周日","dayNum":7,"startTime":"00:00","maxTimeDiscount":100},
+    {"diff":2.85,"bottom":1.75,"top":4.6,"time":"32","day":"周日","dayNum":7,"startTime":"04:00","maxTimeDiscount":100},
+    {"diff":4.22,"bottom":1.75,"top":5.97,"time":"33","day":"周日","dayNum":7,"startTime":"08:00","maxTimeDiscount":130},
+    {"diff":4.22,"bottom":1.75,"top":5.97,"time":"34","day":"周日","dayNum":7,"startTime":"12:00","maxTimeDiscount":130},
+    {"diff":4.22,"bottom":1.75,"top":5.97,"time":"35","day":"周日","dayNum":7,"startTime":"16:00","maxTimeDiscount":130},
+    {"diff":2.85,"bottom":1.75,"top":4.6,"time":"36","day":"周日","dayNum":7,"startTime":"20:00","maxTimeDiscount":100},
+    {"diff":2.85,"bottom":1.75,"top":4.6,"time":"37","day":"周一","dayNum":1,"startTime":"00:00","maxTimeDiscount":100},
+    {"diff":2.85,"bottom":1.75,"top":4.6,"time":"38","day":"周一","dayNum":1,"startTime":"04:00","maxTimeDiscount":100},
+    {"diff":4.22,"bottom":1.75,"top":5.97,"time":"39","day":"周一","dayNum":1,"startTime":"08:00","maxTimeDiscount":130},
+    {"diff":4.22,"bottom":1.75,"top":5.97,"time":"40","day":"周一","dayNum":1,"startTime":"12:00","maxTimeDiscount":130},
+    {"diff":4.22,"bottom":1.75,"top":5.97,"time":"41","day":"周一","dayNum":1,"startTime":"16:00","maxTimeDiscount":130},
+    {"diff":2.85,"bottom":1.75,"top":4.6,"time":"42","day":"周一","dayNum":1,"startTime":"20:00","maxTimeDiscount":100}
+];
+
+            
+var options = {
+    "coord":{
+      "type":"rect",
+      "xAxis":{
+        "field":["time"],
+        //"posParseToInt":true,
+        "label":{
+          "rotation":45
+        }
+      },
+      "yAxis":[
+        {
+          "align":"left",
+          "title":{
+            "text":"出价（元）"
+          }
+        }
+      ]
+    },
+    "graphs":[
+      {
+        "type":"bar",
+        "field":[["bottom","diff"]],
+        "node":{
+          "fillStyle":["","#90b601"],
+          "radius":0,
+          "minHeight":0.5
+        }
+      }
+    ],
+     tips:{
+      
+     } 
+  };
+            
+                
+                window.bar = chartx.create("canvasTest" , data , options)
+                
+                            
+
+            </textarea></form>
+        </td>
+        <td style="padding:0 10px;" id="td-vr">
+            <div id="chartdemo-r">
+            <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
+                <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
+
+                <h4>柱状图（bar chart）</h4>
+                <p>
+                    联系人：@释剑
+                </p>
+            </div>
+            <div  class="test-c">
+                <div id="canvasTest" style='width:100%;height:300px;position:relative;'></div>
+            </div>
+
+            </div>
+        </td>
+    </tr>
+</table>
+
+    
+</body> 
+</html>
+
+

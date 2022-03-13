@@ -81,6 +81,7 @@ class LineGraphs extends GraphsBase
         };
 
         me.data = me._trimGraphs();
+        debugger
         me.groups.forEach(g => {
             g.resetData( me.data[ g.field ].data , dataTrigger );
         });

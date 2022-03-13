@@ -821,6 +821,7 @@ class BarGraphs extends GraphsBase
             //tempBarData 一根柱子的数据， 这个柱子是个数据，上面可以有n个子元素对应的竹节
             let tempBarData = [];
             _.each( hData, function( vSectionData, v ){
+                
                 tempBarData[v] = [];
                 //vSectionData 代表某个字段下面的一组数据比如 uv
 
@@ -843,6 +844,7 @@ class BarGraphs extends GraphsBase
                     //返回一个和value的结构对应的point结构{x:  y: }
                     let point = _coord.getPoint( {
                         iNode : i,
+                        vIndex: v,
                         field : field,
                         value : {
                             //x:

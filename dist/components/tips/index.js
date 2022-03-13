@@ -7,6 +7,8 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports["default"] = void 0;
 
+var _typeof2 = _interopRequireDefault(require("@babel/runtime/helpers/typeof"));
+
 var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
 var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
@@ -24,8 +26,6 @@ var _component = _interopRequireDefault(require("../component"));
 var _canvax = _interopRequireDefault(require("canvax"));
 
 var _tools = require("../../utils/tools");
-
-var _numeral = _interopRequireDefault(require("numeral"));
 
 function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
 
@@ -310,32 +310,50 @@ var Tips = /*#__PURE__*/function (_Component) {
 
 
           name = node.name || node.label || (fieldConfig || {}).name || node.content || node.field || '';
-          value = fieldConfig ? fieldConfig.getFormatValue(node.value) : node.value;
-          var hasValue = node.value || node.value === 0;
-
-          if (!hasValue && !node.__no_value) {
-            style = "#ddd";
-            value = '--';
-          }
-
           str += "<tr>";
 
-          if (!node.__no__name) {
-            str += "<td style='padding:0px 6px;color:" + (!hasValue && !node.__no_value ? '#ddd' : '#a0a0a0;') + "'>" + name + "</td>";
-            hasNodesContent = true;
-          }
+          if ((0, _typeof2["default"])(node.value) == 'object') {
+            //主要是用在散点图的情况
+            if (node.value && node.value.x) {
+              var xfieldConfig = _coord.getFieldConfig(info.xAxis.field);
 
-          if (!node.__no_value) {
-            str += "<td style='padding:0px 6px;font-weight:bold;'>";
-            str += "<span style='color:" + style + "'>" + value + "</span>";
-
-            if (node.subValue) {
-              str += "<span style='padding-left:6px;font-weight:normal;'>" + node.subValue + "</span>";
+              var xName = xfieldConfig && xfieldConfig.name || info.xAxis.field;
+              var xvalue = xfieldConfig ? xfieldConfig.getFormatValue(node.value.x) : node.value.x;
+              str += "<td style='padding:0px 6px;'>" + xName + "：<span style='color:" + style + "'>" + xvalue + "</span></td>";
               hasNodesContent = true;
             }
 
-            ;
-            str += "</td>";
+            if (node.value && node.value.y) {
+              value = fieldConfig ? fieldConfig.getFormatValue(node.value.y) : node.value.y;
+              str += "<td style='padding:0px 6px;'>" + name + "：<span style='color:" + style + "'>" + value + "</span></td>";
+              hasNodesContent = true;
+            }
+          } else {
+            value = fieldConfig ? fieldConfig.getFormatValue(node.value) : node.value;
+            var hasValue = node.value || node.value === 0;
+
+            if (!hasValue && !node.__no_value) {
+              style = "#ddd";
+              value = '--';
+            }
+
+            if (!node.__no__name) {
+              str += "<td style='padding:0px 6px;color:" + (!hasValue && !node.__no_value ? '#ddd' : '#a0a0a0;') + "'>" + name + "</td>";
+              hasNodesContent = true;
+            }
+
+            if (!node.__no_value) {
+              str += "<td style='padding:0px 6px;font-weight:bold;'>";
+              str += "<span style='color:" + style + "'>" + value + "</span>";
+
+              if (node.subValue) {
+                str += "<span style='padding-left:6px;font-weight:normal;'>" + node.subValue + "</span>";
+                hasNodesContent = true;
+              }
+
+              ;
+              str += "</td>";
+            }
           }
 
           str += "</tr>";

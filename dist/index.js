@@ -75,6 +75,8 @@ require("./components/markcloumn/index");
 
 require("./components/relation_backline/index");
 
+require("./components/title/index");
+
 //2d图表元类
 //-----------------------------------------------
 //坐标系
@@ -95,7 +97,7 @@ if (projectTheme && projectTheme.length) {
 ; //皮肤设定end -----------------
 
 var chartx = {
-  version: '1.1.68',
+  version: '__VERSION__',
   options: {}
 };
 

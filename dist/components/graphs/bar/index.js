@@ -795,6 +795,7 @@ var BarGraphs = /*#__PURE__*/function (_GraphsBase) {
 
             var point = _coord.getPoint({
               iNode: i,
+              vIndex: v,
               field: field,
               value: {
                 //x:

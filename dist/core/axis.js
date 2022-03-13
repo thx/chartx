@@ -146,6 +146,7 @@ var axis = /*#__PURE__*/function () {
         this._dataSectionGroup = [this.dataSection];
       } else {
         if (this.layoutType == "proportion") {
+          //如果像柱状图中有堆叠的情况出现， arr中已经把堆叠的数据加起来了
           var arr = this._getDataSection();
 
           if ("origin" in this._opt) {

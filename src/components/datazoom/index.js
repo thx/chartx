@@ -424,7 +424,7 @@ class dataZoom extends Component
                     _.extend( app.dataFrame.range , range );
                 };
             
-                console.log( range );
+                //console.log( range );
 
                 app.resetData( null , trigger );
                 app.fire("dataZoomDragIng");

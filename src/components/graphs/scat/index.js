@@ -574,7 +574,6 @@ class ScatGraphs extends GraphsBase
                 me._shapesp.addChild( _nodeElement );
 
                 _nodeElement.on(event.types.get(), function(e) {
-                    
                      e.eventInfo = {
                          title: null,
                          trigger: me.node,

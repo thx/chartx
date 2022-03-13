@@ -561,6 +561,13 @@ class Rect extends coordBase
 
         let y = _value.y;
         if( !isNaN( y ) && y !== null && y !== undefined && y !== ""  ){
+            if( !!opt.vIndex ){
+                //说明是堆叠的
+                //要获取到对应Y轴的最小值， 如果最小值是大于0的，那么val要加上这个最小值
+                if( _yAxis._min > 0 ){
+                    y += _yAxis._min;
+                }
+            }
             point.y = -_yAxis.getPosOfVal( y );
         } else {
             point.y = undefined;

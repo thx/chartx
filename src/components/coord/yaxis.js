@@ -42,7 +42,6 @@ export default class yAxis extends Axis
 
         _.extend( true, this, getDefaultProps( yAxis.defaultProps() ) , opt );
         
-
         this.init(opt);
         
     }
