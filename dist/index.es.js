@@ -8042,7 +8042,6 @@ var _default = {
       var codeWithoutVariables = code.slice(0, range[0]) + code.slice(range[1]);
       return this._eval(codeWithoutVariables, 'options', 'variables', variables);
     } catch (e) {
-      console.log('parse error');
       return {};
     }
   }
@@ -9694,10 +9693,6 @@ var numeral = createCommonjsModule(function (module) {
         //coerce val to string
         if (typeof val !== 'string') {
             val += '';
-
-            if (console.warn) {
-                console.warn('Numeral.js: Value is not string. It has been co-erced to: ', val);
-            }
         }
 
         //trim whitespaces from either sides
@@ -19641,7 +19636,6 @@ var LineGraphs = /*#__PURE__*/function (_GraphsBase) {
         me.dataFrame = dataFrame;
       }
       me.data = me._trimGraphs();
-      debugger;
       me.groups.forEach(function (g) {
         g.resetData(me.data[g.field].data, dataTrigger);
       });
@@ -22310,7 +22304,6 @@ var PieGraphs = /*#__PURE__*/function (_GraphsBase) {
         var color = me._getColor(me.node.fillStyle, layoutData);
 
         layoutData.fillStyle = layoutData.color = color;
-        debugger;
         data.push(layoutData);
       }
 
@@ -28060,7 +28053,6 @@ function scaleSolution(solution, width, height, padding) {
       yRange = bounds.yRange;
 
   if (xRange.max == xRange.min || yRange.max == yRange.min) {
-    console.log("not scaling solution: zero size detected");
     return solution;
   }
 
@@ -28719,9 +28711,7 @@ function computeTextCentres(circles, areas) {
     var centre = computeTextCentre(interior, exterior);
     ret[area] = centre;
 
-    if (centre.disjoint && areas[i].size > 0) {
-      console.log("WARNING: area " + area + " not represented on screen");
-    }
+    if (centre.disjoint && areas[i].size > 0) ;
   }
 
   return ret;
@@ -31143,7 +31133,6 @@ function jsonToArrayForRelation(data, options, _childrenField) {
   var label = options.node && options.node.content && options.node.content.field;
 
   if (!checkDataIsJson(data, key, childrenKey)) {
-    console.error('该数据不能正确绘制，请提供数组对象形式的数据！');
     return result;
   }
   var childrens = [];
@@ -34921,7 +34910,6 @@ var _typeof2 = interopRequireDefault(_typeof_1$1);
         try {
           return fn();
         } finally {
-          console.log(name + " time: " + (_.now() - start) + "ms");
         }
       }
 
@@ -44697,7 +44685,6 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
           }
 
           if (e.type == "wheel") {
-            console.log(_deltaY, e.deltaY);
 
             if (Math.abs(e.deltaY) > Math.abs(_deltaY)) {
               _deltaY = e.deltaY;
@@ -45101,7 +45088,6 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
       var me = this;
 
       _.each(this.data.edges, function (edge) {
-        console.log(edge.points);
         var key = edge.key.join('_');
 
         if (me.line.isTree && edge.points.length == 3) {
@@ -49596,7 +49582,6 @@ var Map = /*#__PURE__*/function (_GraphsBase) {
       this._setNodeStyle(_path, 'select');
 
       nodeData.selected = true;
-      console.log("select:true");
     }
   }, {
     key: "unselectAt",
@@ -49610,7 +49595,6 @@ var Map = /*#__PURE__*/function (_GraphsBase) {
       this._setNodeStyle(_path);
 
       geoGraph.selected = false;
-      console.log("select:false");
 
       if (geoGraph.focused) {
         this.focusAt(adcode);
@@ -52323,7 +52307,6 @@ var Tips = /*#__PURE__*/function (_Component) {
   (0, _createClass2["default"])(Tips, [{
     key: "show",
     value: function show(e) {
-      console.log('tips show');
       if (!this.enabled) return;
 
       if (e.eventInfo) {
@@ -52361,7 +52344,6 @@ var Tips = /*#__PURE__*/function (_Component) {
   }, {
     key: "move",
     value: function move(e) {
-      console.log('tips move');
       if (!this.enabled) return;
 
       if (e.eventInfo) {
@@ -52384,7 +52366,6 @@ var Tips = /*#__PURE__*/function (_Component) {
   }, {
     key: "hide",
     value: function hide(e) {
-      console.log('tips hide');
 
       this._hide(e);
 
@@ -55863,7 +55844,7 @@ if (projectTheme && projectTheme.length) {
 }
 
 var chartx = {
-  version: '__VERSION__',
+  version: '1.1.69',
   options: {}
 };
 

@@ -8045,7 +8045,6 @@ var chartx = (function () {
 	      var codeWithoutVariables = code.slice(0, range[0]) + code.slice(range[1]);
 	      return this._eval(codeWithoutVariables, 'options', 'variables', variables);
 	    } catch (e) {
-	      console.log('parse error');
 	      return {};
 	    }
 	  }
@@ -9697,10 +9696,6 @@ var chartx = (function () {
 	        //coerce val to string
 	        if (typeof val !== 'string') {
 	            val += '';
-
-	            if (console.warn) {
-	                console.warn('Numeral.js: Value is not string. It has been co-erced to: ', val);
-	            }
 	        }
 
 	        //trim whitespaces from either sides
@@ -19644,7 +19639,6 @@ var chartx = (function () {
 	        me.dataFrame = dataFrame;
 	      }
 	      me.data = me._trimGraphs();
-	      debugger;
 	      me.groups.forEach(function (g) {
 	        g.resetData(me.data[g.field].data, dataTrigger);
 	      });
@@ -22313,7 +22307,6 @@ var chartx = (function () {
 	        var color = me._getColor(me.node.fillStyle, layoutData);
 
 	        layoutData.fillStyle = layoutData.color = color;
-	        debugger;
 	        data.push(layoutData);
 	      }
 
@@ -28063,7 +28056,6 @@ var chartx = (function () {
 	      yRange = bounds.yRange;
 
 	  if (xRange.max == xRange.min || yRange.max == yRange.min) {
-	    console.log("not scaling solution: zero size detected");
 	    return solution;
 	  }
 
@@ -28722,9 +28714,7 @@ var chartx = (function () {
 	    var centre = computeTextCentre(interior, exterior);
 	    ret[area] = centre;
 
-	    if (centre.disjoint && areas[i].size > 0) {
-	      console.log("WARNING: area " + area + " not represented on screen");
-	    }
+	    if (centre.disjoint && areas[i].size > 0) ;
 	  }
 
 	  return ret;
@@ -31146,7 +31136,6 @@ var chartx = (function () {
 	  var label = options.node && options.node.content && options.node.content.field;
 
 	  if (!checkDataIsJson(data, key, childrenKey)) {
-	    console.error('该数据不能正确绘制，请提供数组对象形式的数据！');
 	    return result;
 	  }
 	  var childrens = [];
@@ -34924,7 +34913,6 @@ var chartx = (function () {
 	        try {
 	          return fn();
 	        } finally {
-	          console.log(name + " time: " + (_.now() - start) + "ms");
 	        }
 	      }
 
@@ -44700,7 +44688,6 @@ var chartx = (function () {
 	          }
 
 	          if (e.type == "wheel") {
-	            console.log(_deltaY, e.deltaY);
 
 	            if (Math.abs(e.deltaY) > Math.abs(_deltaY)) {
 	              _deltaY = e.deltaY;
@@ -45104,7 +45091,6 @@ var chartx = (function () {
 	      var me = this;
 
 	      _.each(this.data.edges, function (edge) {
-	        console.log(edge.points);
 	        var key = edge.key.join('_');
 
 	        if (me.line.isTree && edge.points.length == 3) {
@@ -49599,7 +49585,6 @@ var chartx = (function () {
 	      this._setNodeStyle(_path, 'select');
 
 	      nodeData.selected = true;
-	      console.log("select:true");
 	    }
 	  }, {
 	    key: "unselectAt",
@@ -49613,7 +49598,6 @@ var chartx = (function () {
 	      this._setNodeStyle(_path);
 
 	      geoGraph.selected = false;
-	      console.log("select:false");
 
 	      if (geoGraph.focused) {
 	        this.focusAt(adcode);
@@ -52326,7 +52310,6 @@ var chartx = (function () {
 	  (0, _createClass2["default"])(Tips, [{
 	    key: "show",
 	    value: function show(e) {
-	      console.log('tips show');
 	      if (!this.enabled) return;
 
 	      if (e.eventInfo) {
@@ -52364,7 +52347,6 @@ var chartx = (function () {
 	  }, {
 	    key: "move",
 	    value: function move(e) {
-	      console.log('tips move');
 	      if (!this.enabled) return;
 
 	      if (e.eventInfo) {
@@ -52387,7 +52369,6 @@ var chartx = (function () {
 	  }, {
 	    key: "hide",
 	    value: function hide(e) {
-	      console.log('tips hide');
 
 	      this._hide(e);
 
@@ -55866,7 +55847,7 @@ var chartx = (function () {
 	}
 
 	var chartx = {
-	  version: '__VERSION__',
+	  version: '1.1.69',
 	  options: {}
 	};
 
