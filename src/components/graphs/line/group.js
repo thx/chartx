@@ -346,7 +346,7 @@ export default class LineGraphsGroup extends event.Dispatcher
      * dataTrigger 描述了数据变化的原因和变化的过程，比如上面的数据 left少了一个数据，right多了一个数据
      * @param {object} dataTrigger 
      */
-    resetData(data, dataTrigger)
+    resetData(data, dataTrigger, opt)
     {
         let me = this;
         if( data ){

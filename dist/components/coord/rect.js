@@ -231,18 +231,41 @@ var Rect = /*#__PURE__*/function (_coordBase) {
     key: "resetData",
     value: function resetData(dataFrame) {
       var me = this;
-      this.dataFrame = dataFrame;
+      var _padding = this.app.padding;
+      var w = this._opt.width || this.app.width;
+      this.dataFrame = dataFrame; // let _xAxisDataFrame = this.getAxisDataFrame(this.xAxis.field);
+      // this._xAxis.resetData( _xAxisDataFrame );
 
-      var _xAxisDataFrame = this.getAxisDataFrame(this.xAxis.field);
-
-      this._xAxis.resetData(_xAxisDataFrame);
+      var _yAxisWAll = 0;
+      var _leftYAxisW = 0;
 
       _.each(this._yAxis, function (_yAxis) {
         //这个_yAxis是具体的y轴实例
         var yAxisDataFrame = me.getAxisDataFrame(_yAxis.field);
 
         _yAxis.resetData(yAxisDataFrame);
+
+        _yAxisWAll += _yAxis.width;
+
+        if (_yAxis.align == 'left') {
+          _leftYAxisW = _yAxis.width;
+        }
       });
+
+      var xAxisWidth = w - _yAxisWAll - _padding.left - _padding.right;
+      this.width = xAxisWidth;
+
+      var _xAxisDataFrame = this.getAxisDataFrame(this.xAxis.field);
+
+      this._xAxis.resetData(_xAxisDataFrame, {
+        width: xAxisWidth,
+        pos: {
+          x: _padding.left + _leftYAxisW //y : y
+
+        }
+      });
+
+      this.origin.x = _leftYAxisW + _padding.left; //this.origin.y = y;
 
       this._resetXY_axisLine_pos();
 
@@ -309,22 +332,18 @@ var Rect = /*#__PURE__*/function (_coordBase) {
         resize: opt.resize
       });
 
-      this._yAxisRight && this._yAxisRight.setX(_yAxisW + _padding.left + this._xAxis.width); //绘制背景网格
+      this._yAxisRight && this._yAxisRight.setX(_yAxisW + _padding.left + this._xAxis.width);
+      this.width = this._xAxis.width;
+      this.height = this._yAxis.length ? this._yAxis[0].height : 0;
+      this.origin.x = _yAxisW + _padding.left;
+      this.origin.y = y; //绘制背景网格
 
       this._grid.draw({
-        width: this._xAxis.width,
-        height: this._yAxis[0].height,
-        pos: {
-          x: _yAxisW + _padding.left,
-          y: y
-        },
+        width: this.width,
+        height: this.height,
+        pos: this.origin,
         resize: opt.resize
       });
-
-      this.width = this._xAxis.width;
-      this.height = this._yAxis[0].height;
-      this.origin.x = _yAxisW + _padding.left;
-      this.origin.y = y;
 
       this._initInduce();
 

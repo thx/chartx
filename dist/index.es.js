@@ -8104,6 +8104,7 @@ var components = {
   */
 };
 var _default = {
+  chartxVersion: '1.1.77',
   create: function create(el, _data, _opt) {
     var chart = null;
     var me = this;
@@ -9693,6 +9694,10 @@ var numeral = createCommonjsModule(function (module) {
         //coerce val to string
         if (typeof val !== 'string') {
             val += '';
+
+            if (console.warn) {
+                console.warn('Numeral.js: Value is not string. It has been co-erced to: ', val);
+            }
         }
 
         //trim whitespaces from either sides
@@ -10438,12 +10443,15 @@ var coordBase = /*#__PURE__*/function (_Component) {
       } else {
         if ((0, _typeof2["default"])(value) == "object") {
           value = JSON.stringify(value);
-        } //太黑盒，不再做处理
-        //else if( !isNaN( value ) && value !== "" && value !== null ){
-        //可以转换为number的， 就用 numeral 来格式化一下
-        //value = numeral(value).format('0,0')  //太黑色
-        //}
+        } else if (!isNaN(value) && value !== "" && value !== null) {
+          //可以转换为number的， 就用 numeral 来格式化一下
+          var values = value.toString().split('.');
+          value = (0, _numeral["default"])(values[0]).format('0,0');
 
+          if (values.length > 1) {
+            value += '.' + values[1];
+          }
+        }
       }
       return value;
     } //设置 graphsFieldsMap 中对应field 的 enabled状态
@@ -11270,15 +11278,23 @@ var Chart = /*#__PURE__*/function (_event$Dispatcher) {
         name: 'coord'
       });
 
+      var width = _coord.width;
+      var height = _coord.height;
+      var origin = _coord.origin;
+
       if (_coord) {
         _coord.resetData(this.dataFrame, trigger);
       }
 
       _.each(graphsList, function (_g) {
-        _g.resetData(me.dataFrame, trigger);
+        _g.resetData(me.dataFrame, trigger, {
+          origin: origin,
+          width: width,
+          height: height
+        });
       });
 
-      this.componentsReset(trigger);
+      this.componentsReset(trigger, origin);
 
       if (_coord && _coord.horizontal) {
         this._horizontalGraphsText();
@@ -13063,14 +13079,25 @@ var xAxis = /*#__PURE__*/function (_Axis) {
 
   }, {
     key: "resetData",
-    value: function resetData(dataFrame) {
+    value: function resetData(dataFrame, opt) {
+      // if( _opt ){
+      //     if( 'width' in _opt ){
+      //         this.width = _opt.width;
+      //     }
+      //     if( 'pos' in _opt ){
+      //         if( 'x' in _opt.pos ) this.setX( _opt.pos.x );
+      //         if( 'y' in _opt.pos ) this.setY( _opt.pos.y );
+      //     }
+      // }
+      opt && _.extend(true, this, opt);
+
       this._setField(dataFrame.field);
 
       this.resetDataOrg(dataFrame.org);
 
       this._initHandle();
 
-      this.draw();
+      this.draw(opt);
     }
   }, {
     key: "setX",
@@ -14367,7 +14394,7 @@ var rectGrid = /*#__PURE__*/function (_event$Dispatcher) {
 
       self.xAxisSp = new _canvax["default"].Display.Sprite(), self.sprite.addChild(self.xAxisSp);
       self.yAxisSp = new _canvax["default"].Display.Sprite(), self.sprite.addChild(self.yAxisSp);
-      var arr = _yAxis.layoutData;
+      var arr = _yAxis ? _yAxis.layoutData : [];
 
       for (var a = 0, al = arr.length; a < al; a++) {
         var o = arr[a];
@@ -14799,18 +14826,41 @@ var Rect = /*#__PURE__*/function (_coordBase) {
     key: "resetData",
     value: function resetData(dataFrame) {
       var me = this;
-      this.dataFrame = dataFrame;
+      var _padding = this.app.padding;
+      var w = this._opt.width || this.app.width;
+      this.dataFrame = dataFrame; // let _xAxisDataFrame = this.getAxisDataFrame(this.xAxis.field);
+      // this._xAxis.resetData( _xAxisDataFrame );
 
-      var _xAxisDataFrame = this.getAxisDataFrame(this.xAxis.field);
-
-      this._xAxis.resetData(_xAxisDataFrame);
+      var _yAxisWAll = 0;
+      var _leftYAxisW = 0;
 
       _.each(this._yAxis, function (_yAxis) {
         //这个_yAxis是具体的y轴实例
         var yAxisDataFrame = me.getAxisDataFrame(_yAxis.field);
 
         _yAxis.resetData(yAxisDataFrame);
+
+        _yAxisWAll += _yAxis.width;
+
+        if (_yAxis.align == 'left') {
+          _leftYAxisW = _yAxis.width;
+        }
       });
+
+      var xAxisWidth = w - _yAxisWAll - _padding.left - _padding.right;
+      this.width = xAxisWidth;
+
+      var _xAxisDataFrame = this.getAxisDataFrame(this.xAxis.field);
+
+      this._xAxis.resetData(_xAxisDataFrame, {
+        width: xAxisWidth,
+        pos: {
+          x: _padding.left + _leftYAxisW //y : y
+
+        }
+      });
+
+      this.origin.x = _leftYAxisW + _padding.left; //this.origin.y = y;
 
       this._resetXY_axisLine_pos();
 
@@ -14873,22 +14923,18 @@ var Rect = /*#__PURE__*/function (_coordBase) {
         resize: opt.resize
       });
 
-      this._yAxisRight && this._yAxisRight.setX(_yAxisW + _padding.left + this._xAxis.width); //绘制背景网格
+      this._yAxisRight && this._yAxisRight.setX(_yAxisW + _padding.left + this._xAxis.width);
+      this.width = this._xAxis.width;
+      this.height = this._yAxis.length ? this._yAxis[0].height : 0;
+      this.origin.x = _yAxisW + _padding.left;
+      this.origin.y = y; //绘制背景网格
 
       this._grid.draw({
-        width: this._xAxis.width,
-        height: this._yAxis[0].height,
-        pos: {
-          x: _yAxisW + _padding.left,
-          y: y
-        },
+        width: this.width,
+        height: this.height,
+        pos: this.origin,
         resize: opt.resize
       });
-
-      this.width = this._xAxis.width;
-      this.height = this._yAxis[0].height;
-      this.origin.x = _yAxisW + _padding.left;
-      this.origin.y = y;
 
       this._initInduce();
 
@@ -18398,7 +18444,7 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
 
   }, {
     key: "resetData",
-    value: function resetData(data, dataTrigger) {
+    value: function resetData(data, dataTrigger, opt) {
       var me = this;
 
       if (data) {
@@ -19629,15 +19675,23 @@ var LineGraphs = /*#__PURE__*/function (_GraphsBase) {
     }
   }, {
     key: "resetData",
-    value: function resetData(dataFrame, dataTrigger) {
+    value: function resetData(dataFrame, dataTrigger, opt) {
       var me = this;
 
       if (dataFrame) {
         me.dataFrame = dataFrame;
       }
+
+      if (opt) {
+        if ('origin' in opt) {
+          if ('x' in opt.origin) this.sprite.context.x = opt.origin.x;
+          if ('y' in opt.origin) this.sprite.context.y = opt.origin.y;
+        }
+      }
+
       me.data = me._trimGraphs();
       me.groups.forEach(function (g) {
-        g.resetData(me.data[g.field].data, dataTrigger);
+        g.resetData(me.data[g.field].data, dataTrigger, opt);
       });
     }
   }, {
@@ -34909,8 +34963,7 @@ var _typeof2 = interopRequireDefault(_typeof_1$1);
 
         try {
           return fn();
-        } finally {
-        }
+        } finally {}
       }
 
       function notime(name, fn) {
@@ -44685,7 +44738,6 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
           }
 
           if (e.type == "wheel") {
-
             if (Math.abs(e.deltaY) > Math.abs(_deltaY)) {
               _deltaY = e.deltaY;
             }
@@ -52366,7 +52418,6 @@ var Tips = /*#__PURE__*/function (_Component) {
   }, {
     key: "hide",
     value: function hide(e) {
-
       this._hide(e);
 
       this.onhide.apply(this, [e]);
@@ -55844,7 +55895,7 @@ if (projectTheme && projectTheme.length) {
 }
 
 var chartx = {
-  version: '1.1.69',
+  version: '1.1.77',
   options: {}
 };
 

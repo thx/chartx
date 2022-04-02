@@ -112,14 +112,24 @@ export default class xAxis extends Axis
     }
 
     //配置和数据变化
-    resetData( dataFrame )
+    resetData( dataFrame , opt)
     {
+        // if( _opt ){
+        //     if( 'width' in _opt ){
+        //         this.width = _opt.width;
+        //     }
+        //     if( 'pos' in _opt ){
+        //         if( 'x' in _opt.pos ) this.setX( _opt.pos.x );
+        //         if( 'y' in _opt.pos ) this.setY( _opt.pos.y );
+        //     }
+        // }
+        opt && _.extend(true, this, opt);
         
         this._setField(dataFrame.field)
         this.resetDataOrg( dataFrame.org );
 
         this._initHandle();
-        this.draw();
+        this.draw( opt );
     }
 
     setX($n)

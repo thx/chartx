@@ -583,6 +583,10 @@ var Chart = /*#__PURE__*/function (_event$Dispatcher) {
         name: 'coord'
       });
 
+      var width = _coord.width;
+      var height = _coord.height;
+      var origin = _coord.origin;
+
       if (_coord) {
         _coord.resetData(this.dataFrame, trigger);
       }
@@ -590,10 +594,14 @@ var Chart = /*#__PURE__*/function (_event$Dispatcher) {
       ;
 
       _.each(graphsList, function (_g) {
-        _g.resetData(me.dataFrame, trigger);
+        _g.resetData(me.dataFrame, trigger, {
+          origin: origin,
+          width: width,
+          height: height
+        });
       });
 
-      this.componentsReset(trigger);
+      this.componentsReset(trigger, origin);
 
       if (_coord && _coord.horizontal) {
         this._horizontalGraphsText();

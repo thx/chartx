@@ -261,7 +261,7 @@ var rectGrid = /*#__PURE__*/function (_event$Dispatcher) {
 
       self.xAxisSp = new _canvax["default"].Display.Sprite(), self.sprite.addChild(self.xAxisSp);
       self.yAxisSp = new _canvax["default"].Display.Sprite(), self.sprite.addChild(self.yAxisSp);
-      var arr = _yAxis.layoutData;
+      var arr = _yAxis ? _yAxis.layoutData : [];
 
       for (var a = 0, al = arr.length; a < al; a++) {
         var o = arr[a];

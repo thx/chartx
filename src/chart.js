@@ -486,15 +486,20 @@ class Chart extends event.Dispatcher
             return;
         };
     
-        let _coord = this.getComponent({name:'coord'})
+        let _coord = this.getComponent({name:'coord'});
+        let width  = _coord.width;
+        let height = _coord.height;
+        let origin = _coord.origin;
         if( _coord ){
             _coord.resetData( this.dataFrame , trigger);
         };
         _.each( graphsList, function( _g ){
-            _g.resetData( me.dataFrame , trigger);
+            _g.resetData( me.dataFrame , trigger, {
+                origin, width, height
+            });
         } );
 
-        this.componentsReset( trigger );
+        this.componentsReset( trigger, origin );
 
         if( _coord && _coord.horizontal ){
             this._horizontalGraphsText();

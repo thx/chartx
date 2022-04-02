@@ -208,12 +208,14 @@ class coordBase extends Component
             if( typeof(value) == "object" ){
                 value = JSON.stringify(value);
             } 
-
-            //太黑盒，不再做处理
-            //else if( !isNaN( value ) && value !== "" && value !== null ){
+            else if( !isNaN( value ) && value !== "" && value !== null ){
                 //可以转换为number的， 就用 numeral 来格式化一下
-                //value = numeral(value).format('0,0')  //太黑色
-            //}
+                let values = value.toString().split('.');
+                value = numeral(values[0]).format('0,0');
+                if( values.length > 1 ){
+                    value += ('.'+values[1])
+                }
+            }
         };
         return value;
     }

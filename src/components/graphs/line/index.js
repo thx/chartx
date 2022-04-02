@@ -71,7 +71,7 @@ class LineGraphs extends GraphsBase
         
     }
 
-    resetData(dataFrame, dataTrigger)
+    resetData(dataFrame, dataTrigger, opt)
     {
         
         let me = this;
@@ -80,10 +80,16 @@ class LineGraphs extends GraphsBase
             me.dataFrame = dataFrame;
         };
 
-        me.data = me._trimGraphs();
-        debugger
+        if( opt ){
+            if( 'origin' in opt ){
+                if('x' in opt.origin) this.sprite.context.x = opt.origin.x;
+                if('y' in opt.origin) this.sprite.context.y = opt.origin.y;
+            }
+        }
+
+        me.data = me._trimGraphs(); 
         me.groups.forEach(g => {
-            g.resetData( me.data[ g.field ].data , dataTrigger );
+            g.resetData( me.data[ g.field ].data , dataTrigger, opt );
         });
     }
 

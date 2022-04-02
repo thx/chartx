@@ -237,7 +237,7 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
 
   }, {
     key: "resetData",
-    value: function resetData(data, dataTrigger) {
+    value: function resetData(data, dataTrigger, opt) {
       var me = this;
 
       if (data) {

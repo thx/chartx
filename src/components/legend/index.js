@@ -75,7 +75,7 @@ class Legend extends Component
                     textAlign :{
                         detail : '水平对齐方式',
                         default: 'left'
-                    },
+                    }, 
                     textBaseline : {
                         detail : '文本基线对齐方式',
                         default: 'middle'

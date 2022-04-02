@@ -80,7 +80,7 @@ var LineGraphs = /*#__PURE__*/function (_GraphsBase) {
     }
   }, {
     key: "resetData",
-    value: function resetData(dataFrame, dataTrigger) {
+    value: function resetData(dataFrame, dataTrigger, opt) {
       var me = this;
 
       if (dataFrame) {
@@ -88,10 +88,17 @@ var LineGraphs = /*#__PURE__*/function (_GraphsBase) {
       }
 
       ;
+
+      if (opt) {
+        if ('origin' in opt) {
+          if ('x' in opt.origin) this.sprite.context.x = opt.origin.x;
+          if ('y' in opt.origin) this.sprite.context.y = opt.origin.y;
+        }
+      }
+
       me.data = me._trimGraphs();
-      debugger;
       me.groups.forEach(function (g) {
-        g.resetData(me.data[g.field].data, dataTrigger);
+        g.resetData(me.data[g.field].data, dataTrigger, opt);
       });
     }
   }, {

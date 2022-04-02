@@ -349,8 +349,7 @@ export default class rectGrid extends event.Dispatcher
         self.xAxisSp = new Canvax.Display.Sprite(),  self.sprite.addChild(self.xAxisSp);
         self.yAxisSp = new Canvax.Display.Sprite(),  self.sprite.addChild(self.yAxisSp);
         
-
-        let arr = _yAxis.layoutData;
+        let arr = _yAxis? _yAxis.layoutData : [];
         for(let a = 0, al = arr.length; a < al; a++){
             let o = arr[a];
 

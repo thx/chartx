@@ -55,7 +55,8 @@ let babelHandle = ( _src = _srcPath ) => {
             plugins: [
                 "@babel/plugin-proposal-class-properties",
                 //"transform-es2015-modules-umd"
-                [ "@babel/plugin-transform-runtime"]
+                [ "@babel/plugin-transform-runtime"],
+                "no-debugging"
             ]
         }))
         //.pipe(eslint())
@@ -74,7 +75,7 @@ let versionHandle = () => {
     return new Promise( resolve => {
         const packageObj = fs.readJsonSync('./package.json')
         let version = packageObj.version;
-        return gulp.src( ["dist/index.js"] )
+        return gulp.src( ["dist/index.js", "dist/global.js"] )
         .pipe( replace( '__VERSION__', version ) )
         .pipe( gulp.dest("dist/") )
         .on('finish', ()=>{
@@ -95,10 +96,7 @@ let getRollupOpts = ()=>{
         input: './dist/index.js',
         plugins: [
             resolve({ mainFields:['module', 'main'], browser: true }), 
-            commonjs(),
-            strip({
-                debugger: true
-            })
+            commonjs()
         ]
     };
     

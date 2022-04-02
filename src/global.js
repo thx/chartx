@@ -25,6 +25,7 @@ let components = {
 }
 
 export default {
+    chartxVersion: '__VERSION__',
     create : function( el, _data, _opt ){
         let chart = null;
         let me = this;

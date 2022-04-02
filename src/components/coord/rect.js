@@ -188,17 +188,39 @@ class Rect extends coordBase
     resetData( dataFrame )
     {
         let me = this;
+        let _padding = this.app.padding;
+        let w = this._opt.width || this.app.width;
         this.dataFrame = dataFrame;
 
-        let _xAxisDataFrame = this.getAxisDataFrame(this.xAxis.field);
-        this._xAxis.resetData( _xAxisDataFrame );
+        // let _xAxisDataFrame = this.getAxisDataFrame(this.xAxis.field);
+        // this._xAxis.resetData( _xAxisDataFrame );
 
+        let _yAxisWAll = 0;
+        let _leftYAxisW= 0;
         _.each( this._yAxis , function( _yAxis ){
             //这个_yAxis是具体的y轴实例
             let yAxisDataFrame = me.getAxisDataFrame( _yAxis.field );
             _yAxis.resetData( yAxisDataFrame );
+            _yAxisWAll += _yAxis.width;
+            if( _yAxis.align == 'left' ){
+                _leftYAxisW = _yAxis.width;
+            }
         } );
 
+        let xAxisWidth = w - _yAxisWAll - _padding.left - _padding.right;
+        this.width = xAxisWidth;
+        let _xAxisDataFrame = this.getAxisDataFrame(this.xAxis.field);
+        this._xAxis.resetData( _xAxisDataFrame , {
+            width: xAxisWidth,
+            pos : {
+                x : _padding.left + _leftYAxisW,
+                //y : y
+            },
+        } );
+
+        this.origin.x = _leftYAxisW + _padding.left;
+        //this.origin.y = y;
+ 
         this._resetXY_axisLine_pos();
 
         this._grid.reset({
@@ -265,22 +287,18 @@ class Rect extends coordBase
         
         this._yAxisRight && this._yAxisRight.setX( _yAxisW + _padding.left + this._xAxis.width );
 
-        //绘制背景网格
-        this._grid.draw({
-            width        : this._xAxis.width,
-            height       : this._yAxis[0].height,
-            pos          : {
-                x        : _yAxisW + _padding.left,
-                y        : y
-            },
-            resize       : opt.resize
-        } );
-
-
         this.width = this._xAxis.width;
-        this.height = this._yAxis[0].height;
+        this.height = this._yAxis.length ? this._yAxis[0].height : 0;
         this.origin.x = _yAxisW + _padding.left;
         this.origin.y = y;
+
+        //绘制背景网格
+        this._grid.draw({
+            width: this.width,
+            height: this.height,
+            pos    : this.origin,
+            resize : opt.resize
+        } );
 
         this._initInduce();
 
