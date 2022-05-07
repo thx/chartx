@@ -11,6 +11,7 @@ let { _, event } = Canvax;
 let Rect    = Canvax.Shapes.Rect;
 let Diamond = Canvax.Shapes.Diamond;
 let Path    = Canvax.Shapes.Path;
+let BrokenLine = Canvax.Shapes.BrokenLine;
 let Circle  = Canvax.Shapes.Circle;
 let Arrow   = Canvax.Shapes.Arrow;
 
@@ -948,7 +949,13 @@ class Relation extends GraphsBase {
                 me._setTreePoints( edge );
             };
 
-            let path        = me._getPathStr(edge, me.line.inflectionRadius);
+            let lineShapeOpt= me._getLineShape(edge, me.line.inflectionRadius)
+
+            let type        = lineShapeOpt.type;  
+            let path        = lineShapeOpt.path;
+            let pointList   = lineShapeOpt.pointList;
+            let shape       = type == 'path' ? Path : BrokenLine;
+
             let lineWidth   = me.getProp( me.line.lineWidth, edge );
             let strokeStyle = me.getProp( me.line.strokeStyle, edge );
             let lineType    = me.getProp( me.line.lineType, edge );
@@ -957,20 +964,39 @@ class Relation extends GraphsBase {
             let edgeId = 'edge_'+key;
             let _path  = me.edgesSp.getChildById( edgeId );
             if( _path ){
-                _path.context.path = path;
+                
+                if( type == 'path' ){
+                    _path.context.path = path;
+                }
+                if( type == 'brokenLine' ){
+                    _path.context.pointList = pointList;
+                }
+
                 _path.context.lineWidth = lineWidth;
                 _path.context.strokeStyle = strokeStyle;
                 _path.context.lineType = lineType;
+
             } else {
-                _path = new Path({
+
+                let _ctx = {
+                    lineWidth,
+                    strokeStyle,
+                    lineType,
+                    cursor
+                }
+
+                if( type == 'path' ){
+                    _ctx.path = path;
+                }
+                if( type == 'brokenLine' ){
+                    //_ctx.smooth = true;
+                    //_ctx.curvature = 0.25;
+                    _ctx.pointList = pointList;
+                }
+
+                _path = new shape({
                     id : edgeId,
-                    context: {
-                        path,
-                        lineWidth,
-                        strokeStyle,
-                        lineType,
-                        cursor
-                    }
+                    context: _ctx
                 });
                 _path.on(event.types.get(), function (e) {
                     let node = this.nodeData;
@@ -996,16 +1022,7 @@ class Relation extends GraphsBase {
                 }
             };
             
-            // edge的xy 就是 可以用来显示label的位置
-            // let _circle = new Circle({
-            //     context : {
-            //         r : 2,
-            //         x : edge.x,
-            //         y : edge.y,
-            //         fillStyle: "red"
-            //     }
-            // })
-            //me.labelsSp.addChild( _circle );
+
 
             
             let edgeLabelId  = 'label_'+key;
@@ -1462,10 +1479,15 @@ class Relation extends GraphsBase {
      * @param {shapeType,points} edge 
      * @param {number} inflectionRadius 拐点的圆角半径
      */
-    _getPathStr(edge, inflectionRadius) {
+    _getLineShape(edge, inflectionRadius) {
         
         let points = edge.points;
 
+        let line = {
+            type: 'path', // pah or brokenLine
+            pointList: null,
+            path: str
+        };
 
         let head = points[0];
         let tail = points.slice(-1)[0];
@@ -1477,6 +1499,13 @@ class Relation extends GraphsBase {
             }
             if( points.length == 4 ){
                 str += ",C" + points[1].x + " " + points[1].y + " "+ points[2].x + " " + points[2].y + " " + tail.x + " " + tail.y;
+            }
+            if( points.length >= 5 ){
+                line.type = 'brokenLine';
+                line.pointList = points.map( item => {
+                    return [ item.x, item.y ]
+                } );
+                return line;
             }
         };
 
@@ -1527,8 +1556,10 @@ class Relation extends GraphsBase {
                 }
             } );
         };
+
+        line.path = str;
         //str += "z"
-        return str;
+        return line;
     }
     /**
      * 字符串是否含有html标签的检测

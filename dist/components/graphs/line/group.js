@@ -556,7 +556,11 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
         y: me.y,
         strokeStyle: strokeStyle,
         smooth: me.line.smooth,
+        curvature: me.line.curvature,
         lineType: me._getProp(me.line.lineType),
+        lineDash: me.line.lineDash,
+        //TODO: 不能用_getProp
+        lineJoin: 'bevel',
         smoothFilter: function smoothFilter(rp) {
           //smooth为true的话，折线图需要对折线做一些纠正，不能超过底部
           if (rp[1] > 0) {
@@ -1344,9 +1348,17 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
               detail: '线的样式',
               "default": 'solid'
             },
+            lineDash: {
+              detail: '虚线的线段样式，默认[6,3]',
+              "default": [2, 5]
+            },
             smooth: {
               detail: '是否平滑处理',
               "default": true
+            },
+            curvature: {
+              detail: '折线smooth为true的时候，配置的曲率，默认 0.25',
+              "default": undefined
             },
             shadowOffsetX: {
               detail: '折线的X方向阴影偏移量',

@@ -46,6 +46,7 @@ var _ = _canvax["default"]._,
 var Rect = _canvax["default"].Shapes.Rect;
 var Diamond = _canvax["default"].Shapes.Diamond;
 var Path = _canvax["default"].Shapes.Path;
+var BrokenLine = _canvax["default"].Shapes.BrokenLine;
 var Circle = _canvax["default"].Shapes.Circle;
 var Arrow = _canvax["default"].Shapes.Arrow;
 /**
@@ -648,8 +649,12 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
 
         ;
 
-        var path = me._getPathStr(edge, me.line.inflectionRadius);
+        var lineShapeOpt = me._getLineShape(edge, me.line.inflectionRadius);
 
+        var type = lineShapeOpt.type;
+        var path = lineShapeOpt.path;
+        var pointList = lineShapeOpt.pointList;
+        var shape = type == 'path' ? Path : BrokenLine;
         var lineWidth = me.getProp(me.line.lineWidth, edge);
         var strokeStyle = me.getProp(me.line.strokeStyle, edge);
         var lineType = me.getProp(me.line.lineType, edge);
@@ -659,20 +664,38 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
         var _path = me.edgesSp.getChildById(edgeId);
 
         if (_path) {
-          _path.context.path = path;
+          if (type == 'path') {
+            _path.context.path = path;
+          }
+
+          if (type == 'brokenLine') {
+            _path.context.pointList = pointList;
+          }
+
           _path.context.lineWidth = lineWidth;
           _path.context.strokeStyle = strokeStyle;
           _path.context.lineType = lineType;
         } else {
-          _path = new Path({
+          var _ctx = {
+            lineWidth: lineWidth,
+            strokeStyle: strokeStyle,
+            lineType: lineType,
+            cursor: cursor
+          };
+
+          if (type == 'path') {
+            _ctx.path = path;
+          }
+
+          if (type == 'brokenLine') {
+            //_ctx.smooth = true;
+            //_ctx.curvature = 0.25;
+            _ctx.pointList = pointList;
+          }
+
+          _path = new shape({
             id: edgeId,
-            context: {
-              path: path,
-              lineWidth: lineWidth,
-              strokeStyle: strokeStyle,
-              lineType: lineType,
-              cursor: cursor
-            }
+            context: _ctx
           });
 
           _path.on(event.types.get(), function (e) {
@@ -704,17 +727,7 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
           }
         }
 
-        ; // edge的xy 就是 可以用来显示label的位置
-        // let _circle = new Circle({
-        //     context : {
-        //         r : 2,
-        //         x : edge.x,
-        //         y : edge.y,
-        //         fillStyle: "red"
-        //     }
-        // })
-        //me.labelsSp.addChild( _circle );
-
+        ;
         var edgeLabelId = 'label_' + key;
         var enabled = me.getProp(me.line.edgeLabel.enabled, edge);
 
@@ -1287,9 +1300,15 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
      */
 
   }, {
-    key: "_getPathStr",
-    value: function _getPathStr(edge, inflectionRadius) {
+    key: "_getLineShape",
+    value: function _getLineShape(edge, inflectionRadius) {
       var points = edge.points;
+      var line = {
+        type: 'path',
+        // pah or brokenLine
+        pointList: null,
+        path: str
+      };
       var head = points[0];
       var tail = points.slice(-1)[0];
       var str = "M" + head.x + " " + head.y;
@@ -1301,6 +1320,14 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
 
         if (points.length == 4) {
           str += ",C" + points[1].x + " " + points[1].y + " " + points[2].x + " " + points[2].y + " " + tail.x + " " + tail.y;
+        }
+
+        if (points.length >= 5) {
+          line.type = 'brokenLine';
+          line.pointList = points.map(function (item) {
+            return [item.x, item.y];
+          });
+          return line;
         }
       }
 
@@ -1352,9 +1379,10 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
         });
       }
 
-      ; //str += "z"
+      ;
+      line.path = str; //str += "z"
 
-      return str;
+      return line;
     }
     /**
      * 字符串是否含有html标签的检测

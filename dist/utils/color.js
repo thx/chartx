@@ -19,6 +19,17 @@ var reg = /^#([0-9a-fA-f]{3}|[0-9a-fA-f]{6})$/;
 /*16进制颜色转为RGB格式*/
 
 function colorRgb(hex) {
+  if (Array.isArray(hex)) {
+    hex = hex[0];
+  }
+
+  ;
+
+  if (!hex) {
+    return 'RGB(0,0,0)';
+  }
+
+  ;
   var sColor = hex.toLowerCase();
 
   if (sColor && reg.test(sColor)) {

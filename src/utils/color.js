@@ -3,6 +3,13 @@ let reg = /^#([0-9a-fA-f]{3}|[0-9a-fA-f]{6})$/;
 
 /*16进制颜色转为RGB格式*/  
 export function colorRgb( hex ){  
+    if( Array.isArray(hex) ){
+        hex = hex[0]
+    };
+    if( !hex ){
+        return 'RGB(0,0,0)'
+    };
+    
     let sColor = hex.toLowerCase();  
     if(sColor && reg.test(sColor)){  
         if(sColor.length === 4){  

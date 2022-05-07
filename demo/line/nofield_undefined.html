@@ -68,37 +68,49 @@ var options = {
     
         { 
             type : "line",
-            field : undefined , 
-            line : {
-                strokeStyle : "#eeccdd"
-            },
-            area : {
-                alpha : [ 0.5 , 0 ]
-            },
-            node : {
-                //配置拐点才出现节点
-                corner : true
-            },
-            label : {
-                enabled : true
-            }
+            field : undefined 
         }
     ],
     legend : {
         enabled : 1
-    },
-    dataZoom: {
-        range : {
-            start : 0,
-            end : 10
-        }
     },
     tips : {
         pointer : "line"
     } 
 };
 
-window.line = chartx.create("canvasTest" , data , options)
+var options1 = {
+    coord : {
+        type : "rect",
+        //横向的图表，是坐标系横向了
+        //horizontal : true,
+
+        xAxis : {
+            field : "xfield",
+            label:{
+                rotation  : 30 
+            }
+        }
+    },
+    graphs : [
+    
+        { 
+            type : "line",
+            field : 'uv' 
+        }
+    ],
+    legend : {
+        enabled : 1
+    },
+    tips : {
+        pointer : "line"
+    } 
+};
+
+window.line = chartx.create("canvasTest" , data , options);
+setTimeout( function(){
+    line.reset(options1)
+} , 2000)
 
 
             </textarea></form>
