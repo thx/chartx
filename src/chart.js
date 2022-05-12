@@ -111,7 +111,7 @@ class Chart extends event.Dispatcher
             };
             
             _.each( comps, function( comp ){
-            
+             
                 if( //没有type的coord和没有field(or keyField)的graphs，都无效，不要创建该组件
                     //关系图中是keyField
                     //(compName == "coord" && !comp.type ) || 

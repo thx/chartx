@@ -377,7 +377,7 @@ var LineGraphs = /*#__PURE__*/function (_GraphsBase) {
         aniDuration: {
           //覆盖基类中的设置，line的duration要1000
           detail: '动画时长',
-          "default": 1200
+          "default": 800
         },
         _props: [_group["default"]]
       };

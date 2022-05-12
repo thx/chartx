@@ -5085,7 +5085,7 @@ var GraphicsData = /*#__PURE__*/function () {
   _createClass(GraphicsData, [{
     key: "clone",
     value: function clone() {
-      var cloneGraphicsData = new GraphicsData(this.lineWidth, this.strokeStyle, this.strokeAlpha, this.fillStyle, this.fillAlpha, this.shadowOffsetX, this.shadowOffsetY, this.shadowBlur, this.shadowColor, this.shape);
+      var cloneGraphicsData = new GraphicsData(this.lineWidth, this.strokeStyle, this.strokeAlpha, this.fillStyle, this.fillAlpha, this.shadowOffsetX, this.shadowOffsetY, this.shadowBlur, this.shadowColor, this.lineCap, this.lineJoin, this.miterLimit, this.shape);
       cloneGraphicsData.fill = this.fill;
       cloneGraphicsData.line = this.line;
       return cloneGraphicsData;
@@ -5119,6 +5119,10 @@ var GraphicsData = /*#__PURE__*/function () {
       this.shadowBlur = style.shadowBlur; //阴影模糊效果
 
       this.shadowColor = style.shadowColor; //阴影颜色
+
+      this.lineCap = style.lineCap;
+      this.lineJoin = style.lineJoin;
+      this.miterLimit = style.miterLimit;
     }
   }, {
     key: "hasFill",
@@ -6928,9 +6932,11 @@ var BrokenLine = /*#__PURE__*/function (_Shape) {
   _createClass(BrokenLine, [{
     key: "watch",
     value: function watch(name, value, preValue) {
-      if (name == "pointList" || name == "smooth" || name == "lineType") {
+      var names = ['curvature', 'pointList', 'smooth', 'lineType'];
+
+      if (names.indexOf(name) > -1) {
         if (name == "pointList" && this.context.smooth) {
-          this.context.pointList = myMath.getSmoothPointList(value, this.context.smoothFilter, _context.curvature);
+          this.context.pointList = myMath.getSmoothPointList(value, this.context.smoothFilter, this.context.curvature);
           this._pointList = value;
         }
 
@@ -6938,7 +6944,7 @@ var BrokenLine = /*#__PURE__*/function (_Shape) {
           //如果是smooth的切换
           if (value) {
             //从原始中拿数据重新生成
-            this.context.pointList = myMath.getSmoothPointList(this._pointList, this.context.smoothFilter, _context.curvature);
+            this.context.pointList = myMath.getSmoothPointList(this._pointList, this.context.smoothFilter, this.context.curvature);
           } else {
             this.context.pointList = this._pointList;
           }
@@ -8000,7 +8006,7 @@ var Diamond = /*#__PURE__*/function (_Shape) {
 }(Shape);
 
 var Canvax = {
-  version: "2.0.79",
+  version: "2.0.81",
   _: _,
   $: $,
   event: event,
@@ -20007,7 +20013,7 @@ var LineGraphs = /*#__PURE__*/function (_GraphsBase) {
         aniDuration: {
           //覆盖基类中的设置，line的duration要1000
           detail: '动画时长',
-          "default": 1200
+          "default": 800
         },
         _props: [_group["default"]]
       };
@@ -52613,7 +52619,7 @@ var Tips = /*#__PURE__*/function (_Component) {
       if (document) {
         this._tipDom = document.createElement("div");
         this._tipDom.className = "chart-tips";
-        this._tipDom.style.cssText += "; border-radius:" + this.borderRadius + "px;background:" + this.fillStyle + ";border:1px solid " + this.strokeStyle + ";visibility:hidden;position:fixed;z-index:99999;enabled:inline-block;*enabled:inline;*zoom:1;padding:6px;color:" + this.fontColor + ";line-height:1.5";
+        this._tipDom.style.cssText += "; border-radius:" + this.borderRadius + "px;background:" + this.fillStyle + ";border:1px solid " + this.strokeStyle + ";visibility:hidden;position:fixed;z-index:99999999;enabled:inline-block;*enabled:inline;*zoom:1;padding:6px;color:" + this.fontColor + ";line-height:1.5";
         this._tipDom.style.cssText += "; box-shadow:1px 1px 3px " + this.strokeStyle + ";";
         this._tipDom.style.cssText += "; border:none;white-space:nowrap;word-wrap:normal;";
         this._tipDom.style.cssText += "; text-align:left;pointer-events:none;";
