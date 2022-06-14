@@ -421,7 +421,6 @@ var Map = /*#__PURE__*/function (_GraphsBase) {
       this._setNodeStyle(_path, 'select');
 
       nodeData.selected = true;
-      console.log("select:true");
     }
   }, {
     key: "unselectAt",
@@ -435,7 +434,6 @@ var Map = /*#__PURE__*/function (_GraphsBase) {
       this._setNodeStyle(_path);
 
       geoGraph.selected = false;
-      console.log("select:false");
 
       if (geoGraph.focused) {
         this.focusAt(adcode);

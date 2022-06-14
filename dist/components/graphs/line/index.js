@@ -58,7 +58,6 @@ var LineGraphs = /*#__PURE__*/function (_GraphsBase) {
   }, {
     key: "draw",
     value: function draw(opt) {
-      debugger;
       !opt && (opt = {});
       this.width = opt.width;
       this.height = opt.height;
