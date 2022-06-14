@@ -67,7 +67,6 @@ var lineMarkPoint = /*#__PURE__*/function (_Component) {
     key: "draw",
     value: function draw() {
       var me = this;
-      debugger;
 
       var _coord = this.app.getComponent({
         name: 'coord'
@@ -198,7 +197,7 @@ var lineMarkPoint = /*#__PURE__*/function (_Component) {
       var appHeight = this.app.height;
       var coordHeight = _coord.height;
       var y = nodeData.y;
-      var lineLength = !this.line.enabled ? 1 : this.line.lineLength;
+      var lineLength = !this.line.enabled ? 3 : this.line.lineLength;
       var lineDis = this.line.lineDis; //line到node的距离
 
       var position = "online";
@@ -272,7 +271,7 @@ var lineMarkPoint = /*#__PURE__*/function (_Component) {
             },
             lineLength: {
               detail: '线的长度，也就是label到line的距离',
-              "default": 6
+              "default": 8
             },
             lineDis: {
               detail: 'line到折线上面node的距离',

@@ -34,7 +34,7 @@ class lineMarkPoint extends Component
                     },
                     lineLength: {
                         detail : '线的长度，也就是label到line的距离',
-                        default: 6
+                        default: 8
                     },
                     lineDis: {
                         detail: 'line到折线上面node的距离',
@@ -115,7 +115,7 @@ class lineMarkPoint extends Component
     draw()
     {
         let me = this;
-        debugger
+        
         let _coord = this.app.getComponent({name:'coord'});
         this.pos = {   
             x: _coord.origin.x,
@@ -228,7 +228,7 @@ class lineMarkPoint extends Component
         let appHeight = this.app.height;
         let coordHeight = _coord.height;
         let y = nodeData.y;
-        let lineLength = !this.line.enabled ? 1 : this.line.lineLength;
+        let lineLength = !this.line.enabled ? 3 : this.line.lineLength;
         let lineDis = this.line.lineDis;  //line到node的距离
       
         let position = "online";
