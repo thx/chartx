@@ -189,6 +189,7 @@ var PieGraphs = /*#__PURE__*/function (_GraphsBase) {
         var color = me._getColor(me.node.fillStyle, layoutData);
 
         layoutData.fillStyle = layoutData.color = color;
+        debugger;
         data.push(layoutData);
       }
 

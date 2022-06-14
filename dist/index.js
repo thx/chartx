@@ -77,6 +77,8 @@ require("./components/relation_backline/index");
 
 require("./components/title/index");
 
+require("./components/lineMarkPoint/index");
+
 //2d图表元类
 //-----------------------------------------------
 //坐标系
@@ -97,7 +99,7 @@ if (projectTheme && projectTheme.length) {
 ; //皮肤设定end -----------------
 
 var chartx = {
-  version: '1.1.79',
+  version: '1.1.81',
   options: {}
 };
 

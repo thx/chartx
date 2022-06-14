@@ -48,7 +48,7 @@ class LineGraphs extends GraphsBase
 
     draw(opt)
     {
-        
+        debugger
         !opt && (opt ={});
         this.width = opt.width;
         this.height = opt.height;

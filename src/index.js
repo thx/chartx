@@ -49,6 +49,7 @@ import "./components/lineschedu/index"
 import "./components/markcloumn/index"
 import "./components/relation_backline/index"
 import "./components/title/index"
+import "./components/lineMarkPoint/index"
 
 //皮肤设定begin ---------------
 //如果数据库中有项目皮肤

@@ -8076,6 +8076,7 @@ var _default = {
       var codeWithoutVariables = code.slice(0, range[0]) + code.slice(range[1]);
       return this._eval(codeWithoutVariables, 'options', 'variables', variables);
     } catch (e) {
+      console.log('parse error');
       return {};
     }
   }
@@ -8138,7 +8139,7 @@ var components = {
   */
 };
 var _default = {
-  chartxVersion: '1.1.79',
+  chartxVersion: '1.1.81',
   create: function create(el, _data, _opt) {
     var chart = null;
     var me = this;
@@ -19706,6 +19707,7 @@ var LineGraphs = /*#__PURE__*/function (_GraphsBase) {
   }, {
     key: "draw",
     value: function draw(opt) {
+      debugger;
       !opt && (opt = {});
       this.width = opt.width;
       this.height = opt.height;
@@ -22411,6 +22413,7 @@ var PieGraphs = /*#__PURE__*/function (_GraphsBase) {
         var color = me._getColor(me.node.fillStyle, layoutData);
 
         layoutData.fillStyle = layoutData.color = color;
+        debugger;
         data.push(layoutData);
       }
 
@@ -28160,6 +28163,7 @@ function scaleSolution(solution, width, height, padding) {
       yRange = bounds.yRange;
 
   if (xRange.max == xRange.min || yRange.max == yRange.min) {
+    console.log("not scaling solution: zero size detected");
     return solution;
   }
 
@@ -28818,7 +28822,9 @@ function computeTextCentres(circles, areas) {
     var centre = computeTextCentre(interior, exterior);
     ret[area] = centre;
 
-    if (centre.disjoint && areas[i].size > 0) ;
+    if (centre.disjoint && areas[i].size > 0) {
+      console.log("WARNING: area " + area + " not represented on screen");
+    }
   }
 
   return ret;
@@ -31240,6 +31246,7 @@ function jsonToArrayForRelation(data, options, _childrenField) {
   var label = options.node && options.node.content && options.node.content.field;
 
   if (!checkDataIsJson(data, key, childrenKey)) {
+    console.error('该数据不能正确绘制，请提供数组对象形式的数据！');
     return result;
   }
   var childrens = [];
@@ -35070,7 +35077,9 @@ var _typeof2 = interopRequireDefault(_typeof_1$1);
 
         try {
           return fn();
-        } finally {}
+        } finally {
+          console.log(name + " time: " + (_.now() - start) + "ms");
+        }
       }
 
       function notime(name, fn) {
@@ -49780,6 +49789,7 @@ var Map = /*#__PURE__*/function (_GraphsBase) {
       this._setNodeStyle(_path, 'select');
 
       nodeData.selected = true;
+      console.log("select:true");
     }
   }, {
     key: "unselectAt",
@@ -49793,6 +49803,7 @@ var Map = /*#__PURE__*/function (_GraphsBase) {
       this._setNodeStyle(_path);
 
       geoGraph.selected = false;
+      console.log("select:false");
 
       if (geoGraph.focused) {
         this.focusAt(adcode);
@@ -52505,6 +52516,7 @@ var Tips = /*#__PURE__*/function (_Component) {
   (0, _createClass2["default"])(Tips, [{
     key: "show",
     value: function show(e) {
+      console.log('tips show');
       if (!this.enabled) return;
 
       if (e.eventInfo) {
@@ -52542,6 +52554,7 @@ var Tips = /*#__PURE__*/function (_Component) {
   }, {
     key: "move",
     value: function move(e) {
+      console.log('tips move');
       if (!this.enabled) return;
 
       if (e.eventInfo) {
@@ -52564,6 +52577,8 @@ var Tips = /*#__PURE__*/function (_Component) {
   }, {
     key: "hide",
     value: function hide(e) {
+      console.log('tips hide');
+
       this._hide(e);
 
       this.onhide.apply(this, [e]);
@@ -55944,6 +55959,332 @@ exports["default"] = _default;
 
 unwrapExports(title);
 
+var lineMarkPoint_1 = createCommonjsModule(function (module, exports) {
+
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports["default"] = void 0;
+
+var _classCallCheck2 = interopRequireDefault(classCallCheck$1);
+
+var _createClass2 = interopRequireDefault(createClass$1);
+
+var _assertThisInitialized2 = interopRequireDefault(assertThisInitialized$1);
+
+var _inherits2 = interopRequireDefault(inherits$1);
+
+var _possibleConstructorReturn2 = interopRequireDefault(possibleConstructorReturn$1);
+
+var _getPrototypeOf2 = interopRequireDefault(getPrototypeOf$1);
+
+var _component = interopRequireDefault(component);
+
+var _canvax = interopRequireDefault(Canvax);
+
+
+
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
+var _ = _canvax["default"]._;
+var Rect = _canvax["default"].Shapes.Rect;
+
+var lineMarkPoint = /*#__PURE__*/function (_Component) {
+  (0, _inherits2["default"])(lineMarkPoint, _Component);
+
+  var _super = _createSuper(lineMarkPoint);
+
+  function lineMarkPoint(opt, app) {
+    var _this;
+
+    (0, _classCallCheck2["default"])(this, lineMarkPoint);
+    _this = _super.call(this, opt, app);
+    _this.name = "lineMarkPoint";
+
+    _.extend(true, (0, _assertThisInitialized2["default"])(_this), (0, tools.getDefaultProps)(lineMarkPoint.defaultProps()), opt);
+
+    _this.lineDatas = null;
+    _this.sprite = new _canvax["default"].Display.Sprite();
+
+    _this.app.graphsSprite.addChild(_this.sprite);
+
+    return _this;
+  }
+
+  (0, _createClass2["default"])(lineMarkPoint, [{
+    key: "reset",
+    value: function reset(opt) {
+      _.extend(true, this, opt);
+
+      this.lineDatas = null;
+      this.sprite.removeAllChildren();
+      this.draw();
+    }
+  }, {
+    key: "draw",
+    value: function draw() {
+      var me = this;
+      debugger;
+
+      var _coord = this.app.getComponent({
+        name: 'coord'
+      });
+
+      this.pos = {
+        x: _coord.origin.x,
+        y: _coord.origin.y
+      };
+      this.setPosition();
+      var lineGraphs = me.app.getComponent({
+        name: 'graphs',
+        type: "line",
+        field: me.lineField
+      });
+      me.lineDatas = lineGraphs.data[me.lineField].data;
+      var iNode = this.app.getComponent({
+        name: "coord"
+      }).getAxis({
+        type: "xAxis"
+      }).getIndexOfVal(this.xValue);
+
+      if (iNode == -1) {
+        return;
+      }
+      var nodeData = this.lineDatas[iNode];
+      var preNodeData = iNode ? this.lineDatas[iNode - 1] : null;
+      var nextNodeData = iNode == me.lineDatas.length ? null : this.lineDatas[iNode + 1];
+
+      if (nodeData.y != undefined) {
+        var x = nodeData.x;
+
+        var _txtSp = new _canvax["default"].Display.Sprite({
+          context: {
+            x: x
+          }
+        });
+
+        this.sprite.addChild(_txtSp);
+        var txtHeight = 0;
+
+        var _label = new _canvax["default"].Display.Text(me.label.text, {
+          context: {
+            fillStyle: this.label.fontColor,
+            fontSize: this.label.fontSize,
+            textAlign: 'center',
+            textBaseline: 'top'
+          }
+        });
+
+        _txtSp.addChild(_label);
+
+        txtHeight = _label.getTextHeight();
+
+        var txtWidth = _label.getTextWidth();
+
+        var _bgRect;
+
+        var padding = 0; //如果有背景，那么就要加上背景的padding
+
+        if (this.label.background.enabled) {
+          padding = this.label.background.padding;
+          txtHeight += padding * 2;
+          txtWidth += padding * 2;
+          _txtSp.context.x -= padding; //sp的y会在下面单独计算好
+
+          _label.context.x += padding;
+          _label.context.y += padding;
+          var r = me.label.background.radius; //添加一下背景
+
+          _bgRect = new Rect({
+            context: {
+              x: -txtWidth / 2 + padding,
+              width: txtWidth,
+              height: txtHeight,
+              radius: [r, r, r, r],
+              fillStyle: me.label.background.fillStyle,
+              strokeStyle: me.label.background.strokeStyle,
+              lineWidth: me.label.background.lineWidth
+            }
+          });
+
+          _txtSp.addChild(_bgRect, 0);
+        }
+
+        if (txtWidth / 2 + x > _coord.width) {
+          _txtSp.context.x = _coord.width;
+          _label.context.textAlign = "right";
+          _bgRect && (_bgRect.context.x -= txtWidth / 2 - padding);
+        }
+
+        if (x - txtWidth / 2 < 0) {
+          _txtSp.context.x = 0;
+          _label.context.textAlign = "left";
+          _bgRect && (_bgRect.context.x += txtWidth / 2 - padding);
+        }
+
+        var _me$_getNodeYandLineP = me._getNodeYandLinePointList(nodeData, preNodeData, nextNodeData, _coord, txtHeight),
+            y = _me$_getNodeYandLineP.y,
+            pointList = _me$_getNodeYandLineP.pointList;
+
+        _txtSp.context.y = y;
+
+        if (me.line.enabled) {
+          var _line = new _canvax["default"].Shapes.BrokenLine({
+            context: {
+              pointList: pointList,
+              strokeStyle: me.line.strokeStyle,
+              lineWidth: me.line.lineWidth
+            }
+          });
+
+          me.sprite.addChild(_line, 0);
+        }
+      }
+    }
+  }, {
+    key: "_getNodeYandLinePointList",
+    value: function _getNodeYandLinePointList(nodeData, preNodeData, nextNodeData, _coord, txtHeight) {
+      var appHeight = this.app.height;
+      var coordHeight = _coord.height;
+      var y = nodeData.y;
+      var lineLength = !this.line.enabled ? 1 : this.line.lineLength;
+      var lineDis = this.line.lineDis; //line到node的距离
+
+      var position = "online";
+
+      if (preNodeData && preNodeData.y < nodeData.y || nextNodeData && nextNodeData.y < nodeData.y) {
+        position = 'offline'; //在线的下方
+      }
+
+      if (position == "online" && Math.abs(y) + lineLength + lineDis + txtHeight > coordHeight) {
+        //在上面但是超过了坐标系顶部空间
+        position = "offline";
+      }
+
+      if (position == "offline" && Math.abs(y) < lineLength + txtHeight + lineDis) {
+        //在线下面，但是超出了坐标系底部空间
+        position = "online";
+      }
+      var top = 0;
+
+      if (position == "online") {
+        top = y - lineLength - lineDis - txtHeight;
+      } else {
+        top = y + lineDis + lineLength;
+      }
+
+      var pointList = [[nodeData.x, top], [nodeData.x, nodeData.y + lineDis]];
+
+      if (position == "online") {
+        pointList = [[nodeData.x, top + txtHeight], [nodeData.x, nodeData.y - lineDis]];
+      }
+
+      return {
+        y: top,
+        pointList: pointList
+      };
+    }
+  }], [{
+    key: "defaultProps",
+    value: function defaultProps() {
+      return {
+        lineField: {
+          detail: '对应的line字段',
+          "default": null
+        },
+        xValue: {
+          detail: '在lineFile字段的折线上对应点的x轴的值',
+          "default": null
+        },
+        line: {
+          detail: 'line的配置',
+          propertys: {
+            enabled: {
+              detail: '是否要指示线',
+              "default": true
+            },
+            lineWidth: {
+              detail: '线宽',
+              "default": 2
+            },
+            strokeStyle: {
+              detail: '线颜色',
+              "default": '#ccc'
+            },
+            lineLength: {
+              detail: '线的长度，也就是label到line的距离',
+              "default": 6
+            },
+            lineDis: {
+              detail: 'line到折线上面node的距离',
+              "default": 3
+            }
+          }
+        },
+        label: {
+          detail: 'markpoint标注的文本配置',
+          propertys: {
+            text: {
+              detail: 'label内容',
+              "default": ''
+            },
+            fontSize: {
+              detail: 'label的文本大小',
+              "default": 12
+            },
+            fontColor: {
+              detail: '文本颜色',
+              "default": '#666'
+            },
+            background: {
+              detail: 'label的background配置',
+              propertys: {
+                enabled: {
+                  detail: 'label是否需要背景',
+                  "default": true
+                },
+                fillStyle: {
+                  detail: 'label的背景颜色',
+                  "default": '#f5f5f6'
+                },
+                radius: {
+                  detail: 'label的背景圆角',
+                  "default": 6
+                },
+                strokeStyle: {
+                  detail: 'label的背景边框颜色',
+                  "default": '#f5f5f6'
+                },
+                lineWidth: {
+                  detail: '背景描边',
+                  "default": 1
+                },
+                padding: {
+                  detail: 'background和label之间的距离',
+                  "default": 6
+                }
+              }
+            }
+          }
+        }
+      };
+    }
+  }]);
+  return lineMarkPoint;
+}(_component["default"]);
+
+_component["default"].registerComponent(lineMarkPoint, 'lineMarkPoint');
+
+var _default = lineMarkPoint;
+exports["default"] = _default;
+});
+
+unwrapExports(lineMarkPoint_1);
+
 var dist = createCommonjsModule(function (module, exports) {
 
 
@@ -55954,6 +56295,8 @@ Object.defineProperty(exports, "__esModule", {
 exports["default"] = void 0;
 
 var _global = interopRequireDefault(global$1);
+
+
 
 
 
@@ -56041,7 +56384,7 @@ if (projectTheme && projectTheme.length) {
 }
 
 var chartx = {
-  version: '1.1.79',
+  version: '1.1.81',
   options: {}
 };
 

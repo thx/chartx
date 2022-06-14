@@ -83,6 +83,7 @@ var Tips = /*#__PURE__*/function (_Component) {
   (0, _createClass2["default"])(Tips, [{
     key: "show",
     value: function show(e) {
+      console.log('tips show');
       if (!this.enabled) return;
 
       if (e.eventInfo) {
@@ -124,6 +125,7 @@ var Tips = /*#__PURE__*/function (_Component) {
   }, {
     key: "move",
     value: function move(e) {
+      console.log('tips move');
       if (!this.enabled) return;
 
       if (e.eventInfo) {
@@ -148,6 +150,8 @@ var Tips = /*#__PURE__*/function (_Component) {
   }, {
     key: "hide",
     value: function hide(e) {
+      console.log('tips hide');
+
       this._hide(e);
 
       this.onhide.apply(this, [e]);
