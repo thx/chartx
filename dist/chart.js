@@ -504,11 +504,15 @@ var Chart = /*#__PURE__*/function (_event$Dispatcher) {
   }, {
     key: "reset",
     value: function reset(opt, data) {
-      opt && (this._opt = opt);
+      //opt && (this._opt = opt);
+      if (opt) {
+        this._opt = this.polyfill(opt);
+      }
       /* 不能 extend opt 
       !opt && (opt={});
       _.extend(this._opt, opt);
       */
+
 
       data && (this._data = data);
       this.dataFrame = this.initData(this._data, opt);

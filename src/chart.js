@@ -411,7 +411,10 @@ class Chart extends event.Dispatcher
     reset(opt, data)
     {
         
-        opt && (this._opt = opt);
+        //opt && (this._opt = opt);
+        if( opt ){
+            this._opt = this.polyfill(opt);
+        }
         
         /* 不能 extend opt 
         !opt && (opt={});

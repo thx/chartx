@@ -260,7 +260,8 @@ var axis = /*#__PURE__*/function () {
       }
 
       ;
-    }
+    } //后续也会做堆叠的折线图，就是面积图， 和堆叠图不同的是走的是一维数据计算
+
   }, {
     key: "_oneDimensional",
     value: function _oneDimensional() {
@@ -273,7 +274,7 @@ var axis = /*#__PURE__*/function () {
 
       ;
       return arr;
-    } //二维的yAxis设置，肯定是堆叠的比如柱状图，后续也会做堆叠的折线图， 就是面积图
+    } //二维的yAxis设置，肯定是堆叠的比如柱状图，
 
   }, {
     key: "_twoDimensional",

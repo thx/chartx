@@ -172,18 +172,32 @@ export default class Axis extends baseAxis
         _.extend( true, this, getDefaultProps( Axis.defaultProps() ) );
     }
 
-    addValToSection(y)
+    //vals 参数可以是单个number 也可以是 多个
+    addValToSection( vals )
     {
+        if( !Array.isArray( vals ) ){
+            vals = [ vals ]
+        };
+
         //如果y在现有的数据区间里面， 就不需要重新计算和绘制了
         if( this.layoutType == "proportion" ){
-            if( y >= this._min && y<= this._max ){
+            let allIn = true;
+            vals.forEach( val => {
+                if( !(val >= this._min && val<= this._max) ){
+                    allIn = false;
+                } 
+            });
+            if( allIn ){
+                //都在dataSection的区间内，就不用管了
                 return;
-            } 
+            };
         };
 
         //如果y不在当前datasection范围内，那么就要重新绘制
         this.dataSection = [];
-        this._addValToSection( y );
+        vals.forEach( val => {
+            this._addValToSection( val );
+        });
         this._initHandle();
         this.draw();
 

@@ -40,7 +40,7 @@ var data= [
     [ "1月2号" , 130  , 35        , 232],
     [ "1月3号" , 123  , 65        , 221],
     [ "1月4号" , 132  , 54        , 232],
-    [ "1月5号" , 130  , 22        , 238],
+    [ "1月5号" , ''   , ''        , 238],
     [ "1月6号" , 150  , 66        , 269],
     [ "1月7号" , 110  , 33        , 222],
     [ "1月8号" , 166  , 47        , 232],
@@ -48,6 +48,19 @@ var data= [
     [ "1月10号", 158  , 87        , 289],
     [ "1月11号", 179  , 37        , 212],
     [ "1月12号", 188  , 92        , 273]
+];
+
+var data1= [
+    ["xfield" , "uv" , "uvbottom", "pv"],
+    [ "1月1号" , 110  , 52        , 200],
+    [ "1月2号" , 130  , 35        , 232],
+    [ "1月3号" , 123  , 65        , 221],
+    [ "1月4号" , 132  , 54        , 232],
+    [ "1月5号" , ''   , ''        , 238],
+    [ "1月6号" , 150  , 66        , 269],
+    [ "1月7号" , 110  , 33        , 222],
+    [ "1月8号" , 166  , 47        , 232],
+    [ "1月9号" , 132  , 62        , 233]
 ];
 
 
@@ -62,7 +75,7 @@ var options = {
     graphs: [
         {
             type: "line",
-            field: [["uv", "uvbottom" ], "pv"],
+            field: [["uv", "uvbottom" ]],
             node: {
                 enabled: true
             }
@@ -71,16 +84,15 @@ var options = {
     legend: {
         enabled: 1
     },
-    tips: {}
+    tips: {},
+    datazoom:{}
 }
-
 
 window.line = chartx.create("canvasTest" , data , options)
 
 setTimeout( function(){
-    return;
-    chartx.create("canvasTest" , data , options)
-} , 3000)
+    line.resetData( data1 )
+} , 5000)
 
             </textarea></form>
         </td>

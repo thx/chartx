@@ -31,6 +31,11 @@ function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflec
 
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
 
+//假如用户传入的是和 堆叠柱状图一样的 二维数组的field [ [uv, uv_bottom], pv ] 这样的，
+//那么就 只保留uv作为field， 第二个数据作为 bottom field， 其他的多余的删除掉
+//然后，bottomFieldMap中用field的uv作为key，bottom的field作为值，传给group来绘制起点
+var bottomFieldMap = {};
+
 var LineGraphs = /*#__PURE__*/function (_GraphsBase) {
   (0, _inherits2["default"])(LineGraphs, _GraphsBase);
 
@@ -286,7 +291,7 @@ var LineGraphs = /*#__PURE__*/function (_GraphsBase) {
         var iGroup = _canvax._.indexOf(_flattenField, field);
 
         var group = new _group["default"](fieldConfig, iGroup, //不同于fieldMap.ind
-        me._opt, me.ctx, me.height, me.width, me);
+        me._opt, me.ctx, me.height, me.width, me, bottomFieldMap);
         group.draw({
           animation: me.animation,
           isResize: opt.resize
@@ -381,6 +386,22 @@ var LineGraphs = /*#__PURE__*/function (_GraphsBase) {
         },
         _props: [_group["default"]]
       };
+    }
+  }, {
+    key: "polyfill",
+    value: function polyfill(opt) {
+      if (Array.isArray(opt.field)) {
+        opt.field.forEach(function (item) {
+          if (Array.isArray(item) && item.length > 1) {
+            //说明这个是一个河流图，[ [uv, uv_bottom] ] 这样的，
+            var bottomField = item[1];
+            item.length = 1;
+            bottomFieldMap[item[0]] = bottomField;
+          }
+        });
+      }
+
+      return opt;
     }
   }]);
   return LineGraphs;

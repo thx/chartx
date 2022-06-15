@@ -71,6 +71,7 @@ export default class LineGraphsGroup extends event.Dispatcher
                         detail: '折线的阴影颜色，默认和折线的strokeStyle同步， 如果strokeStyle是一个渐变色，那么shadowColor就会失效，变成默认的黑色，需要手动设置该shadowColor',
                         default: null
                     }
+                    
                 }
             },
             node : {
@@ -183,13 +184,22 @@ export default class LineGraphsGroup extends event.Dispatcher
                     alpha: {
                         detail: '面积透明度',
                         default: 0.25
+                    },
+                    bottomLine: {
+                        detail: 'area的底部线配置',
+                        propertys : {
+                            enabled : {
+                                detail: '是否开启',
+                                default: true
+                            }
+                        }
                     }
                 }
             }
         }
     }
 
-    constructor( fieldConfig, iGroup, opt, ctx, h, w , _graphs)
+    constructor( fieldConfig, iGroup, opt, ctx, h, w , _graphs, bottomFieldMap={})
     {
         super();
 
@@ -212,7 +222,11 @@ export default class LineGraphsGroup extends event.Dispatcher
 
         this._pointList = []; //brokenline最终的状态
         this._currPointList = []; //brokenline 动画中的当前状态
-        this._bline = null;
+        this._line = null;
+
+        this._bottomPointList = []; // bottomLine的最终状态
+        this._currBottomPointList = []; // bottomLine 动画中的当前状态
+        this._bottomLine = null;
 
         //设置默认的color 为 fieldConfig.color
         this.color = fieldConfig.color;
@@ -229,6 +243,9 @@ export default class LineGraphsGroup extends event.Dispatcher
 
         this._growed = false;
 
+        //_bottomField如果有， 那么在画area的时候起点是_bottomField上面的值，而不是从默认的坐标0开始
+        this._bottomField = bottomFieldMap[ this.field ];
+        
         this.init(opt)
     }
 
@@ -257,7 +274,8 @@ export default class LineGraphsGroup extends event.Dispatcher
         this._focusNodes.removeAllChildren();
         this._nodes.removeAllChildren();
         this._labels.removeAllChildren();
-        this._bline = null;
+        this._line = null;
+        this._bottomLine = null;
         this._area = null;
     }
 
@@ -362,7 +380,7 @@ export default class LineGraphsGroup extends event.Dispatcher
         };
 
         if( !dataTrigger || !dataTrigger.comp ){
-            //如果是系统级别的调用，需要从新执行绘制
+            //如果是系统级别的调用，需要从新执行绘制, 不是内部的触发比如（datazoom）
             me._growed = false;
             if(me.clipRect){
                 me.clipRect.destroy();
@@ -371,9 +389,10 @@ export default class LineGraphsGroup extends event.Dispatcher
             me._widget( this );
             me._grow();
         } else {
-
+debugger
             me._pointList = this._getPointList( this.data );
-        
+            me._bottomPointList = this._getBottomPointList();
+    
             let plen = me._pointList.length;
             let cplen = me._currPointList.length;
 
@@ -387,19 +406,31 @@ export default class LineGraphsGroup extends event.Dispatcher
 
             if( params.left ){
                 if( params.left > 0 ){
-                    this._currPointList = this._pointList.slice(0, params.left ).concat( this._currPointList )
+                    this._currPointList = this._pointList.slice(0, params.left ).concat( this._currPointList );
+                    if( this._bottomField ){
+                        this._currBottomPointList = this._bottomPointList.slice(0, params.left ).concat( this._currBottomPointList );
+                    }
                 }
                 if( params.left < 0 ){
                     this._currPointList.splice( 0, Math.abs( params.left ) );
+                    if( this._bottomField ){
+                        this._currBottomPointList.splice( 0, Math.abs( params.left ) );
+                    }
                 }
             };
 
             if( params.right ){
                 if( params.right > 0 ){
                     this._currPointList = this._currPointList.concat( this._pointList.slice( -params.right ) );
+                    if( this._bottomField ){
+                        this._currBottomPointList = this._currBottomPointList.concat( this._bottomPointList.slice( -params.right ) );
+                    }
                 }
                 if( params.right < 0 ){
                     this._currPointList.splice( this._currPointList.length - Math.abs( params.right ) );
+                    if( this._bottomField ){
+                        this._currBottomPointList.splice( this._currBottomPointList.length - Math.abs( params.right ) );
+                    }
                 }
             };
 
@@ -414,39 +445,47 @@ export default class LineGraphsGroup extends event.Dispatcher
     {
         
         let me = this;
-
+debugger
         if( !me.data.length ){
             //因为在index中有调用
-            if( me._bline.context ){
-                me._bline.context.pointList = [];
+            if( me._line.context ){
+                me._line.context.pointList = [];
             };
-            if( me._area.context ){
+            if( me._bottomLine.context ){
+                me._bottomLine.context.pointList = [];
+            };
+            if( me._area && me._area.context ){
                 me._area.context.path = '';
             };
             callback && callback( me );
             return;
         };
 
-        function _update( list ){
+        function _update( pointList, bottomPointList ){
 
-            if( !me._bline ){
+            if( !me._line ){
                 me.sprite._removeTween( me._transitionTween );
                 me._transitionTween = null;
                 return;
             }
             
-            if( me._bline.context ){
-                me._bline.context.pointList = _.clone( list );
-                me._bline.context.strokeStyle = me._getLineStrokeStyle();
+            if( me._line.context ){
+                me._line.context.pointList = _.clone( pointList );
+                me._line.context.strokeStyle = me._getLineStrokeStyle();
+            }
+
+            if( me._bottomField && me._bottomLine && me._bottomLine.context ){
+                me._bottomLine.context.pointList = _.clone( bottomPointList );
+                me._bottomLine.context.strokeStyle = me._getLineStrokeStyle();
             }
             
-            if( me._area.context ){
-                me._area.context.path = me._fillLine(me._bline);
+            if( me._area && me._area.context ){
+                me._area.context.path = me._getFillPath(me._line, me._bottomLine);
                 me._area.context.fillStyle = me._getFillStyle();
             }
 
             let iNode=0;
-            _.each( list, function( point, i ){
+            _.each( pointList, function( point, i ){
                 if( _.isNumber( point[1] ) ){
                     if( me._nodes ){
                         let _node = me._nodes.getChildAt(iNode);
@@ -471,21 +510,23 @@ export default class LineGraphsGroup extends event.Dispatcher
         if( !this._growed ){
             //如果还在入场中
             me._currPointList = me._pointList;
-            _update( me._currPointList );
+            me._currBottomPointList = me._bottomPointList;
+            _update( me._currPointList, me._currBottomPointList );
             return;
         }
 
         this._transitionTween = AnimationFrame.registTween({
-            from: me._getPointPosStr(me._currPointList),
-            to: me._getPointPosStr(me._pointList),
+            from: me._getPointPosStr(me._currPointList, me._currBottomPointList),
+            to: me._getPointPosStr(me._pointList, me._bottomPointList),
             desc: me.field,
             onUpdate: function( arg ) {
                 for (let p in arg) {
+                    let currPointerList = p.split("_")[0] == 'p' ? me._currPointList : me._currBottomPointList
                     let ind = parseInt(p.split("_")[2]);
                     let xory = parseInt(p.split("_")[1]);
-                    me._currPointList[ind] && (me._currPointList[ind][xory] = arg[p]); //p_1_n中间的1代表x or y
+                    currPointerList[ind] && (currPointerList[ind][xory] = arg[p]); //p_1_n中间的1代表x or y
                 };
-                _update( me._currPointList );
+                _update( me._currPointList , me._currBottomPointList);
             },
             onComplete: function() {
                 
@@ -495,7 +536,7 @@ export default class LineGraphsGroup extends event.Dispatcher
                 //在动画结束后强制把目标状态绘制一次。
                 //解决在onUpdate中可能出现的异常会导致绘制有问题。
                 //这样的话，至少最后的结果会是对的。
-                _update( me._pointList );
+                _update( me._pointList, me._bottomPointList );
                 callback && callback( me );
             }
         });
@@ -552,17 +593,24 @@ export default class LineGraphsGroup extends event.Dispatcher
         });
     }
 
-    _getPointPosStr(list)
+    _getPointPosStr(pointList, bottomPointList)
     {
         let obj = {};
-        _.each(list, function(p, i) {
+        pointList.forEach((p,i) => {
             if( !p ){
                 //折线图中这个节点可能没有
                 return;
             };
-
             obj["p_1_" + i] = p[1]; //p_y==p_1
             obj["p_0_" + i] = p[0]; //p_x==p_0
+        });
+        bottomPointList.forEach((p,i) => {
+            if( !p ){
+                //折线图中这个节点可能没有
+                return;
+            };
+            obj["bp_1_" + i] = p[1]; //p_y==p_1
+            obj["bp_0_" + i] = p[0]; //p_x==p_0
         });
         return obj;
     }
@@ -582,6 +630,7 @@ export default class LineGraphsGroup extends event.Dispatcher
 
     _widget( opt )
     {
+
         let me = this;
         !opt && (opt ={});
 
@@ -598,22 +647,6 @@ export default class LineGraphsGroup extends event.Dispatcher
             //filter后，data可能length==0
             return;
         };
-
-        // change log 入场动画修改为了从左到右的剪切显示
-        // let list = [];
-        // if (opt.animation) {
-        //     let firstNode = this._getFirstNode();
-        //     let firstY = firstNode ? firstNode.y : undefined;
-        //     for (let a = 0, al = me.data.length; a < al; a++) {
-        //         let o = me.data[a];
-        //         list.push([
-        //             o.x,
-        //             _.isNumber( o.y ) ? firstY : o.y
-        //         ]);
-        //     };
-        // } else {
-        //     list = me._pointList;
-        // };
 
         let list = me._pointList;
         
@@ -665,31 +698,76 @@ export default class LineGraphsGroup extends event.Dispatcher
             bline.context.visible = false
         };
         me.lineSprite.addChild(bline);
-        me._bline = bline;
+        me._line = bline;
 
-        let area = new Path({ //填充
-            context: {
-                path: me._fillLine(bline),
-                fillStyle: me._getFillStyle(), 
-                globalAlpha: _.isArray(me.area.alpha) ? 1 : me.area.alpha
+        if( me.area.enabled ){
+
+            if( this._bottomField ){
+                //如果有 _bottomField
+                me._bottomPointList = this._getBottomPointList();
+
+                let _list = me._bottomPointList;
+                me._currBottomPointList = _list;
+                
+                let bottomLineCtx = {};
+                Object.assign(bottomLineCtx, blineCtx);
+                bottomLineCtx.pointList = me._bottomPointList;
+                let bottomLine = new BrokenLine({ //线条
+                    context: bottomLineCtx
+                });
+                if (!this.area.bottomLine.enabled) {
+                    bottomLine.context.visible = false
+                };
+                me.lineSprite.addChild(bottomLine);
+                me._bottomLine = bottomLine;
+                
             }
-        });
-        area.on( event.types.get() , function (e) {
-            e.eventInfo = {
-                trigger : me.area,
-                nodes   : []
-            };
-            me._graphs.app.fire( e.type, e );
-        });
+            
+            let area = new Path({ //填充
+                context: {
+                    path: me._getFillPath(me._line, me._bottomLine),
+                    fillStyle: me._getFillStyle(), 
+                    globalAlpha: _.isArray(me.area.alpha) ? 1 : me.area.alpha
+                }
+            });
+            area.on( event.types.get() , function (e) {
+                e.eventInfo = {
+                    trigger : me.area,
+                    nodes   : []
+                };
+                me._graphs.app.fire( e.type, e );
+            });
 
-        if( !this.area.enabled ){
-            area.context.visible = false
-        };
-        me.lineSprite.addChild(area);
-        me._area = area;
+            me.lineSprite.addChild(area);
+            me._area = area;
+        }
 
         me._createNodes( opt );
         me._createTexts( opt );
+    }
+
+    _getBottomPointList(){
+
+        if( !this._bottomField ) return [];
+
+        let _coord = this._graphs.app.getCoord();
+        let bottomData = this._graphs.dataFrame.getFieldData(  this._bottomField );
+        this._yAxis.addValToSection( bottomData ); //把bottomData的数据也同步到y轴的dataSection, 可能y轴需要更新
+
+        let _bottomPointList = [];
+        bottomData.forEach( (item,i) => {
+            let point = _coord.getPoint( {
+                iNode : i,
+                field : this.field,
+                value : {
+                    //x:
+                    y : item
+                }
+            } );
+            _bottomPointList.push( [ point.pos.x, point.pos.y ] );
+        });
+
+        return _bottomPointList;
     }
 
     _getFirstNode()
@@ -816,7 +894,7 @@ export default class LineGraphsGroup extends event.Dispatcher
         //如果graphType 传入的是area，并且，用户并没有配area.lineargradientDriction,那么就会默认和line.lineargradientDriction对齐
         let driction = this[ graphType ].lineargradientDriction || this.line.lineargradientDriction;
         
-        !pointList && ( pointList = this._bline.context.pointList );
+        !pointList && ( pointList = this._line.context.pointList );
 
         let linearPointStart,linearPointEnd;
 
@@ -1099,9 +1177,11 @@ export default class LineGraphsGroup extends event.Dispatcher
       
     }
 
-    _fillLine(bline)
-    { //填充直线
-        let fillPath = _.clone(bline.context.pointList);
+    _getFillPath(line,bottomLine)
+    { 
+        //填充
+        let pointList = _.clone(line.context.pointList);
+        let bottomPointList = bottomLine ? _.clone(bottomLine.context.pointList) : [];
 
         let path = "";
         
@@ -1109,8 +1189,7 @@ export default class LineGraphsGroup extends event.Dispatcher
 
         let _currPath = null;
 
-
-        _.each( fillPath, function( point, i ){
+        _.each( pointList, function( point, i ){
             if( _.isNumber( point[1] ) ){
                 if( _currPath === null ){
                     _currPath = [];
@@ -1123,16 +1202,53 @@ export default class LineGraphsGroup extends event.Dispatcher
                 };
             }
 
-            if( i == fillPath.length-1 &&  _.isNumber( point[1] )){
+            if( i == pointList.length-1 &&  _.isNumber( point[1] )){
                 getOnePath();
             }
 
         } );
 
         function getOnePath(){
-            _currPath.push(
-                [_currPath[_currPath.length - 1][0], originPos], [_currPath[0][0], originPos], [_currPath[0][0], _currPath[0][1]]
-            );
+            
+            let _first = _currPath[0];
+            let _firstIndex = null;
+            let _last = _currPath[_currPath.length - 1];
+            let _lastIndex = null;
+
+            if(bottomPointList.length){
+                for( let i=0,l=bottomPointList.length; i<l; i++ ){
+                    let item = bottomPointList[i];
+                    if( _firstIndex != null && _lastIndex != null ){
+                        break;
+                    }
+                    if( _firstIndex == null && _first[0] == item[0] ){
+                        _firstIndex = i;
+                    }
+                    if( _lastIndex == null && _last[0] == item[0] ){
+                        _lastIndex = i;
+                    }
+                }
+
+                let i = 0;
+                while (i <= (_lastIndex-_firstIndex)){
+                    _currPath.push( bottomPointList[ _lastIndex-i ] )
+                    i++;
+                }
+
+                _currPath.push(
+                    [ _first[0], _first[1]]
+                );
+
+                debugger
+
+            } else {
+                _currPath.push(
+                    [_last[0], originPos], 
+                    [_first[0], originPos], 
+                    [_first[0], _first[1]]
+                );
+            }
+            
             path += getPath( _currPath );
             _currPath = null;
         }
@@ -1193,7 +1309,7 @@ export default class LineGraphsGroup extends event.Dispatcher
 
         };
         
-        this._bline && search( this._bline.context.pointList );
+        this._line && search( this._line.context.pointList );
         
         if( !point || point.y == undefined ){
             return null;
@@ -1215,7 +1331,6 @@ export default class LineGraphsGroup extends event.Dispatcher
 
         return node;
     }
-
 
     tipsPointerOf( e )
     {

@@ -3,6 +3,11 @@ import GraphsBase from "../index"
 import { _ } from "canvax"
 import {getDefaultProps} from "../../../utils/tools"
 
+//假如用户传入的是和 堆叠柱状图一样的 二维数组的field [ [uv, uv_bottom], pv ] 这样的，
+//那么就 只保留uv作为field， 第二个数据作为 bottom field， 其他的多余的删除掉
+//然后，bottomFieldMap中用field的uv作为key，bottom的field作为值，传给group来绘制起点
+let bottomFieldMap = {};
+
 class LineGraphs extends GraphsBase
 {
 
@@ -24,6 +29,20 @@ class LineGraphs extends GraphsBase
                 Group
             ]
         }
+    }
+
+    static polyfill( opt ){
+        if( Array.isArray( opt.field ) ){
+            opt.field.forEach( item => {
+                if( Array.isArray( item ) && item.length > 1 ){
+                    //说明这个是一个河流图，[ [uv, uv_bottom] ] 这样的，
+                    let bottomField = item[1];
+                    item.length = 1;
+                    bottomFieldMap[ item[0] ] = bottomField;
+                }
+            });
+        }
+        return opt
     }
 
     constructor(opt, app)
@@ -48,7 +67,7 @@ class LineGraphs extends GraphsBase
 
     draw(opt)
     {
-        debugger
+        
         !opt && (opt ={});
         this.width = opt.width;
         this.height = opt.height;
@@ -275,7 +294,8 @@ class LineGraphs extends GraphsBase
                 me.ctx,
                 me.height,
                 me.width,
-                me
+                me,
+                bottomFieldMap
             );
 
             group.draw( {

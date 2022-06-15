@@ -8136,7 +8136,7 @@ var components = {
   */
 };
 var _default = {
-  chartxVersion: '1.1.81',
+  chartxVersion: '1.1.82',
   create: function create(el, _data, _opt) {
     var chart = null;
     var me = this;
@@ -11237,11 +11237,15 @@ var Chart = /*#__PURE__*/function (_event$Dispatcher) {
   }, {
     key: "reset",
     value: function reset(opt, data) {
-      opt && (this._opt = opt);
+      //opt && (this._opt = opt);
+      if (opt) {
+        this._opt = this.polyfill(opt);
+      }
       /* 不能 extend opt 
       !opt && (opt={});
       _.extend(this._opt, opt);
       */
+
 
       data && (this._data = data);
       this.dataFrame = this.initData(this._data, opt);
@@ -12052,7 +12056,8 @@ var axis = /*#__PURE__*/function () {
       if (vLen > 1) {
         return this._twoDimensional();
       }
-    }
+    } //后续也会做堆叠的折线图，就是面积图， 和堆叠图不同的是走的是一维数据计算
+
   }, {
     key: "_oneDimensional",
     value: function _oneDimensional() {
@@ -12063,7 +12068,7 @@ var axis = /*#__PURE__*/function () {
         arr[i] = arr[i] || 0;
       }
       return arr;
-    } //二维的yAxis设置，肯定是堆叠的比如柱状图，后续也会做堆叠的折线图， 就是面积图
+    } //二维的yAxis设置，肯定是堆叠的比如柱状图，
 
   }, {
     key: "_twoDimensional",
@@ -12770,21 +12775,36 @@ var Axis = /*#__PURE__*/function (_baseAxis) {
     Canvax._.extend(true, (0, _assertThisInitialized2["default"])(_this), (0, tools.getDefaultProps)(Axis.defaultProps()));
 
     return _this;
-  }
+  } //vals 参数可以是单个number 也可以是 多个
+
 
   (0, _createClass2["default"])(Axis, [{
     key: "addValToSection",
-    value: function addValToSection(y) {
-      //如果y在现有的数据区间里面， 就不需要重新计算和绘制了
+    value: function addValToSection(vals) {
+      var _this2 = this;
+
+      if (!Array.isArray(vals)) {
+        vals = [vals];
+      }
+
       if (this.layoutType == "proportion") {
-        if (y >= this._min && y <= this._max) {
+        var allIn = true;
+        vals.forEach(function (val) {
+          if (!(val >= _this2._min && val <= _this2._max)) {
+            allIn = false;
+          }
+        });
+
+        if (allIn) {
+          //都在dataSection的区间内，就不用管了
           return;
         }
       }
 
       this.dataSection = [];
-
-      this._addValToSection(y);
+      vals.forEach(function (val) {
+        _this2._addValToSection(val);
+      });
 
       this._initHandle();
 
@@ -18314,6 +18334,7 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
   function LineGraphsGroup(fieldConfig, iGroup, opt, ctx, h, w, _graphs) {
     var _this;
 
+    var bottomFieldMap = arguments.length > 7 && arguments[7] !== undefined ? arguments[7] : {};
     (0, _classCallCheck2["default"])(this, LineGraphsGroup);
     _this = _super.call(this);
     _this._graphs = _graphs;
@@ -18333,7 +18354,12 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
 
     _this._currPointList = []; //brokenline 动画中的当前状态
 
-    _this._bline = null; //设置默认的color 为 fieldConfig.color
+    _this._line = null;
+    _this._bottomPointList = []; // bottomLine的最终状态
+
+    _this._currBottomPointList = []; // bottomLine 动画中的当前状态
+
+    _this._bottomLine = null; //设置默认的color 为 fieldConfig.color
 
     _this.color = fieldConfig.color;
 
@@ -18345,7 +18371,9 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
 
     _this.clipRect = null;
     _this.__currFocusInd = -1;
-    _this._growed = false;
+    _this._growed = false; //_bottomField如果有， 那么在画area的时候起点是_bottomField上面的值，而不是从默认的坐标0开始
+
+    _this._bottomField = bottomFieldMap[_this.field];
 
     _this.init(opt);
 
@@ -18379,7 +18407,8 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
 
       this._labels.removeAllChildren();
 
-      this._bline = null;
+      this._line = null;
+      this._bottomLine = null;
       this._area = null;
     }
   }, {
@@ -18491,7 +18520,7 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
       }
 
       if (!dataTrigger || !dataTrigger.comp) {
-        //如果是系统级别的调用，需要从新执行绘制
+        //如果是系统级别的调用，需要从新执行绘制, 不是内部的触发比如（datazoom）
         me._growed = false;
 
         if (me.clipRect) {
@@ -18504,6 +18533,7 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
         me._grow();
       } else {
         me._pointList = this._getPointList(this.data);
+        me._bottomPointList = this._getBottomPointList();
         var plen = me._pointList.length;
         var cplen = me._currPointList.length;
         var params = {
@@ -18519,20 +18549,36 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
         if (params.left) {
           if (params.left > 0) {
             this._currPointList = this._pointList.slice(0, params.left).concat(this._currPointList);
+
+            if (this._bottomField) {
+              this._currBottomPointList = this._bottomPointList.slice(0, params.left).concat(this._currBottomPointList);
+            }
           }
 
           if (params.left < 0) {
             this._currPointList.splice(0, Math.abs(params.left));
+
+            if (this._bottomField) {
+              this._currBottomPointList.splice(0, Math.abs(params.left));
+            }
           }
         }
 
         if (params.right) {
           if (params.right > 0) {
             this._currPointList = this._currPointList.concat(this._pointList.slice(-params.right));
+
+            if (this._bottomField) {
+              this._currBottomPointList = this._currBottomPointList.concat(this._bottomPointList.slice(-params.right));
+            }
           }
 
           if (params.right < 0) {
             this._currPointList.splice(this._currPointList.length - Math.abs(params.right));
+
+            if (this._bottomField) {
+              this._currBottomPointList.splice(this._currBottomPointList.length - Math.abs(params.right));
+            }
           }
         }
 
@@ -18551,38 +18597,47 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
 
       if (!me.data.length) {
         //因为在index中有调用
-        if (me._bline.context) {
-          me._bline.context.pointList = [];
+        if (me._line.context) {
+          me._line.context.pointList = [];
         }
 
-        if (me._area.context) {
+        if (me._bottomLine.context) {
+          me._bottomLine.context.pointList = [];
+        }
+
+        if (me._area && me._area.context) {
           me._area.context.path = '';
         }
         callback && callback(me);
         return;
       }
 
-      function _update(list) {
-        if (!me._bline) {
+      function _update(pointList, bottomPointList) {
+        if (!me._line) {
           me.sprite._removeTween(me._transitionTween);
 
           me._transitionTween = null;
           return;
         }
 
-        if (me._bline.context) {
-          me._bline.context.pointList = _.clone(list);
-          me._bline.context.strokeStyle = me._getLineStrokeStyle();
+        if (me._line.context) {
+          me._line.context.pointList = _.clone(pointList);
+          me._line.context.strokeStyle = me._getLineStrokeStyle();
         }
 
-        if (me._area.context) {
-          me._area.context.path = me._fillLine(me._bline);
+        if (me._bottomField && me._bottomLine && me._bottomLine.context) {
+          me._bottomLine.context.pointList = _.clone(bottomPointList);
+          me._bottomLine.context.strokeStyle = me._getLineStrokeStyle();
+        }
+
+        if (me._area && me._area.context) {
+          me._area.context.path = me._getFillPath(me._line, me._bottomLine);
           me._area.context.fillStyle = me._getFillStyle();
         }
 
         var iNode = 0;
 
-        _.each(list, function (point, i) {
+        _.each(pointList, function (point, i) {
           if (_.isNumber(point[1])) {
             if (me._nodes) {
               var _node = me._nodes.getChildAt(iNode);
@@ -18612,24 +18667,26 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
       if (!this._growed) {
         //如果还在入场中
         me._currPointList = me._pointList;
+        me._currBottomPointList = me._bottomPointList;
 
-        _update(me._currPointList);
+        _update(me._currPointList, me._currBottomPointList);
 
         return;
       }
 
       this._transitionTween = AnimationFrame.registTween({
-        from: me._getPointPosStr(me._currPointList),
-        to: me._getPointPosStr(me._pointList),
+        from: me._getPointPosStr(me._currPointList, me._currBottomPointList),
+        to: me._getPointPosStr(me._pointList, me._bottomPointList),
         desc: me.field,
         onUpdate: function onUpdate(arg) {
           for (var p in arg) {
+            var currPointerList = p.split("_")[0] == 'p' ? me._currPointList : me._currBottomPointList;
             var ind = parseInt(p.split("_")[2]);
             var xory = parseInt(p.split("_")[1]);
-            me._currPointList[ind] && (me._currPointList[ind][xory] = arg[p]); //p_1_n中间的1代表x or y
+            currPointerList[ind] && (currPointerList[ind][xory] = arg[p]); //p_1_n中间的1代表x or y
           }
 
-          _update(me._currPointList);
+          _update(me._currPointList, me._currBottomPointList);
         },
         onComplete: function onComplete() {
           me.sprite._removeTween(me._transitionTween);
@@ -18638,7 +18695,7 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
           //解决在onUpdate中可能出现的异常会导致绘制有问题。
           //这样的话，至少最后的结果会是对的。
 
-          _update(me._pointList);
+          _update(me._pointList, me._bottomPointList);
 
           callback && callback(me);
         }
@@ -18701,10 +18758,9 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
     }
   }, {
     key: "_getPointPosStr",
-    value: function _getPointPosStr(list) {
+    value: function _getPointPosStr(pointList, bottomPointList) {
       var obj = {};
-
-      _.each(list, function (p, i) {
+      pointList.forEach(function (p, i) {
         if (!p) {
           //折线图中这个节点可能没有
           return;
@@ -18713,7 +18769,15 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
 
         obj["p_0_" + i] = p[0]; //p_x==p_0
       });
+      bottomPointList.forEach(function (p, i) {
+        if (!p) {
+          //折线图中这个节点可能没有
+          return;
+        }
+        obj["bp_1_" + i] = p[1]; //p_y==p_1
 
+        obj["bp_0_" + i] = p[0]; //p_x==p_0
+      });
       return obj;
     }
   }, {
@@ -18745,21 +18809,6 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
         //filter后，data可能length==0
         return;
       }
-      // let list = [];
-      // if (opt.animation) {
-      //     let firstNode = this._getFirstNode();
-      //     let firstY = firstNode ? firstNode.y : undefined;
-      //     for (let a = 0, al = me.data.length; a < al; a++) {
-      //         let o = me.data[a];
-      //         list.push([
-      //             o.x,
-      //             _.isNumber( o.y ) ? firstY : o.y
-      //         ]);
-      //     };
-      // } else {
-      //     list = me._pointList;
-      // };
-
       var list = me._pointList;
       me._currPointList = list;
 
@@ -18809,33 +18858,81 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
         bline.context.visible = false;
       }
       me.lineSprite.addChild(bline);
-      me._bline = bline;
-      var area = new Path({
-        //填充
-        context: {
-          path: me._fillLine(bline),
-          fillStyle: me._getFillStyle(),
-          globalAlpha: _.isArray(me.area.alpha) ? 1 : me.area.alpha
+      me._line = bline;
+
+      if (me.area.enabled) {
+        if (this._bottomField) {
+          //如果有 _bottomField
+          me._bottomPointList = this._getBottomPointList();
+          var _list = me._bottomPointList;
+          me._currBottomPointList = _list;
+          var bottomLineCtx = {};
+          Object.assign(bottomLineCtx, blineCtx);
+          bottomLineCtx.pointList = me._bottomPointList;
+          var bottomLine = new BrokenLine({
+            //线条
+            context: bottomLineCtx
+          });
+
+          if (!this.area.bottomLine.enabled) {
+            bottomLine.context.visible = false;
+          }
+          me.lineSprite.addChild(bottomLine);
+          me._bottomLine = bottomLine;
         }
-      });
-      area.on(event.types.get(), function (e) {
-        e.eventInfo = {
-          trigger: me.area,
-          nodes: []
-        };
 
-        me._graphs.app.fire(e.type, e);
-      });
+        var area = new Path({
+          //填充
+          context: {
+            path: me._getFillPath(me._line, me._bottomLine),
+            fillStyle: me._getFillStyle(),
+            globalAlpha: _.isArray(me.area.alpha) ? 1 : me.area.alpha
+          }
+        });
+        area.on(event.types.get(), function (e) {
+          e.eventInfo = {
+            trigger: me.area,
+            nodes: []
+          };
 
-      if (!this.area.enabled) {
-        area.context.visible = false;
+          me._graphs.app.fire(e.type, e);
+        });
+        me.lineSprite.addChild(area);
+        me._area = area;
       }
-      me.lineSprite.addChild(area);
-      me._area = area;
 
       me._createNodes(opt);
 
       me._createTexts(opt);
+    }
+  }, {
+    key: "_getBottomPointList",
+    value: function _getBottomPointList() {
+      var _this3 = this;
+
+      if (!this._bottomField) return [];
+
+      var _coord = this._graphs.app.getCoord();
+
+      var bottomData = this._graphs.dataFrame.getFieldData(this._bottomField);
+
+      this._yAxis.addValToSection(bottomData); //把bottomData的数据也同步到y轴的dataSection, 可能y轴需要更新
+
+
+      var _bottomPointList = [];
+      bottomData.forEach(function (item, i) {
+        var point = _coord.getPoint({
+          iNode: i,
+          field: _this3.field,
+          value: {
+            //x:
+            y: item
+          }
+        });
+
+        _bottomPointList.push([point.pos.x, point.pos.y]);
+      });
+      return _bottomPointList;
     }
   }, {
     key: "_getFirstNode",
@@ -18968,7 +19065,7 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
       var pointList = arguments.length > 1 ? arguments[1] : undefined;
       //如果graphType 传入的是area，并且，用户并没有配area.lineargradientDriction,那么就会默认和line.lineargradientDriction对齐
       var driction = this[graphType].lineargradientDriction || this.line.lineargradientDriction;
-      !pointList && (pointList = this._bline.context.pointList);
+      !pointList && (pointList = this._line.context.pointList);
       var linearPointStart, linearPointEnd;
 
       if (driction == 'topBottom') {
@@ -19258,16 +19355,17 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
       }
     }
   }, {
-    key: "_fillLine",
-    value: function _fillLine(bline) {
-      //填充直线
-      var fillPath = _.clone(bline.context.pointList);
+    key: "_getFillPath",
+    value: function _getFillPath(line, bottomLine) {
+      //填充
+      var pointList = _.clone(line.context.pointList);
 
+      var bottomPointList = bottomLine ? _.clone(bottomLine.context.pointList) : [];
       var path = "";
       var originPos = -this._yAxis.originPos;
       var _currPath = null;
 
-      _.each(fillPath, function (point, i) {
+      _.each(pointList, function (point, i) {
         if (_.isNumber(point[1])) {
           if (_currPath === null) {
             _currPath = [];
@@ -19281,13 +19379,46 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
           }
         }
 
-        if (i == fillPath.length - 1 && _.isNumber(point[1])) {
+        if (i == pointList.length - 1 && _.isNumber(point[1])) {
           getOnePath();
         }
       });
 
       function getOnePath() {
-        _currPath.push([_currPath[_currPath.length - 1][0], originPos], [_currPath[0][0], originPos], [_currPath[0][0], _currPath[0][1]]);
+        var _first = _currPath[0];
+        var _firstIndex = null;
+        var _last = _currPath[_currPath.length - 1];
+        var _lastIndex = null;
+
+        if (bottomPointList.length) {
+          for (var _i2 = 0, l = bottomPointList.length; _i2 < l; _i2++) {
+            var item = bottomPointList[_i2];
+
+            if (_firstIndex != null && _lastIndex != null) {
+              break;
+            }
+
+            if (_firstIndex == null && _first[0] == item[0]) {
+              _firstIndex = _i2;
+            }
+
+            if (_lastIndex == null && _last[0] == item[0]) {
+              _lastIndex = _i2;
+            }
+          }
+
+          var i = 0;
+
+          while (i <= _lastIndex - _firstIndex) {
+            _currPath.push(bottomPointList[_lastIndex - i]);
+
+            i++;
+          }
+
+          _currPath.push([_first[0], _first[1]]);
+        } else {
+          _currPath.push([_last[0], originPos], [_first[0], originPos], [_first[0], _first[1]]);
+        }
 
         path += (0, tools.getPath)(_currPath);
         _currPath = null;
@@ -19354,7 +19485,7 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
         search(_pl);
       };
 
-      this._bline && search(this._bline.context.pointList);
+      this._line && search(this._line.context.pointList);
 
       if (!point || point.y == undefined) {
         return null;
@@ -19630,6 +19761,15 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
             alpha: {
               detail: '面积透明度',
               "default": 0.25
+            },
+            bottomLine: {
+              detail: 'area的底部线配置',
+              propertys: {
+                enabled: {
+                  detail: '是否开启',
+                  "default": true
+                }
+              }
             }
           }
         }
@@ -19676,6 +19816,11 @@ var _index = interopRequireDefault(graphs);
 function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
 
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
+//假如用户传入的是和 堆叠柱状图一样的 二维数组的field [ [uv, uv_bottom], pv ] 这样的，
+//那么就 只保留uv作为field， 第二个数据作为 bottom field， 其他的多余的删除掉
+//然后，bottomFieldMap中用field的uv作为key，bottom的field作为值，传给group来绘制起点
+var bottomFieldMap = {};
 
 var LineGraphs = /*#__PURE__*/function (_GraphsBase) {
   (0, _inherits2["default"])(LineGraphs, _GraphsBase);
@@ -19924,7 +20069,7 @@ var LineGraphs = /*#__PURE__*/function (_GraphsBase) {
         var iGroup = Canvax._.indexOf(_flattenField, field);
 
         var group = new _group["default"](fieldConfig, iGroup, //不同于fieldMap.ind
-        me._opt, me.ctx, me.height, me.width, me);
+        me._opt, me.ctx, me.height, me.width, me, bottomFieldMap);
         group.draw({
           animation: me.animation,
           isResize: opt.resize
@@ -20015,6 +20160,22 @@ var LineGraphs = /*#__PURE__*/function (_GraphsBase) {
         },
         _props: [_group["default"]]
       };
+    }
+  }, {
+    key: "polyfill",
+    value: function polyfill(opt) {
+      if (Array.isArray(opt.field)) {
+        opt.field.forEach(function (item) {
+          if (Array.isArray(item) && item.length > 1) {
+            //说明这个是一个河流图，[ [uv, uv_bottom] ] 这样的，
+            var bottomField = item[1];
+            item.length = 1;
+            bottomFieldMap[item[0]] = bottomField;
+          }
+        });
+      }
+
+      return opt;
     }
   }]);
   return LineGraphs;
@@ -56363,7 +56524,7 @@ if (projectTheme && projectTheme.length) {
 }
 
 var chartx = {
-  version: '1.1.81',
+  version: '1.1.82',
   options: {}
 };
 
