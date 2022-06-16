@@ -3,6 +3,7 @@ import {_} from "canvax"
 import dataSection from "./dataSection"
 import {getDefaultProps} from "../utils/tools"
 
+
 class axis {
     static defaultProps(){
         return {
@@ -123,12 +124,8 @@ class axis {
 
         if (this.layoutType == "proportion") {
 
-            if (this._min == null) {
-                this._min = _.min(this.dataSection);
-            };
-            if (this._max == null) {
-                this._max = _.max(this.dataSection);
-            };
+            this._min = _.min(this.dataSection);
+            this._max = _.max(this.dataSection);
 
             //默认情况下 origin 就是datasection的最小值
             //如果用户设置了origin，那么就已用户的设置为准

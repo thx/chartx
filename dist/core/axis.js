@@ -74,17 +74,8 @@ var axis = /*#__PURE__*/function () {
       var me = this;
 
       if (this.layoutType == "proportion") {
-        if (this._min == null) {
-          this._min = _canvax._.min(this.dataSection);
-        }
-
-        ;
-
-        if (this._max == null) {
-          this._max = _canvax._.max(this.dataSection);
-        }
-
-        ; //默认情况下 origin 就是datasection的最小值
+        this._min = _canvax._.min(this.dataSection);
+        this._max = _canvax._.max(this.dataSection); //默认情况下 origin 就是datasection的最小值
         //如果用户设置了origin，那么就已用户的设置为准
 
         if (!("origin" in this._opt)) {

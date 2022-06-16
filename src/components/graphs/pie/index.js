@@ -254,7 +254,7 @@ class PieGraphs extends GraphsBase
             //设置颜色
             let color = me._getColor( me.node.fillStyle, layoutData );
             layoutData.fillStyle = layoutData.color = color;
-            debugger
+            
             data.push( layoutData );
         };
 

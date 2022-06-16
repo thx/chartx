@@ -40,7 +40,7 @@ var data= [
     [ "1月2号" , 130  , 35        , 232],
     [ "1月3号" , 123  , 65        , 221],
     [ "1月4号" , 132  , 54        , 232],
-    [ "1月5号" , ''   , ''        , 238],
+    [ "1月5号" , 153  , 63        , 238],
     [ "1月6号" , 150  , 66        , 269],
     [ "1月7号" , 110  , 33        , 222],
     [ "1月8号" , 166  , 47        , 232],
@@ -91,6 +91,7 @@ var options = {
 window.line = chartx.create("canvasTest" , data , options)
 
 setTimeout( function(){
+    return
     line.resetData( data1 )
 } , 5000)
 

@@ -545,7 +545,7 @@ var Chart = /*#__PURE__*/function (_event$Dispatcher) {
         this._data = data; //注意，resetData不能为null，必须是 数组格式
 
         this.dataFrame.resetData(data); // if( !data.length ){
-        //     debugger
+        //     
         //     this.clean();
         //     this.init();
         //     this.draw( this._opt );

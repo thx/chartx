@@ -78,7 +78,6 @@ class Chart extends event.Dispatcher
                 compModule && compModule.polyfill( comp );
             });
         }
-        
         return opt;
     }
 
@@ -454,7 +453,7 @@ class Chart extends event.Dispatcher
             this.dataFrame.resetData( data );
 
             // if( !data.length ){
-            //     debugger
+            //     
             //     this.clean();
             //     this.init();
             //     this.draw( this._opt );

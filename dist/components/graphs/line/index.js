@@ -292,11 +292,6 @@ var LineGraphs = /*#__PURE__*/function (_GraphsBase) {
 
         var group = new _group["default"](fieldConfig, iGroup, //不同于fieldMap.ind
         me._opt, me.ctx, me.height, me.width, me, bottomFieldMap);
-        group.draw({
-          animation: me.animation,
-          isResize: opt.resize
-        }, g.data);
-        newGroups.push(group);
         var insert = false; //在groups数组中插入到比自己_groupInd小的元素前面去
 
         for (var gi = 0, gl = me.groups.length; gi < gl; gi++) {
@@ -325,6 +320,11 @@ var LineGraphs = /*#__PURE__*/function (_GraphsBase) {
         }
 
         ;
+        group.draw({
+          animation: me.animation,
+          isResize: opt.resize
+        }, g.data);
+        newGroups.push(group);
       });
 
       return newGroups;

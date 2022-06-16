@@ -389,7 +389,7 @@ export default class LineGraphsGroup extends event.Dispatcher
             me._widget( this );
             me._grow();
         } else {
-debugger
+
             me._pointList = this._getPointList( this.data );
             me._bottomPointList = this._getBottomPointList();
     
@@ -445,7 +445,7 @@ debugger
     {
         
         let me = this;
-debugger
+
         if( !me.data.length ){
             //因为在index中有调用
             if( me._line.context ){
@@ -1239,7 +1239,7 @@ debugger
                     [ _first[0], _first[1]]
                 );
 
-                debugger
+                
 
             } else {
                 _currPath.push(

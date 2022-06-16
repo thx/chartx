@@ -298,13 +298,6 @@ class LineGraphs extends GraphsBase
                 bottomFieldMap
             );
 
-            group.draw( {
-                animation : me.animation,
-                isResize: opt.resize
-            }, g.data );
-
-            newGroups.push( group );
-
             let insert = false;
             //在groups数组中插入到比自己_groupInd小的元素前面去
             for( let gi=0,gl=me.groups.length ; gi<gl ; gi++ ){
@@ -328,6 +321,13 @@ class LineGraphs extends GraphsBase
                 me.groups.push(group);
                 me.sprite.addChild(group.sprite);
             };
+
+            group.draw( {
+                animation : me.animation,
+                isResize: opt.resize
+            }, g.data );
+
+            newGroups.push( group );
 
         } );
 

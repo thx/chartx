@@ -8077,6 +8077,7 @@ var chartx = (function () {
 	      var codeWithoutVariables = code.slice(0, range[0]) + code.slice(range[1]);
 	      return this._eval(codeWithoutVariables, 'options', 'variables', variables);
 	    } catch (e) {
+	      console.log('parse error');
 	      return {};
 	    }
 	  }
@@ -11279,7 +11280,7 @@ var chartx = (function () {
 	        this._data = data; //注意，resetData不能为null，必须是 数组格式
 
 	        this.dataFrame.resetData(data); // if( !data.length ){
-	        //     debugger
+	        //     
 	        //     this.clean();
 	        //     this.init();
 	        //     this.draw( this._opt );
@@ -11901,13 +11902,8 @@ var chartx = (function () {
 	      var me = this;
 
 	      if (this.layoutType == "proportion") {
-	        if (this._min == null) {
-	          this._min = Canvax._.min(this.dataSection);
-	        }
-
-	        if (this._max == null) {
-	          this._max = Canvax._.max(this.dataSection);
-	        }
+	        this._min = Canvax._.min(this.dataSection);
+	        this._max = Canvax._.max(this.dataSection); //默认情况下 origin 就是datasection的最小值
 	        //如果用户设置了origin，那么就已用户的设置为准
 
 	        if (!("origin" in this._opt)) {
@@ -12803,6 +12799,7 @@ var chartx = (function () {
 	          return;
 	        }
 	      }
+	      debugger; //如果y不在当前datasection范围内，那么就要重新绘制
 
 	      this.dataSection = [];
 	      vals.forEach(function (val) {
@@ -12811,7 +12808,8 @@ var chartx = (function () {
 
 	      this._initHandle();
 
-	      this.draw(); //然后要检测下依附于这个轴的所有graphs，都要重新绘制
+	      this.draw();
+	      debugger; //然后要检测下依附于这个轴的所有graphs，都要重新绘制
 
 	      this._coord.resetGraphsOfAxis(this);
 	    }
@@ -18521,6 +18519,7 @@ var chartx = (function () {
 	      if (data) {
 	        this.data = data;
 	      }
+	      debugger;
 
 	      if (!dataTrigger || !dataTrigger.comp) {
 	        //如果是系统级别的调用，需要从新执行绘制, 不是内部的触发比如（datazoom）
@@ -18799,6 +18798,7 @@ var chartx = (function () {
 	  }, {
 	    key: "_widget",
 	    value: function _widget(opt) {
+	      debugger;
 	      var me = this;
 	      !opt && (opt = {});
 
@@ -20077,11 +20077,6 @@ var chartx = (function () {
 
 	        var group = new _group["default"](fieldConfig, iGroup, //不同于fieldMap.ind
 	        me._opt, me.ctx, me.height, me.width, me, bottomFieldMap);
-	        group.draw({
-	          animation: me.animation,
-	          isResize: opt.resize
-	        }, g.data);
-	        newGroups.push(group);
 	        var insert = false; //在groups数组中插入到比自己_groupInd小的元素前面去
 
 	        for (var gi = 0, gl = me.groups.length; gi < gl; gi++) {
@@ -20106,6 +20101,11 @@ var chartx = (function () {
 	          me.groups.push(group);
 	          me.sprite.addChild(group.sprite);
 	        }
+	        group.draw({
+	          animation: me.animation,
+	          isResize: opt.resize
+	        }, g.data);
+	        newGroups.push(group);
 	      });
 
 	      return newGroups;
@@ -28326,6 +28326,7 @@ var chartx = (function () {
 	      yRange = bounds.yRange;
 
 	  if (xRange.max == xRange.min || yRange.max == yRange.min) {
+	    console.log("not scaling solution: zero size detected");
 	    return solution;
 	  }
 
@@ -28984,7 +28985,9 @@ var chartx = (function () {
 	    var centre = computeTextCentre(interior, exterior);
 	    ret[area] = centre;
 
-	    if (centre.disjoint && areas[i].size > 0) ;
+	    if (centre.disjoint && areas[i].size > 0) {
+	      console.log("WARNING: area " + area + " not represented on screen");
+	    }
 	  }
 
 	  return ret;
@@ -31406,6 +31409,7 @@ var chartx = (function () {
 	  var label = options.node && options.node.content && options.node.content.field;
 
 	  if (!checkDataIsJson(data, key, childrenKey)) {
+	    console.error('该数据不能正确绘制，请提供数组对象形式的数据！');
 	    return result;
 	  }
 	  var childrens = [];
@@ -35236,7 +35240,9 @@ var chartx = (function () {
 
 	        try {
 	          return fn();
-	        } finally {}
+	        } finally {
+	          console.log(name + " time: " + (_.now() - start) + "ms");
+	        }
 	      }
 
 	      function notime(name, fn) {
@@ -45020,6 +45026,8 @@ var chartx = (function () {
 	          }
 
 	          if (e.type == "wheel") {
+	            console.log(_deltaY, e.deltaY);
+
 	            if (Math.abs(e.deltaY) > Math.abs(_deltaY)) {
 	              _deltaY = e.deltaY;
 	            }
@@ -45422,6 +45430,7 @@ var chartx = (function () {
 	      var me = this;
 
 	      _.each(this.data.edges, function (edge) {
+	        console.log(edge.points);
 	        var key = edge.key.join('_');
 
 	        if (me.line.isTree && edge.points.length == 3) {
@@ -49943,6 +49952,7 @@ var chartx = (function () {
 	      this._setNodeStyle(_path, 'select');
 
 	      nodeData.selected = true;
+	      console.log("select:true");
 	    }
 	  }, {
 	    key: "unselectAt",
@@ -49956,6 +49966,7 @@ var chartx = (function () {
 	      this._setNodeStyle(_path);
 
 	      geoGraph.selected = false;
+	      console.log("select:false");
 
 	      if (geoGraph.focused) {
 	        this.focusAt(adcode);
@@ -52668,6 +52679,7 @@ var chartx = (function () {
 	  (0, _createClass2["default"])(Tips, [{
 	    key: "show",
 	    value: function show(e) {
+	      console.log('tips show');
 	      if (!this.enabled) return;
 
 	      if (e.eventInfo) {
@@ -52705,6 +52717,7 @@ var chartx = (function () {
 	  }, {
 	    key: "move",
 	    value: function move(e) {
+	      console.log('tips move');
 	      if (!this.enabled) return;
 
 	      if (e.eventInfo) {
@@ -52727,6 +52740,8 @@ var chartx = (function () {
 	  }, {
 	    key: "hide",
 	    value: function hide(e) {
+	      console.log('tips hide');
+
 	      this._hide(e);
 
 	      this.onhide.apply(this, [e]);
