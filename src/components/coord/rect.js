@@ -4,6 +4,7 @@ import xAxisConstructor from "./xaxis"
 import yAxisConstructor from "./yaxis"
 import Grid from "./grid"
 import {getDefaultProps} from "../../utils/tools"
+import Trigger from "../trigger"
 
 let { _,event } = Canvax
 
@@ -628,7 +629,7 @@ class Rect extends coordBase
         if( axis.type == 'yAxis' ){
             graphs.forEach( graph => {
                 if( graph.yAxisAlign == axis.align ){
-                    graph.resetData();
+                    graph.resetData(null, new Trigger( this ) );
                 }
             });
         }

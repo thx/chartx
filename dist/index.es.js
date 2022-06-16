@@ -8136,7 +8136,7 @@ var components = {
   */
 };
 var _default = {
-  chartxVersion: '1.1.83',
+  chartxVersion: '1.1.84',
   create: function create(el, _data, _opt) {
     var chart = null;
     var me = this;
@@ -14652,6 +14652,36 @@ exports["default"] = rectGrid;
 
 unwrapExports(grid);
 
+var trigger = createCommonjsModule(function (module, exports) {
+
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports["default"] = void 0;
+
+var _createClass2 = interopRequireDefault(createClass$1);
+
+var _classCallCheck2 = interopRequireDefault(classCallCheck$1);
+
+/**
+ * 每个组件中对外影响的时候，要抛出一个trigger对象
+ * 上面的comp属性就是触发这个trigger的组件本身
+ * params属性则是这次trigger的一些动作参数
+ * 目前legend和datazoom组件都有用到
+ */
+var Trigger = /*#__PURE__*/(0, _createClass2["default"])(function Trigger(comp) {
+  var params = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+  (0, _classCallCheck2["default"])(this, Trigger);
+  this.comp = comp;
+  this.params = params;
+});
+exports["default"] = Trigger;
+});
+
+unwrapExports(trigger);
+
 var rect = createCommonjsModule(function (module, exports) {
 
 
@@ -14684,6 +14714,8 @@ var _yaxis = interopRequireDefault(yaxis);
 var _grid = interopRequireDefault(grid);
 
 
+
+var _trigger = interopRequireDefault(trigger);
 
 function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
 
@@ -15316,12 +15348,14 @@ var Rect = /*#__PURE__*/function (_coordBase) {
   }, {
     key: "resetGraphsOfAxis",
     value: function resetGraphsOfAxis(axis) {
+      var _this2 = this;
+
       var graphs = this.app.getGraphs();
 
       if (axis.type == 'yAxis') {
         graphs.forEach(function (graph) {
           if (graph.yAxisAlign == axis.align) {
-            graph.resetData();
+            graph.resetData(null, new _trigger["default"](_this2));
           }
         });
       }
@@ -46736,36 +46770,6 @@ exports["default"] = _default;
 
 unwrapExports(relation);
 
-var trigger = createCommonjsModule(function (module, exports) {
-
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports["default"] = void 0;
-
-var _createClass2 = interopRequireDefault(createClass$1);
-
-var _classCallCheck2 = interopRequireDefault(classCallCheck$1);
-
-/**
- * 每个组件中对外影响的时候，要抛出一个trigger对象
- * 上面的comp属性就是触发这个trigger的组件本身
- * params属性则是这次trigger的一些动作参数
- * 目前legend和datazoom组件都有用到
- */
-var Trigger = /*#__PURE__*/(0, _createClass2["default"])(function Trigger(comp) {
-  var params = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-  (0, _classCallCheck2["default"])(this, Trigger);
-  this.comp = comp;
-  this.params = params;
-});
-exports["default"] = Trigger;
-});
-
-unwrapExports(trigger);
-
 var tree = createCommonjsModule(function (module, exports) {
 
 
@@ -56519,7 +56523,7 @@ if (projectTheme && projectTheme.length) {
 }
 
 var chartx = {
-  version: '1.1.83',
+  version: '1.1.84',
   options: {}
 };
 

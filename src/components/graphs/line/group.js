@@ -374,7 +374,8 @@ export default class LineGraphsGroup extends event.Dispatcher
      */
     resetData(data, dataTrigger, opt)
     {
-        let me = this;
+        debugger
+        let me = this; 
         if( data ){
             this.data = data;
         };
@@ -722,7 +723,7 @@ export default class LineGraphsGroup extends event.Dispatcher
                 me._bottomLine = bottomLine;
                 
             }
-            
+            debugger
             let area = new Path({ //填充
                 context: {
                     path: me._getFillPath(me._line, me._bottomLine),

@@ -105,7 +105,7 @@ class LineGraphs extends GraphsBase
                 if('y' in opt.origin) this.sprite.context.y = opt.origin.y;
             }
         }
-
+debugger
         me.data = me._trimGraphs(); 
         me.groups.forEach(g => {
             g.resetData( me.data[ g.field ].data , dataTrigger, opt );
