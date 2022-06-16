@@ -418,7 +418,7 @@ debugger
                     }
                 }
             };
-
+ 
             if( params.right ){
                 if( params.right > 0 ){
                     this._currPointList = this._currPointList.concat( this._pointList.slice( -params.right ) );
