@@ -254,7 +254,6 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
       }
 
       ;
-      debugger;
 
       if (!dataTrigger || !dataTrigger.comp) {
         //如果是系统级别的调用，需要从新执行绘制, 不是内部的触发比如（datazoom）
@@ -271,7 +270,6 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
 
         me._grow();
       } else {
-        debugger;
         me._pointList = this._getPointList(this.data);
         me._bottomPointList = this._getBottomPointList();
         var plen = me._pointList.length;
@@ -340,7 +338,6 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
     key: "_transition",
     value: function _transition(callback) {
       var me = this;
-      debugger;
 
       if (!me.data.length) {
         //因为在index中有调用
@@ -561,7 +558,6 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
   }, {
     key: "_widget",
     value: function _widget(opt) {
-      debugger;
       var me = this;
       !opt && (opt = {});
 
@@ -1247,8 +1243,6 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
           }
 
           _currPath.push([_first[0], _first[1]]);
-
-          debugger;
         } else {
           _currPath.push([_last[0], originPos], [_first[0], originPos], [_first[0], _first[1]]);
         }

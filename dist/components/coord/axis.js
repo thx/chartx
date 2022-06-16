@@ -73,8 +73,7 @@ var Axis = /*#__PURE__*/function (_baseAxis) {
         ;
       }
 
-      ;
-      debugger; //如果y不在当前datasection范围内，那么就要重新绘制
+      ; //如果y不在当前datasection范围内，那么就要重新绘制
 
       this.dataSection = [];
       vals.forEach(function (val) {
@@ -83,8 +82,7 @@ var Axis = /*#__PURE__*/function (_baseAxis) {
 
       this._initHandle();
 
-      this.draw();
-      debugger; //然后要检测下依附于这个轴的所有graphs，都要重新绘制
+      this.draw(); //然后要检测下依附于这个轴的所有graphs，都要重新绘制
 
       this._coord.resetGraphsOfAxis(this);
     }
