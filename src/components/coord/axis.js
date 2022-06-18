@@ -150,6 +150,10 @@ export default class Axis extends baseAxis
                     evade: {
                         detail: '是否开启逃避算法,目前的逃避只是隐藏',
                         default: true
+                    },
+                    alpha: {
+                        detail: '透明度',
+                        default: 1
                     }
                 }
             },

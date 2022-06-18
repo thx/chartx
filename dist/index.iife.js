@@ -8139,7 +8139,7 @@ var chartx = (function () {
 	  */
 	};
 	var _default = {
-	  chartxVersion: '1.1.84',
+	  chartxVersion: '1.1.87',
 	  create: function create(el, _data, _opt) {
 	    var chart = null;
 	    var me = this;
@@ -12958,6 +12958,10 @@ var chartx = (function () {
 	            evade: {
 	              detail: '是否开启逃避算法,目前的逃避只是隐藏',
 	              "default": true
+	            },
+	            alpha: {
+	              detail: '透明度',
+	              "default": 1
 	            }
 	          }
 	        },
@@ -13317,6 +13321,8 @@ var chartx = (function () {
 	  }, {
 	    key: "_widget",
 	    value: function _widget(opt) {
+	      var _this2 = this;
+
 	      var me = this;
 	      !opt && (opt = {});
 
@@ -13328,7 +13334,7 @@ var chartx = (function () {
 	      var arr = me.layoutData;
 	      var visibleInd = 0;
 
-	      for (var a = 0, al = arr.length; a < al; a++) {
+	      var _loop = function _loop(a, al) {
 	        _.isFunction(me.filter) && me.filter({
 	          layoutData: arr,
 	          index: a
@@ -13336,40 +13342,49 @@ var chartx = (function () {
 	        var o = arr[a];
 
 	        if (!o.visible) {
-	          continue;
+	          return "continue";
 	        }
 	        var x = o.x,
 	            y = me.tickLine.lineLength + me.tickLine.distance + me.label.distance;
 
-	        var _node = me.rulesSprite.getChildAt(visibleInd); //文字 
+	        var _node = me.rulesSprite.getChildAt(visibleInd);
+
+	        var _getProp = function _getProp(prop) {
+	          var _prop = prop;
+
+	          if (_.isFunction(prop)) {
+	            _prop = prop.apply(_this2, [o, arr, a]);
+	          }
+	          return _prop;
+	        }; //文字 
 
 
 	        var textContext = {
 	          x: o._text_x || o.x,
 	          y: y,
-	          fillStyle: this.label.fontColor,
-	          fontSize: this.label.fontSize,
-	          rotation: -Math.abs(this.label.rotation),
-	          textAlign: this.label.textAlign,
-	          lineHeight: this.label.lineHeight,
-	          textBaseline: !!this.label.rotation ? "middle" : "top",
-	          globalAlpha: 1
+	          fillStyle: _getProp(_this2.label.fontColor),
+	          fontSize: _getProp(_this2.label.fontSize),
+	          rotation: -Math.abs(_this2.label.rotation),
+	          textAlign: _getProp(_this2.label.textAlign),
+	          lineHeight: _getProp(_this2.label.lineHeight),
+	          textBaseline: !!_this2.label.rotation ? "middle" : "top",
+	          globalAlpha: _getProp(_this2.label.alpha)
 	        };
 
-	        if (!!this.label.rotation && this.label.rotation != 90) {
+	        if (!!_this2.label.rotation && _this2.label.rotation != 90) {
 	          textContext.x += 5;
 	          textContext.y += 3;
 	        }
 
 	        var tickLineContext = {
 	          x: x,
-	          y: this.tickLine.distance,
+	          y: _this2.tickLine.distance,
 	          end: {
 	            x: 0,
-	            y: this.tickLine.lineLength
+	            y: _this2.tickLine.lineLength
 	          },
-	          lineWidth: this.tickLine.lineWidth,
-	          strokeStyle: this.tickLine.strokeStyle
+	          lineWidth: _this2.tickLine.lineWidth,
+	          strokeStyle: _this2.tickLine.strokeStyle
 	        };
 	        var duration = 300;
 	        var delay = visibleInd * Math.min(1000 / arr.length, 25);
@@ -13434,6 +13449,12 @@ var chartx = (function () {
 	          me.rulesSprite.addChild(_node);
 	        }
 	        visibleInd++;
+	      };
+
+	      for (var a = 0, al = arr.length; a < al; a++) {
+	        var _ret = _loop(a);
+
+	        if (_ret === "continue") continue;
 	      }
 
 	      if (this.rulesSprite.children.length >= visibleInd) {
@@ -56102,7 +56123,7 @@ var chartx = (function () {
 
 	unwrapExports(title);
 
-	var lineMarkPoint_1 = createCommonjsModule(function (module, exports) {
+	var linemarkpoint = createCommonjsModule(function (module, exports) {
 
 
 
@@ -56425,7 +56446,7 @@ var chartx = (function () {
 	exports["default"] = _default;
 	});
 
-	unwrapExports(lineMarkPoint_1);
+	unwrapExports(linemarkpoint);
 
 	var dist = createCommonjsModule(function (module, exports) {
 
@@ -56526,7 +56547,7 @@ var chartx = (function () {
 	}
 
 	var chartx = {
-	  version: '1.1.84',
+	  version: '1.1.87',
 	  options: {}
 	};
 

@@ -77,7 +77,7 @@ require("./components/relation_backline/index");
 
 require("./components/title/index");
 
-require("./components/lineMarkPoint/index");
+require("./components/linemarkpoint/index");
 
 //2d图表元类
 //-----------------------------------------------
@@ -99,7 +99,7 @@ if (projectTheme && projectTheme.length) {
 ; //皮肤设定end -----------------
 
 var chartx = {
-  version: '1.1.84',
+  version: '1.1.87',
   options: {}
 };
 

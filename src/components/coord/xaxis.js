@@ -323,17 +323,25 @@ export default class xAxis extends Axis
 
             let _node = me.rulesSprite.getChildAt( visibleInd );
 
+            let _getProp = ( prop ) => {
+                let _prop = prop;
+                if( _.isFunction( prop ) ){
+                    _prop = prop.apply( this, [ o, arr, a ] );
+                };
+                return _prop;
+            }
+
             //文字 
             let textContext = {
                 x            : o._text_x || o.x,
                 y            : y,
-                fillStyle    : this.label.fontColor,
-                fontSize     : this.label.fontSize,
+                fillStyle    : _getProp(this.label.fontColor),
+                fontSize     : _getProp(this.label.fontSize),
                 rotation     : -Math.abs(this.label.rotation),
-                textAlign    : this.label.textAlign,
-                lineHeight   : this.label.lineHeight,
+                textAlign    : _getProp(this.label.textAlign),
+                lineHeight   : _getProp(this.label.lineHeight),
                 textBaseline : !!this.label.rotation ? "middle" : "top",
-                globalAlpha  : 1
+                globalAlpha  : _getProp( this.label.alpha )
             };
             if (!!this.label.rotation && this.label.rotation != 90) {
                 textContext.x += 5;

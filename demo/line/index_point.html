@@ -56,7 +56,13 @@ var options = {
     coord: {
         type: "rect",
         xAxis: {
-            field: "xfield"
+            field: "xfield",
+            label: {
+                alpha: function(){
+                    debugger
+                    return 1
+                }
+            }
         }
     },
     graphs: [
