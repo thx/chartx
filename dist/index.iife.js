@@ -8139,7 +8139,7 @@ var chartx = (function () {
 	  */
 	};
 	var _default = {
-	  chartxVersion: '1.1.92',
+	  chartxVersion: '1.1.93',
 	  create: function create(el, _data, _opt) {
 	    var chart = null;
 	    var me = this;
@@ -52783,15 +52783,20 @@ var chartx = (function () {
 	    value: function _setPosition(e) {
 	      //tips直接修改为fixed，所以定位直接用e.x e.y 2020-02-27
 	      if (!this.enabled) return;
-	      if (!this._tipDom) return; //let x = this._checkX( e.clientX + this.offsetX);
+	      if (!this._tipDom) return;
+	      var x, y;
+
+	      if (this.containerIsBody) {
+	        var domBounding = this.app.canvax.el.getBoundingClientRect();
+	        var globalPoint = e.target.localToGlobal(e.point);
+	        x = this._checkX(globalPoint.x + domBounding.x + this.offsetX);
+	        y = this._checkY(globalPoint.y + domBounding.y + this.offsetY);
+	      } else {
+	        x = this._checkX(e.offsetX + this.offsetX);
+	        y = this._checkY(e.offsetY + this.offsetY);
+	      } //let x = this._checkX( e.clientX + this.offsetX);
 	      //let y = this._checkY( e.clientY + this.offsetY);
 
-	      var domBounding = this.app.canvax.el.getBoundingClientRect();
-	      var globalPoint = e.target.localToGlobal(e.point);
-
-	      var x = this._checkX(globalPoint.x + domBounding.x + this.offsetX);
-
-	      var y = this._checkY(globalPoint.y + domBounding.y + this.offsetY);
 
 	      this._tipDom.style.cssText += ";visibility:visible;left:" + x + "px;top:" + y + "px;";
 
@@ -52809,7 +52814,7 @@ var chartx = (function () {
 	      if (document) {
 	        this._tipDom = document.createElement("div");
 	        this._tipDom.className = "chart-tips";
-	        this._tipDom.style.cssText += "; border-radius:" + this.borderRadius + "px;background:" + this.fillStyle + ";border:1px solid " + this.strokeStyle + ";visibility:hidden;position:fixed;z-index:99999999;enabled:inline-block;*enabled:inline;*zoom:1;padding:6px;color:" + this.fontColor + ";line-height:1.5";
+	        this._tipDom.style.cssText += "; border-radius:" + this.borderRadius + "px;background:" + this.fillStyle + ";border:1px solid " + this.strokeStyle + ";visibility:hidden;position:" + (this.containerIsBody ? 'fixed' : 'absolute') + ";z-index:99999999;enabled:inline-block;*enabled:inline;*zoom:1;padding:6px;color:" + this.fontColor + ";line-height:1.5";
 	        this._tipDom.style.cssText += "; box-shadow:1px 1px 3px " + this.strokeStyle + ";";
 	        this._tipDom.style.cssText += "; border:none;white-space:nowrap;word-wrap:normal;";
 	        this._tipDom.style.cssText += "; text-align:left;pointer-events:none;";
@@ -56566,7 +56571,7 @@ var chartx = (function () {
 	}
 
 	var chartx = {
-	  version: '1.1.92',
+	  version: '1.1.93',
 	  options: {}
 	};
 

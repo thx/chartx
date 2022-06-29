@@ -222,14 +222,19 @@ console.log('tips show')
         if (!this.enabled) return;
         if (!this._tipDom) return;
         
+        let x,y;
+        if( this.containerIsBody ){
+            var domBounding = this.app.canvax.el.getBoundingClientRect();
+            let globalPoint = e.target.localToGlobal( e.point );
+            x = this._checkX( globalPoint.x + domBounding.x + this.offsetX);
+            y = this._checkY( globalPoint.y + domBounding.y + this.offsetY);
+        } else {
+            x = this._checkX( e.offsetX + this.offsetX);
+            y = this._checkY( e.offsetY + this.offsetY);
+        }
         //let x = this._checkX( e.clientX + this.offsetX);
         //let y = this._checkY( e.clientY + this.offsetY);
-        var domBounding = this.app.canvax.el.getBoundingClientRect();
-
-        let globalPoint = e.target.localToGlobal( e.point );
-
-        let x = this._checkX( globalPoint.x + domBounding.x + this.offsetX);
-        let y = this._checkY( globalPoint.y + domBounding.y + this.offsetY);
+        
 
         this._tipDom.style.cssText += ";visibility:visible;left:" + x + "px;top:" + y + "px;";
 
@@ -245,7 +250,7 @@ console.log('tips show')
         if( document ){
             this._tipDom = document.createElement("div");
             this._tipDom.className = "chart-tips";
-            this._tipDom.style.cssText += "; border-radius:" + this.borderRadius + "px;background:" + this.fillStyle + ";border:1px solid " + this.strokeStyle + ";visibility:hidden;position:fixed;z-index:99999999;enabled:inline-block;*enabled:inline;*zoom:1;padding:6px;color:" + this.fontColor + ";line-height:1.5"
+            this._tipDom.style.cssText += "; border-radius:" + this.borderRadius + "px;background:" + this.fillStyle + ";border:1px solid " + this.strokeStyle + ";visibility:hidden;position:"+( this.containerIsBody ? 'fixed' : 'absolute' )+";z-index:99999999;enabled:inline-block;*enabled:inline;*zoom:1;padding:6px;color:" + this.fontColor + ";line-height:1.5"
             this._tipDom.style.cssText += "; box-shadow:1px 1px 3px " + this.strokeStyle + ";"
             this._tipDom.style.cssText += "; border:none;white-space:nowrap;word-wrap:normal;"
             this._tipDom.style.cssText += "; text-align:left;pointer-events:none;"
