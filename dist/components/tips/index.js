@@ -46,7 +46,17 @@ var Tips = /*#__PURE__*/function (_Component) {
     (0, _classCallCheck2["default"])(this, Tips);
     _this = _super.call(this, opt, app);
     _this.name = "tips";
-    _this.tipDomContainer = document ? document.body : null; //this.app.canvax.domView;
+    _this.tipDomContainer = null;
+
+    if (document) {
+      if (_this.containerIsBody) {
+        _this.tipDomContainer = document.body;
+      } else {
+        _this.tipDomContainer = _this.app.canvax.domView;
+      }
+    }
+
+    ; // (document && this.containerIsBody) ? document.body : null; //this.app.canvax.domView;
 
     _this.cW = 0; //容器的width
 
@@ -609,6 +619,10 @@ var Tips = /*#__PURE__*/function (_Component) {
         content: {
           detail: '自定义tips的内容（html）',
           "default": null
+        },
+        containerIsBody: {
+          detail: 'tips的html内容是否放到body下面，默认true，false则放到图表自身的容器内',
+          "default": true
         },
         borderRadius: {
           detail: 'tips的边框圆角半径',

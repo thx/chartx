@@ -26,7 +26,7 @@ class axis {
                 default: null
             },
 
-            verniers:{
+            verniers: {
                 detail : '设定的游标，dataSection的区间一定会覆盖这些值',
                 default: []
             },

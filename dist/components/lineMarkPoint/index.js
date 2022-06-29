@@ -202,22 +202,28 @@ var lineMarkPoint = /*#__PURE__*/function (_Component) {
 
       var position = "online";
 
-      if (preNodeData && preNodeData.y < nodeData.y || nextNodeData && nextNodeData.y < nodeData.y) {
-        position = 'offline'; //在线的下方
-      }
+      if (this.position == 'auto') {
+        if (preNodeData && preNodeData.y < nodeData.y || nextNodeData && nextNodeData.y < nodeData.y) {
+          position = 'offline'; //在线的下方
+        }
 
-      ;
+        ;
 
-      if (position == "online" && Math.abs(y) + lineLength + lineDis + txtHeight > coordHeight) {
-        //在上面但是超过了坐标系顶部空间
-        position = "offline";
-      }
+        if (position == "online" && Math.abs(y) + lineLength + lineDis + txtHeight > coordHeight) {
+          //在上面但是超过了坐标系顶部空间
+          position = "offline";
+        }
 
-      ;
+        ;
 
-      if (position == "offline" && Math.abs(y) < lineLength + txtHeight + lineDis) {
-        //在线下面，但是超出了坐标系底部空间
-        position = "online";
+        if (position == "offline" && Math.abs(y) < lineLength + txtHeight + lineDis) {
+          //在线下面，但是超出了坐标系底部空间
+          position = "online";
+        }
+
+        ;
+      } else {
+        position = this.position;
       }
 
       ;
@@ -237,6 +243,7 @@ var lineMarkPoint = /*#__PURE__*/function (_Component) {
         pointList = [[nodeData.x, top + txtHeight], [nodeData.x, nodeData.y - lineDis]];
       }
 
+      ;
       return {
         y: top,
         pointList: pointList
@@ -324,6 +331,10 @@ var lineMarkPoint = /*#__PURE__*/function (_Component) {
               }
             }
           }
+        },
+        position: {
+          detail: '在线的方向，online（线上边） or offline（线下方），默认自动计算',
+          "default": 'auto'
         }
       };
     }

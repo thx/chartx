@@ -18,6 +18,10 @@ class Tips extends Component {
                 detail : '自定义tips的内容（html）',
                 default: null
             },
+            containerIsBody: {
+                detail: 'tips的html内容是否放到body下面，默认true，false则放到图表自身的容器内',
+                default: true
+            },
             borderRadius : {
                 detail  : 'tips的边框圆角半径',
                 default : 5
@@ -96,7 +100,14 @@ class Tips extends Component {
 
         this.name = "tips"
 
-        this.tipDomContainer = document ? document.body : null; //this.app.canvax.domView;
+        this.tipDomContainer = null;
+        if( document ){
+            if( this.containerIsBody ){
+                this.tipDomContainer = document.body; 
+            } else {
+                this.tipDomContainer = this.app.canvax.domView;
+            }
+        }; // (document && this.containerIsBody) ? document.body : null; //this.app.canvax.domView;
         this.cW = 0;  //容器的width
         this.cH = 0;  //容器的height
 

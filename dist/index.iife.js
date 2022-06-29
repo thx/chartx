@@ -8139,7 +8139,7 @@ var chartx = (function () {
 	  */
 	};
 	var _default = {
-	  chartxVersion: '1.1.87',
+	  chartxVersion: '1.1.92',
 	  create: function create(el, _data, _opt) {
 	    var chart = null;
 	    var me = this;
@@ -52647,7 +52647,15 @@ var chartx = (function () {
 	    (0, _classCallCheck2["default"])(this, Tips);
 	    _this = _super.call(this, opt, app);
 	    _this.name = "tips";
-	    _this.tipDomContainer = document ? document.body : null; //this.app.canvax.domView;
+	    _this.tipDomContainer = null;
+
+	    if (document) {
+	      if (_this.containerIsBody) {
+	        _this.tipDomContainer = document.body;
+	      } else {
+	        _this.tipDomContainer = _this.app.canvax.domView;
+	      }
+	    }
 
 	    _this.cW = 0; //容器的width
 
@@ -53168,6 +53176,10 @@ var chartx = (function () {
 	        content: {
 	          detail: '自定义tips的内容（html）',
 	          "default": null
+	        },
+	        containerIsBody: {
+	          detail: 'tips的html内容是否放到body下面，默认true，false则放到图表自身的容器内',
+	          "default": true
 	        },
 	        borderRadius: {
 	          detail: 'tips的边框圆角半径',
@@ -56319,18 +56331,22 @@ var chartx = (function () {
 
 	      var position = "online";
 
-	      if (preNodeData && preNodeData.y < nodeData.y || nextNodeData && nextNodeData.y < nodeData.y) {
-	        position = 'offline'; //在线的下方
-	      }
+	      if (this.position == 'auto') {
+	        if (preNodeData && preNodeData.y < nodeData.y || nextNodeData && nextNodeData.y < nodeData.y) {
+	          position = 'offline'; //在线的下方
+	        }
 
-	      if (position == "online" && Math.abs(y) + lineLength + lineDis + txtHeight > coordHeight) {
-	        //在上面但是超过了坐标系顶部空间
-	        position = "offline";
-	      }
+	        if (position == "online" && Math.abs(y) + lineLength + lineDis + txtHeight > coordHeight) {
+	          //在上面但是超过了坐标系顶部空间
+	          position = "offline";
+	        }
 
-	      if (position == "offline" && Math.abs(y) < lineLength + txtHeight + lineDis) {
-	        //在线下面，但是超出了坐标系底部空间
-	        position = "online";
+	        if (position == "offline" && Math.abs(y) < lineLength + txtHeight + lineDis) {
+	          //在线下面，但是超出了坐标系底部空间
+	          position = "online";
+	        }
+	      } else {
+	        position = this.position;
 	      }
 	      var top = 0;
 
@@ -56345,7 +56361,6 @@ var chartx = (function () {
 	      if (position == "online") {
 	        pointList = [[nodeData.x, top + txtHeight], [nodeData.x, nodeData.y - lineDis]];
 	      }
-
 	      return {
 	        y: top,
 	        pointList: pointList
@@ -56433,6 +56448,10 @@ var chartx = (function () {
 	              }
 	            }
 	          }
+	        },
+	        position: {
+	          detail: '在线的方向，online（线上边） or offline（线下方），默认自动计算',
+	          "default": 'auto'
 	        }
 	      };
 	    }
@@ -56547,7 +56566,7 @@ var chartx = (function () {
 	}
 
 	var chartx = {
-	  version: '1.1.87',
+	  version: '1.1.92',
 	  options: {}
 	};
 

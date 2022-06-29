@@ -59,7 +59,7 @@ var options = {
             field: "xfield",
             label: {
                 alpha: function(){
-                    debugger
+                    
                     return 1
                 }
             }
@@ -88,6 +88,10 @@ var options = {
             xValue  : "1月1号", //对应xAxis的字段
             label  : {
                 text: "近期最低"
+            },
+            position: 'online',
+            line: {
+                lineLength: 2
             }
         },
         { 
@@ -95,7 +99,8 @@ var options = {
             xValue  : "1月2号", //对应xAxis的字段
             label  : {
                 text: "历史最高"
-            }
+            },
+            position: 'offline'
         },
         { 
             lineField : "uv",
@@ -119,7 +124,10 @@ var options = {
                 }
             }
         }
-    ]
+    ],
+    tips: {
+        containerIsBody: false
+    }
 }
 
 

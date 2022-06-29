@@ -88,6 +88,10 @@ class lineMarkPoint extends Component
                     }
                     
                 }
+            },
+            position: {
+                detail: '在线的方向，online（线上边） or offline（线下方），默认自动计算',
+                default: 'auto'
             }
         }
     }
@@ -230,18 +234,22 @@ class lineMarkPoint extends Component
         let y = nodeData.y;
         let lineLength = !this.line.enabled ? 3 : this.line.lineLength;
         let lineDis = this.line.lineDis;  //line到node的距离
-      
+      debugger
         let position = "online";
-        if( (preNodeData && preNodeData.y < nodeData.y) || (nextNodeData && nextNodeData.y < nodeData.y) ){
-            position = 'offline';//在线的下方
-        };
-        if( position == "online" && Math.abs( y )+lineLength+lineDis+txtHeight > coordHeight ){
-            //在上面但是超过了坐标系顶部空间
-            position = "offline"
-        };
-        if( position == "offline" && Math.abs( y ) < lineLength+txtHeight+lineDis ){
-            //在线下面，但是超出了坐标系底部空间
-            position = "online"
+        if( this.position == 'auto' ){
+            if( (preNodeData && preNodeData.y < nodeData.y) || (nextNodeData && nextNodeData.y < nodeData.y) ){
+                position = 'offline';//在线的下方
+            };
+            if( position == "online" && Math.abs( y )+lineLength+lineDis+txtHeight > coordHeight ){
+                //在上面但是超过了坐标系顶部空间
+                position = "offline"
+            };
+            if( position == "offline" && Math.abs( y ) < lineLength+txtHeight+lineDis ){
+                //在线下面，但是超出了坐标系底部空间
+                position = "online"
+            };
+        } else {
+            position = this.position;
         };
 
         let top = 0;
@@ -255,9 +263,8 @@ class lineMarkPoint extends Component
         let pointList =[ [ nodeData.x, top ], [ nodeData.x, nodeData.y+lineDis ] ]
         if( position == "online" ){
             pointList =[ [ nodeData.x, top+txtHeight ], [ nodeData.x, nodeData.y-lineDis ] ]
-        }
+        };
         
-
         return {
             y: top,
             pointList
