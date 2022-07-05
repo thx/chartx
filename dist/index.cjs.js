@@ -8138,7 +8138,7 @@ var components = {
   */
 };
 var _default = {
-  chartxVersion: '1.1.93',
+  chartxVersion: '1.1.95',
   create: function create(el, _data, _opt) {
     var chart = null;
     var me = this;
@@ -11961,7 +11961,15 @@ var axis = /*#__PURE__*/function () {
           }
 
           if (arr.length == 1) {
-            arr.push(arr[0] * .5);
+            var n = arr[0];
+
+            if (Math.abs(n) > 10) {
+              arr = [n - 1, n, n + 1];
+            } else if (Math.abs(n) >= 1 && Math.abs(n) <= 10) {
+              arr = [n - 0.1, n, n + 0.1];
+            } else {
+              arr = [n * .5, n, n * 2];
+            }
           }
 
           if (Array.isArray(this.verniers) && this.verniers.length) {
@@ -12061,10 +12069,14 @@ var axis = /*#__PURE__*/function () {
       var arr = Canvax._.flatten(this.dataOrg); //_.flatten( data.org );
 
 
+      var _arr = [];
+
       for (var i = 0, il = arr.length; i < il; i++) {
-        arr[i] = arr[i] || 0;
+        if (arr[i] != null && arr[i] != undefined && arr[i] != '') {
+          _arr.push(arr[i]);
+        }
       }
-      return arr;
+      return Canvax._.unique(_arr);
     } //二维的yAxis设置，肯定是堆叠的比如柱状图，
 
   }, {
@@ -56570,7 +56582,7 @@ if (projectTheme && projectTheme.length) {
 }
 
 var chartx = {
-  version: '1.1.93',
+  version: '1.1.95',
   options: {}
 };
 

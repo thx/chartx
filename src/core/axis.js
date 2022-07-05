@@ -189,7 +189,14 @@ class axis {
                 }
 
                 if (arr.length == 1){
-                    arr.push(arr[0] * .5);
+                    let n = arr[0];
+                    if( Math.abs(n) > 10 ){
+                        arr = [ n-1, n, n+1 ];
+                    } else if( Math.abs(n) >= 1 && Math.abs(n) <= 10 ){
+                        arr = [ n-0.1, n, n+ 0.1 ]
+                    } else {
+                        arr = [ n*.5, n, n*2 ];
+                    }
                 }
 
                 if( Array.isArray( this.verniers ) && this.verniers.length ){
@@ -282,12 +289,15 @@ class axis {
     //后续也会做堆叠的折线图，就是面积图， 和堆叠图不同的是走的是一维数据计算
     _oneDimensional() {
         let arr = _.flatten(this.dataOrg); //_.flatten( data.org );
-
+ 
+        let _arr = [];
         for (let i = 0, il = arr.length; i < il; i++) {
-            arr[i] = arr[i] || 0;
+            if( arr[i] != null && arr[i] != undefined && arr[i] != ''){
+                _arr.push( arr[i] );
+            }
         };
 
-        return arr;
+        return _.unique( _arr );
     }
     //二维的yAxis设置，肯定是堆叠的比如柱状图，
     _twoDimensional() {
