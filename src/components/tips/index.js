@@ -221,16 +221,20 @@ console.log('tips show')
         //tips直接修改为fixed，所以定位直接用e.x e.y 2020-02-27
         if (!this.enabled) return;
         if (!this._tipDom) return;
-        
+
+        var domBounding = this.app.canvax.el.getBoundingClientRect();
+
         let x,y;
         if( this.containerIsBody ){
-            var domBounding = this.app.canvax.el.getBoundingClientRect();
             let globalPoint = e.target.localToGlobal( e.point );
             x = this._checkX( globalPoint.x + domBounding.x + this.offsetX);
             y = this._checkY( globalPoint.y + domBounding.y + this.offsetY);
         } else {
-            x = this._checkX( e.offsetX + this.offsetX);
-            y = this._checkY( e.offsetY + this.offsetY);
+            x = this._checkX( e.offsetX + domBounding.x + this.offsetX);
+            y = this._checkY( e.offsetY + domBounding.y + this.offsetY);
+
+            x -= domBounding.x;
+            y -= domBounding.y;
         }
         //let x = this._checkX( e.clientX + this.offsetX);
         //let y = this._checkY( e.clientY + this.offsetY);

@@ -8138,7 +8138,7 @@ var components = {
   */
 };
 var _default = {
-  chartxVersion: '1.1.95',
+  chartxVersion: '1.1.96',
   create: function create(el, _data, _opt) {
     var chart = null;
     var me = this;
@@ -52795,16 +52795,18 @@ var Tips = /*#__PURE__*/function (_Component) {
       //tips直接修改为fixed，所以定位直接用e.x e.y 2020-02-27
       if (!this.enabled) return;
       if (!this._tipDom) return;
+      var domBounding = this.app.canvax.el.getBoundingClientRect();
       var x, y;
 
       if (this.containerIsBody) {
-        var domBounding = this.app.canvax.el.getBoundingClientRect();
         var globalPoint = e.target.localToGlobal(e.point);
         x = this._checkX(globalPoint.x + domBounding.x + this.offsetX);
         y = this._checkY(globalPoint.y + domBounding.y + this.offsetY);
       } else {
-        x = this._checkX(e.offsetX + this.offsetX);
-        y = this._checkY(e.offsetY + this.offsetY);
+        x = this._checkX(e.offsetX + domBounding.x + this.offsetX);
+        y = this._checkY(e.offsetY + domBounding.y + this.offsetY);
+        x -= domBounding.x;
+        y -= domBounding.y;
       } //let x = this._checkX( e.clientX + this.offsetX);
       //let y = this._checkY( e.clientY + this.offsetY);
 
@@ -56582,7 +56584,7 @@ if (projectTheme && projectTheme.length) {
 }
 
 var chartx = {
-  version: '1.1.95',
+  version: '1.1.96',
   options: {}
 };
 
