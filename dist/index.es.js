@@ -8136,7 +8136,7 @@ var components = {
   */
 };
 var _default = {
-  chartxVersion: '1.1.96',
+  chartxVersion: '1.1.97',
   create: function create(el, _data, _opt) {
     var chart = null;
     var me = this;
@@ -52794,17 +52794,19 @@ var Tips = /*#__PURE__*/function (_Component) {
       if (!this.enabled) return;
       if (!this._tipDom) return;
       var domBounding = this.app.canvax.el.getBoundingClientRect();
+      var domBX = domBounding.x || domBounding.left;
+      var domBY = domBounding.y || domBounding.top;
       var x, y;
 
       if (this.containerIsBody) {
         var globalPoint = e.target.localToGlobal(e.point);
-        x = this._checkX(globalPoint.x + domBounding.x + this.offsetX);
-        y = this._checkY(globalPoint.y + domBounding.y + this.offsetY);
+        x = this._checkX(globalPoint.x + domBX + this.offsetX);
+        y = this._checkY(globalPoint.y + domBY + this.offsetY);
       } else {
-        x = this._checkX(e.offsetX + domBounding.x + this.offsetX);
-        y = this._checkY(e.offsetY + domBounding.y + this.offsetY);
-        x -= domBounding.x;
-        y -= domBounding.y;
+        x = this._checkX(e.offsetX + domBX + this.offsetX);
+        y = this._checkY(e.offsetY + domBY + this.offsetY);
+        x -= domBX;
+        y -= domBY;
       } //let x = this._checkX( e.clientX + this.offsetX);
       //let y = this._checkY( e.clientY + this.offsetY);
 
@@ -56582,7 +56584,7 @@ if (projectTheme && projectTheme.length) {
 }
 
 var chartx = {
-  version: '1.1.96',
+  version: '1.1.97',
   options: {}
 };
 

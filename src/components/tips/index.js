@@ -222,19 +222,20 @@ console.log('tips show')
         if (!this.enabled) return;
         if (!this._tipDom) return;
 
-        var domBounding = this.app.canvax.el.getBoundingClientRect();
+        let domBounding = this.app.canvax.el.getBoundingClientRect();
+        let domBX = domBounding.x || domBounding.left;
+        let domBY = domBounding.y || domBounding.top;
 
         let x,y;
         if( this.containerIsBody ){
             let globalPoint = e.target.localToGlobal( e.point );
-            x = this._checkX( globalPoint.x + domBounding.x + this.offsetX);
-            y = this._checkY( globalPoint.y + domBounding.y + this.offsetY);
+            x = this._checkX( globalPoint.x + domBX + this.offsetX);
+            y = this._checkY( globalPoint.y + domBY + this.offsetY);
         } else {
-            x = this._checkX( e.offsetX + domBounding.x + this.offsetX);
-            y = this._checkY( e.offsetY + domBounding.y + this.offsetY);
-
-            x -= domBounding.x;
-            y -= domBounding.y;
+            x = this._checkX( e.offsetX + domBX + this.offsetX);
+            y = this._checkY( e.offsetY + domBY + this.offsetY);
+            x -= domBX;
+            y -= domBY;
         }
         //let x = this._checkX( e.clientX + this.offsetX);
         //let y = this._checkY( e.clientY + this.offsetY);
