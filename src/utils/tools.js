@@ -14,46 +14,6 @@ export function getDisMinATArr($n, $arr) {
     return index
 }
 
-/**
-* 获取一个path路径
-* @param  {[Array]} $arr    [数组]
-* @return {[String]}        [path字符串]
-*/
-export function getPath($arr){
-    var M = 'M', L = 'L', Z = 'z'
-    var s = '';
-    var start = {
-        x : 0,
-        y : 0
-    }
-    if( _.isArray( $arr[0] ) ){
-        start.x = $arr[0][0];
-        start.y = $arr[0][1];
-        s = M + $arr[0][0] + ' ' + $arr[0][1]
-    } else {
-        start = $arr[0];
-        s = M + $arr[0].x + ' ' + $arr[0].y
-    }
-    for(var a = 1,al = $arr.length; a < al ; a++){
-        var x = 0 , y = 0 , item = $arr[a]; 
-        if( _.isArray( item ) ){
-            x = item[0];
-            y = item[1];
-        } else {
-            x = item.x;
-            y = item.y;
-        }
-        //s += ' ' + L + x + ' ' + y
-        if( x == start.x && y == start.y ){
-            s += ' ' + Z
-        } else {
-            s += ' ' + L + x + ' ' + y
-        }
-    }
-    
-    // s += ' ' + Z
-    return s
-}
 
 
 export function getDefaultProps( dProps, target={} ){

@@ -205,7 +205,7 @@ var markCloumn = /*#__PURE__*/function (_Component) {
 
         if (me.line.endY == 'auto') {
           _.each(me.nodes, function (node) {
-            y = Math.min(node.y);
+            y = Math.min(node.y, y);
           });
         }
 

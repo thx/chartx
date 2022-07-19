@@ -589,19 +589,10 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
         y: me.y,
         strokeStyle: strokeStyle,
         smooth: me.line.smooth,
-        curvature: me.line.curvature,
         lineType: me._getProp(me.line.lineType),
         lineDash: me.line.lineDash,
         //TODO: 不能用_getProp
         lineJoin: 'bevel',
-        smoothFilter: function smoothFilter(rp) {
-          //smooth为true的话，折线图需要对折线做一些纠正，不能超过底部
-          if (rp[1] > 0) {
-            rp[1] = 0;
-          } else if (Math.abs(rp[1]) > me.h) {
-            rp[1] = -me.h;
-          }
-        },
         lineCap: "round"
       };
 
@@ -631,6 +622,8 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
       ;
       me.lineSprite.addChild(bline);
       me._line = bline;
+      debugger;
+      window['_line'] = me._line;
 
       if (me.area.enabled) {
         if (this._bottomField) {
@@ -1182,89 +1175,60 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
   }, {
     key: "_getFillPath",
     value: function _getFillPath(line, bottomLine) {
-      //填充
-      var pointList = _.clone(line.context.pointList);
-
-      var bottomPointList = bottomLine ? _.clone(bottomLine.context.pointList) : [];
-      var path = "";
+      var path = '';
+      var M = 'M',
+          L = 'L',
+          Z = 'z';
       var originPos = -this._yAxis.originPos;
-      var _currPath = null;
+      var bottomGraphicsData = bottomLine ? bottomLine.graphics.graphicsData : [];
+      line.graphics.graphicsData.forEach(function (graphicsData, gInd) {
+        var points = [].concat(graphicsData.shape.points);
 
-      _.each(pointList, function (point, i) {
-        if (_.isNumber(point[1])) {
-          if (_currPath === null) {
-            _currPath = [];
-          }
+        if (points.length > 1) {
+          if (bottomGraphicsData.length) {
+            var bottomGraphicsDataGroup = bottomGraphicsData[gInd] || bottomGraphicsData.slice(-1)[0];
+            var bpoints = bottomGraphicsDataGroup.shape.points;
 
-          _currPath.push(point);
-        } else {
-          // not a number
-          if (_currPath && _currPath.length) {
-            getOnePath();
+            for (var _i2 = 0, l = bpoints.length / 2; _i2 < l; _i2++) {
+              points.push(bpoints[(l - _i2 - 1) * 2]);
+              points.push(bpoints[(l - _i2 - 1) * 2 + 1]);
+            }
+
+            points = points.concat([points[0], points[1]]);
+          } else {
+            points = points.concat([points[points.length - 2], originPos, points[0], originPos, points[0], points[1]]);
           }
 
           ;
-        }
+          var pointLen = points.length / 2;
 
-        if (i == pointList.length - 1 && _.isNumber(point[1])) {
-          getOnePath();
+          for (var i = 0; i < pointLen; i++) {
+            var x = points[i * 2];
+            var y = points[i * 2 + 1];
+
+            if (!i) {
+              path += M + x + ' ' + y;
+            } else {
+              path += L + x + ' ' + y;
+
+              if (i == pointLen - 1) {
+                path += Z;
+              }
+            }
+          }
         }
       });
-
-      function getOnePath() {
-        var _first = _currPath[0];
-        var _firstIndex = null;
-        var _last = _currPath[_currPath.length - 1];
-        var _lastIndex = null;
-
-        if (bottomPointList.length) {
-          for (var _i2 = 0, l = bottomPointList.length; _i2 < l; _i2++) {
-            var item = bottomPointList[_i2];
-
-            if (_firstIndex != null && _lastIndex != null) {
-              break;
-            }
-
-            if (_firstIndex == null && _first[0] == item[0]) {
-              _firstIndex = _i2;
-            }
-
-            if (_lastIndex == null && _last[0] == item[0]) {
-              _lastIndex = _i2;
-            }
-          }
-
-          var i = 0;
-
-          while (i <= _lastIndex - _firstIndex) {
-            _currPath.push(bottomPointList[_lastIndex - i]);
-
-            i++;
-          }
-
-          _currPath.push([_first[0], _first[1]]);
-        } else {
-          _currPath.push([_last[0], originPos], [_first[0], originPos], [_first[0], _first[1]]);
-        }
-
-        path += (0, _tools.getPath)(_currPath);
-        _currPath = null;
-      }
-
       return path;
     } //根据x方向的 val来 获取对应的node， 这个node可能刚好是一个node， 也可能两个node中间的某个位置
 
   }, {
     key: "getNodeInfoOfX",
     value: function getNodeInfoOfX(x) {
-      var me = this;
-      var nodeInfo;
-
+      //现在从data中查找0.5px间距内的值，有的话返回
       for (var i = 0, l = this.data.length; i < l; i++) {
-        if (this.data[i].value !== null && Math.abs(this.data[i].x - x) <= 1) {
-          //左右相差不到1px的，都算
-          nodeInfo = this.data[i];
-          return nodeInfo;
+        if (this.data[i].value !== null && Math.abs(this.data[i].x - x) <= 0.5) {
+          //左右相差不到0.5px的，都算
+          return this.data[i];
         }
       }
 
@@ -1282,17 +1246,28 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
       var point;
 
       var search = function search(points) {
-        if (x < points[0][0] || x > points.slice(-1)[0][0]) {
+        //points 是一维的数据,至少一个点有两个数据
+        if (points.length < 2) return;
+        var pointLen = points.length / 2;
+
+        if (x < points[0] || x > points[(pointLen - 1) * 2]) {
+          //x<points[0][0] || x>points.slice(-1)[0][0]
+          //x不在该points区间，忽略
           return;
         }
 
         ;
-        var midInd = parseInt(points.length / 2);
+        var midInd = parseInt(pointLen / 2);
+        var midNextInd = midInd + 1;
+        var midPreInd = midInd - 1;
+        var midX = points[midInd * 2];
+        var midY = points[midInd * 2 + 1];
 
-        if (Math.abs(points[midInd][0] - x) <= 1) {
+        if (Math.abs(midX - x) <= 0.5) {
+          //假如中间点的x和查找的x相差0.5以内，就已该midX为准
           point = {
-            x: points[midInd][0],
-            y: points[midInd][1]
+            x: midX,
+            y: midY
           };
           return;
         }
@@ -1300,19 +1275,20 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
         ;
         var _pl = [];
 
-        if (x > points[midInd][0]) {
-          if (x < points[midInd + 1][0]) {
-            point = getPointFromXInLine(x, [points[midInd], points[midInd + 1]]);
+        if (x > midX) {
+          if (x < points[midNextInd * 2]) {
+            //大于midX但是小于下一个点
+            point = getPointFromXInLine(x, [[midX, midY], [points[midNextInd * 2], points[midNextInd * 2 + 1]]]);
             return;
           } else {
-            _pl = points.slice(midInd + 1);
+            _pl = points.slice(midNextInd * 2);
           }
         } else {
-          if (x > points[midInd - 1][0]) {
-            point = getPointFromXInLine(x, [points[midInd - 1], points[midInd]]);
+          if (x > points[midPreInd * 2]) {
+            point = getPointFromXInLine(x, [[points[midPreInd * 2], points[midPreInd * 2 + 1]], [midX, midY]]);
             return;
           } else {
-            _pl = points.slice(0, midInd);
+            _pl = points.slice(0, midInd * 2);
           }
         }
 
@@ -1320,7 +1296,16 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
         search(_pl);
       };
 
-      this._line && search(this._line.context.pointList);
+      if (this._line) {
+        var lineGraphsData = this._line.graphics.graphicsData;
+        lineGraphsData.forEach(function (graphsData) {
+          if (!point) {
+            search(graphsData.shape.points);
+          }
+        });
+      }
+
+      ;
 
       if (!point || point.y == undefined) {
         return null;
@@ -1330,16 +1315,16 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
 
       var node = {
         type: "line",
-        iGroup: me.iGroup,
+        iGroup: this.iGroup,
         iNode: -1,
         //并非data中的数据，而是计算出来的数据
-        field: me.field,
+        field: this.field,
         value: this._yAxis.getValOfPos(-point.y),
         x: point.x,
         y: point.y,
         rowData: null,
         //非data中的数据，没有rowData
-        color: me._getProp(me.node.strokeStyle) || me._getLineStrokeStyle()
+        color: this._getProp(this.node.strokeStyle) || this._getLineStrokeStyle()
       };
       return node;
     }
@@ -1470,10 +1455,6 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
             smooth: {
               detail: '是否平滑处理',
               "default": true
-            },
-            curvature: {
-              detail: '折线smooth为true的时候，配置的曲率，默认 0.25',
-              "default": undefined
             },
             shadowOffsetX: {
               detail: '折线的X方向阴影偏移量',

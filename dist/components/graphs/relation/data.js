@@ -61,6 +61,7 @@ function jsonToArrayForRelation(data, options, _childrenField) {
   var label = options.node && options.node.content && options.node.content.field;
 
   if (!checkDataIsJson(data, key, childrenKey)) {
+    console.error('该数据不能正确绘制，请提供数组对象形式的数据！');
     return result;
   }
 

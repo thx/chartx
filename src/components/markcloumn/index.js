@@ -148,6 +148,7 @@ class markCloumn extends Component
     }
 
     _widget(){
+        
         let me = this;
         let _coord = this.app.getComponent({name:'coord'});
         let _xAxis = _coord._xAxis;
@@ -226,7 +227,7 @@ class markCloumn extends Component
             };
             if( me.line.endY == 'auto' ){
                 _.each( me.nodes, function( node ){
-                    y = Math.min( node.y );
+                    y = Math.min( node.y, y );
                 } );
             };
             lineOpt.end.y = y;

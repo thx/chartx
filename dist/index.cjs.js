@@ -6895,6 +6895,8 @@ var myMath = {
 function _createSuper$a(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct$a(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
 
 function _isNativeReflectConstruct$a() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+var mathMin = Math.min;
+var mathMax = Math.max;
 
 var BrokenLine = /*#__PURE__*/function (_Shape) {
   _inherits(BrokenLine, _Shape);
@@ -6902,8 +6904,6 @@ var BrokenLine = /*#__PURE__*/function (_Shape) {
   var _super = _createSuper$a(BrokenLine);
 
   function BrokenLine(opt) {
-    var _this;
-
     _classCallCheck(this, BrokenLine);
 
     opt = Utils.checkOpt(opt);
@@ -6911,70 +6911,198 @@ var BrokenLine = /*#__PURE__*/function (_Shape) {
     var _context = _.extend(true, {
       lineType: null,
       smooth: false,
-      curvature: null,
-      //曲率 , smooth==true生效
-      pointList: [],
-      //{Array}  // 必须，各个顶角坐标
-      smoothFilter: Utils.__emptyFunc
+      smoothMonotone: 'none',
+      pointList: [] //{Array}  // 必须，各个顶角坐标
+
     }, opt.context);
 
-    if (!opt.isClone && _context.smooth) {
-      _context.pointList = myMath.getSmoothPointList(_context.pointList, _context.smoothFilter, _context.curvature);
+    if (_context.smooth === true || _context.smooth === 'true') {
+      _context.smooth = 0.5; //smooth 0-1
     }
+
     opt.context = _context;
     opt.type = "brokenline";
-    _this = _super.call(this, opt); //保存好原始值
-
-    _this._pointList = _context.pointList;
-    return _this;
+    return _super.call(this, opt);
   }
 
   _createClass(BrokenLine, [{
     key: "watch",
     value: function watch(name, value, preValue) {
-      var names = ['curvature', 'pointList', 'smooth', 'lineType'];
+      var names = ['pointList', 'smooth', 'lineType', 'smoothMonotone'];
 
       if (names.indexOf(name) > -1) {
-        if (name == "pointList" && this.context.smooth) {
-          this.context.pointList = myMath.getSmoothPointList(value, this.context.smoothFilter, this.context.curvature);
-          this._pointList = value;
-        }
-
-        if (name == "smooth") {
-          //如果是smooth的切换
-          if (value) {
-            //从原始中拿数据重新生成
-            this.context.pointList = myMath.getSmoothPointList(this._pointList, this.context.smoothFilter, this.context.curvature);
-          } else {
-            this.context.pointList = this._pointList;
-          }
-        }
         this.graphics.clear();
+        this.draw(this.graphics);
       }
     }
   }, {
     key: "draw",
     value: function draw(graphics) {
-      var context = this.context;
-      var pointList = context.pointList;
+      var pointList = this.context.pointList;
+      this.drawGraphics(graphics, pointList, this.context.smooth, this.context.smoothMonotone);
+      return this;
+    }
+    /**
+     * 绘制非单调的平滑线
+     */
+
+  }, {
+    key: "drawGraphics",
+    value: function drawGraphics(ctx) {
+      var points = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [];
+      var smooth = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0.5;
+      var smoothMonotone = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 'x' | 'y' | 'none';
+      var start = 0;
+      var dir = 1;
+      var segLen = points.length;
+      var prevX;
+      var prevY;
+      var cpx0;
+      var cpy0;
+      var cpx1;
+      var cpy1;
+      var idx = start;
       var beginPath = false;
+      var k = 0;
 
-      for (var i = 0, l = pointList.length; i < l; i++) {
-        var point = pointList[i];
+      for (; k < segLen; k++) {
+        var point = points[idx];
 
-        if (myMath.isValibPoint(point)) {
-          if (!beginPath) {
-            graphics.moveTo(point[0], point[1]);
-          } else {
-            graphics.lineTo(point[0], point[1]);
-          }
-          beginPath = true;
-        } else {
+        if (!myMath.isValibPoint(point)) {
+          //如果发现是空点，那么就跳过，同时吧 beginPath 设置为false，代表一个path已经结束
+          idx += dir;
           beginPath = false;
+          continue;
         }
+
+        var x = point[0];
+        var y = point[1];
+
+        if (!beginPath) {
+          ctx.moveTo(x, y);
+          cpx0 = x;
+          cpy0 = y;
+        } else {
+          var dx = x - prevX;
+          var dy = y - prevY; //忽略太过微小的片段
+
+          if (dx * dx + dy * dy < 0.5) {
+            idx += dir;
+            continue;
+          }
+
+          if (smooth > 0) {
+            var nextIdx = idx + dir;
+            var nextPoint = points[nextIdx];
+            var nextX = nextPoint ? nextPoint[0] : null;
+            var nextY = nextPoint ? nextPoint[1] : null; //忽略重复的点
+
+            while (nextX === x && nextY === y && k < segLen) {
+              k++;
+              nextIdx += dir;
+              idx += dir;
+              nextPoint = points[nextIdx];
+              nextX = nextPoint ? nextPoint[0] : null;
+              nextY = nextPoint ? nextPoint[1] : null;
+              x = points[idx][0];
+              y = points[idx][1];
+              dx = x - prevX;
+              dy = y - prevY;
+            }
+
+            var tmpK = k + 1;
+            var ratioNextSeg = 0.5;
+            var vx = 0;
+            var vy = 0;
+            var nextCpx0 = void 0;
+            var nextCpy0 = void 0; // 最后一个点
+
+            if (tmpK >= segLen || !myMath.isValibPoint({
+              x: nextX,
+              y: nextY
+            })) {
+              cpx1 = x;
+              cpy1 = y;
+            } else {
+              vx = nextX - prevX;
+              vy = nextY - prevY;
+              var dx0 = x - prevX;
+              var dx1 = nextX - x;
+              var dy0 = y - prevY;
+              var dy1 = nextY - y;
+              var lenPrevSeg = void 0;
+              var lenNextSeg = void 0;
+
+              if (smoothMonotone === 'x') {
+                lenPrevSeg = Math.abs(dx0);
+                lenNextSeg = Math.abs(dx1);
+
+                var _dir = vx > 0 ? 1 : -1;
+
+                cpx1 = x - _dir * lenPrevSeg * smooth;
+                cpy1 = y;
+                nextCpx0 = x + _dir * lenNextSeg * smooth;
+                nextCpy0 = y;
+              } else if (smoothMonotone === 'y') {
+                lenPrevSeg = Math.abs(dy0);
+                lenNextSeg = Math.abs(dy1);
+
+                var _dir2 = vy > 0 ? 1 : -1;
+
+                cpx1 = x;
+                cpy1 = y - _dir2 * lenPrevSeg * smooth;
+                nextCpx0 = x;
+                nextCpy0 = y + _dir2 * lenNextSeg * smooth;
+              } else {
+                lenPrevSeg = Math.sqrt(dx0 * dx0 + dy0 * dy0);
+                lenNextSeg = Math.sqrt(dx1 * dx1 + dy1 * dy1); // seg长度的使用比例
+
+                ratioNextSeg = lenNextSeg / (lenNextSeg + lenPrevSeg);
+                cpx1 = x - vx * smooth * (1 - ratioNextSeg);
+                cpy1 = y - vy * smooth * (1 - ratioNextSeg); // 下一段的cp0
+
+                nextCpx0 = x + vx * smooth * ratioNextSeg;
+                nextCpy0 = y + vy * smooth * ratioNextSeg; // 点和下一个点之间的平滑约束。
+                // 平滑后避免过度极端。
+
+                nextCpx0 = mathMin(nextCpx0, mathMax(nextX, x));
+                nextCpy0 = mathMin(nextCpy0, mathMax(nextY, y));
+                nextCpx0 = mathMax(nextCpx0, mathMin(nextX, x));
+                nextCpy0 = mathMax(nextCpy0, mathMin(nextY, y)); // 根据下一段调整后的 cp0 重新回收 cp1。
+
+                vx = nextCpx0 - x;
+                vy = nextCpy0 - y;
+                cpx1 = x - vx * lenPrevSeg / lenNextSeg;
+                cpy1 = y - vy * lenPrevSeg / lenNextSeg; // 点和上一个点之间的平滑约束。
+                // 平滑后避免过度极端。
+
+                cpx1 = mathMin(cpx1, mathMax(prevX, x));
+                cpy1 = mathMin(cpy1, mathMax(prevY, y));
+                cpx1 = mathMax(cpx1, mathMin(prevX, x));
+                cpy1 = mathMax(cpy1, mathMin(prevY, y)); //再次調整下一個cp0。
+
+                vx = x - cpx1;
+                vy = y - cpy1;
+                nextCpx0 = x + vx * lenNextSeg / lenPrevSeg;
+                nextCpy0 = y + vy * lenNextSeg / lenPrevSeg;
+              }
+            }
+
+            ctx.bezierCurveTo(cpx0, cpy0, cpx1, cpy1, x, y);
+            cpx0 = nextCpx0;
+            cpy0 = nextCpy0;
+          } else {
+            ctx.lineTo(x, y);
+          }
+        }
+
+        prevX = x;
+        prevY = y;
+        idx += dir;
+        beginPath = true;
       }
 
-      return this;
+      return k;
     }
   }]);
 
@@ -7008,6 +7136,7 @@ var Circle$1 = /*#__PURE__*/function (_Shape) {
     value: function watch(name, value, preValue) {
       if (name == "r") {
         this.graphics.clear();
+        this.draw(this.graphics);
       }
     }
   }, {
@@ -7065,6 +7194,7 @@ var Path = /*#__PURE__*/function (_Shape) {
       if (name == "path") {
         //如果path有变动，需要自动计算新的pointList
         this.graphics.clear();
+        this.draw(this.graphics);
       }
     }
   }, {
@@ -7473,6 +7603,7 @@ var Ellipse$1 = /*#__PURE__*/function (_Shape) {
     value: function watch(name, value, preValue) {
       if (name == "hr" || name == "vr") {
         this.graphics.clear();
+        this.draw(this.graphics);
       }
     }
   }, {
@@ -7527,6 +7658,7 @@ var Polygon$1 = /*#__PURE__*/function (_Shape) {
       //调用parent的setGraphics
       if (name == "pointList" || name == "smooth" || name == "lineType") {
         this.graphics.clear();
+        this.draw(this.graphics);
       }
     }
   }, {
@@ -7635,6 +7767,7 @@ var Line = /*#__PURE__*/function (_Shape) {
       //并不清楚是start.x 还是end.x， 当然，这并不重要
       if (name == "x" || name == "y") {
         this.graphics.clear();
+        this.draw(this.graphics);
       }
     }
   }, {
@@ -7678,6 +7811,7 @@ var Rect = /*#__PURE__*/function (_Shape) {
     value: function watch(name, value, preValue) {
       if (name == "width" || name == "height" || name == "radius") {
         this.graphics.clear();
+        this.draw(this.graphics);
       }
     }
     /**
@@ -7777,6 +7911,7 @@ var Sector = /*#__PURE__*/function (_Shape) {
         this.isRing = false; //是否为一个圆环，这里也要开始初始化一下
 
         this.graphics.clear();
+        this.draw(this.graphics);
       }
     }
   }, {
@@ -7978,6 +8113,7 @@ var Diamond = /*#__PURE__*/function (_Shape) {
       //并不清楚是start.x 还是end.x， 当然，这并不重要
       if (['includedAngle'].indexOf(name) > -1) {
         this.graphics.clear();
+        this.draw(this.graphics);
       }
     }
   }, {
@@ -8006,7 +8142,7 @@ var Diamond = /*#__PURE__*/function (_Shape) {
 }(Shape);
 
 var Canvax = {
-  version: "2.0.81",
+  version: "2.0.84",
   _: _,
   $: $,
   event: event,
@@ -8024,6 +8160,7 @@ Canvax.Display = {
 };
 Canvax.Shapes = {
   BrokenLine: BrokenLine,
+  //BrokenLineOld: BrokenLineOld,
   Circle: Circle$1,
   Droplet: Droplet,
   Ellipse: Ellipse$1,
@@ -8076,6 +8213,7 @@ var _default = {
       var codeWithoutVariables = code.slice(0, range[0]) + code.slice(range[1]);
       return this._eval(codeWithoutVariables, 'options', 'variables', variables);
     } catch (e) {
+      console.log('parse error');
       return {};
     }
   }
@@ -8138,7 +8276,7 @@ var components = {
   */
 };
 var _default = {
-  chartxVersion: '1.1.97',
+  chartxVersion: '1.1.98',
   create: function create(el, _data, _opt) {
     var chart = null;
     var me = this;
@@ -9011,7 +9149,6 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.getDefaultProps = getDefaultProps;
 exports.getDisMinATArr = getDisMinATArr;
-exports.getPath = getPath;
 
 
 
@@ -9028,56 +9165,6 @@ function getDisMinATArr($n, $arr) {
   }
 
   return index;
-}
-/**
-* 获取一个path路径
-* @param  {[Array]} $arr    [数组]
-* @return {[String]}        [path字符串]
-*/
-
-
-function getPath($arr) {
-  var M = 'M',
-      L = 'L',
-      Z = 'z';
-  var s = '';
-  var start = {
-    x: 0,
-    y: 0
-  };
-
-  if (Canvax._.isArray($arr[0])) {
-    start.x = $arr[0][0];
-    start.y = $arr[0][1];
-    s = M + $arr[0][0] + ' ' + $arr[0][1];
-  } else {
-    start = $arr[0];
-    s = M + $arr[0].x + ' ' + $arr[0].y;
-  }
-
-  for (var a = 1, al = $arr.length; a < al; a++) {
-    var x = 0,
-        y = 0,
-        item = $arr[a];
-
-    if (Canvax._.isArray(item)) {
-      x = item[0];
-      y = item[1];
-    } else {
-      x = item.x;
-      y = item.y;
-    } //s += ' ' + L + x + ' ' + y
-
-
-    if (x == start.x && y == start.y) {
-      s += ' ' + Z;
-    } else {
-      s += ' ' + L + x + ' ' + y;
-    }
-  } // s += ' ' + Z
-
-
-  return s;
 }
 
 function getDefaultProps(dProps) {
@@ -9106,7 +9193,6 @@ function getDefaultProps(dProps) {
 unwrapExports(tools);
 var tools_1 = tools.getDefaultProps;
 var tools_2 = tools.getDisMinATArr;
-var tools_3 = tools.getPath;
 
 var component = createCommonjsModule(function (module, exports) {
 
@@ -18885,19 +18971,10 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
         y: me.y,
         strokeStyle: strokeStyle,
         smooth: me.line.smooth,
-        curvature: me.line.curvature,
         lineType: me._getProp(me.line.lineType),
         lineDash: me.line.lineDash,
         //TODO: 不能用_getProp
         lineJoin: 'bevel',
-        smoothFilter: function smoothFilter(rp) {
-          //smooth为true的话，折线图需要对折线做一些纠正，不能超过底部
-          if (rp[1] > 0) {
-            rp[1] = 0;
-          } else if (Math.abs(rp[1]) > me.h) {
-            rp[1] = -me.h;
-          }
-        },
         lineCap: "round"
       };
 
@@ -18923,6 +19000,8 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
       }
       me.lineSprite.addChild(bline);
       me._line = bline;
+      debugger;
+      window['_line'] = me._line;
 
       if (me.area.enabled) {
         if (this._bottomField) {
@@ -19421,87 +19500,58 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
   }, {
     key: "_getFillPath",
     value: function _getFillPath(line, bottomLine) {
-      //填充
-      var pointList = _.clone(line.context.pointList);
-
-      var bottomPointList = bottomLine ? _.clone(bottomLine.context.pointList) : [];
-      var path = "";
+      var path = '';
+      var M = 'M',
+          L = 'L',
+          Z = 'z';
       var originPos = -this._yAxis.originPos;
-      var _currPath = null;
+      var bottomGraphicsData = bottomLine ? bottomLine.graphics.graphicsData : [];
+      line.graphics.graphicsData.forEach(function (graphicsData, gInd) {
+        var points = [].concat(graphicsData.shape.points);
 
-      _.each(pointList, function (point, i) {
-        if (_.isNumber(point[1])) {
-          if (_currPath === null) {
-            _currPath = [];
+        if (points.length > 1) {
+          if (bottomGraphicsData.length) {
+            var bottomGraphicsDataGroup = bottomGraphicsData[gInd] || bottomGraphicsData.slice(-1)[0];
+            var bpoints = bottomGraphicsDataGroup.shape.points;
+
+            for (var _i2 = 0, l = bpoints.length / 2; _i2 < l; _i2++) {
+              points.push(bpoints[(l - _i2 - 1) * 2]);
+              points.push(bpoints[(l - _i2 - 1) * 2 + 1]);
+            }
+
+            points = points.concat([points[0], points[1]]);
+          } else {
+            points = points.concat([points[points.length - 2], originPos, points[0], originPos, points[0], points[1]]);
           }
+          var pointLen = points.length / 2;
 
-          _currPath.push(point);
-        } else {
-          // not a number
-          if (_currPath && _currPath.length) {
-            getOnePath();
+          for (var i = 0; i < pointLen; i++) {
+            var x = points[i * 2];
+            var y = points[i * 2 + 1];
+
+            if (!i) {
+              path += M + x + ' ' + y;
+            } else {
+              path += L + x + ' ' + y;
+
+              if (i == pointLen - 1) {
+                path += Z;
+              }
+            }
           }
-        }
-
-        if (i == pointList.length - 1 && _.isNumber(point[1])) {
-          getOnePath();
         }
       });
-
-      function getOnePath() {
-        var _first = _currPath[0];
-        var _firstIndex = null;
-        var _last = _currPath[_currPath.length - 1];
-        var _lastIndex = null;
-
-        if (bottomPointList.length) {
-          for (var _i2 = 0, l = bottomPointList.length; _i2 < l; _i2++) {
-            var item = bottomPointList[_i2];
-
-            if (_firstIndex != null && _lastIndex != null) {
-              break;
-            }
-
-            if (_firstIndex == null && _first[0] == item[0]) {
-              _firstIndex = _i2;
-            }
-
-            if (_lastIndex == null && _last[0] == item[0]) {
-              _lastIndex = _i2;
-            }
-          }
-
-          var i = 0;
-
-          while (i <= _lastIndex - _firstIndex) {
-            _currPath.push(bottomPointList[_lastIndex - i]);
-
-            i++;
-          }
-
-          _currPath.push([_first[0], _first[1]]);
-        } else {
-          _currPath.push([_last[0], originPos], [_first[0], originPos], [_first[0], _first[1]]);
-        }
-
-        path += (0, tools.getPath)(_currPath);
-        _currPath = null;
-      }
-
       return path;
     } //根据x方向的 val来 获取对应的node， 这个node可能刚好是一个node， 也可能两个node中间的某个位置
 
   }, {
     key: "getNodeInfoOfX",
     value: function getNodeInfoOfX(x) {
-      var me = this;
-      var nodeInfo;
-
+      //现在从data中查找0.5px间距内的值，有的话返回
       for (var i = 0, l = this.data.length; i < l; i++) {
-        if (this.data[i].value !== null && Math.abs(this.data[i].x - x) <= 1) {
-          //左右相差不到1px的，都算
-          nodeInfo = this.data[i];
-          return nodeInfo;
+        if (this.data[i].value !== null && Math.abs(this.data[i].x - x) <= 0.5) {
+          //左右相差不到0.5px的，都算
+          return this.data[i];
         }
       }
 
@@ -19517,39 +19567,58 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
       var point;
 
       var search = function search(points) {
-        if (x < points[0][0] || x > points.slice(-1)[0][0]) {
+        //points 是一维的数据,至少一个点有两个数据
+        if (points.length < 2) return;
+        var pointLen = points.length / 2;
+
+        if (x < points[0] || x > points[(pointLen - 1) * 2]) {
+          //x<points[0][0] || x>points.slice(-1)[0][0]
+          //x不在该points区间，忽略
           return;
         }
-        var midInd = parseInt(points.length / 2);
+        var midInd = parseInt(pointLen / 2);
+        var midNextInd = midInd + 1;
+        var midPreInd = midInd - 1;
+        var midX = points[midInd * 2];
+        var midY = points[midInd * 2 + 1];
 
-        if (Math.abs(points[midInd][0] - x) <= 1) {
+        if (Math.abs(midX - x) <= 0.5) {
+          //假如中间点的x和查找的x相差0.5以内，就已该midX为准
           point = {
-            x: points[midInd][0],
-            y: points[midInd][1]
+            x: midX,
+            y: midY
           };
           return;
         }
         var _pl = [];
 
-        if (x > points[midInd][0]) {
-          if (x < points[midInd + 1][0]) {
-            point = getPointFromXInLine(x, [points[midInd], points[midInd + 1]]);
+        if (x > midX) {
+          if (x < points[midNextInd * 2]) {
+            //大于midX但是小于下一个点
+            point = getPointFromXInLine(x, [[midX, midY], [points[midNextInd * 2], points[midNextInd * 2 + 1]]]);
             return;
           } else {
-            _pl = points.slice(midInd + 1);
+            _pl = points.slice(midNextInd * 2);
           }
         } else {
-          if (x > points[midInd - 1][0]) {
-            point = getPointFromXInLine(x, [points[midInd - 1], points[midInd]]);
+          if (x > points[midPreInd * 2]) {
+            point = getPointFromXInLine(x, [[points[midPreInd * 2], points[midPreInd * 2 + 1]], [midX, midY]]);
             return;
           } else {
-            _pl = points.slice(0, midInd);
+            _pl = points.slice(0, midInd * 2);
           }
         }
         search(_pl);
       };
 
-      this._line && search(this._line.context.pointList);
+      if (this._line) {
+        var lineGraphsData = this._line.graphics.graphicsData;
+        lineGraphsData.forEach(function (graphsData) {
+          if (!point) {
+            search(graphsData.shape.points);
+          }
+        });
+      }
 
       if (!point || point.y == undefined) {
         return null;
@@ -19557,16 +19626,16 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
 
       var node = {
         type: "line",
-        iGroup: me.iGroup,
+        iGroup: this.iGroup,
         iNode: -1,
         //并非data中的数据，而是计算出来的数据
-        field: me.field,
+        field: this.field,
         value: this._yAxis.getValOfPos(-point.y),
         x: point.x,
         y: point.y,
         rowData: null,
         //非data中的数据，没有rowData
-        color: me._getProp(me.node.strokeStyle) || me._getLineStrokeStyle()
+        color: this._getProp(this.node.strokeStyle) || this._getLineStrokeStyle()
       };
       return node;
     }
@@ -19691,10 +19760,6 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
             smooth: {
               detail: '是否平滑处理',
               "default": true
-            },
-            curvature: {
-              detail: '折线smooth为true的时候，配置的曲率，默认 0.25',
-              "default": undefined
             },
             shadowOffsetX: {
               detail: '折线的X方向阴影偏移量',
@@ -28383,6 +28448,7 @@ function scaleSolution(solution, width, height, padding) {
       yRange = bounds.yRange;
 
   if (xRange.max == xRange.min || yRange.max == yRange.min) {
+    console.log("not scaling solution: zero size detected");
     return solution;
   }
 
@@ -29041,7 +29107,9 @@ function computeTextCentres(circles, areas) {
     var centre = computeTextCentre(interior, exterior);
     ret[area] = centre;
 
-    if (centre.disjoint && areas[i].size > 0) ;
+    if (centre.disjoint && areas[i].size > 0) {
+      console.log("WARNING: area " + area + " not represented on screen");
+    }
   }
 
   return ret;
@@ -31463,6 +31531,7 @@ function jsonToArrayForRelation(data, options, _childrenField) {
   var label = options.node && options.node.content && options.node.content.field;
 
   if (!checkDataIsJson(data, key, childrenKey)) {
+    console.error('该数据不能正确绘制，请提供数组对象形式的数据！');
     return result;
   }
   var childrens = [];
@@ -35293,7 +35362,9 @@ var _typeof2 = interopRequireDefault(_typeof_1$1);
 
         try {
           return fn();
-        } finally {}
+        } finally {
+          console.log(name + " time: " + (_.now() - start) + "ms");
+        }
       }
 
       function notime(name, fn) {
@@ -45077,6 +45148,8 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
           }
 
           if (e.type == "wheel") {
+            console.log(_deltaY, e.deltaY);
+
             if (Math.abs(e.deltaY) > Math.abs(_deltaY)) {
               _deltaY = e.deltaY;
             }
@@ -45479,6 +45552,7 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
       var me = this;
 
       _.each(this.data.edges, function (edge) {
+        console.log(edge.points);
         var key = edge.key.join('_');
 
         if (me.line.isTree && edge.points.length == 3) {
@@ -49970,6 +50044,7 @@ var Map = /*#__PURE__*/function (_GraphsBase) {
       this._setNodeStyle(_path, 'select');
 
       nodeData.selected = true;
+      console.log("select:true");
     }
   }, {
     key: "unselectAt",
@@ -49983,6 +50058,7 @@ var Map = /*#__PURE__*/function (_GraphsBase) {
       this._setNodeStyle(_path);
 
       geoGraph.selected = false;
+      console.log("select:false");
 
       if (geoGraph.focused) {
         this.focusAt(adcode);
@@ -52703,6 +52779,7 @@ var Tips = /*#__PURE__*/function (_Component) {
   (0, _createClass2["default"])(Tips, [{
     key: "show",
     value: function show(e) {
+      console.log('tips show');
       if (!this.enabled) return;
 
       if (e.eventInfo) {
@@ -52740,6 +52817,7 @@ var Tips = /*#__PURE__*/function (_Component) {
   }, {
     key: "move",
     value: function move(e) {
+      console.log('tips move');
       if (!this.enabled) return;
 
       if (e.eventInfo) {
@@ -52762,6 +52840,8 @@ var Tips = /*#__PURE__*/function (_Component) {
   }, {
     key: "hide",
     value: function hide(e) {
+      console.log('tips hide');
+
       this._hide(e);
 
       this.onhide.apply(this, [e]);
@@ -54631,7 +54711,7 @@ var markCloumn = /*#__PURE__*/function (_Component) {
 
         if (me.line.endY == 'auto') {
           _.each(me.nodes, function (node) {
-            y = Math.min(node.y);
+            y = Math.min(node.y, y);
           });
         }
         lineOpt.end.y = y;
@@ -56349,6 +56429,7 @@ var lineMarkPoint = /*#__PURE__*/function (_Component) {
       var lineLength = !this.line.enabled ? 3 : this.line.lineLength;
       var lineDis = this.line.lineDis; //line到node的距离
 
+      debugger;
       var position = "online";
 
       if (this.position == 'auto') {
@@ -56586,7 +56667,7 @@ if (projectTheme && projectTheme.length) {
 }
 
 var chartx = {
-  version: '1.1.97',
+  version: '1.1.98',
   options: {}
 };
 
