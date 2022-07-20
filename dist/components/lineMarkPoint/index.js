@@ -200,7 +200,6 @@ var lineMarkPoint = /*#__PURE__*/function (_Component) {
       var lineLength = !this.line.enabled ? 3 : this.line.lineLength;
       var lineDis = this.line.lineDis; //line到node的距离
 
-      debugger;
       var position = "online";
 
       if (this.position == 'auto') {

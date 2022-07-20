@@ -8211,7 +8211,6 @@ var _default = {
       var codeWithoutVariables = code.slice(0, range[0]) + code.slice(range[1]);
       return this._eval(codeWithoutVariables, 'options', 'variables', variables);
     } catch (e) {
-      console.log('parse error');
       return {};
     }
   }
@@ -8274,7 +8273,7 @@ var components = {
   */
 };
 var _default = {
-  chartxVersion: '1.1.98',
+  chartxVersion: '1.1.99',
   create: function create(el, _data, _opt) {
     var chart = null;
     var me = this;
@@ -18998,7 +18997,6 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
       }
       me.lineSprite.addChild(bline);
       me._line = bline;
-      debugger;
       window['_line'] = me._line;
 
       if (me.area.enabled) {
@@ -28446,7 +28444,6 @@ function scaleSolution(solution, width, height, padding) {
       yRange = bounds.yRange;
 
   if (xRange.max == xRange.min || yRange.max == yRange.min) {
-    console.log("not scaling solution: zero size detected");
     return solution;
   }
 
@@ -29105,9 +29102,7 @@ function computeTextCentres(circles, areas) {
     var centre = computeTextCentre(interior, exterior);
     ret[area] = centre;
 
-    if (centre.disjoint && areas[i].size > 0) {
-      console.log("WARNING: area " + area + " not represented on screen");
-    }
+    if (centre.disjoint && areas[i].size > 0) ;
   }
 
   return ret;
@@ -31529,7 +31524,6 @@ function jsonToArrayForRelation(data, options, _childrenField) {
   var label = options.node && options.node.content && options.node.content.field;
 
   if (!checkDataIsJson(data, key, childrenKey)) {
-    console.error('该数据不能正确绘制，请提供数组对象形式的数据！');
     return result;
   }
   var childrens = [];
@@ -35360,9 +35354,7 @@ var _typeof2 = interopRequireDefault(_typeof_1$1);
 
         try {
           return fn();
-        } finally {
-          console.log(name + " time: " + (_.now() - start) + "ms");
-        }
+        } finally {}
       }
 
       function notime(name, fn) {
@@ -45146,8 +45138,6 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
           }
 
           if (e.type == "wheel") {
-            console.log(_deltaY, e.deltaY);
-
             if (Math.abs(e.deltaY) > Math.abs(_deltaY)) {
               _deltaY = e.deltaY;
             }
@@ -45550,7 +45540,6 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
       var me = this;
 
       _.each(this.data.edges, function (edge) {
-        console.log(edge.points);
         var key = edge.key.join('_');
 
         if (me.line.isTree && edge.points.length == 3) {
@@ -50042,7 +50031,6 @@ var Map = /*#__PURE__*/function (_GraphsBase) {
       this._setNodeStyle(_path, 'select');
 
       nodeData.selected = true;
-      console.log("select:true");
     }
   }, {
     key: "unselectAt",
@@ -50056,7 +50044,6 @@ var Map = /*#__PURE__*/function (_GraphsBase) {
       this._setNodeStyle(_path);
 
       geoGraph.selected = false;
-      console.log("select:false");
 
       if (geoGraph.focused) {
         this.focusAt(adcode);
@@ -52777,7 +52764,6 @@ var Tips = /*#__PURE__*/function (_Component) {
   (0, _createClass2["default"])(Tips, [{
     key: "show",
     value: function show(e) {
-      console.log('tips show');
       if (!this.enabled) return;
 
       if (e.eventInfo) {
@@ -52815,7 +52801,6 @@ var Tips = /*#__PURE__*/function (_Component) {
   }, {
     key: "move",
     value: function move(e) {
-      console.log('tips move');
       if (!this.enabled) return;
 
       if (e.eventInfo) {
@@ -52838,8 +52823,6 @@ var Tips = /*#__PURE__*/function (_Component) {
   }, {
     key: "hide",
     value: function hide(e) {
-      console.log('tips hide');
-
       this._hide(e);
 
       this.onhide.apply(this, [e]);
@@ -56427,7 +56410,6 @@ var lineMarkPoint = /*#__PURE__*/function (_Component) {
       var lineLength = !this.line.enabled ? 3 : this.line.lineLength;
       var lineDis = this.line.lineDis; //line到node的距离
 
-      debugger;
       var position = "online";
 
       if (this.position == 'auto') {
@@ -56665,7 +56647,7 @@ if (projectTheme && projectTheme.length) {
 }
 
 var chartx = {
-  version: '1.1.98',
+  version: '1.1.99',
   options: {}
 };
 

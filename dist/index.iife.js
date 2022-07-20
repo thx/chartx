@@ -8214,7 +8214,6 @@ var chartx = (function () {
 	      var codeWithoutVariables = code.slice(0, range[0]) + code.slice(range[1]);
 	      return this._eval(codeWithoutVariables, 'options', 'variables', variables);
 	    } catch (e) {
-	      console.log('parse error');
 	      return {};
 	    }
 	  }
@@ -8277,7 +8276,7 @@ var chartx = (function () {
 	  */
 	};
 	var _default = {
-	  chartxVersion: '1.1.98',
+	  chartxVersion: '1.1.99',
 	  create: function create(el, _data, _opt) {
 	    var chart = null;
 	    var me = this;
@@ -19001,7 +19000,6 @@ var chartx = (function () {
 	      }
 	      me.lineSprite.addChild(bline);
 	      me._line = bline;
-	      debugger;
 	      window['_line'] = me._line;
 
 	      if (me.area.enabled) {
@@ -28449,7 +28447,6 @@ var chartx = (function () {
 	      yRange = bounds.yRange;
 
 	  if (xRange.max == xRange.min || yRange.max == yRange.min) {
-	    console.log("not scaling solution: zero size detected");
 	    return solution;
 	  }
 
@@ -29108,9 +29105,7 @@ var chartx = (function () {
 	    var centre = computeTextCentre(interior, exterior);
 	    ret[area] = centre;
 
-	    if (centre.disjoint && areas[i].size > 0) {
-	      console.log("WARNING: area " + area + " not represented on screen");
-	    }
+	    if (centre.disjoint && areas[i].size > 0) ;
 	  }
 
 	  return ret;
@@ -31532,7 +31527,6 @@ var chartx = (function () {
 	  var label = options.node && options.node.content && options.node.content.field;
 
 	  if (!checkDataIsJson(data, key, childrenKey)) {
-	    console.error('该数据不能正确绘制，请提供数组对象形式的数据！');
 	    return result;
 	  }
 	  var childrens = [];
@@ -35363,9 +35357,7 @@ var chartx = (function () {
 
 	        try {
 	          return fn();
-	        } finally {
-	          console.log(name + " time: " + (_.now() - start) + "ms");
-	        }
+	        } finally {}
 	      }
 
 	      function notime(name, fn) {
@@ -45149,8 +45141,6 @@ var chartx = (function () {
 	          }
 
 	          if (e.type == "wheel") {
-	            console.log(_deltaY, e.deltaY);
-
 	            if (Math.abs(e.deltaY) > Math.abs(_deltaY)) {
 	              _deltaY = e.deltaY;
 	            }
@@ -45553,7 +45543,6 @@ var chartx = (function () {
 	      var me = this;
 
 	      _.each(this.data.edges, function (edge) {
-	        console.log(edge.points);
 	        var key = edge.key.join('_');
 
 	        if (me.line.isTree && edge.points.length == 3) {
@@ -50045,7 +50034,6 @@ var chartx = (function () {
 	      this._setNodeStyle(_path, 'select');
 
 	      nodeData.selected = true;
-	      console.log("select:true");
 	    }
 	  }, {
 	    key: "unselectAt",
@@ -50059,7 +50047,6 @@ var chartx = (function () {
 	      this._setNodeStyle(_path);
 
 	      geoGraph.selected = false;
-	      console.log("select:false");
 
 	      if (geoGraph.focused) {
 	        this.focusAt(adcode);
@@ -52780,7 +52767,6 @@ var chartx = (function () {
 	  (0, _createClass2["default"])(Tips, [{
 	    key: "show",
 	    value: function show(e) {
-	      console.log('tips show');
 	      if (!this.enabled) return;
 
 	      if (e.eventInfo) {
@@ -52818,7 +52804,6 @@ var chartx = (function () {
 	  }, {
 	    key: "move",
 	    value: function move(e) {
-	      console.log('tips move');
 	      if (!this.enabled) return;
 
 	      if (e.eventInfo) {
@@ -52841,8 +52826,6 @@ var chartx = (function () {
 	  }, {
 	    key: "hide",
 	    value: function hide(e) {
-	      console.log('tips hide');
-
 	      this._hide(e);
 
 	      this.onhide.apply(this, [e]);
@@ -56430,7 +56413,6 @@ var chartx = (function () {
 	      var lineLength = !this.line.enabled ? 3 : this.line.lineLength;
 	      var lineDis = this.line.lineDis; //line到node的距离
 
-	      debugger;
 	      var position = "online";
 
 	      if (this.position == 'auto') {
@@ -56668,7 +56650,7 @@ var chartx = (function () {
 	}
 
 	var chartx = {
-	  version: '1.1.98',
+	  version: '1.1.99',
 	  options: {}
 	};
 
