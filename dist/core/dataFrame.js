@@ -110,8 +110,13 @@ function _default(dataOrg, opt) {
 
   };
 
-  function _initHandle(dataOrg) {
-    //数据做一份拷贝，避免污染源数据
+  function _init(dataOrg) {
+    //数据的最外面一定是个数组
+    if (!Array.isArray(dataOrg)) {
+      dataOrg = [dataOrg];
+    } //数据做一份拷贝，避免污染源数据
+
+
     dataOrg = JSON.parse(JSON.stringify(dataOrg, function (k, v) {
       if (v === undefined) {
         return null;
@@ -179,7 +184,7 @@ function _default(dataOrg, opt) {
 
       var preLen = dataFrame.length; //设置数据之前的数据长度
 
-      _initHandle(dataOrg);
+      _init(dataOrg);
 
       dataFrame.data = _getDataAndSetDataLen(); //如果之前是有数据的情况，一些当前状态恢复到dataFrame里去 begin
 
@@ -434,7 +439,7 @@ function _default(dataOrg, opt) {
     return list;
   }
 
-  _initHandle(dataOrg);
+  _init(dataOrg);
 
   dataFrame.data = _getDataAndSetDataLen();
   return dataFrame;

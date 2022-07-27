@@ -25,14 +25,15 @@ import "./components/graphs/sankey/index"
 import "./components/graphs/progress/index"
 import "./components/graphs/relation/index"
 import "./components/graphs/tree/index"
+import "./components/graphs/compacttree/index"
 import "./components/graphs/force/index"
 import "./components/graphs/map/index"
  
 
-//-----------------------------------------------
-//布局算法
-import "./layout/dagre/index"
-import "./layout/tree/index"
+// //-----------------------------------------------
+// //布局算法
+// import "./layout/dagre/index"
+// import "./layout/tree/index"
 
 //-----------------------------------------------
 //components

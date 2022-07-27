@@ -86,7 +86,12 @@ export default function( dataOrg, opt ){
         filters       : {}    //数据过滤器，在range的基础上
     };
 
-    function _initHandle( dataOrg ){
+    function _init( dataOrg ){
+
+        //数据的最外面一定是个数组
+        if( !Array.isArray( dataOrg ) ){
+            dataOrg = [ dataOrg ]
+        }
         
         //数据做一份拷贝，避免污染源数据
         dataOrg = JSON.parse( JSON.stringify( dataOrg , function(k,v) {
@@ -147,7 +152,7 @@ export default function( dataOrg, opt ){
             let preRange = _.extend( true, {}, dataFrame.range );
             let preLen = dataFrame.length; //设置数据之前的数据长度
 
-            _initHandle( dataOrg );
+            _init( dataOrg );
             dataFrame.data = _getDataAndSetDataLen();
 
             //如果之前是有数据的情况，一些当前状态恢复到dataFrame里去 begin
@@ -345,7 +350,7 @@ export default function( dataOrg, opt ){
         return list;
     }
 
-    _initHandle( dataOrg );
+    _init( dataOrg );
     dataFrame.data = _getDataAndSetDataLen();
 
     return dataFrame;

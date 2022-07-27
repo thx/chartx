@@ -7,7 +7,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports["default"] = void 0;
 
-var _toConsumableArray2 = _interopRequireDefault(require("@babel/runtime/helpers/toConsumableArray"));
+var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
 
 var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
@@ -25,17 +25,13 @@ var _canvax = _interopRequireDefault(require("canvax"));
 
 var _index = _interopRequireDefault(require("../index"));
 
-var _global = _interopRequireDefault(require("../../../global"));
-
-var _dataFrame = _interopRequireDefault(require("../../../core/dataFrame"));
-
 var _tools = require("../../../utils/tools");
-
-var _data2 = require("./data");
 
 var _zoom = _interopRequireDefault(require("../../../utils/zoom"));
 
-var _index2 = _interopRequireDefault(require("../../../layout/dagre/index"));
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { (0, _defineProperty2["default"])(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
 
 function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
 
@@ -45,60 +41,35 @@ var _ = _canvax["default"]._,
     event = _canvax["default"].event;
 var Rect = _canvax["default"].Shapes.Rect;
 var Diamond = _canvax["default"].Shapes.Diamond;
+var Line = _canvax["default"].Shapes.Line;
 var Path = _canvax["default"].Shapes.Path;
 var BrokenLine = _canvax["default"].Shapes.BrokenLine;
 var Circle = _canvax["default"].Shapes.Circle;
 var Arrow = _canvax["default"].Shapes.Arrow;
+var collapseIconWidth = 22;
+var typeIconWidth = 20;
 /**
  * 关系图中 包括了  配置，数据，和布局数据，
  * 默认用配置和数据可以完成绘图， 但是如果有布局数据，就绘图玩额外调用一次绘图，把布局数据传入修正布局效果
+ * 
+ * relation 也好，  tree也好， 最后都要转换成 nodes edges
+ * 
  */
 
-var Relation = /*#__PURE__*/function (_GraphsBase) {
-  (0, _inherits2["default"])(Relation, _GraphsBase);
+var RelationBase = /*#__PURE__*/function (_GraphsBase) {
+  (0, _inherits2["default"])(RelationBase, _GraphsBase);
 
-  var _super = _createSuper(Relation);
+  var _super = _createSuper(RelationBase);
 
-  function Relation(opt, app) {
+  function RelationBase(opt, app) {
     var _this;
 
-    (0, _classCallCheck2["default"])(this, Relation);
+    (0, _classCallCheck2["default"])(this, RelationBase);
     _this = _super.call(this, opt, app);
     _this.type = "relation";
 
-    _.extend(true, (0, _assertThisInitialized2["default"])(_this), (0, _tools.getDefaultProps)(Relation.defaultProps()), opt);
+    _.extend(true, (0, _assertThisInitialized2["default"])(_this), (0, _tools.getDefaultProps)(RelationBase.defaultProps()), opt);
 
-    if (_this.layout === 'dagre') {
-      var dagreOpts = {
-        graph: {
-          rankdir: 'TB',
-          nodesep: 10,
-          ranksep: 10,
-          edgesep: 10,
-          acyclicer: "greedy"
-        },
-        node: {},
-        edge: {
-          labelpos: 'c' //labeloffset: 0
-
-        }
-      };
-
-      _.extend(true, dagreOpts, _this.layoutOpts);
-
-      _.extend(true, _this.layoutOpts, dagreOpts);
-
-      if (!_this.rankdir) {
-        _this.rankdir = _this.layoutOpts.graph.rankdir;
-      } else {
-        //如果有设置this.randdir 则已经 ta 为准
-        _this.layoutOpts.graph.rankdir = _this.rankdir;
-      }
-
-      ;
-    }
-
-    ;
     _this.domContainer = app.canvax.domView;
     _this.induce = null;
 
@@ -107,7 +78,7 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
     return _this;
   }
 
-  (0, _createClass2["default"])(Relation, [{
+  (0, _createClass2["default"])(RelationBase, [{
     key: "init",
     value: function init() {
       this._initInduce();
@@ -142,6 +113,63 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
       this.graphsView.addChild(this.graphsSp);
       this.sprite.addChild(this.graphsView);
       this.zoom = new _zoom["default"]();
+    } //这个node是放在 nodes  和 edges 中的数据结构
+
+  }, {
+    key: "getDefNode",
+    value: function getDefNode() {
+      var opt = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+      var node = _objectSpread({
+        type: "relation",
+        //tree中会覆盖为tree
+        iNode: 0,
+        rowData: null,
+        key: "",
+        content: '',
+        ctype: 'canvas',
+        //下面三个属性在_setElementAndSize中设置
+        contentElement: null,
+        //外面传的layout数据可能没有element，widget的时候要检测下
+        width: null,
+        height: null,
+        //这个在layout的时候设置
+        x: null,
+        y: null,
+        shapeType: null,
+        focused: false,
+        selected: false
+      }, opt);
+
+      return node;
+    }
+  }, {
+    key: "checkNodeSizeForShapeType",
+    value: function checkNodeSizeForShapeType(node) {
+      //如果是菱形，还需要重新调整新的尺寸
+      if (node.shapeType == 'diamond') {
+        //因为node的尺寸前面计算出来的是矩形的尺寸，如果是菱形的话，这里就是指内接矩形的尺寸，
+        //需要换算成外接矩形的尺寸
+        var includedAngle = this.node.includedAngle / 2;
+        var includeRad = includedAngle * Math.PI / 180;
+        var width = node.width,
+            height = node.height;
+        node._innerBound = {
+          width: width,
+          height: height
+        };
+        var newWidthDiff = height / Math.tan(includeRad);
+        var newHeightDiff = width * Math.tan(includeRad); //在内接矩形基础上扩展出来的外界矩形
+
+        var newWidth = width + newWidthDiff;
+        var newHeight = height + newHeightDiff; //node上面记录的width 和 height 永远是内容的 高宽, 但是像 diamond 等， 布局的时候的bound是要计算一个新的
+        //布局的时候， 布局算法要优先取 layoutWidth  和  layoutHeight
+
+        node.width = newWidth;
+        node.height = newHeight;
+      }
+
+      ;
     }
   }, {
     key: "_initInduce",
@@ -255,74 +283,19 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
       });
     }
   }, {
-    key: "draw",
-    value: function draw(opt) {
-      var _this2 = this;
-
-      !opt && (opt = {});
-
-      _.extend(true, this, opt);
-
-      this._initData(opt.data).then(function (data) {
-        _this2.data = data;
-
-        _this2._layoutData();
-
-        _this2.widget();
-
-        _this2.induce.context.width = _this2.width;
-        _this2.induce.context.height = _this2.height;
-        _this2.sprite.context.x = parseInt(_this2.origin.x);
-        _this2.sprite.context.y = parseInt(_this2.origin.y);
-
-        var _offsetLeft = (_this2.width - _this2.data.size.width) / 2;
-
-        if (_offsetLeft < 0) {
-          _offsetLeft = 0;
-        }
-
-        ;
-
-        var _offsetTop = (_this2.height - _this2.data.size.height) / 2;
-
-        if (_offsetTop < 0) {
-          _offsetTop = 0;
-        }
-
-        ;
-        _this2.graphsSp.context.x = parseInt(_offsetLeft);
-        _this2.graphsSp.context.y = parseInt(_offsetTop);
-
-        _this2.fire("complete");
-      });
-    } //如果dataTrigger.origin 有传入， 则已经这个origin为参考点做重新布局
-    //TODO， 如果这个图的options中有配置 一个 符合 关系图的数据{nodes, edges, size}
-    //那么这个时候的resetData还不能满足，因为resetData的第一个个参数是dataFrame， 而options.data其实已经算是配置了，
-    //后面遇到这个情况再调整吧
-
-  }, {
-    key: "resetData",
-    value: function resetData(dataFrame, dataTrigger) {
-      var _this3 = this;
-
-      this._resetData(dataFrame, dataTrigger).then(function () {
-        _this3.fire("complete");
-      });
-    }
-  }, {
     key: "_resetData",
     value: function _resetData(data, dataTrigger) {
-      var _this4 = this;
+      var _this2 = this;
 
       var me = this;
       this._preData = this.data;
       return new Promise(function (resolve) {
-        _this4._initData(data).then(function (_data) {
-          _this4.data = _data;
+        _this2.initData(data, dataTrigger).then(function (_data) {
+          _this2.data = _data;
 
-          _this4._layoutData();
+          _this2.layoutData();
 
-          _.each(_this4._preData.nodes, function (preNode) {
+          _.each(_this2._preData.nodes, function (preNode) {
             var nodeData = _.find(me.data.nodes, function (node) {
               return preNode.key == node.key;
             });
@@ -330,13 +303,18 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
             if (!nodeData) {
               me._destroy(preNode);
             } else {
-              //如果找到了，要从前面
+              //如果找到了，要从前面 复制几个属性过来
               nodeData.focused = preNode.focused;
-              nodeData.selected = preNode.selected;
+              nodeData.selected = preNode.selected; //把原来的对象的 contentElement 搞过来， 就可以减少getChild的消耗
+
+              if (nodeData.ctype == preNode.ctype) {
+                //类型没变， 就可以用同一个 contentElement
+                nodeData.contentElement = preNode.contentElement;
+              }
             }
           });
 
-          _.each(_this4._preData.edges, function (preEdge) {
+          _.each(_this2._preData.edges, function (preEdge) {
             if (!_.find(me.data.edges, function (edge) {
               return preEdge.key.join('_') == edge.key.join('_');
             })) {
@@ -344,18 +322,18 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
             }
           });
 
-          _this4.widget();
+          _this2.widget();
 
           if (dataTrigger) {
             var origin = dataTrigger.origin || (dataTrigger.params || {}).origin; //兼容老的配置里面没有params，直接传origin的情况
             //钉住某个node为参考点（不移动)
 
             if (origin != undefined) {
-              var preOriginNode = _.find(_this4._preData.nodes, function (node) {
+              var preOriginNode = _.find(_this2._preData.nodes, function (node) {
                 return node.key == origin;
               });
 
-              var originNode = _.find(_this4.data.nodes, function (node) {
+              var originNode = _.find(_this2.data.nodes, function (node) {
                 return node.key == origin;
               });
 
@@ -365,9 +343,9 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
                   y: parseInt(preOriginNode.y) - parseInt(originNode.y)
                 };
 
-                var _this4$zoom$offset = _this4.zoom.offset(offsetPos),
-                    x = _this4$zoom$offset.x,
-                    y = _this4$zoom$offset.y;
+                var _this2$zoom$offset = _this2.zoom.offset(offsetPos),
+                    x = _this2$zoom$offset.x,
+                    y = _this2$zoom$offset.y;
 
                 me.graphsView.context.x = parseInt(x);
                 me.graphsView.context.y = parseInt(y);
@@ -386,256 +364,7 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
     }
   }, {
     key: "_destroy",
-    value: function _destroy(item) {
-      item.shapeElement && item.shapeElement.destroy();
-
-      if (item.contentElement.destroy) {
-        item.contentElement.destroy();
-      } else {
-        //否则就可定是个dom
-        this.domContainer.removeChild(item.contentElement);
-      }
-
-      ; //下面的几个是销毁edge上面的元素
-
-      item.pathElement && item.pathElement.destroy();
-      item.labelElement && item.labelElement.destroy();
-      item.arrowElement && item.arrowElement.destroy();
-      item.edgeIconElement && item.edgeIconElement.destroy();
-      item.edgeIconBack && item.edgeIconBack.destroy();
-    }
-  }, {
-    key: "_getDefNode",
-    value: function _getDefNode() {
-      var node = {
-        type: "relation",
-        iNode: 0,
-        rowData: null,
-        key: "",
-        content: '',
-        _contentInited: false,
-        ctype: 'canvas',
-        //下面三个属性在_setElementAndSize中设置
-        contentElement: null,
-        //外面传的layout数据可能没有element，widget的时候要检测下
-        width: null,
-        height: null,
-        //这个在layout的时候设置
-        x: null,
-        y: null,
-        shapeType: null,
-        //如果是edge，要填写这两节点
-        source: null,
-        target: null,
-        focused: false,
-        selected: false
-      };
-      return node;
-    } //$data如果用户设置了符合data的数据格式数据{nodes, edges, size}，那就直接返回
-
-  }, {
-    key: "_initData",
-    value: function _initData($data) {
-      var _this5 = this;
-
-      return new Promise(function (resolve) {
-        if ($data && $data.nodes && $data.edges) {
-          resolve($data);
-          return;
-        }
-
-        ;
-        var data = {
-          //{ type,key,content,ctype,width,height,x,y }
-          nodes: [],
-          //{ type,key[],content,ctype,width,height,x,y }
-          edges: [],
-          size: {
-            width: 0,
-            height: 0
-          }
-        };
-        var originData = _this5.app._data;
-
-        if ((0, _data2.checkDataIsJson)(originData, _this5.field, _this5.childrenField)) {
-          _this5.jsonData = (0, _data2.jsonToArrayForRelation)(originData, _this5, _this5.childrenField);
-          _this5.dataFrame = _this5.app.dataFrame = (0, _dataFrame["default"])(_this5.jsonData);
-        } else {
-          if (_this5.layout == "tree") {
-            //源数据就是图表标准数据，只需要转换成json的Children格式
-            //app.dataFrame.jsonOrg ==> [{name: key:} ...] 不是children的树结构
-            _this5.jsonData = (0, _data2.arrayToTreeJsonForRelation)(_this5.app.dataFrame.jsonOrg, _this5);
-          }
-
-          ;
-        }
-
-        ;
-
-        for (var i = 0; i < _this5.dataFrame.length; i++) {
-          var rowData = _this5.dataFrame.getRowDataAt(i);
-
-          var fields = _.flatten([(rowData[_this5.field] + "").split(",")]);
-
-          var content = _this5._getContent(rowData);
-
-          var node = _this5._getDefNode();
-
-          Object.assign(node, {
-            iNode: i,
-            rowData: rowData,
-            key: fields.length == 1 ? fields[0] : fields,
-            content: content,
-            ctype: _this5._checkHtml(content) ? 'html' : 'canvas'
-          });
-
-          if (fields.length == 1) {
-            //isNode
-            node.shapeType = _this5.getProp(_this5.node.shapeType, node);
-            Object.assign(node, _this5.layoutOpts.node);
-            data.nodes.push(node);
-          } else {
-            // isEdge
-            node.shapeType = _this5.getProp(_this5.line.shapeType, node);
-            Object.assign(node, _this5.layoutOpts.edge);
-            data.edges.push(node);
-          }
-
-          ;
-        }
-
-        ;
-
-        _this5._initAllDataSize(data).then(function (data) {
-          resolve(data);
-        });
-      });
-    }
-  }, {
-    key: "_initAllDataSize",
-    value: function _initAllDataSize(data) {
-      var _this6 = this;
-
-      return new Promise(function (resolve) {
-        var _nodeMap = {};
-        var initNum = 0;
-        data.nodes.concat(data.edges).forEach(function (node) {
-          _nodeMap[node.key] = node; //计算和设置node的尺寸
-
-          _this6._initContentAndGetSize(node).then(function (opt) {
-            _.extend(node, opt); //如果是菱形，还需要重新调整新的尺寸
-
-
-            if (node.shapeType == 'diamond') {
-              //因为node的尺寸前面计算出来的是矩形的尺寸，如果是菱形的话，这里就是指内接矩形的尺寸，
-              //需要换算成外接矩形的尺寸
-              var innerRect = {
-                //内接矩形
-                width: node.width,
-                height: node.height
-              };
-              var includedAngle = _this6.node.includedAngle / 2;
-              var includeRad = includedAngle * Math.PI / 180;
-              var newWidthDiff = innerRect.height / Math.tan(includeRad);
-              var newHeightDiff = innerRect.width * Math.tan(includeRad); //在内接矩形基础上扩展出来的外界矩形
-
-              var newWidth = innerRect.width + newWidthDiff;
-              var newHeight = innerRect.height + newHeightDiff; //把新的菱形的外界边界回写
-
-              node._innerRect = {
-                width: node.width,
-                height: node.height
-              };
-              node.width = newWidth;
-              node.height = newHeight;
-            }
-
-            ;
-            node._contentInited = true;
-            initNum++; //如果所有的node的size都初始化完毕
-
-            if (initNum == data.nodes.length + data.edges.length) {
-              //all is inited
-              //然后给edge填写source 和 target
-              _.each(data.edges, function (edge) {
-                var keys = edge.key;
-                edge.source = _nodeMap[keys[0]];
-                edge.target = _nodeMap[keys[1]];
-              });
-
-              resolve(data);
-            }
-
-            ;
-          });
-        });
-      });
-    }
-  }, {
-    key: "_layoutData",
-    value: function _layoutData() {
-      if (this.layout == "dagre") {
-        this._dagreLayout(this.data);
-      } else if (this.layout == "tree") {
-        this._treeLayout(this.data);
-      } else if (_.isFunction(this.layout)) {
-        //layout需要设置好data中nodes的xy， 以及edges的points，和 size的width，height
-        this.layout(this.data);
-      }
-
-      ;
-    }
-  }, {
-    key: "_dagreLayout",
-    value: function _dagreLayout(data) {
-      //https://github.com/dagrejs/dagre/wiki
-      var layout = _global["default"].layout.dagre || _index2["default"];
-      var g = new layout.graphlib.Graph();
-      g.setGraph(this.layoutOpts.graph);
-      g.setDefaultEdgeLabel(function () {
-        //其实我到现在都还没搞明白setDefaultEdgeLabel的作用
-        return {};
-      });
-
-      _.each(data.nodes, function (node) {
-        g.setNode(node.key, node);
-      });
-
-      _.each(data.edges, function (edge) {
-        //后面的参数直接把edge对象传入进去的话，setEdge会吧point 和 x y 等信息写回edge
-        g.setEdge.apply(g, (0, _toConsumableArray2["default"])(edge.key).concat([edge])); //g.setEdge(edge.key[0],edge.key[1]);
-      });
-
-      layout.layout(g);
-      data.size.width = g.graph().width;
-      data.size.height = g.graph().height; //this.g = g;
-
-      return data;
-    } //TODO: 待实现，目前其实用dagre可以直接实现tree，但是如果可以用更加轻便的tree也可以尝试下
-
-  }, {
-    key: "_treeLayout",
-    value: function _treeLayout() {// let tree = global.layout.tree().separation(function(a, b) {
-      //     //设置横向节点之间的间距
-      //     let totalWidth = a.width + b.width;
-      //     return (totalWidth/2) + 10;
-      // });
-      // let nodes = tree.nodes( this.jsonData[0] ).reverse();
-      // let links = tree.links(nodes);
-    }
-  }, {
-    key: "widget",
-    value: function widget() {
-      /*
-      me.g.edges().forEach( e => {
-          let edge = me.g.edge(e);
-          console.log( edge )
-      } );
-      */
-      this._drawEdges();
-
-      this._drawNodes();
-    }
+    value: function _destroy(item) {}
   }, {
     key: "_drawEdges",
     value: function _drawEdges() {
@@ -645,7 +374,7 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
         console.log(edge.points);
         var key = edge.key.join('_');
 
-        if (me.line.isTree && edge.points.length == 3) {
+        if ((me.line.isTree || edge.isTree) && edge.points.length == 3) {
           //严格树状图的话（三个点），就转化成4个点的，有两个拐点
           me._setTreePoints(edge);
         }
@@ -957,15 +686,6 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
       });
     }
   }, {
-    key: "_drawNodes",
-    value: function _drawNodes() {
-      var me = this;
-
-      _.each(this.data.nodes, function (node) {
-        me._drawNode(node);
-      });
-    }
-  }, {
     key: "_drawNode",
     value: function _drawNode(node) {
       var me = this;
@@ -1004,8 +724,10 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
         context = {
           x: parseInt(node.x),
           y: parseInt(node.y),
+          // x: parseInt(node.x) + parseInt(node.width / 2),
+          // y: parseInt(node.y) + parseInt(node.height / 2),
           cursor: cursor,
-          innerRect: node._innerRect,
+          innerRect: node._innerBound,
           lineWidth: lineWidth,
           fillStyle: fillStyle,
           strokeStyle: strokeStyle,
@@ -1017,6 +739,8 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
       }
 
       ;
+
+      if (node.shapeType == 'underLine') {}
 
       var _boxShape = me.nodesSp.getChildById(nodeId);
 
@@ -1103,8 +827,8 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
           node.contentElement.style.transformOrigin = "left top"; //修改为左上角为旋转中心点来和canvas同步
 
           if (node.shapeType == 'diamond') {
-            node.contentElement.style.left = -parseInt(node._innerRect.width / 2 * me.status.transform.scale) + "px";
-            node.contentElement.style.top = -parseInt(node._innerRect.height / 2 * me.status.transform.scale) + "px";
+            node.contentElement.style.left = -parseInt((node.width - node._innerBound.width) / 2 * me.status.transform.scale) + "px";
+            node.contentElement.style.top = -parseInt((node.height - node._innerBound.height) / 2 * me.status.transform.scale) + "px";
           }
 
           ;
@@ -1210,10 +934,10 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
   }, {
     key: "selectAll",
     value: function selectAll() {
-      var _this7 = this;
+      var _this3 = this;
 
       this.data.nodes.forEach(function (nodeData) {
-        _this7.selectAt(nodeData);
+        _this3.selectAt(nodeData);
       });
     }
   }, {
@@ -1234,10 +958,10 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
   }, {
     key: "unselectAll",
     value: function unselectAll() {
-      var _this8 = this;
+      var _this4 = this;
 
       this.data.nodes.forEach(function (nodeData) {
-        _this8.unselectAt(nodeData);
+        _this4.unselectAt(nodeData);
       });
     }
   }, {
@@ -1284,13 +1008,16 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
       }
 
       if (this.rankdir == "LR" || this.rankdir == "RL") {
+        var yDiff = parseInt(edge.source.shapeType == 'underLine' ? edge.source.height / 2 : 0);
+        var xDiff = parseInt(edge.source.shapeType == 'underLine' ? collapseIconWidth : 0);
+        var dir = this.rankdir == "RL" ? -1 : 1;
         points[0] = {
-          x: edge.source.x + (this.rankdir == "RL" ? -1 : 1) * edge.source.width / 2,
-          y: edge.source.y
+          x: parseInt(edge.source.x) + parseInt(dir * (edge.source.width / 2)) + dir * xDiff,
+          y: parseInt(edge.source.y) + yDiff
         };
         points.splice(1, 0, {
           x: points.slice(-2, -1)[0].x,
-          y: edge.source.y
+          y: parseInt(edge.source.y) + yDiff
         });
       }
 
@@ -1383,6 +1110,19 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
       }
 
       ;
+
+      if (edge.target.shapeType == 'underLine') {
+        var x = parseInt(edge.target.x) + parseInt(edge.target.width / 2);
+
+        if (edge.target.rowData.__originData.children && edge.target.rowData.__originData.children.length) {
+          x += collapseIconWidth;
+        }
+
+        ;
+        str += ",L" + x + " " + (parseInt(edge.target.y) + parseInt(edge.target.height / 2));
+      }
+
+      ;
       line.path = str; //str += "z"
 
       return line;
@@ -1438,50 +1178,33 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
       return ~this.dataFrame.fields.indexOf(str);
     }
   }, {
-    key: "_initContentAndGetSize",
-    value: function _initContentAndGetSize(node) {
-      var me = this;
-      var contentType = node.ctype;
-
-      if (me._isField(contentType)) {
-        contentType = node.rowData[contentType];
-      }
-
-      ;
-      !contentType && (contentType = 'canvas');
-
-      if (contentType == 'canvas') {
-        return me._getEleAndsetCanvasSize(node);
-      }
-
-      ;
-
-      if (contentType == 'html') {
-        return me._getEleAndsetHtmlSize(node);
-      }
-
-      ;
-    }
-  }, {
     key: "_getEleAndsetCanvasSize",
     value: function _getEleAndsetCanvasSize(node) {
-      var _this9 = this;
+      var _this5 = this;
 
       var me = this;
       return new Promise(function (resolve) {
         var content = node.content;
-        var width = node.rowData.width,
-            height = node.rowData.height; //let sprite = new Canvax.Display.Sprite({});
+        var width = me.getProp(me.node.width, node);
+
+        if (!width && me.node.rowData && node.rowData.width) {
+          width = node.rowData.width;
+        }
+
+        var height = me.getProp(me.node.height, node);
+
+        if (!height && me.node.rowData && node.rowData.height) {
+          height = node.rowData.height;
+        }
 
         var context = {
           fillStyle: me.getProp(me.node.content.fontColor, node),
           textAlign: me.getProp(me.node.content.textAlign, node),
-          textBaseline: me.getProp(me.node.content.textBaseline, node)
-        }; //console.log(node.key);
-
+          textBaseline: me.getProp(me.node.content.textBaseline, node),
+          fontSize: me.getProp(me.node.content.fontSize, node)
+        };
         var contentLabelId = "content_label_" + node.key;
-
-        var _contentLabel = me.nodesContentSp.getChildById(contentLabelId);
+        var _contentLabel = node.contentElement; // || me.nodesContentSp.getChildById( contentLabelId );
 
         if (_contentLabel) {
           //已经存在的label
@@ -1506,8 +1229,8 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
         ;
         var inited;
 
-        if (_this9.node.content.init && typeof _this9.node.content.init === 'function') {
-          inited = _this9.node.content.init(node, _contentLabel);
+        if (_this5.node.content.init && typeof _this5.node.content.init === 'function') {
+          inited = _this5.node.content.init(node, _contentLabel);
         }
 
         ;
@@ -1527,8 +1250,8 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
             ;
             resolve({
               contentElement: _contentLabel,
-              width: width,
-              height: height
+              width: parseInt(width),
+              height: parseInt(height)
             });
           });
         } else {
@@ -1545,8 +1268,8 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
           ;
           resolve({
             contentElement: _contentLabel,
-            width: width,
-            height: height
+            width: parseInt(width),
+            height: parseInt(height)
           });
         }
       });
@@ -1554,37 +1277,47 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
   }, {
     key: "_getEleAndsetHtmlSize",
     value: function _getEleAndsetHtmlSize(node) {
-      var _this10 = this;
+      var _this6 = this;
 
       var me = this;
       return new Promise(function (resolve) {
         var content = node.content;
-        var width = node.rowData.width,
-            height = node.rowData.height;
+        var width = me.getProp(me.node.width, node);
+
+        if (!width && me.node.rowData && node.rowData.width) {
+          width = node.rowData.width;
+        }
+
+        var height = me.getProp(me.node.height, node);
+
+        if (!height && me.node.rowData && node.rowData.height) {
+          height = node.rowData.height;
+        }
+
         var contentLabelClass = "__content_label_" + node.key;
+        var _dom = node.contentElement; // || this.domContainer.getElementsByClassName( contentLabelClass );
 
-        var _dom = _this10.domContainer.getElementsByClassName(contentLabelClass);
-
-        if (!_dom.length) {
+        if (!_dom) {
           _dom = document.createElement("div");
           _dom.className = "chartx_relation_node " + contentLabelClass;
           _dom.style.cssText += "; position:absolute;visibility:hidden;";
 
-          _this10.domContainer.appendChild(_dom);
-        } else {
-          _dom = _dom[0];
-        }
+          _this6.domContainer.appendChild(_dom);
+        } // else {
+        //     _dom = _dom[0]
+        // };
 
-        ;
+
         _dom.style.cssText += "; color:" + me.getProp(me.node.content.fontColor, node) + ";";
         _dom.style.cssText += "; text-align:" + me.getProp(me.node.content.textAlign, node) + ";";
-        _dom.style.cssText += "; vertical-align:" + me.getProp(me.node.content.textBaseline, node) + ";"; //_dom.style.cssText += "; padding:"+me.getProp(me.node.padding, node)+"px;";
+        _dom.style.cssText += "; vertical-align:" + me.getProp(me.node.content.textBaseline, node) + ";"; //TODO 这里注释掉， 就让dom自己内部去控制padding吧
+        //_dom.style.cssText += "; padding:"+me.getProp(me.node.padding, node)+"px;"; 
 
         _dom.innerHTML = content;
         var inited;
 
-        if (_this10.node.content.init && typeof _this10.node.content.init === 'function') {
-          inited = _this10.node.content.init(node, _dom);
+        if (_this6.node.content.init && typeof _this6.node.content.init === 'function') {
+          inited = _this6.node.content.init(node, _dom);
         }
 
         ;
@@ -1604,8 +1337,8 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
             ;
             resolve({
               contentElement: _dom,
-              width: width,
-              height: height
+              width: parseInt(width),
+              height: parseInt(height)
             });
           });
         } else {
@@ -1622,8 +1355,8 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
           ;
           resolve({
             contentElement: _dom,
-            width: width,
-            height: height
+            width: parseInt(width),
+            height: parseInt(height)
           });
         }
 
@@ -1666,11 +1399,6 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
           documentation: '',
           "default": null
         },
-        childrenField: {
-          detail: '树结构数据的关联字段',
-          documentation: '如果是树结构的关联数据，不是行列式，那么就通过这个字段来建立父子关系',
-          "default": 'children'
-        },
         //rankdir: "TB",
         //align: "DR",
         //nodesep: 0,//同级node之间的距离
@@ -1680,11 +1408,19 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
           detail: '布局方向',
           "default": null
         },
+        ranksep: {
+          detail: '排与排之间的距离',
+          "default": 40
+        },
+        nodesep: {
+          detail: '同级node之间的距离',
+          "default": 20
+        },
         node: {
           detail: '单个节点的配置',
           propertys: {
             shapeType: {
-              detail: '节点图形，支持rect,diamond',
+              detail: '节点图形，支持rect,diamond,underLine(adc用)',
               "default": 'rect'
             },
             maxWidth: {
@@ -1696,16 +1432,16 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
               "default": 'pointer'
             },
             width: {
-              detail: '内容的width',
+              detail: '节点的width,默认null（系统自动计算）, 也可以是个function，用户来计算每一个节点的width',
               "default": null
             },
             height: {
-              detail: '内容的height',
+              detail: '节点的height,默认null（系统自动计算）, 也可以是个function，用户来计算每一个节点的height',
               "default": null
             },
             radius: {
               detail: '圆角角度，对rect生效',
-              "default": 6
+              "default": 4
             },
             includedAngle: {
               detail: 'shapeType为diamond(菱形)的时候生效,x方向的夹角',
@@ -1799,6 +1535,23 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
                 onend: {
                   detail: '执行select处理函数的后处理函数',
                   "default": null
+                },
+                content: {
+                  detail: '选中后节点内容配置',
+                  propertys: {
+                    fontColor: {
+                      detail: '内容文本颜色',
+                      "default": '#666'
+                    },
+                    fontSize: {
+                      detail: '内容文本大小（在canvas格式下有效）',
+                      "default": 14
+                    },
+                    format: {
+                      detail: '内容格式化处理函数',
+                      "default": null
+                    }
+                  }
                 }
               }
             },
@@ -1834,6 +1587,23 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
                   detail: 'hover节点背景色',
                   "default": '#ffffff'
                 },
+                content: {
+                  detail: 'hover后节点内容配置',
+                  propertys: {
+                    fontColor: {
+                      detail: '内容文本颜色',
+                      "default": '#666'
+                    },
+                    fontSize: {
+                      detail: '内容文本大小（在canvas格式下有效）',
+                      "default": 14
+                    },
+                    format: {
+                      detail: '内容格式化处理函数',
+                      "default": null
+                    }
+                  }
+                },
                 lineWidth: {
                   detail: 'hover描边宽度',
                   "default": 1
@@ -1859,6 +1629,10 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
                 fontColor: {
                   detail: '内容文本颜色',
                   "default": '#666'
+                },
+                fontSize: {
+                  detail: '内容文本大小（在canvas格式下有效）',
+                  "default": 14
                 },
                 format: {
                   detail: '内容格式化处理函数',
@@ -2007,14 +1781,6 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
             cursor: 'default'
           }
         },
-        layout: {
-          detail: '采用的布局引擎,比如dagre',
-          "default": "dagre"
-        },
-        layoutOpts: {
-          detail: '布局引擎对应的配置,dagre详见dagre的官方wiki',
-          propertys: {}
-        },
         status: {
           detail: '一些开关配置',
           propertys: {
@@ -2052,10 +1818,8 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
       };
     }
   }]);
-  return Relation;
+  return RelationBase;
 }(_index["default"]);
 
-_index["default"].registerComponent(Relation, 'graphs', 'relation');
-
-var _default = Relation;
+var _default = RelationBase;
 exports["default"] = _default;

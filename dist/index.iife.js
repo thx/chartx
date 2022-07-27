@@ -8214,6 +8214,7 @@ var chartx = (function () {
 	      var codeWithoutVariables = code.slice(0, range[0]) + code.slice(range[1]);
 	      return this._eval(codeWithoutVariables, 'options', 'variables', variables);
 	    } catch (e) {
+	      console.log('parse error');
 	      return {};
 	    }
 	  }
@@ -8850,8 +8851,13 @@ var chartx = (function () {
 
 	  };
 
-	  function _initHandle(dataOrg) {
-	    //数据做一份拷贝，避免污染源数据
+	  function _init(dataOrg) {
+	    //数据的最外面一定是个数组
+	    if (!Array.isArray(dataOrg)) {
+	      dataOrg = [dataOrg];
+	    } //数据做一份拷贝，避免污染源数据
+
+
 	    dataOrg = JSON.parse(JSON.stringify(dataOrg, function (k, v) {
 	      if (v === undefined) {
 	        return null;
@@ -8909,7 +8915,7 @@ var chartx = (function () {
 
 	      var preLen = dataFrame.length; //设置数据之前的数据长度
 
-	      _initHandle(dataOrg);
+	      _init(dataOrg);
 
 	      dataFrame.data = _getDataAndSetDataLen(); //如果之前是有数据的情况，一些当前状态恢复到dataFrame里去 begin
 
@@ -9112,7 +9118,7 @@ var chartx = (function () {
 	    return list;
 	  }
 
-	  _initHandle(dataOrg);
+	  _init(dataOrg);
 
 	  dataFrame.data = _getDataAndSetDataLen();
 	  return dataFrame;
@@ -19000,6 +19006,7 @@ var chartx = (function () {
 	      }
 	      me.lineSprite.addChild(bline);
 	      me._line = bline;
+	      debugger;
 	      window['_line'] = me._line;
 
 	      if (me.area.enabled) {
@@ -28447,6 +28454,7 @@ var chartx = (function () {
 	      yRange = bounds.yRange;
 
 	  if (xRange.max == xRange.min || yRange.max == yRange.min) {
+	    console.log("not scaling solution: zero size detected");
 	    return solution;
 	  }
 
@@ -29105,7 +29113,9 @@ var chartx = (function () {
 	    var centre = computeTextCentre(interior, exterior);
 	    ret[area] = centre;
 
-	    if (centre.disjoint && areas[i].size > 0) ;
+	    if (centre.disjoint && areas[i].size > 0) {
+	      console.log("WARNING: area " + area + " not represented on screen");
+	    }
 	  }
 
 	  return ret;
@@ -31527,6 +31537,7 @@ var chartx = (function () {
 	  var label = options.node && options.node.content && options.node.content.field;
 
 	  if (!checkDataIsJson(data, key, childrenKey)) {
+	    console.error('该数据不能正确绘制，请提供数组对象形式的数据！');
 	    return result;
 	  }
 	  var childrens = [];
@@ -35357,7 +35368,9 @@ var chartx = (function () {
 
 	        try {
 	          return fn();
-	        } finally {}
+	        } finally {
+	          console.log(name + " time: " + (_.now() - start) + "ms");
+	        }
 	      }
 
 	      function notime(name, fn) {
@@ -45141,6 +45154,8 @@ var chartx = (function () {
 	          }
 
 	          if (e.type == "wheel") {
+	            console.log(_deltaY, e.deltaY);
+
 	            if (Math.abs(e.deltaY) > Math.abs(_deltaY)) {
 	              _deltaY = e.deltaY;
 	            }
@@ -45543,6 +45558,7 @@ var chartx = (function () {
 	      var me = this;
 
 	      _.each(this.data.edges, function (edge) {
+	        console.log(edge.points);
 	        var key = edge.key.join('_');
 
 	        if (me.line.isTree && edge.points.length == 3) {
@@ -47290,6 +47306,4458 @@ var chartx = (function () {
 
 	unwrapExports(tree);
 
+	var base = createCommonjsModule(function (module, exports) {
+
+
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports["default"] = void 0;
+
+	var _defineProperty2 = interopRequireDefault(defineProperty$1);
+
+	var _classCallCheck2 = interopRequireDefault(classCallCheck$1);
+
+	var _createClass2 = interopRequireDefault(createClass$1);
+
+	var _assertThisInitialized2 = interopRequireDefault(assertThisInitialized$1);
+
+	var _inherits2 = interopRequireDefault(inherits$1);
+
+	var _possibleConstructorReturn2 = interopRequireDefault(possibleConstructorReturn$1);
+
+	var _getPrototypeOf2 = interopRequireDefault(getPrototypeOf$1);
+
+	var _canvax = interopRequireDefault(Canvax);
+
+	var _index = interopRequireDefault(graphs);
+
+
+
+	var _zoom = interopRequireDefault(zoom);
+
+	function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
+
+	function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { (0, _defineProperty2["default"])(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
+
+	function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
+
+	function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
+	var _ = _canvax["default"]._,
+	    event = _canvax["default"].event;
+	var Rect = _canvax["default"].Shapes.Rect;
+	var Diamond = _canvax["default"].Shapes.Diamond;
+	var Line = _canvax["default"].Shapes.Line;
+	var Path = _canvax["default"].Shapes.Path;
+	var BrokenLine = _canvax["default"].Shapes.BrokenLine;
+	var Circle = _canvax["default"].Shapes.Circle;
+	var Arrow = _canvax["default"].Shapes.Arrow;
+	var collapseIconWidth = 22;
+	/**
+	 * 关系图中 包括了  配置，数据，和布局数据，
+	 * 默认用配置和数据可以完成绘图， 但是如果有布局数据，就绘图玩额外调用一次绘图，把布局数据传入修正布局效果
+	 * 
+	 * relation 也好，  tree也好， 最后都要转换成 nodes edges
+	 * 
+	 */
+
+	var RelationBase = /*#__PURE__*/function (_GraphsBase) {
+	  (0, _inherits2["default"])(RelationBase, _GraphsBase);
+
+	  var _super = _createSuper(RelationBase);
+
+	  function RelationBase(opt, app) {
+	    var _this;
+
+	    (0, _classCallCheck2["default"])(this, RelationBase);
+	    _this = _super.call(this, opt, app);
+	    _this.type = "relation";
+
+	    _.extend(true, (0, _assertThisInitialized2["default"])(_this), (0, tools.getDefaultProps)(RelationBase.defaultProps()), opt);
+
+	    _this.domContainer = app.canvax.domView;
+	    _this.induce = null;
+
+	    _this.init();
+
+	    return _this;
+	  }
+
+	  (0, _createClass2["default"])(RelationBase, [{
+	    key: "init",
+	    value: function init() {
+	      this._initInduce();
+
+	      this.nodesSp = new _canvax["default"].Display.Sprite({
+	        id: "nodesSp"
+	      });
+	      this.nodesContentSp = new _canvax["default"].Display.Sprite({
+	        id: "nodesContentSp"
+	      });
+	      this.edgesSp = new _canvax["default"].Display.Sprite({
+	        id: "edgesSp"
+	      });
+	      this.arrowsSp = new _canvax["default"].Display.Sprite({
+	        id: "arrowsSp"
+	      });
+	      this.labelsSp = new _canvax["default"].Display.Sprite({
+	        id: "labelsSp"
+	      });
+	      this.graphsSp = new _canvax["default"].Display.Sprite({
+	        id: "graphsSp"
+	      }); //这个view和induce是一一对应的，在induce上面执行拖拽和滚轮缩放，操作的目标元素就是graphsView
+
+	      this.graphsView = new _canvax["default"].Display.Sprite({
+	        id: "graphsView"
+	      });
+	      this.graphsSp.addChild(this.edgesSp);
+	      this.graphsSp.addChild(this.nodesSp);
+	      this.graphsSp.addChild(this.nodesContentSp);
+	      this.graphsSp.addChild(this.arrowsSp);
+	      this.graphsSp.addChild(this.labelsSp);
+	      this.graphsView.addChild(this.graphsSp);
+	      this.sprite.addChild(this.graphsView);
+	      this.zoom = new _zoom["default"]();
+	    } //这个node是放在 nodes  和 edges 中的数据结构
+
+	  }, {
+	    key: "getDefNode",
+	    value: function getDefNode() {
+	      var opt = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+	      var node = _objectSpread({
+	        type: "relation",
+	        //tree中会覆盖为tree
+	        iNode: 0,
+	        rowData: null,
+	        key: "",
+	        content: '',
+	        ctype: 'canvas',
+	        //下面三个属性在_setElementAndSize中设置
+	        contentElement: null,
+	        //外面传的layout数据可能没有element，widget的时候要检测下
+	        width: null,
+	        height: null,
+	        //这个在layout的时候设置
+	        x: null,
+	        y: null,
+	        shapeType: null,
+	        focused: false,
+	        selected: false
+	      }, opt);
+
+	      return node;
+	    }
+	  }, {
+	    key: "checkNodeSizeForShapeType",
+	    value: function checkNodeSizeForShapeType(node) {
+	      //如果是菱形，还需要重新调整新的尺寸
+	      if (node.shapeType == 'diamond') {
+	        //因为node的尺寸前面计算出来的是矩形的尺寸，如果是菱形的话，这里就是指内接矩形的尺寸，
+	        //需要换算成外接矩形的尺寸
+	        var includedAngle = this.node.includedAngle / 2;
+	        var includeRad = includedAngle * Math.PI / 180;
+	        var width = node.width,
+	            height = node.height;
+	        node._innerBound = {
+	          width: width,
+	          height: height
+	        };
+	        var newWidthDiff = height / Math.tan(includeRad);
+	        var newHeightDiff = width * Math.tan(includeRad); //在内接矩形基础上扩展出来的外界矩形
+
+	        var newWidth = width + newWidthDiff;
+	        var newHeight = height + newHeightDiff; //node上面记录的width 和 height 永远是内容的 高宽, 但是像 diamond 等， 布局的时候的bound是要计算一个新的
+	        //布局的时候， 布局算法要优先取 layoutWidth  和  layoutHeight
+
+	        node.width = newWidth;
+	        node.height = newHeight;
+	      }
+	    }
+	  }, {
+	    key: "_initInduce",
+	    value: function _initInduce() {
+	      var me = this;
+	      this.induce = new Rect({
+	        id: "induce",
+	        context: {
+	          width: 0,
+	          height: 0,
+	          fillStyle: "#000000",
+	          globalAlpha: 0
+	        }
+	      });
+	      this.sprite.addChild(this.induce);
+	      var _mosedownIng = false;
+
+	      var _preCursor = me.app.canvax.domView ? "default" : me.app.canvax.domView.style.cursor; //滚轮缩放相关
+
+
+	      var _wheelHandleTimeLen = 32; //16*2
+
+	      var _wheelHandleTimeer = null;
+	      var _deltaY = 0;
+	      this.induce.on(event.types.get(), function (e) {
+	        if (me.status.transform.enabled) {
+	          e.preventDefault();
+	          var point = e.target.localToGlobal(e.point, me.sprite); //鼠标拖拽移动
+
+	          if (e.type == "mousedown") {
+	            me.induce.toFront();
+	            _mosedownIng = true;
+	            me.app.canvax.domView && (me.app.canvax.domView.style.cursor = "move");
+	            me.zoom.mouseMoveTo(point);
+	          }
+
+	          if (e.type == "mouseup" || e.type == "mouseout") {
+	            me.induce.toBack();
+	            _mosedownIng = false;
+	            me.app.canvax.domView && (me.app.canvax.domView.style.cursor = _preCursor);
+	          }
+
+	          if (e.type == "mousemove") {
+	            if (_mosedownIng) {
+	              var _me$zoom$move = me.zoom.move(point),
+	                  x = _me$zoom$move.x,
+	                  y = _me$zoom$move.y;
+
+	              me.graphsView.context.x = parseInt(x);
+	              me.graphsView.context.y = parseInt(y);
+	            }
+	          }
+
+	          if (e.type == "wheel") {
+	            console.log(_deltaY, e.deltaY);
+
+	            if (Math.abs(e.deltaY) > Math.abs(_deltaY)) {
+	              _deltaY = e.deltaY;
+	            }
+
+	            if (!_wheelHandleTimeer) {
+	              _wheelHandleTimeer = setTimeout(function () {
+	                if (me.status.transform.wheelAction == 'offset') {
+	                  //移动的话用offset,偏移多少像素
+	                  var _me$zoom$offset = me.zoom.offset({
+	                    x: -e.deltaX,
+	                    y: -e.deltaY
+	                  }),
+	                      _x = _me$zoom$offset.x,
+	                      _y = _me$zoom$offset.y; //me.zoom.move( {x:zx, y:zy} );
+
+
+	                  me.graphsView.context.x = _x;
+	                  me.graphsView.context.y = _y;
+	                }
+
+	                if (me.status.transform.wheelAction == 'scale') {
+	                  // 缩放         
+	                  var _me$zoom$wheel = me.zoom.wheel(e, point),
+	                      scale = _me$zoom$wheel.scale,
+	                      _x2 = _me$zoom$wheel.x,
+	                      _y2 = _me$zoom$wheel.y;
+
+	                  me.graphsView.context.x = _x2;
+	                  me.graphsView.context.y = _y2;
+	                  me.graphsView.context.scaleX = scale;
+	                  me.graphsView.context.scaleY = scale;
+	                  me.status.transform.scale = scale;
+	                }
+
+	                _wheelHandleTimeer = null;
+	                _deltaY = 0;
+	              }, _wheelHandleTimeLen);
+	            }
+	          }
+	        }
+	      });
+	    }
+	  }, {
+	    key: "_resetData",
+	    value: function _resetData(data, dataTrigger) {
+	      var _this2 = this;
+
+	      var me = this;
+	      this._preData = this.data;
+	      return new Promise(function (resolve) {
+	        _this2.initData(data, dataTrigger).then(function (_data) {
+	          _this2.data = _data;
+
+	          _this2.layoutData();
+
+	          _.each(_this2._preData.nodes, function (preNode) {
+	            var nodeData = _.find(me.data.nodes, function (node) {
+	              return preNode.key == node.key;
+	            });
+
+	            if (!nodeData) {
+	              me._destroy(preNode);
+	            } else {
+	              //如果找到了，要从前面 复制几个属性过来
+	              nodeData.focused = preNode.focused;
+	              nodeData.selected = preNode.selected; //把原来的对象的 contentElement 搞过来， 就可以减少getChild的消耗
+
+	              if (nodeData.ctype == preNode.ctype) {
+	                //类型没变， 就可以用同一个 contentElement
+	                nodeData.contentElement = preNode.contentElement;
+	              }
+	            }
+	          });
+
+	          _.each(_this2._preData.edges, function (preEdge) {
+	            if (!_.find(me.data.edges, function (edge) {
+	              return preEdge.key.join('_') == edge.key.join('_');
+	            })) {
+	              me._destroy(preEdge);
+	            }
+	          });
+
+	          _this2.widget();
+
+	          if (dataTrigger) {
+	            var origin = dataTrigger.origin || (dataTrigger.params || {}).origin; //兼容老的配置里面没有params，直接传origin的情况
+	            //钉住某个node为参考点（不移动)
+
+	            if (origin != undefined) {
+	              var preOriginNode = _.find(_this2._preData.nodes, function (node) {
+	                return node.key == origin;
+	              });
+
+	              var originNode = _.find(_this2.data.nodes, function (node) {
+	                return node.key == origin;
+	              });
+
+	              if (preOriginNode && originNode) {
+	                var offsetPos = {
+	                  x: parseInt(preOriginNode.x) - parseInt(originNode.x),
+	                  y: parseInt(preOriginNode.y) - parseInt(originNode.y)
+	                };
+
+	                var _this2$zoom$offset = _this2.zoom.offset(offsetPos),
+	                    x = _this2$zoom$offset.x,
+	                    y = _this2$zoom$offset.y;
+
+	                me.graphsView.context.x = parseInt(x);
+	                me.graphsView.context.y = parseInt(y);
+	              }
+	            }
+	          }
+	          resolve();
+	        });
+	      });
+	    }
+	  }, {
+	    key: "_destroy",
+	    value: function _destroy(item) {}
+	  }, {
+	    key: "_drawEdges",
+	    value: function _drawEdges() {
+	      var me = this;
+
+	      _.each(this.data.edges, function (edge) {
+	        console.log(edge.points);
+	        var key = edge.key.join('_');
+
+	        if ((me.line.isTree || edge.isTree) && edge.points.length == 3) {
+	          //严格树状图的话（三个点），就转化成4个点的，有两个拐点
+	          me._setTreePoints(edge);
+	        }
+
+	        var lineShapeOpt = me._getLineShape(edge, me.line.inflectionRadius);
+
+	        var type = lineShapeOpt.type;
+	        var path = lineShapeOpt.path;
+	        var pointList = lineShapeOpt.pointList;
+	        var shape = type == 'path' ? Path : BrokenLine;
+	        var lineWidth = me.getProp(me.line.lineWidth, edge);
+	        var strokeStyle = me.getProp(me.line.strokeStyle, edge);
+	        var lineType = me.getProp(me.line.lineType, edge);
+	        var cursor = me.getProp(me.line.cursor, edge);
+	        var edgeId = 'edge_' + key;
+
+	        var _path = me.edgesSp.getChildById(edgeId);
+
+	        if (_path) {
+	          if (type == 'path') {
+	            _path.context.path = path;
+	          }
+
+	          if (type == 'brokenLine') {
+	            _path.context.pointList = pointList;
+	          }
+
+	          _path.context.lineWidth = lineWidth;
+	          _path.context.strokeStyle = strokeStyle;
+	          _path.context.lineType = lineType;
+	        } else {
+	          var _ctx = {
+	            lineWidth: lineWidth,
+	            strokeStyle: strokeStyle,
+	            lineType: lineType,
+	            cursor: cursor
+	          };
+
+	          if (type == 'path') {
+	            _ctx.path = path;
+	          }
+
+	          if (type == 'brokenLine') {
+	            //_ctx.smooth = true;
+	            //_ctx.curvature = 0.25;
+	            _ctx.pointList = pointList;
+	          }
+
+	          _path = new shape({
+	            id: edgeId,
+	            context: _ctx
+	          });
+
+	          _path.on(event.types.get(), function (e) {
+	            var node = this.nodeData;
+	            node.__no_value = true;
+	            e.eventInfo = {
+	              trigger: me.line,
+	              nodes: [node]
+	            };
+	            me.app.fire(e.type, e);
+	          });
+
+	          me.edgesSp.addChild(_path);
+	        }
+	        edge.pathElement = _path;
+	        _path.nodeData = edge; //edge也是一个node数据
+
+	        var arrowControl = edge.points.slice(-2, -1)[0];
+
+	        if (me.line.shapeType == "bezier") {
+	          if (me.rankdir == "TB" || me.rankdir == "BT") {
+	            arrowControl.x += (edge.source.x - edge.target.x) / 20;
+	          }
+
+	          if (me.rankdir == "LR" || me.rankdir == "RL") {
+	            arrowControl.y += (edge.source.y - edge.target.y) / 20;
+	          }
+	        }
+	        var edgeLabelId = 'label_' + key;
+	        var enabled = me.getProp(me.line.edgeLabel.enabled, edge);
+
+	        if (enabled) {
+	          var textAlign = me.getProp(me.node.content.textAlign, edge);
+	          var textBaseline = me.getProp(me.node.content.textBaseline, edge);
+	          var fontSize = me.getProp(me.line.edgeLabel.fontSize, edge);
+	          var fontColor = me.getProp(me.line.edgeLabel.fontColor, edge); // let offsetX      = me.getProp( me.line.edgeLabel.offsetX    , edge );
+	          // let offsetY      = me.getProp( me.line.edgeLabel.offsetY    , edge );
+
+	          var offset = me.getProp(me.line.icon.offset, edge);
+
+	          if (!offset) {
+	            //default 使用edge.x edge.y 也就是edge label的位置
+	            offset = {
+	              x: edge.x,
+	              y: edge.y
+	            };
+	          }
+
+	          var _edgeLabel = me.labelsSp.getChildById(edgeLabelId);
+
+	          if (_edgeLabel) {
+	            _edgeLabel.resetText(edge.content);
+
+	            _edgeLabel.context.x = offset.x;
+	            _edgeLabel.context.y = offset.y;
+	            _edgeLabel.context.fontSize = fontSize;
+	            _edgeLabel.context.fillStyle = fontColor;
+	            _edgeLabel.context.textAlign = textAlign;
+	            _edgeLabel.context.textBaseline = textBaseline;
+	          } else {
+	            _edgeLabel = new _canvax["default"].Display.Text(edge.content, {
+	              id: edgeLabelId,
+	              context: {
+	                x: offset.x,
+	                y: offset.y,
+	                fontSize: fontSize,
+	                fillStyle: fontColor,
+	                textAlign: textAlign,
+	                textBaseline: textBaseline
+	              }
+	            });
+
+	            _edgeLabel.on(event.types.get(), function (e) {
+	              var node = this.nodeData;
+	              node.__no_value = true;
+	              e.eventInfo = {
+	                trigger: me.line,
+	                nodes: [node]
+	              };
+	              me.app.fire(e.type, e);
+	            });
+
+	            me.labelsSp.addChild(_edgeLabel);
+	          }
+
+	          edge.labelElement = _edgeLabel;
+	          _edgeLabel.nodeData = edge;
+	        }
+	        var edgeIconEnabled = me.getProp(me.line.icon.enabled, edge);
+
+	        if (edgeIconEnabled) {
+	          var _chartCode = me.getProp(me.line.icon.charCode, edge);
+
+	          var charCode = String.fromCharCode(parseInt(_chartCode, 16));
+
+	          if (_chartCode != '') {
+	            var _lineWidth = me.getProp(me.line.icon.lineWidth, edge);
+
+	            var _strokeStyle = me.getProp(me.line.icon.strokeStyle, edge);
+
+	            var fontFamily = me.getProp(me.line.icon.fontFamily, edge);
+
+	            var _fontSize = me.getProp(me.line.icon.fontSize, edge);
+
+	            var _fontColor = me.getProp(me.line.icon.fontColor, edge);
+
+	            var background = me.getProp(me.line.icon.background, edge);
+	            var _textAlign = 'center';
+	            var _textBaseline = 'middle';
+
+	            var _offset = me.getProp(me.line.icon.offset, edge);
+
+	            var offsetX = me.getProp(me.line.icon.offsetX, edge);
+	            var offsetY = me.getProp(me.line.icon.offsetY, edge);
+
+	            if (!_offset) {
+	              //default 使用edge.x edge.y 也就是edge label的位置
+	              _offset = {
+	                x: parseInt(edge.x) + offsetX,
+	                y: parseInt(edge.y) + offsetY
+	              };
+	            }
+	            var _iconBackCtx = {
+	              x: _offset.x,
+	              y: _offset.y - 1,
+	              r: parseInt(_fontSize * 0.5) + 2,
+	              fillStyle: background,
+	              strokeStyle: _strokeStyle,
+	              lineWidth: _lineWidth
+	            };
+	            var edgeIconBackId = 'edge_item_icon_back_' + key;
+
+	            var _iconBack = me.labelsSp.getChildById(edgeIconBackId);
+
+	            if (_iconBack) {
+	              //_.extend( true, _iconBack.context, _iconBackCtx )
+	              Object.assign(_iconBack.context, _iconBackCtx);
+	            } else {
+	              _iconBack = new Circle({
+	                id: edgeIconBackId,
+	                context: _iconBackCtx
+	              });
+	              me.labelsSp.addChild(_iconBack);
+	            }
+	            edge.edgeIconBack = _iconBack;
+	            _iconBack.nodeData = edge;
+	            var edgeIconId = 'edge_item_icon_' + key;
+
+	            var _edgeIcon = me.labelsSp.getChildById(edgeIconId);
+
+	            if (_edgeIcon) {
+	              _edgeIcon.resetText(charCode);
+
+	              _edgeIcon.context.x = _offset.x;
+	              _edgeIcon.context.y = _offset.y;
+	              _edgeIcon.context.fontSize = _fontSize;
+	              _edgeIcon.context.fillStyle = _fontColor;
+	              _edgeIcon.context.textAlign = _textAlign;
+	              _edgeIcon.context.textBaseline = _textBaseline;
+	              _edgeIcon.context.fontFamily = fontFamily; //_edgeIcon.context.lineWidth    = lineWidth;
+	              //_edgeIcon.context.strokeStyle  = strokeStyle;
+	            } else {
+	              _edgeIcon = new _canvax["default"].Display.Text(charCode, {
+	                id: edgeIconId,
+	                context: {
+	                  x: _offset.x,
+	                  y: _offset.y,
+	                  fillStyle: _fontColor,
+	                  cursor: 'pointer',
+	                  fontSize: _fontSize,
+	                  textAlign: _textAlign,
+	                  textBaseline: _textBaseline,
+	                  fontFamily: fontFamily
+	                }
+	              });
+
+	              _edgeIcon.on(event.types.get(), function (e) {
+	                var node = this.nodeData;
+	                node.__no_value = true;
+	                var trigger = me.line;
+
+	                if (me.line.icon['on' + e.type]) {
+	                  trigger = me.line.icon;
+	                }
+	                e.eventInfo = {
+	                  trigger: trigger,
+	                  nodes: [node]
+	                };
+	                me.app.fire(e.type, e);
+	              });
+
+	              me.labelsSp.addChild(_edgeIcon);
+	            }
+
+	            edge.edgeIconElement = _edgeIcon;
+	            _edgeIcon.nodeData = edge;
+	          }
+	        }
+
+	        if (me.line.arrow.enabled) {
+	          var arrowId = "arrow_" + key;
+
+	          var _arrow = me.arrowsSp.getChildById(arrowId);
+
+	          if (_arrow) {
+	            //arrow 只监听了x y 才会重绘，，，暂时只能这样处理,手动的赋值control.x control.y
+	            //而不是直接把 arrowControl 赋值给 control
+	            _arrow.context.x = me.line.arrow.offsetX;
+	            _arrow.context.y = me.line.arrow.offsetY;
+	            _arrow.context.fillStyle = strokeStyle;
+	            _arrow.context.control.x = arrowControl.x;
+	            _arrow.context.control.y = arrowControl.y;
+	            _arrow.context.point = edge.points.slice(-1)[0];
+	            _arrow.context.strokeStyle = strokeStyle;
+	            _arrow.context.fillStyle = strokeStyle; // _.extend(true, _arrow, {
+	            //     control: arrowControl,
+	            //     point: edge.points.slice(-1)[0],
+	            //     strokeStyle: strokeStyle
+	            // } );
+	          } else {
+	            _arrow = new Arrow({
+	              id: arrowId,
+	              context: {
+	                x: me.line.arrow.offsetX,
+	                y: me.line.arrow.offsetY,
+	                control: arrowControl,
+	                point: edge.points.slice(-1)[0],
+	                strokeStyle: strokeStyle,
+	                fillStyle: strokeStyle
+	              }
+	            });
+	            me.arrowsSp.addChild(_arrow);
+	          }
+	          edge.arrowElement = _arrow;
+	        }
+	      });
+	    }
+	  }, {
+	    key: "_drawNode",
+	    value: function _drawNode(node) {
+	      var me = this;
+	      var shape = Rect;
+	      var nodeId = "node_" + node.key;
+	      var cursor = me.node.cursor;
+
+	      var _me$_getNodeStyle = me._getNodeStyle(node),
+	          lineWidth = _me$_getNodeStyle.lineWidth,
+	          fillStyle = _me$_getNodeStyle.fillStyle,
+	          strokeStyle = _me$_getNodeStyle.strokeStyle,
+	          radius = _me$_getNodeStyle.radius,
+	          shadowOffsetX = _me$_getNodeStyle.shadowOffsetX,
+	          shadowOffsetY = _me$_getNodeStyle.shadowOffsetY,
+	          shadowBlur = _me$_getNodeStyle.shadowBlur,
+	          shadowColor = _me$_getNodeStyle.shadowColor;
+
+	      var context = {
+	        x: parseInt(node.x) - parseInt(node.width / 2),
+	        y: parseInt(node.y) - parseInt(node.height / 2),
+	        width: node.width,
+	        height: node.height,
+	        cursor: cursor,
+	        lineWidth: lineWidth,
+	        fillStyle: fillStyle,
+	        strokeStyle: strokeStyle,
+	        radius: radius,
+	        shadowOffsetX: shadowOffsetX,
+	        shadowOffsetY: shadowOffsetY,
+	        shadowBlur: shadowBlur,
+	        shadowColor: shadowColor
+	      };
+
+	      if (node.shapeType == 'diamond') {
+	        shape = Diamond;
+	        context = {
+	          x: parseInt(node.x),
+	          y: parseInt(node.y),
+	          // x: parseInt(node.x) + parseInt(node.width / 2),
+	          // y: parseInt(node.y) + parseInt(node.height / 2),
+	          cursor: cursor,
+	          innerRect: node._innerBound,
+	          lineWidth: lineWidth,
+	          fillStyle: fillStyle,
+	          strokeStyle: strokeStyle,
+	          shadowOffsetX: shadowOffsetX,
+	          shadowOffsetY: shadowOffsetY,
+	          shadowBlur: shadowBlur,
+	          shadowColor: shadowColor
+	        };
+	      }
+
+	      if (node.shapeType == 'underLine') ;
+
+	      var _boxShape = me.nodesSp.getChildById(nodeId);
+
+	      if (_boxShape) {
+	        _.extend(_boxShape.context, context);
+	      } else {
+	        _boxShape = new shape({
+	          id: nodeId,
+	          hoverClone: false,
+	          context: context
+	        });
+	        me.nodesSp.addChild(_boxShape);
+
+	        _boxShape.on(event.types.get(), function (e) {
+	          var node = this.nodeData;
+	          node.__no_value = true;
+	          e.eventInfo = {
+	            trigger: me.node,
+	            nodes: [node]
+	          };
+
+	          if (me.node.focus.enabled) {
+	            if (e.type == "mouseover") {
+	              me.focusAt(this.nodeData);
+	            }
+
+	            if (e.type == "mouseout") {
+	              me.unfocusAt(this.nodeData);
+	            }
+	          }
+
+	          if (me.node.select.enabled && me.node.select.triggerEventType.indexOf(e.type) > -1) {
+	            //如果开启了图表的选中交互
+	            //TODO:这里不能
+	            var onbefore = me.node.select.onbefore;
+	            var onend = me.node.select.onend;
+
+	            if (!onbefore || typeof onbefore == 'function' && onbefore.apply(me, [this.nodeData]) !== false) {
+	              if (this.nodeData.selected) {
+	                //说明已经选中了
+	                me.unselectAt(this.nodeData);
+	              } else {
+	                me.selectAt(this.nodeData);
+	              }
+
+	              onend && typeof onend == 'function' && onend.apply(me, [this.nodeData]);
+	            }
+	          }
+	          me.app.fire(e.type, e);
+	        });
+	      }
+	      _boxShape.nodeData = node;
+	      node.shapeElement = _boxShape;
+
+	      if (me.node.select.list.indexOf(node.key) > -1) {
+	        me.selectAt(node);
+	      }
+
+	      if (node.ctype == "canvas") {
+	        node.contentElement.context.visible = true;
+	      }
+
+	      _boxShape.on("transform", function () {
+	        if (node.ctype == "canvas") {
+	          node.contentElement.context.x = parseInt(node.x);
+	          node.contentElement.context.y = parseInt(node.y);
+	        } else if (node.ctype == "html") {
+	          var devicePixelRatio = typeof window !== 'undefined' ? window.devicePixelRatio : 1;
+
+	          var contentMatrix = _boxShape.worldTransform.clone();
+
+	          contentMatrix = contentMatrix.scale(1 / devicePixelRatio, 1 / devicePixelRatio);
+	          node.contentElement.style.transform = "matrix(" + contentMatrix.toArray().join() + ")";
+	          node.contentElement.style.transformOrigin = "left top"; //修改为左上角为旋转中心点来和canvas同步
+
+	          if (node.shapeType == 'diamond') {
+	            node.contentElement.style.left = -parseInt((node.width - node._innerBound.width) / 2 * me.status.transform.scale) + "px";
+	            node.contentElement.style.top = -parseInt((node.height - node._innerBound.height) / 2 * me.status.transform.scale) + "px";
+	          }
+	          node.contentElement.style.visibility = "visible";
+	        }
+	      });
+	    }
+	  }, {
+	    key: "_getNodeStyle",
+	    value: function _getNodeStyle(nodeData, targetPath) {
+	      var me = this;
+
+	      var radius = _.flatten([me.getProp(me.node.radius, nodeData)]);
+
+	      var target = me.node;
+
+	      if (targetPath == 'select') {
+	        target = me.node.select;
+	      }
+
+	      if (targetPath == 'focus') {
+	        target = me.node.focus;
+	      }
+
+	      var lineWidth = me.getProp(target.lineWidth, nodeData);
+	      var fillStyle = me.getProp(target.fillStyle, nodeData);
+	      var strokeStyle = me.getProp(target.strokeStyle, nodeData);
+	      var shadowOffsetX = me.getProp(target.shadow.shadowOffsetX, nodeData);
+	      var shadowOffsetY = me.getProp(target.shadow.shadowOffsetY, nodeData);
+	      var shadowBlur = me.getProp(target.shadow.shadowBlur, nodeData);
+	      var shadowColor = me.getProp(target.shadow.shadowColor, nodeData);
+	      return {
+	        lineWidth: lineWidth,
+	        fillStyle: fillStyle,
+	        strokeStyle: strokeStyle,
+	        radius: radius,
+	        shadowOffsetX: shadowOffsetX,
+	        shadowOffsetY: shadowOffsetY,
+	        shadowBlur: shadowBlur,
+	        shadowColor: shadowColor
+	      };
+	    }
+	  }, {
+	    key: "_setNodeStyle",
+	    value: function _setNodeStyle(nodeData, targetPath) {
+	      var _this$_getNodeStyle = this._getNodeStyle(nodeData, targetPath),
+	          lineWidth = _this$_getNodeStyle.lineWidth,
+	          fillStyle = _this$_getNodeStyle.fillStyle,
+	          strokeStyle = _this$_getNodeStyle.strokeStyle,
+	          shadowOffsetX = _this$_getNodeStyle.shadowOffsetX,
+	          shadowOffsetY = _this$_getNodeStyle.shadowOffsetY,
+	          shadowBlur = _this$_getNodeStyle.shadowBlur,
+	          shadowColor = _this$_getNodeStyle.shadowColor;
+
+	      if (nodeData.shapeElement && nodeData.shapeElement.context) {
+	        var ctx = nodeData.shapeElement.context;
+	        ctx.lineWidth = lineWidth;
+	        ctx.fillStyle = fillStyle;
+	        ctx.strokeStyle = strokeStyle;
+	        ctx.shadowOffsetX = shadowOffsetX;
+	        ctx.shadowOffsetY = shadowOffsetY;
+	        ctx.shadowBlur = shadowBlur;
+	        ctx.shadowColor = shadowColor;
+	      }
+	    }
+	  }, {
+	    key: "focusAt",
+	    value: function focusAt(key) {
+	      var nodeData = this.getNodeDataAt(key);
+
+	      if (nodeData) {
+	        !nodeData.selected && this._setNodeStyle(nodeData, 'focus');
+	        nodeData.focused = true;
+	      }
+	    }
+	  }, {
+	    key: "unfocusAt",
+	    value: function unfocusAt(key) {
+	      var nodeData = this.getNodeDataAt(key);
+
+	      if (nodeData) {
+	        !nodeData.selected && this._setNodeStyle(nodeData);
+	        nodeData.focused = false;
+	      }
+	    }
+	  }, {
+	    key: "selectAt",
+	    value: function selectAt(key) {
+	      var nodeData = this.getNodeDataAt(key);
+
+	      if (nodeData) {
+	        this._setNodeStyle(nodeData, 'select');
+
+	        nodeData.selected = true;
+
+	        if (this.node.select.list.indexOf(nodeData.key) == -1) {
+	          this.node.select.list.push(nodeData.key);
+	        }
+	      }
+	    }
+	  }, {
+	    key: "selectAll",
+	    value: function selectAll() {
+	      var _this3 = this;
+
+	      this.data.nodes.forEach(function (nodeData) {
+	        _this3.selectAt(nodeData);
+	      });
+	    }
+	  }, {
+	    key: "unselectAt",
+	    value: function unselectAt(key) {
+	      var nodeData = this.getNodeDataAt(key);
+
+	      if (nodeData) {
+	        nodeData.focused ? this._setNodeStyle(nodeData, 'focus') : this._setNodeStyle(nodeData);
+	        nodeData.selected = false;
+	        var selectedKeyInd = this.node.select.list.indexOf(nodeData.key);
+
+	        if (selectedKeyInd > -1) {
+	          this.node.select.list.splice(selectedKeyInd, 1);
+	        }
+	      }
+	    }
+	  }, {
+	    key: "unselectAll",
+	    value: function unselectAll() {
+	      var _this4 = this;
+
+	      this.data.nodes.forEach(function (nodeData) {
+	        _this4.unselectAt(nodeData);
+	      });
+	    }
+	  }, {
+	    key: "getNodeDataAt",
+	    value: function getNodeDataAt(key) {
+	      if (key.type && (key.type == "relation" || key.type == "tree")) {
+	        return key;
+	      }
+
+	      if (typeof key == 'string') {
+	        var keys = key.split(',');
+
+	        if (keys.length == 1) {
+	          return this.data.nodes.find(function (item) {
+	            return item.key == key;
+	          });
+	        }
+
+	        if (keys.length == 2) {
+	          return this.data.edges.find(function (item) {
+	            return item.key.join() == keys.join();
+	          });
+	        }
+	      }
+	    }
+	  }, {
+	    key: "_setTreePoints",
+	    value: function _setTreePoints(edge) {
+	      var points = edge.points;
+
+	      if (this.rankdir == "TB" || this.rankdir == "BT") {
+	        points[0] = {
+	          x: edge.source.x,
+	          y: edge.source.y + (this.rankdir == "BT" ? -1 : 1) * edge.source.height / 2
+	        };
+	        points.splice(1, 0, {
+	          x: edge.source.x,
+	          y: points.slice(-2, -1)[0].y
+	        });
+	      }
+
+	      if (this.rankdir == "LR" || this.rankdir == "RL") {
+	        var yDiff = parseInt(edge.source.shapeType == 'underLine' ? edge.source.height / 2 : 0);
+	        var xDiff = parseInt(edge.source.shapeType == 'underLine' ? collapseIconWidth : 0);
+	        var dir = this.rankdir == "RL" ? -1 : 1;
+	        points[0] = {
+	          x: parseInt(edge.source.x) + parseInt(dir * (edge.source.width / 2)) + dir * xDiff,
+	          y: parseInt(edge.source.y) + yDiff
+	        };
+	        points.splice(1, 0, {
+	          x: points.slice(-2, -1)[0].x,
+	          y: parseInt(edge.source.y) + yDiff
+	        });
+	      }
+
+	      edge.points = points;
+	    }
+	    /**
+	     * 
+	     * @param {shapeType,points} edge 
+	     * @param {number} inflectionRadius 拐点的圆角半径
+	     */
+
+	  }, {
+	    key: "_getLineShape",
+	    value: function _getLineShape(edge, inflectionRadius) {
+	      var points = edge.points;
+	      var line = {
+	        type: 'path',
+	        // pah or brokenLine
+	        pointList: null,
+	        path: str
+	      };
+	      var head = points[0];
+	      var tail = points.slice(-1)[0];
+	      var str = "M" + head.x + " " + head.y;
+
+	      if (edge.shapeType == "bezier") {
+	        if (points.length == 3) {
+	          str += ",Q" + points[1].x + " " + points[1].y + " " + tail.x + " " + tail.y;
+	        }
+
+	        if (points.length == 4) {
+	          str += ",C" + points[1].x + " " + points[1].y + " " + points[2].x + " " + points[2].y + " " + tail.x + " " + tail.y;
+	        }
+
+	        if (points.length >= 5) {
+	          line.type = 'brokenLine';
+	          line.pointList = points.map(function (item) {
+	            return [item.x, item.y];
+	          });
+	          return line;
+	        }
+	      }
+
+	      if (edge.shapeType == "brokenLine") {
+	        _.each(points, function (point, i) {
+	          if (i) {
+	            if (inflectionRadius && i < points.length - 1) {
+	              //圆角连线
+	              var prePoint = points[i - 1];
+	              var nextPoint = points[i + 1]; //要从这个点到上个点的半径距离，已point为控制点，绘制nextPoint的半径距离
+
+	              var radius = inflectionRadius; //radius要做次二次校验，取radius 以及 point 和prePoint距离以及和 nextPoint 的最小值
+	              //let _disPre = Math.abs(Math.sqrt( (prePoint.x - point.x)*(prePoint.x - point.x) + (prePoint.y - point.y)*(prePoint.y - point.y) ));
+	              //let _disNext = Math.abs(Math.sqrt( (nextPoint.x - point.x)*(nextPoint.x - point.x) + (nextPoint.y - point.y)*(nextPoint.y - point.y) ));
+
+	              var _disPre = Math.max(Math.abs(prePoint.x - point.x) / 2, Math.abs(prePoint.y - point.y) / 2);
+
+	              var _disNext = Math.max(Math.abs(nextPoint.x - point.x) / 2, Math.abs(nextPoint.y - point.y) / 2);
+
+	              radius = _.min([radius, _disPre, _disNext]); //console.log(Math.atan2( point.y - prePoint.y , point.x - prePoint.x ),Math.atan2( nextPoint.y - point.y , nextPoint.x - point.x ))
+
+	              if (point.x == prePoint.x && point.y == prePoint.y || point.x == nextPoint.x && point.y == nextPoint.y || Math.atan2(point.y - prePoint.y, point.x - prePoint.x) == Math.atan2(nextPoint.y - point.y, nextPoint.x - point.x)) {
+	                //如果中间的这个点 ， 和前后的点在一个直线上面，就略过
+	                return;
+	              } else {
+	                var getPointOf = function getPointOf(p) {
+	                  var _atan2 = Math.atan2(p.y - point.y, p.x - point.x);
+
+	                  return {
+	                    x: point.x + radius * Math.cos(_atan2),
+	                    y: point.y + radius * Math.sin(_atan2)
+	                  };
+	                };
+	                var bezierBegin = getPointOf(prePoint);
+	                var bezierEnd = getPointOf(nextPoint);
+	                str += ",L" + bezierBegin.x + " " + bezierBegin.y + ",Q" + point.x + " " + point.y + " " + bezierEnd.x + " " + bezierEnd.y;
+	              }
+	            } else {
+	              //直角连线
+	              str += ",L" + point.x + " " + point.y;
+	            }
+	          }
+	        });
+	      }
+
+	      if (edge.target.shapeType == 'underLine') {
+	        var x = parseInt(edge.target.x) + parseInt(edge.target.width / 2);
+
+	        if (edge.target.rowData.__originData.children && edge.target.rowData.__originData.children.length) {
+	          x += collapseIconWidth;
+	        }
+	        str += ",L" + x + " " + (parseInt(edge.target.y) + parseInt(edge.target.height / 2));
+	      }
+	      line.path = str; //str += "z"
+
+	      return line;
+	    }
+	    /**
+	     * 字符串是否含有html标签的检测
+	     */
+
+	  }, {
+	    key: "_checkHtml",
+	    value: function _checkHtml(str) {
+	      var reg = /<[^>]+>/g;
+	      return reg.test(str);
+	    }
+	  }, {
+	    key: "_getContent",
+	    value: function _getContent(rowData) {
+	      var me = this;
+
+	      var _c; //this.node.content;
+
+
+	      var field = this.node.content.field;
+
+	      if (this._isField(field)) {
+	        _c = rowData[field];
+	      }
+
+	      if (me.node.content.format && _.isFunction(me.node.content.format)) {
+	        _c = me.node.content.format.apply(this, [_c, rowData]);
+	      } else {
+	        //否则用fieldConfig上面的
+	        var _coord = me.app.getComponent({
+	          name: 'coord'
+	        });
+
+	        var fieldConfig = _coord.getFieldConfig(field);
+
+	        if (fieldConfig) {
+	          _c = fieldConfig.getFormatValue(_c);
+	        }
+	      }
+
+	      return _c;
+	    }
+	  }, {
+	    key: "_isField",
+	    value: function _isField(str) {
+	      return ~this.dataFrame.fields.indexOf(str);
+	    }
+	  }, {
+	    key: "_getEleAndsetCanvasSize",
+	    value: function _getEleAndsetCanvasSize(node) {
+	      var _this5 = this;
+
+	      var me = this;
+	      return new Promise(function (resolve) {
+	        var content = node.content;
+	        var width = me.getProp(me.node.width, node);
+
+	        if (!width && me.node.rowData && node.rowData.width) {
+	          width = node.rowData.width;
+	        }
+
+	        var height = me.getProp(me.node.height, node);
+
+	        if (!height && me.node.rowData && node.rowData.height) {
+	          height = node.rowData.height;
+	        }
+
+	        var context = {
+	          fillStyle: me.getProp(me.node.content.fontColor, node),
+	          textAlign: me.getProp(me.node.content.textAlign, node),
+	          textBaseline: me.getProp(me.node.content.textBaseline, node),
+	          fontSize: me.getProp(me.node.content.fontSize, node)
+	        };
+	        var contentLabelId = "content_label_" + node.key;
+	        var _contentLabel = node.contentElement; // || me.nodesContentSp.getChildById( contentLabelId );
+
+	        if (_contentLabel) {
+	          //已经存在的label
+	          _contentLabel.resetText(content);
+
+	          _.extend(_contentLabel.context, context);
+	        } else {
+	          //新创建text，根据 text 来计算node需要的width和height
+	          _contentLabel = new _canvax["default"].Display.Text(content, {
+	            id: contentLabelId,
+	            context: context
+	          });
+	          _contentLabel.context.visible = false;
+
+	          if (!_.isArray(node.key)) {
+	            me.nodesContentSp.addChild(_contentLabel);
+	          }
+	        }
+	        var inited;
+
+	        if (_this5.node.content.init && typeof _this5.node.content.init === 'function') {
+	          inited = _this5.node.content.init(node, _contentLabel);
+	        }
+
+	        if (inited && typeof inited.then == 'function') {
+	          inited.then(function () {
+	            if (!width) {
+	              width = _contentLabel.getTextWidth() + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
+	            }
+
+	            if (!height) {
+	              height = _contentLabel.getTextHeight() + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
+	            }
+	            resolve({
+	              contentElement: _contentLabel,
+	              width: parseInt(width),
+	              height: parseInt(height)
+	            });
+	          });
+	        } else {
+	          if (!width) {
+	            width = _contentLabel.getTextWidth() + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
+	          }
+
+	          if (!height) {
+	            height = _contentLabel.getTextHeight() + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
+	          }
+	          resolve({
+	            contentElement: _contentLabel,
+	            width: parseInt(width),
+	            height: parseInt(height)
+	          });
+	        }
+	      });
+	    }
+	  }, {
+	    key: "_getEleAndsetHtmlSize",
+	    value: function _getEleAndsetHtmlSize(node) {
+	      var _this6 = this;
+
+	      var me = this;
+	      return new Promise(function (resolve) {
+	        var content = node.content;
+	        var width = me.getProp(me.node.width, node);
+
+	        if (!width && me.node.rowData && node.rowData.width) {
+	          width = node.rowData.width;
+	        }
+
+	        var height = me.getProp(me.node.height, node);
+
+	        if (!height && me.node.rowData && node.rowData.height) {
+	          height = node.rowData.height;
+	        }
+
+	        var contentLabelClass = "__content_label_" + node.key;
+	        var _dom = node.contentElement; // || this.domContainer.getElementsByClassName( contentLabelClass );
+
+	        if (!_dom) {
+	          _dom = document.createElement("div");
+	          _dom.className = "chartx_relation_node " + contentLabelClass;
+	          _dom.style.cssText += "; position:absolute;visibility:hidden;";
+
+	          _this6.domContainer.appendChild(_dom);
+	        } // else {
+	        //     _dom = _dom[0]
+	        // };
+
+
+	        _dom.style.cssText += "; color:" + me.getProp(me.node.content.fontColor, node) + ";";
+	        _dom.style.cssText += "; text-align:" + me.getProp(me.node.content.textAlign, node) + ";";
+	        _dom.style.cssText += "; vertical-align:" + me.getProp(me.node.content.textBaseline, node) + ";"; //TODO 这里注释掉， 就让dom自己内部去控制padding吧
+	        //_dom.style.cssText += "; padding:"+me.getProp(me.node.padding, node)+"px;"; 
+
+	        _dom.innerHTML = content;
+	        var inited;
+
+	        if (_this6.node.content.init && typeof _this6.node.content.init === 'function') {
+	          inited = _this6.node.content.init(node, _dom);
+	        }
+
+	        if (inited && typeof inited.then == 'function') {
+	          inited.then(function (opt) {
+	            if (!width) {
+	              width = _dom.offsetWidth; // + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
+	            }
+
+	            if (!height) {
+	              height = _dom.offsetHeight; // + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
+	            }
+	            resolve({
+	              contentElement: _dom,
+	              width: parseInt(width),
+	              height: parseInt(height)
+	            });
+	          });
+	        } else {
+	          if (!width) {
+	            width = _dom.offsetWidth; // + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
+	          }
+
+	          if (!height) {
+	            height = _dom.offsetHeight; // + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
+	          }
+	          resolve({
+	            contentElement: _dom,
+	            width: parseInt(width),
+	            height: parseInt(height)
+	          });
+	        }
+	      });
+	    }
+	  }, {
+	    key: "getNodesAt",
+	    value: function getNodesAt() {}
+	  }, {
+	    key: "getProp",
+	    value: function getProp(prop, nodeData) {
+	      var _prop = prop;
+
+	      if (this._isField(prop)) {
+	        _prop = nodeData.rowData[prop];
+	      } else {
+	        if (_.isArray(prop)) {
+	          _prop = prop[nodeData.iNode];
+	        }
+
+	        if (_.isFunction(prop)) {
+	          _prop = prop.apply(this, [nodeData]);
+	        }
+	      }
+	      return _prop;
+	    }
+	  }], [{
+	    key: "defaultProps",
+	    value: function defaultProps() {
+	      return {
+	        field: {
+	          detail: 'key字段设置',
+	          documentation: '',
+	          "default": null
+	        },
+	        //rankdir: "TB",
+	        //align: "DR",
+	        //nodesep: 0,//同级node之间的距离
+	        //edgesep: 0,
+	        //ranksep: 0, //排与排之间的距离
+	        rankdir: {
+	          detail: '布局方向',
+	          "default": null
+	        },
+	        ranksep: {
+	          detail: '排与排之间的距离',
+	          "default": 40
+	        },
+	        nodesep: {
+	          detail: '同级node之间的距离',
+	          "default": 20
+	        },
+	        node: {
+	          detail: '单个节点的配置',
+	          propertys: {
+	            shapeType: {
+	              detail: '节点图形，支持rect,diamond,underLine(adc用)',
+	              "default": 'rect'
+	            },
+	            maxWidth: {
+	              detail: '节点最大的width',
+	              "default": 200
+	            },
+	            cursor: {
+	              detail: '节点的鼠标样式',
+	              "default": 'pointer'
+	            },
+	            width: {
+	              detail: '节点的width,默认null（系统自动计算）, 也可以是个function，用户来计算每一个节点的width',
+	              "default": null
+	            },
+	            height: {
+	              detail: '节点的height,默认null（系统自动计算）, 也可以是个function，用户来计算每一个节点的height',
+	              "default": null
+	            },
+	            radius: {
+	              detail: '圆角角度，对rect生效',
+	              "default": 4
+	            },
+	            includedAngle: {
+	              detail: 'shapeType为diamond(菱形)的时候生效,x方向的夹角',
+	              "default": 60
+	            },
+	            fillStyle: {
+	              detail: '节点背景色',
+	              "default": '#ffffff'
+	            },
+	            lineWidth: {
+	              detail: '描边宽度',
+	              "default": 1
+	            },
+	            strokeStyle: {
+	              detail: '描边颜色',
+	              "default": '#e5e5e5'
+	            },
+	            shadow: {
+	              detail: '阴影设置',
+	              propertys: {
+	                shadowOffsetX: {
+	                  detail: 'x偏移量',
+	                  "default": 0
+	                },
+	                shadowOffsetY: {
+	                  detail: 'y偏移量',
+	                  "default": 0
+	                },
+	                shadowBlur: {
+	                  detail: '阴影模糊值',
+	                  "default": 0
+	                },
+	                shadowColor: {
+	                  detail: '阴影颜色',
+	                  "default": '#000000'
+	                }
+	              }
+	            },
+	            select: {
+	              detail: '选中效果',
+	              propertys: {
+	                enabled: {
+	                  detail: '是否开启选中',
+	                  "default": false
+	                },
+	                list: {
+	                  detail: '选中的node.key的集合,外部传入可以选中',
+	                  "default": []
+	                },
+	                triggerEventType: {
+	                  detail: '触发事件',
+	                  "default": 'click,tap'
+	                },
+	                shadow: {
+	                  detail: '选中效果的阴影设置',
+	                  propertys: {
+	                    shadowOffsetX: {
+	                      detail: 'x偏移量',
+	                      "default": 0
+	                    },
+	                    shadowOffsetY: {
+	                      detail: 'y偏移量',
+	                      "default": 0
+	                    },
+	                    shadowBlur: {
+	                      detail: '阴影模糊值',
+	                      "default": 0
+	                    },
+	                    shadowColor: {
+	                      detail: '阴影颜色',
+	                      "default": '#000000'
+	                    }
+	                  }
+	                },
+	                fillStyle: {
+	                  detail: 'hover节点背景色',
+	                  "default": '#ffffff'
+	                },
+	                lineWidth: {
+	                  detail: 'hover描边宽度',
+	                  "default": 1
+	                },
+	                strokeStyle: {
+	                  detail: 'hover描边颜色',
+	                  "default": '#e5e5e5'
+	                },
+	                onbefore: {
+	                  detail: '执行select处理函数的前处理函数，返回false则取消执行select',
+	                  "default": null
+	                },
+	                onend: {
+	                  detail: '执行select处理函数的后处理函数',
+	                  "default": null
+	                },
+	                content: {
+	                  detail: '选中后节点内容配置',
+	                  propertys: {
+	                    fontColor: {
+	                      detail: '内容文本颜色',
+	                      "default": '#666'
+	                    },
+	                    fontSize: {
+	                      detail: '内容文本大小（在canvas格式下有效）',
+	                      "default": 14
+	                    },
+	                    format: {
+	                      detail: '内容格式化处理函数',
+	                      "default": null
+	                    }
+	                  }
+	                }
+	              }
+	            },
+	            focus: {
+	              detail: 'hover效果',
+	              propertys: {
+	                enabled: {
+	                  detail: '是否开启hover效果',
+	                  "default": false
+	                },
+	                shadow: {
+	                  detail: '选中效果的阴影设置',
+	                  propertys: {
+	                    shadowOffsetX: {
+	                      detail: 'x偏移量',
+	                      "default": 0
+	                    },
+	                    shadowOffsetY: {
+	                      detail: 'y偏移量',
+	                      "default": 0
+	                    },
+	                    shadowBlur: {
+	                      detail: '阴影模糊值',
+	                      "default": 0
+	                    },
+	                    shadowColor: {
+	                      detail: '阴影颜色',
+	                      "default": '#000000'
+	                    }
+	                  }
+	                },
+	                fillStyle: {
+	                  detail: 'hover节点背景色',
+	                  "default": '#ffffff'
+	                },
+	                content: {
+	                  detail: 'hover后节点内容配置',
+	                  propertys: {
+	                    fontColor: {
+	                      detail: '内容文本颜色',
+	                      "default": '#666'
+	                    },
+	                    fontSize: {
+	                      detail: '内容文本大小（在canvas格式下有效）',
+	                      "default": 14
+	                    },
+	                    format: {
+	                      detail: '内容格式化处理函数',
+	                      "default": null
+	                    }
+	                  }
+	                },
+	                lineWidth: {
+	                  detail: 'hover描边宽度',
+	                  "default": 1
+	                },
+	                strokeStyle: {
+	                  detail: 'hover描边颜色',
+	                  "default": '#e5e5e5'
+	                }
+	              }
+	            },
+	            padding: {
+	              detail: 'node节点容器到内容的边距,节点内容是canvas的时候生效，dom节点不生效',
+	              "default": 10
+	            },
+	            content: {
+	              detail: '节点内容配置',
+	              propertys: {
+	                field: {
+	                  detail: '内容字段',
+	                  documentation: '默认content字段',
+	                  "default": 'content'
+	                },
+	                fontColor: {
+	                  detail: '内容文本颜色',
+	                  "default": '#666'
+	                },
+	                fontSize: {
+	                  detail: '内容文本大小（在canvas格式下有效）',
+	                  "default": 14
+	                },
+	                format: {
+	                  detail: '内容格式化处理函数',
+	                  "default": null
+	                },
+	                textAlign: {
+	                  detail: "textAlign",
+	                  "default": "center"
+	                },
+	                textBaseline: {
+	                  detail: 'textBaseline',
+	                  "default": "middle"
+	                },
+	                init: {
+	                  detail: '内容节点的初始化完成回调',
+	                  documentation: '在节点内容配置为需要异步完成的时候，比如节点内容配置为一个magix的view',
+	                  "default": null
+	                }
+	              }
+	            }
+	          }
+	        },
+	        line: {
+	          detail: '两个节点连线配置',
+	          propertys: {
+	            isTree: {
+	              detail: '是否树结构的连线',
+	              documentation: '非树结构启用该配置可能会有意想不到的惊喜，慎用',
+	              "default": false
+	            },
+	            inflectionRadius: {
+	              detail: '树状连线的拐点圆角半径',
+	              "default": 0
+	            },
+	            shapeType: {
+	              detail: '连线的图形样式 brokenLine or bezier',
+	              "default": 'bezier'
+	            },
+	            lineWidth: {
+	              detail: '线宽',
+	              "default": 1
+	            },
+	            strokeStyle: {
+	              detail: '连线的颜色',
+	              "default": '#e5e5e5'
+	            },
+	            lineType: {
+	              detail: '连线样式（虚线等）',
+	              "default": 'solid'
+	            },
+	            arrow: {
+	              detail: '连线箭头配置',
+	              propertys: {
+	                enabled: {
+	                  detail: '是否开启arrow设置',
+	                  "default": true
+	                },
+	                offsetX: {
+	                  detail: 'x方向偏移',
+	                  "default": 0
+	                },
+	                offsetY: {
+	                  detail: 'y方向偏移',
+	                  "default": 0
+	                }
+	              }
+	            },
+	            edgeLabel: {
+	              detail: '连线上面的label配置',
+	              propertys: {
+	                enabled: {
+	                  detail: '是否开启label设置',
+	                  "default": true
+	                },
+	                fontColor: {
+	                  detail: '文本颜色',
+	                  "default": '#ccc'
+	                },
+	                fontSize: {
+	                  detail: '文本大小',
+	                  "default": 12
+	                },
+	                // offsetX: {
+	                //     detail: 'x方向偏移量',
+	                //     default:0
+	                // },
+	                // offsetY: {
+	                //     detail: 'y方向偏移量',
+	                //     default:0
+	                // },
+	                offset: {
+	                  detail: 'label的位置，函数，参数是整个edge对象',
+	                  "default": null
+	                }
+	              }
+	            },
+	            icon: {
+	              detail: '连线上面的操作icon',
+	              propertys: {
+	                enabled: {
+	                  detail: '是否开启线上的icon设置',
+	                  "default": false
+	                },
+	                charCode: {
+	                  detail: 'iconfont上面对应的unicode中&#x后面的字符',
+	                  "default": null
+	                },
+	                lineWidth: {
+	                  detail: 'icon描边线宽',
+	                  "default": 1
+	                },
+	                strokeStyle: {
+	                  detail: 'icon的描边颜色',
+	                  "default": '#e5e5e5'
+	                },
+	                fontColor: {
+	                  detail: 'icon的颜色',
+	                  "default": '#e5e5e5'
+	                },
+	                fontFamily: {
+	                  detail: 'font-face的font-family设置',
+	                  "default": 'iconfont'
+	                },
+	                fontSize: {
+	                  detail: 'icon的字体大小',
+	                  "default": 14
+	                },
+	                offset: {
+	                  detail: 'icon的位置，函数，参数是整个edge对象',
+	                  "default": null
+	                },
+	                offsetX: {
+	                  detail: '在计算出offset后的X再次便宜量',
+	                  "default": 1
+	                },
+	                offsetY: {
+	                  detail: '在计算出offset后的Y再次便宜量',
+	                  "default": 2
+	                },
+	                background: {
+	                  detail: 'icon的背景颜色，背景为圆形',
+	                  "default": "#fff"
+	                }
+	              }
+	            },
+	            cursor: 'default'
+	          }
+	        },
+	        status: {
+	          detail: '一些开关配置',
+	          propertys: {
+	            transform: {
+	              detail: "是否启动拖拽缩放整个画布",
+	              propertys: {
+	                fitView: {
+	                  detail: "自动缩放",
+	                  "default": '' //autoZoom
+
+	                },
+	                enabled: {
+	                  detail: "是否开启",
+	                  "default": true
+	                },
+	                scale: {
+	                  detail: "缩放值",
+	                  "default": 1
+	                },
+	                scaleOrigin: {
+	                  detail: "缩放原点",
+	                  "default": {
+	                    x: 0,
+	                    y: 0
+	                  }
+	                },
+	                wheelAction: {
+	                  detail: "滚轮触屏滑动触发的行为，可选有scale和offset，默认offset",
+	                  "default": "offset"
+	                }
+	              }
+	            }
+	          }
+	        }
+	      };
+	    }
+	  }]);
+	  return RelationBase;
+	}(_index["default"]);
+
+	var _default = RelationBase;
+	exports["default"] = _default;
+	});
+
+	unwrapExports(base);
+
+	function defaultSeparation(a, b) {
+	  return a.parent === b.parent ? 1 : 2;
+	}
+
+	function meanX(children) {
+	  return children.reduce(meanXReduce, 0) / children.length;
+	}
+
+	function meanXReduce(x, c) {
+	  return x + c.x;
+	}
+
+	function maxY(children) {
+	  return 1 + children.reduce(maxYReduce, 0);
+	}
+
+	function maxYReduce(y, c) {
+	  return Math.max(y, c.y);
+	}
+
+	function leafLeft(node) {
+	  var children;
+	  while (children = node.children) node = children[0];
+	  return node;
+	}
+
+	function leafRight(node) {
+	  var children;
+	  while (children = node.children) node = children[children.length - 1];
+	  return node;
+	}
+
+	function cluster() {
+	  var separation = defaultSeparation,
+	      dx = 1,
+	      dy = 1,
+	      nodeSize = false;
+
+	  function cluster(root) {
+	    var previousNode,
+	        x = 0;
+
+	    // First walk, computing the initial x & y values.
+	    root.eachAfter(function(node) {
+	      var children = node.children;
+	      if (children) {
+	        node.x = meanX(children);
+	        node.y = maxY(children);
+	      } else {
+	        node.x = previousNode ? x += separation(node, previousNode) : 0;
+	        node.y = 0;
+	        previousNode = node;
+	      }
+	    });
+
+	    var left = leafLeft(root),
+	        right = leafRight(root),
+	        x0 = left.x - separation(left, right) / 2,
+	        x1 = right.x + separation(right, left) / 2;
+
+	    // Second walk, normalizing x & y to the desired size.
+	    return root.eachAfter(nodeSize ? function(node) {
+	      node.x = (node.x - root.x) * dx;
+	      node.y = (root.y - node.y) * dy;
+	    } : function(node) {
+	      node.x = (node.x - x0) / (x1 - x0) * dx;
+	      node.y = (1 - (root.y ? node.y / root.y : 1)) * dy;
+	    });
+	  }
+
+	  cluster.separation = function(x) {
+	    return arguments.length ? (separation = x, cluster) : separation;
+	  };
+
+	  cluster.size = function(x) {
+	    return arguments.length ? (nodeSize = false, dx = +x[0], dy = +x[1], cluster) : (nodeSize ? null : [dx, dy]);
+	  };
+
+	  cluster.nodeSize = function(x) {
+	    return arguments.length ? (nodeSize = true, dx = +x[0], dy = +x[1], cluster) : (nodeSize ? [dx, dy] : null);
+	  };
+
+	  return cluster;
+	}
+
+	function count(node) {
+	  var sum = 0,
+	      children = node.children,
+	      i = children && children.length;
+	  if (!i) sum = 1;
+	  else while (--i >= 0) sum += children[i].value;
+	  node.value = sum;
+	}
+
+	function node_count() {
+	  return this.eachAfter(count);
+	}
+
+	function node_each(callback) {
+	  var node = this, current, next = [node], children, i, n;
+	  do {
+	    current = next.reverse(), next = [];
+	    while (node = current.pop()) {
+	      callback(node), children = node.children;
+	      if (children) for (i = 0, n = children.length; i < n; ++i) {
+	        next.push(children[i]);
+	      }
+	    }
+	  } while (next.length);
+	  return this;
+	}
+
+	function node_eachBefore(callback) {
+	  var node = this, nodes = [node], children, i;
+	  while (node = nodes.pop()) {
+	    callback(node), children = node.children;
+	    if (children) for (i = children.length - 1; i >= 0; --i) {
+	      nodes.push(children[i]);
+	    }
+	  }
+	  return this;
+	}
+
+	function node_eachAfter(callback) {
+	  var node = this, nodes = [node], next = [], children, i, n;
+	  while (node = nodes.pop()) {
+	    next.push(node), children = node.children;
+	    if (children) for (i = 0, n = children.length; i < n; ++i) {
+	      nodes.push(children[i]);
+	    }
+	  }
+	  while (node = next.pop()) {
+	    callback(node);
+	  }
+	  return this;
+	}
+
+	function node_sum(value) {
+	  return this.eachAfter(function(node) {
+	    var sum = +value(node.data) || 0,
+	        children = node.children,
+	        i = children && children.length;
+	    while (--i >= 0) sum += children[i].value;
+	    node.value = sum;
+	  });
+	}
+
+	function node_sort(compare) {
+	  return this.eachBefore(function(node) {
+	    if (node.children) {
+	      node.children.sort(compare);
+	    }
+	  });
+	}
+
+	function node_path(end) {
+	  var start = this,
+	      ancestor = leastCommonAncestor(start, end),
+	      nodes = [start];
+	  while (start !== ancestor) {
+	    start = start.parent;
+	    nodes.push(start);
+	  }
+	  var k = nodes.length;
+	  while (end !== ancestor) {
+	    nodes.splice(k, 0, end);
+	    end = end.parent;
+	  }
+	  return nodes;
+	}
+
+	function leastCommonAncestor(a, b) {
+	  if (a === b) return a;
+	  var aNodes = a.ancestors(),
+	      bNodes = b.ancestors(),
+	      c = null;
+	  a = aNodes.pop();
+	  b = bNodes.pop();
+	  while (a === b) {
+	    c = a;
+	    a = aNodes.pop();
+	    b = bNodes.pop();
+	  }
+	  return c;
+	}
+
+	function node_ancestors() {
+	  var node = this, nodes = [node];
+	  while (node = node.parent) {
+	    nodes.push(node);
+	  }
+	  return nodes;
+	}
+
+	function node_descendants() {
+	  var nodes = [];
+	  this.each(function(node) {
+	    nodes.push(node);
+	  });
+	  return nodes;
+	}
+
+	function node_leaves() {
+	  var leaves = [];
+	  this.eachBefore(function(node) {
+	    if (!node.children) {
+	      leaves.push(node);
+	    }
+	  });
+	  return leaves;
+	}
+
+	function node_links() {
+	  var root = this, links = [];
+	  root.each(function(node) {
+	    if (node !== root) { // Don’t include the root’s parent, if any.
+	      links.push({source: node.parent, target: node});
+	    }
+	  });
+	  return links;
+	}
+
+	function hierarchy$1(data, children) {
+	  var root = new Node(data),
+	      valued = +data.value && (root.value = data.value),
+	      node,
+	      nodes = [root],
+	      child,
+	      childs,
+	      i,
+	      n;
+
+	  if (children == null) children = defaultChildren;
+
+	  while (node = nodes.pop()) {
+	    if (valued) node.value = +node.data.value;
+	    if ((childs = children(node.data)) && (n = childs.length)) {
+	      node.children = new Array(n);
+	      for (i = n - 1; i >= 0; --i) {
+	        nodes.push(child = node.children[i] = new Node(childs[i]));
+	        child.parent = node;
+	        child.depth = node.depth + 1;
+	      }
+	    }
+	  }
+
+	  return root.eachBefore(computeHeight);
+	}
+
+	function node_copy() {
+	  return hierarchy$1(this).eachBefore(copyData);
+	}
+
+	function defaultChildren(d) {
+	  return d.children;
+	}
+
+	function copyData(node) {
+	  node.data = node.data.data;
+	}
+
+	function computeHeight(node) {
+	  var height = 0;
+	  do node.height = height;
+	  while ((node = node.parent) && (node.height < ++height));
+	}
+
+	function Node(data) {
+	  this.data = data;
+	  this.depth =
+	  this.height = 0;
+	  this.parent = null;
+	}
+
+	Node.prototype = hierarchy$1.prototype = {
+	  constructor: Node,
+	  count: node_count,
+	  each: node_each,
+	  eachAfter: node_eachAfter,
+	  eachBefore: node_eachBefore,
+	  sum: node_sum,
+	  sort: node_sort,
+	  path: node_path,
+	  ancestors: node_ancestors,
+	  descendants: node_descendants,
+	  leaves: node_leaves,
+	  links: node_links,
+	  copy: node_copy
+	};
+
+	var slice$1 = Array.prototype.slice;
+
+	function shuffle(array) {
+	  var m = array.length,
+	      t,
+	      i;
+
+	  while (m) {
+	    i = Math.random() * m-- | 0;
+	    t = array[m];
+	    array[m] = array[i];
+	    array[i] = t;
+	  }
+
+	  return array;
+	}
+
+	function enclose(circles) {
+	  var i = 0, n = (circles = shuffle(slice$1.call(circles))).length, B = [], p, e;
+
+	  while (i < n) {
+	    p = circles[i];
+	    if (e && enclosesWeak(e, p)) ++i;
+	    else e = encloseBasis(B = extendBasis(B, p)), i = 0;
+	  }
+
+	  return e;
+	}
+
+	function extendBasis(B, p) {
+	  var i, j;
+
+	  if (enclosesWeakAll(p, B)) return [p];
+
+	  // If we get here then B must have at least one element.
+	  for (i = 0; i < B.length; ++i) {
+	    if (enclosesNot(p, B[i])
+	        && enclosesWeakAll(encloseBasis2(B[i], p), B)) {
+	      return [B[i], p];
+	    }
+	  }
+
+	  // If we get here then B must have at least two elements.
+	  for (i = 0; i < B.length - 1; ++i) {
+	    for (j = i + 1; j < B.length; ++j) {
+	      if (enclosesNot(encloseBasis2(B[i], B[j]), p)
+	          && enclosesNot(encloseBasis2(B[i], p), B[j])
+	          && enclosesNot(encloseBasis2(B[j], p), B[i])
+	          && enclosesWeakAll(encloseBasis3(B[i], B[j], p), B)) {
+	        return [B[i], B[j], p];
+	      }
+	    }
+	  }
+
+	  // If we get here then something is very wrong.
+	  throw new Error;
+	}
+
+	function enclosesNot(a, b) {
+	  var dr = a.r - b.r, dx = b.x - a.x, dy = b.y - a.y;
+	  return dr < 0 || dr * dr < dx * dx + dy * dy;
+	}
+
+	function enclosesWeak(a, b) {
+	  var dr = a.r - b.r + 1e-6, dx = b.x - a.x, dy = b.y - a.y;
+	  return dr > 0 && dr * dr > dx * dx + dy * dy;
+	}
+
+	function enclosesWeakAll(a, B) {
+	  for (var i = 0; i < B.length; ++i) {
+	    if (!enclosesWeak(a, B[i])) {
+	      return false;
+	    }
+	  }
+	  return true;
+	}
+
+	function encloseBasis(B) {
+	  switch (B.length) {
+	    case 1: return encloseBasis1(B[0]);
+	    case 2: return encloseBasis2(B[0], B[1]);
+	    case 3: return encloseBasis3(B[0], B[1], B[2]);
+	  }
+	}
+
+	function encloseBasis1(a) {
+	  return {
+	    x: a.x,
+	    y: a.y,
+	    r: a.r
+	  };
+	}
+
+	function encloseBasis2(a, b) {
+	  var x1 = a.x, y1 = a.y, r1 = a.r,
+	      x2 = b.x, y2 = b.y, r2 = b.r,
+	      x21 = x2 - x1, y21 = y2 - y1, r21 = r2 - r1,
+	      l = Math.sqrt(x21 * x21 + y21 * y21);
+	  return {
+	    x: (x1 + x2 + x21 / l * r21) / 2,
+	    y: (y1 + y2 + y21 / l * r21) / 2,
+	    r: (l + r1 + r2) / 2
+	  };
+	}
+
+	function encloseBasis3(a, b, c) {
+	  var x1 = a.x, y1 = a.y, r1 = a.r,
+	      x2 = b.x, y2 = b.y, r2 = b.r,
+	      x3 = c.x, y3 = c.y, r3 = c.r,
+	      a2 = x1 - x2,
+	      a3 = x1 - x3,
+	      b2 = y1 - y2,
+	      b3 = y1 - y3,
+	      c2 = r2 - r1,
+	      c3 = r3 - r1,
+	      d1 = x1 * x1 + y1 * y1 - r1 * r1,
+	      d2 = d1 - x2 * x2 - y2 * y2 + r2 * r2,
+	      d3 = d1 - x3 * x3 - y3 * y3 + r3 * r3,
+	      ab = a3 * b2 - a2 * b3,
+	      xa = (b2 * d3 - b3 * d2) / (ab * 2) - x1,
+	      xb = (b3 * c2 - b2 * c3) / ab,
+	      ya = (a3 * d2 - a2 * d3) / (ab * 2) - y1,
+	      yb = (a2 * c3 - a3 * c2) / ab,
+	      A = xb * xb + yb * yb - 1,
+	      B = 2 * (r1 + xa * xb + ya * yb),
+	      C = xa * xa + ya * ya - r1 * r1,
+	      r = -(A ? (B + Math.sqrt(B * B - 4 * A * C)) / (2 * A) : C / B);
+	  return {
+	    x: x1 + xa + xb * r,
+	    y: y1 + ya + yb * r,
+	    r: r
+	  };
+	}
+
+	function place(b, a, c) {
+	  var dx = b.x - a.x, x, a2,
+	      dy = b.y - a.y, y, b2,
+	      d2 = dx * dx + dy * dy;
+	  if (d2) {
+	    a2 = a.r + c.r, a2 *= a2;
+	    b2 = b.r + c.r, b2 *= b2;
+	    if (a2 > b2) {
+	      x = (d2 + b2 - a2) / (2 * d2);
+	      y = Math.sqrt(Math.max(0, b2 / d2 - x * x));
+	      c.x = b.x - x * dx - y * dy;
+	      c.y = b.y - x * dy + y * dx;
+	    } else {
+	      x = (d2 + a2 - b2) / (2 * d2);
+	      y = Math.sqrt(Math.max(0, a2 / d2 - x * x));
+	      c.x = a.x + x * dx - y * dy;
+	      c.y = a.y + x * dy + y * dx;
+	    }
+	  } else {
+	    c.x = a.x + c.r;
+	    c.y = a.y;
+	  }
+	}
+
+	function intersects(a, b) {
+	  var dr = a.r + b.r - 1e-6, dx = b.x - a.x, dy = b.y - a.y;
+	  return dr > 0 && dr * dr > dx * dx + dy * dy;
+	}
+
+	function score(node) {
+	  var a = node._,
+	      b = node.next._,
+	      ab = a.r + b.r,
+	      dx = (a.x * b.r + b.x * a.r) / ab,
+	      dy = (a.y * b.r + b.y * a.r) / ab;
+	  return dx * dx + dy * dy;
+	}
+
+	function Node$1(circle) {
+	  this._ = circle;
+	  this.next = null;
+	  this.previous = null;
+	}
+
+	function packEnclose(circles) {
+	  if (!(n = circles.length)) return 0;
+
+	  var a, b, c, n, aa, ca, i, j, k, sj, sk;
+
+	  // Place the first circle.
+	  a = circles[0], a.x = 0, a.y = 0;
+	  if (!(n > 1)) return a.r;
+
+	  // Place the second circle.
+	  b = circles[1], a.x = -b.r, b.x = a.r, b.y = 0;
+	  if (!(n > 2)) return a.r + b.r;
+
+	  // Place the third circle.
+	  place(b, a, c = circles[2]);
+
+	  // Initialize the front-chain using the first three circles a, b and c.
+	  a = new Node$1(a), b = new Node$1(b), c = new Node$1(c);
+	  a.next = c.previous = b;
+	  b.next = a.previous = c;
+	  c.next = b.previous = a;
+
+	  // Attempt to place each remaining circle…
+	  pack: for (i = 3; i < n; ++i) {
+	    place(a._, b._, c = circles[i]), c = new Node$1(c);
+
+	    // Find the closest intersecting circle on the front-chain, if any.
+	    // “Closeness” is determined by linear distance along the front-chain.
+	    // “Ahead” or “behind” is likewise determined by linear distance.
+	    j = b.next, k = a.previous, sj = b._.r, sk = a._.r;
+	    do {
+	      if (sj <= sk) {
+	        if (intersects(j._, c._)) {
+	          b = j, a.next = b, b.previous = a, --i;
+	          continue pack;
+	        }
+	        sj += j._.r, j = j.next;
+	      } else {
+	        if (intersects(k._, c._)) {
+	          a = k, a.next = b, b.previous = a, --i;
+	          continue pack;
+	        }
+	        sk += k._.r, k = k.previous;
+	      }
+	    } while (j !== k.next);
+
+	    // Success! Insert the new circle c between a and b.
+	    c.previous = a, c.next = b, a.next = b.previous = b = c;
+
+	    // Compute the new closest circle pair to the centroid.
+	    aa = score(a);
+	    while ((c = c.next) !== b) {
+	      if ((ca = score(c)) < aa) {
+	        a = c, aa = ca;
+	      }
+	    }
+	    b = a.next;
+	  }
+
+	  // Compute the enclosing circle of the front chain.
+	  a = [b._], c = b; while ((c = c.next) !== b) a.push(c._); c = enclose(a);
+
+	  // Translate the circles to put the enclosing circle around the origin.
+	  for (i = 0; i < n; ++i) a = circles[i], a.x -= c.x, a.y -= c.y;
+
+	  return c.r;
+	}
+
+	function siblings(circles) {
+	  packEnclose(circles);
+	  return circles;
+	}
+
+	function optional(f) {
+	  return f == null ? null : required(f);
+	}
+
+	function required(f) {
+	  if (typeof f !== "function") throw new Error;
+	  return f;
+	}
+
+	function constantZero() {
+	  return 0;
+	}
+
+	function constant(x) {
+	  return function() {
+	    return x;
+	  };
+	}
+
+	function defaultRadius(d) {
+	  return Math.sqrt(d.value);
+	}
+
+	function index() {
+	  var radius = null,
+	      dx = 1,
+	      dy = 1,
+	      padding = constantZero;
+
+	  function pack(root) {
+	    root.x = dx / 2, root.y = dy / 2;
+	    if (radius) {
+	      root.eachBefore(radiusLeaf(radius))
+	          .eachAfter(packChildren(padding, 0.5))
+	          .eachBefore(translateChild(1));
+	    } else {
+	      root.eachBefore(radiusLeaf(defaultRadius))
+	          .eachAfter(packChildren(constantZero, 1))
+	          .eachAfter(packChildren(padding, root.r / Math.min(dx, dy)))
+	          .eachBefore(translateChild(Math.min(dx, dy) / (2 * root.r)));
+	    }
+	    return root;
+	  }
+
+	  pack.radius = function(x) {
+	    return arguments.length ? (radius = optional(x), pack) : radius;
+	  };
+
+	  pack.size = function(x) {
+	    return arguments.length ? (dx = +x[0], dy = +x[1], pack) : [dx, dy];
+	  };
+
+	  pack.padding = function(x) {
+	    return arguments.length ? (padding = typeof x === "function" ? x : constant(+x), pack) : padding;
+	  };
+
+	  return pack;
+	}
+
+	function radiusLeaf(radius) {
+	  return function(node) {
+	    if (!node.children) {
+	      node.r = Math.max(0, +radius(node) || 0);
+	    }
+	  };
+	}
+
+	function packChildren(padding, k) {
+	  return function(node) {
+	    if (children = node.children) {
+	      var children,
+	          i,
+	          n = children.length,
+	          r = padding(node) * k || 0,
+	          e;
+
+	      if (r) for (i = 0; i < n; ++i) children[i].r += r;
+	      e = packEnclose(children);
+	      if (r) for (i = 0; i < n; ++i) children[i].r -= r;
+	      node.r = e + r;
+	    }
+	  };
+	}
+
+	function translateChild(k) {
+	  return function(node) {
+	    var parent = node.parent;
+	    node.r *= k;
+	    if (parent) {
+	      node.x = parent.x + k * node.x;
+	      node.y = parent.y + k * node.y;
+	    }
+	  };
+	}
+
+	function roundNode(node) {
+	  node.x0 = Math.round(node.x0);
+	  node.y0 = Math.round(node.y0);
+	  node.x1 = Math.round(node.x1);
+	  node.y1 = Math.round(node.y1);
+	}
+
+	function treemapDice(parent, x0, y0, x1, y1) {
+	  var nodes = parent.children,
+	      node,
+	      i = -1,
+	      n = nodes.length,
+	      k = parent.value && (x1 - x0) / parent.value;
+
+	  while (++i < n) {
+	    node = nodes[i], node.y0 = y0, node.y1 = y1;
+	    node.x0 = x0, node.x1 = x0 += node.value * k;
+	  }
+	}
+
+	function partition$1() {
+	  var dx = 1,
+	      dy = 1,
+	      padding = 0,
+	      round = false;
+
+	  function partition(root) {
+	    var n = root.height + 1;
+	    root.x0 =
+	    root.y0 = padding;
+	    root.x1 = dx;
+	    root.y1 = dy / n;
+	    root.eachBefore(positionNode(dy, n));
+	    if (round) root.eachBefore(roundNode);
+	    return root;
+	  }
+
+	  function positionNode(dy, n) {
+	    return function(node) {
+	      if (node.children) {
+	        treemapDice(node, node.x0, dy * (node.depth + 1) / n, node.x1, dy * (node.depth + 2) / n);
+	      }
+	      var x0 = node.x0,
+	          y0 = node.y0,
+	          x1 = node.x1 - padding,
+	          y1 = node.y1 - padding;
+	      if (x1 < x0) x0 = x1 = (x0 + x1) / 2;
+	      if (y1 < y0) y0 = y1 = (y0 + y1) / 2;
+	      node.x0 = x0;
+	      node.y0 = y0;
+	      node.x1 = x1;
+	      node.y1 = y1;
+	    };
+	  }
+
+	  partition.round = function(x) {
+	    return arguments.length ? (round = !!x, partition) : round;
+	  };
+
+	  partition.size = function(x) {
+	    return arguments.length ? (dx = +x[0], dy = +x[1], partition) : [dx, dy];
+	  };
+
+	  partition.padding = function(x) {
+	    return arguments.length ? (padding = +x, partition) : padding;
+	  };
+
+	  return partition;
+	}
+
+	var keyPrefix = "$", // Protect against keys like “__proto__”.
+	    preroot = {depth: -1},
+	    ambiguous = {};
+
+	function defaultId(d) {
+	  return d.id;
+	}
+
+	function defaultParentId(d) {
+	  return d.parentId;
+	}
+
+	function stratify() {
+	  var id = defaultId,
+	      parentId = defaultParentId;
+
+	  function stratify(data) {
+	    var d,
+	        i,
+	        n = data.length,
+	        root,
+	        parent,
+	        node,
+	        nodes = new Array(n),
+	        nodeId,
+	        nodeKey,
+	        nodeByKey = {};
+
+	    for (i = 0; i < n; ++i) {
+	      d = data[i], node = nodes[i] = new Node(d);
+	      if ((nodeId = id(d, i, data)) != null && (nodeId += "")) {
+	        nodeKey = keyPrefix + (node.id = nodeId);
+	        nodeByKey[nodeKey] = nodeKey in nodeByKey ? ambiguous : node;
+	      }
+	    }
+
+	    for (i = 0; i < n; ++i) {
+	      node = nodes[i], nodeId = parentId(data[i], i, data);
+	      if (nodeId == null || !(nodeId += "")) {
+	        if (root) throw new Error("multiple roots");
+	        root = node;
+	      } else {
+	        parent = nodeByKey[keyPrefix + nodeId];
+	        if (!parent) throw new Error("missing: " + nodeId);
+	        if (parent === ambiguous) throw new Error("ambiguous: " + nodeId);
+	        if (parent.children) parent.children.push(node);
+	        else parent.children = [node];
+	        node.parent = parent;
+	      }
+	    }
+
+	    if (!root) throw new Error("no root");
+	    root.parent = preroot;
+	    root.eachBefore(function(node) { node.depth = node.parent.depth + 1; --n; }).eachBefore(computeHeight);
+	    root.parent = null;
+	    if (n > 0) throw new Error("cycle");
+
+	    return root;
+	  }
+
+	  stratify.id = function(x) {
+	    return arguments.length ? (id = required(x), stratify) : id;
+	  };
+
+	  stratify.parentId = function(x) {
+	    return arguments.length ? (parentId = required(x), stratify) : parentId;
+	  };
+
+	  return stratify;
+	}
+
+	function defaultSeparation$1(a, b) {
+	  return a.parent === b.parent ? 1 : 2;
+	}
+
+	// function radialSeparation(a, b) {
+	//   return (a.parent === b.parent ? 1 : 2) / a.depth;
+	// }
+
+	// This function is used to traverse the left contour of a subtree (or
+	// subforest). It returns the successor of v on this contour. This successor is
+	// either given by the leftmost child of v or by the thread of v. The function
+	// returns null if and only if v is on the highest level of its subtree.
+	function nextLeft(v) {
+	  var children = v.children;
+	  return children ? children[0] : v.t;
+	}
+
+	// This function works analogously to nextLeft.
+	function nextRight(v) {
+	  var children = v.children;
+	  return children ? children[children.length - 1] : v.t;
+	}
+
+	// Shifts the current subtree rooted at w+. This is done by increasing
+	// prelim(w+) and mod(w+) by shift.
+	function moveSubtree(wm, wp, shift) {
+	  var change = shift / (wp.i - wm.i);
+	  wp.c -= change;
+	  wp.s += shift;
+	  wm.c += change;
+	  wp.z += shift;
+	  wp.m += shift;
+	}
+
+	// All other shifts, applied to the smaller subtrees between w- and w+, are
+	// performed by this function. To prepare the shifts, we have to adjust
+	// change(w+), shift(w+), and change(w-).
+	function executeShifts(v) {
+	  var shift = 0,
+	      change = 0,
+	      children = v.children,
+	      i = children.length,
+	      w;
+	  while (--i >= 0) {
+	    w = children[i];
+	    w.z += shift;
+	    w.m += shift;
+	    shift += w.s + (change += w.c);
+	  }
+	}
+
+	// If vi-’s ancestor is a sibling of v, returns vi-’s ancestor. Otherwise,
+	// returns the specified (default) ancestor.
+	function nextAncestor(vim, v, ancestor) {
+	  return vim.a.parent === v.parent ? vim.a : ancestor;
+	}
+
+	function TreeNode(node, i) {
+	  this._ = node;
+	  this.parent = null;
+	  this.children = null;
+	  this.A = null; // default ancestor
+	  this.a = this; // ancestor
+	  this.z = 0; // prelim
+	  this.m = 0; // mod
+	  this.c = 0; // change
+	  this.s = 0; // shift
+	  this.t = null; // thread
+	  this.i = i; // number
+	}
+
+	TreeNode.prototype = Object.create(Node.prototype);
+
+	function treeRoot(root) {
+	  var tree = new TreeNode(root, 0),
+	      node,
+	      nodes = [tree],
+	      child,
+	      children,
+	      i,
+	      n;
+
+	  while (node = nodes.pop()) {
+	    if (children = node._.children) {
+	      node.children = new Array(n = children.length);
+	      for (i = n - 1; i >= 0; --i) {
+	        nodes.push(child = node.children[i] = new TreeNode(children[i], i));
+	        child.parent = node;
+	      }
+	    }
+	  }
+
+	  (tree.parent = new TreeNode(null, 0)).children = [tree];
+	  return tree;
+	}
+
+	// Node-link tree diagram using the Reingold-Tilford "tidy" algorithm
+	function tree$1() {
+	  var separation = defaultSeparation$1,
+	      dx = 1,
+	      dy = 1,
+	      nodeSize = null;
+
+	  function tree(root) {
+	    var t = treeRoot(root);
+
+	    // Compute the layout using Buchheim et al.’s algorithm.
+	    t.eachAfter(firstWalk), t.parent.m = -t.z;
+	    t.eachBefore(secondWalk);
+
+	    // If a fixed node size is specified, scale x and y.
+	    if (nodeSize) root.eachBefore(sizeNode);
+
+	    // If a fixed tree size is specified, scale x and y based on the extent.
+	    // Compute the left-most, right-most, and depth-most nodes for extents.
+	    else {
+	      var left = root,
+	          right = root,
+	          bottom = root;
+	      root.eachBefore(function(node) {
+	        if (node.x < left.x) left = node;
+	        if (node.x > right.x) right = node;
+	        if (node.depth > bottom.depth) bottom = node;
+	      });
+	      var s = left === right ? 1 : separation(left, right) / 2,
+	          tx = s - left.x,
+	          kx = dx / (right.x + s + tx),
+	          ky = dy / (bottom.depth || 1);
+	      root.eachBefore(function(node) {
+	        node.x = (node.x + tx) * kx;
+	        node.y = node.depth * ky;
+	      });
+	    }
+
+	    return root;
+	  }
+
+	  // Computes a preliminary x-coordinate for v. Before that, FIRST WALK is
+	  // applied recursively to the children of v, as well as the function
+	  // APPORTION. After spacing out the children by calling EXECUTE SHIFTS, the
+	  // node v is placed to the midpoint of its outermost children.
+	  function firstWalk(v) {
+	    var children = v.children,
+	        siblings = v.parent.children,
+	        w = v.i ? siblings[v.i - 1] : null;
+	    if (children) {
+	      executeShifts(v);
+	      var midpoint = (children[0].z + children[children.length - 1].z) / 2;
+	      if (w) {
+	        v.z = w.z + separation(v._, w._);
+	        v.m = v.z - midpoint;
+	      } else {
+	        v.z = midpoint;
+	      }
+	    } else if (w) {
+	      v.z = w.z + separation(v._, w._);
+	    }
+	    v.parent.A = apportion(v, w, v.parent.A || siblings[0]);
+	  }
+
+	  // Computes all real x-coordinates by summing up the modifiers recursively.
+	  function secondWalk(v) {
+	    v._.x = v.z + v.parent.m;
+	    v.m += v.parent.m;
+	  }
+
+	  // The core of the algorithm. Here, a new subtree is combined with the
+	  // previous subtrees. Threads are used to traverse the inside and outside
+	  // contours of the left and right subtree up to the highest common level. The
+	  // vertices used for the traversals are vi+, vi-, vo-, and vo+, where the
+	  // superscript o means outside and i means inside, the subscript - means left
+	  // subtree and + means right subtree. For summing up the modifiers along the
+	  // contour, we use respective variables si+, si-, so-, and so+. Whenever two
+	  // nodes of the inside contours conflict, we compute the left one of the
+	  // greatest uncommon ancestors using the function ANCESTOR and call MOVE
+	  // SUBTREE to shift the subtree and prepare the shifts of smaller subtrees.
+	  // Finally, we add a new thread (if necessary).
+	  function apportion(v, w, ancestor) {
+	    if (w) {
+	      var vip = v,
+	          vop = v,
+	          vim = w,
+	          vom = vip.parent.children[0],
+	          sip = vip.m,
+	          sop = vop.m,
+	          sim = vim.m,
+	          som = vom.m,
+	          shift;
+	      while (vim = nextRight(vim), vip = nextLeft(vip), vim && vip) {
+	        vom = nextLeft(vom);
+	        vop = nextRight(vop);
+	        vop.a = v;
+	        shift = vim.z + sim - vip.z - sip + separation(vim._, vip._);
+	        if (shift > 0) {
+	          moveSubtree(nextAncestor(vim, v, ancestor), v, shift);
+	          sip += shift;
+	          sop += shift;
+	        }
+	        sim += vim.m;
+	        sip += vip.m;
+	        som += vom.m;
+	        sop += vop.m;
+	      }
+	      if (vim && !nextRight(vop)) {
+	        vop.t = vim;
+	        vop.m += sim - sop;
+	      }
+	      if (vip && !nextLeft(vom)) {
+	        vom.t = vip;
+	        vom.m += sip - som;
+	        ancestor = v;
+	      }
+	    }
+	    return ancestor;
+	  }
+
+	  function sizeNode(node) {
+	    node.x *= dx;
+	    node.y = node.depth * dy;
+	  }
+
+	  tree.separation = function(x) {
+	    return arguments.length ? (separation = x, tree) : separation;
+	  };
+
+	  tree.size = function(x) {
+	    return arguments.length ? (nodeSize = false, dx = +x[0], dy = +x[1], tree) : (nodeSize ? null : [dx, dy]);
+	  };
+
+	  tree.nodeSize = function(x) {
+	    return arguments.length ? (nodeSize = true, dx = +x[0], dy = +x[1], tree) : (nodeSize ? [dx, dy] : null);
+	  };
+
+	  return tree;
+	}
+
+	function treemapSlice(parent, x0, y0, x1, y1) {
+	  var nodes = parent.children,
+	      node,
+	      i = -1,
+	      n = nodes.length,
+	      k = parent.value && (y1 - y0) / parent.value;
+
+	  while (++i < n) {
+	    node = nodes[i], node.x0 = x0, node.x1 = x1;
+	    node.y0 = y0, node.y1 = y0 += node.value * k;
+	  }
+	}
+
+	var phi = (1 + Math.sqrt(5)) / 2;
+
+	function squarifyRatio(ratio, parent, x0, y0, x1, y1) {
+	  var rows = [],
+	      nodes = parent.children,
+	      row,
+	      nodeValue,
+	      i0 = 0,
+	      i1 = 0,
+	      n = nodes.length,
+	      dx, dy,
+	      value = parent.value,
+	      sumValue,
+	      minValue,
+	      maxValue,
+	      newRatio,
+	      minRatio,
+	      alpha,
+	      beta;
+
+	  while (i0 < n) {
+	    dx = x1 - x0, dy = y1 - y0;
+
+	    // Find the next non-empty node.
+	    do sumValue = nodes[i1++].value; while (!sumValue && i1 < n);
+	    minValue = maxValue = sumValue;
+	    alpha = Math.max(dy / dx, dx / dy) / (value * ratio);
+	    beta = sumValue * sumValue * alpha;
+	    minRatio = Math.max(maxValue / beta, beta / minValue);
+
+	    // Keep adding nodes while the aspect ratio maintains or improves.
+	    for (; i1 < n; ++i1) {
+	      sumValue += nodeValue = nodes[i1].value;
+	      if (nodeValue < minValue) minValue = nodeValue;
+	      if (nodeValue > maxValue) maxValue = nodeValue;
+	      beta = sumValue * sumValue * alpha;
+	      newRatio = Math.max(maxValue / beta, beta / minValue);
+	      if (newRatio > minRatio) { sumValue -= nodeValue; break; }
+	      minRatio = newRatio;
+	    }
+
+	    // Position and record the row orientation.
+	    rows.push(row = {value: sumValue, dice: dx < dy, children: nodes.slice(i0, i1)});
+	    if (row.dice) treemapDice(row, x0, y0, x1, value ? y0 += dy * sumValue / value : y1);
+	    else treemapSlice(row, x0, y0, value ? x0 += dx * sumValue / value : x1, y1);
+	    value -= sumValue, i0 = i1;
+	  }
+
+	  return rows;
+	}
+
+	var squarify = (function custom(ratio) {
+
+	  function squarify(parent, x0, y0, x1, y1) {
+	    squarifyRatio(ratio, parent, x0, y0, x1, y1);
+	  }
+
+	  squarify.ratio = function(x) {
+	    return custom((x = +x) > 1 ? x : 1);
+	  };
+
+	  return squarify;
+	})(phi);
+
+	function index$1() {
+	  var tile = squarify,
+	      round = false,
+	      dx = 1,
+	      dy = 1,
+	      paddingStack = [0],
+	      paddingInner = constantZero,
+	      paddingTop = constantZero,
+	      paddingRight = constantZero,
+	      paddingBottom = constantZero,
+	      paddingLeft = constantZero;
+
+	  function treemap(root) {
+	    root.x0 =
+	    root.y0 = 0;
+	    root.x1 = dx;
+	    root.y1 = dy;
+	    root.eachBefore(positionNode);
+	    paddingStack = [0];
+	    if (round) root.eachBefore(roundNode);
+	    return root;
+	  }
+
+	  function positionNode(node) {
+	    var p = paddingStack[node.depth],
+	        x0 = node.x0 + p,
+	        y0 = node.y0 + p,
+	        x1 = node.x1 - p,
+	        y1 = node.y1 - p;
+	    if (x1 < x0) x0 = x1 = (x0 + x1) / 2;
+	    if (y1 < y0) y0 = y1 = (y0 + y1) / 2;
+	    node.x0 = x0;
+	    node.y0 = y0;
+	    node.x1 = x1;
+	    node.y1 = y1;
+	    if (node.children) {
+	      p = paddingStack[node.depth + 1] = paddingInner(node) / 2;
+	      x0 += paddingLeft(node) - p;
+	      y0 += paddingTop(node) - p;
+	      x1 -= paddingRight(node) - p;
+	      y1 -= paddingBottom(node) - p;
+	      if (x1 < x0) x0 = x1 = (x0 + x1) / 2;
+	      if (y1 < y0) y0 = y1 = (y0 + y1) / 2;
+	      tile(node, x0, y0, x1, y1);
+	    }
+	  }
+
+	  treemap.round = function(x) {
+	    return arguments.length ? (round = !!x, treemap) : round;
+	  };
+
+	  treemap.size = function(x) {
+	    return arguments.length ? (dx = +x[0], dy = +x[1], treemap) : [dx, dy];
+	  };
+
+	  treemap.tile = function(x) {
+	    return arguments.length ? (tile = required(x), treemap) : tile;
+	  };
+
+	  treemap.padding = function(x) {
+	    return arguments.length ? treemap.paddingInner(x).paddingOuter(x) : treemap.paddingInner();
+	  };
+
+	  treemap.paddingInner = function(x) {
+	    return arguments.length ? (paddingInner = typeof x === "function" ? x : constant(+x), treemap) : paddingInner;
+	  };
+
+	  treemap.paddingOuter = function(x) {
+	    return arguments.length ? treemap.paddingTop(x).paddingRight(x).paddingBottom(x).paddingLeft(x) : treemap.paddingTop();
+	  };
+
+	  treemap.paddingTop = function(x) {
+	    return arguments.length ? (paddingTop = typeof x === "function" ? x : constant(+x), treemap) : paddingTop;
+	  };
+
+	  treemap.paddingRight = function(x) {
+	    return arguments.length ? (paddingRight = typeof x === "function" ? x : constant(+x), treemap) : paddingRight;
+	  };
+
+	  treemap.paddingBottom = function(x) {
+	    return arguments.length ? (paddingBottom = typeof x === "function" ? x : constant(+x), treemap) : paddingBottom;
+	  };
+
+	  treemap.paddingLeft = function(x) {
+	    return arguments.length ? (paddingLeft = typeof x === "function" ? x : constant(+x), treemap) : paddingLeft;
+	  };
+
+	  return treemap;
+	}
+
+	function binary(parent, x0, y0, x1, y1) {
+	  var nodes = parent.children,
+	      i, n = nodes.length,
+	      sum, sums = new Array(n + 1);
+
+	  for (sums[0] = sum = i = 0; i < n; ++i) {
+	    sums[i + 1] = sum += nodes[i].value;
+	  }
+
+	  partition(0, n, parent.value, x0, y0, x1, y1);
+
+	  function partition(i, j, value, x0, y0, x1, y1) {
+	    if (i >= j - 1) {
+	      var node = nodes[i];
+	      node.x0 = x0, node.y0 = y0;
+	      node.x1 = x1, node.y1 = y1;
+	      return;
+	    }
+
+	    var valueOffset = sums[i],
+	        valueTarget = (value / 2) + valueOffset,
+	        k = i + 1,
+	        hi = j - 1;
+
+	    while (k < hi) {
+	      var mid = k + hi >>> 1;
+	      if (sums[mid] < valueTarget) k = mid + 1;
+	      else hi = mid;
+	    }
+
+	    if ((valueTarget - sums[k - 1]) < (sums[k] - valueTarget) && i + 1 < k) --k;
+
+	    var valueLeft = sums[k] - valueOffset,
+	        valueRight = value - valueLeft;
+
+	    if ((x1 - x0) > (y1 - y0)) {
+	      var xk = (x0 * valueRight + x1 * valueLeft) / value;
+	      partition(i, k, valueLeft, x0, y0, xk, y1);
+	      partition(k, j, valueRight, xk, y0, x1, y1);
+	    } else {
+	      var yk = (y0 * valueRight + y1 * valueLeft) / value;
+	      partition(i, k, valueLeft, x0, y0, x1, yk);
+	      partition(k, j, valueRight, x0, yk, x1, y1);
+	    }
+	  }
+	}
+
+	function sliceDice(parent, x0, y0, x1, y1) {
+	  (parent.depth & 1 ? treemapSlice : treemapDice)(parent, x0, y0, x1, y1);
+	}
+
+	var resquarify = (function custom(ratio) {
+
+	  function resquarify(parent, x0, y0, x1, y1) {
+	    if ((rows = parent._squarify) && (rows.ratio === ratio)) {
+	      var rows,
+	          row,
+	          nodes,
+	          i,
+	          j = -1,
+	          n,
+	          m = rows.length,
+	          value = parent.value;
+
+	      while (++j < m) {
+	        row = rows[j], nodes = row.children;
+	        for (i = row.value = 0, n = nodes.length; i < n; ++i) row.value += nodes[i].value;
+	        if (row.dice) treemapDice(row, x0, y0, x1, y0 += (y1 - y0) * row.value / value);
+	        else treemapSlice(row, x0, y0, x0 += (x1 - x0) * row.value / value, y1);
+	        value -= row.value;
+	      }
+	    } else {
+	      parent._squarify = rows = squarifyRatio(ratio, parent, x0, y0, x1, y1);
+	      rows.ratio = ratio;
+	    }
+	  }
+
+	  resquarify.ratio = function(x) {
+	    return custom((x = +x) > 1 ? x : 1);
+	  };
+
+	  return resquarify;
+	})(phi);
+
+
+
+	var src = /*#__PURE__*/Object.freeze({
+		__proto__: null,
+		cluster: cluster,
+		hierarchy: hierarchy$1,
+		pack: index,
+		packSiblings: siblings,
+		packEnclose: enclose,
+		partition: partition$1,
+		stratify: stratify,
+		tree: tree$1,
+		treemap: index$1,
+		treemapBinary: binary,
+		treemapDice: treemapDice,
+		treemapSlice: treemapSlice,
+		treemapSliceDice: sliceDice,
+		treemapSquarify: squarify,
+		treemapResquarify: resquarify
+	});
+
+	var tree$2 = createCommonjsModule(function (module, exports) {
+
+
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports["default"] = flextree;
+
+	var _slicedToArray2 = interopRequireDefault(slicedToArray);
+
+	var _assertThisInitialized2 = interopRequireDefault(assertThisInitialized$1);
+
+	var _classCallCheck2 = interopRequireDefault(classCallCheck$1);
+
+	var _createClass2 = interopRequireDefault(createClass$1);
+
+	var _inherits2 = interopRequireDefault(inherits$1);
+
+	var _possibleConstructorReturn2 = interopRequireDefault(possibleConstructorReturn$1);
+
+	var _getPrototypeOf2 = interopRequireDefault(getPrototypeOf$1);
+
+
+
+	function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
+
+	function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
+	var defaults = Object.freeze({
+	  children: function children(data) {
+	    return data.children;
+	  },
+	  nodeSize: function nodeSize(node) {
+	    return node.data.size;
+	  },
+	  spacing: 0
+	}); // Create a layout function with customizable options. Per D3-style, the
+	// options can be set at any time using setter methods. The layout function
+	// will compute the tree node positions based on the options in effect at the
+	// time it is called.
+
+	function flextree(options) {
+	  var opts = Object.assign({}, defaults, options);
+
+	  function accessor(name) {
+	    var opt = opts[name];
+	    return typeof opt === 'function' ? opt : function () {
+	      return opt;
+	    };
+	  }
+
+	  function layout(tree) {
+	    var wtree = wrap(getWrapper(), tree, function (node) {
+	      return node.children;
+	    });
+	    wtree.update();
+	    return wtree.data;
+	  }
+
+	  function getFlexNode() {
+	    var nodeSize = accessor('nodeSize');
+
+	    var _spacing = accessor('spacing');
+
+	    return /*#__PURE__*/function (_hierarchy$prototype$) {
+	      (0, _inherits2["default"])(FlexNode, _hierarchy$prototype$);
+
+	      var _super = _createSuper(FlexNode);
+
+	      function FlexNode(data) {
+	        (0, _classCallCheck2["default"])(this, FlexNode);
+	        return _super.call(this, data);
+	      }
+
+	      (0, _createClass2["default"])(FlexNode, [{
+	        key: "copy",
+	        value: function copy() {
+	          var c = wrap(this.constructor, this, function (node) {
+	            return node.children;
+	          });
+	          c.each(function (node) {
+	            return node.data = node.data.data;
+	          });
+	          return c;
+	        }
+	      }, {
+	        key: "size",
+	        get: function get() {
+	          return nodeSize(this);
+	        }
+	      }, {
+	        key: "spacing",
+	        value: function spacing(oNode) {
+	          return _spacing(this, oNode);
+	        }
+	      }, {
+	        key: "nodes",
+	        get: function get() {
+	          return this.descendants();
+	        }
+	      }, {
+	        key: "xSize",
+	        get: function get() {
+	          return this.size[0];
+	        }
+	      }, {
+	        key: "ySize",
+	        get: function get() {
+	          return this.size[1];
+	        }
+	      }, {
+	        key: "top",
+	        get: function get() {
+	          return this.y;
+	        }
+	      }, {
+	        key: "bottom",
+	        get: function get() {
+	          return this.y + this.ySize;
+	        }
+	      }, {
+	        key: "left",
+	        get: function get() {
+	          return this.x - this.xSize / 2;
+	        }
+	      }, {
+	        key: "right",
+	        get: function get() {
+	          return this.x + this.xSize / 2;
+	        }
+	      }, {
+	        key: "root",
+	        get: function get() {
+	          var ancs = this.ancestors();
+	          return ancs[ancs.length - 1];
+	        }
+	      }, {
+	        key: "numChildren",
+	        get: function get() {
+	          return this.hasChildren ? this.children.length : 0;
+	        }
+	      }, {
+	        key: "hasChildren",
+	        get: function get() {
+	          return !this.noChildren;
+	        }
+	      }, {
+	        key: "noChildren",
+	        get: function get() {
+	          return this.children === null;
+	        }
+	      }, {
+	        key: "firstChild",
+	        get: function get() {
+	          return this.hasChildren ? this.children[0] : null;
+	        }
+	      }, {
+	        key: "lastChild",
+	        get: function get() {
+	          return this.hasChildren ? this.children[this.numChildren - 1] : null;
+	        }
+	      }, {
+	        key: "extents",
+	        get: function get() {
+	          return (this.children || []).reduce(function (acc, kid) {
+	            return FlexNode.maxExtents(acc, kid.extents);
+	          }, this.nodeExtents);
+	        }
+	      }, {
+	        key: "nodeExtents",
+	        get: function get() {
+	          return {
+	            top: this.top,
+	            bottom: this.bottom,
+	            left: this.left,
+	            right: this.right
+	          };
+	        }
+	      }], [{
+	        key: "maxExtents",
+	        value: function maxExtents(e0, e1) {
+	          return {
+	            top: Math.min(e0.top, e1.top),
+	            bottom: Math.max(e0.bottom, e1.bottom),
+	            left: Math.min(e0.left, e1.left),
+	            right: Math.max(e0.right, e1.right)
+	          };
+	        }
+	      }]);
+	      return FlexNode;
+	    }(src.hierarchy.prototype.constructor);
+	  }
+
+	  function getWrapper() {
+	    var FlexNode = getFlexNode();
+	    var nodeSize = accessor('nodeSize');
+
+	    var _spacing2 = accessor('spacing');
+
+	    return /*#__PURE__*/function (_FlexNode) {
+	      (0, _inherits2["default"])(_class, _FlexNode);
+
+	      var _super2 = _createSuper(_class);
+
+	      function _class(data) {
+	        var _this;
+
+	        (0, _classCallCheck2["default"])(this, _class);
+	        _this = _super2.call(this, data);
+	        Object.assign((0, _assertThisInitialized2["default"])(_this), {
+	          x: 0,
+	          y: 0,
+	          relX: 0,
+	          prelim: 0,
+	          shift: 0,
+	          change: 0,
+	          lExt: (0, _assertThisInitialized2["default"])(_this),
+	          lExtRelX: 0,
+	          lThr: null,
+	          rExt: (0, _assertThisInitialized2["default"])(_this),
+	          rExtRelX: 0,
+	          rThr: null
+	        });
+	        return _this;
+	      }
+
+	      (0, _createClass2["default"])(_class, [{
+	        key: "size",
+	        get: function get() {
+	          return nodeSize(this.data);
+	        }
+	      }, {
+	        key: "spacing",
+	        value: function spacing(oNode) {
+	          return _spacing2(this.data, oNode.data);
+	        }
+	      }, {
+	        key: "x",
+	        get: function get() {
+	          return this.data.x;
+	        },
+	        set: function set(v) {
+	          this.data.x = v;
+	        }
+	      }, {
+	        key: "y",
+	        get: function get() {
+	          return this.data.y;
+	        },
+	        set: function set(v) {
+	          this.data.y = v;
+	        }
+	      }, {
+	        key: "update",
+	        value: function update() {
+	          layoutChildren(this);
+	          resolveX(this);
+	          return this;
+	        }
+	      }]);
+	      return _class;
+	    }(FlexNode);
+	  }
+
+	  function wrap(FlexClass, treeData, children) {
+	    var _wrap = function _wrap(data, parent) {
+	      var node = new FlexClass(data);
+	      Object.assign(node, {
+	        parent: parent,
+	        depth: parent === null ? 0 : parent.depth + 1,
+	        height: 0,
+	        length: 1
+	      });
+	      var kidsData = children(data) || [];
+	      node.children = kidsData.length === 0 ? null : kidsData.map(function (kd) {
+	        return _wrap(kd, node);
+	      });
+
+	      if (node.children) {
+	        Object.assign(node, node.children.reduce(function (hl, kid) {
+	          return {
+	            height: Math.max(hl.height, kid.height + 1),
+	            length: hl.length + kid.length
+	          };
+	        }, node));
+	      }
+
+	      return node;
+	    };
+
+	    return _wrap(treeData, null);
+	  }
+
+	  Object.assign(layout, {
+	    nodeSize: function nodeSize(arg) {
+	      return arguments.length ? (opts.nodeSize = arg, layout) : opts.nodeSize;
+	    },
+	    spacing: function spacing(arg) {
+	      return arguments.length ? (opts.spacing = arg, layout) : opts.spacing;
+	    },
+	    children: function children(arg) {
+	      return arguments.length ? (opts.children = arg, layout) : opts.children;
+	    },
+	    hierarchy: function hierarchy(treeData, children) {
+	      var kids = typeof children === 'undefined' ? opts.children : children;
+	      return wrap(getFlexNode(), treeData, kids);
+	    },
+	    dump: function dump(tree) {
+	      var nodeSize = accessor('nodeSize');
+
+	      var _dump = function _dump(i0) {
+	        return function (node) {
+	          var i1 = i0 + '  ';
+	          var i2 = i0 + '    ';
+	          var x = node.x,
+	              y = node.y;
+	          var size = nodeSize(node);
+	          var kids = node.children || [];
+	          var kdumps = kids.length === 0 ? ' ' : ",".concat(i1, "children: [").concat(i2).concat(kids.map(_dump(i2)).join(i2)).concat(i1, "],").concat(i0);
+	          return "{ size: [".concat(size.join(', '), "],").concat(i1, "x: ").concat(x, ", y: ").concat(y).concat(kdumps, "},");
+	        };
+	      };
+
+	      return _dump('\n')(tree);
+	    }
+	  });
+	  return layout;
+	}
+
+	var layoutChildren = function layoutChildren(w) {
+	  var y = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+	  w.y = y;
+	  (w.children || []).reduce(function (acc, kid) {
+	    var _acc = (0, _slicedToArray2["default"])(acc, 2),
+	        i = _acc[0],
+	        lastLows = _acc[1];
+
+	    layoutChildren(kid, w.y + w.ySize); // The lowest vertical coordinate while extreme nodes still point
+	    // in current subtree.
+
+	    var lowY = (i === 0 ? kid.lExt : kid.rExt).bottom;
+	    if (i !== 0) separate(w, i, lastLows);
+	    var lows = updateLows(lowY, i, lastLows);
+	    return [i + 1, lows];
+	  }, [0, null]);
+	  shiftChange(w);
+	  positionRoot(w);
+	  return w;
+	}; // Resolves the relative coordinate properties - relX and prelim --
+	// to set the final, absolute x coordinate for each node. This also sets
+	// `prelim` to 0, so that `relX` for each node is its x-coordinate relative
+	// to its parent.
+
+
+	var resolveX = function resolveX(w, prevSum, parentX) {
+	  // A call to resolveX without arguments is assumed to be for the root of
+	  // the tree. This will set the root's x-coord to zero.
+	  if (typeof prevSum === 'undefined') {
+	    prevSum = -w.relX - w.prelim;
+	    parentX = 0;
+	  }
+
+	  var sum = prevSum + w.relX;
+	  w.relX = sum + w.prelim - parentX;
+	  w.prelim = 0;
+	  w.x = parentX + w.relX;
+	  (w.children || []).forEach(function (k) {
+	    return resolveX(k, sum, w.x);
+	  });
+	  return w;
+	}; // Process shift and change for all children, to add intermediate spacing to
+	// each child's modifier.
+
+
+	var shiftChange = function shiftChange(w) {
+	  (w.children || []).reduce(function (acc, child) {
+	    var _acc2 = (0, _slicedToArray2["default"])(acc, 2),
+	        lastShiftSum = _acc2[0],
+	        lastChangeSum = _acc2[1];
+
+	    var shiftSum = lastShiftSum + child.shift;
+	    var changeSum = lastChangeSum + shiftSum + child.change;
+	    child.relX += changeSum;
+	    return [shiftSum, changeSum];
+	  }, [0, 0]);
+	}; // Separates the latest child from its previous sibling
+
+	/* eslint-disable complexity */
+
+
+	var separate = function separate(w, i, lows) {
+	  var lSib = w.children[i - 1];
+	  var curSubtree = w.children[i];
+	  var rContour = lSib;
+	  var rSumMods = lSib.relX;
+	  var lContour = curSubtree;
+	  var lSumMods = curSubtree.relX;
+	  var isFirst = true;
+
+	  while (rContour && lContour) {
+	    if (rContour.bottom > lows.lowY) lows = lows.next; // How far to the left of the right side of rContour is the left side
+	    // of lContour? First compute the center-to-center distance, then add
+	    // the "spacing"
+
+	    var dist = rSumMods + rContour.prelim - (lSumMods + lContour.prelim) + rContour.xSize / 2 + lContour.xSize / 2 + rContour.spacing(lContour);
+
+	    if (dist > 0 || dist < 0 && isFirst) {
+	      lSumMods += dist; // Move subtree by changing relX.
+
+	      moveSubtree(curSubtree, dist);
+	      distributeExtra(w, i, lows.index, dist);
+	    }
+
+	    isFirst = false; // Advance highest node(s) and sum(s) of modifiers
+
+	    var rightBottom = rContour.bottom;
+	    var leftBottom = lContour.bottom;
+
+	    if (rightBottom <= leftBottom) {
+	      rContour = nextRContour(rContour);
+	      if (rContour) rSumMods += rContour.relX;
+	    }
+
+	    if (rightBottom >= leftBottom) {
+	      lContour = nextLContour(lContour);
+	      if (lContour) lSumMods += lContour.relX;
+	    }
+	  } // Set threads and update extreme nodes. In the first case, the
+	  // current subtree is taller than the left siblings.
+
+
+	  if (!rContour && lContour) setLThr(w, i, lContour, lSumMods); // In the next case, the left siblings are taller than the current subtree
+	  else if (rContour && !lContour) setRThr(w, i, rContour, rSumMods);
+	};
+	/* eslint-enable complexity */
+	// Move subtree by changing relX.
+
+
+	var moveSubtree = function moveSubtree(subtree, distance) {
+	  subtree.relX += distance;
+	  subtree.lExtRelX += distance;
+	  subtree.rExtRelX += distance;
+	};
+
+	var distributeExtra = function distributeExtra(w, curSubtreeI, leftSibI, dist) {
+	  var curSubtree = w.children[curSubtreeI];
+	  var n = curSubtreeI - leftSibI; // Are there intermediate children?
+
+	  if (n > 1) {
+	    var delta = dist / n;
+	    w.children[leftSibI + 1].shift += delta;
+	    curSubtree.shift -= delta;
+	    curSubtree.change -= dist - delta;
+	  }
+	};
+
+	var nextLContour = function nextLContour(w) {
+	  return w.hasChildren ? w.firstChild : w.lThr;
+	};
+
+	var nextRContour = function nextRContour(w) {
+	  return w.hasChildren ? w.lastChild : w.rThr;
+	};
+
+	var setLThr = function setLThr(w, i, lContour, lSumMods) {
+	  var firstChild = w.firstChild;
+	  var lExt = firstChild.lExt;
+	  var curSubtree = w.children[i];
+	  lExt.lThr = lContour; // Change relX so that the sum of modifier after following thread is correct.
+
+	  var diff = lSumMods - lContour.relX - firstChild.lExtRelX;
+	  lExt.relX += diff; // Change preliminary x coordinate so that the node does not move.
+
+	  lExt.prelim -= diff; // Update extreme node and its sum of modifiers.
+
+	  firstChild.lExt = curSubtree.lExt;
+	  firstChild.lExtRelX = curSubtree.lExtRelX;
+	}; // Mirror image of setLThr.
+
+
+	var setRThr = function setRThr(w, i, rContour, rSumMods) {
+	  var curSubtree = w.children[i];
+	  var rExt = curSubtree.rExt;
+	  var lSib = w.children[i - 1];
+	  rExt.rThr = rContour;
+	  var diff = rSumMods - rContour.relX - curSubtree.rExtRelX;
+	  rExt.relX += diff;
+	  rExt.prelim -= diff;
+	  curSubtree.rExt = lSib.rExt;
+	  curSubtree.rExtRelX = lSib.rExtRelX;
+	}; // Position root between children, taking into account their modifiers
+
+
+	var positionRoot = function positionRoot(w) {
+	  if (w.hasChildren) {
+	    var k0 = w.firstChild;
+	    var kf = w.lastChild;
+	    var prelim = (k0.prelim + k0.relX - k0.xSize / 2 + kf.relX + kf.prelim + kf.xSize / 2) / 2;
+	    Object.assign(w, {
+	      prelim: prelim,
+	      lExt: k0.lExt,
+	      lExtRelX: k0.lExtRelX,
+	      rExt: kf.rExt,
+	      rExtRelX: kf.rExtRelX
+	    });
+	  }
+	}; // Make/maintain a linked list of the indexes of left siblings and their
+	// lowest vertical coordinate.
+
+
+	var updateLows = function updateLows(lowY, index, lastLows) {
+	  // Remove siblings that are hidden by the new subtree.
+	  while (lastLows !== null && lowY >= lastLows.lowY) {
+	    lastLows = lastLows.next;
+	  } // Prepend the new subtree.
+
+
+	  return {
+	    lowY: lowY,
+	    index: index,
+	    next: lastLows
+	  };
+	};
+	});
+
+	unwrapExports(tree$2);
+
+	var compacttree = createCommonjsModule(function (module, exports) {
+
+
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports["default"] = void 0;
+
+	var _classCallCheck2 = interopRequireDefault(classCallCheck$1);
+
+	var _createClass2 = interopRequireDefault(createClass$1);
+
+	var _assertThisInitialized2 = interopRequireDefault(assertThisInitialized$1);
+
+	var _inherits2 = interopRequireDefault(inherits$1);
+
+	var _possibleConstructorReturn2 = interopRequireDefault(possibleConstructorReturn$1);
+
+	var _getPrototypeOf2 = interopRequireDefault(getPrototypeOf$1);
+
+	var _canvax = interopRequireDefault(Canvax);
+
+	var _base = interopRequireDefault(base);
+
+
+
+	var _trigger2 = interopRequireDefault(trigger);
+
+	var _tree2 = interopRequireDefault(tree$2);
+
+	function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
+
+	function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
+	var _ = _canvax["default"]._,
+	    event = _canvax["default"].event;
+	var Circle = _canvax["default"].Shapes.Circle;
+	var Rect = _canvax["default"].Shapes.Rect; //内部交互需要同步回源数据的属性， 树状图要实现文本的编辑，所以content也要加入进来
+
+	var syncToOriginKeys = ['collapsed', 'width', 'height', 'content'];
+	var collapseIconWidth = 22;
+	/**
+	 * 关系图中 包括了  配置，数据，和布局数据，
+	 * 默认用配置和数据可以完成绘图， 但是如果有布局数据，就绘图玩额外调用一次绘图，把布局数据传入修正布局效果
+	 */
+
+	var compactTree = /*#__PURE__*/function (_GraphsBase) {
+	  (0, _inherits2["default"])(compactTree, _GraphsBase);
+
+	  var _super = _createSuper(compactTree);
+
+	  function compactTree(opt, app) {
+	    var _this;
+
+	    (0, _classCallCheck2["default"])(this, compactTree);
+	    _this = _super.call(this, opt, app);
+	    _this.type = "compacttree";
+
+	    _.extend(true, (0, _assertThisInitialized2["default"])(_this), (0, tools.getDefaultProps)(compactTree.defaultProps()), opt);
+
+	    return _this;
+	  }
+
+	  (0, _createClass2["default"])(compactTree, [{
+	    key: "draw",
+	    value: function draw(opt) {
+	      var _this2 = this;
+
+	      !opt && (opt = {});
+
+	      _.extend(true, this, opt);
+
+	      this.initData(opt.data).then(function (data) {
+	        _this2.data = data;
+
+	        _this2.layoutData();
+
+	        _this2.widget();
+
+	        _this2.induce.context.width = _this2.width;
+	        _this2.induce.context.height = _this2.height;
+	        _this2.sprite.context.x = parseInt(_this2.origin.x);
+	        _this2.sprite.context.y = parseInt(_this2.origin.y); //test bound
+
+	        _this2._bound = new Rect({
+	          context: {
+	            x: _this2.data.extents.left,
+	            y: _this2.data.extents.top,
+	            width: _this2.data.size.width,
+	            height: _this2.data.size.height,
+	            lineWidth: 1,
+	            strokeStyle: 'red'
+	          }
+	        });
+
+	        _this2.graphsSp.addChild(_this2._bound);
+
+	        _this2.graphsSp.context.x = Math.max((_this2.width - _this2.data.size.width) / 2, _this2.app.padding.left);
+	        _this2.graphsSp.context.y = _this2.height / 2;
+
+	        _this2.fire("complete");
+	      });
+	    } //如果dataTrigger.origin 有传入， 则已经这个origin为参考点做重新布局
+	    //TODO， 如果这个图的options中有配置 一个 符合 关系图的数据{nodes, edges, size}
+	    //那么这个时候的resetData还不能满足，因为resetData的第一个个参数是dataFrame， 而options.data其实已经算是配置了，
+	    //后面遇到这个情况再调整吧
+
+	  }, {
+	    key: "resetData",
+	    value: function resetData(dataFrame, dataTrigger) {
+	      var _this3 = this;
+
+	      this._resetData(dataFrame, dataTrigger).then(function () {
+	        _this3.fire("complete");
+
+	        Object.assign(_this3._bound.context, {
+	          x: _this3.data.extents.left,
+	          y: _this3.data.extents.top,
+	          width: _this3.data.size.width,
+	          height: _this3.data.size.height
+	        });
+	      });
+	    }
+	  }, {
+	    key: "widget",
+	    value: function widget() {
+	      this._drawEdges();
+
+	      this._drawNodes();
+	    } //$data如果用户设置了符合data的数据格式数据{nodes, edges, size, extents}，那就直接返回
+
+	  }, {
+	    key: "initData",
+	    value: function initData($data, $dataTrigger) {
+	      var _this4 = this;
+
+	      return new Promise(function (resolve) {
+	        if ($data && $data.nodes && $data.edges) {
+	          resolve($data);
+	          return;
+	        }
+	        var data = {
+	          // relation 也好，  tree也好， 最后都要转换成 nodes edges  渲染统一依赖 nodes 和 edges
+	          //{ type,key,content,ctype,width,height,x,y }
+	          nodes: [],
+	          //{ type,key[],content,ctype,width,height,x,y }
+	          edges: [],
+	          size: {
+	            width: 0,
+	            height: 0
+	          },
+	          treeOriginData: null,
+	          //原始全量的treeData
+	          treeData: null,
+	          //折叠过滤掉后的需要渲染的treeData
+	          nodesLength: 0
+	        };
+	        var originData = _this4.app._data;
+	        data.treeOriginData = originData; //TODO 这里可以 判断 $dataTrigger 如果是来自图表内部的 collapse 等， 
+	        //就可以不用走下面的 arrayToTreeJsonForRelation ， 后续优化
+	        //项目里一般都建议直接使用treeData的格式，但是这里要做一次判断是因为chartpark上面做的demo只能下面的格式
+
+	        /**
+	         * [ {id:1,label:''},{id:2,label:''},{id:'1,2',label:''} ]
+	         */
+	        //要把这个格式转成 {id:1,children: [{id:2}]} 这样的格式
+	        //注意，这里不能用dataFrame去做判断，判断不出来的，只能用原始的 originData
+
+	        if (Array.isArray(originData)) {
+	          data.treeOriginData = _this4.arrayToTreeJsonForRelation(_this4.app.dataFrame.jsonOrg, _this4);
+	        }
+
+	        var t = new Date().getTime(); //然后从treeOriginData 过滤掉 需要显示的子树 到 treeData
+	        //{treeData, nodeLength}这里设置了这两个属性
+
+	        Object.assign(data, _this4._filterTreeData(data.treeOriginData));
+	        console.log(data.nodesLength + '个节点构建树:', new Date().getTime() - t);
+	        var t1 = new Date().getTime();
+
+	        _this4._initAllDataSize(data).then(function () {
+	          //这个时候已经设置好了 treeData 的 size 属性width、height
+	          //可以开始布局了，布局完就可以设置好 data 的 nodes edges 和 size 属性
+	          console.log(data.nodesLength + '个节点计算size:', new Date().getTime() - t1);
+	          resolve(data);
+	        });
+	      });
+	    } //treeOriginData 一定是一个 树结构的
+
+	  }, {
+	    key: "_filterTreeData",
+	    value: function _filterTreeData(treeOriginData) {
+	      var _this5 = this;
+
+	      var nodesLength = 1;
+	      var collapsedField = this.node.collapse.field;
+	      var childrenField = this.childrenField;
+	      var nodes = [];
+	      var edges = []; // let treeData = {};
+	      // Object.assign( treeData, treeOriginData );
+	      // let childrenField = this.childrenField;
+	      // let children = treeOriginData[ childrenField ];
+	      // treeData[ childrenField ] = [];
+
+	      var filter = function filter(treeOriginData, depth) {
+	        var treeData = {};
+	        Object.assign(treeData, treeOriginData);
+	        treeData['__originData'] = treeOriginData; //和原数据建立下关系，比如 treeData 中的一些数据便跟了要同步到原数据中去
+
+	        treeData[childrenField] = []; //开始构建nodes
+
+	        var content = _this5._getContent(treeData);
+
+	        var node = _this5.getDefNode({
+	          type: 'tree'
+	        });
+
+	        Object.assign(node, {
+	          iNode: nodes.length,
+	          rowData: treeData,
+	          key: treeData[_this5.field],
+	          content: content,
+	          ctype: _this5._checkHtml(content) ? 'html' : 'canvas',
+	          width: 0,
+	          height: 0,
+	          depth: depth || 0 //深度
+
+	        }); //不能放到assign中去，  getProp的处理中可能依赖node.rowData
+
+	        node.shapeType = _this5.getProp(_this5.node.shapeType, node);
+	        nodes.push(node);
+	        treeData._node = node;
+
+	        if (!treeData[collapsedField]) {
+	          //如果这个节点已经折叠了
+	          //检查他的子节点
+	          (treeOriginData[childrenField] || []).forEach(function (child) {
+	            var childTreeData = filter(child, depth + 1);
+	            treeData[childrenField].push(childTreeData);
+	            nodesLength++; //开始构建edges
+
+	            var rowData = {};
+	            var content = ''; //this._getContent(rowData);
+
+	            var node = _this5.getDefNode({
+	              type: 'tree'
+	            });
+
+	            Object.assign(node, {
+	              isTree: true,
+	              iNode: edges.length,
+	              rowData: rowData,
+	              key: [treeData[_this5.field], childTreeData[_this5.field]],
+	              //treeData[ this.field ]+","+child[ this.field ],
+	              content: content,
+	              ctype: _this5._checkHtml(content) ? 'html' : 'canvas',
+	              //如果是edge，要有source 和 target
+	              source: treeData._node,
+	              target: childTreeData._node,
+	              sourceTreeData: treeData,
+	              targetTreeData: childTreeData
+	            });
+	            node.shapeType = _this5.getProp(_this5.line.shapeType, node);
+	            edges.push(node);
+	          });
+	        }
+
+	        return treeData;
+	      };
+
+	      var treeData = filter(treeOriginData, 0);
+	      return {
+	        treeData: treeData,
+	        nodesLength: nodesLength,
+	        nodes: nodes,
+	        edges: edges
+	      };
+	    } //所有对nodeData原始数据的改变都需要同步到原数据, 比如 collapsed 折叠状态, 还有动态计算出来的width 和 height
+
+	  }, {
+	    key: "_syncToOrigin",
+	    value: function _syncToOrigin(treeData) {
+	      for (var k in treeData) {
+	        if (syncToOriginKeys.indexOf(k) > -1) {
+	          treeData.__originData[k] = treeData[k];
+	        }
+	      }
+	    }
+	  }, {
+	    key: "_eachTreeDataHandle",
+	    value: function _eachTreeDataHandle(treeData, handle) {
+	      var _this6 = this;
+
+	      handle && handle(treeData);
+	      (treeData[this.childrenField] || []).forEach(function (nodeData) {
+	        _this6._eachTreeDataHandle(nodeData, handle);
+	      });
+	    }
+	  }, {
+	    key: "_initAllDataSize",
+	    value: function _initAllDataSize(data) {
+	      var _this7 = this;
+
+	      var treeData = data.treeData,
+	          nodesLength = data.nodesLength;
+	      var initNum = 0;
+	      return new Promise(function (resolve) {
+	        _this7._eachTreeDataHandle(treeData, function (treeDataItem) {
+	          //计算和设置node的尺寸
+	          _this7._setSize(treeDataItem).then(function () {
+	            initNum++;
+
+	            if (initNum == nodesLength) {
+	              //全部处理完毕了
+	              resolve(data);
+	            }
+	          });
+	        });
+	      });
+	    }
+	  }, {
+	    key: "_setSize",
+	    value: function _setSize(treeData) {
+	      var _this8 = this;
+
+	      return new Promise(function (resolve) {
+	        var node = treeData._node; //这里的width都是指内容的size
+
+	        var width = treeData.width || _this8.getProp(_this8.node.width, treeData);
+
+	        var height = treeData.height || _this8.getProp(_this8.node.height, treeData);
+
+	        if (width && height) {
+	          //如果node上面已经有了 尺寸 
+	          //（treeData中自己带了尺寸数据，或者node.width node.height设置了固定的尺寸配置）
+	          // 这个时候 contentElement 可能就是空（可以有可视范围内渲染优化，布局阶段不需要初始化contentElement），
+	          var sizeOpt = {
+	            width: width,
+	            height: height,
+	            contentElement: node.contentElement
+	          }; // opt -> contentElement,width,height 
+
+	          _.extend(node, sizeOpt); // 重新校验一下size， 比如菱形的 外界矩形是不一样的
+
+
+	          _this8.checkNodeSizeForShapeType(node);
+
+	          resolve(sizeOpt);
+	          return;
+	        }
+
+	        _this8._initcontentElementAndSize(treeData).then(function (sizeOpt) {
+	          resolve(sizeOpt);
+	        });
+	      });
+	    } //通过 初始化 contnt 来动态计算 size 的走这里
+
+	  }, {
+	    key: "_initcontentElementAndSize",
+	    value: function _initcontentElementAndSize(treeData) {
+	      var _this9 = this;
+
+	      return new Promise(function (resolve) {
+	        var node = treeData._node; //那么，走到这里， 就说明需要动态的计算size尺寸，动态计算， 是一定要有contentElement的
+
+	        var contentType = node.ctype;
+
+	        if (_this9._isField(contentType)) {
+	          contentType = node.rowData[contentType];
+	        }
+	        !contentType && (contentType = 'canvas');
+
+	        var _initEle;
+
+	        if (contentType == 'canvas') {
+	          _initEle = _this9._getEleAndsetCanvasSize;
+	        }
+
+	        if (contentType == 'html') {
+	          _initEle = _this9._getEleAndsetHtmlSize;
+	        }
+
+	        _initEle.apply(_this9, [node]).then(function (sizeOpt) {
+	          // opt -> contentElement,width,height 
+	          _.extend(node, sizeOpt); //动态计算的尺寸，要写入到treeData中去，然后同步到 treeData的 originData，
+	          //这样就可以 和 整个originData一起存入数据库，后续可以加快再次打开的渲染速度
+
+
+	          treeData.width = node.width;
+	          treeData.height = node.height;
+
+	          _this9._syncToOrigin(treeData); // 重新校验一下size， 比如菱形的 外界矩形是不一样的
+
+
+	          _this9.checkNodeSizeForShapeType(node);
+
+	          resolve(sizeOpt);
+	        });
+	      });
+	    }
+	  }, {
+	    key: "layoutData",
+	    value: function layoutData() {
+	      if (_.isFunction(this.layout)) {
+	        //layout需要设置好data中nodes的xy， 以及edges的points，和 size的width，height
+	        this.layout(this.data);
+	      } else {
+	        this.treeLayout(this.data); //tree中自己实现layout
+	      }
+	    }
+	  }, {
+	    key: "treeLayout",
+	    value: function treeLayout(data) {
+	      var _this10 = this;
+
+	      var layoutIsHorizontal = this.rankdir == 'LR' || this.rankdir == 'RL'; //layoutIsHorizontal = false;
+
+	      var t1 = new Date().getTime();
+	      var spaceX = this.nodesep; //20;
+
+	      var spaceY = this.ranksep; //20;
+
+	      var layout = (0, _tree2["default"])({
+	        spacing: spaceX,
+	        nodeSize: function nodeSize(node) {
+	          //计算的尺寸已经node的数据为准， 不取treeData的
+	          var height = node.data._node.height || 0;
+	          var width = node.data._node.width || 0;
+
+	          if (node.data.children && node.data.children.length) {
+	            width += collapseIconWidth;
+	          }
+
+	          if (layoutIsHorizontal) {
+	            return [height, width + spaceY];
+	          }
+
+	          return [width, height + spaceY]; //因为节点高度包含节点下方的间距
+	        }
+	      });
+
+	      var _tree = layout.hierarchy(data.treeData);
+
+	      var _layout = layout(_tree);
+
+	      var left = 0,
+	          top = 0,
+	          right = 0,
+	          bottom = 0;
+	      var width = 0,
+	          height = 0;
+
+	      _layout.each(function (node) {
+	        if (layoutIsHorizontal) {
+	          var x = node.x;
+	          node.x = node.y;
+	          node.y = x;
+	        }
+	        left = Math.min(left, node.x);
+	        right = Math.max(right, node.x + node.data.width);
+	        top = Math.min(top, node.y);
+	        bottom = Math.max(bottom, node.y + node.data.height + spaceY); //node的x y 都是矩形的中心点
+
+	        node.data._node.x = node.x + node.data.width / 2;
+	        node.data._node.y = node.y + node.data.height / 2;
+	        node.data._node.depth = node.depth;
+	      });
+
+	      width = right - left;
+	      height = bottom - top - spaceY; ////设置edge的points
+
+	      data.edges.forEach(function (edge) {
+	        _this10.getEdgePoints(edge);
+	      });
+	      console.log(data.nodesLength + '个节点计算layout:', new Date().getTime() - t1);
+	      Object.assign(data, {
+	        size: {
+	          width: width,
+	          height: height
+	        },
+	        extents: {
+	          left: left,
+	          top: top,
+	          right: right,
+	          bottom: bottom
+	        }
+	      });
+	    } //可以继承覆盖
+
+	  }, {
+	    key: "getEdgePoints",
+	    value: function getEdgePoints(edge) {
+	      var points = []; //firstPoint
+
+	      var firstPoint = {
+	        x: parseInt(edge.source.x) + parseInt(edge.source.width / 2),
+	        y: parseInt(edge.source.y)
+	      };
+
+	      if (edge.source.shapeType == 'underLine') {
+	        firstPoint.y = parseInt(edge.source.y) + parseInt(edge.source.height / 2);
+	      }
+
+	      points.push(firstPoint); //lastPoint
+
+	      var lastPoint = {
+	        x: parseInt(edge.target.x) - parseInt(edge.target.width / 2),
+	        y: parseInt(edge.target.y)
+	      };
+
+	      if (edge.target.shapeType == 'underLine') {
+	        lastPoint.y = parseInt(edge.target.y) + parseInt(edge.target.height / 2);
+	      } //LR
+
+
+	      points.push({
+	        x: firstPoint.x + parseInt((lastPoint.x - firstPoint.x) / 2),
+	        y: lastPoint.y
+	      });
+	      points.push(lastPoint);
+	      edge.points = points;
+	      return points;
+	    }
+	  }, {
+	    key: "_drawNodes",
+	    value: function _drawNodes() {
+	      var _this11 = this;
+
+	      _.each(this.data.nodes, function (node) {
+	        var drawNode = function drawNode() {
+	          _this11._drawNode(node); //处理一些tree 相对 relation 特有的逻辑
+	          //collapse
+
+
+	          if (_this11.node.collapse.enabled) {
+	            if (node.rowData[_this11.childrenField] && node.rowData.__originData[_this11.childrenField] && node.rowData.__originData[_this11.childrenField].length) {
+	              var key = node.rowData[_this11.field];
+	              var iconId = key + "_collapse_icon";
+	              var iconBackId = key + "_collapse_icon_back";
+	              var charCode = _this11.node.collapse.openCharCode;
+
+	              if (!node.rowData.collapsed) {
+	                charCode = _this11.node.collapse.closeCharCode;
+	              }
+	              var iconText = String.fromCharCode(parseInt(_this11.getProp(charCode, node), 16));
+
+	              var fontSize = _this11.getProp(_this11.node.collapse.fontSize, node);
+
+	              var fontColor = _this11.getProp(_this11.node.collapse.fontColor, node);
+
+	              var fontFamily = _this11.getProp(_this11.node.collapse.fontFamily, node);
+
+	              var offsetX = _this11.getProp(_this11.node.collapse.offsetX, node);
+
+	              var offsetY = _this11.getProp(_this11.node.collapse.offsetY, node);
+
+	              var tipsContent = _this11.getProp(_this11.node.collapse.tipsContent, node);
+
+	              var background = _this11.getProp(_this11.node.collapse.background, node);
+
+	              var lineWidth = _this11.getProp(_this11.node.collapse.lineWidth, node);
+
+	              var strokeStyle = _this11.getProp(_this11.node.collapse.strokeStyle, node);
+
+	              var _collapseIcon = _this11.labelsSp.getChildById(iconId);
+
+	              var _collapseIconBack = _this11.labelsSp.getChildById(iconBackId);
+
+	              var x = parseInt(node.x + node.width / 2 + offsetX);
+	              var y = parseInt(node.y + offsetY); //collapseIcon的 位置默认为左右方向的xy
+
+	              var collapseCtx = {
+	                x: x,
+	                y: y + 1,
+	                fontSize: fontSize,
+	                fontFamily: fontFamily,
+	                fillStyle: fontColor,
+	                textAlign: "center",
+	                textBaseline: "middle",
+	                cursor: 'pointer'
+	              };
+	              var _collapseBackCtx = {
+	                x: x,
+	                y: y,
+	                r: parseInt(fontSize * 0.5) + 2,
+	                fillStyle: background,
+	                strokeStyle: strokeStyle,
+	                lineWidth: lineWidth
+	              };
+
+	              if (_collapseIcon) {
+	                _collapseIcon.resetText(iconText);
+
+	                Object.assign(_collapseIcon.context, collapseCtx);
+	                Object.assign(_collapseIconBack.context, _collapseBackCtx);
+	              } else {
+	                _collapseIcon = new _canvax["default"].Display.Text(iconText, {
+	                  id: iconId,
+	                  context: collapseCtx
+	                });
+	                _collapseIconBack = new Circle({
+	                  id: iconBackId,
+	                  context: _collapseBackCtx
+	                });
+
+	                _this11.labelsSp.addChild(_collapseIconBack);
+
+	                _this11.labelsSp.addChild(_collapseIcon);
+
+	                _collapseIcon._collapseIconBack = _collapseIconBack;
+
+	                _collapseIcon.on(event.types.get(), function (e) {
+	                  var trigger = _this11.node.collapse;
+	                  e.eventInfo = {
+	                    trigger: trigger,
+	                    tipsContent: tipsContent,
+	                    nodes: [] //node
+
+	                  }; //下面的这个就只在鼠标环境下有就好了
+
+	                  if (_collapseIconBack.context) {
+	                    if (e.type == 'mousedown') {
+	                      _collapseIconBack.context.r += 1;
+	                    }
+
+	                    if (e.type == 'mouseup') {
+	                      _collapseIconBack.context.r -= 1;
+	                    }
+	                  }
+
+	                  if (_this11.node.collapse.triggerEventType.indexOf(e.type) > -1) {
+	                    node.rowData.collapsed = !node.rowData.collapsed;
+
+	                    _this11._syncToOrigin(node.rowData);
+
+	                    var _trigger = new _trigger2["default"](_this11, {
+	                      origin: key
+	                    });
+
+	                    _this11.app.resetData(null, _trigger);
+	                  }
+
+	                  _this11.app.fire(e.type, e);
+	                });
+	              }
+	              //collapseIcon的引用就断了
+
+	              _collapseIcon.nodeData = node;
+	              node.collapseIcon = _collapseIcon;
+	              node.collapseIconBack = _collapseIconBack;
+	            }
+	          }
+	        };
+
+	        if (!node.contentElement) {
+	          //绘制的时候如果发现没有 contentElement，那么就要把 contentElement 初始化了
+	          _this11._initcontentElementAndSize(node.rowData).then(function () {
+	            drawNode();
+	          });
+	        } else {
+	          drawNode();
+	        }
+	      });
+	    }
+	  }, {
+	    key: "_destroy",
+	    value: function _destroy(item) {
+	      var _this12 = this;
+
+	      item.shapeElement && item.shapeElement.destroy();
+
+	      if (item.contentElement) {
+	        if (item.contentElement.destroy) {
+	          item.contentElement.destroy();
+	        } else {
+	          //否则就可定是个dom
+	          this.domContainer.removeChild(item.contentElement);
+	        }
+	      }
+
+	      item.pathElement && item.pathElement.destroy();
+	      item.labelElement && item.labelElement.destroy();
+	      item.arrowElement && item.arrowElement.destroy();
+	      item.edgeIconElement && item.edgeIconElement.destroy();
+	      item.edgeIconBack && item.edgeIconBack.destroy(); //下面两个是tree中独有的
+
+	      item.collapseIcon && item.collapseIcon.destroy();
+	      item.collapseIconBack && item.collapseIconBack.destroy();
+
+	      if (Array.isArray(item[this.field])) {
+	        //是个edge的话，要检查下源头是不是没有子节点了， 没有子节点了， 还要把collapseIcon 都干掉
+	        var sourceNode = item.source;
+
+	        if (!this.data.edges.find(function (item) {
+	          return item[_this12.field][0] == sourceNode[_this12.field];
+	        })) {
+	          //如歌edges里面还有 targetNode[this.field] 开头的，targetNode 还有子节点, 否则就可以把 targetNode的collapseIcon去掉
+	          sourceNode.collapseIcon && sourceNode.collapseIcon.destroy();
+	          sourceNode.collapseIconBack && sourceNode.collapseIconBack.destroy();
+	        }
+	      }
+	    }
+	  }, {
+	    key: "arrayToTreeJsonForRelation",
+	    value: function arrayToTreeJsonForRelation(data) {
+	      var _this13 = this;
+
+	      // [ { key: 1, name: },{key:'1,2'} ] to [ { name: children: [ {}... ] } ] 
+	      var _nodes = {};
+	      var _edges = {};
+
+	      _.each(data, function (item) {
+	        var key = item[_this13.field] + '';
+
+	        if (key.split(',').length == 1) {
+	          _nodes[key] = item;
+	        } else {
+	          _edges[key] = item;
+	        }
+	      }); //先找到所有的一层
+
+
+	      var arr = [];
+
+	      _.each(_nodes, function (node, nkey) {
+	        var isFirstLev = true;
+
+	        _.each(_edges, function (edge, ekey) {
+	          ekey = ekey + '';
+
+	          if (ekey.split(',')[1] == nkey) {
+	            isFirstLev = false;
+	            return false;
+	          }
+	        });
+
+	        if (isFirstLev) {
+	          arr.push(node);
+	          node.__inRelation = true;
+	        }
+	      }); //有了第一层就好办了
+
+
+	      var getChildren = function getChildren(list) {
+	        _.each(list, function (node) {
+	          if (node.__cycle) return;
+	          var key = node[_this13.field];
+
+	          _.each(_edges, function (edge, ekey) {
+	            ekey = ekey + '';
+
+	            if (ekey.split(',')[0] == key) {
+	              //那么说明[1] 就是自己的children
+	              var childNode = _nodes[ekey.split(',')[1]];
+
+	              if (childNode) {
+	                if (!node[_this13.childrenField]) node[_this13.childrenField] = [];
+
+	                if (!_.find(node[_this13.childrenField], function (_child) {
+	                  return _child[_this13.field] == childNode[_this13.field];
+	                })) {
+	                  node[_this13.childrenField].push(childNode);
+	                }
+	                //如果这个目标节点__inRelation已经在关系结构中
+	                //那么说明形成闭环了，不需要再分析这个节点的children
+
+	                if (childNode.__inRelation) {
+	                  childNode.__cycle = true;
+	                }
+	              }
+	            }
+	          });
+
+	          if (node[_this13.childrenField] && node[_this13.childrenField].length) {
+	            getChildren(node[_this13.childrenField]);
+	          }
+	        });
+	      };
+
+	      getChildren(arr);
+	      return arr.length ? arr[0] : null;
+	    }
+	  }], [{
+	    key: "defaultProps",
+	    value: function defaultProps() {
+	      return {
+	        childrenField: {
+	          detail: '树结构数据的关联字段',
+	          documentation: '如果是树结构的关联数据，不是行列式，那么就通过这个字段来建立父子关系',
+	          "default": 'children'
+	        },
+	        rankdir: {
+	          detail: '布局方向',
+	          "default": 'LR'
+	        },
+	        layout: {
+	          detail: '紧凑的树布局方案， 也可以设置为一个function，自定义布局算法',
+	          "default": "tree"
+	        },
+	        layoutOpts: {
+	          detail: '布局引擎对应的配置',
+	          propertys: {}
+	        },
+	        ranksep: {
+	          detail: '排与排之间的距离',
+	          "default": 60
+	        },
+	        nodesep: {
+	          detail: '同级node之间的距离',
+	          "default": 20
+	        },
+	        node: {
+	          detail: '单个节点的配置',
+	          propertys: {
+	            collapse: {
+	              detail: '树状图是否有节点收缩按钮',
+	              propertys: {
+	                enabled: {
+	                  detail: "是否开启",
+	                  "default": true
+	                },
+	                field: {
+	                  detail: "用来记录collapsed是否折叠的字段，在节点的数据上",
+	                  "default": "collapsed"
+	                },
+	                triggerEventType: {
+	                  detail: '触发事件',
+	                  "default": 'click,tap'
+	                },
+	                openCharCode: {
+	                  detail: "点击后触发展开的icon chartCode，当前状态为收缩",
+	                  "default": ''
+	                },
+	                closeCharCode: {
+	                  detail: "点击后触发收缩的icon chartCode，当前状态为展开",
+	                  "default": ''
+	                },
+	                fontSize: {
+	                  detail: "icon字号大小",
+	                  "default": 10
+	                },
+	                fontColor: {
+	                  detail: "icon字体颜色",
+	                  "default": '#666'
+	                },
+	                fontFamily: {
+	                  detail: "icon在css中的fontFamily",
+	                  "default": 'iconfont'
+	                },
+	                tipsContent: {
+	                  detail: '鼠标移动到收缩icon上面的tips内容',
+	                  "default": ''
+	                },
+	                offsetX: {
+	                  detail: 'x方向偏移量',
+	                  "default": 10
+	                },
+	                offsetY: {
+	                  detail: 'y方向偏移量',
+	                  "default": 1
+	                },
+	                background: {
+	                  detail: 'icon的 背景色',
+	                  "default": '#fff'
+	                },
+	                lineWidth: {
+	                  detail: '边框大小',
+	                  "default": 1
+	                },
+	                strokeStyle: {
+	                  detail: '描边颜色',
+	                  "default": '#667894'
+	                }
+	              }
+	            }
+	          }
+	        },
+	        line: {
+	          detail: '连线配置',
+	          propertys: {
+	            arrow: {
+	              detail: '箭头配置',
+	              propertys: {
+	                enabled: {
+	                  detail: '是否显示',
+	                  "default": false
+	                }
+	              }
+	            },
+	            edgeLabel: {
+	              detail: '连线文本',
+	              propertys: {
+	                enabled: {
+	                  detail: '是否要连线的文本',
+	                  "default": false
+	                }
+	              }
+	            },
+	            icon: {
+	              detail: '连线上的icon',
+	              propertys: {
+	                enabled: {
+	                  detail: '是否要连线上的icon',
+	                  "default": false
+	                }
+	              }
+	            }
+	          }
+	        }
+	      };
+	    }
+	  }]);
+	  return compactTree;
+	}(_base["default"]);
+
+	_base["default"].registerComponent(compactTree, 'graphs', 'compacttree');
+
+	var _default = compactTree;
+	exports["default"] = _default;
+	});
+
+	unwrapExports(compacttree);
+
 	function center(x, y) {
 	  var nodes, strength = 1;
 
@@ -47738,7 +52206,7 @@ var chartx = (function () {
 	treeProto.x = tree_x;
 	treeProto.y = tree_y;
 
-	function constant(x) {
+	function constant$1(x) {
 	  return function() {
 	    return x;
 	  };
@@ -47763,7 +52231,7 @@ var chartx = (function () {
 	      strength = 1,
 	      iterations = 1;
 
-	  if (typeof radius !== "function") radius = constant(radius == null ? 1 : +radius);
+	  if (typeof radius !== "function") radius = constant$1(radius == null ? 1 : +radius);
 
 	  function force() {
 	    var i, n = nodes.length,
@@ -47839,13 +52307,13 @@ var chartx = (function () {
 	  };
 
 	  force.radius = function(_) {
-	    return arguments.length ? (radius = typeof _ === "function" ? _ : constant(+_), initialize(), force) : radius;
+	    return arguments.length ? (radius = typeof _ === "function" ? _ : constant$1(+_), initialize(), force) : radius;
 	  };
 
 	  return force;
 	}
 
-	function index(d) {
+	function index$2(d) {
 	  return d.index;
 	}
 
@@ -47856,10 +52324,10 @@ var chartx = (function () {
 	}
 
 	function link(links) {
-	  var id = index,
+	  var id = index$2,
 	      strength = defaultStrength,
 	      strengths,
-	      distance = constant(30),
+	      distance = constant$1(30),
 	      distances,
 	      nodes,
 	      count,
@@ -47950,11 +52418,11 @@ var chartx = (function () {
 	  };
 
 	  force.strength = function(_) {
-	    return arguments.length ? (strength = typeof _ === "function" ? _ : constant(+_), initializeStrength(), force) : strength;
+	    return arguments.length ? (strength = typeof _ === "function" ? _ : constant$1(+_), initializeStrength(), force) : strength;
 	  };
 
 	  force.distance = function(_) {
-	    return arguments.length ? (distance = typeof _ === "function" ? _ : constant(+_), initializeDistance(), force) : distance;
+	    return arguments.length ? (distance = typeof _ === "function" ? _ : constant$1(+_), initializeDistance(), force) : distance;
 	  };
 
 	  return force;
@@ -48322,7 +52790,7 @@ var chartx = (function () {
 	      node,
 	      random,
 	      alpha,
-	      strength = constant(-30),
+	      strength = constant$1(-30),
 	      strengths,
 	      distanceMin2 = 1,
 	      distanceMax2 = Infinity,
@@ -48411,7 +52879,7 @@ var chartx = (function () {
 	  };
 
 	  force.strength = function(_) {
-	    return arguments.length ? (strength = typeof _ === "function" ? _ : constant(+_), initialize(), force) : strength;
+	    return arguments.length ? (strength = typeof _ === "function" ? _ : constant$1(+_), initialize(), force) : strength;
 	  };
 
 	  force.distanceMin = function(_) {
@@ -48431,11 +52899,11 @@ var chartx = (function () {
 
 	function radial(radius, x, y) {
 	  var nodes,
-	      strength = constant(0.1),
+	      strength = constant$1(0.1),
 	      strengths,
 	      radiuses;
 
-	  if (typeof radius !== "function") radius = constant(+radius);
+	  if (typeof radius !== "function") radius = constant$1(+radius);
 	  if (x == null) x = 0;
 	  if (y == null) y = 0;
 
@@ -48467,11 +52935,11 @@ var chartx = (function () {
 	  };
 
 	  force.strength = function(_) {
-	    return arguments.length ? (strength = typeof _ === "function" ? _ : constant(+_), initialize(), force) : strength;
+	    return arguments.length ? (strength = typeof _ === "function" ? _ : constant$1(+_), initialize(), force) : strength;
 	  };
 
 	  force.radius = function(_) {
-	    return arguments.length ? (radius = typeof _ === "function" ? _ : constant(+_), initialize(), force) : radius;
+	    return arguments.length ? (radius = typeof _ === "function" ? _ : constant$1(+_), initialize(), force) : radius;
 	  };
 
 	  force.x = function(_) {
@@ -48486,12 +52954,12 @@ var chartx = (function () {
 	}
 
 	function x$3(x) {
-	  var strength = constant(0.1),
+	  var strength = constant$1(0.1),
 	      nodes,
 	      strengths,
 	      xz;
 
-	  if (typeof x !== "function") x = constant(x == null ? 0 : +x);
+	  if (typeof x !== "function") x = constant$1(x == null ? 0 : +x);
 
 	  function force(alpha) {
 	    for (var i = 0, n = nodes.length, node; i < n; ++i) {
@@ -48515,23 +52983,23 @@ var chartx = (function () {
 	  };
 
 	  force.strength = function(_) {
-	    return arguments.length ? (strength = typeof _ === "function" ? _ : constant(+_), initialize(), force) : strength;
+	    return arguments.length ? (strength = typeof _ === "function" ? _ : constant$1(+_), initialize(), force) : strength;
 	  };
 
 	  force.x = function(_) {
-	    return arguments.length ? (x = typeof _ === "function" ? _ : constant(+_), initialize(), force) : x;
+	    return arguments.length ? (x = typeof _ === "function" ? _ : constant$1(+_), initialize(), force) : x;
 	  };
 
 	  return force;
 	}
 
 	function y$2(y) {
-	  var strength = constant(0.1),
+	  var strength = constant$1(0.1),
 	      nodes,
 	      strengths,
 	      yz;
 
-	  if (typeof y !== "function") y = constant(y == null ? 0 : +y);
+	  if (typeof y !== "function") y = constant$1(y == null ? 0 : +y);
 
 	  function force(alpha) {
 	    for (var i = 0, n = nodes.length, node; i < n; ++i) {
@@ -48555,11 +53023,11 @@ var chartx = (function () {
 	  };
 
 	  force.strength = function(_) {
-	    return arguments.length ? (strength = typeof _ === "function" ? _ : constant(+_), initialize(), force) : strength;
+	    return arguments.length ? (strength = typeof _ === "function" ? _ : constant$1(+_), initialize(), force) : strength;
 	  };
 
 	  force.y = function(_) {
-	    return arguments.length ? (y = typeof _ === "function" ? _ : constant(+_), initialize(), force) : y;
+	    return arguments.length ? (y = typeof _ === "function" ? _ : constant$1(+_), initialize(), force) : y;
 	  };
 
 	  return force;
@@ -48567,7 +53035,7 @@ var chartx = (function () {
 
 
 
-	var src = /*#__PURE__*/Object.freeze({
+	var src$1 = /*#__PURE__*/Object.freeze({
 		__proto__: null,
 		forceCenter: center,
 		forceCollide: collide,
@@ -48606,7 +53074,7 @@ var chartx = (function () {
 
 	var _index = interopRequireDefault(graphs);
 
-	var force = _interopRequireWildcard(src);
+	var force = _interopRequireWildcard(src$1);
 
 
 
@@ -50034,6 +54502,7 @@ var chartx = (function () {
 	      this._setNodeStyle(_path, 'select');
 
 	      nodeData.selected = true;
+	      console.log("select:true");
 	    }
 	  }, {
 	    key: "unselectAt",
@@ -50047,6 +54516,7 @@ var chartx = (function () {
 	      this._setNodeStyle(_path);
 
 	      geoGraph.selected = false;
+	      console.log("select:false");
 
 	      if (geoGraph.focused) {
 	        this.focusAt(adcode);
@@ -50405,288 +54875,6 @@ var chartx = (function () {
 	});
 
 	unwrapExports(map);
-
-	var tree$1 = createCommonjsModule(function (module, exports) {
-
-
-
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	exports["default"] = void 0;
-
-	var _hierarchy = interopRequireDefault(hierarchy);
-
-	var _global = interopRequireDefault(global$1);
-
-	// Node-link tree diagram using the Reingold-Tilford "tidy" algorithm
-	var TREE = function TREE() {
-	  var hierarchy = (0, _hierarchy["default"])().sort(null).value(null),
-	      separation = layout_treeSeparation,
-	      size = [1, 1],
-	      // width, height
-	  nodeSize = null;
-
-	  function tree(d, i) {
-	    var nodes = hierarchy.call(this, d, i),
-	        root0 = nodes[0],
-	        root1 = wrapTree(root0); // Compute the layout using Buchheim et al.'s algorithm.
-
-	    _hierarchy["default"].layout_hierarchyVisitAfter(root1, firstWalk), root1.parent.m = -root1.z;
-
-	    _hierarchy["default"].layout_hierarchyVisitBefore(root1, secondWalk); // If a fixed node size is specified, scale x and y.
-
-
-	    if (nodeSize) _hierarchy["default"].layout_hierarchyVisitBefore(root0, sizeNode); // If a fixed tree size is specified, scale x and y based on the extent.
-	    // Compute the left-most, right-most, and depth-most nodes for extents.
-	    else {
-	      var left = root0,
-	          right = root0,
-	          bottom = root0;
-
-	      _hierarchy["default"].layout_hierarchyVisitBefore(root0, function (node) {
-	        if (node.x < left.x) left = node;
-	        if (node.x > right.x) right = node;
-	        if (node.depth > bottom.depth) bottom = node;
-	      });
-
-	      var tx = separation(left, right) / 2 - left.x,
-	          kx = size[0] / (right.x + separation(right, left) / 2 + tx),
-	          ky = size[1] / (bottom.depth || 1);
-
-	      _hierarchy["default"].layout_hierarchyVisitBefore(root0, function (node) {
-	        node.x = (node.x + tx) * kx;
-	        node.y = node.depth * ky;
-	      });
-	    }
-	    return nodes;
-	  }
-
-	  function wrapTree(root0) {
-	    var root1 = {
-	      A: null,
-	      children: [root0]
-	    },
-	        queue = [root1],
-	        node1;
-
-	    while ((node1 = queue.pop()) != null) {
-	      for (var children = node1.children, child, i = 0, n = children.length; i < n; ++i) {
-	        queue.push((children[i] = child = {
-	          _: children[i],
-	          // source node
-	          parent: node1,
-	          children: (child = children[i].children) && child.slice() || [],
-	          A: null,
-	          // default ancestor
-	          a: null,
-	          // ancestor
-	          z: 0,
-	          // prelim
-	          m: 0,
-	          // mod
-	          c: 0,
-	          // change
-	          s: 0,
-	          // shift
-	          t: null,
-	          // thread
-	          i: i // number
-
-	        }).a = child);
-	      }
-	    }
-
-	    return root1.children[0];
-	  } // FIRST WALK
-	  // Computes a preliminary x-coordinate for v. Before that, FIRST WALK is
-	  // applied recursively to the children of v, as well as the function
-	  // APPORTION. After spacing out the children by calling EXECUTE SHIFTS, the
-	  // node v is placed to the midpoint of its outermost children.
-
-
-	  function firstWalk(v) {
-	    var children = v.children,
-	        siblings = v.parent.children,
-	        w = v.i ? siblings[v.i - 1] : null;
-
-	    if (children.length) {
-	      layout_treeShift(v);
-	      var midpoint = (children[0].z + children[children.length - 1].z) / 2;
-
-	      if (w) {
-	        v.z = w.z + separation(v._, w._);
-	        v.m = v.z - midpoint;
-	      } else {
-	        v.z = midpoint;
-	      }
-	    } else if (w) {
-	      v.z = w.z + separation(v._, w._);
-	    }
-
-	    v.parent.A = apportion(v, w, v.parent.A || siblings[0]);
-	  } // SECOND WALK
-	  // Computes all real x-coordinates by summing up the modifiers recursively.
-
-
-	  function secondWalk(v) {
-	    v._.x = v.z + v.parent.m;
-	    v.m += v.parent.m;
-	  } // APPORTION
-	  // The core of the algorithm. Here, a new subtree is combined with the
-	  // previous subtrees. Threads are used to traverse the inside and outside
-	  // contours of the left and right subtree up to the highest common level. The
-	  // vertices used for the traversals are vi+, vi-, vo-, and vo+, where the
-	  // superscript o means outside and i means inside, the subscript - means left
-	  // subtree and + means right subtree. For summing up the modifiers along the
-	  // contour, we use respective variables si+, si-, so-, and so+. Whenever two
-	  // nodes of the inside contours conflict, we compute the left one of the
-	  // greatest uncommon ancestors using the function ANCESTOR and call MOVE
-	  // SUBTREE to shift the subtree and prepare the shifts of smaller subtrees.
-	  // Finally, we add a new thread (if necessary).
-
-
-	  function apportion(v, w, ancestor) {
-	    if (w) {
-	      var vip = v,
-	          vop = v,
-	          vim = w,
-	          vom = vip.parent.children[0],
-	          sip = vip.m,
-	          sop = vop.m,
-	          sim = vim.m,
-	          som = vom.m,
-	          shift;
-
-	      while (vim = layout_treeRight(vim), vip = layout_treeLeft(vip), vim && vip) {
-	        vom = layout_treeLeft(vom);
-	        vop = layout_treeRight(vop);
-	        vop.a = v;
-	        shift = vim.z + sim - vip.z - sip + separation(vim._, vip._);
-
-	        if (shift > 0) {
-	          layout_treeMove(layout_treeAncestor(vim, v, ancestor), v, shift);
-	          sip += shift;
-	          sop += shift;
-	        }
-
-	        sim += vim.m;
-	        sip += vip.m;
-	        som += vom.m;
-	        sop += vop.m;
-	      }
-
-	      if (vim && !layout_treeRight(vop)) {
-	        vop.t = vim;
-	        vop.m += sim - sop;
-	      }
-
-	      if (vip && !layout_treeLeft(vom)) {
-	        vom.t = vip;
-	        vom.m += sip - som;
-	        ancestor = v;
-	      }
-	    }
-
-	    return ancestor;
-	  }
-
-	  function sizeNode(node) {
-	    node.x *= size[0];
-	    node.y = node.depth * size[1];
-	  }
-
-	  tree.separation = function (x) {
-	    if (!arguments.length) return separation;
-	    separation = x;
-	    return tree;
-	  };
-
-	  tree.size = function (x) {
-	    if (!arguments.length) return nodeSize ? null : size;
-	    nodeSize = (size = x) == null ? sizeNode : null;
-	    return tree;
-	  };
-
-	  tree.nodeSize = function (x) {
-	    if (!arguments.length) return nodeSize ? size : null;
-	    nodeSize = (size = x) == null ? null : sizeNode;
-	    return tree;
-	  };
-
-	  return _hierarchy["default"].layout_hierarchyRebind(tree, hierarchy);
-	};
-
-	function layout_treeSeparation(a, b) {
-	  return a.parent == b.parent ? 1 : 2;
-	} // function d3_layout_treeSeparationRadial(a, b) {
-	//   return (a.parent == b.parent ? 1 : 2) / a.depth;
-	// }
-	// NEXT LEFT
-	// This function is used to traverse the left contour of a subtree (or
-	// subforest). It returns the successor of v on this contour. This successor is
-	// either given by the leftmost child of v or by the thread of v. The function
-	// returns null if and only if v is on the highest level of its subtree.
-
-
-	function layout_treeLeft(v) {
-	  var children = v.children;
-	  return children.length ? children[0] : v.t;
-	} // NEXT RIGHT
-	// This function works analogously to NEXT LEFT.
-
-
-	function layout_treeRight(v) {
-	  var children = v.children,
-	      n;
-	  return (n = children.length) ? children[n - 1] : v.t;
-	} // MOVE SUBTREE
-	// Shifts the current subtree rooted at w+. This is done by increasing
-	// prelim(w+) and mod(w+) by shift.
-
-
-	function layout_treeMove(wm, wp, shift) {
-	  var change = shift / (wp.i - wm.i);
-	  wp.c -= change;
-	  wp.s += shift;
-	  wm.c += change;
-	  wp.z += shift;
-	  wp.m += shift;
-	} // EXECUTE SHIFTS
-	// All other shifts, applied to the smaller subtrees between w- and w+, are
-	// performed by this function. To prepare the shifts, we have to adjust
-	// change(w+), shift(w+), and change(w-).
-
-
-	function layout_treeShift(v) {
-	  var shift = 0,
-	      change = 0,
-	      children = v.children,
-	      i = children.length,
-	      w;
-
-	  while (--i >= 0) {
-	    w = children[i];
-	    w.z += shift;
-	    w.m += shift;
-	    shift += w.s + (change += w.c);
-	  }
-	} // ANCESTOR
-	// If vi-’s ancestor is a sibling of v, returns vi-’s ancestor. Otherwise,
-	// returns the specified (default) ancestor.
-
-
-	function layout_treeAncestor(vim, v, ancestor) {
-	  return vim.a.parent === v.parent ? vim.a : ancestor;
-	}
-
-	_global["default"].registerLayout('tree', TREE);
-
-	var _default = TREE;
-	exports["default"] = _default;
-	});
-
-	unwrapExports(tree$1);
 
 	var legend = createCommonjsModule(function (module, exports) {
 
@@ -52767,6 +56955,7 @@ var chartx = (function () {
 	  (0, _createClass2["default"])(Tips, [{
 	    key: "show",
 	    value: function show(e) {
+	      console.log('tips show');
 	      if (!this.enabled) return;
 
 	      if (e.eventInfo) {
@@ -52804,6 +56993,7 @@ var chartx = (function () {
 	  }, {
 	    key: "move",
 	    value: function move(e) {
+	      console.log('tips move');
 	      if (!this.enabled) return;
 
 	      if (e.eventInfo) {
@@ -52826,6 +57016,8 @@ var chartx = (function () {
 	  }, {
 	    key: "hide",
 	    value: function hide(e) {
+	      console.log('tips hide');
+
 	      this._hide(e);
 
 	      this.onhide.apply(this, [e]);
@@ -56413,6 +60605,7 @@ var chartx = (function () {
 	      var lineLength = !this.line.enabled ? 3 : this.line.lineLength;
 	      var lineDis = this.line.lineDis; //line到node的距离
 
+	      debugger;
 	      var position = "online";
 
 	      if (this.position == 'auto') {
@@ -56630,15 +60823,15 @@ var chartx = (function () {
 
 
 
-
-
 	//2d图表元类
 	//-----------------------------------------------
 	//坐标系
 	//-----------------------------------------------
 	//graphs
-	//-----------------------------------------------
-	//布局算法
+	// //-----------------------------------------------
+	// //布局算法
+	// import "./layout/dagre/index"
+	// import "./layout/tree/index"
 	//-----------------------------------------------
 	//components
 	//皮肤设定begin ---------------
@@ -56661,8 +60854,8 @@ var chartx = (function () {
 	exports["default"] = _default;
 	});
 
-	var index$1 = unwrapExports(dist);
+	var index$3 = unwrapExports(dist);
 
-	return index$1;
+	return index$3;
 
 }());

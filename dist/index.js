@@ -43,13 +43,11 @@ require("./components/graphs/relation/index");
 
 require("./components/graphs/tree/index");
 
+require("./components/graphs/compacttree/index");
+
 require("./components/graphs/force/index");
 
 require("./components/graphs/map/index");
-
-require("./layout/dagre/index");
-
-require("./layout/tree/index");
 
 require("./components/legend/index");
 
@@ -84,8 +82,10 @@ require("./components/linemarkpoint/index");
 //坐标系
 //-----------------------------------------------
 //graphs
-//-----------------------------------------------
-//布局算法
+// //-----------------------------------------------
+// //布局算法
+// import "./layout/dagre/index"
+// import "./layout/tree/index"
 //-----------------------------------------------
 //components
 //皮肤设定begin ---------------

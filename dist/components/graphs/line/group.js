@@ -622,6 +622,7 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
       ;
       me.lineSprite.addChild(bline);
       me._line = bline;
+      debugger;
       window['_line'] = me._line;
 
       if (me.area.enabled) {
