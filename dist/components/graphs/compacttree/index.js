@@ -472,12 +472,12 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
 
         ;
         left = Math.min(left, node.x);
-        right = Math.max(right, node.x + node.data.width);
+        right = Math.max(right, node.x + node.data._node.width);
         top = Math.min(top, node.y);
-        bottom = Math.max(bottom, node.y + node.data.height + spaceY); //node的x y 都是矩形的中心点
+        bottom = Math.max(bottom, node.y + node.data._node.height + spaceY); //node的x y 都是矩形的中心点
 
-        node.data._node.x = node.x + node.data.width / 2;
-        node.data._node.y = node.y + node.data.height / 2;
+        node.data._node.x = node.x + node.data._node.width / 2;
+        node.data._node.y = node.y + node.data._node.height / 2;
         node.data._node.depth = node.depth;
       });
 

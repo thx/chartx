@@ -102,7 +102,7 @@ var data1 = [
     { key: "6"       , label: '杭州'    },
     { key: "666"       , label: '金华'    },
     { key: "66"       , label: '宁波'    },
-    { key: "7"       , label: '闲林'    },
+    //{ key: "7"       , label: '闲林'    },
     { key: "8"       , label: '北京'    },
     { key: "9"      , label: '娄底'    },
     { key: "10"      , label: '<div onclick="alert(1)"  style="width:50px;height:50px;background:red;">上海1</div>' },
@@ -115,7 +115,7 @@ var data1 = [
     { key: "4,66"   , label: '浙江宁波' },
     { key: "4,666"   , label: '浙江金华' },
     { key: "4,6"   , label: '浙江杭州' },
-    { key: "6,7"   , label: '杭州闲林' },
+    //{ key: "6,7"   , label: '杭州闲林' },
     { key: "1,8"   , label: '中国北京' },
     { key: "2,9"   , label: '湖南娄底' },
     { key: "1,10"  , label: '中国上海' }
@@ -226,7 +226,12 @@ setTimeout( function(){
         chart.resetData( data1 , {
             origin: '10'
         })
-    }, 3000)
+        setTimeout(function(){
+            chart.resetData( data , {
+                origin: '10'
+            })
+        }, 2000)
+    }, 2000)
 } , 100)
 
 

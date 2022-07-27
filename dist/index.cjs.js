@@ -47595,7 +47595,8 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
             } else {
               //如果找到了，要从前面 复制几个属性过来
               nodeData.focused = preNode.focused;
-              nodeData.selected = preNode.selected; //把原来的对象的 contentElement 搞过来， 就可以减少getChild的消耗
+              nodeData.selected = preNode.selected; //TODO:把原来的对象的 contentElement 搞过来， 就可以减少getChild的消耗
+              //还有个更加重要的原因，这段代码解决了展开收起的抖动
 
               if (nodeData.ctype == preNode.ctype) {
                 //类型没变， 就可以用同一个 contentElement
@@ -48430,7 +48431,8 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
           fontSize: me.getProp(me.node.content.fontSize, node)
         };
         var contentLabelId = "content_label_" + node.key;
-        var _contentLabel = node.contentElement; // || me.nodesContentSp.getChildById( contentLabelId );
+
+        var _contentLabel = node.contentElement || me.nodesContentSp.getChildById(contentLabelId);
 
         if (_contentLabel) {
           //已经存在的label
@@ -48507,7 +48509,8 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
         }
 
         var contentLabelClass = "__content_label_" + node.key;
-        var _dom = node.contentElement; // || this.domContainer.getElementsByClassName( contentLabelClass );
+
+        var _dom = node.contentElement || _this6.domContainer.getElementsByClassName(contentLabelClass)[0];
 
         if (!_dom) {
           _dom = document.createElement("div");
@@ -51293,12 +51296,12 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
           node.y = x;
         }
         left = Math.min(left, node.x);
-        right = Math.max(right, node.x + node.data.width);
+        right = Math.max(right, node.x + node.data._node.width);
         top = Math.min(top, node.y);
-        bottom = Math.max(bottom, node.y + node.data.height + spaceY); //node的x y 都是矩形的中心点
+        bottom = Math.max(bottom, node.y + node.data._node.height + spaceY); //node的x y 都是矩形的中心点
 
-        node.data._node.x = node.x + node.data.width / 2;
-        node.data._node.y = node.y + node.data.height / 2;
+        node.data._node.x = node.x + node.data._node.width / 2;
+        node.data._node.y = node.y + node.data._node.height / 2;
         node.data._node.depth = node.depth;
       });
 

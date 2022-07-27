@@ -409,7 +409,7 @@ class compactTree extends GraphsBase {
     _setSize( treeData ) {
         return new Promise( resolve => {
             let node = treeData._node;
-
+            
             //这里的width都是指内容的size
             let width = treeData.width || this.getProp( this.node.width, treeData );
             let height = treeData.height || this.getProp( this.node.height, treeData );
@@ -464,7 +464,6 @@ class compactTree extends GraphsBase {
             };
 
             _initEle.apply( this, [node] ).then( sizeOpt  => {
-                
                 // opt -> contentElement,width,height 
                 _.extend(node, sizeOpt);
                 //动态计算的尺寸，要写入到treeData中去，然后同步到 treeData的 originData，
@@ -512,6 +511,7 @@ class compactTree extends GraphsBase {
                 if( layoutIsHorizontal ){
                     return [ height, width+spaceY ]
                 }
+                
                 return [ width, height+spaceY ] //因为节点高度包含节点下方的间距
             }
         });
@@ -531,14 +531,13 @@ class compactTree extends GraphsBase {
             };
 
             left = Math.min( left, node.x );
-            right = Math.max( right, node.x + node.data.width );
+            right = Math.max( right, node.x + node.data._node.width );
             top = Math.min( top, node.y );
-            bottom = Math.max( bottom, node.y + node.data.height+ spaceY );
+            bottom = Math.max( bottom, node.y + node.data._node.height+ spaceY );
          
-
             //node的x y 都是矩形的中心点
-            node.data._node.x = node.x + node.data.width/2;
-            node.data._node.y = node.y + node.data.height/2;
+            node.data._node.x = node.x + node.data._node.width/2;
+            node.data._node.y = node.y + node.data._node.height/2;
             node.data._node.depth = node.depth;
 
         });
@@ -724,7 +723,7 @@ class compactTree extends GraphsBase {
             }
 
           
-
+            
             if( !node.contentElement ){
                 //绘制的时候如果发现没有 contentElement，那么就要把 contentElement 初始化了
                 this._initcontentElementAndSize( node.rowData ).then( ()=>{
