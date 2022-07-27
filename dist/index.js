@@ -57,6 +57,8 @@ require("./components/markline/index");
 
 require("./components/tips/index");
 
+require("./components/contextmenu/index");
+
 require("./components/bartgi/index");
 
 require("./components/barguide/index");
@@ -99,7 +101,7 @@ if (projectTheme && projectTheme.length) {
 ; //皮肤设定end -----------------
 
 var chartx = {
-  version: '1.1.99',
+  version: '__VERSION__',
   options: {}
 };
 

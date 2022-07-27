@@ -675,6 +675,7 @@ class compactTree extends GraphsBase {
                             this.labelsSp.addChild( _collapseIcon );
     
                             _collapseIcon._collapseIconBack = _collapseIconBack;
+                            
                             _collapseIcon.on( event.types.get(), (e)=> {
                     
                                 let trigger = this.node.collapse;

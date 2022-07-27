@@ -6,6 +6,8 @@ import Coord from "./components/coord/index"
 
 let { _ , $ , event } = Canvax;
 
+//注册右键菜单事件
+event.types.register('contextmenu');
 
 class Chart extends event.Dispatcher
 {
@@ -717,6 +719,14 @@ class Chart extends event.Dispatcher
             };
 
         };
+
+        let _contextmenu = this.getComponent({name:'contextmenu'});
+        if( _contextmenu ){
+            if( event.type == 'contextmenu' ){
+                _contextmenu.show(event);
+            }
+        }
+
     }
 
 

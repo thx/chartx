@@ -33,7 +33,9 @@ function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Re
 
 var _ = _canvax["default"]._,
     $ = _canvax["default"].$,
-    event = _canvax["default"].event;
+    event = _canvax["default"].event; //注册右键菜单事件
+
+event.types.register('contextmenu');
 
 var Chart = /*#__PURE__*/function (_event$Dispatcher) {
   (0, _inherits2["default"])(Chart, _event$Dispatcher);
@@ -891,6 +893,16 @@ var Chart = /*#__PURE__*/function (_event$Dispatcher) {
       }
 
       ;
+
+      var _contextmenu = this.getComponent({
+        name: 'contextmenu'
+      });
+
+      if (_contextmenu) {
+        if (event.type == 'contextmenu') {
+          _contextmenu.show(event);
+        }
+      }
     }
   }, {
     key: "_bindEvent",
