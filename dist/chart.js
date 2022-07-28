@@ -899,6 +899,10 @@ var Chart = /*#__PURE__*/function (_event$Dispatcher) {
       });
 
       if (_contextmenu) {
+        if ('mousedown,click'.indexOf(event.type) > -1) {
+          _contextmenu.hide(event);
+        }
+
         if (event.type == 'contextmenu') {
           _contextmenu.show(event);
         }

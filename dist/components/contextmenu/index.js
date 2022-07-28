@@ -7,8 +7,6 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports["default"] = void 0;
 
-var _typeof2 = _interopRequireDefault(require("@babel/runtime/helpers/typeof"));
-
 var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
 var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
@@ -82,6 +80,8 @@ var contextMenu = /*#__PURE__*/function (_Component) {
       me._removeContent();
     });
 
+    _this.isShow = false;
+
     _.extend(true, (0, _assertThisInitialized2["default"])(_this), (0, _tools.getDefaultProps)(contextMenu.defaultProps()), opt);
 
     return _this;
@@ -125,20 +125,17 @@ var contextMenu = /*#__PURE__*/function (_Component) {
       }
 
       this.onshow.apply(this, [e]);
+      this.isShow = true;
     }
   }, {
     key: "hide",
     value: function hide(e) {
-      this._hide(e);
-
-      this.onhide.apply(this, [e]);
-    }
-  }, {
-    key: "_hide",
-    value: function _hide(e) {
       if (!this.enabled) return;
 
       this._hideDialogMenus(e);
+
+      this.onhide.apply(this, [e]);
+      this.isShow = false;
     }
   }, {
     key: "_hideDialogMenus",
@@ -246,113 +243,11 @@ var contextMenu = /*#__PURE__*/function (_Component) {
       if (this.content) {
         tipsContent = _.isFunction(this.content) ? this.content(e.eventInfo, e) : this.content;
       } else {
-        tipsContent = this._getDefaultContent(e.eventInfo);
+        tipsContent = '';
       }
 
       ;
       return tipsContent;
-    }
-  }, {
-    key: "_getDefaultContent",
-    value: function _getDefaultContent(info) {
-      var _coord = this.app.getComponent({
-        name: 'coord'
-      });
-
-      var str = "";
-
-      if (!info.nodes.length && !info.tipsContent) {
-        return str;
-      }
-
-      ;
-      var hasNodesContent = false;
-
-      if (info.nodes.length) {
-        str += "<table >";
-
-        if (info.title !== undefined && info.title !== null && info.title !== "") {
-          str += "<tr><td colspan='2' style='text-align:left;padding-left:3px;'>";
-          str += "<span style='font-size:12px;padding:4px;color:#333;'>" + info.title + "</span>";
-          str += "</td></tr>";
-          hasNodesContent = true;
-        }
-
-        ;
-
-        _.each(info.nodes, function (node, i) {
-          // if (!node.value && node.value !== 0) {
-          //     return;
-          // };
-          var style = node.color || node.fillStyle || node.strokeStyle;
-          var name, value;
-
-          var fieldConfig = _coord.getFieldConfig(node.field); //node.name优先级最高，是因为像 pie funnel cloud 等一维图表，会有name属性
-          //关系图中会有content
-
-
-          name = node.name || node.label || (fieldConfig || {}).name || node.content || node.field || '';
-          str += "<tr>";
-
-          if ((0, _typeof2["default"])(node.value) == 'object') {
-            //主要是用在散点图的情况
-            if (node.value && node.value.x) {
-              var xfieldConfig = _coord.getFieldConfig(info.xAxis.field);
-
-              var xName = xfieldConfig && xfieldConfig.name || info.xAxis.field;
-              var xvalue = xfieldConfig ? xfieldConfig.getFormatValue(node.value.x) : node.value.x;
-              str += "<td style='padding:0px 6px;'>" + xName + "：<span style='color:" + style + "'>" + xvalue + "</span></td>";
-              hasNodesContent = true;
-            }
-
-            if (node.value && node.value.y) {
-              value = fieldConfig ? fieldConfig.getFormatValue(node.value.y) : node.value.y;
-              str += "<td style='padding:0px 6px;'>" + name + "：<span style='color:" + style + "'>" + value + "</span></td>";
-              hasNodesContent = true;
-            }
-          } else {
-            value = fieldConfig ? fieldConfig.getFormatValue(node.value) : node.value;
-            var hasValue = node.value || node.value === 0;
-
-            if (!hasValue && !node.__no_value) {
-              style = "#ddd";
-              value = '--';
-            }
-
-            if (!node.__no__name) {
-              str += "<td style='padding:0px 6px;color:" + (!hasValue && !node.__no_value ? '#ddd' : '#a0a0a0;') + "'>" + name + "</td>";
-              hasNodesContent = true;
-            }
-
-            if (!node.__no_value) {
-              str += "<td style='padding:0px 6px;font-weight:bold;'>";
-              str += "<span style='color:" + style + "'>" + value + "</span>";
-
-              if (node.subValue) {
-                str += "<span style='padding-left:6px;font-weight:normal;'>" + node.subValue + "</span>";
-                hasNodesContent = true;
-              }
-
-              ;
-              str += "</td>";
-            }
-          }
-
-          str += "</tr>";
-        });
-
-        str += "</table>";
-      }
-
-      if (!hasNodesContent) {
-        str = "";
-      }
-
-      if (info.tipsContent) {
-        str += info.tipsContent;
-      }
-
-      return str;
     }
     /**
      *检测是x方向超过了视窗

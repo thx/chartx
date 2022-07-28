@@ -722,6 +722,9 @@ class Chart extends event.Dispatcher
 
         let _contextmenu = this.getComponent({name:'contextmenu'});
         if( _contextmenu ){
+            if( 'mousedown,click'.indexOf( event.type ) > -1 ){
+                _contextmenu.hide(event);
+            }
             if( event.type == 'contextmenu' ){
                 _contextmenu.show(event);
             }

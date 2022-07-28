@@ -196,90 +196,97 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
       var _deltaY = 0;
       this.induce.on(event.types.get(), function (e) {
         if (me.status.transform.enabled) {
-          e.preventDefault();
-          var point = e.target.localToGlobal(e.point, me.sprite); //鼠标拖拽移动
+          var _contextmenu = me.app.getComponent({
+            name: 'contextmenu'
+          });
 
-          if (e.type == "mousedown") {
-            me.induce.toFront();
-            _mosedownIng = true;
-            me.app.canvax.domView && (me.app.canvax.domView.style.cursor = "move");
-            me.zoom.mouseMoveTo(point);
-          }
+          if (!_contextmenu || !_contextmenu.isShow) {
+            e.preventDefault();
+            var point = e.target.localToGlobal(e.point, me.sprite); //鼠标拖拽移动
 
-          ;
-
-          if (e.type == "mouseup" || e.type == "mouseout") {
-            me.induce.toBack();
-            _mosedownIng = false;
-            me.app.canvax.domView && (me.app.canvax.domView.style.cursor = _preCursor);
-          }
-
-          ;
-
-          if (e.type == "mousemove") {
-            if (_mosedownIng) {
-              var _me$zoom$move = me.zoom.move(point),
-                  x = _me$zoom$move.x,
-                  y = _me$zoom$move.y;
-
-              me.graphsView.context.x = parseInt(x);
-              me.graphsView.context.y = parseInt(y);
-            }
-          }
-
-          ; //滚轮缩放
-
-          if (e.type == "wheel") {
-            console.log(_deltaY, e.deltaY);
-
-            if (Math.abs(e.deltaY) > Math.abs(_deltaY)) {
-              _deltaY = e.deltaY;
+            if (e.type == "mousedown") {
+              me.induce.toFront();
+              _mosedownIng = true;
+              me.app.canvax.domView && (me.app.canvax.domView.style.cursor = "move");
+              me.zoom.mouseMoveTo(point);
             }
 
             ;
 
-            if (!_wheelHandleTimeer) {
-              _wheelHandleTimeer = setTimeout(function () {
-                if (me.status.transform.wheelAction == 'offset') {
-                  //移动的话用offset,偏移多少像素
-                  var _me$zoom$offset = me.zoom.offset({
-                    x: -e.deltaX,
-                    y: -e.deltaY
-                  }),
-                      _x = _me$zoom$offset.x,
-                      _y = _me$zoom$offset.y; //me.zoom.move( {x:zx, y:zy} );
+            if (e.type == "mouseup" || e.type == "mouseout") {
+              me.induce.toBack();
+              _mosedownIng = false;
+              me.app.canvax.domView && (me.app.canvax.domView.style.cursor = _preCursor);
+            }
+
+            ;
+
+            if (e.type == "mousemove") {
+              if (_mosedownIng) {
+                var _me$zoom$move = me.zoom.move(point),
+                    x = _me$zoom$move.x,
+                    y = _me$zoom$move.y;
+
+                me.graphsView.context.x = parseInt(x);
+                me.graphsView.context.y = parseInt(y);
+              }
+            }
+
+            ; //滚轮缩放
+
+            if (e.type == "wheel") {
+              console.log(_deltaY, e.deltaY);
+
+              if (Math.abs(e.deltaY) > Math.abs(_deltaY)) {
+                _deltaY = e.deltaY;
+              }
+
+              ;
+
+              if (!_wheelHandleTimeer) {
+                _wheelHandleTimeer = setTimeout(function () {
+                  if (me.status.transform.wheelAction == 'offset') {
+                    //移动的话用offset,偏移多少像素
+                    var _me$zoom$offset = me.zoom.offset({
+                      x: -e.deltaX,
+                      y: -e.deltaY
+                    }),
+                        _x = _me$zoom$offset.x,
+                        _y = _me$zoom$offset.y; //me.zoom.move( {x:zx, y:zy} );
 
 
-                  me.graphsView.context.x = _x;
-                  me.graphsView.context.y = _y;
-                }
+                    me.graphsView.context.x = _x * 2;
+                    me.graphsView.context.y = _y * 2;
+                  }
 
-                if (me.status.transform.wheelAction == 'scale') {
-                  // 缩放         
-                  var _me$zoom$wheel = me.zoom.wheel(e, point),
-                      scale = _me$zoom$wheel.scale,
-                      _x2 = _me$zoom$wheel.x,
-                      _y2 = _me$zoom$wheel.y;
+                  if (me.status.transform.wheelAction == 'scale') {
+                    // 缩放         
+                    var _me$zoom$wheel = me.zoom.wheel(e, point),
+                        scale = _me$zoom$wheel.scale,
+                        _x2 = _me$zoom$wheel.x,
+                        _y2 = _me$zoom$wheel.y;
 
-                  me.graphsView.context.x = _x2;
-                  me.graphsView.context.y = _y2;
-                  me.graphsView.context.scaleX = scale;
-                  me.graphsView.context.scaleY = scale;
-                  me.status.transform.scale = scale;
-                }
+                    me.graphsView.context.x = _x2 * 2;
+                    me.graphsView.context.y = _y2 * 2;
+                    me.graphsView.context.scaleX = scale;
+                    me.graphsView.context.scaleY = scale;
+                    me.status.transform.scale = scale;
+                  }
 
-                _wheelHandleTimeer = null;
-                _deltaY = 0;
-              }, _wheelHandleTimeLen);
+                  _wheelHandleTimeer = null;
+                  _deltaY = 0;
+                }, _wheelHandleTimeLen);
+              }
+
+              ;
             }
 
             ;
           }
-
-          ;
         }
 
         ;
+        me.app.fire(e.type, e);
       });
     }
   }, {

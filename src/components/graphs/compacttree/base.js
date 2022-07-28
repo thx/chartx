@@ -590,63 +590,66 @@ class RelationBase extends GraphsBase {
         this.induce.on( event.types.get(), function (e) {
 
             if (me.status.transform.enabled) {
-                e.preventDefault();
-                let point = e.target.localToGlobal(e.point, me.sprite);
-
-                //鼠标拖拽移动
-                if (e.type == "mousedown") {
-                    me.induce.toFront();
-                    _mosedownIng = true;
-                    me.app.canvax.domView && (me.app.canvax.domView.style.cursor = "move");
-                    me.zoom.mouseMoveTo( point );
-                };
-                if (e.type == "mouseup" || e.type == "mouseout") {
-                    me.induce.toBack();
-                    _mosedownIng = false;
-                    me.app.canvax.domView && (me.app.canvax.domView.style.cursor = _preCursor);
-                };
-                if (e.type == "mousemove") {
-                    if ( _mosedownIng ) {
-                        let {x,y} = me.zoom.move( point );
-                        me.graphsView.context.x = parseInt(x);
-                        me.graphsView.context.y = parseInt(y);
-                    }
-                };
-
-                //滚轮缩放
-                if (e.type == "wheel") {
-                    console.log( _deltaY, e.deltaY )
-                    if (Math.abs(e.deltaY) > Math.abs(_deltaY)) {
-                        _deltaY = e.deltaY;
+                let _contextmenu = me.app.getComponent({name:'contextmenu'});
+                if( !_contextmenu || !_contextmenu.isShow ){
+                    e.preventDefault();
+                    let point = e.target.localToGlobal(e.point, me.sprite);
+    
+                    //鼠标拖拽移动
+                    if (e.type == "mousedown") {
+                        me.induce.toFront();
+                        _mosedownIng = true;
+                        me.app.canvax.domView && (me.app.canvax.domView.style.cursor = "move");
+                        me.zoom.mouseMoveTo( point );
                     };
-                    if (!_wheelHandleTimeer) {
-                        _wheelHandleTimeer = setTimeout(function () {
- 
-                            if( me.status.transform.wheelAction == 'offset' ){
-                                //移动的话用offset,偏移多少像素
-                                let {x,y} = me.zoom.offset( {x:-e.deltaX, y:-e.deltaY} ); //me.zoom.move( {x:zx, y:zy} );
-                                me.graphsView.context.x = x;
-                                me.graphsView.context.y = y;
-                            } 
-                            if( me.status.transform.wheelAction == 'scale' ){
-                                // 缩放         
-                                let {scale,x,y} = me.zoom.wheel( e, point );
-                                me.graphsView.context.x = x;
-                                me.graphsView.context.y = y;
-                                me.graphsView.context.scaleX = scale;
-                                me.graphsView.context.scaleY = scale;
-                                me.status.transform.scale = scale;
-                            } 
-                            
-                            _wheelHandleTimeer = null;
-                            _deltaY = 0;
-
-                        }, _wheelHandleTimeLen);
+                    if (e.type == "mouseup" || e.type == "mouseout") {
+                        me.induce.toBack();
+                        _mosedownIng = false;
+                        me.app.canvax.domView && (me.app.canvax.domView.style.cursor = _preCursor);
                     };
-                };
-
-
+                    if (e.type == "mousemove") {
+                        if ( _mosedownIng ) {
+                            let {x,y} = me.zoom.move( point );
+                            me.graphsView.context.x = parseInt(x);
+                            me.graphsView.context.y = parseInt(y);
+                        }
+                    };
+    
+                    //滚轮缩放
+                    if (e.type == "wheel") {
+                        console.log( _deltaY, e.deltaY )
+                        if (Math.abs(e.deltaY) > Math.abs(_deltaY)) {
+                            _deltaY = e.deltaY;
+                        };
+                        if (!_wheelHandleTimeer) {
+                            _wheelHandleTimeer = setTimeout(function () {
+     
+                                if( me.status.transform.wheelAction == 'offset' ){
+                                    //移动的话用offset,偏移多少像素
+                                    let {x,y} = me.zoom.offset( {x:-e.deltaX, y:-e.deltaY} ); //me.zoom.move( {x:zx, y:zy} );
+                                    me.graphsView.context.x = x*2;
+                                    me.graphsView.context.y = y*2;
+                                } 
+                                if( me.status.transform.wheelAction == 'scale' ){
+                                    // 缩放         
+                                    let {scale,x,y} = me.zoom.wheel( e, point );
+                                    me.graphsView.context.x = x*2;
+                                    me.graphsView.context.y = y*2;
+                                    me.graphsView.context.scaleX = scale;
+                                    me.graphsView.context.scaleY = scale;
+                                    me.status.transform.scale = scale;
+                                } 
+                                
+                                _wheelHandleTimeer = null;
+                                _deltaY = 0;
+    
+                            }, _wheelHandleTimeLen);
+                        };
+                    };
+                }
             };
+
+            me.app.fire(e.type, e);
 
         });
 
