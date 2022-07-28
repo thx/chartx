@@ -8274,7 +8274,7 @@ var components = {
   */
 };
 var _default = {
-  chartxVersion: '1.1.99',
+  chartxVersion: '1.1.100',
   create: function create(el, _data, _opt) {
     var chart = null;
     var me = this;
@@ -61213,7 +61213,7 @@ if (projectTheme && projectTheme.length) {
 }
 
 var chartx = {
-  version: '1.1.99',
+  version: '1.1.100',
   options: {}
 };
 
