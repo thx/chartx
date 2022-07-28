@@ -176,17 +176,17 @@ class compactTree extends GraphsBase {
             this.sprite.context.y = parseInt(this.origin.y);
 
             //test bound
-            this._bound = new Rect({
-                context: {
-                    x: this.data.extents.left,
-                    y: this.data.extents.top,
-                    width: this.data.size.width,
-                    height: this.data.size.height,
-                    lineWidth:1,
-                    strokeStyle: 'red'
-                }
-            });
-            this.graphsSp.addChild( this._bound )
+            // this._bound = new Rect({
+            //     context: {
+            //         x: this.data.extents.left,
+            //         y: this.data.extents.top,
+            //         width: this.data.size.width,
+            //         height: this.data.size.height,
+            //         lineWidth:1,
+            //         strokeStyle: 'red'
+            //     }
+            // });
+            // this.graphsSp.addChild( this._bound )
 
 
             this.graphsSp.context.x = Math.max( (this.width - this.data.size.width)/2, this.app.padding.left );
@@ -205,12 +205,14 @@ class compactTree extends GraphsBase {
     resetData( dataFrame, dataTrigger ){
         this._resetData( dataFrame, dataTrigger ).then( ()=>{
             this.fire("complete");
-            Object.assign( this._bound.context, {
-                x: this.data.extents.left,
-                y: this.data.extents.top,
-                width: this.data.size.width,
-                height: this.data.size.height
-            } );
+
+            // Object.assign( this._bound.context, {
+            //     x: this.data.extents.left,
+            //     y: this.data.extents.top,
+            //     width: this.data.size.width,
+            //     height: this.data.size.height
+            // } );
+
         } );
     }
 

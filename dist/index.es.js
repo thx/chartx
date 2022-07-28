@@ -47558,15 +47558,15 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
                   if (me.status.transform.wheelAction == 'offset') {
                     //移动的话用offset,偏移多少像素
                     var _me$zoom$offset = me.zoom.offset({
-                      x: -e.deltaX,
-                      y: -e.deltaY
+                      x: -e.deltaX * 2,
+                      y: -e.deltaY * 2
                     }),
                         _x = _me$zoom$offset.x,
                         _y = _me$zoom$offset.y; //me.zoom.move( {x:zx, y:zy} );
 
 
-                    me.graphsView.context.x = _x * 2;
-                    me.graphsView.context.y = _y * 2;
+                    me.graphsView.context.x = _x;
+                    me.graphsView.context.y = _y;
                   }
 
                   if (me.status.transform.wheelAction == 'scale') {
@@ -47576,8 +47576,8 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
                         _x2 = _me$zoom$wheel.x,
                         _y2 = _me$zoom$wheel.y;
 
-                    me.graphsView.context.x = _x2 * 2;
-                    me.graphsView.context.y = _y2 * 2;
+                    me.graphsView.context.x = _x2;
+                    me.graphsView.context.y = _y2;
                     me.graphsView.context.scaleX = scale;
                     me.graphsView.context.scaleY = scale;
                     me.status.transform.scale = scale;
@@ -50942,19 +50942,17 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
         _this2.induce.context.height = _this2.height;
         _this2.sprite.context.x = parseInt(_this2.origin.x);
         _this2.sprite.context.y = parseInt(_this2.origin.y); //test bound
-
-        _this2._bound = new Rect({
-          context: {
-            x: _this2.data.extents.left,
-            y: _this2.data.extents.top,
-            width: _this2.data.size.width,
-            height: _this2.data.size.height,
-            lineWidth: 1,
-            strokeStyle: 'red'
-          }
-        });
-
-        _this2.graphsSp.addChild(_this2._bound);
+        // this._bound = new Rect({
+        //     context: {
+        //         x: this.data.extents.left,
+        //         y: this.data.extents.top,
+        //         width: this.data.size.width,
+        //         height: this.data.size.height,
+        //         lineWidth:1,
+        //         strokeStyle: 'red'
+        //     }
+        // });
+        // this.graphsSp.addChild( this._bound )
 
         _this2.graphsSp.context.x = Math.max((_this2.width - _this2.data.size.width) / 2, _this2.app.padding.left);
         _this2.graphsSp.context.y = _this2.height / 2;
@@ -50972,14 +50970,13 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
       var _this3 = this;
 
       this._resetData(dataFrame, dataTrigger).then(function () {
-        _this3.fire("complete");
+        _this3.fire("complete"); // Object.assign( this._bound.context, {
+        //     x: this.data.extents.left,
+        //     y: this.data.extents.top,
+        //     width: this.data.size.width,
+        //     height: this.data.size.height
+        // } );
 
-        Object.assign(_this3._bound.context, {
-          x: _this3.data.extents.left,
-          y: _this3.data.extents.top,
-          width: _this3.data.size.width,
-          height: _this3.data.size.height
-        });
       });
     }
   }, {
@@ -57743,6 +57740,8 @@ var contextMenu = /*#__PURE__*/function (_Component) {
   }, {
     key: "_creatMenuDom",
     value: function _creatMenuDom(e) {
+      var _this2 = this;
+
       if (document) {
         this._tipDom = document.createElement("div");
         this._tipDom.className = "context-menu-tips";
@@ -57751,6 +57750,11 @@ var contextMenu = /*#__PURE__*/function (_Component) {
         this._tipDom.style.cssText += "; border:none;white-space:nowrap;word-wrap:normal;";
         this._tipDom.style.cssText += "; text-align:left;";
         this._tipDom.style.cssText += "; -webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;";
+
+        this._tipDom.onclick = function () {
+          _this2.hide();
+        };
+
         this.tipDomContainer && this.tipDomContainer.appendChild(this._tipDom);
         return this._tipDom;
       }
@@ -61209,7 +61213,7 @@ if (projectTheme && projectTheme.length) {
 }
 
 var chartx = {
-  version: '__VERSION__',
+  version: '1.1.99',
   options: {}
 };
 

@@ -248,15 +248,15 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
                   if (me.status.transform.wheelAction == 'offset') {
                     //移动的话用offset,偏移多少像素
                     var _me$zoom$offset = me.zoom.offset({
-                      x: -e.deltaX,
-                      y: -e.deltaY
+                      x: -e.deltaX * 2,
+                      y: -e.deltaY * 2
                     }),
                         _x = _me$zoom$offset.x,
                         _y = _me$zoom$offset.y; //me.zoom.move( {x:zx, y:zy} );
 
 
-                    me.graphsView.context.x = _x * 2;
-                    me.graphsView.context.y = _y * 2;
+                    me.graphsView.context.x = _x;
+                    me.graphsView.context.y = _y;
                   }
 
                   if (me.status.transform.wheelAction == 'scale') {
@@ -266,8 +266,8 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
                         _x2 = _me$zoom$wheel.x,
                         _y2 = _me$zoom$wheel.y;
 
-                    me.graphsView.context.x = _x2 * 2;
-                    me.graphsView.context.y = _y2 * 2;
+                    me.graphsView.context.x = _x2;
+                    me.graphsView.context.y = _y2;
                     me.graphsView.context.scaleX = scale;
                     me.graphsView.context.scaleY = scale;
                     me.status.transform.scale = scale;

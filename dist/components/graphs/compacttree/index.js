@@ -83,19 +83,17 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
         _this2.induce.context.height = _this2.height;
         _this2.sprite.context.x = parseInt(_this2.origin.x);
         _this2.sprite.context.y = parseInt(_this2.origin.y); //test bound
-
-        _this2._bound = new Rect({
-          context: {
-            x: _this2.data.extents.left,
-            y: _this2.data.extents.top,
-            width: _this2.data.size.width,
-            height: _this2.data.size.height,
-            lineWidth: 1,
-            strokeStyle: 'red'
-          }
-        });
-
-        _this2.graphsSp.addChild(_this2._bound);
+        // this._bound = new Rect({
+        //     context: {
+        //         x: this.data.extents.left,
+        //         y: this.data.extents.top,
+        //         width: this.data.size.width,
+        //         height: this.data.size.height,
+        //         lineWidth:1,
+        //         strokeStyle: 'red'
+        //     }
+        // });
+        // this.graphsSp.addChild( this._bound )
 
         _this2.graphsSp.context.x = Math.max((_this2.width - _this2.data.size.width) / 2, _this2.app.padding.left);
         _this2.graphsSp.context.y = _this2.height / 2;
@@ -113,14 +111,13 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
       var _this3 = this;
 
       this._resetData(dataFrame, dataTrigger).then(function () {
-        _this3.fire("complete");
+        _this3.fire("complete"); // Object.assign( this._bound.context, {
+        //     x: this.data.extents.left,
+        //     y: this.data.extents.top,
+        //     width: this.data.size.width,
+        //     height: this.data.size.height
+        // } );
 
-        Object.assign(_this3._bound.context, {
-          x: _this3.data.extents.left,
-          y: _this3.data.extents.top,
-          width: _this3.data.size.width,
-          height: _this3.data.size.height
-        });
       });
     }
   }, {

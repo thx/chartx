@@ -626,19 +626,19 @@ class RelationBase extends GraphsBase {
      
                                 if( me.status.transform.wheelAction == 'offset' ){
                                     //移动的话用offset,偏移多少像素
-                                    let {x,y} = me.zoom.offset( {x:-e.deltaX, y:-e.deltaY} ); //me.zoom.move( {x:zx, y:zy} );
-                                    me.graphsView.context.x = x*2;
-                                    me.graphsView.context.y = y*2;
-                                } 
+                                    let {x,y} = me.zoom.offset( {x:-e.deltaX*2, y:-e.deltaY*2} ); //me.zoom.move( {x:zx, y:zy} );
+                                    me.graphsView.context.x = x;
+                                    me.graphsView.context.y = y;
+                                }
                                 if( me.status.transform.wheelAction == 'scale' ){
                                     // 缩放         
                                     let {scale,x,y} = me.zoom.wheel( e, point );
-                                    me.graphsView.context.x = x*2;
-                                    me.graphsView.context.y = y*2;
+                                    me.graphsView.context.x = x;
+                                    me.graphsView.context.y = y;
                                     me.graphsView.context.scaleX = scale;
                                     me.graphsView.context.scaleY = scale;
                                     me.status.transform.scale = scale;
-                                } 
+                                }
                                 
                                 _wheelHandleTimeer = null;
                                 _deltaY = 0;

@@ -187,6 +187,8 @@ var contextMenu = /*#__PURE__*/function (_Component) {
   }, {
     key: "_creatMenuDom",
     value: function _creatMenuDom(e) {
+      var _this2 = this;
+
       if (document) {
         this._tipDom = document.createElement("div");
         this._tipDom.className = "context-menu-tips";
@@ -195,6 +197,11 @@ var contextMenu = /*#__PURE__*/function (_Component) {
         this._tipDom.style.cssText += "; border:none;white-space:nowrap;word-wrap:normal;";
         this._tipDom.style.cssText += "; text-align:left;";
         this._tipDom.style.cssText += "; -webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;";
+
+        this._tipDom.onclick = function () {
+          _this2.hide();
+        };
+
         this.tipDomContainer && this.tipDomContainer.appendChild(this._tipDom);
         return this._tipDom;
       }
