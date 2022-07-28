@@ -56935,16 +56935,6 @@ var Tips = /*#__PURE__*/function (_Component) {
     (0, _classCallCheck2["default"])(this, Tips);
     _this = _super.call(this, opt, app);
     _this.name = "tips";
-    _this.tipDomContainer = null;
-
-    if (document) {
-      if (_this.containerIsBody) {
-        _this.tipDomContainer = document.body;
-      } else {
-        _this.tipDomContainer = _this.app.canvax.domView;
-      }
-    }
-
     _this.cW = 0; //容器的width
 
     _this.cH = 0; //容器的height
@@ -56974,13 +56964,22 @@ var Tips = /*#__PURE__*/function (_Component) {
 
     _.extend(true, (0, _assertThisInitialized2["default"])(_this), (0, tools.getDefaultProps)(Tips.defaultProps()), opt);
 
+    _this.tipDomContainer = null;
+
+    if (document) {
+      if (_this.containerIsBody) {
+        _this.tipDomContainer = document.body;
+      } else {
+        _this.tipDomContainer = _this.app.canvax.domView;
+      }
+    }
+
     return _this;
   }
 
   (0, _createClass2["default"])(Tips, [{
     key: "show",
     value: function show(e) {
-      console.log('tips show');
       if (!this.enabled) return;
 
       if (e.eventInfo) {
@@ -57609,16 +57608,6 @@ var contextMenu = /*#__PURE__*/function (_Component) {
     (0, _classCallCheck2["default"])(this, contextMenu);
     _this = _super.call(this, opt, app);
     _this.name = "contextmenu";
-    _this.tipDomContainer = null;
-
-    if (document) {
-      if (_this.containerIsBody) {
-        _this.tipDomContainer = document.body;
-      } else {
-        _this.tipDomContainer = _this.app.canvax.domView;
-      }
-    }
-
     _this.cW = 0; //容器的width
 
     _this.cH = 0; //容器的height
@@ -57648,6 +57637,15 @@ var contextMenu = /*#__PURE__*/function (_Component) {
     _this.isShow = false;
 
     _.extend(true, (0, _assertThisInitialized2["default"])(_this), (0, tools.getDefaultProps)(contextMenu.defaultProps()), opt);
+
+    _this.tipDomContainer = document ? document.body : null; //右键菜单只能放body下面
+    // if( document ){
+    //     if( this.containerIsBody ){
+    //         this.tipDomContainer = document.body; 
+    //     } else {
+    //         this.tipDomContainer = this.app.canvax.domView;
+    //     }
+    // }; // (document && this.containerIsBody) ? document.body : null; //this.app.canvax.domView;
 
     return _this;
   }

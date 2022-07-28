@@ -100,14 +100,6 @@ class Tips extends Component {
 
         this.name = "tips"
 
-        this.tipDomContainer = null;
-        if( document ){
-            if( this.containerIsBody ){
-                this.tipDomContainer = document.body; 
-            } else {
-                this.tipDomContainer = this.app.canvax.domView;
-            }
-        }; // (document && this.containerIsBody) ? document.body : null; //this.app.canvax.domView;
         this.cW = 0;  //容器的width
         this.cH = 0;  //容器的height
 
@@ -134,11 +126,20 @@ class Tips extends Component {
         });
 
         _.extend(true, this, getDefaultProps( Tips.defaultProps() ), opt);
+
+        this.tipDomContainer = null;
+        if( document ){
+            if( this.containerIsBody ){
+                this.tipDomContainer = document.body; 
+            } else {
+                this.tipDomContainer = this.app.canvax.domView;
+            }
+        }; // (document && this.containerIsBody) ? document.body : null; //this.app.canvax.domView;
         
     }
 
     show(e) {
-console.log('tips show')
+
         if (!this.enabled) return;
 
         if ( e.eventInfo ) {

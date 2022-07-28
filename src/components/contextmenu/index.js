@@ -68,15 +68,7 @@ class contextMenu extends Component {
         super(opt, app);
 
         this.name = "contextmenu"
-
-        this.tipDomContainer = null;
-        if( document ){
-            if( this.containerIsBody ){
-                this.tipDomContainer = document.body; 
-            } else {
-                this.tipDomContainer = this.app.canvax.domView;
-            }
-        }; // (document && this.containerIsBody) ? document.body : null; //this.app.canvax.domView;
+        
         this.cW = 0;  //容器的width
         this.cH = 0;  //容器的height
 
@@ -104,6 +96,15 @@ class contextMenu extends Component {
         this.isShow = false;
 
         _.extend(true, this, getDefaultProps( contextMenu.defaultProps() ), opt);
+
+        this.tipDomContainer = document ? document.body : null; //右键菜单只能放body下面
+        // if( document ){
+        //     if( this.containerIsBody ){
+        //         this.tipDomContainer = document.body; 
+        //     } else {
+        //         this.tipDomContainer = this.app.canvax.domView;
+        //     }
+        // }; // (document && this.containerIsBody) ? document.body : null; //this.app.canvax.domView;
         
     }
 
@@ -145,8 +146,8 @@ class contextMenu extends Component {
     
     hide(e){
         if (!this.enabled) return;
+        
         this._hideDialogMenus(e);
-
         this.onhide.apply( this, [e] );
         this.isShow = false;
     }
