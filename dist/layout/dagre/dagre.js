@@ -3579,9 +3579,7 @@ var _typeof2 = _interopRequireDefault(require("@babel/runtime/helpers/typeof"));
 
         try {
           return fn();
-        } finally {
-          console.log(name + " time: " + (_.now() - start) + "ms");
-        }
+        } finally {}
       }
 
       function notime(name, fn) {

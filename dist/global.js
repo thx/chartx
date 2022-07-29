@@ -36,7 +36,7 @@ var components = {
   */
 };
 var _default = {
-  chartxVersion: '1.1.100',
+  chartxVersion: '1.1.101',
   create: function create(el, _data, _opt) {
     var chart = null;
     var me = this;
