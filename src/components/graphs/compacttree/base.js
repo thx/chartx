@@ -1413,8 +1413,16 @@ class RelationBase extends GraphsBase {
                 height = node.rowData.height
             }
 
+            let fontColor = me.getProp(me.node.content.fontColor, node);
+            if( node.rowData.fontColor ){
+                fontColor = node.rowData.fontColor;
+            }
+            if( node.rowData.style && node.rowData.style.fontColor ){
+                fontColor = node.rowData.style.fontColor;
+            }
+
             let context = {
-                fillStyle: me.getProp(me.node.content.fontColor, node),
+                fillStyle: fontColor,
                 textAlign: me.getProp(me.node.content.textAlign, node),
                 textBaseline: me.getProp(me.node.content.textBaseline, node),
                 fontSize: me.getProp(me.node.content.fontSize, node)

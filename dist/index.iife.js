@@ -8276,7 +8276,7 @@ var chartx = (function () {
 	  */
 	};
 	var _default = {
-	  chartxVersion: '1.1.101',
+	  chartxVersion: '1.1.102',
 	  create: function create(el, _data, _opt) {
 	    var chart = null;
 	    var me = this;
@@ -48434,8 +48434,18 @@ var chartx = (function () {
 	          height = node.rowData.height;
 	        }
 
+	        var fontColor = me.getProp(me.node.content.fontColor, node);
+
+	        if (node.rowData.fontColor) {
+	          fontColor = node.rowData.fontColor;
+	        }
+
+	        if (node.rowData.style && node.rowData.style.fontColor) {
+	          fontColor = node.rowData.style.fontColor;
+	        }
+
 	        var context = {
-	          fillStyle: me.getProp(me.node.content.fontColor, node),
+	          fillStyle: fontColor,
 	          textAlign: me.getProp(me.node.content.textAlign, node),
 	          textBaseline: me.getProp(me.node.content.textBaseline, node),
 	          fontSize: me.getProp(me.node.content.fontSize, node)
@@ -50887,7 +50897,7 @@ var chartx = (function () {
 	var Circle = _canvax["default"].Shapes.Circle;
 	var Rect = _canvax["default"].Shapes.Rect; //内部交互需要同步回源数据的属性， 树状图要实现文本的编辑，所以content也要加入进来
 
-	var syncToOriginKeys = ['collapsed', 'width', 'height', 'content'];
+	var syncToOriginKeys = ['collapsed', 'style', 'content'];
 	var collapseIconWidth = 22;
 	/**
 	 * 关系图中 包括了  配置，数据，和布局数据，
@@ -51170,9 +51180,9 @@ var chartx = (function () {
 	      return new Promise(function (resolve) {
 	        var node = treeData._node; //这里的width都是指内容的size
 
-	        var width = treeData.width || _this8.getProp(_this8.node.width, treeData);
+	        var width = treeData.width || treeData.style && treeData.style.width || _this8.getProp(_this8.node.width, treeData);
 
-	        var height = treeData.height || _this8.getProp(_this8.node.height, treeData);
+	        var height = treeData.height || treeData.style && treeData.style.height || _this8.getProp(_this8.node.height, treeData);
 
 	        if (width && height) {
 	          //如果node上面已经有了 尺寸 
@@ -51230,8 +51240,11 @@ var chartx = (function () {
 	          //这样就可以 和 整个originData一起存入数据库，后续可以加快再次打开的渲染速度
 
 
-	          treeData.width = node.width;
-	          treeData.height = node.height;
+	          if (!treeData.style) {
+	            treeData.style = {};
+	          }
+	          treeData.style.width = node.width;
+	          treeData.style.height = node.height;
 
 	          _this9._syncToOrigin(treeData); // 重新校验一下size， 比如菱形的 外界矩形是不一样的
 
@@ -61193,7 +61206,7 @@ var chartx = (function () {
 	}
 
 	var chartx = {
-	  version: '1.1.101',
+	  version: '1.1.102',
 	  options: {}
 	};
 

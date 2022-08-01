@@ -1204,8 +1204,18 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
           height = node.rowData.height;
         }
 
+        var fontColor = me.getProp(me.node.content.fontColor, node);
+
+        if (node.rowData.fontColor) {
+          fontColor = node.rowData.fontColor;
+        }
+
+        if (node.rowData.style && node.rowData.style.fontColor) {
+          fontColor = node.rowData.style.fontColor;
+        }
+
         var context = {
-          fillStyle: me.getProp(me.node.content.fontColor, node),
+          fillStyle: fontColor,
           textAlign: me.getProp(me.node.content.textAlign, node),
           textBaseline: me.getProp(me.node.content.textBaseline, node),
           fontSize: me.getProp(me.node.content.fontSize, node)

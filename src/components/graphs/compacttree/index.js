@@ -10,7 +10,7 @@ let Circle  = Canvax.Shapes.Circle;
 let Rect    = Canvax.Shapes.Rect;
 
 //内部交互需要同步回源数据的属性， 树状图要实现文本的编辑，所以content也要加入进来
-let syncToOriginKeys = ['collapsed', 'width' , 'height', 'content'];
+let syncToOriginKeys = ['collapsed', 'style', 'content'];
 let collapseIconWidth= 22;
 let typeIconWidth = 20;
 
@@ -413,8 +413,8 @@ class compactTree extends GraphsBase {
             let node = treeData._node;
             
             //这里的width都是指内容的size
-            let width = treeData.width || this.getProp( this.node.width, treeData );
-            let height = treeData.height || this.getProp( this.node.height, treeData );
+            let width = treeData.width || ( treeData.style && treeData.style.width ) || this.getProp( this.node.width, treeData );
+            let height = treeData.height || ( treeData.style && treeData.style.height ) || this.getProp( this.node.height, treeData );
     
             if( width && height ){
                 //如果node上面已经有了 尺寸 
@@ -470,8 +470,11 @@ class compactTree extends GraphsBase {
                 _.extend(node, sizeOpt);
                 //动态计算的尺寸，要写入到treeData中去，然后同步到 treeData的 originData，
                 //这样就可以 和 整个originData一起存入数据库，后续可以加快再次打开的渲染速度
-                treeData.width = node.width;
-                treeData.height = node.height;
+                if( !treeData.style ){
+                    treeData.style = {}
+                };
+                treeData.style.width = node.width;
+                treeData.style.height = node.height;
                 this._syncToOrigin( treeData );
 
                 // 重新校验一下size， 比如菱形的 外界矩形是不一样的
@@ -604,7 +607,6 @@ class compactTree extends GraphsBase {
     _drawNodes(){
         _.each(this.data.nodes, (node) => {
             
-
             let drawNode = ()=>{
                 this._drawNode( node );
                 //处理一些tree 相对 relation 特有的逻辑
