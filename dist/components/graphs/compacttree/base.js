@@ -1120,8 +1120,9 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
 
       if (edge.target.shapeType == 'underLine') {
         var x = parseInt(edge.target.x) + parseInt(edge.target.width / 2);
+        var childrenField = this.childrenField;
 
-        if (edge.target.rowData.__originData.children && edge.target.rowData.__originData.children.length) {
+        if (edge.target.rowData.__originData[childrenField] && edge.target.rowData.__originData[childrenField].length) {
           x += collapseIconWidth;
         }
 

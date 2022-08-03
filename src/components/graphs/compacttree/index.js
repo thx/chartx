@@ -294,7 +294,7 @@ class compactTree extends GraphsBase {
         // let children = treeOriginData[ childrenField ];
         // treeData[ childrenField ] = [];
 
-        let filter = ( treeOriginData, depth ) => {
+        let filter = ( treeOriginData, parent, depth ) => {
             let treeData = {};
             Object.assign( treeData, treeOriginData );
             treeData['__originData'] = treeOriginData; //和原数据建立下关系，比如 treeData 中的一些数据便跟了要同步到原数据中去
@@ -328,7 +328,7 @@ class compactTree extends GraphsBase {
                 //如果这个节点已经折叠了
                 //检查他的子节点
                 (treeOriginData[ childrenField ] || []).forEach( child => {
-                    let childTreeData = filter( child , depth+1);
+                    let childTreeData = filter( child , treeOriginData,  depth+1);
                     treeData[ childrenField ].push( childTreeData );
                     nodesLength++;
 
@@ -366,7 +366,7 @@ class compactTree extends GraphsBase {
             
         }
 
-        let treeData = filter( treeOriginData, 0 );
+        let treeData = filter( treeOriginData, null, 0 );
         
         return {treeData, nodesLength, nodes, edges};
         
@@ -496,7 +496,7 @@ class compactTree extends GraphsBase {
     }
 
     treeLayout( data ){
-        
+        let childrenField = this.childrenField;
         let layoutIsHorizontal = this.rankdir == 'LR' || this.rankdir == 'RL';
         //layoutIsHorizontal = false;
         let t1 = new Date().getTime();
@@ -509,7 +509,7 @@ class compactTree extends GraphsBase {
                 let height = node.data._node.height || 0; 
                 let width = node.data._node.width || 0;
                 
-                if( node.data.children && node.data.children.length ){
+                if( node.data[ childrenField ] && node.data[ childrenField ].length ){
                     width += collapseIconWidth
                 };
 

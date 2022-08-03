@@ -1356,7 +1356,9 @@ class RelationBase extends GraphsBase {
 
         if(edge.target.shapeType == 'underLine'){
             let x = parseInt(edge.target.x) + parseInt(edge.target.width / 2);
-            if( edge.target.rowData.__originData.children && edge.target.rowData.__originData.children.length){
+            
+            let childrenField = this.childrenField;
+            if( edge.target.rowData.__originData[ childrenField ] && edge.target.rowData.__originData[ childrenField ].length){
                 x += collapseIconWidth
             };
             str += ",L" + x + " " + ( parseInt(edge.target.y) + parseInt(edge.target.height / 2) );

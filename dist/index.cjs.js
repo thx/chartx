@@ -8275,7 +8275,7 @@ var components = {
   */
 };
 var _default = {
-  chartxVersion: '1.1.102',
+  chartxVersion: '1.1.103',
   create: function create(el, _data, _opt) {
     var chart = null;
     var me = this;
@@ -48357,8 +48357,9 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
 
       if (edge.target.shapeType == 'underLine') {
         var x = parseInt(edge.target.x) + parseInt(edge.target.width / 2);
+        var childrenField = this.childrenField;
 
-        if (edge.target.rowData.__originData.children && edge.target.rowData.__originData.children.length) {
+        if (edge.target.rowData.__originData[childrenField] && edge.target.rowData.__originData[childrenField].length) {
           x += collapseIconWidth;
         }
         str += ",L" + x + " " + (parseInt(edge.target.y) + parseInt(edge.target.height / 2));
@@ -51055,7 +51056,7 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
       // let children = treeOriginData[ childrenField ];
       // treeData[ childrenField ] = [];
 
-      var filter = function filter(treeOriginData, depth) {
+      var filter = function filter(treeOriginData, parent, depth) {
         var treeData = {};
         Object.assign(treeData, treeOriginData);
         treeData['__originData'] = treeOriginData; //和原数据建立下关系，比如 treeData 中的一些数据便跟了要同步到原数据中去
@@ -51088,7 +51089,7 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
           //如果这个节点已经折叠了
           //检查他的子节点
           (treeOriginData[childrenField] || []).forEach(function (child) {
-            var childTreeData = filter(child, depth + 1);
+            var childTreeData = filter(child, treeOriginData, depth + 1);
             treeData[childrenField].push(childTreeData);
             nodesLength++; //开始构建edges
 
@@ -51121,7 +51122,7 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
         return treeData;
       };
 
-      var treeData = filter(treeOriginData, 0);
+      var treeData = filter(treeOriginData, null, 0);
       return {
         treeData: treeData,
         nodesLength: nodesLength,
@@ -51269,6 +51270,7 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
     value: function treeLayout(data) {
       var _this10 = this;
 
+      var childrenField = this.childrenField;
       var layoutIsHorizontal = this.rankdir == 'LR' || this.rankdir == 'RL'; //layoutIsHorizontal = false;
 
       var t1 = new Date().getTime();
@@ -51283,7 +51285,7 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
           var height = node.data._node.height || 0;
           var width = node.data._node.width || 0;
 
-          if (node.data.children && node.data.children.length) {
+          if (node.data[childrenField] && node.data[childrenField].length) {
             width += collapseIconWidth;
           }
 
@@ -61205,7 +61207,7 @@ if (projectTheme && projectTheme.length) {
 }
 
 var chartx = {
-  version: '1.1.102',
+  version: '1.1.103',
   options: {}
 };
 
