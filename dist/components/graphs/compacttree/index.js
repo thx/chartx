@@ -450,6 +450,9 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
           }
 
           return [width, height + spaceY]; //因为节点高度包含节点下方的间距
+        },
+        children: function children(data) {
+          return data[childrenField];
         }
       });
 

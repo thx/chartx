@@ -8273,7 +8273,7 @@ var components = {
   */
 };
 var _default = {
-  chartxVersion: '1.1.103',
+  chartxVersion: '1.1.105',
   create: function create(el, _data, _opt) {
     var chart = null;
     var me = this;
@@ -47577,6 +47577,13 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
             }
           }
         }
+
+        e.eventInfo = {
+          trigger: me,
+          iNode: -1 //TODO:这里设置了的话，会导致多graphs里获取不到别的graphs的nodes信息了
+          //nodes : me.getNodesAt( this.iNode ) 
+
+        };
         me.app.fire(e.type, e);
       });
     }
@@ -49029,7 +49036,8 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
               }
             }
           }
-        }
+        } //可以在这里注册所有的事件监听，会从induce上面派发
+
       };
     }
   }]);
@@ -51292,6 +51300,9 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
           }
 
           return [width, height + spaceY]; //因为节点高度包含节点下方的间距
+        },
+        children: function children(data) {
+          return data[childrenField];
         }
       });
 
@@ -61205,7 +61216,7 @@ if (projectTheme && projectTheme.length) {
 }
 
 var chartx = {
-  version: '1.1.103',
+  version: '1.1.105',
   options: {}
 };
 

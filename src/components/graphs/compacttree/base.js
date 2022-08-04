@@ -452,6 +452,8 @@ class RelationBase extends GraphsBase {
                     }
                 }
             }
+
+            //可以在这里注册所有的事件监听，会从induce上面派发
         }
     }
 
@@ -649,6 +651,13 @@ class RelationBase extends GraphsBase {
                 }
             };
 
+            //induce 的 事件都 在 graph 上面派发，可以用
+            e.eventInfo = {
+                trigger : me,
+                iNode : -1
+                //TODO:这里设置了的话，会导致多graphs里获取不到别的graphs的nodes信息了
+                //nodes : me.getNodesAt( this.iNode ) 
+            };
             me.app.fire(e.type, e);
 
         });

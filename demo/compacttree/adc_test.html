@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
+<title>xChart demo -- ADC</title>
+
+<script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
+<script type="text/javascript" src="../../dist/index.iife.js"></script>
+<!-- codemirror -->
+<script type="text/javascript" src="../../lib/codemirror/codemirror.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/active-line.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/javascript.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/matchbrackets.js"></script>
+<link rel="stylesheet" href="../../lib/codemirror/codemirror.css">
+<link rel="stylesheet" href="../../lib/codemirror/zenburn.css">
+<link rel="stylesheet" href="../../lib/codemirror/docs.css">
+<!-- codemirror end -->
+<!--bootstrap-->
+<script type="text/javascript" src="../../lib/bootstrap/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap-theme.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/docs.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap.min.css">
+<!--bootstrap end-->
+<script type="text/javascript" src="../../lib/demo.js"></script>
+<link rel="stylesheet" href="../../lib/demo.css">
+<style>
+    @font-face {
+      font-family: 'iconfont';  /* project id 1300960 */
+      src: url('http://at.alicdn.com/t/font_1300960_i8qitq28j4a.eot');
+      src: url('http://at.alicdn.com/t/font_1300960_i8qitq28j4a.eot?#iefix') format('embedded-opentype'),
+      url('http://at.alicdn.com/t/font_1300960_i8qitq28j4a.woff2') format('woff2'),
+      url('http://at.alicdn.com/t/font_1300960_i8qitq28j4a.woff') format('woff'),
+      url('http://at.alicdn.com/t/font_1300960_i8qitq28j4a.ttf') format('truetype'),
+      url('http://at.alicdn.com/t/font_1300960_i8qitq28j4a.svg#iconfont') format('svg');
+    }
+       
+       .iconfont {
+           font-family: "iconfont";
+           line-height: 1;
+           font-size: 16px;
+           font-style: normal;
+           font-weight: normal;
+           font-variant: normal;
+           display: inline-block;
+           position: relative;
+           -webkit-font-smoothing: antialiased;
+           -moz-osx-font-smoothing: grayscale;
+           vertical-align: -1px;
+           color:#92A5AF;
+       }
+    </style>
+</head>
+<body >
+    
+    <i class="iconfont">&#xe906;</i>
+<script>
+
+var s = `{"subComponentList":[{"name":"测试节点","collapsed":false,"id":3916002,"style":{"width":"","height":"","fontColor":""},"type":"Block"}],"name":"adc","collapsed":false,"id":3916001,"type":"Root","style":{"width":"","height":"","fontColor":""}}`
+let t = new Date().getTime();
+var data = JSON.parse( s );
+console.log( 'adc json串格式化', (new Date().getTime() - t) )
+
+
+</script>
+<table>
+    <tr>
+        <td id="td-vl">
+            <form><textarea id="code" name="code">
+
+var options = {
+    graphs : {
+        type     : "compacttree",
+        field    : "id",
+        childrenField: "subComponentList",
+        node : {
+            onkeydown: function(){
+debugger
+            },
+            //width: 100, height:30,
+            strokeStyle: "#a1a9b0",
+            fillStyle: function( node){
+                if( node.depth == 0 ){
+                    return '#577ef7'
+                } else {
+                    return 'rgba(0,0,0,0)'
+                }
+            },
+            shapeType: function( node ){
+                if( node.depth == 0 ){
+                    return 'rect'
+                } else {
+                    return 'underLine'
+                }
+            },
+            lineWidth: 0,
+            content : {
+                field : "name",
+                init: function(){
+                    
+                    return new Promise( resolve => {
+                        setTimeout( function(){
+                            resolve( {} )
+                        } , 50)
+                    } )
+
+                },
+                fontColor: function( node ){
+                    if( node.depth == 0 ){
+                        return '#ffffff'
+                    } else {
+                        return '#666666'
+                    }
+                },
+                fontSize: function( node ){
+                    if( node.depth == 0 ){
+                        return 16
+                    } else {
+                        return 14
+                    }
+                }
+            },
+            select: {
+                enabled: true,
+                list : [1418001],
+                onbefore: function(node){
+                    if( this.node.select.list.indexOf( node.key ) > -1 ){
+                        return false
+                    }
+                    this.unselectAll();
+                },
+                onend: function(node){
+                    debugger
+                },
+                fillStyle: function( node ){
+                    if( node.depth == 0 ){
+                        return '#577ef7'
+                    } else {
+                        return 'rgba(87,126,247,0.08)'
+                    }
+                },
+                strokeStyle: "#577ef7",
+                fontColor: "#577ef7"
+            },
+            focus: {
+                enabled: true,
+                fillStyle: function( node ){
+                    if( node.depth == 0 ){
+                        return '#577ef7'
+                    } else {
+                        return 'rgba(0,0,0,0)'
+                    }
+                },
+                strokeStyle: "#577ef7"
+            },
+            collapse: {
+                enabled: true,
+                openCharCode: 'e906',
+                closeCharCode: 'e907',
+                fontColor:"#667894"
+            }
+        },
+        line : {
+            strokeStyle: "#a1a9b0"
+        }
+      
+    },
+    contextmenu: {
+        content: function(){
+            return "<div style=\"cursor:pointer\" onclick=\"alert('df')\">contentmenu</div>"
+        }
+    }
+};
+
+window.chart = chartx.create("canvasTest" , data , options)
+
+
+            </textarea></form>
+        </td>
+        <td style="padding:0 10px;" id="td-vr">
+            <div id="chartdemo-r">
+            <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
+                <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
+
+                <h4>ADC树</h4>
+                <p id="name">
+                    联系人：@释剑
+                </p>
+            </div>
+            <div class="test-c">
+                <div id="canvasTest" style='width:800px;height:800px;position:relative;'></div>
+            </div>
+
+            </div>
+        </td>
+    </tr>
+</table>
+
+    
+</body> 
+</html>
+

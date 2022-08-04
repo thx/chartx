@@ -518,7 +518,8 @@ class compactTree extends GraphsBase {
                 }
                 
                 return [ width, height+spaceY ] //因为节点高度包含节点下方的间距
-            }
+            },
+            children: data => data[ childrenField ]
         });
         
         const _tree = layout.hierarchy( data.treeData );
