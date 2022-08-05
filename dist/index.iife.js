@@ -8276,7 +8276,7 @@ var chartx = (function () {
 	  */
 	};
 	var _default = {
-	  chartxVersion: '1.1.105',
+	  chartxVersion: '1.1.106',
 	  create: function create(el, _data, _opt) {
 	    var chart = null;
 	    var me = this;
@@ -61223,7 +61223,7 @@ var chartx = (function () {
 	}
 
 	var chartx = {
-	  version: '1.1.105',
+	  version: '1.1.106',
 	  options: {}
 	};
 
