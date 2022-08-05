@@ -168,6 +168,8 @@ class Force extends GraphsBase {
         this.data = opt.data || this._initData();
 
         this.widget();
+
+        this.fire("complete");
     }
 
     _initData() {

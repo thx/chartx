@@ -34709,6 +34709,9 @@ var options = {
 };
 
 window.chart = chartx.create("canvasTest" , data , options)
+chart.on('complete' , function(){
+    console.log(e)
+})
 
 
             </textarea></form>

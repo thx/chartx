@@ -415,6 +415,8 @@ class Map extends GraphsBase {
         this._include.context.width = this.width;
         this._include.context.height = this.height;
 
+        this.fire("complete");
+
     }
 
     _widget(geoData, graphBBox) {

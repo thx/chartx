@@ -235,6 +235,7 @@ var Map = /*#__PURE__*/function (_GraphsBase) {
       });
       this._include.context.width = this.width;
       this._include.context.height = this.height;
+      this.fire("complete");
     }
   }, {
     key: "_widget",

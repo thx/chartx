@@ -293,6 +293,8 @@ class FunnelGraphs extends GraphsBase
         this.sprite.context.x = this.origin.x + this.width/2;
         this.sprite.context.y = this.origin.y;
 
+        this.fire("complete");
+
     }
 
     _trimGraphs()

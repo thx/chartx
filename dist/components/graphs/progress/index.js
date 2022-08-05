@@ -70,6 +70,7 @@ var Progress = /*#__PURE__*/function (_GraphsBase) {
       });
       this.sprite.context.x = this.origin.x;
       this.sprite.context.y = this.origin.y;
+      this.fire("complete");
     }
   }, {
     key: "_trimGraphs",

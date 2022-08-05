@@ -87,6 +87,7 @@ var Force = /*#__PURE__*/function (_GraphsBase) {
 
       this.data = opt.data || this._initData();
       this.widget();
+      this.fire("complete");
     }
   }, {
     key: "_initData",

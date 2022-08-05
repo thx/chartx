@@ -26451,6 +26451,7 @@ var chartx = (function () {
 
 	      this.sprite.context.x = this.origin.x + this.width / 2;
 	      this.sprite.context.y = this.origin.y;
+	      this.fire("complete");
 	    }
 	  }, {
 	    key: "_trimGraphs",
@@ -31053,6 +31054,7 @@ var chartx = (function () {
 	      });
 	      this.sprite.context.x = this.origin.x;
 	      this.sprite.context.y = this.origin.y;
+	      this.fire("complete");
 	    }
 	  }, {
 	    key: "_trimGraphs",
@@ -53168,6 +53170,7 @@ var chartx = (function () {
 
 	      this.data = opt.data || this._initData();
 	      this.widget();
+	      this.fire("complete");
 	    }
 	  }, {
 	    key: "_initData",
@@ -54356,6 +54359,7 @@ var chartx = (function () {
 	      });
 	      this._include.context.width = this.width;
 	      this._include.context.height = this.height;
+	      this.fire("complete");
 	    }
 	  }, {
 	    key: "_widget",

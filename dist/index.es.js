@@ -26448,6 +26448,7 @@ var FunnelGraphs = /*#__PURE__*/function (_GraphsBase) {
 
       this.sprite.context.x = this.origin.x + this.width / 2;
       this.sprite.context.y = this.origin.y;
+      this.fire("complete");
     }
   }, {
     key: "_trimGraphs",
@@ -31050,6 +31051,7 @@ var Progress = /*#__PURE__*/function (_GraphsBase) {
       });
       this.sprite.context.x = this.origin.x;
       this.sprite.context.y = this.origin.y;
+      this.fire("complete");
     }
   }, {
     key: "_trimGraphs",
@@ -53165,6 +53167,7 @@ var Force = /*#__PURE__*/function (_GraphsBase) {
 
       this.data = opt.data || this._initData();
       this.widget();
+      this.fire("complete");
     }
   }, {
     key: "_initData",
@@ -54353,6 +54356,7 @@ var Map = /*#__PURE__*/function (_GraphsBase) {
       });
       this._include.context.width = this.width;
       this._include.context.height = this.height;
+      this.fire("complete");
     }
   }, {
     key: "_widget",
