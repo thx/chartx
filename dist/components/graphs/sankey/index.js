@@ -173,7 +173,7 @@ var sankeyGraphs = /*#__PURE__*/function (_GraphsBase) {
 
         var nodeColor = me._getColor(me.node.fillStyle, node, i);
 
-        var nodeEl = new Rect({
+        var nodeElement = new Rect({
           xyToInt: false,
           context: {
             x: node.x,
@@ -183,9 +183,9 @@ var sankeyGraphs = /*#__PURE__*/function (_GraphsBase) {
             fillStyle: nodeColor
           }
         });
-        nodeEl.data = node;
+        nodeElement.data = node;
 
-        me._nodes.addChild(nodeEl);
+        me._nodes.addChild(nodeElement);
       });
     }
   }, {

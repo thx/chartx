@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
+<title>xChart demo -- bar</title>
+
+<script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
+<script type="text/javascript" src="../../dist/index.iife.js"></script>
+<!-- codemirror -->
+<script type="text/javascript" src="../../lib/codemirror/codemirror.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/active-line.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/javascript.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/matchbrackets.js"></script>
+<link rel="stylesheet" href="../../lib/codemirror/codemirror.css">
+<link rel="stylesheet" href="../../lib/codemirror/zenburn.css">
+<link rel="stylesheet" href="../../lib/codemirror/docs.css">
+<!-- codemirror end -->
+<!--bootstrap-->
+<script type="text/javascript" src="../../lib/bootstrap/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap-theme.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/docs.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap.min.css">
+<!--bootstrap end-->
+<script type="text/javascript" src="../../lib/demo.js"></script>
+<link rel="stylesheet" href="../../lib/demo.css">
+</head>
+<body >
+
+<table>
+    <tr>
+        <td id="td-vl">
+            <form><textarea id="code" name="code">
+
+//chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
+//第一行是表头。
+var data= [
+    ["xfield" , "uv" ,"pv","click"],
+    [ "1月1号" , null , undefined , null    ],
+    [ "1月2号" , 0   , "" , ""    ],
+    [ "1月3号" , -23   , 15 , undefined    ],
+    [ "1月4号" , -32  , 135 , 121212    ],
+    [ "1月5号" , 0  , 173 , 123231    ],
+    [ "1月6号" , 0  , 154 , 131239    ],
+    [ "1月7号" , 0  , 168 , null    ],
+    [ "1月8号" , 66   ,183 , 152311    ],
+    [ "1月9号" , 132   , 145 , 112123    ],
+    [ "1月10号", 158  , 85 , 123232    ],
+    [ "1月11号", 79  , 53 , 271212    ],
+    [ "1月12号", 188  , 104 , 123239    ],
+    [ "1月13号", 55  , 168 , 161235    ],
+    [ "1月14号", undefined   ,183 , 123231    ]
+];
+
+
+var options = {
+    coord: {
+        type: "rect",
+        xAxis: {
+            field: "xfield",
+            label: {
+                rotation: 30
+            },
+            title: {
+                text: "我是xAxis"
+            }
+        },
+        fieldsConfig: {
+            click: {
+                name: '点击量',
+                format: '0.0a'
+            }
+        }
+    },
+    graphs: [
+    {
+        type: "line",
+        //animation: false,
+        field: "pv",
+        color: 'rgba(56, 90, 204,  1)',
+        line: {
+            lineargradientDriction:"leftRight",
+            shadowBlur:8,
+            shadowColor: 'rgba(56, 90, 204,  0.6)',
+            growDriction: 'rightLeft',
+            strokeStyle: {
+                lineargradient: [
+                    {
+                        position: 0,
+                        color: 'rgba(56, 90, 204, 0.2)'
+                    },
+                    {
+                        position: 0.05,
+                        color: 'rgba(56, 90, 204,  1)'
+                    },
+                    {
+                        position: 0.95,
+                        color: 'rgba(56, 90, 204, 1)'
+                    },
+                    {
+                        position: 1,
+                        color: 'rgba(56, 90, 204, 0.2)'
+                    }
+                ]
+            }
+        },
+        label: {
+            enabled: true
+        },
+        area: {
+            alpha:0,
+            lineargradientDriction:"topBottom",
+            fillStyle: {
+                lineargradient: [
+                    {
+                        position: 0,
+                        color: 'rgba(56, 90, 204, 1)'
+                    },
+                    {
+                        position: 1,
+                        color: 'rgba(56, 90, 204, 0)'
+                    }
+                ]
+            }
+        },
+        node: {
+            enabled: false
+        }
+    },
+    {
+        type: "line",
+        //animation: false,
+        field: "click",
+        yAxisAlign:'right',
+        color: 'rgba(56, 90, 204,  1)',
+        line: {
+            lineargradientDriction:"leftRight",
+            strokeStyle: {
+                lineargradient: [
+                {
+                    position: 0,
+                    color: 'rgba(56, 90, 204, 0.2)'
+                },
+                {
+                    position: 0.05,
+                    color: 'rgba(56, 90, 204,  1)'
+                },
+                {
+                    position: 0.95,
+                    color: 'rgba(56, 90, 204, 1)'
+                },
+                {
+                    position: 1,
+                    color: 'rgba(56, 90, 204, 0.2)'
+                }
+            ]
+            }
+        },
+        label: {
+            enabled: true
+        },
+        area: {
+            alpha:0.25
+        }
+    }
+    ],
+    legend: {
+        enabled: true
+    },
+    tips:{
+        linkageName: 'linkage' //这个属性注意要保证y轴的width是一致的
+    }
+}
+
+
+var options1 = {
+    coord: {
+        type: "rect",
+        xAxis: {
+            field: "xfield",
+            label: {
+                rotation: 30
+            },
+            title: {
+                text: "我是xAxis"
+            }
+        },
+        fieldsConfig: {
+            click: {
+                name: '点击量',
+                format: '0.0a'
+            }
+        }
+    },
+    graphs: [
+    {
+        type: "line",
+        field: "uv",
+        color: 'rgba(56, 90, 204,  1)',
+        line: {
+            lineargradientDriction:"leftRight",
+            strokeStyle: {
+                lineargradient: [
+                {
+                    position: 0,
+                    color: 'rgba(56, 90, 204, 0.2)'
+                },
+                {
+                    position: 0.05,
+                    color: 'rgba(56, 90, 204,  1)'
+                },
+                {
+                    position: 0.95,
+                    color: 'rgba(56, 90, 204, 1)'
+                },
+                {
+                    position: 1,
+                    color: 'rgba(56, 90, 204, 0.2)'
+                }
+            ]
+            }
+        },
+        label: {
+            enabled: true
+        },
+        area: {
+            alpha:0.25
+        }
+    },
+    {
+        type: "line",
+        //animation: false,
+        field: "click",
+        yAxisAlign:'right',
+        color: 'rgba(56, 90, 204,  1)',
+        line: {
+            lineargradientDriction:"leftRight",
+            strokeStyle: {
+                lineargradient: [
+                {
+                    position: 0,
+                    color: 'rgba(56, 90, 204, 0.2)'
+                },
+                {
+                    position: 0.05,
+                    color: 'rgba(56, 90, 204,  1)'
+                },
+                {
+                    position: 0.95,
+                    color: 'rgba(56, 90, 204, 1)'
+                },
+                {
+                    position: 1,
+                    color: 'rgba(56, 90, 204, 0.2)'
+                }
+            ]
+            }
+        },
+        label: {
+            enabled: true
+        },
+        area: {
+            alpha:0.25
+        }
+    }
+    ],
+    legend: {
+        enabled: true
+    },
+    tips:{
+        linkageName: 'linkage'
+    }
+}
+
+
+window.line = chartx.create("canvasTest" , data , options)
+window.line1 = chartx.create("canvasTest1" , data , options1)
+
+            </textarea></form>
+        </td>
+        <td style="padding:0 10px;" id="td-vr">
+            <div id="chartdemo-r">
+            <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
+                <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
+
+                <h4>折线图（bar chart）</h4>
+                <p>
+                    联系人：@释剑
+                </p>
+            </div>
+            <div  class="test-c">
+                <div id="canvasTest" style='width:900px;height:300px;position:relative;'></div>
+                <div id="canvasTest1" style='width:900px;height:300px;position:relative;'></div>
+            </div>
+
+            </div>
+        </td>
+    </tr>
+</table>
+
+
+</body> 
+</html>
+
+

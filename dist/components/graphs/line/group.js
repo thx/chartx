@@ -154,9 +154,10 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
   }, {
     key: "_getColor",
     value: function _getColor(s, iNode) {
-      var color = this._getProp(s, iNode);
+      var color = this._getProp(s, iNode); //只有iNode有传数据的时候（ 获取node的color 或者 获取 label的color ），才做如下处理
 
-      if (color === undefined || color === null) {
+
+      if (arguments.length > 1 && (color === undefined || color === null)) {
         //这个时候可以先取线的style，和线保持一致
         color = this._getLineStrokeStyle();
 
@@ -492,7 +493,8 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
 
       ;
       this.clipRect.animate(growTo, {
-        duration: this._graphs.aniDuration,
+        duration: this._graphs.growDuration,
+        easing: this.growEasing,
         onUpdate: function onUpdate() {
           var clipRectCtx = _this2.clipRect.context;
 
@@ -622,7 +624,6 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
       ;
       me.lineSprite.addChild(bline);
       me._line = bline;
-      window['_line'] = me._line;
 
       if (me.area.enabled) {
         if (this._bottomField) {
@@ -765,12 +766,18 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
         _fillStyle = fill_gradient;
       }
 
-      ; //也可以传入一个线性渐变
+      ;
 
-      if (this.area.fillStyle && this.area.fillStyle.lineargradient) {
+      if (!_fillStyle) {
+        // _fillStyle 可以 接受渐变色，可以不用_getColor， _getColor会过滤掉渐变色
+        _fillStyle = me._getProp(me.area.fillStyle) || me._getLineStrokeStyle(null, "area");
+      } //也可以传入一个线性渐变
+
+
+      if (_fillStyle && _fillStyle.lineargradient) {
         var _me$ctx2;
 
-        var lineargradient = this.area.fillStyle.lineargradient; //如果是右轴的话，渐变色要对应的反转
+        var lineargradient = _fillStyle.lineargradient; //如果是右轴的话，渐变色要对应的反转
 
         if (this.yAxisAlign == 'right') {
           lineargradient = lineargradient.reverse();
@@ -790,11 +797,6 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
         _fillStyle = fill_gradient;
       }
 
-      if (!_fillStyle) {
-        // _fillStyle 可以 接受渐变色，可以不用_getColor， _getColor会过滤掉渐变色
-        _fillStyle = me._getProp(me.area.fillStyle) || me._getLineStrokeStyle(null, "area");
-      }
-
       return _fillStyle;
     }
   }, {
@@ -811,7 +813,8 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
       }
 
       ;
-      var lineargradient = this._opt.line.strokeStyle.lineargradient;
+      _style = this._getColor(this._opt.line.strokeStyle);
+      var lineargradient = _style.lineargradient;
 
       if (lineargradient) {
         var _me$ctx3;
@@ -833,10 +836,9 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
         });
 
         return _style;
-      } else {
-        _style = this._getColor(this._opt.line.strokeStyle);
-        return _style;
       }
+
+      return _style;
     }
   }, {
     key: "_getLinearGradientPoints",
@@ -990,28 +992,28 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
         }
 
         ;
-        var nodeEl = me._nodes.children[iNode]; //同一个元素，才能直接extend context
+        var nodeElement = me._nodes.children[iNode]; //同一个元素，才能直接extend context
 
-        if (nodeEl) {
-          if (nodeEl.type == _shapeType) {
-            _.extend(nodeEl.context, context);
+        if (nodeElement) {
+          if (nodeElement.type == _shapeType) {
+            _.extend(nodeElement.context, context);
           } else {
-            nodeEl.destroy(); //重新创建一个新的元素放到相同位置
+            nodeElement.destroy(); //重新创建一个新的元素放到相同位置
 
-            nodeEl = new nodeConstructor({
+            nodeElement = new nodeConstructor({
               context: context
             });
 
-            me._nodes.addChildAt(nodeEl, iNode);
+            me._nodes.addChildAt(nodeElement, iNode);
           }
 
           ;
         } else {
-          nodeEl = new nodeConstructor({
+          nodeElement = new nodeConstructor({
             context: context
           });
 
-          me._nodes.addChild(nodeEl);
+          me._nodes.addChild(nodeElement);
         }
 
         ;
@@ -1024,13 +1026,13 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
 
           if (pre && next) {
             if (_y2 == pre[1] && _y2 == next[1]) {
-              nodeEl.context.visible = false;
+              nodeElement.context.visible = false;
             }
           }
         }
 
         ;
-        me.data[a].nodeEl = nodeEl;
+        me.data[a].nodeElement = nodeElement;
         iNode++;
       }
 
@@ -1354,7 +1356,7 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
       var node = this.data[iNode];
 
       if (node) {
-        var _node = node.nodeEl;
+        var _node = node.nodeElement;
 
         if (_node && !node.focused && this.__currFocusInd != iNode) {
           //console.log( 'focusOf' )
@@ -1400,7 +1402,7 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
       if (node) {
         this._focusNodes.removeAllChildren();
 
-        var _node = node.nodeEl;
+        var _node = node.nodeElement;
 
         if (_node && node.focused) {
           //console.log('unfocus')
@@ -1418,6 +1420,16 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
     key: "defaultProps",
     value: function defaultProps() {
       return {
+        growEasing: {
+          detail: '折线生长动画的动画类型参数，默认 Linear.None',
+          documentation: '类型演示https://sole.github.io/tween.js/examples/03_graphs.html',
+          "default": 'Linear.None'
+        },
+        growDuration: {
+          //覆盖基类中的设置，line的duration要1000
+          detail: '动画时长',
+          "default": 800
+        },
         line: {
           detail: '线配置',
           propertys: {

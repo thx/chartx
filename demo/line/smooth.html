@@ -98,6 +98,8 @@ var options = {
     graphs: [
     {
         type: "line",
+        growDuration: 3000,
+        growEasing: 'Quadratic.Out',
         //animation: false,
         field: "click",
         yAxisAlign:'right',
@@ -106,8 +108,8 @@ var options = {
             lineWidth:2.5,
             lineargradientDriction:"leftRight",
             curvature: 0.6,
-            lineType: 'dashed',
-            lineDash: [6,6],
+            //lineType: 'dashed',
+            //lineDash: [6,6],
             strokeStyle: {
                 lineargradient: [
                 {

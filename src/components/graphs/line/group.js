@@ -16,6 +16,15 @@ export default class LineGraphsGroup extends event.Dispatcher
 {
     static defaultProps(){
         return {
+            growEasing: {
+                detail: '折线生长动画的动画类型参数，默认 Linear.None',
+                documentation: '类型演示https://sole.github.io/tween.js/examples/03_graphs.html',
+                default: 'Linear.None'
+            },
+            growDuration: { //覆盖基类中的设置，line的duration要1000
+                detail: '动画时长',
+                default: 800
+            },
             line : {
                 detail : '线配置',
                 propertys : {
@@ -302,7 +311,9 @@ export default class LineGraphsGroup extends event.Dispatcher
     _getColor(s, iNode)
     {
         let color = this._getProp(s, iNode);
-        if ( color === undefined || color === null ) {
+
+        //只有iNode有传数据的时候（ 获取node的color 或者 获取 label的color ），才做如下处理
+        if ( arguments.length > 1 && (color === undefined || color === null )) {
             //这个时候可以先取线的style，和线保持一致
             color = this._getLineStrokeStyle();
 
@@ -316,6 +327,7 @@ export default class LineGraphsGroup extends event.Dispatcher
                 color = this.fieldConfig.color; //this._getProp(this.color, iNode) //this.color会被写入到fieldMap.color
             }
         };
+
         return color;
     }
 
@@ -566,7 +578,8 @@ export default class LineGraphsGroup extends event.Dispatcher
         };
 
         this.clipRect.animate( growTo , {
-            duration: this._graphs.aniDuration,
+            duration: this._graphs.growDuration,
+            easing: this.growEasing,
             onUpdate: ()=>{
 
                 let clipRectCtx = this.clipRect.context
@@ -687,8 +700,8 @@ export default class LineGraphsGroup extends event.Dispatcher
         };
         me.lineSprite.addChild(bline);
         me._line = bline;
-        debugger
-        window['_line'] = me._line
+        
+        
         if( me.area.enabled ){
 
             if( this._bottomField ){
@@ -815,10 +828,15 @@ export default class LineGraphsGroup extends event.Dispatcher
             _fillStyle = fill_gradient;
         };
 
-        //也可以传入一个线性渐变
-        if( this.area.fillStyle && this.area.fillStyle.lineargradient ){
+        if( !_fillStyle ){
+            // _fillStyle 可以 接受渐变色，可以不用_getColor， _getColor会过滤掉渐变色
+            _fillStyle = me._getProp( me.area.fillStyle ) || me._getLineStrokeStyle( null, "area" );
+        }
 
-            let lineargradient = this.area.fillStyle.lineargradient;
+        //也可以传入一个线性渐变
+        if( _fillStyle && _fillStyle.lineargradient ){
+
+            let lineargradient = _fillStyle.lineargradient;
             //如果是右轴的话，渐变色要对应的反转
             if( this.yAxisAlign == 'right' ){
                 lineargradient = lineargradient.reverse();
@@ -832,12 +850,9 @@ export default class LineGraphsGroup extends event.Dispatcher
             _.each( lineargradient , function( item ){
                 fill_gradient.addColorStop( item.position , item.color);
             });
-            _fillStyle = fill_gradient
-        }
 
-        if( !_fillStyle ){
-            // _fillStyle 可以 接受渐变色，可以不用_getColor， _getColor会过滤掉渐变色
-            _fillStyle = me._getProp( me.area.fillStyle ) || me._getLineStrokeStyle( null, "area" );
+            _fillStyle = fill_gradient
+
         }
     
         return _fillStyle;
@@ -852,7 +867,9 @@ export default class LineGraphsGroup extends event.Dispatcher
             return this.color;
         };
 
-        let lineargradient = this._opt.line.strokeStyle.lineargradient;
+        _style = this._getColor( this._opt.line.strokeStyle );
+            
+        let lineargradient = _style.lineargradient;
         if( lineargradient ){
 
             //如果是右轴的话，渐变色要对应的反转
@@ -871,10 +888,9 @@ export default class LineGraphsGroup extends event.Dispatcher
 
             return _style;
 
-        } else {
-            _style = this._getColor( this._opt.line.strokeStyle );
-            return _style;
         }
+
+        return _style;
         
     }
 
@@ -1014,26 +1030,26 @@ export default class LineGraphsGroup extends event.Dispatcher
                 context.path = me._getProp( me.node.path, a );
             };
 
-            let nodeEl = me._nodes.children[ iNode ];
+            let nodeElement = me._nodes.children[ iNode ];
 
             //同一个元素，才能直接extend context
-            if( nodeEl ){
-                if( nodeEl.type == _shapeType ){
-                    _.extend( nodeEl.context , context );
+            if( nodeElement ){
+                if( nodeElement.type == _shapeType ){
+                    _.extend( nodeElement.context , context );
                 } else {
-                    nodeEl.destroy();
+                    nodeElement.destroy();
 
                     //重新创建一个新的元素放到相同位置
-                    nodeEl = new nodeConstructor({
+                    nodeElement = new nodeConstructor({
                         context: context
                     });
-                    me._nodes.addChildAt(nodeEl, iNode);
+                    me._nodes.addChildAt(nodeElement, iNode);
                 };
             } else {
-                nodeEl = new nodeConstructor({
+                nodeElement = new nodeConstructor({
                     context: context
                 });
-                me._nodes.addChild(nodeEl);
+                me._nodes.addChild(nodeElement);
             };
                 
             if ( me.node.corner ) { //拐角才有节点
@@ -1042,12 +1058,12 @@ export default class LineGraphsGroup extends event.Dispatcher
                 let next = me._pointList[a + 1];
                 if (pre && next) {
                     if (y == pre[1] && y == next[1]) {
-                        nodeEl.context.visible = false;
+                        nodeElement.context.visible = false;
                     }
                 }
             };
 
-            me.data[a].nodeEl = nodeEl;
+            me.data[a].nodeElement = nodeElement;
 
             iNode++;
         };
@@ -1339,7 +1355,7 @@ export default class LineGraphsGroup extends event.Dispatcher
         let node = this.data[ iNode ];
 
         if(node){
-            let _node = node.nodeEl;
+            let _node = node.nodeElement;
       
             if( _node && !node.focused && this.__currFocusInd != iNode ){
     
@@ -1386,7 +1402,7 @@ export default class LineGraphsGroup extends event.Dispatcher
         if( node ){
             this._focusNodes.removeAllChildren();
 
-            let _node = node.nodeEl;
+            let _node = node.nodeElement;
     
             if( _node && node.focused ){
                 //console.log('unfocus')

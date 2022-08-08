@@ -21,10 +21,6 @@ class LineGraphs extends GraphsBase
                 detail : '绘制在哪根y轴上面',
                 default: 'left'
             },
-            aniDuration: { //覆盖基类中的设置，line的duration要1000
-                detail: '动画时长',
-                default: 800
-            },
             _props : [
                 Group
             ]

@@ -76,93 +76,56 @@ var options = {
     {
         type: "line",
         //animation: false,
-        field: "pv",
-        color: 'rgba(56, 90, 204,  1)',
+        field: "click",
+        //color: 'rgba(56, 90, 204,  1)',
         line: {
             lineargradientDriction:"leftRight",
-            shadowBlur:8,
-            shadowColor: 'rgba(56, 90, 204,  0.6)',
-            growDriction: 'rightLeft',
-            strokeStyle: {
-                lineargradient: [
-                    {
-                        position: 0,
-                        color: 'rgba(56, 90, 204, 0.2)'
-                    },
-                    {
-                        position: 0.05,
-                        color: 'rgba(56, 90, 204,  1)'
-                    },
-                    {
-                        position: 0.95,
-                        color: 'rgba(56, 90, 204, 1)'
-                    },
-                    {
-                        position: 1,
-                        color: 'rgba(56, 90, 204, 0.2)'
-                    }
-                ]
+            strokeStyle: function(){
+                return {
+                    lineargradient: [
+                        {
+                            position: 0,
+                            color: 'rgba(56, 90, 204, 0.2)'
+                        },
+                        {
+                            position: 0.05,
+                            color: 'rgba(56, 90, 204,  1)'
+                        },
+                        {
+                            position: 0.95,
+                            color: 'rgba(56, 90, 204, 1)'
+                        },
+                        {
+                            position: 1,
+                            color: 'rgba(56, 90, 204, 0.2)'
+                        }
+                    ]
+                }
             }
         },
-        label: {
-            enabled: true
-        },
         area: {
-            alpha:0,
+            alpha:0.5,
             lineargradientDriction:"topBottom",
-            fillStyle: {
-                lineargradient: [
-                    {
-                        position: 0,
-                        color: 'rgba(56, 90, 204, 1)'
-                    },
-                    {
-                        position: 1,
-                        color: 'rgba(56, 90, 204, 0)'
-                    }
-                ]
+            fillStyle: function(){
+                debugger
+                return {
+                    lineargradient: [
+                        {
+                            position: 0,
+                            color: 'rgba(56, 90, 204, 1)'
+                        },
+                        {
+                            position: 1,
+                            color: 'rgba(56, 90, 204, 0)'
+                        }
+                    ]
+                }
             }
         },
         node: {
             enabled: false
         }
     },
-    {
-        type: "line",
-        //animation: false,
-        field: "click",
-        yAxisAlign:'right',
-        color: 'rgba(56, 90, 204,  1)',
-        line: {
-            lineargradientDriction:"leftRight",
-            strokeStyle: {
-                lineargradient: [
-                {
-                    position: 0,
-                    color: 'rgba(56, 90, 204, 0.2)'
-                },
-                {
-                    position: 0.05,
-                    color: 'rgba(56, 90, 204,  1)'
-                },
-                {
-                    position: 0.95,
-                    color: 'rgba(56, 90, 204, 1)'
-                },
-                {
-                    position: 1,
-                    color: 'rgba(56, 90, 204, 0.2)'
-                }
-            ]
-            }
-        },
-        label: {
-            enabled: true
-        },
-        area: {
-            alpha:0.25
-        }
-    }
     ],
     legend: {
         enabled: true
@@ -173,108 +136,7 @@ var options = {
 }
 
 
-var options1 = {
-    coord: {
-        type: "rect",
-        xAxis: {
-            field: "xfield",
-            label: {
-                rotation: 30
-            },
-            title: {
-                text: "我是xAxis"
-            }
-        },
-        fieldsConfig: {
-            click: {
-                name: '点击量',
-                format: '0.0a'
-            }
-        }
-    },
-    graphs: [
-    {
-        type: "line",
-        field: "uv",
-        color: 'rgba(56, 90, 204,  1)',
-        line: {
-            lineargradientDriction:"leftRight",
-            strokeStyle: {
-                lineargradient: [
-                {
-                    position: 0,
-                    color: 'rgba(56, 90, 204, 0.2)'
-                },
-                {
-                    position: 0.05,
-                    color: 'rgba(56, 90, 204,  1)'
-                },
-                {
-                    position: 0.95,
-                    color: 'rgba(56, 90, 204, 1)'
-                },
-                {
-                    position: 1,
-                    color: 'rgba(56, 90, 204, 0.2)'
-                }
-            ]
-            }
-        },
-        label: {
-            enabled: true
-        },
-        area: {
-            alpha:0.25
-        }
-    },
-    {
-        type: "line",
-        //animation: false,
-        field: "click",
-        yAxisAlign:'right',
-        color: 'rgba(56, 90, 204,  1)',
-        line: {
-            lineargradientDriction:"leftRight",
-            strokeStyle: {
-                lineargradient: [
-                {
-                    position: 0,
-                    color: 'rgba(56, 90, 204, 0.2)'
-                },
-                {
-                    position: 0.05,
-                    color: 'rgba(56, 90, 204,  1)'
-                },
-                {
-                    position: 0.95,
-                    color: 'rgba(56, 90, 204, 1)'
-                },
-                {
-                    position: 1,
-                    color: 'rgba(56, 90, 204, 0.2)'
-                }
-            ]
-            }
-        },
-        label: {
-            enabled: true
-        },
-        area: {
-            alpha:0.25
-        }
-    }
-    ],
-    legend: {
-        enabled: true
-    },
-    tips:{
-        linkageName: 'linkage'
-    }
-}
-
-
 window.line = chartx.create("canvasTest" , data , options)
-window.line1 = chartx.create("canvasTest1" , data , options1)
 
             </textarea></form>
         </td>

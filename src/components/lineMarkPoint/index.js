@@ -234,7 +234,7 @@ class lineMarkPoint extends Component
         let y = nodeData.y;
         let lineLength = !this.line.enabled ? 3 : this.line.lineLength;
         let lineDis = this.line.lineDis;  //line到node的距离
-      debugger
+      
         let position = "online";
         if( this.position == 'auto' ){
             if( (preNodeData && preNodeData.y < nodeData.y) || (nextNodeData && nextNodeData.y < nodeData.y) ){

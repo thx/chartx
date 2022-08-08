@@ -232,7 +232,7 @@ class sankeyGraphs extends GraphsBase
             node.field = me.field;
            
             let nodeColor = me._getColor( me.node.fillStyle, node, i );
-            let nodeEl = new Rect({
+            let nodeElement = new Rect({
                 xyToInt:false,
                 context: {
                     x: node.x,
@@ -242,9 +242,9 @@ class sankeyGraphs extends GraphsBase
                     fillStyle: nodeColor
                 }
             });
-            nodeEl.data = node;
+            nodeElement.data = node;
 
-            me._nodes.addChild(nodeEl);
+            me._nodes.addChild(nodeElement);
         });
     }
 
