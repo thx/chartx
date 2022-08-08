@@ -8275,7 +8275,7 @@ var components = {
   */
 };
 var _default = {
-  chartxVersion: '1.1.108',
+  chartxVersion: '1.1.109',
   create: function create(el, _data, _opt) {
     var chart = null;
     var me = this;
@@ -19001,8 +19001,10 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
       };
 
       if (me.line.shadowBlur) {
-        blineCtx.shadowBlur = me.line.shadowBlur, blineCtx.shadowColor = me.line.shadowColor || strokeStyle, blineCtx.shadowOffsetY = me.line.shadowOffsetY;
-        blineCtx.shadowOffsetX = me.line.shadowOffsetX;
+        blineCtx.shadowBlur = me._getProp(me.line.shadowBlur);
+        blineCtx.shadowColor = me._getProp(me.line.shadowColor) || strokeStyle;
+        blineCtx.shadowOffsetY = me._getProp(me.line.shadowOffsetY);
+        blineCtx.shadowOffsetX = me._getProp(me.line.shadowOffsetX);
       }
       var bline = new BrokenLine({
         //线条
@@ -61229,7 +61231,7 @@ if (projectTheme && projectTheme.length) {
 }
 
 var chartx = {
-  version: '1.1.108',
+  version: '1.1.109',
   options: {}
 };
 

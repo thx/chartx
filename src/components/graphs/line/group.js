@@ -677,10 +677,10 @@ export default class LineGraphsGroup extends event.Dispatcher
         };
 
         if( me.line.shadowBlur ){
-            blineCtx.shadowBlur = me.line.shadowBlur,
-            blineCtx.shadowColor = me.line.shadowColor || strokeStyle,
-            blineCtx.shadowOffsetY = me.line.shadowOffsetY
-            blineCtx.shadowOffsetX = me.line.shadowOffsetX
+            blineCtx.shadowBlur = me._getProp(me.line.shadowBlur);
+            blineCtx.shadowColor = me._getProp(me.line.shadowColor) || strokeStyle;
+            blineCtx.shadowOffsetY = me._getProp(me.line.shadowOffsetY)
+            blineCtx.shadowOffsetX = me._getProp(me.line.shadowOffsetX)
         };
 
         let bline = new BrokenLine({ //线条

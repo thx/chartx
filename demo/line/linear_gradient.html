@@ -80,6 +80,11 @@ var options = {
         //color: 'rgba(56, 90, 204,  1)',
         line: {
             lineargradientDriction:"leftRight",
+            shadowBlur: 8,
+            shadowOffsetY: 2,
+            shadowColor: function(){
+debugger
+            },
             strokeStyle: function(){
                 return {
                     lineargradient: [
@@ -107,7 +112,7 @@ var options = {
             alpha:0.5,
             lineargradientDriction:"topBottom",
             fillStyle: function(){
-                debugger
+                
                 return {
                     lineargradient: [
                         {
