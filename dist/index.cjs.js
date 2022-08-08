@@ -8275,7 +8275,7 @@ var components = {
   */
 };
 var _default = {
-  chartxVersion: '1.1.110',
+  chartxVersion: '1.1.111',
   create: function create(el, data, opt) {
     var chart = null;
     var me = this;
@@ -51076,7 +51076,7 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
       // let children = treeOriginData[ childrenField ];
       // treeData[ childrenField ] = [];
 
-      var filter = function filter(treeOriginData, parent, depth) {
+      var filter = function filter(treeOriginData, parent, depth, rowInd) {
         var treeData = {};
         Object.assign(treeData, treeOriginData);
         treeData['__originData'] = treeOriginData; //和原数据建立下关系，比如 treeData 中的一些数据便跟了要同步到原数据中去
@@ -51099,7 +51099,9 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
           height: 0,
           depth: depth || 0,
           //深度
-          parent: parent
+          parent: parent,
+          rowInd: rowInd //在parent中的Index
+
         }); //不能放到assign中去，  getProp的处理中可能依赖node.rowData
 
         node.shapeType = _this5.getProp(_this5.node.shapeType, node);
@@ -51109,8 +51111,8 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
         if (!treeData[collapsedField]) {
           //如果这个节点未折叠
           //检查他的子节点
-          (treeOriginData[childrenField] || []).forEach(function (child) {
-            var childTreeData = filter(child, treeOriginData, depth + 1);
+          (treeOriginData[childrenField] || []).forEach(function (child, rowInd) {
+            var childTreeData = filter(child, treeOriginData, depth + 1, rowInd);
             treeData[childrenField].push(childTreeData);
             nodesLength++; //开始构建edges
 
@@ -51143,7 +51145,7 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
         return treeData;
       };
 
-      var treeData = filter(treeOriginData, null, 0);
+      var treeData = filter(treeOriginData, null, 0, 0);
       return {
         treeData: treeData,
         nodesLength: nodesLength,
@@ -61233,7 +61235,7 @@ if (projectTheme && projectTheme.length) {
 }
 
 var chartx = {
-  version: '1.1.110',
+  version: '1.1.111',
   options: {}
 };
 

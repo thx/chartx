@@ -294,7 +294,7 @@ class compactTree extends GraphsBase {
         // let children = treeOriginData[ childrenField ];
         // treeData[ childrenField ] = [];
 
-        let filter = ( treeOriginData, parent, depth ) => {
+        let filter = ( treeOriginData, parent, depth, rowInd ) => {
             let treeData = {};
             Object.assign( treeData, treeOriginData );
             treeData['__originData'] = treeOriginData; //和原数据建立下关系，比如 treeData 中的一些数据便跟了要同步到原数据中去
@@ -316,7 +316,8 @@ class compactTree extends GraphsBase {
                 width: 0,
                 height: 0,
                 depth: depth || 0, //深度
-                parent
+                parent,
+                rowInd  //在parent中的Index
             } );
             //不能放到assign中去，  getProp的处理中可能依赖node.rowData
             node.shapeType = this.getProp( this.node.shapeType, node );
@@ -328,8 +329,8 @@ class compactTree extends GraphsBase {
             if( !treeData[ collapsedField ] ){
                 //如果这个节点未折叠
                 //检查他的子节点
-                (treeOriginData[ childrenField ] || []).forEach( child => {
-                    let childTreeData = filter( child , treeOriginData,  depth+1);
+                (treeOriginData[ childrenField ] || []).forEach( (child,rowInd) => {
+                    let childTreeData = filter( child , treeOriginData,  depth+1, rowInd);
                     treeData[ childrenField ].push( childTreeData );
                     nodesLength++;
 
@@ -367,7 +368,7 @@ class compactTree extends GraphsBase {
             
         }
 
-        let treeData = filter( treeOriginData, null, 0 );
+        let treeData = filter( treeOriginData, null, 0 , 0);
         
         return {treeData, nodesLength, nodes, edges};
         
