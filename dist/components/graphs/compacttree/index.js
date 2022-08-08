@@ -221,8 +221,9 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
           ctype: _this5._checkHtml(content) ? 'html' : 'canvas',
           width: 0,
           height: 0,
-          depth: depth || 0 //深度
-
+          depth: depth || 0,
+          //深度
+          parent: parent
         }); //不能放到assign中去，  getProp的处理中可能依赖node.rowData
 
         node.shapeType = _this5.getProp(_this5.node.shapeType, node);
@@ -230,7 +231,7 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
         treeData._node = node;
 
         if (!treeData[collapsedField]) {
-          //如果这个节点已经折叠了
+          //如果这个节点未折叠
           //检查他的子节点
           (treeOriginData[childrenField] || []).forEach(function (child) {
             var childTreeData = filter(child, treeOriginData, depth + 1);
@@ -240,11 +241,11 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
             var rowData = {};
             var content = ''; //this._getContent(rowData);
 
-            var node = _this5.getDefNode({
+            var edge = _this5.getDefNode({
               type: 'tree'
             });
 
-            Object.assign(node, {
+            Object.assign(edge, {
               isTree: true,
               iNode: edges.length,
               rowData: rowData,
@@ -258,8 +259,8 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
               sourceTreeData: treeData,
               targetTreeData: childTreeData
             });
-            node.shapeType = _this5.getProp(_this5.line.shapeType, node);
-            edges.push(node);
+            edge.shapeType = _this5.getProp(_this5.line.shapeType, edge);
+            edges.push(edge);
           });
         }
 

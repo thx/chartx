@@ -34612,6 +34612,7 @@ var options = {
         onclick: function(e){
             alert('click')
         },
+        
         node : {
             //width: 100, height:30,
             strokeStyle: "#a1a9b0",
@@ -34709,7 +34710,7 @@ var options = {
 };
 
 window.chart = chartx.create("canvasTest" , data , options)
-chart.on('complete' , function(){
+chart.on('complete' , function(e){
     console.log(e)
 })
 

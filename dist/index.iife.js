@@ -8276,19 +8276,10 @@ var chartx = (function () {
 	  */
 	};
 	var _default = {
-	  chartxVersion: '1.1.109',
-	  create: function create(el, _data, _opt) {
+	  chartxVersion: '1.1.110',
+	  create: function create(el, data, opt) {
 	    var chart = null;
 	    var me = this;
-	    var data = JSON.parse(JSON.stringify(_data, function (k, v) {
-	      if (v === undefined) {
-	        return null;
-	      }
-
-	      return v;
-	    })); //data = JSON.parse( JSON.stringify(_data) );
-
-	    var opt = _.clone(_opt);
 
 	    var _destroy = function _destroy() {
 	      me.instances[chart.id] = null;
@@ -8854,15 +8845,7 @@ var chartx = (function () {
 	    //数据的最外面一定是个数组
 	    if (!Array.isArray(dataOrg)) {
 	      dataOrg = [dataOrg];
-	    } //数据做一份拷贝，避免污染源数据
-
-
-	    dataOrg = JSON.parse(JSON.stringify(dataOrg, function (k, v) {
-	      if (v === undefined) {
-	        return null;
-	      }
-	      return v;
-	    }));
+	    }
 
 	    if (!dataOrg || dataOrg.length == 0) {
 	      return dataFrame;
@@ -10921,9 +10904,21 @@ var chartx = (function () {
 	    _this = _super.call(this);
 	    _this.componentModules = componentModules;
 	    _this._node = node;
-	    _this._data = data;
+
+	    if (!data) {
+	      data = [];
+	    }
+	    data = JSON.parse(JSON.stringify(data, function (k, v) {
+	      if (v === undefined) {
+	        return null;
+	      }
+
+	      return v;
+	    }));
+	    _this._data = data; //注意，resetData不能为null，必须是 数组格式
+
 	    _this._opt = _this.polyfill(opt);
-	    _this.dataFrame = _this.initData(data, opt); //legend如果在top，就会把图表的padding.top修改，减去legend的height
+	    _this.dataFrame = _this._initDataFrame(_this._data, _this._opt); //legend如果在top，就会把图表的padding.top修改，减去legend的height
 
 	    _this.padding = null; //node可能是意外外面一件准备好了canvax对象， 包括 stage  width height 等
 
@@ -11336,14 +11331,20 @@ var chartx = (function () {
 	      if (opt) {
 	        this._opt = this.polyfill(opt);
 	      }
-	      /* 不能 extend opt 
-	      !opt && (opt={});
-	      _.extend(this._opt, opt);
-	      */
 
+	      if (!data) {
+	        data = [];
+	      }
+	      data = JSON.parse(JSON.stringify(data, function (k, v) {
+	        if (v === undefined) {
+	          return null;
+	        }
 
-	      data && (this._data = data);
-	      this.dataFrame = this.initData(this._data, opt);
+	        return v;
+	      }));
+	      this._data = data; //注意，resetData不能为null，必须是 数组格式
+
+	      this.dataFrame = this._initDataFrame(this._data, this._opt);
 	      this.clean();
 	      this.init();
 	      this.draw();
@@ -11368,16 +11369,16 @@ var chartx = (function () {
 	        if (!data) {
 	          data = [];
 	        }
+	        data = JSON.parse(JSON.stringify(data, function (k, v) {
+	          if (v === undefined) {
+	            return null;
+	          }
+
+	          return v;
+	        }));
 	        this._data = data; //注意，resetData不能为null，必须是 数组格式
 
-	        this.dataFrame.resetData(data); // if( !data.length ){
-	        //     
-	        //     this.clean();
-	        //     this.init();
-	        //     this.draw( this._opt );
-	        //     this.fire("resetData");
-	        //     return;
-	        // };
+	        this.dataFrame.resetData(this._data);
 	      } else {
 	        //内部组件trigger的话，比如datazoom
 	        this.dataFrame.resetData();
@@ -11433,8 +11434,8 @@ var chartx = (function () {
 	      this.fire("resetData");
 	    }
 	  }, {
-	    key: "initData",
-	    value: function initData() {
+	    key: "_initDataFrame",
+	    value: function _initDataFrame() {
 	      return _dataFrame["default"].apply(this, arguments);
 	    }
 	  }, {
@@ -20085,7 +20086,7 @@ var chartx = (function () {
 	        var _lineData = me.dataFrame.getFieldData(field);
 
 	        if (!_lineData) return;
-	        var _data = [];
+	        var _graphsData = [];
 
 	        for (var b = 0, bl = _lineData.length; b < bl; b++) {
 	          //返回一个和value的结构对应的point结构{x:  y: }
@@ -20111,12 +20112,12 @@ var chartx = (function () {
 
 	          };
 
-	          _data.push(node);
+	          _graphsData.push(node);
 	        }
 	        tmpData[field] = {
 	          yAxis: fieldConfig.yAxis,
 	          field: field,
-	          data: _data
+	          data: _graphsData
 	        };
 	      });
 
@@ -51097,8 +51098,9 @@ var chartx = (function () {
 	          ctype: _this5._checkHtml(content) ? 'html' : 'canvas',
 	          width: 0,
 	          height: 0,
-	          depth: depth || 0 //深度
-
+	          depth: depth || 0,
+	          //深度
+	          parent: parent
 	        }); //不能放到assign中去，  getProp的处理中可能依赖node.rowData
 
 	        node.shapeType = _this5.getProp(_this5.node.shapeType, node);
@@ -51106,7 +51108,7 @@ var chartx = (function () {
 	        treeData._node = node;
 
 	        if (!treeData[collapsedField]) {
-	          //如果这个节点已经折叠了
+	          //如果这个节点未折叠
 	          //检查他的子节点
 	          (treeOriginData[childrenField] || []).forEach(function (child) {
 	            var childTreeData = filter(child, treeOriginData, depth + 1);
@@ -51116,11 +51118,11 @@ var chartx = (function () {
 	            var rowData = {};
 	            var content = ''; //this._getContent(rowData);
 
-	            var node = _this5.getDefNode({
+	            var edge = _this5.getDefNode({
 	              type: 'tree'
 	            });
 
-	            Object.assign(node, {
+	            Object.assign(edge, {
 	              isTree: true,
 	              iNode: edges.length,
 	              rowData: rowData,
@@ -51134,8 +51136,8 @@ var chartx = (function () {
 	              sourceTreeData: treeData,
 	              targetTreeData: childTreeData
 	            });
-	            node.shapeType = _this5.getProp(_this5.line.shapeType, node);
-	            edges.push(node);
+	            edge.shapeType = _this5.getProp(_this5.line.shapeType, edge);
+	            edges.push(edge);
 	          });
 	        }
 
@@ -61232,7 +61234,7 @@ var chartx = (function () {
 	}
 
 	var chartx = {
-	  version: '1.1.109',
+	  version: '1.1.110',
 	  options: {}
 	};
 

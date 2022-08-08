@@ -36,19 +36,10 @@ var components = {
   */
 };
 var _default = {
-  chartxVersion: '1.1.109',
-  create: function create(el, _data, _opt) {
+  chartxVersion: '1.1.110',
+  create: function create(el, data, opt) {
     var chart = null;
     var me = this;
-    var data = JSON.parse(JSON.stringify(_data, function (k, v) {
-      if (v === undefined) {
-        return null;
-      }
-
-      return v;
-    })); //data = JSON.parse( JSON.stringify(_data) );
-
-    var opt = _.clone(_opt);
 
     var _destroy = function _destroy() {
       me.instances[chart.id] = null;

@@ -136,7 +136,7 @@ class LineGraphs extends GraphsBase
             
             if( !_lineData ) return;
             
-            let _data = [];
+            let _graphsData = [];
 
             for (let b = 0, bl = _lineData.length; b < bl; b++) {
 
@@ -162,13 +162,13 @@ class LineGraphs extends GraphsBase
                     color    : fieldConfig.color //默认设置皮肤颜色，动态的在group里面会被修改
                 };
 
-                _data.push( node );
+                _graphsData.push( node );
             };
 
             tmpData[ field ] = {
                 yAxis : fieldConfig.yAxis,
                 field : field,
-                data  : _data
+                data  : _graphsData
             };
 
         } );

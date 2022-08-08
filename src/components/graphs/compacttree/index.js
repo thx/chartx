@@ -315,7 +315,8 @@ class compactTree extends GraphsBase {
                 ctype: this._checkHtml(content) ? 'html' : 'canvas',
                 width: 0,
                 height: 0,
-                depth: depth || 0 //深度
+                depth: depth || 0, //深度
+                parent
             } );
             //不能放到assign中去，  getProp的处理中可能依赖node.rowData
             node.shapeType = this.getProp( this.node.shapeType, node );
@@ -325,7 +326,7 @@ class compactTree extends GraphsBase {
 
 
             if( !treeData[ collapsedField ] ){
-                //如果这个节点已经折叠了
+                //如果这个节点未折叠
                 //检查他的子节点
                 (treeOriginData[ childrenField ] || []).forEach( child => {
                     let childTreeData = filter( child , treeOriginData,  depth+1);
@@ -336,11 +337,11 @@ class compactTree extends GraphsBase {
                     let rowData = {};
                     let content = ''; //this._getContent(rowData);
 
-                    let node = this.getDefNode({
+                    let edge = this.getDefNode({
                         type: 'tree'
                     });
                     
-                    Object.assign( node, {
+                    Object.assign( edge, {
 
                         isTree: true,
                         iNode: edges.length,
@@ -356,8 +357,8 @@ class compactTree extends GraphsBase {
                         targetTreeData: childTreeData
             
                     } );
-                    node.shapeType = this.getProp( this.line.shapeType, node );
-                    edges.push(node);
+                    edge.shapeType = this.getProp( this.line.shapeType, edge );
+                    edges.push(edge);
 
                 }); 
             }

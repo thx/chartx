@@ -138,7 +138,7 @@ var LineGraphs = /*#__PURE__*/function (_GraphsBase) {
         var _lineData = me.dataFrame.getFieldData(field);
 
         if (!_lineData) return;
-        var _data = [];
+        var _graphsData = [];
 
         for (var b = 0, bl = _lineData.length; b < bl; b++) {
           //返回一个和value的结构对应的point结构{x:  y: }
@@ -164,14 +164,14 @@ var LineGraphs = /*#__PURE__*/function (_GraphsBase) {
 
           };
 
-          _data.push(node);
+          _graphsData.push(node);
         }
 
         ;
         tmpData[field] = {
           yAxis: fieldConfig.yAxis,
           field: field,
-          data: _data
+          data: _graphsData
         };
       });
 

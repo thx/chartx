@@ -51,9 +51,23 @@ var Chart = /*#__PURE__*/function (_event$Dispatcher) {
     _this = _super.call(this);
     _this.componentModules = componentModules;
     _this._node = node;
-    _this._data = data;
+
+    if (!data) {
+      data = [];
+    }
+
+    ;
+    data = JSON.parse(JSON.stringify(data, function (k, v) {
+      if (v === undefined) {
+        return null;
+      }
+
+      return v;
+    }));
+    _this._data = data; //注意，resetData不能为null，必须是 数组格式
+
     _this._opt = _this.polyfill(opt);
-    _this.dataFrame = _this.initData(data, opt); //legend如果在top，就会把图表的padding.top修改，减去legend的height
+    _this.dataFrame = _this._initDataFrame(_this._data, _this._opt); //legend如果在top，就会把图表的padding.top修改，减去legend的height
 
     _this.padding = null; //node可能是意外外面一件准备好了canvax对象， 包括 stage  width height 等
 
@@ -510,14 +524,22 @@ var Chart = /*#__PURE__*/function (_event$Dispatcher) {
       if (opt) {
         this._opt = this.polyfill(opt);
       }
-      /* 不能 extend opt 
-      !opt && (opt={});
-      _.extend(this._opt, opt);
-      */
 
+      if (!data) {
+        data = [];
+      }
 
-      data && (this._data = data);
-      this.dataFrame = this.initData(this._data, opt);
+      ;
+      data = JSON.parse(JSON.stringify(data, function (k, v) {
+        if (v === undefined) {
+          return null;
+        }
+
+        return v;
+      }));
+      this._data = data; //注意，resetData不能为null，必须是 数组格式
+
+      this.dataFrame = this._initDataFrame(this._data, this._opt);
       this.clean();
       this.init();
       this.draw();
@@ -544,16 +566,16 @@ var Chart = /*#__PURE__*/function (_event$Dispatcher) {
         }
 
         ;
+        data = JSON.parse(JSON.stringify(data, function (k, v) {
+          if (v === undefined) {
+            return null;
+          }
+
+          return v;
+        }));
         this._data = data; //注意，resetData不能为null，必须是 数组格式
 
-        this.dataFrame.resetData(data); // if( !data.length ){
-        //     
-        //     this.clean();
-        //     this.init();
-        //     this.draw( this._opt );
-        //     this.fire("resetData");
-        //     return;
-        // };
+        this.dataFrame.resetData(this._data);
       } else {
         //内部组件trigger的话，比如datazoom
         this.dataFrame.resetData();
@@ -617,8 +639,8 @@ var Chart = /*#__PURE__*/function (_event$Dispatcher) {
       this.fire("resetData");
     }
   }, {
-    key: "initData",
-    value: function initData() {
+    key: "_initDataFrame",
+    value: function _initDataFrame() {
       return _dataFrame["default"].apply(this, arguments);
     }
   }, {

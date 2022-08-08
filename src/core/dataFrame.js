@@ -92,14 +92,7 @@ export default function( dataOrg, opt ){
         if( !Array.isArray( dataOrg ) ){
             dataOrg = [ dataOrg ]
         }
-        
-        //数据做一份拷贝，避免污染源数据
-        dataOrg = JSON.parse( JSON.stringify( dataOrg , function(k,v) {
-            if(v === undefined){
-                return null
-            };
-            return v
-        } ) );
+
         if( !dataOrg || dataOrg.length == 0 ){
             return dataFrame
         };
