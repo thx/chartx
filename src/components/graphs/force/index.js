@@ -361,7 +361,7 @@ class Force extends GraphsBase {
             _node.nodeData = node.nodeData;
             _node.on(event.types.get(), function(e) {
                 e.eventInfo = {
-                    trigger : me.node,
+                    trigger : 'this.node',
                     nodes   : [ this.nodeData ]
                 };
                 me.app.fire( e.type, e );

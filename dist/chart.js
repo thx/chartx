@@ -871,7 +871,8 @@ var Chart = /*#__PURE__*/function (_event$Dispatcher) {
       //触发每个graphs级别的事件（在 graph 上面 用 on 绑定的事件），
       //用户交互事件先执行，还可以修改e的内容修改tips内容(e.eventInfo)
       if (event.eventInfo) {
-        _.each(this.getGraphs(), function (graph) {
+        var graphs = this.getGraphs();
+        graphs.forEach(function (graph) {
           graph.triggerEvent(event);
         });
       }

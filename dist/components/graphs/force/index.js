@@ -275,7 +275,7 @@ var Force = /*#__PURE__*/function (_GraphsBase) {
 
         _node.on(event.types.get(), function (e) {
           e.eventInfo = {
-            trigger: me.node,
+            trigger: 'this.node',
             nodes: [this.nodeData]
           };
           me.app.fire(e.type, e);

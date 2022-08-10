@@ -7,6 +7,8 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports["default"] = void 0;
 
+var _typeof2 = _interopRequireDefault(require("@babel/runtime/helpers/typeof"));
+
 var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
 var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
@@ -125,7 +127,32 @@ var GraphsBase = /*#__PURE__*/function (_Component) {
   }, {
     key: "triggerEvent",
     value: function triggerEvent(e) {
-      var trigger = e.eventInfo.trigger || this;
+      var _this2 = this;
+
+      var trigger = e.eventInfo.trigger; //这里要求一定是个字符串
+
+      if ((0, _typeof2["default"])(trigger) == 'object') console.log('trigger必须是个字符串');
+
+      if (typeof trigger == 'string') {
+        if (trigger == 'this') {
+          trigger = this;
+        } else {
+          var triggerList = trigger.split(".");
+          triggerList.map(function (cur) {
+            if (cur != 'this') {
+              trigger = _this2[cur];
+            }
+          });
+        }
+      } //TODO 这里会有隐藏的bug， 比如连个line 一个line的node有onclick， 一个line的node.onclick没有但是有line.onclick 
+      //当点击那个line.node的click的时候， 后面这个line的 click也会被触发，
+      //这里在后面确认对其他功能的影响后，需要被去掉
+
+
+      if (!trigger) {
+        trigger = this;
+      }
+
       var fn = trigger["on" + e.type];
 
       if (fn && _.isFunction(fn)) {

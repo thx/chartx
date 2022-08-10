@@ -695,12 +695,14 @@ class Chart extends event.Dispatcher
     }
 
     triggerEvent( event ){
+        
         //触发每个graphs级别的事件（在 graph 上面 用 on 绑定的事件），
         //用户交互事件先执行，还可以修改e的内容修改tips内容(e.eventInfo)
         if( event.eventInfo ){
-            _.each( this.getGraphs(), function( graph ){
+            let graphs = this.getGraphs();
+            graphs.forEach( graph => {
                 graph.triggerEvent( event );
-            } );
+            });
         };
         
         let _tips = this.getComponent({name:'tips'});
@@ -742,6 +744,7 @@ class Chart extends event.Dispatcher
     { 
         if( this.__bindEvented ) return;
         this.on(event.types.get() , (e)=>{
+            
             //先触发自己的事件
             this.triggerEvent( e );
 

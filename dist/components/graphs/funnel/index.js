@@ -326,7 +326,7 @@ var FunnelGraphs = /*#__PURE__*/function (_GraphsBase) {
 
         _polygon.on(event.types.get(), function (e) {
           e.eventInfo = {
-            trigger: me.node,
+            trigger: 'this.node',
             title: title,
             nodes: [this.nodeData]
           };

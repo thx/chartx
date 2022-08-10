@@ -524,7 +524,8 @@ var BarGraphs = /*#__PURE__*/function (_GraphsBase) {
               if (me.node.eventEnabled) {
                 rectEl.on(event.types.get(), function (e) {
                   e.eventInfo = {
-                    trigger: me.node,
+                    trigger: 'this.node',
+                    //me.node,
                     nodes: [this.nodeData]
                   };
                   barGroupSectedHandle.bind(this)(e);

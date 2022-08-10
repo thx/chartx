@@ -198,7 +198,7 @@ class RadarGraphs extends GraphsBase
                         //这样就会直接用这个aAxisInd了，不会用e.point去做计算
                         e.aAxisInd = this.iNode;
                         e.eventInfo = {
-                            trigger : me.node,
+                            trigger : 'this.node',//me.node,
                             nodes : [ this.nodeData ]
                         };
                         me.app.fire( e.type, e );

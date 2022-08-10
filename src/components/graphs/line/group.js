@@ -689,7 +689,7 @@ export default class LineGraphsGroup extends event.Dispatcher
 
         bline.on( event.types.get() , function (e) {
             e.eventInfo = {
-                trigger : me.line,
+                trigger : 'this.line',
                 nodes   : []
             };
             me._graphs.app.fire( e.type, e );
@@ -734,7 +734,7 @@ export default class LineGraphsGroup extends event.Dispatcher
             });
             area.on( event.types.get() , function (e) {
                 e.eventInfo = {
-                    trigger : me.area,
+                    trigger : 'this.area',//me.area,
                     nodes   : []
                 };
                 me._graphs.app.fire( e.type, e );
@@ -817,7 +817,15 @@ export default class LineGraphsGroup extends event.Dispatcher
             //创建一个线性渐变
             fill_gradient = me.ctx.createLinearGradient( ...lps );
 
-            let areaStyle = me.area.fillStyle || me.line.strokeStyle || me.color;
+            let areaStyle = me.area.fillStyle 
+            if( !areaStyle && typeof me.line.strokeStyle == 'string' ){
+                //第二优先级的strokeStyle如果是个 渐变对象就不能同步
+                areaStyle = me.line.strokeStyle;
+            }
+            if( !areaStyle ) {
+                areaStyle = me.color;
+            }
+
             let rgb = colorRgb( areaStyle );
             let rgba0 = rgb.replace(')', ', ' + me._getProp(me.area.alpha[0]) + ')').replace('RGB', 'RGBA');
             fill_gradient.addColorStop(0, rgba0);
@@ -976,8 +984,10 @@ export default class LineGraphsGroup extends event.Dispatcher
         let iNode = 0; //这里不能和下面的a对等，以为list中有很多无效的节点
         for (let a = 0, al = list.length; a < al; a++) {
 
+            let node = me.data[a];
+
             let _nodeColor = me._getColor( (me.node.strokeStyle || me.color), a );
-            me.data[a].color = _nodeColor; //回写回data里，tips的是用的到
+            node.color = _nodeColor; //回写回data里，tips的是用的到
 
             let nodeEnabled = me.node.enabled;
             if( list.length == 1 && !nodeEnabled ){
@@ -1043,11 +1053,27 @@ export default class LineGraphsGroup extends event.Dispatcher
                     nodeElement = new nodeConstructor({
                         context: context
                     });
+                    nodeElement.on( event.types.get() , function (e) {
+                        
+                        e.eventInfo = {
+                            trigger : 'this.node', //me.node,
+                            nodes   : [ node ]
+                        };
+                        me._graphs.app.fire( e.type, e );
+                    });
+
                     me._nodes.addChildAt(nodeElement, iNode);
                 };
             } else {
                 nodeElement = new nodeConstructor({
                     context: context
+                });
+                nodeElement.on( event.types.get() , function (e) {
+                    e.eventInfo = {
+                        trigger : 'this.node',//me.node,
+                        nodes   : [node]
+                    };
+                    me._graphs.app.fire( e.type, e );
                 });
                 me._nodes.addChild(nodeElement);
             };
@@ -1063,7 +1089,7 @@ export default class LineGraphsGroup extends event.Dispatcher
                 }
             };
 
-            me.data[a].nodeElement = nodeElement;
+            node.nodeElement = nodeElement;
 
             iNode++;
         };

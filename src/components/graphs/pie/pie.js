@@ -145,7 +145,7 @@ export default class Pie extends event.Dispatcher
                     //me.fire( e.type, e );
                 
                     e.eventInfo = {
-                        trigger : me._graphs.node,
+                        trigger : 'this._graphs.node',//me._graphs.node,
                         nodes : [ this.nodeData ]
                     };
 

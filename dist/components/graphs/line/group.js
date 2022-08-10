@@ -612,7 +612,7 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
       });
       bline.on(event.types.get(), function (e) {
         e.eventInfo = {
-          trigger: me.line,
+          trigger: 'this.line',
           nodes: []
         };
 
@@ -660,7 +660,8 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
         });
         area.on(event.types.get(), function (e) {
           e.eventInfo = {
-            trigger: me.area,
+            trigger: 'this.area',
+            //me.area,
             nodes: []
           };
 
@@ -759,7 +760,17 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
         if (!lps) return; //创建一个线性渐变
 
         fill_gradient = (_me$ctx = me.ctx).createLinearGradient.apply(_me$ctx, (0, _toConsumableArray2["default"])(lps));
-        var areaStyle = me.area.fillStyle || me.line.strokeStyle || me.color;
+        var areaStyle = me.area.fillStyle;
+
+        if (!areaStyle && typeof me.line.strokeStyle == 'string') {
+          //第二优先级的strokeStyle如果是个 渐变对象就不能同步
+          areaStyle = me.line.strokeStyle;
+        }
+
+        if (!areaStyle) {
+          areaStyle = me.color;
+        }
+
         var rgb = (0, _color.colorRgb)(areaStyle);
         var rgba0 = rgb.replace(')', ', ' + me._getProp(me.area.alpha[0]) + ')').replace('RGB', 'RGBA');
         fill_gradient.addColorStop(0, rgba0);
@@ -925,15 +936,19 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
   }, {
     key: "_createNodes",
     value: function _createNodes() {
+      var _this4 = this;
+
       var opt = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
       var me = this;
       var list = me._currPointList;
       var iNode = 0; //这里不能和下面的a对等，以为list中有很多无效的节点
 
-      for (var a = 0, al = list.length; a < al; a++) {
+      var _loop = function _loop(a, al) {
+        var node = me.data[a];
+
         var _nodeColor = me._getColor(me.node.strokeStyle || me.color, a);
 
-        me.data[a].color = _nodeColor; //回写回data里，tips的是用的到
+        node.color = _nodeColor; //回写回data里，tips的是用的到
 
         var nodeEnabled = me.node.enabled;
 
@@ -949,7 +964,7 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
 
         if (!_point || !_.isNumber(_point[1])) {
           //折线图中有可能这个point为undefined
-          continue;
+          return "continue";
         }
 
         ;
@@ -957,8 +972,8 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
         var y = _point[1];
         var globalAlpha = 0;
 
-        if (this.clipRect && me._growed) {
-          var clipRectCtx = this.clipRect.context;
+        if (_this4.clipRect && me._growed) {
+          var clipRectCtx = _this4.clipRect.context;
 
           if (x >= clipRectCtx.x && x <= clipRectCtx.x + clipRectCtx.width) {
             globalAlpha = 1;
@@ -1005,6 +1020,15 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
             nodeElement = new nodeConstructor({
               context: context
             });
+            nodeElement.on(event.types.get(), function (e) {
+              e.eventInfo = {
+                trigger: 'this.node',
+                //me.node,
+                nodes: [node]
+              };
+
+              me._graphs.app.fire(e.type, e);
+            });
 
             me._nodes.addChildAt(nodeElement, iNode);
           }
@@ -1013,6 +1037,15 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
         } else {
           nodeElement = new nodeConstructor({
             context: context
+          });
+          nodeElement.on(event.types.get(), function (e) {
+            e.eventInfo = {
+              trigger: 'this.node',
+              //me.node,
+              nodes: [node]
+            };
+
+            me._graphs.app.fire(e.type, e);
           });
 
           me._nodes.addChild(nodeElement);
@@ -1034,8 +1067,14 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
         }
 
         ;
-        me.data[a].nodeElement = nodeElement;
+        node.nodeElement = nodeElement;
         iNode++;
+      };
+
+      for (var a = 0, al = list.length; a < al; a++) {
+        var _ret = _loop(a, al);
+
+        if (_ret === "continue") continue;
       }
 
       ; //把过多的节点删除了

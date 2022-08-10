@@ -8213,6 +8213,7 @@ var _default = {
       var codeWithoutVariables = code.slice(0, range[0]) + code.slice(range[1]);
       return this._eval(codeWithoutVariables, 'options', 'variables', variables);
     } catch (e) {
+      console.log('parse error');
       return {};
     }
   }
@@ -8275,7 +8276,7 @@ var components = {
   */
 };
 var _default = {
-  chartxVersion: '1.1.111',
+  chartxVersion: '1.1.112',
   create: function create(el, data, opt) {
     var chart = null;
     var me = this;
@@ -11647,7 +11648,8 @@ var Chart = /*#__PURE__*/function (_event$Dispatcher) {
       //触发每个graphs级别的事件（在 graph 上面 用 on 绑定的事件），
       //用户交互事件先执行，还可以修改e的内容修改tips内容(e.eventInfo)
       if (event.eventInfo) {
-        _.each(this.getGraphs(), function (graph) {
+        var graphs = this.getGraphs();
+        graphs.forEach(function (graph) {
           graph.triggerEvent(event);
         });
       }
@@ -16727,6 +16729,8 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports["default"] = void 0;
 
+var _typeof2 = interopRequireDefault(_typeof_1$1);
+
 var _classCallCheck2 = interopRequireDefault(classCallCheck$1);
 
 var _createClass2 = interopRequireDefault(createClass$1);
@@ -16843,7 +16847,32 @@ var GraphsBase = /*#__PURE__*/function (_Component) {
   }, {
     key: "triggerEvent",
     value: function triggerEvent(e) {
-      var trigger = e.eventInfo.trigger || this;
+      var _this2 = this;
+
+      var trigger = e.eventInfo.trigger; //这里要求一定是个字符串
+
+      if ((0, _typeof2["default"])(trigger) == 'object') console.log('trigger必须是个字符串');
+
+      if (typeof trigger == 'string') {
+        if (trigger == 'this') {
+          trigger = this;
+        } else {
+          var triggerList = trigger.split(".");
+          triggerList.map(function (cur) {
+            if (cur != 'this') {
+              trigger = _this2[cur];
+            }
+          });
+        }
+      } //TODO 这里会有隐藏的bug， 比如连个line 一个line的node有onclick， 一个line的node.onclick没有但是有line.onclick 
+      //当点击那个line.node的click的时候， 后面这个line的 click也会被触发，
+      //这里在后面确认对其他功能的影响后，需要被去掉
+
+
+      if (!trigger) {
+        trigger = this;
+      }
+
       var fn = trigger["on" + e.type];
 
       if (fn && _.isFunction(fn)) {
@@ -17401,7 +17430,8 @@ var BarGraphs = /*#__PURE__*/function (_GraphsBase) {
               if (me.node.eventEnabled) {
                 rectEl.on(event.types.get(), function (e) {
                   e.eventInfo = {
-                    trigger: me.node,
+                    trigger: 'this.node',
+                    //me.node,
                     nodes: [this.nodeData]
                   };
                   barGroupSectedHandle.bind(this)(e);
@@ -19013,7 +19043,7 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
       });
       bline.on(event.types.get(), function (e) {
         e.eventInfo = {
-          trigger: me.line,
+          trigger: 'this.line',
           nodes: []
         };
 
@@ -19057,7 +19087,8 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
         });
         area.on(event.types.get(), function (e) {
           e.eventInfo = {
-            trigger: me.area,
+            trigger: 'this.area',
+            //me.area,
             nodes: []
           };
 
@@ -19150,7 +19181,17 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
         if (!lps) return; //创建一个线性渐变
 
         fill_gradient = (_me$ctx = me.ctx).createLinearGradient.apply(_me$ctx, (0, _toConsumableArray2["default"])(lps));
-        var areaStyle = me.area.fillStyle || me.line.strokeStyle || me.color;
+        var areaStyle = me.area.fillStyle;
+
+        if (!areaStyle && typeof me.line.strokeStyle == 'string') {
+          //第二优先级的strokeStyle如果是个 渐变对象就不能同步
+          areaStyle = me.line.strokeStyle;
+        }
+
+        if (!areaStyle) {
+          areaStyle = me.color;
+        }
+
         var rgb = (0, color.colorRgb)(areaStyle);
         var rgba0 = rgb.replace(')', ', ' + me._getProp(me.area.alpha[0]) + ')').replace('RGB', 'RGBA');
         fill_gradient.addColorStop(0, rgba0);
@@ -19306,14 +19347,17 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
   }, {
     key: "_createNodes",
     value: function _createNodes() {
+      var _this4 = this;
       var me = this;
       var list = me._currPointList;
       var iNode = 0; //这里不能和下面的a对等，以为list中有很多无效的节点
 
-      for (var a = 0, al = list.length; a < al; a++) {
+      var _loop = function _loop(a, al) {
+        var node = me.data[a];
+
         var _nodeColor = me._getColor(me.node.strokeStyle || me.color, a);
 
-        me.data[a].color = _nodeColor; //回写回data里，tips的是用的到
+        node.color = _nodeColor; //回写回data里，tips的是用的到
 
         var nodeEnabled = me.node.enabled;
 
@@ -19329,14 +19373,14 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
 
         if (!_point || !_.isNumber(_point[1])) {
           //折线图中有可能这个point为undefined
-          continue;
+          return "continue";
         }
         var x = _point[0];
         var y = _point[1];
         var globalAlpha = 0;
 
-        if (this.clipRect && me._growed) {
-          var clipRectCtx = this.clipRect.context;
+        if (_this4.clipRect && me._growed) {
+          var clipRectCtx = _this4.clipRect.context;
 
           if (x >= clipRectCtx.x && x <= clipRectCtx.x + clipRectCtx.width) {
             globalAlpha = 1;
@@ -19377,12 +19421,30 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
             nodeElement = new nodeConstructor({
               context: context
             });
+            nodeElement.on(event.types.get(), function (e) {
+              e.eventInfo = {
+                trigger: 'this.node',
+                //me.node,
+                nodes: [node]
+              };
+
+              me._graphs.app.fire(e.type, e);
+            });
 
             me._nodes.addChildAt(nodeElement, iNode);
           }
         } else {
           nodeElement = new nodeConstructor({
             context: context
+          });
+          nodeElement.on(event.types.get(), function (e) {
+            e.eventInfo = {
+              trigger: 'this.node',
+              //me.node,
+              nodes: [node]
+            };
+
+            me._graphs.app.fire(e.type, e);
           });
 
           me._nodes.addChild(nodeElement);
@@ -19400,8 +19462,14 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
             }
           }
         }
-        me.data[a].nodeElement = nodeElement;
+        node.nodeElement = nodeElement;
         iNode++;
+      };
+
+      for (var a = 0, al = list.length; a < al; a++) {
+        var _ret = _loop(a);
+
+        if (_ret === "continue") continue;
       }
 
       if (me._nodes.children.length > iNode) {
@@ -21168,7 +21236,8 @@ var ScatGraphs = /*#__PURE__*/function (_GraphsBase) {
           _nodeElement.on(event.types.get(), function (e) {
             e.eventInfo = {
               title: null,
-              trigger: me.node,
+              trigger: 'this.node',
+              //me.node,
               nodes: [this.nodeData]
             };
 
@@ -22022,7 +22091,8 @@ var Pie = /*#__PURE__*/function (_event$Dispatcher) {
           sector.on(event.types.get(), function (e) {
             //me.fire( e.type, e );
             e.eventInfo = {
-              trigger: me._graphs.node,
+              trigger: 'this._graphs.node',
+              //me._graphs.node,
               nodes: [this.nodeData]
             }; //图表触发，用来处理Tips
 
@@ -23286,7 +23356,8 @@ var RadarGraphs = /*#__PURE__*/function (_GraphsBase) {
               //这样就会直接用这个aAxisInd了，不会用e.point去做计算
               e.aAxisInd = this.iNode;
               e.eventInfo = {
-                trigger: me.node,
+                trigger: 'this.node',
+                //me.node,
                 nodes: [this.nodeData]
               };
               me.app.fire(e.type, e);
@@ -24397,7 +24468,7 @@ var CloudGraphs = /*#__PURE__*/function (_GraphsBase) {
           tag._node = tagTxt;
           tagTxt.on(event.types.get(), function (e) {
             e.eventInfo = {
-              trigger: me.node,
+              trigger: 'this.node',
               title: null,
               nodes: [this.nodeData]
             };
@@ -24958,7 +25029,8 @@ var PlanetGroup = /*#__PURE__*/function () {
           _circle.on(event.types.get(), function (e) {
             e.eventInfo = {
               title: null,
-              trigger: me.node,
+              trigger: 'this.node',
+              //me.node,
               nodes: [this.nodeData]
             };
 
@@ -25598,7 +25670,8 @@ var PlanetGraphs = /*#__PURE__*/function (_GraphsBase) {
         this._center.on(event.types.get(), function (e) {
           e.eventInfo = {
             title: me.center.text,
-            trigger: me.center,
+            trigger: 'this.center',
+            //me.center,
             nodes: [me.center]
           };
 
@@ -26645,7 +26718,7 @@ var FunnelGraphs = /*#__PURE__*/function (_GraphsBase) {
 
         _polygon.on(event.types.get(), function (e) {
           e.eventInfo = {
-            trigger: me.node,
+            trigger: 'this.node',
             title: title,
             nodes: [this.nodeData]
           };
@@ -28478,6 +28551,7 @@ function scaleSolution(solution, width, height, padding) {
       yRange = bounds.yRange;
 
   if (xRange.max == xRange.min || yRange.max == yRange.min) {
+    console.log("not scaling solution: zero size detected");
     return solution;
   }
 
@@ -28869,7 +28943,8 @@ var VennGraphs = /*#__PURE__*/function (_GraphsBase) {
           if (isNewShape) {
             _shape.on(event.types.get(), function (e) {
               e.eventInfo = {
-                trigger: me.node,
+                trigger: 'this.node',
+                //me.node,
                 title: null,
                 nodes: [this.nodeData]
               }; //fire到root上面去的是为了让root去处理tips
@@ -29136,7 +29211,9 @@ function computeTextCentres(circles, areas) {
     var centre = computeTextCentre(interior, exterior);
     ret[area] = centre;
 
-    if (centre.disjoint && areas[i].size > 0) ;
+    if (centre.disjoint && areas[i].size > 0) {
+      console.log("WARNING: area " + area + " not represented on screen");
+    }
   }
 
   return ret;
@@ -29852,7 +29929,8 @@ var sunburstGraphs = /*#__PURE__*/function (_GraphsBase) {
           sector.on(event.types.get(), function (e) {
             //fire到root上面去的是为了让root去处理tips
             e.eventInfo = {
-              trigger: me.node,
+              trigger: 'this.node',
+              //me.node,
               iNode: layoutData.iNode
             };
             me.app.fire(e.type, e);
@@ -30830,7 +30908,8 @@ var sankeyGraphs = /*#__PURE__*/function (_GraphsBase) {
           link.field = me.field;
           link.__no__name = true;
           e.eventInfo = {
-            trigger: me.node,
+            trigger: 'this.node',
+            //me.node,
             title: linkData.source.name + " <span style='display:inline-block;margin-left:4px;position:relative;top:-0.5px;font-size:16px;left:-3px;'>></span> " + linkData.target.name,
             nodes: [linkData]
           }; //fire到root上面去的是为了让root去处理tips
@@ -31559,6 +31638,7 @@ function jsonToArrayForRelation(data, options, _childrenField) {
   var label = options.node && options.node.content && options.node.content.field;
 
   if (!checkDataIsJson(data, key, childrenKey)) {
+    console.error('该数据不能正确绘制，请提供数组对象形式的数据！');
     return result;
   }
   var childrens = [];
@@ -35389,7 +35469,9 @@ var _typeof2 = interopRequireDefault(_typeof_1$1);
 
         try {
           return fn();
-        } finally {}
+        } finally {
+          console.log(name + " time: " + (_.now() - start) + "ms");
+        }
       }
 
       function notime(name, fn) {
@@ -45173,6 +45255,8 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
           }
 
           if (e.type == "wheel") {
+            console.log(_deltaY, e.deltaY);
+
             if (Math.abs(e.deltaY) > Math.abs(_deltaY)) {
               _deltaY = e.deltaY;
             }
@@ -45575,6 +45659,7 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
       var me = this;
 
       _.each(this.data.edges, function (edge) {
+        console.log(edge.points);
         var key = edge.key.join('_');
 
         if (me.line.isTree && edge.points.length == 3) {
@@ -47550,6 +47635,8 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
             }
 
             if (e.type == "wheel") {
+              console.log(_deltaY, e.deltaY);
+
               if (Math.abs(e.deltaY) > Math.abs(_deltaY)) {
                 _deltaY = e.deltaY;
               }
@@ -47685,6 +47772,7 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
       var me = this;
 
       _.each(this.data.edges, function (edge) {
+        console.log(edge.points);
         var key = edge.key.join('_');
 
         if ((me.line.isTree || edge.isTree) && edge.points.length == 3) {
@@ -51051,11 +51139,13 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
         //{treeData, nodeLength}这里设置了这两个属性
 
         Object.assign(data, _this4._filterTreeData(data.treeOriginData));
+        console.log(data.nodesLength + '个节点构建树:', new Date().getTime() - t);
         var t1 = new Date().getTime();
 
         _this4._initAllDataSize(data).then(function () {
           //这个时候已经设置好了 treeData 的 size 属性width、height
           //可以开始布局了，布局完就可以设置好 data 的 nodes edges 和 size 属性
+          console.log(data.nodesLength + '个节点计算size:', new Date().getTime() - t1);
           resolve(data);
         });
       });
@@ -51356,6 +51446,7 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
       data.edges.forEach(function (edge) {
         _this10.getEdgePoints(edge);
       });
+      console.log(data.nodesLength + '个节点计算layout:', new Date().getTime() - t1);
       Object.assign(data, {
         size: {
           width: width,
@@ -53366,7 +53457,7 @@ var Force = /*#__PURE__*/function (_GraphsBase) {
 
         _node.on(event.types.get(), function (e) {
           e.eventInfo = {
-            trigger: me.node,
+            trigger: 'this.node',
             nodes: [this.nodeData]
           };
           me.app.fire(e.type, e);
@@ -54550,6 +54641,7 @@ var Map = /*#__PURE__*/function (_GraphsBase) {
       this._setNodeStyle(_path, 'select');
 
       nodeData.selected = true;
+      console.log("select:true");
     }
   }, {
     key: "unselectAt",
@@ -54563,6 +54655,7 @@ var Map = /*#__PURE__*/function (_GraphsBase) {
       this._setNodeStyle(_path);
 
       geoGraph.selected = false;
+      console.log("select:false");
 
       if (geoGraph.focused) {
         this.focusAt(adcode);
@@ -55272,7 +55365,8 @@ var Legend = /*#__PURE__*/function (_Component) {
       return {
         type: "legend",
         triggerType: 'legend',
-        trigger: this,
+        trigger: 'this',
+        //this,
         tipsEnabled: this.tipsEnabled,
         nodes: [{
           name: data.name,
@@ -57038,6 +57132,7 @@ var Tips = /*#__PURE__*/function (_Component) {
   }, {
     key: "move",
     value: function move(e) {
+      console.log('tips move');
       if (!this.enabled) return;
 
       if (e.eventInfo) {
@@ -57060,6 +57155,8 @@ var Tips = /*#__PURE__*/function (_Component) {
   }, {
     key: "hide",
     value: function hide(e) {
+      console.log('tips hide');
+
       this._hide(e);
 
       this.onhide.apply(this, [e]);
@@ -61235,7 +61332,7 @@ if (projectTheme && projectTheme.length) {
 }
 
 var chartx = {
-  version: '1.1.111',
+  version: '1.1.112',
   options: {}
 };
 

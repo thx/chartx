@@ -207,7 +207,8 @@ var PlanetGraphs = /*#__PURE__*/function (_GraphsBase) {
         this._center.on(event.types.get(), function (e) {
           e.eventInfo = {
             title: me.center.text,
-            trigger: me.center,
+            trigger: 'this.center',
+            //me.center,
             nodes: [me.center]
           };
 

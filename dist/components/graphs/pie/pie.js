@@ -163,7 +163,8 @@ var Pie = /*#__PURE__*/function (_event$Dispatcher) {
           sector.on(event.types.get(), function (e) {
             //me.fire( e.type, e );
             e.eventInfo = {
-              trigger: me._graphs.node,
+              trigger: 'this._graphs.node',
+              //me._graphs.node,
               nodes: [this.nodeData]
             }; //图表触发，用来处理Tips
 

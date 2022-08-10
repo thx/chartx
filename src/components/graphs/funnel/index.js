@@ -468,7 +468,7 @@ class FunnelGraphs extends GraphsBase
             _polygon.nodeData = ld;
             _polygon.on( event.types.get() , function(e) {
                 e.eventInfo = {
-                    trigger : me.node,
+                    trigger : 'this.node',
                     title   : title,
                     nodes   : [ this.nodeData ]
                 };

@@ -94,7 +94,29 @@ export default class GraphsBase extends Component
     //触发事件, 事件处理函数中的this都指向对应的graphs对象。
     triggerEvent( e )
     {
-        let trigger = e.eventInfo.trigger || this;
+        let trigger = e.eventInfo.trigger; //这里要求一定是个字符串
+        if( typeof trigger == 'object' ) console.log('trigger必须是个字符串');
+
+        if( typeof trigger == 'string' ){
+            if( trigger == 'this' ){
+                trigger = this;
+            } else {
+                const triggerList = trigger.split(".");
+                triggerList.map(cur => {
+                    if( cur != 'this' ){
+                        trigger = this[cur];
+                    }
+                });
+            }
+        }
+        
+        //TODO 这里会有隐藏的bug， 比如连个line 一个line的node有onclick， 一个line的node.onclick没有但是有line.onclick 
+        //当点击那个line.node的click的时候， 后面这个line的 click也会被触发，
+        //这里在后面确认对其他功能的影响后，需要被去掉
+        if( !trigger ){
+            trigger = this;
+        }
+    
         let fn = trigger[ "on"+e.type ];
         if( fn && _.isFunction( fn ) ){
             //如果有在pie的配置上面注册对应的事件，则触发

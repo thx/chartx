@@ -534,7 +534,7 @@ export default class PlanetGroup
                     
                      e.eventInfo = {
                          title : null,
-                         trigger : me.node,
+                         trigger : 'this.node',//me.node,
                          nodes : [ this.nodeData ]
                      };
                      if( this.nodeData.label ){

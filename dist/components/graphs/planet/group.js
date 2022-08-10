@@ -444,7 +444,8 @@ var PlanetGroup = /*#__PURE__*/function () {
           _circle.on(event.types.get(), function (e) {
             e.eventInfo = {
               title: null,
-              trigger: me.node,
+              trigger: 'this.node',
+              //me.node,
               nodes: [this.nodeData]
             };
 

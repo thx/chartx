@@ -235,7 +235,8 @@ var sankeyGraphs = /*#__PURE__*/function (_GraphsBase) {
           link.field = me.field;
           link.__no__name = true;
           e.eventInfo = {
-            trigger: me.node,
+            trigger: 'this.node',
+            //me.node,
             title: linkData.source.name + " <span style='display:inline-block;margin-left:4px;position:relative;top:-0.5px;font-size:16px;left:-3px;'>></span> " + linkData.target.name,
             nodes: [linkData]
           }; //fire到root上面去的是为了让root去处理tips

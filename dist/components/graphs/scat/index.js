@@ -428,7 +428,8 @@ var ScatGraphs = /*#__PURE__*/function (_GraphsBase) {
           _nodeElement.on(event.types.get(), function (e) {
             e.eventInfo = {
               title: null,
-              trigger: me.node,
+              trigger: 'this.node',
+              //me.node,
               nodes: [this.nodeData]
             };
 

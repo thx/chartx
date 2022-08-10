@@ -396,7 +396,8 @@ var Legend = /*#__PURE__*/function (_Component) {
       return {
         type: "legend",
         triggerType: 'legend',
-        trigger: this,
+        trigger: 'this',
+        //this,
         tipsEnabled: this.tipsEnabled,
         nodes: [{
           name: data.name,

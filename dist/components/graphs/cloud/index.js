@@ -250,7 +250,7 @@ var CloudGraphs = /*#__PURE__*/function (_GraphsBase) {
           tag._node = tagTxt;
           tagTxt.on(event.types.get(), function (e) {
             e.eventInfo = {
-              trigger: me.node,
+              trigger: 'this.node',
               title: null,
               nodes: [this.nodeData]
             };
