@@ -16,14 +16,9 @@ export default class LineGraphsGroup extends event.Dispatcher
 {
     static defaultProps(){
         return {
-            growEasing: {
-                detail: '折线生长动画的动画类型参数，默认 Linear.None',
-                documentation: '类型演示https://sole.github.io/tween.js/examples/03_graphs.html',
-                default: 'Linear.None'
-            },
-            growDuration: { //覆盖基类中的设置，line的duration要1000
+            aniDuration: { //覆盖基类中的设置，line的duration要1000
                 detail: '动画时长',
-                default: 800
+                default: 1000
             },
             line : {
                 detail : '线配置',
@@ -578,8 +573,8 @@ export default class LineGraphsGroup extends event.Dispatcher
         };
 
         this.clipRect.animate( growTo , {
-            duration: this._graphs.growDuration,
-            easing: this.growEasing,
+            duration: this._graphs.aniDuration,
+            easing: this.aniEasing,
             onUpdate: ()=>{
 
                 let clipRectCtx = this.clipRect.context

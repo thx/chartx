@@ -8213,7 +8213,6 @@ var _default = {
       var codeWithoutVariables = code.slice(0, range[0]) + code.slice(range[1]);
       return this._eval(codeWithoutVariables, 'options', 'variables', variables);
     } catch (e) {
-      console.log('parse error');
       return {};
     }
   }
@@ -16851,7 +16850,7 @@ var GraphsBase = /*#__PURE__*/function (_Component) {
 
       var trigger = e.eventInfo.trigger; //这里要求一定是个字符串
 
-      if ((0, _typeof2["default"])(trigger) == 'object') console.log('trigger必须是个字符串');
+      if ((0, _typeof2["default"])(trigger) == 'object') ;
 
       if (typeof trigger == 'string') {
         if (trigger == 'this') {
@@ -16864,13 +16863,14 @@ var GraphsBase = /*#__PURE__*/function (_Component) {
             }
           });
         }
-      } //TODO 这里会有隐藏的bug， 比如连个line 一个line的node有onclick， 一个line的node.onclick没有但是有line.onclick 
-      //当点击那个line.node的click的时候， 后面这个line的 click也会被触发，
-      //这里在后面确认对其他功能的影响后，需要被去掉
-
+      }
 
       if (!trigger) {
-        trigger = this;
+        //TODO 这里会有隐藏的bug， 比如连个line 一个line的node有onclick， 一个line的node.onclick没有但是有line.onclick 
+        //当点击那个line.node的click的时候， 后面这个line的 click也会被触发，
+        //这里直接先去掉了
+        //trigger = this;
+        return;
       }
 
       var fn = trigger["on" + e.type];
@@ -16946,7 +16946,12 @@ var GraphsBase = /*#__PURE__*/function (_Component) {
         },
         aniDuration: {
           detail: '动画时长',
-          "default": 600
+          "default": 800
+        },
+        aniEasing: {
+          detail: '折线生长动画的动画类型参数，默认 Linear.None',
+          documentation: '类型演示https://sole.github.io/tween.js/examples/03_graphs.html',
+          "default": 'Linear.None'
         },
         color: {
           detail: 'line,area,node,label的抄底样式',
@@ -18936,8 +18941,8 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
         growTo.x = 0;
       }
       this.clipRect.animate(growTo, {
-        duration: this._graphs.growDuration,
-        easing: this.growEasing,
+        duration: this._graphs.aniDuration,
+        easing: this.aniEasing,
         onUpdate: function onUpdate() {
           var clipRectCtx = _this2.clipRect.context;
 
@@ -19816,15 +19821,10 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
     key: "defaultProps",
     value: function defaultProps() {
       return {
-        growEasing: {
-          detail: '折线生长动画的动画类型参数，默认 Linear.None',
-          documentation: '类型演示https://sole.github.io/tween.js/examples/03_graphs.html',
-          "default": 'Linear.None'
-        },
-        growDuration: {
+        aniDuration: {
           //覆盖基类中的设置，line的duration要1000
           detail: '动画时长',
-          "default": 800
+          "default": 1000
         },
         line: {
           detail: '线配置',
@@ -28551,7 +28551,6 @@ function scaleSolution(solution, width, height, padding) {
       yRange = bounds.yRange;
 
   if (xRange.max == xRange.min || yRange.max == yRange.min) {
-    console.log("not scaling solution: zero size detected");
     return solution;
   }
 
@@ -29211,9 +29210,7 @@ function computeTextCentres(circles, areas) {
     var centre = computeTextCentre(interior, exterior);
     ret[area] = centre;
 
-    if (centre.disjoint && areas[i].size > 0) {
-      console.log("WARNING: area " + area + " not represented on screen");
-    }
+    if (centre.disjoint && areas[i].size > 0) ;
   }
 
   return ret;
@@ -31638,7 +31635,6 @@ function jsonToArrayForRelation(data, options, _childrenField) {
   var label = options.node && options.node.content && options.node.content.field;
 
   if (!checkDataIsJson(data, key, childrenKey)) {
-    console.error('该数据不能正确绘制，请提供数组对象形式的数据！');
     return result;
   }
   var childrens = [];
@@ -35469,9 +35465,7 @@ var _typeof2 = interopRequireDefault(_typeof_1$1);
 
         try {
           return fn();
-        } finally {
-          console.log(name + " time: " + (_.now() - start) + "ms");
-        }
+        } finally {}
       }
 
       function notime(name, fn) {
@@ -45255,8 +45249,6 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
           }
 
           if (e.type == "wheel") {
-            console.log(_deltaY, e.deltaY);
-
             if (Math.abs(e.deltaY) > Math.abs(_deltaY)) {
               _deltaY = e.deltaY;
             }
@@ -45659,7 +45651,6 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
       var me = this;
 
       _.each(this.data.edges, function (edge) {
-        console.log(edge.points);
         var key = edge.key.join('_');
 
         if (me.line.isTree && edge.points.length == 3) {
@@ -47635,8 +47626,6 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
             }
 
             if (e.type == "wheel") {
-              console.log(_deltaY, e.deltaY);
-
               if (Math.abs(e.deltaY) > Math.abs(_deltaY)) {
                 _deltaY = e.deltaY;
               }
@@ -47772,7 +47761,6 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
       var me = this;
 
       _.each(this.data.edges, function (edge) {
-        console.log(edge.points);
         var key = edge.key.join('_');
 
         if ((me.line.isTree || edge.isTree) && edge.points.length == 3) {
@@ -51139,13 +51127,11 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
         //{treeData, nodeLength}这里设置了这两个属性
 
         Object.assign(data, _this4._filterTreeData(data.treeOriginData));
-        console.log(data.nodesLength + '个节点构建树:', new Date().getTime() - t);
         var t1 = new Date().getTime();
 
         _this4._initAllDataSize(data).then(function () {
           //这个时候已经设置好了 treeData 的 size 属性width、height
           //可以开始布局了，布局完就可以设置好 data 的 nodes edges 和 size 属性
-          console.log(data.nodesLength + '个节点计算size:', new Date().getTime() - t1);
           resolve(data);
         });
       });
@@ -51446,7 +51432,6 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
       data.edges.forEach(function (edge) {
         _this10.getEdgePoints(edge);
       });
-      console.log(data.nodesLength + '个节点计算layout:', new Date().getTime() - t1);
       Object.assign(data, {
         size: {
           width: width,
@@ -54641,7 +54626,6 @@ var Map = /*#__PURE__*/function (_GraphsBase) {
       this._setNodeStyle(_path, 'select');
 
       nodeData.selected = true;
-      console.log("select:true");
     }
   }, {
     key: "unselectAt",
@@ -54655,7 +54639,6 @@ var Map = /*#__PURE__*/function (_GraphsBase) {
       this._setNodeStyle(_path);
 
       geoGraph.selected = false;
-      console.log("select:false");
 
       if (geoGraph.focused) {
         this.focusAt(adcode);
@@ -57132,7 +57115,6 @@ var Tips = /*#__PURE__*/function (_Component) {
   }, {
     key: "move",
     value: function move(e) {
-      console.log('tips move');
       if (!this.enabled) return;
 
       if (e.eventInfo) {
@@ -57155,8 +57137,6 @@ var Tips = /*#__PURE__*/function (_Component) {
   }, {
     key: "hide",
     value: function hide(e) {
-      console.log('tips hide');
-
       this._hide(e);
 
       this.onhide.apply(this, [e]);

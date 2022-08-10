@@ -21,7 +21,12 @@ export default class GraphsBase extends Component
             },
             aniDuration: {
                 detail: '动画时长',
-                default: 600
+                default: 800
+            },
+            aniEasing: {
+                detail: '折线生长动画的动画类型参数，默认 Linear.None',
+                documentation: '类型演示https://sole.github.io/tween.js/examples/03_graphs.html',
+                default: 'Linear.None'
             },
             color: {
                 detail : 'line,area,node,label的抄底样式',
@@ -110,11 +115,13 @@ export default class GraphsBase extends Component
             }
         }
         
-        //TODO 这里会有隐藏的bug， 比如连个line 一个line的node有onclick， 一个line的node.onclick没有但是有line.onclick 
-        //当点击那个line.node的click的时候， 后面这个line的 click也会被触发，
-        //这里在后面确认对其他功能的影响后，需要被去掉
+        
         if( !trigger ){
-            trigger = this;
+            //TODO 这里会有隐藏的bug， 比如连个line 一个line的node有onclick， 一个line的node.onclick没有但是有line.onclick 
+            //当点击那个line.node的click的时候， 后面这个line的 click也会被触发，
+            //这里直接先去掉了
+            //trigger = this;
+            return;
         }
     
         let fn = trigger[ "on"+e.type ];
