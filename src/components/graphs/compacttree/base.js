@@ -1416,12 +1416,13 @@ class RelationBase extends GraphsBase {
             
             let content = node.content;
             let width = me.getProp(me.node.width, node);
-            if( !width && me.node.rowData && node.rowData.width ){
-                width = node.rowData.width
+            if (!width && node.width) {
+                width = node.width;
             }
-            let height = me.getProp(me.node.height, node);
-            if( !height && me.node.rowData && node.rowData.height ){
-                height = node.rowData.height
+    
+            var height = me.getProp(me.node.height, node);
+            if (!height && node.height) {
+                height = node.height;
             }
 
             let fontColor = me.getProp(me.node.content.fontColor, node);

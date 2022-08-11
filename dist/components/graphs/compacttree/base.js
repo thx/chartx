@@ -1202,14 +1202,14 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
         var content = node.content;
         var width = me.getProp(me.node.width, node);
 
-        if (!width && me.node.rowData && node.rowData.width) {
-          width = node.rowData.width;
+        if (!width && node.width) {
+          width = node.width;
         }
 
         var height = me.getProp(me.node.height, node);
 
-        if (!height && me.node.rowData && node.rowData.height) {
-          height = node.rowData.height;
+        if (!height && node.height) {
+          height = node.height;
         }
 
         var fontColor = me.getProp(me.node.content.fontColor, node);

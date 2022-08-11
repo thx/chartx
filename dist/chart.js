@@ -44,11 +44,12 @@ var Chart = /*#__PURE__*/function (_event$Dispatcher) {
 
   //node 为外部宿主的id 或者 dom节点
   //也可能就是外部已经创建好的 canvax对象 { canvax（实例）, stage, width, height }
-  function Chart(node, data, opt, componentModules) {
+  function Chart(node, data, opt, componentModules, otherOptions) {
     var _this;
 
     (0, _classCallCheck2["default"])(this, Chart);
     _this = _super.call(this);
+    _this.otherOptions = otherOptions;
     _this.componentModules = componentModules;
     _this._node = node;
 
@@ -57,13 +58,17 @@ var Chart = /*#__PURE__*/function (_event$Dispatcher) {
     }
 
     ;
-    data = JSON.parse(JSON.stringify(data, function (k, v) {
-      if (v === undefined) {
-        return null;
-      }
 
-      return v;
-    }));
+    if (!_this.otherOptions.noDataClone) {
+      data = JSON.parse(JSON.stringify(data, function (k, v) {
+        if (v === undefined) {
+          return null;
+        }
+
+        return v;
+      }));
+    }
+
     _this._data = data; //注意，resetData不能为null，必须是 数组格式
 
     _this._opt = _this.polyfill(opt);
@@ -530,13 +535,17 @@ var Chart = /*#__PURE__*/function (_event$Dispatcher) {
       }
 
       ;
-      data = JSON.parse(JSON.stringify(data, function (k, v) {
-        if (v === undefined) {
-          return null;
-        }
 
-        return v;
-      }));
+      if (!this.otherOptions.noDataClone) {
+        data = JSON.parse(JSON.stringify(data, function (k, v) {
+          if (v === undefined) {
+            return null;
+          }
+
+          return v;
+        }));
+      }
+
       this._data = data; //注意，resetData不能为null，必须是 数组格式
 
       this.dataFrame = this._initDataFrame(this._data, this._opt);
@@ -566,13 +575,17 @@ var Chart = /*#__PURE__*/function (_event$Dispatcher) {
         }
 
         ;
-        data = JSON.parse(JSON.stringify(data, function (k, v) {
-          if (v === undefined) {
-            return null;
-          }
 
-          return v;
-        }));
+        if (!this.otherOptions.noDataClone) {
+          data = JSON.parse(JSON.stringify(data, function (k, v) {
+            if (v === undefined) {
+              return null;
+            }
+
+            return v;
+          }));
+        }
+
         this._data = data; //注意，resetData不能为null，必须是 数组格式
 
         this.dataFrame.resetData(this._data);

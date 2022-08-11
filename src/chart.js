@@ -13,21 +13,26 @@ class Chart extends event.Dispatcher
 {
     //node 为外部宿主的id 或者 dom节点
     //也可能就是外部已经创建好的 canvax对象 { canvax（实例）, stage, width, height }
-    constructor( node, data, opt, componentModules )
+    constructor( node, data, opt, componentModules, otherOptions )
     {
         super();
+
+        this.otherOptions = otherOptions;
 
         this.componentModules = componentModules;
      
         this._node = node;
 
         if( !data ){ data = [] };
-        data = JSON.parse( JSON.stringify( data , function(k,v) {
-            if(v === undefined){
-                return null
-            }
-            return v
-        } ) );
+        if( !this.otherOptions.noDataClone ){
+            data = JSON.parse( JSON.stringify( data , function(k,v) {
+                if(v === undefined){
+                    return null
+                }
+                return v
+            } ) );
+        }
+        
         this._data = data; //注意，resetData不能为null，必须是 数组格式
 
         this._opt = this.polyfill(opt);
@@ -427,12 +432,14 @@ class Chart extends event.Dispatcher
         }
         
         if( !data ){ data = [] };
-        data = JSON.parse( JSON.stringify( data , function(k,v) {
-            if(v === undefined){
-                return null
-            }
-            return v
-        } ) );
+        if( !this.otherOptions.noDataClone ){
+            data = JSON.parse( JSON.stringify( data , function(k,v) {
+                if(v === undefined){
+                    return null
+                }
+                return v
+            } ) );
+        }
         this._data = data; //注意，resetData不能为null，必须是 数组格式
 
         this.dataFrame = this._initDataFrame( this._data, this._opt );
@@ -460,12 +467,14 @@ class Chart extends event.Dispatcher
             //直接chart级别的resetData调用
             //只有非内部trigger的的resetData，才会有原数据的改变， 
             if( !data ){ data = [] };
-            data = JSON.parse( JSON.stringify( data , function(k,v) {
-                if(v === undefined){
-                    return null
-                }
-                return v
-            } ) );
+            if( !this.otherOptions.noDataClone ){
+                data = JSON.parse( JSON.stringify( data , function(k,v) {
+                    if(v === undefined){
+                        return null
+                    }
+                    return v
+                } ) );
+            }
             this._data = data; //注意，resetData不能为null，必须是 数组格式
             this.dataFrame.resetData( this._data );
             

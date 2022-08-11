@@ -199,9 +199,15 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
       // let childrenField = this.childrenField;
       // let children = treeOriginData[ childrenField ];
       // treeData[ childrenField ] = [];
+      //parent指向的是treeData不是originData，这里要注意下
 
       var filter = function filter(treeOriginData, parent, depth, rowInd) {
-        var treeData = {};
+        var treeData = {
+          depth: depth || 0,
+          parent: parent,
+          rowInd: rowInd //在parent中的Index
+
+        };
         Object.assign(treeData, treeOriginData);
         treeData['__originData'] = treeOriginData; //和原数据建立下关系，比如 treeData 中的一些数据便跟了要同步到原数据中去
 
@@ -221,10 +227,7 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
           ctype: _this5._checkHtml(content) ? 'html' : 'canvas',
           width: 0,
           height: 0,
-          depth: depth || 0,
-          //深度
-          parent: parent,
-          rowInd: rowInd //在parent中的Index
+          depth: depth || 0 //深度
 
         }); //不能放到assign中去，  getProp的处理中可能依赖node.rowData
 
@@ -236,7 +239,7 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
           //如果这个节点未折叠
           //检查他的子节点
           (treeOriginData[childrenField] || []).forEach(function (child, rowInd) {
-            var childTreeData = filter(child, treeOriginData, depth + 1, rowInd);
+            var childTreeData = filter(child, treeData, depth + 1, rowInd);
             treeData[childrenField].push(childTreeData);
             nodesLength++; //开始构建edges
 

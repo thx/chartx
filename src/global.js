@@ -26,7 +26,7 @@ let components = {
 
 export default {
     chartxVersion: '__VERSION__',
-    create : function( el, data, opt ){
+    create : function( el, data, opt, otherOptions={} ){
         let chart = null;
         let me = this;
 
@@ -53,7 +53,7 @@ export default {
         let Chart = me._getComponentModule('chart');
 
         //try {
-            chart = new Chart( el, data, opt, componentModules );
+            chart = new Chart( el, data, opt, componentModules, otherOptions );
             if( chart ){
                 chart.draw();
                 

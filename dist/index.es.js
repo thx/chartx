@@ -8273,8 +8273,9 @@ var components = {
   */
 };
 var _default = {
-  chartxVersion: '1.1.112',
+  chartxVersion: '1.1.115',
   create: function create(el, data, opt) {
+    var otherOptions = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
     var chart = null;
     var me = this;
 
@@ -8304,7 +8305,7 @@ var _default = {
     var Chart = me._getComponentModule('chart'); //try {
 
 
-    chart = new Chart(el, data, opt, componentModules);
+    chart = new Chart(el, data, opt, componentModules, otherOptions);
 
     if (chart) {
       chart.draw();
@@ -10894,24 +10895,29 @@ var Chart = /*#__PURE__*/function (_event$Dispatcher) {
 
   //node 为外部宿主的id 或者 dom节点
   //也可能就是外部已经创建好的 canvax对象 { canvax（实例）, stage, width, height }
-  function Chart(node, data, opt, componentModules) {
+  function Chart(node, data, opt, componentModules, otherOptions) {
     var _this;
 
     (0, _classCallCheck2["default"])(this, Chart);
     _this = _super.call(this);
+    _this.otherOptions = otherOptions;
     _this.componentModules = componentModules;
     _this._node = node;
 
     if (!data) {
       data = [];
     }
-    data = JSON.parse(JSON.stringify(data, function (k, v) {
-      if (v === undefined) {
-        return null;
-      }
 
-      return v;
-    }));
+    if (!_this.otherOptions.noDataClone) {
+      data = JSON.parse(JSON.stringify(data, function (k, v) {
+        if (v === undefined) {
+          return null;
+        }
+
+        return v;
+      }));
+    }
+
     _this._data = data; //注意，resetData不能为null，必须是 数组格式
 
     _this._opt = _this.polyfill(opt);
@@ -11332,13 +11338,17 @@ var Chart = /*#__PURE__*/function (_event$Dispatcher) {
       if (!data) {
         data = [];
       }
-      data = JSON.parse(JSON.stringify(data, function (k, v) {
-        if (v === undefined) {
-          return null;
-        }
 
-        return v;
-      }));
+      if (!this.otherOptions.noDataClone) {
+        data = JSON.parse(JSON.stringify(data, function (k, v) {
+          if (v === undefined) {
+            return null;
+          }
+
+          return v;
+        }));
+      }
+
       this._data = data; //注意，resetData不能为null，必须是 数组格式
 
       this.dataFrame = this._initDataFrame(this._data, this._opt);
@@ -11366,13 +11376,17 @@ var Chart = /*#__PURE__*/function (_event$Dispatcher) {
         if (!data) {
           data = [];
         }
-        data = JSON.parse(JSON.stringify(data, function (k, v) {
-          if (v === undefined) {
-            return null;
-          }
 
-          return v;
-        }));
+        if (!this.otherOptions.noDataClone) {
+          data = JSON.parse(JSON.stringify(data, function (k, v) {
+            if (v === undefined) {
+              return null;
+            }
+
+            return v;
+          }));
+        }
+
         this._data = data; //注意，resetData不能为null，必须是 数组格式
 
         this.dataFrame.resetData(this._data);
@@ -48517,14 +48531,14 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
         var content = node.content;
         var width = me.getProp(me.node.width, node);
 
-        if (!width && me.node.rowData && node.rowData.width) {
-          width = node.rowData.width;
+        if (!width && node.width) {
+          width = node.width;
         }
 
         var height = me.getProp(me.node.height, node);
 
-        if (!height && me.node.rowData && node.rowData.height) {
-          height = node.rowData.height;
+        if (!height && node.height) {
+          height = node.height;
         }
 
         var fontColor = me.getProp(me.node.content.fontColor, node);
@@ -51149,9 +51163,15 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
       // let childrenField = this.childrenField;
       // let children = treeOriginData[ childrenField ];
       // treeData[ childrenField ] = [];
+      //parent指向的是treeData不是originData，这里要注意下
 
       var filter = function filter(treeOriginData, parent, depth, rowInd) {
-        var treeData = {};
+        var treeData = {
+          depth: depth || 0,
+          parent: parent,
+          rowInd: rowInd //在parent中的Index
+
+        };
         Object.assign(treeData, treeOriginData);
         treeData['__originData'] = treeOriginData; //和原数据建立下关系，比如 treeData 中的一些数据便跟了要同步到原数据中去
 
@@ -51171,10 +51191,7 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
           ctype: _this5._checkHtml(content) ? 'html' : 'canvas',
           width: 0,
           height: 0,
-          depth: depth || 0,
-          //深度
-          parent: parent,
-          rowInd: rowInd //在parent中的Index
+          depth: depth || 0 //深度
 
         }); //不能放到assign中去，  getProp的处理中可能依赖node.rowData
 
@@ -51186,7 +51203,7 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
           //如果这个节点未折叠
           //检查他的子节点
           (treeOriginData[childrenField] || []).forEach(function (child, rowInd) {
-            var childTreeData = filter(child, treeOriginData, depth + 1, rowInd);
+            var childTreeData = filter(child, treeData, depth + 1, rowInd);
             treeData[childrenField].push(childTreeData);
             nodesLength++; //开始构建edges
 
@@ -61310,7 +61327,7 @@ if (projectTheme && projectTheme.length) {
 }
 
 var chartx = {
-  version: '1.1.112',
+  version: '1.1.115',
   options: {}
 };
 

@@ -36,8 +36,9 @@ var components = {
   */
 };
 var _default = {
-  chartxVersion: '1.1.112',
+  chartxVersion: '1.1.115',
   create: function create(el, data, opt) {
+    var otherOptions = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
     var chart = null;
     var me = this;
 
@@ -71,7 +72,7 @@ var _default = {
     var Chart = me._getComponentModule('chart'); //try {
 
 
-    chart = new Chart(el, data, opt, componentModules);
+    chart = new Chart(el, data, opt, componentModules, otherOptions);
 
     if (chart) {
       chart.draw();
