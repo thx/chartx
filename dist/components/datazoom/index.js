@@ -271,7 +271,7 @@ var dataZoom = /*#__PURE__*/function (_Component) {
       ;
       opt.coord.enabled = false;
       opt.coord.padding = 0;
-      var thumbChart = new chartConstructor(cloneEl, app._data, opt, app.componentModules);
+      var thumbChart = new chartConstructor(cloneEl, app._data, opt, app.componentModules, app.otherOptions);
       thumbChart.draw();
       return {
         thumbChart: thumbChart,

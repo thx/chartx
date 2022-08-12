@@ -55748,7 +55748,7 @@ var dataZoom = /*#__PURE__*/function (_Component) {
       }
       opt.coord.enabled = false;
       opt.coord.padding = 0;
-      var thumbChart = new chartConstructor(cloneEl, app._data, opt, app.componentModules);
+      var thumbChart = new chartConstructor(cloneEl, app._data, opt, app.componentModules, app.otherOptions);
       thumbChart.draw();
       return {
         thumbChart: thumbChart,
@@ -57374,13 +57374,13 @@ var Tips = /*#__PURE__*/function (_Component) {
     value: function _checkX(x) {
       var w = this.dW + 2; //后面的2 是 两边的 linewidth
 
-      var scrollLeft = document.body.scrollLeft;
-      var clientWidth = document.body.clientWidth;
+      var left = 0;
+      var clientWidth = document.documentElement.clientWidth;
 
-      if (x < scrollLeft) {
-        x = scrollLeft;
+      if (x < left) {
+        x = left;
       } else if (x + w > clientWidth) {
-        x = scrollLeft + (clientWidth - w);
+        x = clientWidth - w;
       }
 
       return x;
@@ -57394,13 +57394,13 @@ var Tips = /*#__PURE__*/function (_Component) {
     value: function _checkY(y) {
       var h = this.dH + 2; //后面的2 是 两边的 linewidth
 
-      var scrollTop = document.body.scrollTop;
+      var top = 0;
       var clientHeight = document.documentElement.clientHeight;
 
-      if (y < scrollTop) {
-        y = scrollTop;
+      if (y < top) {
+        y = top;
       } else if (y + h > clientHeight) {
-        y = scrollTop + (clientHeight - h);
+        y = clientHeight - h;
       }
 
       return y;
@@ -57916,21 +57916,21 @@ var contextMenu = /*#__PURE__*/function (_Component) {
       return tipsContent;
     }
     /**
-     *检测是x方向超过了视窗
-     */
+    *检测是x方向超过了视窗
+    */
 
   }, {
     key: "_checkX",
     value: function _checkX(x) {
       var w = this.dW + 2; //后面的2 是 两边的 linewidth
 
-      var scrollLeft = document.body.scrollLeft;
-      var clientWidth = document.body.clientWidth;
+      var left = 0;
+      var clientWidth = document.documentElement.clientWidth;
 
-      if (x < scrollLeft) {
-        x = scrollLeft;
+      if (x < left) {
+        x = left;
       } else if (x + w > clientWidth) {
-        x = scrollLeft + (clientWidth - w);
+        x = clientWidth - w;
       }
 
       return x;
@@ -57944,13 +57944,13 @@ var contextMenu = /*#__PURE__*/function (_Component) {
     value: function _checkY(y) {
       var h = this.dH + 2; //后面的2 是 两边的 linewidth
 
-      var scrollTop = document.body.scrollTop;
+      var top = 0;
       var clientHeight = document.documentElement.clientHeight;
 
-      if (y < scrollTop) {
-        y = scrollTop;
+      if (y < top) {
+        y = top;
       } else if (y + h > clientHeight) {
-        y = scrollTop + (clientHeight - h);
+        y = clientHeight - h;
       }
 
       return y;

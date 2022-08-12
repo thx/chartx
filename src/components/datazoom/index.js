@@ -363,7 +363,7 @@ class dataZoom extends Component
         opt.coord.enabled = false;
         opt.coord.padding = 0;
 
-        let thumbChart = new chartConstructor(cloneEl, app._data, opt, app.componentModules);
+        let thumbChart = new chartConstructor(cloneEl, app._data, opt, app.componentModules, app.otherOptions);
         thumbChart.draw();
 
         return {

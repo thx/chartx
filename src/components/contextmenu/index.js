@@ -250,17 +250,17 @@ class contextMenu extends Component {
         return tipsContent;
     }
 
-    /**
+     /**
      *检测是x方向超过了视窗
      */
-    _checkX(x) {
+     _checkX(x) {
         let w = this.dW + 2; //后面的2 是 两边的 linewidth
-        let scrollLeft = document.body.scrollLeft;
-        let clientWidth = document.body.clientWidth;
-        if( x < scrollLeft ){
-            x = scrollLeft;
+        let left = 0;
+        let clientWidth = document.documentElement.clientWidth;
+        if( x < left ){
+            x = left;
         } else if( x + w > clientWidth ){
-            x = scrollLeft + (clientWidth - w)
+            x = clientWidth - w
         }
         return x;
     }
@@ -270,12 +270,12 @@ class contextMenu extends Component {
      */
     _checkY(y) {
         let h = this.dH + 2; //后面的2 是 两边的 linewidth
-        let scrollTop = document.body.scrollTop;
+        let top = 0; 
         let clientHeight = document.documentElement.clientHeight;
-        if( y < scrollTop ){
-            y = scrollTop;
+        if( y < top ){
+            y = top;
         } else if( y + h > clientHeight ){
-            y = scrollTop + (clientHeight - h)
+            y = clientHeight - h;
         }
         return y;
     }
