@@ -46,8 +46,6 @@ var Path = _canvax["default"].Shapes.Path;
 var BrokenLine = _canvax["default"].Shapes.BrokenLine;
 var Circle = _canvax["default"].Shapes.Circle;
 var Arrow = _canvax["default"].Shapes.Arrow;
-var collapseIconWidth = 22;
-var typeIconWidth = 20;
 /**
  * 关系图中 包括了  配置，数据，和布局数据，
  * 默认用配置和数据可以完成绘图， 但是如果有布局数据，就绘图玩额外调用一次绘图，把布局数据传入修正布局效果
@@ -235,6 +233,8 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
             ; //滚轮缩放
 
             if (e.type == "wheel") {
+              console.log(_deltaY, e.deltaY);
+
               if (Math.abs(e.deltaY) > Math.abs(_deltaY)) {
                 _deltaY = e.deltaY;
               }
@@ -386,6 +386,7 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
       var me = this;
 
       _.each(this.data.edges, function (edge) {
+        console.log(edge.points);
         var key = edge.key.join('_');
 
         if ((me.line.isTree || edge.isTree) && edge.points.length == 3) {
@@ -718,9 +719,9 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
           shadowColor = _me$_getNodeStyle.shadowColor;
 
       var context = {
-        x: parseInt(node.x) - parseInt(node.width / 2),
+        x: parseInt(node.x) - parseInt(node.boundingClientWidth / 2),
         y: parseInt(node.y) - parseInt(node.height / 2),
-        width: node.width,
+        width: node.boundingClientWidth,
         height: node.height,
         cursor: cursor,
         lineWidth: lineWidth,
@@ -738,8 +739,6 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
         context = {
           x: parseInt(node.x),
           y: parseInt(node.y),
-          // x: parseInt(node.x) + parseInt(node.width / 2),
-          // y: parseInt(node.y) + parseInt(node.height / 2),
           cursor: cursor,
           innerRect: node._innerBound,
           lineWidth: lineWidth,
@@ -753,8 +752,6 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
       }
 
       ;
-
-      if (node.shapeType == 'underLine') {}
 
       var _boxShape = me.nodesSp.getChildById(nodeId);
 
@@ -829,7 +826,8 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
 
       _boxShape.on("transform", function () {
         if (node.ctype == "canvas") {
-          node.contentElement.context.x = parseInt(node.x);
+          debugger;
+          node.contentElement.context.x = parseInt(node.x - node.boundingClientWidth / 2);
           node.contentElement.context.y = parseInt(node.y);
         } else if (node.ctype == "html") {
           var devicePixelRatio = typeof window !== 'undefined' ? window.devicePixelRatio : 1;
@@ -1023,10 +1021,9 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
 
       if (this.rankdir == "LR" || this.rankdir == "RL") {
         var yDiff = parseInt(edge.source.shapeType == 'underLine' ? edge.source.height / 2 : 0);
-        var xDiff = parseInt(edge.source.shapeType == 'underLine' ? collapseIconWidth : 0);
         var dir = this.rankdir == "RL" ? -1 : 1;
         points[0] = {
-          x: parseInt(edge.source.x) + parseInt(dir * (edge.source.width / 2)) + dir * xDiff,
+          x: parseInt(edge.source.x) + parseInt(dir * (edge.source.rowData._node.boundingClientWidth / 2)),
           y: parseInt(edge.source.y) + yDiff
         };
         points.splice(1, 0, {
@@ -1126,14 +1123,8 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
       ;
 
       if (edge.target.shapeType == 'underLine') {
-        var x = parseInt(edge.target.x) + parseInt(edge.target.width / 2);
-        var childrenField = this.childrenField;
-
-        if (edge.target.rowData.__originData[childrenField] && edge.target.rowData.__originData[childrenField].length) {
-          x += collapseIconWidth;
-        }
-
-        ;
+        var w = edge.target.rowData._node.boundingClientWidth;
+        var x = parseInt(edge.target.x) + parseInt(w / 2);
         str += ",L" + x + " " + (parseInt(edge.target.y) + parseInt(edge.target.height / 2));
       }
 

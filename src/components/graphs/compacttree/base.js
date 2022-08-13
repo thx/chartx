@@ -12,9 +12,6 @@ let BrokenLine = Canvax.Shapes.BrokenLine;
 let Circle  = Canvax.Shapes.Circle;
 let Arrow   = Canvax.Shapes.Arrow;
 
- 
-let collapseIconWidth= 22;
-let typeIconWidth = 20;
 
 /**
  * 关系图中 包括了  配置，数据，和布局数据，
@@ -1036,9 +1033,9 @@ class RelationBase extends GraphsBase {
         let { lineWidth,fillStyle,strokeStyle,radius,shadowOffsetX,shadowOffsetY,shadowBlur,shadowColor } = me._getNodeStyle( node );   
 
         let context = {
-            x: parseInt(node.x) - parseInt(node.width / 2),
+            x: parseInt(node.x) - parseInt(node.boundingClientWidth / 2),
             y: parseInt(node.y) - parseInt(node.height / 2),
-            width: node.width,
+            width: node.boundingClientWidth,
             height: node.height,
             cursor,
             lineWidth,
@@ -1052,8 +1049,6 @@ class RelationBase extends GraphsBase {
             context = {
                 x: parseInt(node.x),
                 y: parseInt(node.y),
-                // x: parseInt(node.x) + parseInt(node.width / 2),
-                // y: parseInt(node.y) + parseInt(node.height / 2),
                 cursor,
                 innerRect : node._innerBound,
                 lineWidth,
@@ -1062,10 +1057,6 @@ class RelationBase extends GraphsBase {
                 shadowOffsetX,shadowOffsetY,shadowBlur,shadowColor
             }
         };
-        
-        if( node.shapeType == 'underLine' ){
-            
-        }
         
         let _boxShape = me.nodesSp.getChildById( nodeId );
         if( _boxShape ){
@@ -1127,7 +1118,8 @@ class RelationBase extends GraphsBase {
 
         _boxShape.on("transform", function() {
             if (node.ctype == "canvas") {
-                node.contentElement.context.x = parseInt(node.x);
+                debugger
+                node.contentElement.context.x = parseInt(node.x - node.boundingClientWidth/2);
                 node.contentElement.context.y = parseInt(node.y);
             } else if (node.ctype == "html") {
                 let devicePixelRatio = typeof (window) !== 'undefined' ? window.devicePixelRatio : 1;
@@ -1248,6 +1240,7 @@ class RelationBase extends GraphsBase {
     }
 
     _setTreePoints( edge ){
+
         let points = edge.points;
       
         if( this.rankdir == "TB" || this.rankdir == "BT" ){
@@ -1262,11 +1255,10 @@ class RelationBase extends GraphsBase {
         }
         if( this.rankdir == "LR" || this.rankdir == "RL" ){
             let yDiff = parseInt( edge.source.shapeType == 'underLine' ? edge.source.height/2 : 0 );
-            let xDiff = parseInt( edge.source.shapeType == 'underLine' ? collapseIconWidth : 0 );
             let dir = (this.rankdir == "RL"?-1:1);
 
             points[0] = {
-                x : parseInt( edge.source.x) + parseInt( dir*(edge.source.width/2) ) + dir*xDiff,
+                x : parseInt( edge.source.x) + parseInt( dir*( edge.source.rowData._node.boundingClientWidth/2) ),
                 y : parseInt( edge.source.y) + yDiff
             };
 
@@ -1364,12 +1356,9 @@ class RelationBase extends GraphsBase {
         };
 
         if(edge.target.shapeType == 'underLine'){
-            let x = parseInt(edge.target.x) + parseInt(edge.target.width / 2);
-            
-            let childrenField = this.childrenField;
-            if( edge.target.rowData.__originData[ childrenField ] && edge.target.rowData.__originData[ childrenField ].length){
-                x += collapseIconWidth
-            };
+    
+            let w = edge.target.rowData._node.boundingClientWidth;
+            let x = parseInt(edge.target.x) + parseInt(w / 2);
             str += ",L" + x + " " + ( parseInt(edge.target.y) + parseInt(edge.target.height / 2) );
         };
 

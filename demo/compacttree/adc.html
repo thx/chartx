@@ -34610,7 +34610,7 @@ var options = {
         type     : "compacttree",
         field    : "id",
         onclick: function(e){
-            alert('click')
+            //alert('click')
         },
         
         node : {
@@ -34695,6 +34695,22 @@ var options = {
                 openCharCode: 'e906',
                 closeCharCode: 'e907',
                 fontColor:"#667894"
+            },
+            preIcon: {
+                charCode: function(node){
+                    if( node.depth == 0 ){
+                        return 
+                    };
+                    return 'e906'
+                }
+            },
+            icons: {
+                charCode: function(node){
+                    if( node.depth == 0 ){
+                        return []
+                    };
+                    return ['e906','e907']
+                }
             }
         },
         line : {

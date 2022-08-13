@@ -39,8 +39,7 @@ var Circle = _canvax["default"].Shapes.Circle;
 var Rect = _canvax["default"].Shapes.Rect; //内部交互需要同步回源数据的属性， 树状图要实现文本的编辑，所以content也要加入进来
 
 var syncToOriginKeys = ['collapsed', 'style', 'content'];
-var collapseIconWidth = 22;
-var typeIconWidth = 20;
+var iconWidth = 22;
 /**
  * 关系图中 包括了  配置，数据，和布局数据，
  * 默认用配置和数据可以完成绘图， 但是如果有布局数据，就绘图玩额外调用一次绘图，把布局数据传入修正布局效果
@@ -83,17 +82,19 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
         _this2.induce.context.height = _this2.height;
         _this2.sprite.context.x = parseInt(_this2.origin.x);
         _this2.sprite.context.y = parseInt(_this2.origin.y); //test bound
-        // this._bound = new Rect({
-        //     context: {
-        //         x: this.data.extents.left,
-        //         y: this.data.extents.top,
-        //         width: this.data.size.width,
-        //         height: this.data.size.height,
-        //         lineWidth:1,
-        //         strokeStyle: 'red'
-        //     }
-        // });
-        // this.graphsSp.addChild( this._bound )
+
+        _this2._bound = new Rect({
+          context: {
+            x: _this2.data.extents.left,
+            y: _this2.data.extents.top,
+            width: _this2.data.size.width,
+            height: _this2.data.size.height,
+            lineWidth: 1,
+            strokeStyle: 'red'
+          }
+        });
+
+        _this2.graphsSp.addChild(_this2._bound);
 
         _this2.graphsSp.context.x = Math.max((_this2.width - _this2.data.size.width) / 2, _this2.app.padding.left);
         _this2.graphsSp.context.y = _this2.height / 2;
@@ -175,11 +176,13 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
         //{treeData, nodeLength}这里设置了这两个属性
 
         Object.assign(data, _this4._filterTreeData(data.treeOriginData));
+        console.log(data.nodesLength + '个节点构建树:', new Date().getTime() - t);
         var t1 = new Date().getTime();
 
         _this4._initAllDataSize(data).then(function () {
           //这个时候已经设置好了 treeData 的 size 属性width、height
           //可以开始布局了，布局完就可以设置好 data 的 nodes edges 和 size 属性
+          console.log(data.nodesLength + '个节点计算size:', new Date().getTime() - t1);
           resolve(data);
         });
       });
@@ -232,6 +235,8 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
         }); //不能放到assign中去，  getProp的处理中可能依赖node.rowData
 
         node.shapeType = _this5.getProp(_this5.node.shapeType, node);
+        node.preIconChartCode = _this5.getProp(_this5.node.preIcon.charCode, node);
+        node.iconChartCodes = _this5.getProp(_this5.node.icons.charCode, node) || [];
         nodes.push(node);
         treeData._node = node;
 
@@ -446,10 +451,23 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
           var width = node.data._node.width || 0;
 
           if (node.data[childrenField] && node.data[childrenField].length) {
-            width += collapseIconWidth;
+            width += iconWidth;
           }
 
           ;
+
+          if (node.data._node.preIconChartCode) {
+            width += iconWidth;
+          }
+
+          ;
+
+          if (node.data._node.iconChartCodes && node.data._node.iconChartCodes.length) {
+            width += iconWidth * node.data._node.iconChartCodes.length;
+          }
+
+          ;
+          node.data._node.boundingClientWidth = width;
 
           if (layoutIsHorizontal) {
             return [height, width + spaceY];
@@ -482,11 +500,11 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
 
         ;
         left = Math.min(left, node.x);
-        right = Math.max(right, node.x + node.data._node.width);
+        right = Math.max(right, node.x + node.data._node.boundingClientWidth);
         top = Math.min(top, node.y);
         bottom = Math.max(bottom, node.y + node.data._node.height + spaceY); //node的x y 都是矩形的中心点
 
-        node.data._node.x = node.x + node.data._node.width / 2;
+        node.data._node.x = node.x + node.data._node.boundingClientWidth / 2;
         node.data._node.y = node.y + node.data._node.height / 2;
         node.data._node.depth = node.depth;
       });
@@ -497,6 +515,7 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
       data.edges.forEach(function (edge) {
         _this10.getEdgePoints(edge);
       });
+      console.log(data.nodesLength + '个节点计算layout:', new Date().getTime() - t1);
       Object.assign(data, {
         size: {
           width: width,
@@ -528,7 +547,7 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
       points.push(firstPoint); //lastPoint
 
       var lastPoint = {
-        x: parseInt(edge.target.x) - parseInt(edge.target.width / 2),
+        x: parseInt(edge.target.x) - parseInt(edge.target.boundingClientWidth / 2),
         y: parseInt(edge.target.y)
       };
 
@@ -557,10 +576,11 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
 
 
           if (_this11.node.collapse.enabled) {
+            var key = node.rowData[_this11.field];
+            var iconId = key + "_collapse_icon";
+            var iconBackId = key + "_collapse_icon_back";
+
             if (node.rowData[_this11.childrenField] && node.rowData.__originData[_this11.childrenField] && node.rowData.__originData[_this11.childrenField].length) {
-              var key = node.rowData[_this11.field];
-              var iconId = key + "_collapse_icon";
-              var iconBackId = key + "_collapse_icon_back";
               var charCode = _this11.node.collapse.openCharCode;
 
               if (!node.rowData.collapsed) {
@@ -678,6 +698,14 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
               _collapseIcon.nodeData = node;
               node.collapseIcon = _collapseIcon;
               node.collapseIconBack = _collapseIconBack;
+            } else {
+              var _collapseIcon2 = _this11.labelsSp.getChildById(iconId);
+
+              if (_collapseIcon2) _collapseIcon2.destroy();
+
+              var _collapseIconBack2 = _this11.labelsSp.getChildById(iconBackId);
+
+              if (_collapseIconBack2) _collapseIconBack2.destroy();
             }
           }
         };
@@ -856,6 +884,15 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
         node: {
           detail: '单个节点的配置',
           propertys: {
+            content: {
+              detail: ' 内容配置',
+              propertys: {
+                textAlign: {
+                  detail: '左右对齐方式',
+                  "default": 'left'
+                }
+              }
+            },
             collapse: {
               detail: '树状图是否有节点收缩按钮',
               propertys: {
@@ -914,6 +951,72 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
                 strokeStyle: {
                   detail: '描边颜色',
                   "default": '#667894'
+                }
+              }
+            },
+            preIcon: {
+              detail: '内容前面的一个icon，主要用来描这个node的类型',
+              propertys: {
+                charCode: {
+                  detail: "icon的iconfont字符串",
+                  "default": ''
+                },
+                fontSize: {
+                  detail: "icon字号大小",
+                  "default": 12
+                },
+                fontColor: {
+                  detail: "icon字体颜色",
+                  "default": '#666'
+                },
+                fontFamily: {
+                  detail: "icon在css中的fontFamily",
+                  "default": 'iconfont'
+                },
+                tipsContent: {
+                  detail: '鼠标移动到收缩icon上面的tips内容',
+                  "default": ''
+                },
+                offsetX: {
+                  detail: 'x方向偏移量',
+                  "default": 10
+                },
+                offsetY: {
+                  detail: 'y方向偏移量',
+                  "default": 1
+                }
+              }
+            },
+            icons: {
+              detail: '内容后面的一组icon，是个数组， 支持函数返回一组icon，单个icon的格式和preIcon保持一致',
+              propertys: {
+                charCode: {
+                  detail: "icon的iconfont字符串",
+                  "default": []
+                },
+                fontSize: {
+                  detail: "icon字号大小",
+                  "default": 12
+                },
+                fontColor: {
+                  detail: "icon字体颜色",
+                  "default": '#666'
+                },
+                fontFamily: {
+                  detail: "icon在css中的fontFamily",
+                  "default": 'iconfont'
+                },
+                tipsContent: {
+                  detail: '鼠标移动到收缩icon上面的tips内容',
+                  "default": ''
+                },
+                offsetX: {
+                  detail: 'x方向偏移量',
+                  "default": 10
+                },
+                offsetY: {
+                  detail: 'y方向偏移量',
+                  "default": 1
                 }
               }
             }

@@ -11,8 +11,7 @@ let Rect    = Canvax.Shapes.Rect;
 
 //内部交互需要同步回源数据的属性， 树状图要实现文本的编辑，所以content也要加入进来
 let syncToOriginKeys = ['collapsed', 'style', 'content'];
-let collapseIconWidth= 22;
-let typeIconWidth = 20;
+let iconWidth= 22;
 
  
 /**
@@ -52,6 +51,15 @@ class compactTree extends GraphsBase {
             node: {
                 detail: '单个节点的配置',
                 propertys: {
+                    content: {
+                        detail:' 内容配置',
+                        propertys: {
+                            textAlign: {
+                                detail: '左右对齐方式',
+                                default: 'left'
+                            }
+                        }
+                    },
                     collapse: {
                         detail: '树状图是否有节点收缩按钮',
                         propertys: {
@@ -110,6 +118,72 @@ class compactTree extends GraphsBase {
                             strokeStyle: {
                                 detail: '描边颜色',
                                 default: '#667894'
+                            }
+                        }
+                    },
+                    preIcon: {
+                        detail: '内容前面的一个icon，主要用来描这个node的类型',
+                        propertys: {
+                            charCode: {
+                                detail: "icon的iconfont字符串",
+                                default: ''
+                            },
+                            fontSize: {
+                                detail: "icon字号大小",
+                                default: 12
+                            },
+                            fontColor: {
+                                detail: "icon字体颜色",
+                                default: '#666'
+                            },
+                            fontFamily: {
+                                detail: "icon在css中的fontFamily",
+                                default: 'iconfont'
+                            },
+                            tipsContent: {
+                                detail: '鼠标移动到收缩icon上面的tips内容',
+                                default: ''
+                            },
+                            offsetX: {
+                                detail: 'x方向偏移量',
+                                default: 10
+                            },
+                            offsetY: {
+                                detail: 'y方向偏移量',
+                                default: 1
+                            }
+                        }
+                    },
+                    icons: {
+                        detail: '内容后面的一组icon，是个数组， 支持函数返回一组icon，单个icon的格式和preIcon保持一致',
+                        propertys: {
+                            charCode: {
+                                detail: "icon的iconfont字符串",
+                                default: []
+                            },
+                            fontSize: {
+                                detail: "icon字号大小",
+                                default: 12
+                            },
+                            fontColor: {
+                                detail: "icon字体颜色",
+                                default: '#666'
+                            },
+                            fontFamily: {
+                                detail: "icon在css中的fontFamily",
+                                default: 'iconfont'
+                            },
+                            tipsContent: {
+                                detail: '鼠标移动到收缩icon上面的tips内容',
+                                default: ''
+                            },
+                            offsetX: {
+                                detail: 'x方向偏移量',
+                                default: 10
+                            },
+                            offsetY: {
+                                detail: 'y方向偏移量',
+                                default: 1
                             }
                         }
                     }
@@ -176,17 +250,17 @@ class compactTree extends GraphsBase {
             this.sprite.context.y = parseInt(this.origin.y);
 
             //test bound
-            // this._bound = new Rect({
-            //     context: {
-            //         x: this.data.extents.left,
-            //         y: this.data.extents.top,
-            //         width: this.data.size.width,
-            //         height: this.data.size.height,
-            //         lineWidth:1,
-            //         strokeStyle: 'red'
-            //     }
-            // });
-            // this.graphsSp.addChild( this._bound )
+            this._bound = new Rect({
+                context: {
+                    x: this.data.extents.left,
+                    y: this.data.extents.top,
+                    width: this.data.size.width,
+                    height: this.data.size.height,
+                    lineWidth:1,
+                    strokeStyle: 'red'
+                }
+            });
+            this.graphsSp.addChild( this._bound )
 
 
             this.graphsSp.context.x = Math.max( (this.width - this.data.size.width)/2, this.app.padding.left );
@@ -324,10 +398,13 @@ class compactTree extends GraphsBase {
             } );
             //不能放到assign中去，  getProp的处理中可能依赖node.rowData
             node.shapeType = this.getProp( this.node.shapeType, node );
+
+            node.preIconChartCode = this.getProp( this.node.preIcon.charCode, node );
+            node.iconChartCodes   = this.getProp( this.node.icons.charCode, node ) || [];
+
             nodes.push(node);
    
             treeData._node = node;
-
 
             if( !treeData[ collapsedField ] ){
                 //如果这个节点未折叠
@@ -376,6 +453,7 @@ class compactTree extends GraphsBase {
         return {treeData, nodesLength, nodes, edges};
         
     }
+
 
     //所有对nodeData原始数据的改变都需要同步到原数据, 比如 collapsed 折叠状态, 还有动态计算出来的width 和 height
     _syncToOrigin( treeData ){
@@ -511,12 +589,22 @@ class compactTree extends GraphsBase {
             spacing: spaceX ,
             nodeSize: node => {
                 //计算的尺寸已经node的数据为准， 不取treeData的
-                let height = node.data._node.height || 0; 
+                let height = node.data._node.height || 0;
                 let width = node.data._node.width || 0;
                 
                 if( node.data[ childrenField ] && node.data[ childrenField ].length ){
-                    width += collapseIconWidth
+                    width += iconWidth
                 };
+
+                if( node.data._node.preIconChartCode ){
+                    width += iconWidth
+                };
+        
+                if( node.data._node.iconChartCodes && node.data._node.iconChartCodes.length ){
+                    width += iconWidth * node.data._node.iconChartCodes.length
+                };
+
+                node.data._node.boundingClientWidth = width;
 
                 if( layoutIsHorizontal ){
                     return [ height, width+spaceY ]
@@ -542,12 +630,12 @@ class compactTree extends GraphsBase {
             };
 
             left = Math.min( left, node.x );
-            right = Math.max( right, node.x + node.data._node.width );
+            right = Math.max( right, node.x + node.data._node.boundingClientWidth );
             top = Math.min( top, node.y );
             bottom = Math.max( bottom, node.y + node.data._node.height+ spaceY );
          
             //node的x y 都是矩形的中心点
-            node.data._node.x = node.x + node.data._node.width/2;
+            node.data._node.x = node.x + node.data._node.boundingClientWidth/2;
             node.data._node.y = node.y + node.data._node.height/2;
             node.data._node.depth = node.depth;
 
@@ -590,7 +678,7 @@ class compactTree extends GraphsBase {
 
         //lastPoint
         let lastPoint = {
-            x: parseInt(edge.target.x) - parseInt(edge.target.width/2),
+            x: parseInt(edge.target.x) - parseInt(edge.target.boundingClientWidth/2),
             y: parseInt(edge.target.y)
         }
         if( edge.target.shapeType == 'underLine' ){
@@ -618,11 +706,12 @@ class compactTree extends GraphsBase {
                 //处理一些tree 相对 relation 特有的逻辑
                 //collapse
                 if( this.node.collapse.enabled ){
+                    let key = node.rowData[this.field];
+                    let iconId     = key+"_collapse_icon";
+                    let iconBackId = key+"_collapse_icon_back";
+
                     if( node.rowData[ this.childrenField ] && node.rowData.__originData[ this.childrenField ] && node.rowData.__originData[ this.childrenField ].length ){
-                        let key = node.rowData[this.field];
-                        let iconId     = key+"_collapse_icon";
-                        let iconBackId = key+"_collapse_icon_back";
-    
+                        
                         let charCode   = this.node.collapse.openCharCode;
                         if( !node.rowData.collapsed ){
                             charCode   = this.node.collapse.closeCharCode;
@@ -637,8 +726,8 @@ class compactTree extends GraphsBase {
                         let tipsContent= this.getProp( this.node.collapse.tipsContent , node);
     
                         let background = this.getProp( this.node.collapse.background  , node);
-                        let lineWidth  = this.getProp( this.node.collapse.lineWidth  , node);
-                        let strokeStyle= this.getProp( this.node.collapse.strokeStyle  , node);
+                        let lineWidth  = this.getProp( this.node.collapse.lineWidth   , node);
+                        let strokeStyle= this.getProp( this.node.collapse.strokeStyle , node);
                         
                         let _collapseIcon= this.labelsSp.getChildById( iconId );
                         let _collapseIconBack = this.labelsSp.getChildById( iconBackId );
@@ -728,6 +817,12 @@ class compactTree extends GraphsBase {
                         node.collapseIcon = _collapseIcon;
                         node.collapseIconBack = _collapseIconBack;
     
+                    } else {
+                        let _collapseIcon = this.labelsSp.getChildById(iconId);
+                        if( _collapseIcon ) _collapseIcon.destroy();
+
+                        let _collapseIconBack = this.labelsSp.getChildById(iconBackId);
+                        if( _collapseIconBack ) _collapseIconBack.destroy();
                     }
                     
                 }
