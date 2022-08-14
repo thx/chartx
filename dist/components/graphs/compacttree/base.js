@@ -303,6 +303,7 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
       this._preData = this.data;
       return new Promise(function (resolve) {
         _this2.initData(data, dataTrigger).then(function (_data) {
+          debugger;
           _this2.data = _data;
 
           _this2.layoutData();
@@ -826,8 +827,7 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
 
       _boxShape.on("transform", function () {
         if (node.ctype == "canvas") {
-          debugger;
-          node.contentElement.context.x = parseInt(node.x - node.boundingClientWidth / 2);
+          node.contentElement.context.x = parseInt(node.x - node.boundingClientWidth / 2 + me.node.padding);
           node.contentElement.context.y = parseInt(node.y);
         } else if (node.ctype == "html") {
           var devicePixelRatio = typeof window !== 'undefined' ? window.devicePixelRatio : 1;
@@ -839,6 +839,7 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
           node.contentElement.style.transformOrigin = "left top"; //修改为左上角为旋转中心点来和canvas同步
 
           if (node.shapeType == 'diamond') {
+            //菱形的位置
             node.contentElement.style.left = -parseInt((node.width - node._innerBound.width) / 2 * me.status.transform.scale) + "px";
             node.contentElement.style.top = -parseInt((node.height - node._innerBound.height) / 2 * me.status.transform.scale) + "px";
           }

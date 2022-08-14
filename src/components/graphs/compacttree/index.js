@@ -101,11 +101,11 @@ class compactTree extends GraphsBase {
                             },
                             offsetX: {
                                 detail: 'x方向偏移量',
-                                default: 10
+                                default: 0
                             },
                             offsetY: {
                                 detail: 'y方向偏移量',
-                                default: 1
+                                default: 0
                             },
                             background: {
                                 detail: 'icon的 背景色',
@@ -179,11 +179,11 @@ class compactTree extends GraphsBase {
                             },
                             offsetX: {
                                 detail: 'x方向偏移量',
-                                default: 10
+                                default: 0
                             },
                             offsetY: {
                                 detail: 'y方向偏移量',
-                                default: 1
+                                default: 0
                             }
                         }
                     }
@@ -616,6 +616,7 @@ class compactTree extends GraphsBase {
         });
         
         const _tree = layout.hierarchy( data.treeData );
+        debugger
         const _layout = layout(_tree);
 
         let left=0,top=0,right=0,bottom=0;
@@ -732,7 +733,7 @@ class compactTree extends GraphsBase {
                         let _collapseIcon= this.labelsSp.getChildById( iconId );
                         let _collapseIconBack = this.labelsSp.getChildById( iconBackId );
     
-                        let x = parseInt(node.x+node.width/2+offsetX);
+                        let x = parseInt(node.x+node.boundingClientWidth/2+offsetX-this.node.padding-fontSize/2);
                         let y = parseInt(node.y+offsetY);
                         //collapseIcon的 位置默认为左右方向的xy
                         let collapseCtx = {
@@ -746,10 +747,11 @@ class compactTree extends GraphsBase {
                             cursor: 'pointer'
                         };
     
+                        let r = parseInt(fontSize*0.5) + 2;
                         let _collapseBackCtx = {
-                            x : x,
+                            x : x ,
                             y : y,
-                            r : parseInt(fontSize*0.5) + 2,
+                            r,
                             fillStyle : background,
                             strokeStyle,
                             lineWidth

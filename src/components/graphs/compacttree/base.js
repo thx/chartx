@@ -673,7 +673,7 @@ class RelationBase extends GraphsBase {
         return new Promise( resolve => {
 
             this.initData( data, dataTrigger ).then( _data => {
-
+debugger
                 this.data = _data;
             
                 this.layoutData();
@@ -1118,8 +1118,7 @@ class RelationBase extends GraphsBase {
 
         _boxShape.on("transform", function() {
             if (node.ctype == "canvas") {
-                debugger
-                node.contentElement.context.x = parseInt(node.x - node.boundingClientWidth/2);
+                node.contentElement.context.x = parseInt(node.x - node.boundingClientWidth/2 + me.node.padding);
                 node.contentElement.context.y = parseInt(node.y);
             } else if (node.ctype == "html") {
                 let devicePixelRatio = typeof (window) !== 'undefined' ? window.devicePixelRatio : 1;
@@ -1129,6 +1128,7 @@ class RelationBase extends GraphsBase {
                 node.contentElement.style.transform = "matrix(" + contentMatrix.toArray().join() + ")";
                 node.contentElement.style.transformOrigin = "left top"; //修改为左上角为旋转中心点来和canvas同步
                 if( node.shapeType == 'diamond' ){
+                    //菱形的位置
                     node.contentElement.style.left = -parseInt(( (node.width-node._innerBound.width)/2) * me.status.transform.scale) + "px";
                     node.contentElement.style.top = -parseInt(( (node.height-node._innerBound.height)/2) * me.status.transform.scale) + "px";
                 };

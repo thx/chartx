@@ -482,6 +482,8 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
 
       var _tree = layout.hierarchy(data.treeData);
 
+      debugger;
+
       var _layout = layout(_tree);
 
       var left = 0,
@@ -612,7 +614,7 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
 
               var _collapseIconBack = _this11.labelsSp.getChildById(iconBackId);
 
-              var x = parseInt(node.x + node.width / 2 + offsetX);
+              var x = parseInt(node.x + node.boundingClientWidth / 2 + offsetX - _this11.node.padding - fontSize / 2);
               var y = parseInt(node.y + offsetY); //collapseIcon的 位置默认为左右方向的xy
 
               var collapseCtx = {
@@ -625,10 +627,11 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
                 textBaseline: "middle",
                 cursor: 'pointer'
               };
+              var r = parseInt(fontSize * 0.5) + 2;
               var _collapseBackCtx = {
                 x: x,
                 y: y,
-                r: parseInt(fontSize * 0.5) + 2,
+                r: r,
                 fillStyle: background,
                 strokeStyle: strokeStyle,
                 lineWidth: lineWidth
@@ -934,11 +937,11 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
                 },
                 offsetX: {
                   detail: 'x方向偏移量',
-                  "default": 10
+                  "default": 0
                 },
                 offsetY: {
                   detail: 'y方向偏移量',
-                  "default": 1
+                  "default": 0
                 },
                 background: {
                   detail: 'icon的 背景色',
@@ -1012,11 +1015,11 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
                 },
                 offsetX: {
                   detail: 'x方向偏移量',
-                  "default": 10
+                  "default": 0
                 },
                 offsetY: {
                   detail: 'y方向偏移量',
-                  "default": 1
+                  "default": 0
                 }
               }
             }

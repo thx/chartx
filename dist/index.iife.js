@@ -8648,7 +8648,7 @@ var chartx = (function () {
 
 	var setPrototypeOf$1 = createCommonjsModule(function (module) {
 	function _setPrototypeOf(o, p) {
-	  module.exports = _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) {
+	  module.exports = _setPrototypeOf = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf(o, p) {
 	    o.__proto__ = p;
 	    return o;
 	  }, module.exports.__esModule = true, module.exports["default"] = module.exports;
@@ -8736,7 +8736,7 @@ var chartx = (function () {
 
 	var getPrototypeOf$1 = createCommonjsModule(function (module) {
 	function _getPrototypeOf(o) {
-	  module.exports = _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) {
+	  module.exports = _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf(o) {
 	    return o.__proto__ || Object.getPrototypeOf(o);
 	  }, module.exports.__esModule = true, module.exports["default"] = module.exports;
 	  return _getPrototypeOf(o);
@@ -47712,6 +47712,7 @@ var chartx = (function () {
 	      this._preData = this.data;
 	      return new Promise(function (resolve) {
 	        _this2.initData(data, dataTrigger).then(function (_data) {
+	          debugger;
 	          _this2.data = _data;
 
 	          _this2.layoutData();
@@ -48193,8 +48194,7 @@ var chartx = (function () {
 
 	      _boxShape.on("transform", function () {
 	        if (node.ctype == "canvas") {
-	          debugger;
-	          node.contentElement.context.x = parseInt(node.x - node.boundingClientWidth / 2);
+	          node.contentElement.context.x = parseInt(node.x - node.boundingClientWidth / 2 + me.node.padding);
 	          node.contentElement.context.y = parseInt(node.y);
 	        } else if (node.ctype == "html") {
 	          var devicePixelRatio = typeof window !== 'undefined' ? window.devicePixelRatio : 1;
@@ -48206,6 +48206,7 @@ var chartx = (function () {
 	          node.contentElement.style.transformOrigin = "left top"; //修改为左上角为旋转中心点来和canvas同步
 
 	          if (node.shapeType == 'diamond') {
+	            //菱形的位置
 	            node.contentElement.style.left = -parseInt((node.width - node._innerBound.width) / 2 * me.status.transform.scale) + "px";
 	            node.contentElement.style.top = -parseInt((node.height - node._innerBound.height) / 2 * me.status.transform.scale) + "px";
 	          }
@@ -49583,33 +49584,30 @@ var chartx = (function () {
 	  };
 	}
 
-	function place(b, a, c) {
-	  var dx = b.x - a.x, x, a2,
-	      dy = b.y - a.y, y, b2,
-	      d2 = dx * dx + dy * dy;
-	  if (d2) {
-	    a2 = a.r + c.r, a2 *= a2;
-	    b2 = b.r + c.r, b2 *= b2;
-	    if (a2 > b2) {
-	      x = (d2 + b2 - a2) / (2 * d2);
-	      y = Math.sqrt(Math.max(0, b2 / d2 - x * x));
-	      c.x = b.x - x * dx - y * dy;
-	      c.y = b.y - x * dy + y * dx;
-	    } else {
-	      x = (d2 + a2 - b2) / (2 * d2);
-	      y = Math.sqrt(Math.max(0, a2 / d2 - x * x));
-	      c.x = a.x + x * dx - y * dy;
-	      c.y = a.y + x * dy + y * dx;
-	    }
+	function place(a, b, c) {
+	  var ax = a.x,
+	      ay = a.y,
+	      da = b.r + c.r,
+	      db = a.r + c.r,
+	      dx = b.x - ax,
+	      dy = b.y - ay,
+	      dc = dx * dx + dy * dy;
+	  if (dc) {
+	    var x = 0.5 + ((db *= db) - (da *= da)) / (2 * dc),
+	        y = Math.sqrt(Math.max(0, 2 * da * (db + dc) - (db -= dc) * db - da * da)) / (2 * dc);
+	    c.x = ax + x * dx + y * dy;
+	    c.y = ay + x * dy - y * dx;
 	  } else {
-	    c.x = a.x + c.r;
-	    c.y = a.y;
+	    c.x = ax + db;
+	    c.y = ay;
 	  }
 	}
 
 	function intersects(a, b) {
-	  var dr = a.r + b.r - 1e-6, dx = b.x - a.x, dy = b.y - a.y;
-	  return dr > 0 && dr * dr > dx * dx + dy * dy;
+	  var dx = b.x - a.x,
+	      dy = b.y - a.y,
+	      dr = a.r + b.r;
+	  return dr * dr - 1e-6 > dx * dx + dy * dy;
 	}
 
 	function score(node) {
@@ -50425,7 +50423,7 @@ var chartx = (function () {
 
 
 
-	var src = /*#__PURE__*/Object.freeze({
+	var d3Hierarchy = /*#__PURE__*/Object.freeze({
 		__proto__: null,
 		cluster: cluster,
 		hierarchy: hierarchy$1,
@@ -50635,7 +50633,7 @@ var chartx = (function () {
 	        }
 	      }]);
 	      return FlexNode;
-	    }(src.hierarchy.prototype.constructor);
+	    }(d3Hierarchy.hierarchy.prototype.constructor);
 	  }
 
 	  function getWrapper() {
@@ -51438,6 +51436,8 @@ var chartx = (function () {
 
 	      var _tree = layout.hierarchy(data.treeData);
 
+	      debugger;
+
 	      var _layout = layout(_tree);
 
 	      var left = 0,
@@ -51564,7 +51564,7 @@ var chartx = (function () {
 
 	              var _collapseIconBack = _this11.labelsSp.getChildById(iconBackId);
 
-	              var x = parseInt(node.x + node.width / 2 + offsetX);
+	              var x = parseInt(node.x + node.boundingClientWidth / 2 + offsetX - _this11.node.padding - fontSize / 2);
 	              var y = parseInt(node.y + offsetY); //collapseIcon的 位置默认为左右方向的xy
 
 	              var collapseCtx = {
@@ -51577,10 +51577,11 @@ var chartx = (function () {
 	                textBaseline: "middle",
 	                cursor: 'pointer'
 	              };
+	              var r = parseInt(fontSize * 0.5) + 2;
 	              var _collapseBackCtx = {
 	                x: x,
 	                y: y,
-	                r: parseInt(fontSize * 0.5) + 2,
+	                r: r,
 	                fillStyle: background,
 	                strokeStyle: strokeStyle,
 	                lineWidth: lineWidth
@@ -51868,11 +51869,11 @@ var chartx = (function () {
 	                },
 	                offsetX: {
 	                  detail: 'x方向偏移量',
-	                  "default": 10
+	                  "default": 0
 	                },
 	                offsetY: {
 	                  detail: 'y方向偏移量',
-	                  "default": 1
+	                  "default": 0
 	                },
 	                background: {
 	                  detail: 'icon的 背景色',
@@ -51946,11 +51947,11 @@ var chartx = (function () {
 	                },
 	                offsetX: {
 	                  detail: 'x方向偏移量',
-	                  "default": 10
+	                  "default": 0
 	                },
 	                offsetY: {
 	                  detail: 'y方向偏移量',
-	                  "default": 1
+	                  "default": 0
 	                }
 	              }
 	            }
@@ -53279,7 +53280,7 @@ var chartx = (function () {
 
 
 
-	var src$1 = /*#__PURE__*/Object.freeze({
+	var src = /*#__PURE__*/Object.freeze({
 		__proto__: null,
 		forceCenter: center,
 		forceCollide: collide,
@@ -53318,7 +53319,7 @@ var chartx = (function () {
 
 	var _index = interopRequireDefault(graphs);
 
-	var force = _interopRequireWildcard(src$1);
+	var force = _interopRequireWildcard(src);
 
 
 
