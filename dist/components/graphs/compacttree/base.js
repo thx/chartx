@@ -131,6 +131,8 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
         //外面传的layout数据可能没有element，widget的时候要检测下
         width: null,
         height: null,
+        boundingClientWidth: 0,
+        //通过width，然后看有多少icon，计算出来用于layout计算的width
         //这个在layout的时候设置
         x: null,
         y: null,
@@ -150,20 +152,20 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
         //需要换算成外接矩形的尺寸
         var includedAngle = this.node.includedAngle / 2;
         var includeRad = includedAngle * Math.PI / 180;
-        var width = node.width,
+        var boundingClientWidth = node.boundingClientWidth,
             height = node.height;
         node._innerBound = {
-          width: width,
+          width: boundingClientWidth,
           height: height
         };
         var newWidthDiff = height / Math.tan(includeRad);
-        var newHeightDiff = width * Math.tan(includeRad); //在内接矩形基础上扩展出来的外界矩形
+        var newHeightDiff = boundingClientWidth * Math.tan(includeRad); //在内接矩形基础上扩展出来的外界矩形
 
-        var newWidth = width + newWidthDiff;
+        var newWidth = boundingClientWidth + newWidthDiff;
         var newHeight = height + newHeightDiff; //node上面记录的width 和 height 永远是内容的 高宽, 但是像 diamond 等， 布局的时候的bound是要计算一个新的
         //布局的时候， 布局算法要优先取 layoutWidth  和  layoutHeight
 
-        node.width = newWidth;
+        node.boundingClientWidth = newWidth;
         node.height = newHeight;
       }
 
@@ -303,7 +305,6 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
       this._preData = this.data;
       return new Promise(function (resolve) {
         _this2.initData(data, dataTrigger).then(function (_data) {
-          debugger;
           _this2.data = _data;
 
           _this2.layoutData();
@@ -388,17 +389,10 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
 
       _.each(this.data.edges, function (edge) {
         console.log(edge.points);
-        var key = edge.key.join('_');
-
-        if ((me.line.isTree || edge.isTree) && edge.points.length == 3) {
-          //严格树状图的话（三个点），就转化成4个点的，有两个拐点
-          me._setTreePoints(edge);
-        }
-
-        ;
 
         var lineShapeOpt = me._getLineShape(edge, me.line.inflectionRadius);
 
+        var key = edge.key.join('_');
         var type = lineShapeOpt.type;
         var path = lineShapeOpt.path;
         var pointList = lineShapeOpt.pointList;
@@ -840,7 +834,7 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
 
           if (node.shapeType == 'diamond') {
             //菱形的位置
-            node.contentElement.style.left = -parseInt((node.width - node._innerBound.width) / 2 * me.status.transform.scale) + "px";
+            node.contentElement.style.left = -parseInt((node.boundingClientWidth - node._innerBound.width) / 2 * me.status.transform.scale) + "px";
             node.contentElement.style.top = -parseInt((node.height - node._innerBound.height) / 2 * me.status.transform.scale) + "px";
           }
 
@@ -1004,37 +998,6 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
 
       ;
     }
-  }, {
-    key: "_setTreePoints",
-    value: function _setTreePoints(edge) {
-      var points = edge.points;
-
-      if (this.rankdir == "TB" || this.rankdir == "BT") {
-        points[0] = {
-          x: edge.source.x,
-          y: edge.source.y + (this.rankdir == "BT" ? -1 : 1) * edge.source.height / 2
-        };
-        points.splice(1, 0, {
-          x: edge.source.x,
-          y: points.slice(-2, -1)[0].y
-        });
-      }
-
-      if (this.rankdir == "LR" || this.rankdir == "RL") {
-        var yDiff = parseInt(edge.source.shapeType == 'underLine' ? edge.source.height / 2 : 0);
-        var dir = this.rankdir == "RL" ? -1 : 1;
-        points[0] = {
-          x: parseInt(edge.source.x) + parseInt(dir * (edge.source.rowData._node.boundingClientWidth / 2)),
-          y: parseInt(edge.source.y) + yDiff
-        };
-        points.splice(1, 0, {
-          x: points.slice(-2, -1)[0].x,
-          y: parseInt(edge.source.y) + yDiff
-        });
-      }
-
-      edge.points = points;
-    }
     /**
      * 
      * @param {shapeType,points} edge 
@@ -1051,17 +1014,19 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
         pointList: null,
         path: str
       };
-      var head = points[0];
-      var tail = points.slice(-1)[0];
+      var head = points.splice(0, 1)[0];
       var str = "M" + head.x + " " + head.y;
+      var start = points[0];
+      str += ",L" + start.x + " " + start.y;
+      var end = points.slice(-1)[0];
 
       if (edge.shapeType == "bezier") {
         if (points.length == 3) {
-          str += ",Q" + points[1].x + " " + points[1].y + " " + tail.x + " " + tail.y;
+          str += ",Q" + points[1].x + " " + points[1].y + " " + end.x + " " + end.y;
         }
 
         if (points.length == 4) {
-          str += ",C" + points[1].x + " " + points[1].y + " " + points[2].x + " " + points[2].y + " " + tail.x + " " + tail.y;
+          str += ",C" + points[1].x + " " + points[1].y + " " + points[2].x + " " + points[2].y + " " + end.x + " " + end.y;
         }
 
         if (points.length >= 5) {
@@ -1076,6 +1041,13 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
       ;
 
       if (edge.shapeType == "brokenLine") {
+        if (points.length == 3) {
+          points.splice(1, 0, {
+            x: points[1].x,
+            y: start.y
+          });
+        }
+
         _.each(points, function (point, i) {
           if (i) {
             if (inflectionRadius && i < points.length - 1) {

@@ -42,7 +42,7 @@ class compactTree extends GraphsBase {
             },
             ranksep:{
                 detail : '排与排之间的距离',
-                default: 60
+                default: 40
             },
             nodesep:{
                 detail : '同级node之间的距离',
@@ -232,7 +232,7 @@ class compactTree extends GraphsBase {
     }
 
     draw( opt ) {
-    
+        
         !opt && (opt = {});
         _.extend(true, this, opt);
 
@@ -250,17 +250,17 @@ class compactTree extends GraphsBase {
             this.sprite.context.y = parseInt(this.origin.y);
 
             //test bound
-            this._bound = new Rect({
-                context: {
-                    x: this.data.extents.left,
-                    y: this.data.extents.top,
-                    width: this.data.size.width,
-                    height: this.data.size.height,
-                    lineWidth:1,
-                    strokeStyle: 'red'
-                }
-            });
-            this.graphsSp.addChild( this._bound )
+            // this._bound = new Rect({
+            //     context: {
+            //         x: this.data.extents.left,
+            //         y: this.data.extents.top,
+            //         width: this.data.size.width,
+            //         height: this.data.size.height,
+            //         lineWidth:1,
+            //         strokeStyle: 'red'
+            //     }
+            // });
+            // this.graphsSp.addChild( this._bound )
 
 
             this.graphsSp.context.x = Math.max( (this.width - this.data.size.width)/2, this.app.padding.left );
@@ -480,6 +480,11 @@ class compactTree extends GraphsBase {
             this._eachTreeDataHandle( treeData, ( treeDataItem )=>{
                 //计算和设置node的尺寸
                 this._setSize( treeDataItem ).then( () => {
+                    
+                    this._setNodeBoundingClientWidth( treeDataItem ); 
+                    // 重新校验一下size， 比如菱形的 外界矩形是不一样的
+                    this.checkNodeSizeForShapeType( treeDataItem._node );   
+
                     initNum ++
                     if( initNum == nodesLength ){
                         //全部处理完毕了
@@ -489,6 +494,28 @@ class compactTree extends GraphsBase {
             } )
         });
 
+    }
+
+    _setNodeBoundingClientWidth( treeData ){
+        let node = treeData._node;
+
+        let boundingClientWidth = node.width || 0;
+        
+        if( node.shapeType != 'diamond' && node.depth ){
+            if( treeData.__originData[ this.childrenField ] && treeData.__originData[ this.childrenField ].length ){
+                boundingClientWidth += iconWidth
+            };
+        }
+
+        if( node.preIconChartCode ){
+            boundingClientWidth += iconWidth
+        };
+
+        if( node.iconChartCodes && node.iconChartCodes.length ){
+            boundingClientWidth += iconWidth * node.iconChartCodes.length
+        };
+
+        node.boundingClientWidth = boundingClientWidth;
     }
 
     _setSize( treeData ) {
@@ -509,8 +536,6 @@ class compactTree extends GraphsBase {
                 };
                 // opt -> contentElement,width,height 
                 _.extend(node, sizeOpt);
-                // 重新校验一下size， 比如菱形的 外界矩形是不一样的
-                this.checkNodeSizeForShapeType( node );
 
                 resolve( sizeOpt )
                 
@@ -519,6 +544,7 @@ class compactTree extends GraphsBase {
 
             //如果配置中没有设置size并且treedata中没有记录size，那么就只能初始化了cotnent来动态计算
             this._initcontentElementAndSize( treeData ).then( sizeOpt => {
+                _.extend(node, sizeOpt);
                 resolve( sizeOpt )
             } );
             
@@ -549,7 +575,7 @@ class compactTree extends GraphsBase {
             };
 
             _initEle.apply( this, [node] ).then( sizeOpt  => {
-                // opt -> contentElement,width,height 
+                // sizeOpt -> contentElement,width,height 
                 _.extend(node, sizeOpt);
                 //动态计算的尺寸，要写入到treeData中去，然后同步到 treeData的 originData，
                 //这样就可以 和 整个originData一起存入数据库，后续可以加快再次打开的渲染速度
@@ -559,9 +585,6 @@ class compactTree extends GraphsBase {
                 treeData.style.width = node.width;
                 treeData.style.height = node.height;
                 this._syncToOrigin( treeData );
-
-                // 重新校验一下size， 比如菱形的 外界矩形是不一样的
-                this.checkNodeSizeForShapeType( node );
 
                 resolve( sizeOpt );
             } );
@@ -590,33 +613,19 @@ class compactTree extends GraphsBase {
             nodeSize: node => {
                 //计算的尺寸已经node的数据为准， 不取treeData的
                 let height = node.data._node.height || 0;
-                let width = node.data._node.width || 0;
-                
-                if( node.data[ childrenField ] && node.data[ childrenField ].length ){
-                    width += iconWidth
-                };
-
-                if( node.data._node.preIconChartCode ){
-                    width += iconWidth
-                };
-        
-                if( node.data._node.iconChartCodes && node.data._node.iconChartCodes.length ){
-                    width += iconWidth * node.data._node.iconChartCodes.length
-                };
-
-                node.data._node.boundingClientWidth = width;
+                let boundingClientWidth = node.data._node.boundingClientWidth || 0;
 
                 if( layoutIsHorizontal ){
-                    return [ height, width+spaceY ]
+                    return [ height, boundingClientWidth+spaceY ]
                 }
                 
-                return [ width, height+spaceY ] //因为节点高度包含节点下方的间距
+                return [ boundingClientWidth, height+spaceY ] //因为节点高度包含节点下方的间距
             },
             children: data => data[ childrenField ]
         });
         
         const _tree = layout.hierarchy( data.treeData );
-        debugger
+        
         const _layout = layout(_tree);
 
         let left=0,top=0,right=0,bottom=0;
@@ -669,26 +678,36 @@ class compactTree extends GraphsBase {
 
         //firstPoint
         let firstPoint = {
-            x: parseInt(edge.source.x) + parseInt(edge.source.width/2),
+            x: parseInt(edge.source.x+edge.source.boundingClientWidth/2),
             y: parseInt(edge.source.y)
         }
+        if( !edge.source.depth ){ //根节点
+            firstPoint.x = parseInt(edge.source.x);
+        }
         if( edge.source.shapeType == 'underLine' ){
-            firstPoint.y = parseInt(edge.source.y) + parseInt(edge.source.height/2)
+            firstPoint.y = parseInt(edge.source.y + edge.source.height/2)
         }
         points.push( firstPoint )
+        
+        let secPoint = {
+            x: firstPoint.x + 10,
+            y: firstPoint.y
+        };
+        points.push( secPoint )
+
 
         //lastPoint
         let lastPoint = {
-            x: parseInt(edge.target.x) - parseInt(edge.target.boundingClientWidth/2),
+            x: parseInt(edge.target.x - edge.target.boundingClientWidth/2),
             y: parseInt(edge.target.y)
         }
         if( edge.target.shapeType == 'underLine' ){
-            lastPoint.y = parseInt(edge.target.y) + parseInt(edge.target.height/2)
+            lastPoint.y = parseInt(edge.target.y + edge.target.height/2)
         }
 
         //LR
         points.push( {
-            x: firstPoint.x + parseInt((lastPoint.x - firstPoint.x)/2),
+            x: secPoint.x + parseInt((lastPoint.x - secPoint.x)/2),
             y: lastPoint.y
         } );
 
@@ -706,7 +725,7 @@ class compactTree extends GraphsBase {
                 this._drawNode( node );
                 //处理一些tree 相对 relation 特有的逻辑
                 //collapse
-                if( this.node.collapse.enabled ){
+                if( node.depth && this.node.collapse.enabled ){
                     let key = node.rowData[this.field];
                     let iconId     = key+"_collapse_icon";
                     let iconBackId = key+"_collapse_icon_back";
@@ -733,7 +752,10 @@ class compactTree extends GraphsBase {
                         let _collapseIcon= this.labelsSp.getChildById( iconId );
                         let _collapseIconBack = this.labelsSp.getChildById( iconBackId );
     
-                        let x = parseInt(node.x+node.boundingClientWidth/2+offsetX-this.node.padding-fontSize/2);
+                        let x = parseInt(node.x+node.boundingClientWidth/2+offsetX-this.node.padding-fontSize/4);
+                        if(  node.shapeType == 'diamond' ){
+                            x += this.node.padding + fontSize*1 + 1;
+                        }
                         let y = parseInt(node.y+offsetY);
                         //collapseIcon的 位置默认为左右方向的xy
                         let collapseCtx = {
@@ -749,7 +771,7 @@ class compactTree extends GraphsBase {
     
                         let r = parseInt(fontSize*0.5) + 2;
                         let _collapseBackCtx = {
-                            x : x ,
+                            x : x,
                             y : y,
                             r,
                             fillStyle : background,
@@ -777,9 +799,11 @@ class compactTree extends GraphsBase {
     
                             _collapseIcon._collapseIconBack = _collapseIconBack;
                             
-                            _collapseIcon.on( event.types.get(), (e)=> {
+                            let me = this;
+                            //这里不能用箭头函数，听我的没错
+                            _collapseIcon.on( event.types.get(), function(e){
                     
-                                let trigger = this.node.collapse;
+                                let trigger = me.node.collapse;
                                 e.eventInfo = {
                                     trigger,
                                     tipsContent,
@@ -796,19 +820,19 @@ class compactTree extends GraphsBase {
                                     }
                                 };
                                
-                                if( this.node.collapse.triggerEventType.indexOf( e.type ) > -1 ){
+                                if( me.node.collapse.triggerEventType.indexOf( e.type ) > -1 ){
                                     
-                                    node.rowData.collapsed = !node.rowData.collapsed;
-                                    this._syncToOrigin( node.rowData );
+                                    this.nodeData.rowData.collapsed = !this.nodeData.rowData.collapsed;
+                                    me._syncToOrigin( this.nodeData.rowData );
     
-                                    let trigger = new Trigger( this, {
+                                    let trigger = new Trigger( me, {
                                         origin : key
                                     } );
     
-                                    this.app.resetData( null ,  trigger);
+                                    me.app.resetData( null ,  trigger);
                                 }
                                 
-                                this.app.fire(e.type, e);
+                                me.app.fire(e.type, e);
     
                             });
                         };

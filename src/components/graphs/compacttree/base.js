@@ -522,6 +522,7 @@ class RelationBase extends GraphsBase {
             contentElement: null, //外面传的layout数据可能没有element，widget的时候要检测下
             width: null,
             height: null,
+            boundingClientWidth: 0, //通过width，然后看有多少icon，计算出来用于layout计算的width
 
             //这个在layout的时候设置
             x: null,
@@ -530,6 +531,8 @@ class RelationBase extends GraphsBase {
 
             focused : false,
             selected: false,
+
+
 
             ...opt
         };  
@@ -545,21 +548,22 @@ class RelationBase extends GraphsBase {
             let includedAngle = this.node.includedAngle/2;
             let includeRad = includedAngle * Math.PI / 180;
 
-            let {width,height} = node;
+            let {boundingClientWidth,height} = node;
             node._innerBound = {
-                width,height
+                width: boundingClientWidth,
+                height
             };
 
             let newWidthDiff = height / Math.tan( includeRad );
-            let newHeightDiff = width  * Math.tan( includeRad );
+            let newHeightDiff = boundingClientWidth  * Math.tan( includeRad );
 
             //在内接矩形基础上扩展出来的外界矩形
-            let newWidth = width  + newWidthDiff;
+            let newWidth = boundingClientWidth  + newWidthDiff;
             let newHeight = height + newHeightDiff;
 
             //node上面记录的width 和 height 永远是内容的 高宽, 但是像 diamond 等， 布局的时候的bound是要计算一个新的
             //布局的时候， 布局算法要优先取 layoutWidth  和  layoutHeight
-            node.width = newWidth;
+            node.boundingClientWidth = newWidth;
             node.height = newHeight;
             
         };
@@ -673,7 +677,7 @@ class RelationBase extends GraphsBase {
         return new Promise( resolve => {
 
             this.initData( data, dataTrigger ).then( _data => {
-debugger
+
                 this.data = _data;
             
                 this.layoutData();
@@ -741,14 +745,9 @@ debugger
 
             console.log(edge.points)
 
-            let key = edge.key.join('_');
-            
-            if( (me.line.isTree || edge.isTree) && edge.points.length == 3 ){
-                //严格树状图的话（三个点），就转化成4个点的，有两个拐点
-                me._setTreePoints( edge );
-            };
-
             let lineShapeOpt= me._getLineShape(edge, me.line.inflectionRadius)
+
+            let key = edge.key.join('_');
 
             let type        = lineShapeOpt.type;  
             let path        = lineShapeOpt.path;
@@ -1129,7 +1128,7 @@ debugger
                 node.contentElement.style.transformOrigin = "left top"; //修改为左上角为旋转中心点来和canvas同步
                 if( node.shapeType == 'diamond' ){
                     //菱形的位置
-                    node.contentElement.style.left = -parseInt(( (node.width-node._innerBound.width)/2) * me.status.transform.scale) + "px";
+                    node.contentElement.style.left = -parseInt(( (node.boundingClientWidth-node._innerBound.width)/2) * me.status.transform.scale) + "px";
                     node.contentElement.style.top = -parseInt(( (node.height-node._innerBound.height)/2) * me.status.transform.scale) + "px";
                 };
                 node.contentElement.style.visibility = "visible";
@@ -1239,38 +1238,6 @@ debugger
         };
     }
 
-    _setTreePoints( edge ){
-
-        let points = edge.points;
-      
-        if( this.rankdir == "TB" || this.rankdir == "BT" ){
-            points[0] = {
-                x : edge.source.x,
-                y : edge.source.y + (this.rankdir == "BT"?-1:1)*edge.source.height/2
-            };
-            points.splice(1,0,{
-                x : edge.source.x,
-                y : points.slice(-2,-1)[0].y
-            });
-        }
-        if( this.rankdir == "LR" || this.rankdir == "RL" ){
-            let yDiff = parseInt( edge.source.shapeType == 'underLine' ? edge.source.height/2 : 0 );
-            let dir = (this.rankdir == "RL"?-1:1);
-
-            points[0] = {
-                x : parseInt( edge.source.x) + parseInt( dir*( edge.source.rowData._node.boundingClientWidth/2) ),
-                y : parseInt( edge.source.y) + yDiff
-            };
-
-            points.splice(1,0,{
-                x : points.slice(-2,-1)[0].x,
-                y : parseInt( edge.source.y ) + yDiff
-            });
-
-        }
-
-        edge.points = points;
-    }
 
     /**
      * 
@@ -1287,16 +1254,20 @@ debugger
             path: str
         };
 
-        let head = points[0];
-        let tail = points.slice(-1)[0];
+        let head = points.splice(0,1)[0]; 
         let str = "M" + head.x + " " + head.y;
+
+        let start = points[0];
+        str += ",L" + start.x + " " + start.y;
+
+        let end = points.slice(-1)[0];
         
         if( edge.shapeType == "bezier" ){
             if( points.length == 3 ){
-                str += ",Q" + points[1].x + " " + points[1].y + " " + tail.x + " " + tail.y;
+                str += ",Q" + points[1].x + " " + points[1].y + " " + end.x + " " + end.y;
             }
             if( points.length == 4 ){
-                str += ",C" + points[1].x + " " + points[1].y + " "+ points[2].x + " " + points[2].y + " " + tail.x + " " + tail.y;
+                str += ",C" + points[1].x + " " + points[1].y + " "+ points[2].x + " " + points[2].y + " " + end.x + " " + end.y;
             }
             if( points.length >= 5 ){
                 line.type = 'brokenLine';
@@ -1308,6 +1279,12 @@ debugger
         };
 
         if( edge.shapeType == "brokenLine" ){
+            if( points.length == 3 ){
+                points.splice(1,0,{
+                    x: points[1].x,
+                    y: start.y
+                })
+            }
             _.each( points, function( point, i ){
                 
                 if( i ){

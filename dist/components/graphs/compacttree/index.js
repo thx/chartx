@@ -82,19 +82,17 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
         _this2.induce.context.height = _this2.height;
         _this2.sprite.context.x = parseInt(_this2.origin.x);
         _this2.sprite.context.y = parseInt(_this2.origin.y); //test bound
-
-        _this2._bound = new Rect({
-          context: {
-            x: _this2.data.extents.left,
-            y: _this2.data.extents.top,
-            width: _this2.data.size.width,
-            height: _this2.data.size.height,
-            lineWidth: 1,
-            strokeStyle: 'red'
-          }
-        });
-
-        _this2.graphsSp.addChild(_this2._bound);
+        // this._bound = new Rect({
+        //     context: {
+        //         x: this.data.extents.left,
+        //         y: this.data.extents.top,
+        //         width: this.data.size.width,
+        //         height: this.data.size.height,
+        //         lineWidth:1,
+        //         strokeStyle: 'red'
+        //     }
+        // });
+        // this.graphsSp.addChild( this._bound )
 
         _this2.graphsSp.context.x = Math.max((_this2.width - _this2.data.size.width) / 2, _this2.app.padding.left);
         _this2.graphsSp.context.y = _this2.height / 2;
@@ -317,6 +315,11 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
         _this7._eachTreeDataHandle(treeData, function (treeDataItem) {
           //计算和设置node的尺寸
           _this7._setSize(treeDataItem).then(function () {
+            _this7._setNodeBoundingClientWidth(treeDataItem); // 重新校验一下size， 比如菱形的 外界矩形是不一样的
+
+
+            _this7.checkNodeSizeForShapeType(treeDataItem._node);
+
             initNum++;
 
             if (initNum == nodesLength) {
@@ -326,6 +329,33 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
           });
         });
       });
+    }
+  }, {
+    key: "_setNodeBoundingClientWidth",
+    value: function _setNodeBoundingClientWidth(treeData) {
+      var node = treeData._node;
+      var boundingClientWidth = node.width || 0;
+
+      if (node.shapeType != 'diamond' && node.depth) {
+        if (treeData.__originData[this.childrenField] && treeData.__originData[this.childrenField].length) {
+          boundingClientWidth += iconWidth;
+        }
+
+        ;
+      }
+
+      if (node.preIconChartCode) {
+        boundingClientWidth += iconWidth;
+      }
+
+      ;
+
+      if (node.iconChartCodes && node.iconChartCodes.length) {
+        boundingClientWidth += iconWidth * node.iconChartCodes.length;
+      }
+
+      ;
+      node.boundingClientWidth = boundingClientWidth;
     }
   }, {
     key: "_setSize",
@@ -349,10 +379,7 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
             contentElement: node.contentElement
           }; // opt -> contentElement,width,height 
 
-          _.extend(node, sizeOpt); // 重新校验一下size， 比如菱形的 外界矩形是不一样的
-
-
-          _this8.checkNodeSizeForShapeType(node);
+          _.extend(node, sizeOpt);
 
           resolve(sizeOpt);
           return;
@@ -361,6 +388,8 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
         ; //如果配置中没有设置size并且treedata中没有记录size，那么就只能初始化了cotnent来动态计算
 
         _this8._initcontentElementAndSize(treeData).then(function (sizeOpt) {
+          _.extend(node, sizeOpt);
+
           resolve(sizeOpt);
         });
       });
@@ -398,7 +427,7 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
         ;
 
         _initEle.apply(_this9, [node]).then(function (sizeOpt) {
-          // opt -> contentElement,width,height 
+          // sizeOpt -> contentElement,width,height 
           _.extend(node, sizeOpt); //动态计算的尺寸，要写入到treeData中去，然后同步到 treeData的 originData，
           //这样就可以 和 整个originData一起存入数据库，后续可以加快再次打开的渲染速度
 
@@ -411,10 +440,7 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
           treeData.style.width = node.width;
           treeData.style.height = node.height;
 
-          _this9._syncToOrigin(treeData); // 重新校验一下size， 比如菱形的 外界矩形是不一样的
-
-
-          _this9.checkNodeSizeForShapeType(node);
+          _this9._syncToOrigin(treeData);
 
           resolve(sizeOpt);
         });
@@ -448,32 +474,13 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
         nodeSize: function nodeSize(node) {
           //计算的尺寸已经node的数据为准， 不取treeData的
           var height = node.data._node.height || 0;
-          var width = node.data._node.width || 0;
-
-          if (node.data[childrenField] && node.data[childrenField].length) {
-            width += iconWidth;
-          }
-
-          ;
-
-          if (node.data._node.preIconChartCode) {
-            width += iconWidth;
-          }
-
-          ;
-
-          if (node.data._node.iconChartCodes && node.data._node.iconChartCodes.length) {
-            width += iconWidth * node.data._node.iconChartCodes.length;
-          }
-
-          ;
-          node.data._node.boundingClientWidth = width;
+          var boundingClientWidth = node.data._node.boundingClientWidth || 0;
 
           if (layoutIsHorizontal) {
-            return [height, width + spaceY];
+            return [height, boundingClientWidth + spaceY];
           }
 
-          return [width, height + spaceY]; //因为节点高度包含节点下方的间距
+          return [boundingClientWidth, height + spaceY]; //因为节点高度包含节点下方的间距
         },
         children: function children(data) {
           return data[childrenField];
@@ -481,8 +488,6 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
       });
 
       var _tree = layout.hierarchy(data.treeData);
-
-      debugger;
 
       var _layout = layout(_tree);
 
@@ -538,28 +543,38 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
       var points = []; //firstPoint
 
       var firstPoint = {
-        x: parseInt(edge.source.x) + parseInt(edge.source.width / 2),
+        x: parseInt(edge.source.x + edge.source.boundingClientWidth / 2),
         y: parseInt(edge.source.y)
       };
 
-      if (edge.source.shapeType == 'underLine') {
-        firstPoint.y = parseInt(edge.source.y) + parseInt(edge.source.height / 2);
+      if (!edge.source.depth) {
+        //根节点
+        firstPoint.x = parseInt(edge.source.x);
       }
 
-      points.push(firstPoint); //lastPoint
+      if (edge.source.shapeType == 'underLine') {
+        firstPoint.y = parseInt(edge.source.y + edge.source.height / 2);
+      }
+
+      points.push(firstPoint);
+      var secPoint = {
+        x: firstPoint.x + 10,
+        y: firstPoint.y
+      };
+      points.push(secPoint); //lastPoint
 
       var lastPoint = {
-        x: parseInt(edge.target.x) - parseInt(edge.target.boundingClientWidth / 2),
+        x: parseInt(edge.target.x - edge.target.boundingClientWidth / 2),
         y: parseInt(edge.target.y)
       };
 
       if (edge.target.shapeType == 'underLine') {
-        lastPoint.y = parseInt(edge.target.y) + parseInt(edge.target.height / 2);
+        lastPoint.y = parseInt(edge.target.y + edge.target.height / 2);
       } //LR
 
 
       points.push({
-        x: firstPoint.x + parseInt((lastPoint.x - firstPoint.x) / 2),
+        x: secPoint.x + parseInt((lastPoint.x - secPoint.x) / 2),
         y: lastPoint.y
       });
       points.push(lastPoint);
@@ -577,7 +592,7 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
           //collapse
 
 
-          if (_this11.node.collapse.enabled) {
+          if (node.depth && _this11.node.collapse.enabled) {
             var key = node.rowData[_this11.field];
             var iconId = key + "_collapse_icon";
             var iconBackId = key + "_collapse_icon_back";
@@ -614,7 +629,12 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
 
               var _collapseIconBack = _this11.labelsSp.getChildById(iconBackId);
 
-              var x = parseInt(node.x + node.boundingClientWidth / 2 + offsetX - _this11.node.padding - fontSize / 2);
+              var x = parseInt(node.x + node.boundingClientWidth / 2 + offsetX - _this11.node.padding - fontSize / 4);
+
+              if (node.shapeType == 'diamond') {
+                x += _this11.node.padding + fontSize * 1 + 1;
+              }
+
               var y = parseInt(node.y + offsetY); //collapseIcon的 位置默认为左右方向的xy
 
               var collapseCtx = {
@@ -657,9 +677,10 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
                 _this11.labelsSp.addChild(_collapseIcon);
 
                 _collapseIcon._collapseIconBack = _collapseIconBack;
+                var me = _this11; //这里不能用箭头函数，听我的没错
 
                 _collapseIcon.on(event.types.get(), function (e) {
-                  var trigger = _this11.node.collapse;
+                  var trigger = me.node.collapse;
                   e.eventInfo = {
                     trigger: trigger,
                     tipsContent: tipsContent,
@@ -679,19 +700,19 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
 
                   ;
 
-                  if (_this11.node.collapse.triggerEventType.indexOf(e.type) > -1) {
-                    node.rowData.collapsed = !node.rowData.collapsed;
+                  if (me.node.collapse.triggerEventType.indexOf(e.type) > -1) {
+                    this.nodeData.rowData.collapsed = !this.nodeData.rowData.collapsed;
 
-                    _this11._syncToOrigin(node.rowData);
+                    me._syncToOrigin(this.nodeData.rowData);
 
-                    var _trigger = new _trigger2["default"](_this11, {
+                    var _trigger = new _trigger2["default"](me, {
                       origin: key
                     });
 
-                    _this11.app.resetData(null, _trigger);
+                    me.app.resetData(null, _trigger);
                   }
 
-                  _this11.app.fire(e.type, e);
+                  me.app.fire(e.type, e);
                 });
               }
 
@@ -878,7 +899,7 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
         },
         ranksep: {
           detail: '排与排之间的距离',
-          "default": 60
+          "default": 40
         },
         nodesep: {
           detail: '同级node之间的距离',

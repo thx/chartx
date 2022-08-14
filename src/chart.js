@@ -811,7 +811,12 @@ class Chart extends event.Dispatcher
             
             _.each( this.getComponents({name:'graphs'}), function( _g ){
                 if( _g.getNodesAt && iNode !== undefined ){
-                    nodes = nodes.concat( _g.getNodesAt( iNode, e ) );
+                    let _nodes = _g.getNodesAt( iNode, e );
+                    if( !_nodes || !_nodes.length ) return;
+                    if( !Array.isArray( _nodes ) ) {
+                        _nodes = [_nodes]
+                    }
+                    nodes = nodes.concat( _nodes );
                 }
             } );
             e.eventInfo.nodes = nodes;
