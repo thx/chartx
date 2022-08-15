@@ -11,7 +11,7 @@ let Rect    = Canvax.Shapes.Rect;
 
 //内部交互需要同步回源数据的属性， 树状图要实现文本的编辑，所以content也要加入进来
 let syncToOriginKeys = ['collapsed', 'style', 'content'];
-let iconWidth= 22;
+let iconWidth= 20;
 
  
 /**
@@ -146,11 +146,11 @@ class compactTree extends GraphsBase {
                             },
                             offsetX: {
                                 detail: 'x方向偏移量',
-                                default: 10
+                                default: 0
                             },
                             offsetY: {
                                 detail: 'y方向偏移量',
-                                default: 1
+                                default: 0
                             }
                         }
                     },
@@ -399,8 +399,8 @@ class compactTree extends GraphsBase {
             //不能放到assign中去，  getProp的处理中可能依赖node.rowData
             node.shapeType = this.getProp( this.node.shapeType, node );
 
-            node.preIconChartCode = this.getProp( this.node.preIcon.charCode, node );
-            node.iconChartCodes   = this.getProp( this.node.icons.charCode, node ) || [];
+            node.preIconCharCode = this.getProp( this.node.preIcon.charCode, node );
+            node.iconCharCodes   = this.getProp( this.node.icons.charCode, node ) || [];
 
             nodes.push(node);
    
@@ -507,12 +507,12 @@ class compactTree extends GraphsBase {
             };
         }
 
-        if( node.preIconChartCode ){
+        if( node.preIconCharCode ){
             boundingClientWidth += iconWidth
         };
 
-        if( node.iconChartCodes && node.iconChartCodes.length ){
-            boundingClientWidth += iconWidth * node.iconChartCodes.length
+        if( node.iconCharCodes && node.iconCharCodes.length ){
+            boundingClientWidth += iconWidth * node.iconCharCodes.length
         };
 
         node.boundingClientWidth = boundingClientWidth;
@@ -719,14 +719,16 @@ class compactTree extends GraphsBase {
     }
 
     _drawNodes(){
+        let me = this;
         _.each(this.data.nodes, (node) => {
-            
+            let key = node.rowData[this.field];
+
             let drawNode = ()=>{
                 this._drawNode( node );
                 //处理一些tree 相对 relation 特有的逻辑
                 //collapse
                 if( node.depth && this.node.collapse.enabled ){
-                    let key = node.rowData[this.field];
+                    
                     let iconId     = key+"_collapse_icon";
                     let iconBackId = key+"_collapse_icon_back";
 
@@ -852,10 +854,89 @@ class compactTree extends GraphsBase {
                     }
                     
                 }
+
+                let getIconStyle = function( prop, charCode ){
+                    let iconText   = String.fromCharCode(parseInt( charCode , 16));
+                    let fontSize   = me.getProp( prop.fontSize, node, charCode);
+                    let fontColor  = me.getProp( prop.fontColor, node, charCode);
+                    let fontFamily = me.getProp( prop.fontFamily, node, charCode);
+                    let offsetX    = me.getProp( prop.offsetX, node, charCode);
+                    let offsetY    = me.getProp( prop.offsetY, node, charCode);
+                    let tipsContent= me.getProp( prop.tipsContent, node, charCode);
+
+                    return {
+                        iconText,
+                        fontSize,
+                        fontColor,
+                        fontFamily,
+                        offsetX,
+                        offsetY,
+                        tipsContent
+                    }
+                }
+
+                //绘制preIcon
+                if( node.preIconCharCode ){
+
+                    let preIconId = key+"_pre_icon";
+                    let { 
+                        iconText,
+                        fontSize,
+                        fontColor,
+                        fontFamily,
+                        offsetX,
+                        offsetY,
+                        tipsContent 
+                    } = getIconStyle( this.node.preIcon, node.preIconCharCode );
+
+                    let x = parseInt(node.x - node.boundingClientWidth/2 + this.node.padding + offsetX);
+                    let y = parseInt(node.y+offsetY);
+                    //collapseIcon的 位置默认为左右方向的xy
+                    let preIconCtx = {
+                        x: x,
+                        y: y + 1,
+                        fontSize,
+                        fontFamily,
+                        fillStyle: fontColor,
+                        textAlign: "left",
+                        textBaseline: "middle",
+                        cursor: 'pointer'
+                    };
+                    let _preIcon= this.labelsSp.getChildById( preIconId );
+                    if( _preIcon ){
+                        _preIcon.resetText( iconText );
+                        Object.assign( _preIcon.context, preIconCtx );
+                    } else {
+                        _preIcon = new Canvax.Display.Text( iconText , {
+                            id: preIconId,
+                            context: preIconCtx
+                        });
+                        this.labelsSp.addChild( _preIcon );
+                    };
+
+                    //TODO: 这个赋值只能在这里处理， 因为resetData的时候， 每次node都是一个新的node数据
+                    //collapseIcon的引用就断了
+                    node.preIconEl = _preIcon;
+
+                } else {
+                    if( node.preIconEl ){
+                        node.preIconEl.destroy();
+                        delete node.preIconEl;
+                    }
+                }
+
+                //绘制icons 待续...
+                if( node.iconCharCodes && node.iconCharCodes.length ){
+                    let iconsSpId = key+"_icons_sp";
+
+                } else {
+                    if( node.iconsSp ){
+                        node.iconsSp.destroy();
+                        delete node.iconsSp;
+                    }
+                }
             }
 
-          
-            
             if( !node.contentElement ){
                 //绘制的时候如果发现没有 contentElement，那么就要把 contentElement 初始化了
                 this._initcontentElementAndSize( node.rowData ).then( ()=>{
@@ -881,15 +962,17 @@ class compactTree extends GraphsBase {
         };
 
         //下面的几个是销毁edge上面的元素
-        item.pathElement     && item.pathElement.destroy();
-        item.labelElement    && item.labelElement.destroy();
-        item.arrowElement    && item.arrowElement.destroy();
-        item.edgeIconElement && item.edgeIconElement.destroy();
-        item.edgeIconBack    && item.edgeIconBack.destroy();
+        item.pathElement      && item.pathElement.destroy();
+        item.labelElement     && item.labelElement.destroy();
+        item.arrowElement     && item.arrowElement.destroy();
+        item.edgeIconElement  && item.edgeIconElement.destroy();
+        item.edgeIconBack     && item.edgeIconBack.destroy();
 
         //下面两个是tree中独有的
-        item.collapseIcon      && item.collapseIcon.destroy();
-        item.collapseIconBack  && item.collapseIconBack.destroy();
+        item.collapseIcon     && item.collapseIcon.destroy();
+        item.collapseIconBack && item.collapseIconBack.destroy();
+
+        item.preIconEl        && item.preIconEl.destroy();
 
         if( Array.isArray( item[this.field] ) ){
             //是个edge的话，要检查下源头是不是没有子节点了， 没有子节点了， 还要把collapseIcon 都干掉

@@ -169,18 +169,12 @@ var BarGraphs = /*#__PURE__*/function (_GraphsBase) {
     }
   }, {
     key: "_getProp",
-    value: function _getProp(s, iNode) {
-      if (_.isArray(s)) {
-        return s[this.iGroup];
-      }
-
-      ;
-
+    value: function _getProp(s, node) {
       if (_.isFunction(s)) {
         var _nodesInfo = [];
 
-        if (iNode != undefined) {
-          _nodesInfo.push(this.data[iNode]);
+        if (node != undefined) {
+          _nodesInfo.push(node);
         }
 
         ;
@@ -595,13 +589,13 @@ var BarGraphs = /*#__PURE__*/function (_GraphsBase) {
 
               ;
               var textCtx = {
-                fillStyle: me.label.fontColor || finalPos.fillStyle,
-                fontSize: me.label.fontSize,
-                lineWidth: me.label.lineWidth,
-                strokeStyle: me.label.strokeStyle || finalPos.fillStyle,
+                fillStyle: me._getProp(me.label.fontColor, nodeData) || finalPos.fillStyle,
+                fontSize: me._getProp(me.label.fontSize, nodeData),
+                lineWidth: me._getProp(me.label.lineWidth, nodeData),
+                strokeStyle: me._getProp(me.label.strokeStyle, nodeData) || finalPos.fillStyle,
                 //textAlign     : me.label.textAlign, 在后面的_getTextAlign中设置
-                textBaseline: me.label.verticalAlign,
-                rotation: me.label.rotation
+                textBaseline: me._getProp(me.label.verticalAlign, nodeData),
+                rotation: me._getProp(me.label.rotation, nodeData)
               }; //然后根据position, offset确定x,y
 
               var _textPos = me._getTextPos(finalPos, nodeData);
@@ -1130,7 +1124,6 @@ var BarGraphs = /*#__PURE__*/function (_GraphsBase) {
                 easing: optsions.easing,
                 delay: h * optsions.delay,
                 onUpdate: function onUpdate() {
-                  debugger;
                   this.context.fillStyle = me._getFillStyle(this.nodeData.color, this.context);
                 },
                 onComplete: function onComplete(arg) {

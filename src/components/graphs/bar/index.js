@@ -281,19 +281,15 @@ class BarGraphs extends GraphsBase
         return color;
     }
 
-    _getProp(s, iNode)
+    _getProp(s, node)
     {
-        if (_.isArray(s)) {
-            return s[ this.iGroup ]
-        };
         if (_.isFunction(s)) {
             let _nodesInfo = [];
-            if( iNode != undefined ){
-                _nodesInfo.push( this.data[ iNode ] );
+            if( node != undefined ){
+                _nodesInfo.push( node );
             };
             return s.apply( this , _nodesInfo );
         };
-        
         return s
     }
 
@@ -673,13 +669,13 @@ class BarGraphs extends GraphsBase
                         };
                         
                         let textCtx = {
-                            fillStyle     : me.label.fontColor || finalPos.fillStyle,
-                            fontSize      : me.label.fontSize,
-                            lineWidth     : me.label.lineWidth,
-                            strokeStyle   : me.label.strokeStyle || finalPos.fillStyle,
+                            fillStyle     : me._getProp( me.label.fontColor , nodeData ) || finalPos.fillStyle,
+                            fontSize      : me._getProp( me.label.fontSize, nodeData ),
+                            lineWidth     : me._getProp( me.label.lineWidth, nodeData),
+                            strokeStyle   : me._getProp( me.label.strokeStyle, nodeData )|| finalPos.fillStyle,
                             //textAlign     : me.label.textAlign, 在后面的_getTextAlign中设置
-                            textBaseline  : me.label.verticalAlign,
-                            rotation      : me.label.rotation
+                            textBaseline  : me._getProp( me.label.verticalAlign, nodeData ),
+                            rotation      : me._getProp( me.label.rotation, nodeData )
                         };
                         //然后根据position, offset确定x,y
                         let _textPos = me._getTextPos( finalPos , nodeData );

@@ -39,7 +39,7 @@ var Circle = _canvax["default"].Shapes.Circle;
 var Rect = _canvax["default"].Shapes.Rect; //内部交互需要同步回源数据的属性， 树状图要实现文本的编辑，所以content也要加入进来
 
 var syncToOriginKeys = ['collapsed', 'style', 'content'];
-var iconWidth = 22;
+var iconWidth = 20;
 /**
  * 关系图中 包括了  配置，数据，和布局数据，
  * 默认用配置和数据可以完成绘图， 但是如果有布局数据，就绘图玩额外调用一次绘图，把布局数据传入修正布局效果
@@ -174,13 +174,11 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
         //{treeData, nodeLength}这里设置了这两个属性
 
         Object.assign(data, _this4._filterTreeData(data.treeOriginData));
-        console.log(data.nodesLength + '个节点构建树:', new Date().getTime() - t);
         var t1 = new Date().getTime();
 
         _this4._initAllDataSize(data).then(function () {
           //这个时候已经设置好了 treeData 的 size 属性width、height
           //可以开始布局了，布局完就可以设置好 data 的 nodes edges 和 size 属性
-          console.log(data.nodesLength + '个节点计算size:', new Date().getTime() - t1);
           resolve(data);
         });
       });
@@ -233,8 +231,8 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
         }); //不能放到assign中去，  getProp的处理中可能依赖node.rowData
 
         node.shapeType = _this5.getProp(_this5.node.shapeType, node);
-        node.preIconChartCode = _this5.getProp(_this5.node.preIcon.charCode, node);
-        node.iconChartCodes = _this5.getProp(_this5.node.icons.charCode, node) || [];
+        node.preIconCharCode = _this5.getProp(_this5.node.preIcon.charCode, node);
+        node.iconCharCodes = _this5.getProp(_this5.node.icons.charCode, node) || [];
         nodes.push(node);
         treeData._node = node;
 
@@ -344,14 +342,14 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
         ;
       }
 
-      if (node.preIconChartCode) {
+      if (node.preIconCharCode) {
         boundingClientWidth += iconWidth;
       }
 
       ;
 
-      if (node.iconChartCodes && node.iconChartCodes.length) {
-        boundingClientWidth += iconWidth * node.iconChartCodes.length;
+      if (node.iconCharCodes && node.iconCharCodes.length) {
+        boundingClientWidth += iconWidth * node.iconCharCodes.length;
       }
 
       ;
@@ -522,7 +520,6 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
       data.edges.forEach(function (edge) {
         _this10.getEdgePoints(edge);
       });
-      console.log(data.nodesLength + '个节点计算layout:', new Date().getTime() - t1);
       Object.assign(data, {
         size: {
           width: width,
@@ -586,14 +583,17 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
     value: function _drawNodes() {
       var _this11 = this;
 
+      var me = this;
+
       _.each(this.data.nodes, function (node) {
+        var key = node.rowData[_this11.field];
+
         var drawNode = function drawNode() {
           _this11._drawNode(node); //处理一些tree 相对 relation 特有的逻辑
           //collapse
 
 
           if (node.depth && _this11.node.collapse.enabled) {
-            var key = node.rowData[_this11.field];
             var iconId = key + "_collapse_icon";
             var iconBackId = key + "_collapse_icon_back";
 
@@ -677,10 +677,10 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
                 _this11.labelsSp.addChild(_collapseIcon);
 
                 _collapseIcon._collapseIconBack = _collapseIconBack;
-                var me = _this11; //这里不能用箭头函数，听我的没错
+                var _me = _this11; //这里不能用箭头函数，听我的没错
 
                 _collapseIcon.on(event.types.get(), function (e) {
-                  var trigger = me.node.collapse;
+                  var trigger = _me.node.collapse;
                   e.eventInfo = {
                     trigger: trigger,
                     tipsContent: tipsContent,
@@ -700,19 +700,19 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
 
                   ;
 
-                  if (me.node.collapse.triggerEventType.indexOf(e.type) > -1) {
+                  if (_me.node.collapse.triggerEventType.indexOf(e.type) > -1) {
                     this.nodeData.rowData.collapsed = !this.nodeData.rowData.collapsed;
 
-                    me._syncToOrigin(this.nodeData.rowData);
+                    _me._syncToOrigin(this.nodeData.rowData);
 
-                    var _trigger = new _trigger2["default"](me, {
+                    var _trigger = new _trigger2["default"](_me, {
                       origin: key
                     });
 
-                    me.app.resetData(null, _trigger);
+                    _me.app.resetData(null, _trigger);
                   }
 
-                  me.app.fire(e.type, e);
+                  _me.app.fire(e.type, e);
                 });
               }
 
@@ -730,6 +730,90 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
               var _collapseIconBack2 = _this11.labelsSp.getChildById(iconBackId);
 
               if (_collapseIconBack2) _collapseIconBack2.destroy();
+            }
+          }
+
+          var getIconStyle = function getIconStyle(prop, charCode) {
+            var iconText = String.fromCharCode(parseInt(charCode, 16));
+            var fontSize = me.getProp(prop.fontSize, node, charCode);
+            var fontColor = me.getProp(prop.fontColor, node, charCode);
+            var fontFamily = me.getProp(prop.fontFamily, node, charCode);
+            var offsetX = me.getProp(prop.offsetX, node, charCode);
+            var offsetY = me.getProp(prop.offsetY, node, charCode);
+            var tipsContent = me.getProp(prop.tipsContent, node, charCode);
+            return {
+              iconText: iconText,
+              fontSize: fontSize,
+              fontColor: fontColor,
+              fontFamily: fontFamily,
+              offsetX: offsetX,
+              offsetY: offsetY,
+              tipsContent: tipsContent
+            };
+          }; //绘制preIcon
+
+
+          if (node.preIconCharCode) {
+            var preIconId = key + "_pre_icon";
+
+            var _getIconStyle = getIconStyle(_this11.node.preIcon, node.preIconCharCode),
+                _iconText = _getIconStyle.iconText,
+                _fontSize = _getIconStyle.fontSize,
+                _fontColor = _getIconStyle.fontColor,
+                _fontFamily = _getIconStyle.fontFamily,
+                _offsetX = _getIconStyle.offsetX,
+                _offsetY = _getIconStyle.offsetY,
+                _tipsContent = _getIconStyle.tipsContent;
+
+            var _x = parseInt(node.x - node.boundingClientWidth / 2 + _this11.node.padding + _offsetX);
+
+            var _y = parseInt(node.y + _offsetY); //collapseIcon的 位置默认为左右方向的xy
+
+
+            var preIconCtx = {
+              x: _x,
+              y: _y + 1,
+              fontSize: _fontSize,
+              fontFamily: _fontFamily,
+              fillStyle: _fontColor,
+              textAlign: "left",
+              textBaseline: "middle",
+              cursor: 'pointer'
+            };
+
+            var _preIcon = _this11.labelsSp.getChildById(preIconId);
+
+            if (_preIcon) {
+              _preIcon.resetText(_iconText);
+
+              Object.assign(_preIcon.context, preIconCtx);
+            } else {
+              _preIcon = new _canvax["default"].Display.Text(_iconText, {
+                id: preIconId,
+                context: preIconCtx
+              });
+
+              _this11.labelsSp.addChild(_preIcon);
+            }
+
+            ; //TODO: 这个赋值只能在这里处理， 因为resetData的时候， 每次node都是一个新的node数据
+            //collapseIcon的引用就断了
+
+            node.preIconEl = _preIcon;
+          } else {
+            if (node.preIconEl) {
+              node.preIconEl.destroy();
+              delete node.preIconEl;
+            }
+          } //绘制icons 待续...
+
+
+          if (node.iconCharCodes && node.iconCharCodes.length) {
+            var iconsSpId = key + "_icons_sp";
+          } else {
+            if (node.iconsSp) {
+              node.iconsSp.destroy();
+              delete node.iconsSp;
             }
           }
         };
@@ -772,6 +856,7 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
 
       item.collapseIcon && item.collapseIcon.destroy();
       item.collapseIconBack && item.collapseIconBack.destroy();
+      item.preIconEl && item.preIconEl.destroy();
 
       if (Array.isArray(item[this.field])) {
         //是个edge的话，要检查下源头是不是没有子节点了， 没有子节点了， 还要把collapseIcon 都干掉
@@ -1003,11 +1088,11 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
                 },
                 offsetX: {
                   detail: 'x方向偏移量',
-                  "default": 10
+                  "default": 0
                 },
                 offsetY: {
                   detail: 'y方向偏移量',
-                  "default": 1
+                  "default": 0
                 }
               }
             },

@@ -8326,7 +8326,6 @@ var chartx = (function () {
 	      var codeWithoutVariables = code.slice(0, range[0]) + code.slice(range[1]);
 	      return this._eval(codeWithoutVariables, 'options', 'variables', variables);
 	    } catch (e) {
-	      console.log('parse error');
 	      return {};
 	    }
 	  }
@@ -8389,7 +8388,7 @@ var chartx = (function () {
 	  */
 	};
 	var _default = {
-	  chartxVersion: '1.1.116',
+	  chartxVersion: '1.1.117',
 	  create: function create(el, data, opt) {
 	    var otherOptions = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
 	    var chart = null;
@@ -17214,7 +17213,7 @@ var chartx = (function () {
 
 	      var trigger = e.eventInfo.trigger; //这里要求一定是个字符串
 
-	      if ((0, _typeof2["default"])(trigger) == 'object') console.log('trigger必须是个字符串');
+	      if ((0, _typeof2["default"])(trigger) == 'object') ;
 
 	      if (typeof trigger == 'string') {
 	        if (trigger == 'this') {
@@ -17496,16 +17495,12 @@ var chartx = (function () {
 	    }
 	  }, {
 	    key: "_getProp",
-	    value: function _getProp(s, iNode) {
-	      if (_.isArray(s)) {
-	        return s[this.iGroup];
-	      }
-
+	    value: function _getProp(s, node) {
 	      if (_.isFunction(s)) {
 	        var _nodesInfo = [];
 
-	        if (iNode != undefined) {
-	          _nodesInfo.push(this.data[iNode]);
+	        if (node != undefined) {
+	          _nodesInfo.push(node);
 	        }
 	        return s.apply(this, _nodesInfo);
 	      }
@@ -17862,13 +17857,13 @@ var chartx = (function () {
 	                continue;
 	              }
 	              var textCtx = {
-	                fillStyle: me.label.fontColor || finalPos.fillStyle,
-	                fontSize: me.label.fontSize,
-	                lineWidth: me.label.lineWidth,
-	                strokeStyle: me.label.strokeStyle || finalPos.fillStyle,
+	                fillStyle: me._getProp(me.label.fontColor, nodeData) || finalPos.fillStyle,
+	                fontSize: me._getProp(me.label.fontSize, nodeData),
+	                lineWidth: me._getProp(me.label.lineWidth, nodeData),
+	                strokeStyle: me._getProp(me.label.strokeStyle, nodeData) || finalPos.fillStyle,
 	                //textAlign     : me.label.textAlign, 在后面的_getTextAlign中设置
-	                textBaseline: me.label.verticalAlign,
-	                rotation: me.label.rotation
+	                textBaseline: me._getProp(me.label.verticalAlign, nodeData),
+	                rotation: me._getProp(me.label.rotation, nodeData)
 	              }; //然后根据position, offset确定x,y
 
 	              var _textPos = me._getTextPos(finalPos, nodeData);
@@ -18334,7 +18329,6 @@ var chartx = (function () {
 	                easing: optsions.easing,
 	                delay: h * optsions.delay,
 	                onUpdate: function onUpdate() {
-	                  debugger;
 	                  this.context.fillStyle = me._getFillStyle(this.nodeData.color, this.context);
 	                },
 	                onComplete: function onComplete(arg) {
@@ -28701,7 +28695,6 @@ var chartx = (function () {
 	      yRange = bounds.yRange;
 
 	  if (xRange.max == xRange.min || yRange.max == yRange.min) {
-	    console.log("not scaling solution: zero size detected");
 	    return solution;
 	  }
 
@@ -29361,9 +29354,7 @@ var chartx = (function () {
 	    var centre = computeTextCentre(interior, exterior);
 	    ret[area] = centre;
 
-	    if (centre.disjoint && areas[i].size > 0) {
-	      console.log("WARNING: area " + area + " not represented on screen");
-	    }
+	    if (centre.disjoint && areas[i].size > 0) ;
 	  }
 
 	  return ret;
@@ -31828,7 +31819,6 @@ var chartx = (function () {
 	  var label = options.node && options.node.content && options.node.content.field;
 
 	  if (!checkDataIsJson(data, key, childrenKey)) {
-	    console.error('该数据不能正确绘制，请提供数组对象形式的数据！');
 	    return result;
 	  }
 	  var childrens = [];
@@ -35659,9 +35649,7 @@ var chartx = (function () {
 
 	        try {
 	          return fn();
-	        } finally {
-	          console.log(name + " time: " + (_.now() - start) + "ms");
-	        }
+	        } finally {}
 	      }
 
 	      function notime(name, fn) {
@@ -45445,8 +45433,6 @@ var chartx = (function () {
 	          }
 
 	          if (e.type == "wheel") {
-	            console.log(_deltaY, e.deltaY);
-
 	            if (Math.abs(e.deltaY) > Math.abs(_deltaY)) {
 	              _deltaY = e.deltaY;
 	            }
@@ -45849,7 +45835,6 @@ var chartx = (function () {
 	      var me = this;
 
 	      _.each(this.data.edges, function (edge) {
-	        console.log(edge.points);
 	        var key = edge.key.join('_');
 
 	        if (me.line.isTree && edge.points.length == 3) {
@@ -47645,6 +47630,7 @@ var chartx = (function () {
 	var BrokenLine = _canvax["default"].Shapes.BrokenLine;
 	var Circle = _canvax["default"].Shapes.Circle;
 	var Arrow = _canvax["default"].Shapes.Arrow;
+	var iconWidth = 20;
 	/**
 	 * 关系图中 包括了  配置，数据，和布局数据，
 	 * 默认用配置和数据可以完成绘图， 但是如果有布局数据，就绘图玩额外调用一次绘图，把布局数据传入修正布局效果
@@ -47823,8 +47809,6 @@ var chartx = (function () {
 	            }
 
 	            if (e.type == "wheel") {
-	              console.log(_deltaY, e.deltaY);
-
 	              if (Math.abs(e.deltaY) > Math.abs(_deltaY)) {
 	                _deltaY = e.deltaY;
 	              }
@@ -47960,8 +47944,6 @@ var chartx = (function () {
 	      var me = this;
 
 	      _.each(this.data.edges, function (edge) {
-	        console.log(edge.points);
-
 	        var lineShapeOpt = me._getLineShape(edge, me.line.inflectionRadius);
 
 	        var key = edge.key.join('_');
@@ -48361,7 +48343,7 @@ var chartx = (function () {
 
 	      _boxShape.on("transform", function () {
 	        if (node.ctype == "canvas") {
-	          node.contentElement.context.x = parseInt(node.x - node.boundingClientWidth / 2 + me.node.padding);
+	          node.contentElement.context.x = parseInt(node.x - node.boundingClientWidth / 2 + me.node.padding + (node.preIconCharCode ? iconWidth : 0));
 	          node.contentElement.context.y = parseInt(node.y);
 	        } else if (node.ctype == "html") {
 	          var devicePixelRatio = typeof window !== 'undefined' ? window.devicePixelRatio : 1;
@@ -48862,7 +48844,7 @@ var chartx = (function () {
 	        }
 
 	        if (_.isFunction(prop)) {
-	          _prop = prop.apply(this, [nodeData]);
+	          _prop = prop.apply(this, Array.prototype.slice.call(arguments).slice(1));
 	        }
 	      }
 	      return _prop;
@@ -51156,7 +51138,7 @@ var chartx = (function () {
 	var Rect = _canvax["default"].Shapes.Rect; //内部交互需要同步回源数据的属性， 树状图要实现文本的编辑，所以content也要加入进来
 
 	var syncToOriginKeys = ['collapsed', 'style', 'content'];
-	var iconWidth = 22;
+	var iconWidth = 20;
 	/**
 	 * 关系图中 包括了  配置，数据，和布局数据，
 	 * 默认用配置和数据可以完成绘图， 但是如果有布局数据，就绘图玩额外调用一次绘图，把布局数据传入修正布局效果
@@ -51289,13 +51271,11 @@ var chartx = (function () {
 	        //{treeData, nodeLength}这里设置了这两个属性
 
 	        Object.assign(data, _this4._filterTreeData(data.treeOriginData));
-	        console.log(data.nodesLength + '个节点构建树:', new Date().getTime() - t);
 	        var t1 = new Date().getTime();
 
 	        _this4._initAllDataSize(data).then(function () {
 	          //这个时候已经设置好了 treeData 的 size 属性width、height
 	          //可以开始布局了，布局完就可以设置好 data 的 nodes edges 和 size 属性
-	          console.log(data.nodesLength + '个节点计算size:', new Date().getTime() - t1);
 	          resolve(data);
 	        });
 	      });
@@ -51348,8 +51328,8 @@ var chartx = (function () {
 	        }); //不能放到assign中去，  getProp的处理中可能依赖node.rowData
 
 	        node.shapeType = _this5.getProp(_this5.node.shapeType, node);
-	        node.preIconChartCode = _this5.getProp(_this5.node.preIcon.charCode, node);
-	        node.iconChartCodes = _this5.getProp(_this5.node.icons.charCode, node) || [];
+	        node.preIconCharCode = _this5.getProp(_this5.node.preIcon.charCode, node);
+	        node.iconCharCodes = _this5.getProp(_this5.node.icons.charCode, node) || [];
 	        nodes.push(node);
 	        treeData._node = node;
 
@@ -51457,12 +51437,12 @@ var chartx = (function () {
 	        }
 	      }
 
-	      if (node.preIconChartCode) {
+	      if (node.preIconCharCode) {
 	        boundingClientWidth += iconWidth;
 	      }
 
-	      if (node.iconChartCodes && node.iconChartCodes.length) {
-	        boundingClientWidth += iconWidth * node.iconChartCodes.length;
+	      if (node.iconCharCodes && node.iconCharCodes.length) {
+	        boundingClientWidth += iconWidth * node.iconCharCodes.length;
 	      }
 	      node.boundingClientWidth = boundingClientWidth;
 	    }
@@ -51619,7 +51599,6 @@ var chartx = (function () {
 	      data.edges.forEach(function (edge) {
 	        _this10.getEdgePoints(edge);
 	      });
-	      console.log(data.nodesLength + '个节点计算layout:', new Date().getTime() - t1);
 	      Object.assign(data, {
 	        size: {
 	          width: width,
@@ -51683,14 +51662,17 @@ var chartx = (function () {
 	    value: function _drawNodes() {
 	      var _this11 = this;
 
+	      var me = this;
+
 	      _.each(this.data.nodes, function (node) {
+	        var key = node.rowData[_this11.field];
+
 	        var drawNode = function drawNode() {
 	          _this11._drawNode(node); //处理一些tree 相对 relation 特有的逻辑
 	          //collapse
 
 
 	          if (node.depth && _this11.node.collapse.enabled) {
-	            var key = node.rowData[_this11.field];
 	            var iconId = key + "_collapse_icon";
 	            var iconBackId = key + "_collapse_icon_back";
 
@@ -51772,10 +51754,10 @@ var chartx = (function () {
 	                _this11.labelsSp.addChild(_collapseIcon);
 
 	                _collapseIcon._collapseIconBack = _collapseIconBack;
-	                var me = _this11; //这里不能用箭头函数，听我的没错
+	                var _me = _this11; //这里不能用箭头函数，听我的没错
 
 	                _collapseIcon.on(event.types.get(), function (e) {
-	                  var trigger = me.node.collapse;
+	                  var trigger = _me.node.collapse;
 	                  e.eventInfo = {
 	                    trigger: trigger,
 	                    tipsContent: tipsContent,
@@ -51793,19 +51775,19 @@ var chartx = (function () {
 	                    }
 	                  }
 
-	                  if (me.node.collapse.triggerEventType.indexOf(e.type) > -1) {
+	                  if (_me.node.collapse.triggerEventType.indexOf(e.type) > -1) {
 	                    this.nodeData.rowData.collapsed = !this.nodeData.rowData.collapsed;
 
-	                    me._syncToOrigin(this.nodeData.rowData);
+	                    _me._syncToOrigin(this.nodeData.rowData);
 
-	                    var _trigger = new _trigger2["default"](me, {
+	                    var _trigger = new _trigger2["default"](_me, {
 	                      origin: key
 	                    });
 
-	                    me.app.resetData(null, _trigger);
+	                    _me.app.resetData(null, _trigger);
 	                  }
 
-	                  me.app.fire(e.type, e);
+	                  _me.app.fire(e.type, e);
 	                });
 	              }
 	              //collapseIcon的引用就断了
@@ -51821,6 +51803,86 @@ var chartx = (function () {
 	              var _collapseIconBack2 = _this11.labelsSp.getChildById(iconBackId);
 
 	              if (_collapseIconBack2) _collapseIconBack2.destroy();
+	            }
+	          }
+
+	          var getIconStyle = function getIconStyle(prop, charCode) {
+	            var iconText = String.fromCharCode(parseInt(charCode, 16));
+	            var fontSize = me.getProp(prop.fontSize, node, charCode);
+	            var fontColor = me.getProp(prop.fontColor, node, charCode);
+	            var fontFamily = me.getProp(prop.fontFamily, node, charCode);
+	            var offsetX = me.getProp(prop.offsetX, node, charCode);
+	            var offsetY = me.getProp(prop.offsetY, node, charCode);
+	            var tipsContent = me.getProp(prop.tipsContent, node, charCode);
+	            return {
+	              iconText: iconText,
+	              fontSize: fontSize,
+	              fontColor: fontColor,
+	              fontFamily: fontFamily,
+	              offsetX: offsetX,
+	              offsetY: offsetY,
+	              tipsContent: tipsContent
+	            };
+	          }; //绘制preIcon
+
+
+	          if (node.preIconCharCode) {
+	            var preIconId = key + "_pre_icon";
+
+	            var _getIconStyle = getIconStyle(_this11.node.preIcon, node.preIconCharCode),
+	                _iconText = _getIconStyle.iconText,
+	                _fontSize = _getIconStyle.fontSize,
+	                _fontColor = _getIconStyle.fontColor,
+	                _fontFamily = _getIconStyle.fontFamily,
+	                _offsetX = _getIconStyle.offsetX,
+	                _offsetY = _getIconStyle.offsetY,
+	                _tipsContent = _getIconStyle.tipsContent;
+
+	            var _x = parseInt(node.x - node.boundingClientWidth / 2 + _this11.node.padding + _offsetX);
+
+	            var _y = parseInt(node.y + _offsetY); //collapseIcon的 位置默认为左右方向的xy
+
+
+	            var preIconCtx = {
+	              x: _x,
+	              y: _y + 1,
+	              fontSize: _fontSize,
+	              fontFamily: _fontFamily,
+	              fillStyle: _fontColor,
+	              textAlign: "left",
+	              textBaseline: "middle",
+	              cursor: 'pointer'
+	            };
+
+	            var _preIcon = _this11.labelsSp.getChildById(preIconId);
+
+	            if (_preIcon) {
+	              _preIcon.resetText(_iconText);
+
+	              Object.assign(_preIcon.context, preIconCtx);
+	            } else {
+	              _preIcon = new _canvax["default"].Display.Text(_iconText, {
+	                id: preIconId,
+	                context: preIconCtx
+	              });
+
+	              _this11.labelsSp.addChild(_preIcon);
+	            }
+	            //collapseIcon的引用就断了
+
+	            node.preIconEl = _preIcon;
+	          } else {
+	            if (node.preIconEl) {
+	              node.preIconEl.destroy();
+	              delete node.preIconEl;
+	            }
+	          } //绘制icons 待续...
+
+
+	          if (node.iconCharCodes && node.iconCharCodes.length) ; else {
+	            if (node.iconsSp) {
+	              node.iconsSp.destroy();
+	              delete node.iconsSp;
 	            }
 	          }
 	        };
@@ -51859,6 +51921,7 @@ var chartx = (function () {
 
 	      item.collapseIcon && item.collapseIcon.destroy();
 	      item.collapseIconBack && item.collapseIconBack.destroy();
+	      item.preIconEl && item.preIconEl.destroy();
 
 	      if (Array.isArray(item[this.field])) {
 	        //是个edge的话，要检查下源头是不是没有子节点了， 没有子节点了， 还要把collapseIcon 都干掉
@@ -52080,11 +52143,11 @@ var chartx = (function () {
 	                },
 	                offsetX: {
 	                  detail: 'x方向偏移量',
-	                  "default": 10
+	                  "default": 0
 	                },
 	                offsetY: {
 	                  detail: 'y方向偏移量',
-	                  "default": 1
+	                  "default": 0
 	                }
 	              }
 	            },
@@ -54915,7 +54978,6 @@ var chartx = (function () {
 	      this._setNodeStyle(_path, 'select');
 
 	      nodeData.selected = true;
-	      console.log("select:true");
 	    }
 	  }, {
 	    key: "unselectAt",
@@ -54929,7 +54991,6 @@ var chartx = (function () {
 	      this._setNodeStyle(_path);
 
 	      geoGraph.selected = false;
-	      console.log("select:false");
 
 	      if (geoGraph.focused) {
 	        this.focusAt(adcode);
@@ -57406,7 +57467,6 @@ var chartx = (function () {
 	  }, {
 	    key: "move",
 	    value: function move(e) {
-	      console.log('tips move');
 	      if (!this.enabled) return;
 
 	      if (e.eventInfo) {
@@ -57429,8 +57489,6 @@ var chartx = (function () {
 	  }, {
 	    key: "hide",
 	    value: function hide(e) {
-	      console.log('tips hide');
-
 	      this._hide(e);
 
 	      this.onhide.apply(this, [e]);
@@ -61606,7 +61664,7 @@ var chartx = (function () {
 	}
 
 	var chartx = {
-	  version: '1.1.116',
+	  version: '1.1.117',
 	  options: {}
 	};
 

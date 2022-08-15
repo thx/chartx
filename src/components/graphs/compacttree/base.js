@@ -13,6 +13,9 @@ let Circle  = Canvax.Shapes.Circle;
 let Arrow   = Canvax.Shapes.Arrow;
 
 
+let iconWidth= 20;
+
+
 /**
  * 关系图中 包括了  配置，数据，和布局数据，
  * 默认用配置和数据可以完成绘图， 但是如果有布局数据，就绘图玩额外调用一次绘图，把布局数据传入修正布局效果
@@ -1116,7 +1119,7 @@ class RelationBase extends GraphsBase {
 
         _boxShape.on("transform", function() {
             if (node.ctype == "canvas") {
-                node.contentElement.context.x = parseInt(node.x - node.boundingClientWidth/2 + me.node.padding);
+                node.contentElement.context.x = parseInt(node.x - node.boundingClientWidth/2 + me.node.padding + (node.preIconCharCode?iconWidth:0) );
                 node.contentElement.context.y = parseInt(node.y);
             } else if (node.ctype == "html") {
                 let devicePixelRatio = typeof (window) !== 'undefined' ? window.devicePixelRatio : 1;
@@ -1541,7 +1544,7 @@ class RelationBase extends GraphsBase {
                 _prop = prop[ nodeData.iNode ]
             };
             if( _.isFunction( prop ) ){
-                _prop = prop.apply( this, [ nodeData ] );
+                _prop = prop.apply( this, [...arguments].slice(1) );
             };
         };
         return _prop;

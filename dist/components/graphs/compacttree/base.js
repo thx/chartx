@@ -46,6 +46,7 @@ var Path = _canvax["default"].Shapes.Path;
 var BrokenLine = _canvax["default"].Shapes.BrokenLine;
 var Circle = _canvax["default"].Shapes.Circle;
 var Arrow = _canvax["default"].Shapes.Arrow;
+var iconWidth = 20;
 /**
  * 关系图中 包括了  配置，数据，和布局数据，
  * 默认用配置和数据可以完成绘图， 但是如果有布局数据，就绘图玩额外调用一次绘图，把布局数据传入修正布局效果
@@ -232,8 +233,6 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
             ; //滚轮缩放
 
             if (e.type == "wheel") {
-              console.log(_deltaY, e.deltaY);
-
               if (Math.abs(e.deltaY) > Math.abs(_deltaY)) {
                 _deltaY = e.deltaY;
               }
@@ -385,8 +384,6 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
       var me = this;
 
       _.each(this.data.edges, function (edge) {
-        console.log(edge.points);
-
         var lineShapeOpt = me._getLineShape(edge, me.line.inflectionRadius);
 
         var key = edge.key.join('_');
@@ -818,7 +815,7 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
 
       _boxShape.on("transform", function () {
         if (node.ctype == "canvas") {
-          node.contentElement.context.x = parseInt(node.x - node.boundingClientWidth / 2 + me.node.padding);
+          node.contentElement.context.x = parseInt(node.x - node.boundingClientWidth / 2 + me.node.padding + (node.preIconCharCode ? iconWidth : 0));
           node.contentElement.context.y = parseInt(node.y);
         } else if (node.ctype == "html") {
           var devicePixelRatio = typeof window !== 'undefined' ? window.devicePixelRatio : 1;
@@ -1369,7 +1366,7 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
         ;
 
         if (_.isFunction(prop)) {
-          _prop = prop.apply(this, [nodeData]);
+          _prop = prop.apply(this, Array.prototype.slice.call(arguments).slice(1));
         }
 
         ;
