@@ -1,5 +1,6 @@
 import Canvax from "canvax"
 import {getDefaultProps} from "../../../utils/tools"
+import { colorIsHex,colorRgba } from "../../../utils/color"
 import GraphsBase from "../index"
 import numeral from "numeral"
 
@@ -53,7 +54,7 @@ class BarGraphs extends GraphsBase
                     },
                     radius: {
                         detail: '叶子节点的圆角半径',
-                        default: 3
+                        default: 10
                     },
                     fillStyle : {
                         detail: 'bar填充色',
@@ -267,15 +268,8 @@ class BarGraphs extends GraphsBase
         };
 
         if( color && color.lineargradient && color.lineargradient.length ){
-            if( nodeData.rectHeight != 0 ){
-                let _style = me.ctx.createLinearGradient( nodeData.x, (nodeData.fromY+nodeData.rectHeight), nodeData.x, nodeData.fromY );
-                _.each( color.lineargradient , function( item ){
-                    _style.addColorStop( item.position , item.color);
-                });
-                color = _style;
-            } else {
-                color = color.lineargradient[ parseInt( color.lineargradient.length / 2 ) ].color;
-            };
+            //如果是个线性渐变的话，就需要加上渐变的位置
+            color.points = [0,nodeData.rectHeight, 0, 0];
         };
 
         if( color === undefined || color === null ){
@@ -285,6 +279,22 @@ class BarGraphs extends GraphsBase
         };
 
         return color;
+    }
+
+    _getProp(s, iNode)
+    {
+        if (_.isArray(s)) {
+            return s[ this.iGroup ]
+        };
+        if (_.isFunction(s)) {
+            let _nodesInfo = [];
+            if( iNode != undefined ){
+                _nodesInfo.push( this.data[ iNode ] );
+            };
+            return s.apply( this , _nodesInfo );
+        };
+        
+        return s
     }
 
     _getBarWidth(cellWidth, ceilWidth2)
@@ -556,6 +566,8 @@ class BarGraphs extends GraphsBase
                         }
                     };  
 
+            
+
                     let finalPos = {
                         x         : Math.round(nodeData.x),
                         y         : nodeData.fromY, 
@@ -566,13 +578,15 @@ class BarGraphs extends GraphsBase
                         scaleY    : -1
                     };
                     nodeData.width = finalPos.width;
+
+                    let rectFill = me._getFillStyle( finalPos.fillStyle, finalPos );
                     
                     let rectCtx = {
                         x         : finalPos.x,
                         y         : nodeData.yOriginPoint.pos,//0,
                         width     : finalPos.width,
                         height    : finalPos.height,
-                        fillStyle : finalPos.fillStyle,
+                        fillStyle : rectFill,
                         fillAlpha : me.node.fillAlpha,
                         scaleY    : 0,
                         cursor    : 'pointer'
@@ -723,6 +737,21 @@ class BarGraphs extends GraphsBase
         });
 
         me._preDataLen = me._dataLen;
+    }
+
+    _getFillStyle( fillColor, rect ){
+        if( typeof fillColor == 'string' && colorIsHex( fillColor ) ){
+            let _style = {
+                points: [0, rect.height , 0, 0],
+                lineargradient: [
+                    {position: 0, color: colorRgba(fillColor, 1) },
+                    {position: 1, color: colorRgba(fillColor, 0.6) }
+                ]
+            }
+            return _style;
+        } else {
+            return fillColor;
+        }
     }
 
     setEnabledField()
@@ -1095,7 +1124,8 @@ class BarGraphs extends GraphsBase
                             easing: optsions.easing,
                             delay: h * optsions.delay,
                             onUpdate: function() {
-
+                                debugger
+                                this.context.fillStyle = me._getFillStyle( this.nodeData.color, this.context );
                             },
                             onComplete: function(arg) {
                                 if (arg.width < 3 && this.context) {

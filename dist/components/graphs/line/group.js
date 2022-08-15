@@ -7,8 +7,6 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports["default"] = void 0;
 
-var _toConsumableArray2 = _interopRequireDefault(require("@babel/runtime/helpers/toConsumableArray"));
-
 var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
 var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
@@ -158,14 +156,11 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
 
 
       if (arguments.length > 1 && (color === undefined || color === null)) {
-        //这个时候可以先取线的style，和线保持一致
-        color = this._getLineStrokeStyle();
-
         if (s && s.lineargradient) {
           color = s.lineargradient[parseInt(s.lineargradient.length / 2)].color;
         }
 
-        ; //因为_getLineStrokeStyle返回的可能是个渐变对象，所以要用isString过滤掉
+        ;
 
         if (!color || !_.isString(color)) {
           //那么最后，取this.fieldConfig.color
@@ -373,14 +368,18 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
           return;
         }
 
+        var _strokeStyle = me._getLineStrokeStyle();
+
+        ;
+
         if (me._line.context) {
           me._line.context.pointList = _.clone(pointList);
-          me._line.context.strokeStyle = me._getLineStrokeStyle();
+          me._line.context.strokeStyle = _strokeStyle;
         }
 
         if (me._bottomField && me._bottomLine && me._bottomLine.context) {
           me._bottomLine.context.pointList = _.clone(bottomPointList);
-          me._bottomLine.context.strokeStyle = me._getLineStrokeStyle();
+          me._bottomLine.context.strokeStyle = _strokeStyle;
         }
 
         if (me._area && me._area.context) {
@@ -582,7 +581,7 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
       var list = me._pointList;
       me._currPointList = list;
 
-      var strokeStyle = me._getLineStrokeStyle(list); //_getLineStrokeStyle 在配置线性渐变的情况下会需要
+      var strokeStyle = me._getLineStrokeStyle(list); //在配置线性渐变的情况下会需要
 
 
       var blineCtx = {
@@ -655,7 +654,7 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
           context: {
             path: me._getFillPath(me._line, me._bottomLine),
             fillStyle: me._getFillStyle(),
-            globalAlpha: _.isArray(me.area.alpha) ? 1 : me.area.alpha
+            globalAlpha: me.area.alpha
           }
         });
         area.on(event.types.get(), function (e) {
@@ -732,64 +731,58 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
     key: "_getFillStyle",
     value: function _getFillStyle() {
       var me = this;
-      var fill_gradient = null;
 
       var _fillStyle;
 
-      if (_.isArray(me.area.alpha)) {
-        var _me$ctx;
-
-        //alpha如果是数组，那么就是渐变背景，那么就至少要有两个值
-        //如果拿回来的style已经是个gradient了，那么就不管了
-        me.area.alpha.length = 2;
-
-        if (me.area.alpha[0] == undefined) {
-          me.area.alpha[0] = 0;
-        }
-
-        ;
-
-        if (me.area.alpha[1] == undefined) {
-          me.area.alpha[1] = 0;
-        }
-
-        ;
-
-        var lps = this._getLinearGradientPoints('area');
-
-        if (!lps) return; //创建一个线性渐变
-
-        fill_gradient = (_me$ctx = me.ctx).createLinearGradient.apply(_me$ctx, (0, _toConsumableArray2["default"])(lps));
-        var areaStyle = me.area.fillStyle;
-
-        if (!areaStyle && typeof me.line.strokeStyle == 'string') {
-          //第二优先级的strokeStyle如果是个 渐变对象就不能同步
-          areaStyle = me.line.strokeStyle;
-        }
-
-        if (!areaStyle) {
-          areaStyle = me.color;
-        }
-
-        var rgb = (0, _color.colorRgb)(areaStyle);
-        var rgba0 = rgb.replace(')', ', ' + me._getProp(me.area.alpha[0]) + ')').replace('RGB', 'RGBA');
-        fill_gradient.addColorStop(0, rgba0);
-        var rgba1 = rgb.replace(')', ', ' + me.area.alpha[1] + ')').replace('RGB', 'RGBA');
-        fill_gradient.addColorStop(1, rgba1);
-        _fillStyle = fill_gradient;
+      if (!this._opt.area || !this._opt.area.fillStyle) {
+        //如果用户没有配置area.strokeStyle，那么就用默认的
+        _fillStyle = this.color;
+      } else {
+        _fillStyle = this._getColor(this._opt.area.fillStyle);
       }
 
-      ;
+      var alpha = me.area.alpha;
 
-      if (!_fillStyle) {
-        // _fillStyle 可以 接受渐变色，可以不用_getColor， _getColor会过滤掉渐变色
-        _fillStyle = me._getProp(me.area.fillStyle) || me._getLineStrokeStyle(null, "area");
-      } //也可以传入一个线性渐变
+      if ((0, _color.colorIsHex)(_fillStyle) && !_.isArray(alpha)) {
+        alpha = [1, 0];
+      }
 
+      if (_.isArray(alpha)) {
+        //alpha如果是数组，那么就是渐变背景，那么就至少要有两个值
+        //如果拿回来的style已经是个gradient了，那么就不管了
+        alpha.length = 2;
+
+        if (alpha[0] == undefined) {
+          alpha[0] = 0;
+        }
+
+        ;
+
+        if (alpha[1] == undefined) {
+          alpha[1] = 0;
+        }
+
+        ;
+        var fill_gradient = {
+          lineargradient: []
+        };
+
+        if ((0, _color.colorIsHex)(_fillStyle)) {
+          //创建一个线性渐变
+          fill_gradient.lineargradient = [{
+            position: 0,
+            color: (0, _color.colorRgba)(_fillStyle, alpha[0])
+          }, {
+            position: 1,
+            color: (0, _color.colorRgba)(_fillStyle, alpha[1])
+          }];
+          _fillStyle = fill_gradient;
+        }
+      }
+
+      ; //也可以传入一个线性渐变
 
       if (_fillStyle && _fillStyle.lineargradient) {
-        var _me$ctx2;
-
         var lineargradient = _fillStyle.lineargradient; //如果是右轴的话，渐变色要对应的反转
 
         if (this.yAxisAlign == 'right') {
@@ -798,40 +791,56 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
 
         ; //如果用户配置 填充是一个线性渐变
 
-        var _lps = this._getLinearGradientPoints('area');
+        var lps = this._getLinearGradientPoints('area');
 
-        if (!_lps) return;
-        fill_gradient = (_me$ctx2 = me.ctx).createLinearGradient.apply(_me$ctx2, (0, _toConsumableArray2["default"])(_lps));
+        if (lps && lps.length) {
+          _fillStyle.points = lps;
+        }
 
-        _.each(lineargradient, function (item) {
-          fill_gradient.addColorStop(item.position, item.color);
-        });
+        ;
+      } //最后，如果是一个十六进制的颜色的话，就变成一个抄底的渐变
 
-        _fillStyle = fill_gradient;
-      }
 
       return _fillStyle;
     }
   }, {
     key: "_getLineStrokeStyle",
-    value: function _getLineStrokeStyle(pointList) {
-      var graphType = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'line';
-      var me = this;
-
+    value: function _getLineStrokeStyle(pointList, graphType) {
       var _style;
 
       if (!this._opt.line || !this._opt.line.strokeStyle) {
         //如果用户没有配置line.strokeStyle，那么就用默认的
-        return this.color;
+        _style = this.color;
+      } else {
+        _style = this._getColor(this._opt.line.strokeStyle);
       }
 
-      ;
-      _style = this._getColor(this._opt.line.strokeStyle);
+      if ((0, _color.colorIsHex)(_style)) {
+        var _lineargradient = {
+          lineargradient: [{
+            position: 0,
+            color: (0, _color.colorRgba)(_style, 0.2) //'rgba(56, 90, 204, 0.2)'
+
+          }, {
+            position: 0.05,
+            color: (0, _color.colorRgba)(_style, 1) //'rgba(56, 90, 204,  1)'
+
+          }, {
+            position: 0.95,
+            color: (0, _color.colorRgba)(_style, 1) //'rgba(56, 90, 204, 1)'
+
+          }, {
+            position: 1,
+            color: (0, _color.colorRgba)(_style, 0.2) //'rgba(56, 90, 204, 0.2)'
+
+          }]
+        };
+        _style = _lineargradient;
+      }
+
       var lineargradient = _style.lineargradient;
 
       if (lineargradient) {
-        var _me$ctx3;
-
         //如果是右轴的话，渐变色要对应的反转
         if (this.yAxisAlign == 'right') {
           lineargradient = lineargradient.reverse();
@@ -839,15 +848,10 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
 
         ; //如果用户配置 填充是一个线性渐变
 
-        var lps = this._getLinearGradientPoints(graphType, pointList);
+        var lps = this._getLinearGradientPoints('line', pointList);
 
         if (!lps) return;
-        _style = (_me$ctx3 = me.ctx).createLinearGradient.apply(_me$ctx3, (0, _toConsumableArray2["default"])(lps));
-
-        _.each(lineargradient, function (item) {
-          _style.addColorStop(item.position, item.color);
-        });
-
+        _style.points = lps;
         return _style;
       }
 
@@ -859,7 +863,7 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
       var graphType = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'line';
       var pointList = arguments.length > 1 ? arguments[1] : undefined;
       //如果graphType 传入的是area，并且，用户并没有配area.lineargradientDriction,那么就会默认和line.lineargradientDriction对齐
-      var driction = this[graphType].lineargradientDriction || this.line.lineargradientDriction;
+      var driction = this[graphType].lineargradientDriction;
       !pointList && (pointList = this._line.context.pointList);
       var linearPointStart, linearPointEnd;
 
@@ -1366,8 +1370,9 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
         y: point.y,
         rowData: null,
         //非data中的数据，没有rowData
-        color: this._getProp(this.node.strokeStyle) || this._getLineStrokeStyle()
+        color: null
       };
+      node.color = this._getProp(this.node.strokeStyle, node);
       return node;
     }
   }, {
@@ -1484,7 +1489,7 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
             },
             lineargradientDriction: {
               detail: '线的填充色是渐变对象的话，这里用来描述方向，默认从上到下（topBottom）,可选leftRight',
-              "default": 'topBottom' //可选 leftRight
+              "default": 'leftRight' //可选 topBottom
 
             },
             lineWidth: {
@@ -1509,15 +1514,18 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
             },
             shadowOffsetY: {
               detail: '折线的Y方向阴影偏移量',
-              "default": 4
+              "default": 2
             },
             shadowBlur: {
               detail: '折线的阴影模糊效果',
-              "default": 0
+              "default": 8
             },
             shadowColor: {
               detail: '折线的阴影颜色，默认和折线的strokeStyle同步， 如果strokeStyle是一个渐变色，那么shadowColor就会失效，变成默认的黑色，需要手动设置该shadowColor',
-              "default": null
+              "default": function _default() {
+                var fieldColor = this.color;
+                return (0, _color.colorRgba)(fieldColor, 0.4);
+              }
             }
           }
         },
@@ -1622,7 +1630,7 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
             },
             lineargradientDriction: {
               detail: '面积的填充色是渐变对象的话，这里用来描述方向，默认null(就会从line中取),从上到下（topBottom）,可选leftRight',
-              "default": null //默认null（就会和line保持一致），可选 topBottom leftRight
+              "default": 'topBottom' //默认null（就会和line保持一致），可选 topBottom leftRight
 
             },
             fillStyle: {
@@ -1631,7 +1639,7 @@ var LineGraphsGroup = /*#__PURE__*/function (_event$Dispatcher) {
             },
             alpha: {
               detail: '面积透明度',
-              "default": 0.25
+              "default": 0.5
             },
             bottomLine: {
               detail: 'area的底部线配置',

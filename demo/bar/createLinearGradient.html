@@ -34,33 +34,29 @@
         <tr>
             <td id="td-vl">
                 <form>
-                    <textarea id="code" name="code">
-                        var data = [
-                            ["xfield","uv" ,"pv" ,"click", "ppc"],
-                            [ 1      , 2   , 1  , 1    , 53]
-                        ];
-                
-                        var options = {
-                            "coord":{
-                                "type":"rect",
-                                "xAxis":{
-                                    "field":"xfield"
-                                }
-                            },
-                            "graphs":[
-                                {
-                                    //"animation": false,
-                                    "type":"bar",
-                                    "field":[["uv","pv"]],
-                                    "node":{"width":20}
-                                }
-                            ],
-                            "tips":{},
-                            "theme": ['#fa8402','#002bff']
-                        }
-
+                <textarea id="code" name="code">
                         
-                        window.bar = chartx.create("canvasTest" , data , options)
+                        var canvas = document.getElementById('canvas');
+                        var ctx = canvas.getContext('2d');
+
+                        ctx.setTransform.apply( ctx , [1,0,0,1,291,156]);
+                        
+                        var style = ctx.createLinearGradient(0,0,0,136);
+                        style.addColorStop(0, 'RGBA(0,43,255,1)');
+                        style.addColorStop(1, 'RGBA(0,43,255,0)');
+
+                        //style = 'red'
+
+                        var points = [6, -136, 34, -136, 34.584999999999994, -135.985, 35.14, -135.94, 35.665, -135.865, 36.160000000000004, -135.76, 36.625, -135.625, 37.059999999999995, -135.46, 37.465, -135.26500000000001, 37.839999999999996, -135.04, 38.185, -134.785, 38.5, -134.5, 38.785, -134.185, 39.04, -133.84, 39.265, -133.465, 39.46, -133.06, 39.625, -132.625, 39.76, -132.16, 39.865, -131.665, 39.94, -131.14, 39.985, -130.585, 40, -130, 40, 0, 0, 0, 0, -130, 0.015000000000000003, -130.585, 0.06000000000000001, -131.14, 0.13499999999999998, -131.665, 0.24000000000000005, -132.16, 0.375, -132.625, 0.5399999999999999, -133.06, 0.7349999999999999, -133.465, 0.9600000000000002, -133.84, 1.215, -134.185, 1.5, -134.5, 1.8150000000000004, -134.785, 2.1599999999999997, -135.04, 2.535, -135.26500000000001, 2.9399999999999995, -135.46, 3.375, -135.625, 3.8400000000000007, -135.76, 4.335, -135.865, 4.86, -135.94, 5.414999999999999, -135.985, 6, -136];
+                        ctx.beginPath();
+                        ctx.moveTo(points[0], points[1]);
+                        for (var j = 1; j < points.length / 2; ++j) {
+                            ctx.lineTo(points[j * 2], points[j * 2 + 1]);
+                        }
+                        ctx.closePath();
+                        
+                        ctx.fillStyle = style;
+                        ctx.fill();
             
 
             </textarea>
@@ -77,7 +73,7 @@
                         </p>
                     </div>
                     <div class="test-c">
-                        <div id="canvasTest" style='background:#fafafa;width:600px;height:400px;position:relative;'></div>
+                        <canvas width="600" height="400" id="canvas" style=" width: 600px; height: 400px; left: 0px; top: 0px;background:#fafafa"></canvas>
                     </div>
 
                 </div>

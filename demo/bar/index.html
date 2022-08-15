@@ -111,7 +111,13 @@
                         ],
                         "ppc"
                     ],
-                    yAxisAlign: "right"
+                    yAxisAlign: "right",
+                    node: {
+                        fillStyle: function(node){
+                            
+                            return this.getFieldConfig( node.field ).color
+                        }
+                    }
                 }
             ],
             dataZoom: {

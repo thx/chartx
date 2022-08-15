@@ -54,7 +54,7 @@
     "fmin": "0.0.2"
   },
   "dependencies": {
-    "canvax": "2.0.84",
+    "canvax": "2.0.86",
     "fmin": "0.0.2",
     "d3-force": "^2.1.1",
     "d3-hierarchy": "1.1.5",

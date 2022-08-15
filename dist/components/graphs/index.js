@@ -216,6 +216,13 @@ var GraphsBase = /*#__PURE__*/function (_Component) {
         }
       });
     }
+  }, {
+    key: "getFieldConfig",
+    value: function getFieldConfig(field) {
+      return this.app.getComponent({
+        name: 'coord'
+      }).getFieldConfig(field);
+    }
   }], [{
     key: "defaultProps",
     value: function defaultProps() {
@@ -242,7 +249,7 @@ var GraphsBase = /*#__PURE__*/function (_Component) {
         },
         color: {
           detail: 'line,area,node,label的抄底样式',
-          "default": 'left'
+          "default": ''
         }
       };
     }

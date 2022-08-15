@@ -1,6 +1,10 @@
 //十六进制颜色值的正则表达式 
 let reg = /^#([0-9a-fA-f]{3}|[0-9a-fA-f]{6})$/; 
 
+export function colorIsHex( color ){
+    return reg.test( color )
+}
+
 /*16进制颜色转为RGB格式*/  
 export function colorRgb( hex ){  
     if( Array.isArray(hex) ){

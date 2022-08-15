@@ -185,10 +185,7 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
         }
       });
       this.sprite.addChild(this.induce);
-      var _mosedownIng = false;
-
-      var _preCursor = me.app.canvax.domView ? "default" : me.app.canvax.domView.style.cursor; //滚轮缩放相关
-
+      var _mosedownIng = false; //滚轮缩放相关
 
       var _wheelHandleTimeLen = 32; //16*2
 
@@ -216,7 +213,7 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
             if (e.type == "mouseup" || e.type == "mouseout") {
               me.induce.toBack();
               _mosedownIng = false;
-              me.app.canvax.domView && (me.app.canvax.domView.style.cursor = _preCursor);
+              me.app.canvax.domView && (me.app.canvax.domView.style.cursor = '');
             }
 
             ;

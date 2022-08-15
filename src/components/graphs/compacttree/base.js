@@ -583,7 +583,6 @@ class RelationBase extends GraphsBase {
         this.sprite.addChild( this.induce );
 
         let _mosedownIng = false;
-        let _preCursor = me.app.canvax.domView ? "default" : me.app.canvax.domView.style.cursor;
 
         //滚轮缩放相关
         let _wheelHandleTimeLen = 32; //16*2
@@ -608,7 +607,7 @@ class RelationBase extends GraphsBase {
                     if (e.type == "mouseup" || e.type == "mouseout") {
                         me.induce.toBack();
                         _mosedownIng = false;
-                        me.app.canvax.domView && (me.app.canvax.domView.style.cursor = _preCursor);
+                        me.app.canvax.domView && (me.app.canvax.domView.style.cursor = '');
                     };
                     if (e.type == "mousemove") {
                         if ( _mosedownIng ) {

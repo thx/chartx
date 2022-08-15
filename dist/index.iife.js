@@ -4451,6 +4451,83 @@ var chartx = (function () {
 	  return SystemRenderer;
 	}();
 
+	var arrayLikeToArray = createCommonjsModule$1(function (module) {
+	function _arrayLikeToArray(arr, len) {
+	  if (len == null || len > arr.length) len = arr.length;
+
+	  for (var i = 0, arr2 = new Array(len); i < len; i++) {
+	    arr2[i] = arr[i];
+	  }
+
+	  return arr2;
+	}
+
+	module.exports = _arrayLikeToArray;
+	module.exports["default"] = module.exports, module.exports.__esModule = true;
+	});
+
+	unwrapExports$1(arrayLikeToArray);
+
+	var arrayWithoutHoles = createCommonjsModule$1(function (module) {
+	function _arrayWithoutHoles(arr) {
+	  if (Array.isArray(arr)) return arrayLikeToArray(arr);
+	}
+
+	module.exports = _arrayWithoutHoles;
+	module.exports["default"] = module.exports, module.exports.__esModule = true;
+	});
+
+	unwrapExports$1(arrayWithoutHoles);
+
+	var iterableToArray = createCommonjsModule$1(function (module) {
+	function _iterableToArray(iter) {
+	  if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter);
+	}
+
+	module.exports = _iterableToArray;
+	module.exports["default"] = module.exports, module.exports.__esModule = true;
+	});
+
+	unwrapExports$1(iterableToArray);
+
+	var unsupportedIterableToArray = createCommonjsModule$1(function (module) {
+	function _unsupportedIterableToArray(o, minLen) {
+	  if (!o) return;
+	  if (typeof o === "string") return arrayLikeToArray(o, minLen);
+	  var n = Object.prototype.toString.call(o).slice(8, -1);
+	  if (n === "Object" && o.constructor) n = o.constructor.name;
+	  if (n === "Map" || n === "Set") return Array.from(o);
+	  if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return arrayLikeToArray(o, minLen);
+	}
+
+	module.exports = _unsupportedIterableToArray;
+	module.exports["default"] = module.exports, module.exports.__esModule = true;
+	});
+
+	unwrapExports$1(unsupportedIterableToArray);
+
+	var nonIterableSpread = createCommonjsModule$1(function (module) {
+	function _nonIterableSpread() {
+	  throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+	}
+
+	module.exports = _nonIterableSpread;
+	module.exports["default"] = module.exports, module.exports.__esModule = true;
+	});
+
+	unwrapExports$1(nonIterableSpread);
+
+	var toConsumableArray = createCommonjsModule$1(function (module) {
+	function _toConsumableArray(arr) {
+	  return arrayWithoutHoles(arr) || iterableToArray(arr) || unsupportedIterableToArray(arr) || nonIterableSpread();
+	}
+
+	module.exports = _toConsumableArray;
+	module.exports["default"] = module.exports, module.exports.__esModule = true;
+	});
+
+	var _toConsumableArray = unwrapExports$1(toConsumableArray);
+
 	var CanvasGraphicsRenderer = /*#__PURE__*/function () {
 	  function CanvasGraphicsRenderer(renderer) {
 	    _classCallCheck(this, CanvasGraphicsRenderer);
@@ -4474,7 +4551,42 @@ var chartx = (function () {
 	        var data = graphicsData[i];
 	        var shape = data.shape;
 	        var fillStyle = data.fillStyle;
+
+	        if (fillStyle && _typeof(fillStyle) == 'object') {
+	          //兼容一下大小写
+	          var linearGradient = fillStyle.linearGradient || fillStyle.lineargradient;
+
+	          if (linearGradient && fillStyle.points) {
+	            (function () {
+	              var _style = ctx.createLinearGradient.apply(ctx, _toConsumableArray(fillStyle.points));
+
+	              linearGradient.forEach(function (item) {
+	                _style.addColorStop(item.position, item.color);
+	              });
+	              fillStyle = _style;
+	            })();
+	          }
+	        }
+
 	        var strokeStyle = data.strokeStyle;
+
+	        if (strokeStyle && _typeof(strokeStyle) == 'object') {
+	          //兼容一下大小写
+	          var _linearGradient = strokeStyle.linearGradient || strokeStyle.lineargradient;
+
+	          if (_linearGradient && strokeStyle.points) {
+	            (function () {
+	              var _style = ctx.createLinearGradient.apply(ctx, _toConsumableArray(strokeStyle.points));
+
+	              _linearGradient.forEach(function (item) {
+	                _style.addColorStop(item.position, item.color);
+	              });
+
+	              strokeStyle = _style;
+	            })();
+	          }
+	        }
+
 	        var fill = data.hasFill() && data.fillAlpha && !isClip;
 	        var line = data.hasLine() && data.strokeAlpha && !isClip;
 	        ctx.lineWidth = data.lineWidth;
@@ -8143,7 +8255,7 @@ var chartx = (function () {
 	}(Shape);
 
 	var Canvax = {
-	  version: "2.0.84",
+	  version: "2.0.86",
 	  _: _,
 	  $: $,
 	  event: event,
@@ -16743,6 +16855,234 @@ var chartx = (function () {
 
 	unwrapExports(polar);
 
+	var arrayWithHoles = createCommonjsModule(function (module) {
+	function _arrayWithHoles(arr) {
+	  if (Array.isArray(arr)) return arr;
+	}
+
+	module.exports = _arrayWithHoles, module.exports.__esModule = true, module.exports["default"] = module.exports;
+	});
+
+	unwrapExports(arrayWithHoles);
+
+	var iterableToArrayLimit = createCommonjsModule(function (module) {
+	function _iterableToArrayLimit(arr, i) {
+	  var _i = arr == null ? null : typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"];
+
+	  if (_i == null) return;
+	  var _arr = [];
+	  var _n = true;
+	  var _d = false;
+
+	  var _s, _e;
+
+	  try {
+	    for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) {
+	      _arr.push(_s.value);
+
+	      if (i && _arr.length === i) break;
+	    }
+	  } catch (err) {
+	    _d = true;
+	    _e = err;
+	  } finally {
+	    try {
+	      if (!_n && _i["return"] != null) _i["return"]();
+	    } finally {
+	      if (_d) throw _e;
+	    }
+	  }
+
+	  return _arr;
+	}
+
+	module.exports = _iterableToArrayLimit, module.exports.__esModule = true, module.exports["default"] = module.exports;
+	});
+
+	unwrapExports(iterableToArrayLimit);
+
+	var arrayLikeToArray$1 = createCommonjsModule(function (module) {
+	function _arrayLikeToArray(arr, len) {
+	  if (len == null || len > arr.length) len = arr.length;
+
+	  for (var i = 0, arr2 = new Array(len); i < len; i++) {
+	    arr2[i] = arr[i];
+	  }
+
+	  return arr2;
+	}
+
+	module.exports = _arrayLikeToArray, module.exports.__esModule = true, module.exports["default"] = module.exports;
+	});
+
+	unwrapExports(arrayLikeToArray$1);
+
+	var unsupportedIterableToArray$1 = createCommonjsModule(function (module) {
+	function _unsupportedIterableToArray(o, minLen) {
+	  if (!o) return;
+	  if (typeof o === "string") return arrayLikeToArray$1(o, minLen);
+	  var n = Object.prototype.toString.call(o).slice(8, -1);
+	  if (n === "Object" && o.constructor) n = o.constructor.name;
+	  if (n === "Map" || n === "Set") return Array.from(o);
+	  if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return arrayLikeToArray$1(o, minLen);
+	}
+
+	module.exports = _unsupportedIterableToArray, module.exports.__esModule = true, module.exports["default"] = module.exports;
+	});
+
+	unwrapExports(unsupportedIterableToArray$1);
+
+	var nonIterableRest = createCommonjsModule(function (module) {
+	function _nonIterableRest() {
+	  throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+	}
+
+	module.exports = _nonIterableRest, module.exports.__esModule = true, module.exports["default"] = module.exports;
+	});
+
+	unwrapExports(nonIterableRest);
+
+	var slicedToArray = createCommonjsModule(function (module) {
+	function _slicedToArray(arr, i) {
+	  return arrayWithHoles(arr) || iterableToArrayLimit(arr, i) || unsupportedIterableToArray$1(arr, i) || nonIterableRest();
+	}
+
+	module.exports = _slicedToArray, module.exports.__esModule = true, module.exports["default"] = module.exports;
+	});
+
+	unwrapExports(slicedToArray);
+
+	var color = createCommonjsModule(function (module, exports) {
+
+
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.colorIsHex = colorIsHex;
+	exports.colorRgb = colorRgb;
+	exports.colorRgba = colorRgba;
+	exports.gradient = gradient;
+	exports.hex2rgb = hex2rgb;
+	exports.rgb2hex = rgb2hex;
+	exports.rgba2rgb = rgba2rgb;
+
+	var _slicedToArray2 = interopRequireDefault(slicedToArray);
+
+	//十六进制颜色值的正则表达式 
+	var reg = /^#([0-9a-fA-f]{3}|[0-9a-fA-f]{6})$/;
+
+	function colorIsHex(color) {
+	  return reg.test(color);
+	}
+	/*16进制颜色转为RGB格式*/
+
+
+	function colorRgb(hex) {
+	  if (Array.isArray(hex)) {
+	    hex = hex[0];
+	  }
+
+	  if (!hex) {
+	    return 'RGB(0,0,0)';
+	  }
+	  var sColor = hex.toLowerCase();
+
+	  if (sColor && reg.test(sColor)) {
+	    if (sColor.length === 4) {
+	      var sColorNew = "#";
+
+	      for (var i = 1; i < 4; i += 1) {
+	        sColorNew += sColor.slice(i, i + 1).concat(sColor.slice(i, i + 1));
+	      }
+
+	      sColor = sColorNew;
+	    } //处理六位的颜色值  
+
+
+	    var sColorChange = [];
+
+	    for (var _i = 1; _i < 7; _i += 2) {
+	      sColorChange.push(parseInt("0x" + sColor.slice(_i, _i + 2)));
+	    }
+
+	    return "RGB(" + sColorChange.join(",") + ")";
+	  } else {
+	    return sColor;
+	  }
+	}
+
+	function colorRgba(hex, a) {
+	  return colorRgb(hex).replace(')', ',' + a + ')').replace('RGB', 'RGBA');
+	}
+
+	function hex2rgb(hex, out) {
+	  var rgb = [];
+
+	  for (var i = 1; i < 7; i += 2) {
+	    rgb.push(parseInt("0x" + hex.slice(i, i + 2)));
+	  }
+
+	  return rgb;
+	}
+
+	function rgb2hex(rgb) {
+	  var r = rgb[0];
+	  var g = rgb[1];
+	  var b = rgb[2];
+	  var hex = (r << 16 | g << 8 | b).toString(16);
+	  return "#" + new Array(Math.abs(hex.length - 7)).join("0") + hex;
+	}
+
+	function rgba2rgb(RGBA_color) {
+	  var background_color = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : "#ffffff";
+
+	  var _RGBA_color$match = RGBA_color.match(/[\d\.]+/g),
+	      _RGBA_color$match2 = (0, _slicedToArray2["default"])(_RGBA_color$match, 4),
+	      r = _RGBA_color$match2[0],
+	      g = _RGBA_color$match2[1],
+	      b = _RGBA_color$match2[2],
+	      a = _RGBA_color$match2[3];
+
+	  var _colorRgb$match = colorRgb(background_color).match(/[\d\.]+/g),
+	      _colorRgb$match2 = (0, _slicedToArray2["default"])(_colorRgb$match, 3),
+	      br = _colorRgb$match2[0],
+	      bg = _colorRgb$match2[1],
+	      bb = _colorRgb$match2[2];
+
+	  return "RGB(" + [(1 - a) * br + a * r, (1 - a) * bg + a * g, (1 - a) * bb + a * b].join(',') + ")";
+	} // 计算渐变过渡色
+
+
+	function gradient(startColor, endColor) {
+	  var step = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 100;
+	  // 将 hex 转换为rgb
+	  var sColor = hex2rgb(startColor);
+	  var eColor = hex2rgb(endColor); // 计算R\G\B每一步的差值
+
+	  var rStep = (eColor[0] - sColor[0]) / step;
+	  var gStep = (eColor[1] - sColor[1]) / step;
+	  var bStep = (eColor[2] - sColor[2]) / step;
+	  var gradientColorArr = [];
+
+	  for (var i = 0; i < step; i++) {
+	    // 计算每一步的hex值
+	    gradientColorArr.push(rgb2hex([parseInt(rStep * i + sColor[0]), parseInt(gStep * i + sColor[1]), parseInt(bStep * i + sColor[2])]));
+	  }
+
+	  return gradientColorArr;
+	}
+	});
+
+	unwrapExports(color);
+	var color_1 = color.colorIsHex;
+	var color_2 = color.colorRgb;
+	var color_3 = color.colorRgba;
+	var color_4 = color.gradient;
+	var color_5 = color.hex2rgb;
+	var color_6 = color.rgb2hex;
+	var color_7 = color.rgba2rgb;
+
 	var graphs = createCommonjsModule(function (module, exports) {
 
 
@@ -16953,6 +17293,13 @@ var chartx = (function () {
 	        }
 	      });
 	    }
+	  }, {
+	    key: "getFieldConfig",
+	    value: function getFieldConfig(field) {
+	      return this.app.getComponent({
+	        name: 'coord'
+	      }).getFieldConfig(field);
+	    }
 	  }], [{
 	    key: "defaultProps",
 	    value: function defaultProps() {
@@ -16979,7 +17326,7 @@ var chartx = (function () {
 	        },
 	        color: {
 	          detail: 'line,area,node,label的抄底样式',
-	          "default": 'left'
+	          "default": ''
 	        }
 	      };
 	    }
@@ -17014,6 +17361,8 @@ var chartx = (function () {
 	var _getPrototypeOf2 = interopRequireDefault(getPrototypeOf$1);
 
 	var _canvax = interopRequireDefault(Canvax);
+
+
 
 
 
@@ -17115,7 +17464,6 @@ var chartx = (function () {
 	  }, {
 	    key: "_getColor",
 	    value: function _getColor(color, nodeData) {
-	      var me = this;
 	      var field = nodeData.field;
 
 	      var _flattenField = _.flatten([this.field]);
@@ -17135,17 +17483,8 @@ var chartx = (function () {
 	      }
 
 	      if (color && color.lineargradient && color.lineargradient.length) {
-	        if (nodeData.rectHeight != 0) {
-	          var _style = me.ctx.createLinearGradient(nodeData.x, nodeData.fromY + nodeData.rectHeight, nodeData.x, nodeData.fromY);
-
-	          _.each(color.lineargradient, function (item) {
-	            _style.addColorStop(item.position, item.color);
-	          });
-
-	          color = _style;
-	        } else {
-	          color = color.lineargradient[parseInt(color.lineargradient.length / 2)].color;
-	        }
+	        //如果是个线性渐变的话，就需要加上渐变的位置
+	        color.points = [0, nodeData.rectHeight, 0, 0];
 	      }
 
 	      if (color === undefined || color === null) {
@@ -17154,6 +17493,23 @@ var chartx = (function () {
 	        color = fieldConfig.color;
 	      }
 	      return color;
+	    }
+	  }, {
+	    key: "_getProp",
+	    value: function _getProp(s, iNode) {
+	      if (_.isArray(s)) {
+	        return s[this.iGroup];
+	      }
+
+	      if (_.isFunction(s)) {
+	        var _nodesInfo = [];
+
+	        if (iNode != undefined) {
+	          _nodesInfo.push(this.data[iNode]);
+	        }
+	        return s.apply(this, _nodesInfo);
+	      }
+	      return s;
 	    }
 	  }, {
 	    key: "_getBarWidth",
@@ -17417,13 +17773,16 @@ var chartx = (function () {
 	              scaleY: -1
 	            };
 	            nodeData.width = finalPos.width;
+
+	            var rectFill = me._getFillStyle(finalPos.fillStyle, finalPos);
+
 	            var rectCtx = {
 	              x: finalPos.x,
 	              y: nodeData.yOriginPoint.pos,
 	              //0,
 	              width: finalPos.width,
 	              height: finalPos.height,
-	              fillStyle: finalPos.fillStyle,
+	              fillStyle: rectFill,
 	              fillAlpha: me.node.fillAlpha,
 	              scaleY: 0,
 	              cursor: 'pointer'
@@ -17559,6 +17918,25 @@ var chartx = (function () {
 	        animate: animate
 	      });
 	      me._preDataLen = me._dataLen;
+	    }
+	  }, {
+	    key: "_getFillStyle",
+	    value: function _getFillStyle(fillColor, rect) {
+	      if (typeof fillColor == 'string' && (0, color.colorIsHex)(fillColor)) {
+	        var _style = {
+	          points: [0, rect.height, 0, 0],
+	          lineargradient: [{
+	            position: 0,
+	            color: (0, color.colorRgba)(fillColor, 1)
+	          }, {
+	            position: 1,
+	            color: (0, color.colorRgba)(fillColor, 0.6)
+	          }]
+	        };
+	        return _style;
+	      } else {
+	        return fillColor;
+	      }
 	    }
 	  }, {
 	    key: "setEnabledField",
@@ -17955,7 +18333,10 @@ var chartx = (function () {
 	                duration: optsions.duration,
 	                easing: optsions.easing,
 	                delay: h * optsions.delay,
-	                onUpdate: function onUpdate() {},
+	                onUpdate: function onUpdate() {
+	                  debugger;
+	                  this.context.fillStyle = me._getFillStyle(this.nodeData.color, this.context);
+	                },
 	                onComplete: function onComplete(arg) {
 	                  if (arg.width < 3 && this.context) {
 	                    this.context.radius = 0;
@@ -18123,7 +18504,7 @@ var chartx = (function () {
 	            },
 	            radius: {
 	              detail: '叶子节点的圆角半径',
-	              "default": 3
+	              "default": 10
 	            },
 	            fillStyle: {
 	              detail: 'bar填充色',
@@ -18251,267 +18632,6 @@ var chartx = (function () {
 
 	unwrapExports(bar);
 
-	var arrayLikeToArray = createCommonjsModule(function (module) {
-	function _arrayLikeToArray(arr, len) {
-	  if (len == null || len > arr.length) len = arr.length;
-
-	  for (var i = 0, arr2 = new Array(len); i < len; i++) {
-	    arr2[i] = arr[i];
-	  }
-
-	  return arr2;
-	}
-
-	module.exports = _arrayLikeToArray, module.exports.__esModule = true, module.exports["default"] = module.exports;
-	});
-
-	unwrapExports(arrayLikeToArray);
-
-	var arrayWithoutHoles = createCommonjsModule(function (module) {
-	function _arrayWithoutHoles(arr) {
-	  if (Array.isArray(arr)) return arrayLikeToArray(arr);
-	}
-
-	module.exports = _arrayWithoutHoles, module.exports.__esModule = true, module.exports["default"] = module.exports;
-	});
-
-	unwrapExports(arrayWithoutHoles);
-
-	var iterableToArray = createCommonjsModule(function (module) {
-	function _iterableToArray(iter) {
-	  if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter);
-	}
-
-	module.exports = _iterableToArray, module.exports.__esModule = true, module.exports["default"] = module.exports;
-	});
-
-	unwrapExports(iterableToArray);
-
-	var unsupportedIterableToArray = createCommonjsModule(function (module) {
-	function _unsupportedIterableToArray(o, minLen) {
-	  if (!o) return;
-	  if (typeof o === "string") return arrayLikeToArray(o, minLen);
-	  var n = Object.prototype.toString.call(o).slice(8, -1);
-	  if (n === "Object" && o.constructor) n = o.constructor.name;
-	  if (n === "Map" || n === "Set") return Array.from(o);
-	  if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return arrayLikeToArray(o, minLen);
-	}
-
-	module.exports = _unsupportedIterableToArray, module.exports.__esModule = true, module.exports["default"] = module.exports;
-	});
-
-	unwrapExports(unsupportedIterableToArray);
-
-	var nonIterableSpread = createCommonjsModule(function (module) {
-	function _nonIterableSpread() {
-	  throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-	}
-
-	module.exports = _nonIterableSpread, module.exports.__esModule = true, module.exports["default"] = module.exports;
-	});
-
-	unwrapExports(nonIterableSpread);
-
-	var toConsumableArray = createCommonjsModule(function (module) {
-	function _toConsumableArray(arr) {
-	  return arrayWithoutHoles(arr) || iterableToArray(arr) || unsupportedIterableToArray(arr) || nonIterableSpread();
-	}
-
-	module.exports = _toConsumableArray, module.exports.__esModule = true, module.exports["default"] = module.exports;
-	});
-
-	unwrapExports(toConsumableArray);
-
-	var arrayWithHoles = createCommonjsModule(function (module) {
-	function _arrayWithHoles(arr) {
-	  if (Array.isArray(arr)) return arr;
-	}
-
-	module.exports = _arrayWithHoles, module.exports.__esModule = true, module.exports["default"] = module.exports;
-	});
-
-	unwrapExports(arrayWithHoles);
-
-	var iterableToArrayLimit = createCommonjsModule(function (module) {
-	function _iterableToArrayLimit(arr, i) {
-	  var _i = arr == null ? null : typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"];
-
-	  if (_i == null) return;
-	  var _arr = [];
-	  var _n = true;
-	  var _d = false;
-
-	  var _s, _e;
-
-	  try {
-	    for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) {
-	      _arr.push(_s.value);
-
-	      if (i && _arr.length === i) break;
-	    }
-	  } catch (err) {
-	    _d = true;
-	    _e = err;
-	  } finally {
-	    try {
-	      if (!_n && _i["return"] != null) _i["return"]();
-	    } finally {
-	      if (_d) throw _e;
-	    }
-	  }
-
-	  return _arr;
-	}
-
-	module.exports = _iterableToArrayLimit, module.exports.__esModule = true, module.exports["default"] = module.exports;
-	});
-
-	unwrapExports(iterableToArrayLimit);
-
-	var nonIterableRest = createCommonjsModule(function (module) {
-	function _nonIterableRest() {
-	  throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-	}
-
-	module.exports = _nonIterableRest, module.exports.__esModule = true, module.exports["default"] = module.exports;
-	});
-
-	unwrapExports(nonIterableRest);
-
-	var slicedToArray = createCommonjsModule(function (module) {
-	function _slicedToArray(arr, i) {
-	  return arrayWithHoles(arr) || iterableToArrayLimit(arr, i) || unsupportedIterableToArray(arr, i) || nonIterableRest();
-	}
-
-	module.exports = _slicedToArray, module.exports.__esModule = true, module.exports["default"] = module.exports;
-	});
-
-	unwrapExports(slicedToArray);
-
-	var color = createCommonjsModule(function (module, exports) {
-
-
-
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	exports.colorRgb = colorRgb;
-	exports.colorRgba = colorRgba;
-	exports.gradient = gradient;
-	exports.hex2rgb = hex2rgb;
-	exports.rgb2hex = rgb2hex;
-	exports.rgba2rgb = rgba2rgb;
-
-	var _slicedToArray2 = interopRequireDefault(slicedToArray);
-
-	//十六进制颜色值的正则表达式 
-	var reg = /^#([0-9a-fA-f]{3}|[0-9a-fA-f]{6})$/;
-	/*16进制颜色转为RGB格式*/
-
-	function colorRgb(hex) {
-	  if (Array.isArray(hex)) {
-	    hex = hex[0];
-	  }
-
-	  if (!hex) {
-	    return 'RGB(0,0,0)';
-	  }
-	  var sColor = hex.toLowerCase();
-
-	  if (sColor && reg.test(sColor)) {
-	    if (sColor.length === 4) {
-	      var sColorNew = "#";
-
-	      for (var i = 1; i < 4; i += 1) {
-	        sColorNew += sColor.slice(i, i + 1).concat(sColor.slice(i, i + 1));
-	      }
-
-	      sColor = sColorNew;
-	    } //处理六位的颜色值  
-
-
-	    var sColorChange = [];
-
-	    for (var _i = 1; _i < 7; _i += 2) {
-	      sColorChange.push(parseInt("0x" + sColor.slice(_i, _i + 2)));
-	    }
-
-	    return "RGB(" + sColorChange.join(",") + ")";
-	  } else {
-	    return sColor;
-	  }
-	}
-
-	function colorRgba(hex, a) {
-	  return colorRgb(hex).replace(')', ',' + a + ')').replace('RGB', 'RGBA');
-	}
-
-	function hex2rgb(hex, out) {
-	  var rgb = [];
-
-	  for (var i = 1; i < 7; i += 2) {
-	    rgb.push(parseInt("0x" + hex.slice(i, i + 2)));
-	  }
-
-	  return rgb;
-	}
-
-	function rgb2hex(rgb) {
-	  var r = rgb[0];
-	  var g = rgb[1];
-	  var b = rgb[2];
-	  var hex = (r << 16 | g << 8 | b).toString(16);
-	  return "#" + new Array(Math.abs(hex.length - 7)).join("0") + hex;
-	}
-
-	function rgba2rgb(RGBA_color) {
-	  var background_color = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : "#ffffff";
-
-	  var _RGBA_color$match = RGBA_color.match(/[\d\.]+/g),
-	      _RGBA_color$match2 = (0, _slicedToArray2["default"])(_RGBA_color$match, 4),
-	      r = _RGBA_color$match2[0],
-	      g = _RGBA_color$match2[1],
-	      b = _RGBA_color$match2[2],
-	      a = _RGBA_color$match2[3];
-
-	  var _colorRgb$match = colorRgb(background_color).match(/[\d\.]+/g),
-	      _colorRgb$match2 = (0, _slicedToArray2["default"])(_colorRgb$match, 3),
-	      br = _colorRgb$match2[0],
-	      bg = _colorRgb$match2[1],
-	      bb = _colorRgb$match2[2];
-
-	  return "RGB(" + [(1 - a) * br + a * r, (1 - a) * bg + a * g, (1 - a) * bb + a * b].join(',') + ")";
-	} // 计算渐变过渡色
-
-
-	function gradient(startColor, endColor) {
-	  var step = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 100;
-	  // 将 hex 转换为rgb
-	  var sColor = hex2rgb(startColor);
-	  var eColor = hex2rgb(endColor); // 计算R\G\B每一步的差值
-
-	  var rStep = (eColor[0] - sColor[0]) / step;
-	  var gStep = (eColor[1] - sColor[1]) / step;
-	  var bStep = (eColor[2] - sColor[2]) / step;
-	  var gradientColorArr = [];
-
-	  for (var i = 0; i < step; i++) {
-	    // 计算每一步的hex值
-	    gradientColorArr.push(rgb2hex([parseInt(rStep * i + sColor[0]), parseInt(gStep * i + sColor[1]), parseInt(bStep * i + sColor[2])]));
-	  }
-
-	  return gradientColorArr;
-	}
-	});
-
-	unwrapExports(color);
-	var color_1 = color.colorRgb;
-	var color_2 = color.colorRgba;
-	var color_3 = color.gradient;
-	var color_4 = color.hex2rgb;
-	var color_5 = color.rgb2hex;
-	var color_6 = color.rgba2rgb;
-
 	var group = createCommonjsModule(function (module, exports) {
 
 
@@ -18520,8 +18640,6 @@ var chartx = (function () {
 	  value: true
 	});
 	exports["default"] = void 0;
-
-	var _toConsumableArray2 = interopRequireDefault(toConsumableArray);
 
 	var _classCallCheck2 = interopRequireDefault(classCallCheck$1);
 
@@ -18672,9 +18790,6 @@ var chartx = (function () {
 
 
 	      if (arguments.length > 1 && (color === undefined || color === null)) {
-	        //这个时候可以先取线的style，和线保持一致
-	        color = this._getLineStrokeStyle();
-
 	        if (s && s.lineargradient) {
 	          color = s.lineargradient[parseInt(s.lineargradient.length / 2)].color;
 	        }
@@ -18851,14 +18966,16 @@ var chartx = (function () {
 	          return;
 	        }
 
+	        var _strokeStyle = me._getLineStrokeStyle();
+
 	        if (me._line.context) {
 	          me._line.context.pointList = _.clone(pointList);
-	          me._line.context.strokeStyle = me._getLineStrokeStyle();
+	          me._line.context.strokeStyle = _strokeStyle;
 	        }
 
 	        if (me._bottomField && me._bottomLine && me._bottomLine.context) {
 	          me._bottomLine.context.pointList = _.clone(bottomPointList);
-	          me._bottomLine.context.strokeStyle = me._getLineStrokeStyle();
+	          me._bottomLine.context.strokeStyle = _strokeStyle;
 	        }
 
 	        if (me._area && me._area.context) {
@@ -19044,7 +19161,7 @@ var chartx = (function () {
 	      var list = me._pointList;
 	      me._currPointList = list;
 
-	      var strokeStyle = me._getLineStrokeStyle(list); //_getLineStrokeStyle 在配置线性渐变的情况下会需要
+	      var strokeStyle = me._getLineStrokeStyle(list); //在配置线性渐变的情况下会需要
 
 
 	      var blineCtx = {
@@ -19111,7 +19228,7 @@ var chartx = (function () {
 	          context: {
 	            path: me._getFillPath(me._line, me._bottomLine),
 	            fillStyle: me._getFillStyle(),
-	            globalAlpha: _.isArray(me.area.alpha) ? 1 : me.area.alpha
+	            globalAlpha: me.area.alpha
 	          }
 	        });
 	        area.on(event.types.get(), function (e) {
@@ -19186,110 +19303,115 @@ var chartx = (function () {
 	    key: "_getFillStyle",
 	    value: function _getFillStyle() {
 	      var me = this;
-	      var fill_gradient = null;
 
 	      var _fillStyle;
 
-	      if (_.isArray(me.area.alpha)) {
-	        var _me$ctx;
-
-	        //alpha如果是数组，那么就是渐变背景，那么就至少要有两个值
-	        //如果拿回来的style已经是个gradient了，那么就不管了
-	        me.area.alpha.length = 2;
-
-	        if (me.area.alpha[0] == undefined) {
-	          me.area.alpha[0] = 0;
-	        }
-
-	        if (me.area.alpha[1] == undefined) {
-	          me.area.alpha[1] = 0;
-	        }
-
-	        var lps = this._getLinearGradientPoints('area');
-
-	        if (!lps) return; //创建一个线性渐变
-
-	        fill_gradient = (_me$ctx = me.ctx).createLinearGradient.apply(_me$ctx, (0, _toConsumableArray2["default"])(lps));
-	        var areaStyle = me.area.fillStyle;
-
-	        if (!areaStyle && typeof me.line.strokeStyle == 'string') {
-	          //第二优先级的strokeStyle如果是个 渐变对象就不能同步
-	          areaStyle = me.line.strokeStyle;
-	        }
-
-	        if (!areaStyle) {
-	          areaStyle = me.color;
-	        }
-
-	        var rgb = (0, color.colorRgb)(areaStyle);
-	        var rgba0 = rgb.replace(')', ', ' + me._getProp(me.area.alpha[0]) + ')').replace('RGB', 'RGBA');
-	        fill_gradient.addColorStop(0, rgba0);
-	        var rgba1 = rgb.replace(')', ', ' + me.area.alpha[1] + ')').replace('RGB', 'RGBA');
-	        fill_gradient.addColorStop(1, rgba1);
-	        _fillStyle = fill_gradient;
+	      if (!this._opt.area || !this._opt.area.fillStyle) {
+	        //如果用户没有配置area.strokeStyle，那么就用默认的
+	        _fillStyle = this.color;
+	      } else {
+	        _fillStyle = this._getColor(this._opt.area.fillStyle);
 	      }
 
-	      if (!_fillStyle) {
-	        // _fillStyle 可以 接受渐变色，可以不用_getColor， _getColor会过滤掉渐变色
-	        _fillStyle = me._getProp(me.area.fillStyle) || me._getLineStrokeStyle(null, "area");
-	      } //也可以传入一个线性渐变
+	      var alpha = me.area.alpha;
 
+	      if ((0, color.colorIsHex)(_fillStyle) && !_.isArray(alpha)) {
+	        alpha = [1, 0];
+	      }
+
+	      if (_.isArray(alpha)) {
+	        //alpha如果是数组，那么就是渐变背景，那么就至少要有两个值
+	        //如果拿回来的style已经是个gradient了，那么就不管了
+	        alpha.length = 2;
+
+	        if (alpha[0] == undefined) {
+	          alpha[0] = 0;
+	        }
+
+	        if (alpha[1] == undefined) {
+	          alpha[1] = 0;
+	        }
+	        var fill_gradient = {
+	          lineargradient: []
+	        };
+
+	        if ((0, color.colorIsHex)(_fillStyle)) {
+	          //创建一个线性渐变
+	          fill_gradient.lineargradient = [{
+	            position: 0,
+	            color: (0, color.colorRgba)(_fillStyle, alpha[0])
+	          }, {
+	            position: 1,
+	            color: (0, color.colorRgba)(_fillStyle, alpha[1])
+	          }];
+	          _fillStyle = fill_gradient;
+	        }
+	      }
 
 	      if (_fillStyle && _fillStyle.lineargradient) {
-	        var _me$ctx2;
-
 	        var lineargradient = _fillStyle.lineargradient; //如果是右轴的话，渐变色要对应的反转
 
 	        if (this.yAxisAlign == 'right') {
 	          lineargradient = lineargradient.reverse();
 	        }
 
-	        var _lps = this._getLinearGradientPoints('area');
+	        var lps = this._getLinearGradientPoints('area');
 
-	        if (!_lps) return;
-	        fill_gradient = (_me$ctx2 = me.ctx).createLinearGradient.apply(_me$ctx2, (0, _toConsumableArray2["default"])(_lps));
+	        if (lps && lps.length) {
+	          _fillStyle.points = lps;
+	        }
+	      } //最后，如果是一个十六进制的颜色的话，就变成一个抄底的渐变
 
-	        _.each(lineargradient, function (item) {
-	          fill_gradient.addColorStop(item.position, item.color);
-	        });
-
-	        _fillStyle = fill_gradient;
-	      }
 
 	      return _fillStyle;
 	    }
 	  }, {
 	    key: "_getLineStrokeStyle",
-	    value: function _getLineStrokeStyle(pointList) {
-	      var graphType = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'line';
-	      var me = this;
-
+	    value: function _getLineStrokeStyle(pointList, graphType) {
 	      var _style;
 
 	      if (!this._opt.line || !this._opt.line.strokeStyle) {
 	        //如果用户没有配置line.strokeStyle，那么就用默认的
-	        return this.color;
+	        _style = this.color;
+	      } else {
+	        _style = this._getColor(this._opt.line.strokeStyle);
 	      }
-	      _style = this._getColor(this._opt.line.strokeStyle);
+
+	      if ((0, color.colorIsHex)(_style)) {
+	        var _lineargradient = {
+	          lineargradient: [{
+	            position: 0,
+	            color: (0, color.colorRgba)(_style, 0.2) //'rgba(56, 90, 204, 0.2)'
+
+	          }, {
+	            position: 0.05,
+	            color: (0, color.colorRgba)(_style, 1) //'rgba(56, 90, 204,  1)'
+
+	          }, {
+	            position: 0.95,
+	            color: (0, color.colorRgba)(_style, 1) //'rgba(56, 90, 204, 1)'
+
+	          }, {
+	            position: 1,
+	            color: (0, color.colorRgba)(_style, 0.2) //'rgba(56, 90, 204, 0.2)'
+
+	          }]
+	        };
+	        _style = _lineargradient;
+	      }
+
 	      var lineargradient = _style.lineargradient;
 
 	      if (lineargradient) {
-	        var _me$ctx3;
-
 	        //如果是右轴的话，渐变色要对应的反转
 	        if (this.yAxisAlign == 'right') {
 	          lineargradient = lineargradient.reverse();
 	        }
 
-	        var lps = this._getLinearGradientPoints(graphType, pointList);
+	        var lps = this._getLinearGradientPoints('line', pointList);
 
 	        if (!lps) return;
-	        _style = (_me$ctx3 = me.ctx).createLinearGradient.apply(_me$ctx3, (0, _toConsumableArray2["default"])(lps));
-
-	        _.each(lineargradient, function (item) {
-	          _style.addColorStop(item.position, item.color);
-	        });
-
+	        _style.points = lps;
 	        return _style;
 	      }
 
@@ -19301,7 +19423,7 @@ var chartx = (function () {
 	      var graphType = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'line';
 	      var pointList = arguments.length > 1 ? arguments[1] : undefined;
 	      //如果graphType 传入的是area，并且，用户并没有配area.lineargradientDriction,那么就会默认和line.lineargradientDriction对齐
-	      var driction = this[graphType].lineargradientDriction || this.line.lineargradientDriction;
+	      var driction = this[graphType].lineargradientDriction;
 	      !pointList && (pointList = this._line.context.pointList);
 	      var linearPointStart, linearPointEnd;
 
@@ -19756,8 +19878,9 @@ var chartx = (function () {
 	        y: point.y,
 	        rowData: null,
 	        //非data中的数据，没有rowData
-	        color: this._getProp(this.node.strokeStyle) || this._getLineStrokeStyle()
+	        color: null
 	      };
+	      node.color = this._getProp(this.node.strokeStyle, node);
 	      return node;
 	    }
 	  }, {
@@ -19868,7 +19991,7 @@ var chartx = (function () {
 	            },
 	            lineargradientDriction: {
 	              detail: '线的填充色是渐变对象的话，这里用来描述方向，默认从上到下（topBottom）,可选leftRight',
-	              "default": 'topBottom' //可选 leftRight
+	              "default": 'leftRight' //可选 topBottom
 
 	            },
 	            lineWidth: {
@@ -19893,15 +20016,18 @@ var chartx = (function () {
 	            },
 	            shadowOffsetY: {
 	              detail: '折线的Y方向阴影偏移量',
-	              "default": 4
+	              "default": 2
 	            },
 	            shadowBlur: {
 	              detail: '折线的阴影模糊效果',
-	              "default": 0
+	              "default": 8
 	            },
 	            shadowColor: {
 	              detail: '折线的阴影颜色，默认和折线的strokeStyle同步， 如果strokeStyle是一个渐变色，那么shadowColor就会失效，变成默认的黑色，需要手动设置该shadowColor',
-	              "default": null
+	              "default": function _default() {
+	                var fieldColor = this.color;
+	                return (0, color.colorRgba)(fieldColor, 0.4);
+	              }
 	            }
 	          }
 	        },
@@ -20006,7 +20132,7 @@ var chartx = (function () {
 	            },
 	            lineargradientDriction: {
 	              detail: '面积的填充色是渐变对象的话，这里用来描述方向，默认null(就会从line中取),从上到下（topBottom）,可选leftRight',
-	              "default": null //默认null（就会和line保持一致），可选 topBottom leftRight
+	              "default": 'topBottom' //默认null（就会和line保持一致），可选 topBottom leftRight
 
 	            },
 	            fillStyle: {
@@ -20015,7 +20141,7 @@ var chartx = (function () {
 	            },
 	            alpha: {
 	              detail: '面积透明度',
-	              "default": 0.25
+	              "default": 0.5
 	            },
 	            bottomLine: {
 	              detail: 'area的底部线配置',
@@ -31600,6 +31726,46 @@ var chartx = (function () {
 	});
 
 	unwrapExports(progress);
+
+	var arrayWithoutHoles$1 = createCommonjsModule(function (module) {
+	function _arrayWithoutHoles(arr) {
+	  if (Array.isArray(arr)) return arrayLikeToArray$1(arr);
+	}
+
+	module.exports = _arrayWithoutHoles, module.exports.__esModule = true, module.exports["default"] = module.exports;
+	});
+
+	unwrapExports(arrayWithoutHoles$1);
+
+	var iterableToArray$1 = createCommonjsModule(function (module) {
+	function _iterableToArray(iter) {
+	  if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter);
+	}
+
+	module.exports = _iterableToArray, module.exports.__esModule = true, module.exports["default"] = module.exports;
+	});
+
+	unwrapExports(iterableToArray$1);
+
+	var nonIterableSpread$1 = createCommonjsModule(function (module) {
+	function _nonIterableSpread() {
+	  throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+	}
+
+	module.exports = _nonIterableSpread, module.exports.__esModule = true, module.exports["default"] = module.exports;
+	});
+
+	unwrapExports(nonIterableSpread$1);
+
+	var toConsumableArray$1 = createCommonjsModule(function (module) {
+	function _toConsumableArray(arr) {
+	  return arrayWithoutHoles$1(arr) || iterableToArray$1(arr) || unsupportedIterableToArray$1(arr) || nonIterableSpread$1();
+	}
+
+	module.exports = _toConsumableArray, module.exports.__esModule = true, module.exports["default"] = module.exports;
+	});
+
+	unwrapExports(toConsumableArray$1);
 
 	var data = createCommonjsModule(function (module, exports) {
 
@@ -45094,7 +45260,7 @@ var chartx = (function () {
 	});
 	exports["default"] = void 0;
 
-	var _toConsumableArray2 = interopRequireDefault(toConsumableArray);
+	var _toConsumableArray2 = interopRequireDefault(toConsumableArray$1);
 
 	var _classCallCheck2 = interopRequireDefault(classCallCheck$1);
 
@@ -47616,10 +47782,7 @@ var chartx = (function () {
 	        }
 	      });
 	      this.sprite.addChild(this.induce);
-	      var _mosedownIng = false;
-
-	      var _preCursor = me.app.canvax.domView ? "default" : me.app.canvax.domView.style.cursor; //滚轮缩放相关
-
+	      var _mosedownIng = false; //滚轮缩放相关
 
 	      var _wheelHandleTimeLen = 32; //16*2
 
@@ -47645,7 +47808,7 @@ var chartx = (function () {
 	            if (e.type == "mouseup" || e.type == "mouseout") {
 	              me.induce.toBack();
 	              _mosedownIng = false;
-	              me.app.canvax.domView && (me.app.canvax.domView.style.cursor = _preCursor);
+	              me.app.canvax.domView && (me.app.canvax.domView.style.cursor = '');
 	            }
 
 	            if (e.type == "mousemove") {
@@ -55621,7 +55784,7 @@ var chartx = (function () {
 	});
 	exports["default"] = void 0;
 
-	var _toConsumableArray2 = interopRequireDefault(toConsumableArray);
+	var _toConsumableArray2 = interopRequireDefault(toConsumableArray$1);
 
 	var _classCallCheck2 = interopRequireDefault(classCallCheck$1);
 

@@ -23,6 +23,8 @@ var _canvax = _interopRequireDefault(require("canvax"));
 
 var _tools = require("../../../utils/tools");
 
+var _color = require("../../../utils/color");
+
 var _index2 = _interopRequireDefault(require("../index"));
 
 var _numeral = _interopRequireDefault(require("numeral"));
@@ -150,19 +152,8 @@ var BarGraphs = /*#__PURE__*/function (_GraphsBase) {
       ;
 
       if (color && color.lineargradient && color.lineargradient.length) {
-        if (nodeData.rectHeight != 0) {
-          var _style = me.ctx.createLinearGradient(nodeData.x, nodeData.fromY + nodeData.rectHeight, nodeData.x, nodeData.fromY);
-
-          _.each(color.lineargradient, function (item) {
-            _style.addColorStop(item.position, item.color);
-          });
-
-          color = _style;
-        } else {
-          color = color.lineargradient[parseInt(color.lineargradient.length / 2)].color;
-        }
-
-        ;
+        //如果是个线性渐变的话，就需要加上渐变的位置
+        color.points = [0, nodeData.rectHeight, 0, 0];
       }
 
       ;
@@ -175,6 +166,29 @@ var BarGraphs = /*#__PURE__*/function (_GraphsBase) {
 
       ;
       return color;
+    }
+  }, {
+    key: "_getProp",
+    value: function _getProp(s, iNode) {
+      if (_.isArray(s)) {
+        return s[this.iGroup];
+      }
+
+      ;
+
+      if (_.isFunction(s)) {
+        var _nodesInfo = [];
+
+        if (iNode != undefined) {
+          _nodesInfo.push(this.data[iNode]);
+        }
+
+        ;
+        return s.apply(this, _nodesInfo);
+      }
+
+      ;
+      return s;
     }
   }, {
     key: "_getBarWidth",
@@ -476,13 +490,16 @@ var BarGraphs = /*#__PURE__*/function (_GraphsBase) {
               scaleY: -1
             };
             nodeData.width = finalPos.width;
+
+            var rectFill = me._getFillStyle(finalPos.fillStyle, finalPos);
+
             var rectCtx = {
               x: finalPos.x,
               y: nodeData.yOriginPoint.pos,
               //0,
               width: finalPos.width,
               height: finalPos.height,
-              fillStyle: finalPos.fillStyle,
+              fillStyle: rectFill,
               fillAlpha: me.node.fillAlpha,
               scaleY: 0,
               cursor: 'pointer'
@@ -647,6 +664,25 @@ var BarGraphs = /*#__PURE__*/function (_GraphsBase) {
         animate: animate
       });
       me._preDataLen = me._dataLen;
+    }
+  }, {
+    key: "_getFillStyle",
+    value: function _getFillStyle(fillColor, rect) {
+      if (typeof fillColor == 'string' && (0, _color.colorIsHex)(fillColor)) {
+        var _style = {
+          points: [0, rect.height, 0, 0],
+          lineargradient: [{
+            position: 0,
+            color: (0, _color.colorRgba)(fillColor, 1)
+          }, {
+            position: 1,
+            color: (0, _color.colorRgba)(fillColor, 0.6)
+          }]
+        };
+        return _style;
+      } else {
+        return fillColor;
+      }
     }
   }, {
     key: "setEnabledField",
@@ -1093,7 +1129,10 @@ var BarGraphs = /*#__PURE__*/function (_GraphsBase) {
                 duration: optsions.duration,
                 easing: optsions.easing,
                 delay: h * optsions.delay,
-                onUpdate: function onUpdate() {},
+                onUpdate: function onUpdate() {
+                  debugger;
+                  this.context.fillStyle = me._getFillStyle(this.nodeData.color, this.context);
+                },
                 onComplete: function onComplete(arg) {
                   if (arg.width < 3 && this.context) {
                     this.context.radius = 0;
@@ -1271,7 +1310,7 @@ var BarGraphs = /*#__PURE__*/function (_GraphsBase) {
             },
             radius: {
               detail: '叶子节点的圆角半径',
-              "default": 3
+              "default": 10
             },
             fillStyle: {
               detail: 'bar填充色',

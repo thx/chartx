@@ -30,7 +30,7 @@ export default class GraphsBase extends Component
             },
             color: {
                 detail : 'line,area,node,label的抄底样式',
-                default: 'left'
+                default: ''
             }
         }
     }
@@ -179,6 +179,9 @@ export default class GraphsBase extends Component
                 me.fire("complete");
             }
         });
+    }
+    getFieldConfig( field ){
+        return this.app.getComponent({name:'coord'}).getFieldConfig(field);
     }
 
 }

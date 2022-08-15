@@ -5,6 +5,7 @@ var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefau
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.colorIsHex = colorIsHex;
 exports.colorRgb = colorRgb;
 exports.colorRgba = colorRgba;
 exports.gradient = gradient;
@@ -16,7 +17,12 @@ var _slicedToArray2 = _interopRequireDefault(require("@babel/runtime/helpers/sli
 
 //十六进制颜色值的正则表达式 
 var reg = /^#([0-9a-fA-f]{3}|[0-9a-fA-f]{6})$/;
+
+function colorIsHex(color) {
+  return reg.test(color);
+}
 /*16进制颜色转为RGB格式*/
+
 
 function colorRgb(hex) {
   if (Array.isArray(hex)) {
