@@ -8388,7 +8388,7 @@ var chartx = (function () {
 	  */
 	};
 	var _default = {
-	  chartxVersion: '1.1.117',
+	  chartxVersion: '1.1.118',
 	  create: function create(el, data, opt) {
 	    var otherOptions = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
 	    var chart = null;
@@ -51284,7 +51284,8 @@ var chartx = (function () {
 	  }, {
 	    key: "_filterTreeData",
 	    value: function _filterTreeData(treeOriginData) {
-	      var _this5 = this;
+	      var _this5 = this,
+	          _this$data;
 
 	      var nodesLength = 1;
 	      var collapsedField = this.node.collapse.field;
@@ -51297,19 +51298,39 @@ var chartx = (function () {
 	      // treeData[ childrenField ] = [];
 	      //parent指向的是treeData不是originData，这里要注意下
 
-	      var filter = function filter(treeOriginData, parent, depth, rowInd) {
-	        var treeData = {
+	      var filter = function filter(treeOriginData, parent, depth, rowInd, treeData) {
+	        Object.assign(treeData, {
 	          depth: depth || 0,
 	          parent: parent,
 	          rowInd: rowInd //在parent中的Index
 
-	        };
+	        }); //resetData的时候，有些节点原本有数据的
+
+	        var preChildrenList = treeData[childrenField] || [];
 	        Object.assign(treeData, treeOriginData);
 	        treeData['__originData'] = treeOriginData; //和原数据建立下关系，比如 treeData 中的一些数据便跟了要同步到原数据中去
 
 	        treeData[childrenField] = []; //开始构建nodes
 
-	        var content = _this5._getContent(treeData);
+	        var content = _this5._getContent(treeData); //下面这个判断逻辑主要用在resetData的时候用
+
+
+	        if (treeData._node && content != treeData._node.content) {
+	          treeData._node = null;
+	          delete treeData._node;
+
+	          if (!treeData.style) {
+	            treeData.style = {
+	              width: 0,
+	              height: 0
+	            };
+	          }
+
+	          if (!treeOriginData.style || treeOriginData.style && (!treeOriginData.style.width || !treeOriginData.style.height)) {
+	            treeData.style.width = 0;
+	            treeData.style.height = 0;
+	          }
+	        }
 
 	        var node = _this5.getDefNode({
 	          type: 'tree'
@@ -51337,7 +51358,10 @@ var chartx = (function () {
 	          //如果这个节点未折叠
 	          //检查他的子节点
 	          (treeOriginData[childrenField] || []).forEach(function (child, rowInd) {
-	            var childTreeData = filter(child, treeData, depth + 1, rowInd);
+	            var preChildTreeData = preChildrenList.find(function (item) {
+	              return item[_this5.field] == child[_this5.field];
+	            }) || {};
+	            var childTreeData = filter(child, treeData, depth + 1, rowInd, preChildTreeData);
 	            treeData[childrenField].push(childTreeData);
 	            nodesLength++; //开始构建edges
 
@@ -51370,7 +51394,8 @@ var chartx = (function () {
 	        return treeData;
 	      };
 
-	      var treeData = filter(treeOriginData, null, 0, 0);
+	      var preTreeData = ((_this$data = this.data) === null || _this$data === void 0 ? void 0 : _this$data.treeData) || {};
+	      var treeData = filter(treeOriginData, null, 0, 0, preTreeData);
 	      return {
 	        treeData: treeData,
 	        nodesLength: nodesLength,
@@ -52127,7 +52152,7 @@ var chartx = (function () {
 	                },
 	                fontSize: {
 	                  detail: "icon字号大小",
-	                  "default": 12
+	                  "default": 18
 	                },
 	                fontColor: {
 	                  detail: "icon字体颜色",
@@ -58197,7 +58222,7 @@ var chartx = (function () {
 	      if (document) {
 	        this._tipDom = document.createElement("div");
 	        this._tipDom.className = "context-menu-tips";
-	        this._tipDom.style.cssText += "; border-radius:" + this.borderRadius + "px;background:" + this.fillStyle + ";border:1px solid " + this.strokeStyle + ";visibility:hidden;position:" + (this.containerIsBody ? 'fixed' : 'absolute') + ";z-index:99999999;enabled:inline-block;*enabled:inline;*zoom:1;padding:6px;color:" + this.fontColor + ";line-height:1.5";
+	        this._tipDom.style.cssText += "; border-radius:" + this.borderRadius + "px;background:" + this.fillStyle + ";border:1px solid " + this.strokeStyle + ";visibility:hidden;position:" + (this.containerIsBody ? 'fixed' : 'absolute') + ";z-index:99999999;enabled:inline-block;*enabled:inline;*zoom:1;color:" + this.fontColor + ";line-height:1.5";
 	        this._tipDom.style.cssText += "; box-shadow:1px 1px 3px " + this.strokeStyle + ";";
 	        this._tipDom.style.cssText += "; border:none;white-space:nowrap;word-wrap:normal;";
 	        this._tipDom.style.cssText += "; text-align:left;";
@@ -61664,7 +61689,7 @@ var chartx = (function () {
 	}
 
 	var chartx = {
-	  version: '1.1.117',
+	  version: '1.1.118',
 	  options: {}
 	};
 
