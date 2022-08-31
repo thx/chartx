@@ -8385,7 +8385,7 @@ var components = {
   */
 };
 var _default = {
-  chartxVersion: '1.1.118',
+  chartxVersion: '1.1.120',
   create: function create(el, data, opt) {
     var otherOptions = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
     var chart = null;
@@ -17280,6 +17280,7 @@ var GraphsBase = /*#__PURE__*/function (_Component) {
           process: to
         },
         duration: duration,
+        easing: this.aniEasing,
         onUpdate: function onUpdate(status) {
           _.isFunction(callback) && callback(status.process);
         },
@@ -31217,6 +31218,8 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports["default"] = void 0;
 
+var _defineProperty2 = interopRequireDefault(defineProperty$1);
+
 var _classCallCheck2 = interopRequireDefault(classCallCheck$1);
 
 var _createClass2 = interopRequireDefault(createClass$1);
@@ -31235,11 +31238,18 @@ var _index = interopRequireDefault(graphs);
 
 
 
+
+
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { (0, _defineProperty2["default"])(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
+
 function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
 
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
 
-var _ = _canvax["default"]._;
+var _ = _canvax["default"]._; // https://zhuanlan.zhihu.com/p/271906562
+// https://www.cnblogs.com/guojikun/p/10663487.html
 
 var Progress = /*#__PURE__*/function (_GraphsBase) {
   (0, _inherits2["default"])(Progress, _GraphsBase);
@@ -31337,7 +31347,7 @@ var Progress = /*#__PURE__*/function (_GraphsBase) {
         name: 'coord'
       });
 
-      var middleAngle = startAngle + allAngle / 2;
+      var middleAngle = startAngle + Math.min(allAngle, 180);
       var endAngle = startAngle + allAngle;
       var startRadian = Math.PI * startAngle / 180; //起始弧度
 
@@ -31404,19 +31414,6 @@ var Progress = /*#__PURE__*/function (_GraphsBase) {
           }
         }
       }
-      /*  样式的设置全部在外面处理
-      if( field ){
-          //没有field的说明是bgNodeData的调用,
-          nodeData.fillStyle = me._getStyle( nodeData, me.node.fillStyle );
-      };
-      */
-
-      /*
-      if( allAngle%360 > 180 ){
-          nodeData.large_arc_flag = 1;
-      };
-      */
-
       return nodeData;
     }
   }, {
@@ -31437,12 +31434,13 @@ var Progress = /*#__PURE__*/function (_GraphsBase) {
           });
           me.sprite.addChild(me._bgPathElement);
         }
-        me._bgPathElement.context.fillStyle = this.bgNodeData.fillStyle;
+        me._bgPathElement.context.lineWidth = this.node.width;
+        me._bgPathElement.context.strokeStyle = this.bgNodeData.fillStyle;
       }
 
       _.each(this.data, function (nodeDatas) {
         _.each(nodeDatas, function (nodeData, i) {
-          var pathStr = me._getPathStr(nodeData);
+          var pathStr = me._getBarPathStr1(nodeData);
 
           var elId = "progress_bar_" + nodeData.field + "_" + i;
           var pathElement = me.sprite.getChildById(elId);
@@ -31458,7 +31456,77 @@ var Progress = /*#__PURE__*/function (_GraphsBase) {
             });
             me.sprite.addChild(pathElement);
           }
-          pathElement.context.fillStyle = nodeData.fillStyle;
+          pathElement.context.lineWidth = me.node.width;
+          var style = nodeData.fillStyle;
+          var allColors = [];
+
+          if (style && style.lineargradient) {
+            var start = _objectSpread({}, style.lineargradient[0]);
+
+            var end = _objectSpread({}, style.lineargradient.slice(-1)[0]);
+
+            var lineargradient = [start, end];
+
+            if (nodeData.endAngle > nodeData.middleAngle) {
+              //超过了180度的话要绘制第二条
+              allColors = (0, color.gradient)(style.lineargradient[0].color, style.lineargradient.slice(-1)[0].color, parseInt(nodeData.allAngle / 10));
+              end.color = allColors[17];
+            } //let newLineargradient = 
+            // let _style = me.ctx.createLinearGradient( nodeData.startOutPoint.x ,nodeData.startOutPoint.y, nodeData.middleOutPoint.x, nodeData.middleOutPoint.y );
+            // _.each( lineargradient , function( item ){
+            //     _style.addColorStop( item.position , item.color);
+            // });
+
+
+            style = {
+              lineargradient: lineargradient,
+              points: [nodeData.startOutPoint.x, nodeData.startOutPoint.y, nodeData.middleOutPoint.x, nodeData.middleOutPoint.y]
+            };
+          }
+          pathElement.context.strokeStyle = style;
+
+          if (nodeData.endAngle > nodeData.middleAngle) {
+            //超过了180度的话要绘制第二条
+            var _pathStr = me._getBarPathStr2(nodeData);
+
+            var _elId = "progress_bar_" + nodeData.field + "_" + i + "_2";
+
+            var _pathElement = me.sprite.getChildById(_elId);
+
+            if (_pathElement) {
+              _pathElement.context.path = _pathStr;
+            } else {
+              _pathElement = new _canvax["default"].Shapes.Path({
+                id: _elId,
+                context: {
+                  path: _pathStr
+                }
+              });
+              me.sprite.addChild(_pathElement);
+            }
+            _pathElement.context.lineWidth = me.node.width;
+            var _style = nodeData.fillStyle;
+
+            if (_style && _style.lineargradient) {
+              var _start = _objectSpread({}, _style.lineargradient[0]);
+
+              _start.color = allColors[17];
+
+              var _end = _objectSpread({}, _style.lineargradient.slice(-1)[0]);
+
+              var _lineargradient = [_start, _end]; // let _style = me.ctx.createLinearGradient( nodeData.middleOutPoint.x ,nodeData.middleOutPoint.y, nodeData.endOutPoint.x, nodeData.endOutPoint.y );
+              // _.each( lineargradient , function( item ){
+              //     _style.addColorStop( item.position , item.color);
+              // });
+              // style = _style;
+
+              _style = {
+                lineargradient: _lineargradient,
+                points: [nodeData.middleOutPoint.x, nodeData.middleOutPoint.y, nodeData.endOutPoint.x, nodeData.endOutPoint.y]
+              };
+            }
+            _pathElement.context.strokeStyle = _style;
+          }
 
           if (me.label.enabled) {
             var labelSpId = "progress_label_" + nodeData.field + "_sprite_" + i;
@@ -31526,20 +31594,36 @@ var Progress = /*#__PURE__*/function (_GraphsBase) {
     value: function _getPathStr(nodeData) {
       var pathStr = "M" + nodeData.startOutPoint.x + " " + nodeData.startOutPoint.y;
       pathStr += "A" + nodeData.outRadius + " " + nodeData.outRadius + " 0 0 1 " + nodeData.middleOutPoint.x + " " + nodeData.middleOutPoint.y;
-      pathStr += "A" + nodeData.outRadius + " " + nodeData.outRadius + " 0 0 1 " + nodeData.endOutPoint.x + " " + nodeData.endOutPoint.y;
-      var actionType = "L";
+      pathStr += "A" + nodeData.outRadius + " " + nodeData.outRadius + " 0 0 1 " + nodeData.endOutPoint.x + " " + nodeData.endOutPoint.y; // let actionType = "L";
+      // if( nodeData.allAngle % 360 == 0 ){
+      //     //actionType = "M" 
+      // };
+      // pathStr += actionType+nodeData.endInnerPoint.x+" "+nodeData.endInnerPoint.y;
+      // pathStr += "A"+nodeData.innerRadius+" "+nodeData.innerRadius+" 0 0 0 " + nodeData.middleInnerPoint.x + " "+ nodeData.middleInnerPoint.y;
+      // pathStr += "A"+nodeData.innerRadius+" "+nodeData.innerRadius+" 0 0 0 " + nodeData.startInnerPoint.x + " "+ nodeData.startInnerPoint.y;
+      // pathStr += "Z";
 
-      if (nodeData.allAngle % 360 == 0) ;
-      pathStr += actionType + nodeData.endInnerPoint.x + " " + nodeData.endInnerPoint.y;
-      pathStr += "A" + nodeData.innerRadius + " " + nodeData.innerRadius + " 0 0 0 " + nodeData.middleInnerPoint.x + " " + nodeData.middleInnerPoint.y;
-      pathStr += "A" + nodeData.innerRadius + " " + nodeData.innerRadius + " 0 0 0 " + nodeData.startInnerPoint.x + " " + nodeData.startInnerPoint.y;
-      pathStr += "Z";
+      return pathStr;
+    }
+  }, {
+    key: "_getBarPathStr1",
+    value: function _getBarPathStr1(nodeData) {
+      var pathStr = "M" + nodeData.startOutPoint.x + " " + nodeData.startOutPoint.y;
+      pathStr += "A" + nodeData.outRadius + " " + nodeData.outRadius + " 0 0 1 " + nodeData.middleOutPoint.x + " " + nodeData.middleOutPoint.y; //pathStr += "A"+nodeData.outRadius+" "+nodeData.outRadius+" 0 0 1 " + nodeData.endOutPoint.x + " "+ nodeData.endOutPoint.y;
+
+      return pathStr;
+    }
+  }, {
+    key: "_getBarPathStr2",
+    value: function _getBarPathStr2(nodeData) {
+      var pathStr = "M" + nodeData.middleOutPoint.x + " " + nodeData.middleOutPoint.y; //pathStr += "A"+nodeData.outRadius+" "+nodeData.outRadius+" 0 0 1 " + nodeData.middleOutPoint.x + " "+ nodeData.middleOutPoint.y;
+
+      pathStr += "A" + nodeData.outRadius + " " + nodeData.outRadius + " 0 0 1 " + nodeData.endOutPoint.x + " " + nodeData.endOutPoint.y;
       return pathStr;
     }
   }, {
     key: "_getStyle",
     value: function _getStyle(nodeData, prop, def) {
-      var me = this;
 
       var _coord = this.app.getComponent({
         name: 'coord'
@@ -31548,7 +31632,7 @@ var Progress = /*#__PURE__*/function (_GraphsBase) {
       var fieldConfig = _coord.getFieldConfig(nodeData.field);
 
       def = def || (fieldConfig ? fieldConfig.color : "#171717");
-      var style;
+      var style = prop;
 
       if (prop) {
         if (_.isString(prop)) {
@@ -31561,14 +31645,6 @@ var Progress = /*#__PURE__*/function (_GraphsBase) {
 
         if (_.isFunction(prop)) {
           style = prop.apply(this, arguments);
-        }
-
-        if (prop && prop.lineargradient) {
-          style = me.ctx.createLinearGradient(nodeData.startOutPoint.x, nodeData.startOutPoint.y, nodeData.endOutPoint.x, nodeData.endOutPoint.y);
-
-          _.each(prop.lineargradient, function (item) {
-            style.addColorStop(item.position, item.color);
-          });
         }
       }
 
@@ -31586,17 +31662,13 @@ var Progress = /*#__PURE__*/function (_GraphsBase) {
           detail: '字段配置',
           "default": null
         },
+        aniEasing: 'Quintic.Out',
         node: {
           detail: '进度条设置',
           propertys: {
             width: {
               detail: '进度条的宽度',
-              "default": 20
-            },
-            radius: {
-              detail: '进度条两端的圆角半径',
-              "default": 10 //默认为width的一半
-
+              "default": 16
             },
             fillStyle: {
               detail: '进度条的填充色',
@@ -61686,7 +61758,7 @@ if (projectTheme && projectTheme.length) {
 }
 
 var chartx = {
-  version: '1.1.118',
+  version: '1.1.120',
   options: {}
 };
 

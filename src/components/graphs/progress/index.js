@@ -1,8 +1,12 @@
 import Canvax from "canvax"
 import GraphsBase from "../index"
 import {getDefaultProps} from "../../../utils/tools"
+import {gradient} from "../../../utils/color"
 
 let _ = Canvax._;
+
+// https://zhuanlan.zhihu.com/p/271906562
+// https://www.cnblogs.com/guojikun/p/10663487.html
 
 class Progress extends GraphsBase
 {
@@ -12,16 +16,13 @@ class Progress extends GraphsBase
                 detail:'字段配置',
                 default: null
             },
+            aniEasing: 'Quintic.Out',
             node : {
                 detail : '进度条设置',
                 propertys : {
                     width : {
                         detail: '进度条的宽度',
-                        default : 20
-                    },
-                    radius : {
-                        detail : '进度条两端的圆角半径',
-                        default : 10, //默认为width的一半
+                        default : 16
                     },
                     fillStyle : {
                         detail : '进度条的填充色',
@@ -206,9 +207,8 @@ class Progress extends GraphsBase
     _getNodeData(startAngle, allAngle, field, val, i){
         let me = this;
         let _coord = this.app.getComponent({name:'coord'});
-        let middleAngle = startAngle + allAngle/2;
+        let middleAngle = startAngle + Math.min(allAngle, 180);
         let endAngle = startAngle + allAngle;
-
 
         let startRadian = Math.PI * startAngle / 180; //起始弧度
         let middleRadian = Math.PI * middleAngle / 180;
@@ -272,18 +272,6 @@ class Progress extends GraphsBase
             }
         };
 
-        /*  样式的设置全部在外面处理
-        if( field ){
-            //没有field的说明是bgNodeData的调用,
-            nodeData.fillStyle = me._getStyle( nodeData, me.node.fillStyle );
-        };
-        */
-
-        /*
-        if( allAngle%360 > 180 ){
-            nodeData.large_arc_flag = 1;
-        };
-        */
         return nodeData;
     }
 
@@ -302,13 +290,13 @@ class Progress extends GraphsBase
                 });
                 me.sprite.addChild( me._bgPathElement );
             };
-            me._bgPathElement.context.fillStyle = this.bgNodeData.fillStyle;
+            me._bgPathElement.context.lineWidth = this.node.width;
+            me._bgPathElement.context.strokeStyle = this.bgNodeData.fillStyle;
         };
 
         _.each( this.data, function( nodeDatas ){
             _.each( nodeDatas, function(nodeData,i){
-                let pathStr = me._getPathStr( nodeData );
-
+                let pathStr = me._getBarPathStr1( nodeData );
                 let elId = "progress_bar_"+nodeData.field+"_"+i;
                 let pathElement = me.sprite.getChildById( elId );
                 if( pathElement ){
@@ -322,8 +310,77 @@ class Progress extends GraphsBase
                     });
                     me.sprite.addChild( pathElement );
                 };
+                pathElement.context.lineWidth = me.node.width;
+                let style = nodeData.fillStyle;
                 
-                pathElement.context.fillStyle = nodeData.fillStyle;
+                let allColors=[]
+                if( style && style.lineargradient ){
+                    
+                    let start = {...style.lineargradient[0]}
+                    let end = {...style.lineargradient.slice(-1)[0]}
+                    let lineargradient = [ start, end ]
+                    
+                    if( nodeData.endAngle > nodeData.middleAngle ){
+                        //超过了180度的话要绘制第二条
+                        allColors = gradient( style.lineargradient[0].color, style.lineargradient.slice(-1)[0].color, parseInt(nodeData.allAngle/10) )
+                        console.log( allColors )
+                        end.color = allColors[ 17 ]
+                    }
+                    
+                    //let newLineargradient = 
+                    // let _style = me.ctx.createLinearGradient( nodeData.startOutPoint.x ,nodeData.startOutPoint.y, nodeData.middleOutPoint.x, nodeData.middleOutPoint.y );
+                    // _.each( lineargradient , function( item ){
+                    //     _style.addColorStop( item.position , item.color);
+                    // });
+                    style = {
+                        lineargradient,
+                        points: [nodeData.startOutPoint.x ,nodeData.startOutPoint.y, nodeData.middleOutPoint.x, nodeData.middleOutPoint.y]
+                    };
+                };
+                pathElement.context.strokeStyle = style;
+
+                if( nodeData.endAngle > nodeData.middleAngle ){
+                    //超过了180度的话要绘制第二条
+                    let pathStr = me._getBarPathStr2( nodeData );
+                    let elId = "progress_bar_"+nodeData.field+"_"+i+"_2";
+                    let pathElement = me.sprite.getChildById( elId );
+                    if( pathElement ){
+                        pathElement.context.path = pathStr;
+                    } else {
+                        pathElement = new Canvax.Shapes.Path({
+                            id : elId,
+                            context : {
+                                path : pathStr
+                            }
+                        });
+                        me.sprite.addChild( pathElement );
+                    };
+                    pathElement.context.lineWidth = me.node.width;
+
+                    let style = nodeData.fillStyle;
+                    if( style && style.lineargradient ){
+                        
+                        
+                        let start = {...style.lineargradient[0]}
+                        start.color = allColors[ 17 ];
+                        let end = {...style.lineargradient.slice(-1)[0]}
+                        let lineargradient = [ start, end ]
+                        
+                        // let _style = me.ctx.createLinearGradient( nodeData.middleOutPoint.x ,nodeData.middleOutPoint.y, nodeData.endOutPoint.x, nodeData.endOutPoint.y );
+                        // _.each( lineargradient , function( item ){
+                        //     _style.addColorStop( item.position , item.color);
+                        // });
+                        // style = _style;
+                        style = {
+                            lineargradient,
+                            points: [nodeData.middleOutPoint.x ,nodeData.middleOutPoint.y, nodeData.endOutPoint.x, nodeData.endOutPoint.y]
+                        };
+                    };
+                    pathElement.context.strokeStyle = style;
+
+                }
+
+
 
                 if( me.label.enabled ){
 
@@ -397,17 +454,31 @@ class Progress extends GraphsBase
         pathStr += "A"+nodeData.outRadius+" "+nodeData.outRadius+" 0 0 1 " + nodeData.middleOutPoint.x + " "+ nodeData.middleOutPoint.y;
         pathStr += "A"+nodeData.outRadius+" "+nodeData.outRadius+" 0 0 1 " + nodeData.endOutPoint.x + " "+ nodeData.endOutPoint.y;
 
-        let actionType = "L";
-        if( nodeData.allAngle % 360 == 0 ){
-            //actionType = "M" 
-        };
+        // let actionType = "L";
+        // if( nodeData.allAngle % 360 == 0 ){
+        //     //actionType = "M" 
+        // };
 
-        pathStr += actionType+nodeData.endInnerPoint.x+" "+nodeData.endInnerPoint.y;
+        // pathStr += actionType+nodeData.endInnerPoint.x+" "+nodeData.endInnerPoint.y;
         
-        pathStr += "A"+nodeData.innerRadius+" "+nodeData.innerRadius+" 0 0 0 " + nodeData.middleInnerPoint.x + " "+ nodeData.middleInnerPoint.y;
-        pathStr += "A"+nodeData.innerRadius+" "+nodeData.innerRadius+" 0 0 0 " + nodeData.startInnerPoint.x + " "+ nodeData.startInnerPoint.y;
+        // pathStr += "A"+nodeData.innerRadius+" "+nodeData.innerRadius+" 0 0 0 " + nodeData.middleInnerPoint.x + " "+ nodeData.middleInnerPoint.y;
+        // pathStr += "A"+nodeData.innerRadius+" "+nodeData.innerRadius+" 0 0 0 " + nodeData.startInnerPoint.x + " "+ nodeData.startInnerPoint.y;
         
-        pathStr += "Z";
+        // pathStr += "Z";
+        return pathStr;
+    }
+
+    _getBarPathStr1( nodeData ){
+        let pathStr = "M"+nodeData.startOutPoint.x+" "+nodeData.startOutPoint.y;
+        pathStr += "A"+nodeData.outRadius+" "+nodeData.outRadius+" 0 0 1 " + nodeData.middleOutPoint.x + " "+ nodeData.middleOutPoint.y;
+        //pathStr += "A"+nodeData.outRadius+" "+nodeData.outRadius+" 0 0 1 " + nodeData.endOutPoint.x + " "+ nodeData.endOutPoint.y;
+        return pathStr;
+    }
+
+    _getBarPathStr2( nodeData ){
+        let pathStr = "M"+nodeData.middleOutPoint.x+" "+nodeData.middleOutPoint.y;
+        //pathStr += "A"+nodeData.outRadius+" "+nodeData.outRadius+" 0 0 1 " + nodeData.middleOutPoint.x + " "+ nodeData.middleOutPoint.y;
+        pathStr += "A"+nodeData.outRadius+" "+nodeData.outRadius+" 0 0 1 " + nodeData.endOutPoint.x + " "+ nodeData.endOutPoint.y;
         return pathStr;
     }
 
@@ -417,7 +488,7 @@ class Progress extends GraphsBase
         let fieldConfig = _coord.getFieldConfig( nodeData.field );
         def = def || (fieldConfig ? fieldConfig.color : "#171717");
 
-        let style;
+        let style = prop;
         if( prop ){
             if( _.isString(prop) ){
                 style = prop;
@@ -428,14 +499,7 @@ class Progress extends GraphsBase
             if( _.isFunction(prop) ){
                 style = prop.apply( this, arguments );
             };
-            if( prop && prop.lineargradient ){
-    
-                style = me.ctx.createLinearGradient( nodeData.startOutPoint.x ,nodeData.startOutPoint.y, nodeData.endOutPoint.x, nodeData.endOutPoint.y );
-                _.each( prop.lineargradient , function( item ){
-                    style.addColorStop( item.position , item.color);
-                });
-    
-            };
+            
         }
         if( !style ){
             style = def;

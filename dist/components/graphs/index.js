@@ -207,6 +207,7 @@ var GraphsBase = /*#__PURE__*/function (_Component) {
           process: to
         },
         duration: duration,
+        easing: this.aniEasing,
         onUpdate: function onUpdate(status) {
           _.isFunction(callback) && callback(status.process);
         },

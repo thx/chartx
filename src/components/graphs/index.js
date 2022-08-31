@@ -171,6 +171,7 @@ export default class GraphsBase extends Component
                 process: to
             },
             duration: duration,
+            easing: this.aniEasing,
             onUpdate: function ( status ) {
                 _.isFunction( callback ) && callback( status.process );
             },
