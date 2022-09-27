@@ -1120,7 +1120,6 @@ class BarGraphs extends GraphsBase
                             easing: optsions.easing,
                             delay: h * optsions.delay,
                             onUpdate: function() {
-                                debugger
                                 this.context.fillStyle = me._getFillStyle( this.nodeData.color, this.context );
                             },
                             onComplete: function(arg) {

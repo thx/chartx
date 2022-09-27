@@ -433,7 +433,7 @@ class compactTree extends GraphsBase {
                 (treeOriginData[ childrenField ] || []).forEach( (child,rowInd) => {
 
                     let preChildTreeData = preChildrenList.find( item => item[this.field] == child[this.field] ) || {};
-                    debugger
+                    
                     let childTreeData = filter( child , treeData,  depth+1, rowInd, preChildTreeData);
                     
                     treeData[ childrenField ].push( childTreeData );
@@ -473,7 +473,7 @@ class compactTree extends GraphsBase {
             
         }
 
-        debugger
+        
 
         let preTreeData = this.data?.treeData || {};
         let treeData = filter( treeOriginData, null, 0 , 0, preTreeData);
@@ -506,6 +506,7 @@ class compactTree extends GraphsBase {
         let initNum = 0;
         return new Promise( resolve => {
             this._eachTreeDataHandle( treeData, ( treeDataItem )=>{
+                
                 //计算和设置node的尺寸
                 this._setSize( treeDataItem ).then( () => {
                     
@@ -639,6 +640,7 @@ class compactTree extends GraphsBase {
         const layout = Layout({ 
             spacing: spaceX ,
             nodeSize: node => {
+                
                 //计算的尺寸已经node的数据为准， 不取treeData的
                 let height = node.data._node.height || 0;
                 let boundingClientWidth = node.data._node.boundingClientWidth || 0;
@@ -965,14 +967,19 @@ class compactTree extends GraphsBase {
                 }
             }
 
-            if( !node.contentElement ){
-                //绘制的时候如果发现没有 contentElement，那么就要把 contentElement 初始化了
-                this._initcontentElementAndSize( node.rowData ).then( ()=>{
-                    drawNode();
-                } )
-            } else {
+            //绘制的时候一定要准备好conentElement的
+            this._initcontentElementAndSize( node.rowData ).then( ()=>{
                 drawNode();
-            }
+            } )
+          
+            // if( !node.contentElement ){
+            //     //绘制的时候如果发现没有 contentElement，那么就要把 contentElement 初始化了
+            //     this._initcontentElementAndSize( node.rowData ).then( ()=>{
+            //         drawNode();
+            //     } )
+            // } else {
+            //     drawNode();
+            // }
             
         });
     }

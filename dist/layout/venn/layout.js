@@ -781,6 +781,7 @@ function scaleSolution(solution, width, height, padding) {
       yRange = bounds.yRange;
 
   if (xRange.max == xRange.min || yRange.max == yRange.min) {
+    console.log("not scaling solution: zero size detected");
     return solution;
   }
 

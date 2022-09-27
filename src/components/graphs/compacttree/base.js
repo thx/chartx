@@ -622,7 +622,7 @@ class RelationBase extends GraphsBase {
     
                     //滚轮缩放
                     if (e.type == "wheel") {
-                        console.log( _deltaY, e.deltaY )
+                        //console.log( _deltaY, e.deltaY )
                         if (Math.abs(e.deltaY) > Math.abs(_deltaY)) {
                             _deltaY = e.deltaY;
                         };
@@ -745,7 +745,7 @@ class RelationBase extends GraphsBase {
         let me = this;
         _.each(this.data.edges,  ( edge ) => {
 
-            console.log(edge.points)
+            //console.log(edge.points)
 
             let lineShapeOpt= me._getLineShape(edge, me.line.inflectionRadius)
 
@@ -1431,33 +1431,26 @@ class RelationBase extends GraphsBase {
                 inited = this.node.content.init(node, _contentLabel);
             };
 
-            if( inited && typeof inited.then == 'function' ){
-                inited.then( ()=> {
-                    if ( !width ) {
-                        width = _contentLabel.getTextWidth() + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
-                    };
-                    if ( !height ) {
-                        height = _contentLabel.getTextHeight() + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
-                    };
-                    resolve( {
-                        contentElement : _contentLabel,
-                        width          : parseInt(width),
-                        height         : parseInt(height)
-                    });
-                } )
-            } else {
+            let _handle = ()=>{
                 if ( !width ) {
                     width = _contentLabel.getTextWidth() + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
                 };
                 if ( !height ) {
                     height = _contentLabel.getTextHeight() + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
                 };
-    
                 resolve( {
                     contentElement : _contentLabel,
                     width          : parseInt(width),
                     height         : parseInt(height)
                 });
+            }
+
+            if( inited && typeof inited.then == 'function' ){
+                inited.then( ()=> {
+                    _handle()
+                } )
+            } else {
+                _handle()
             } 
         });
 
@@ -1500,21 +1493,7 @@ class RelationBase extends GraphsBase {
                 inited = this.node.content.init(node, _dom);
             };
 
-            if( inited && typeof inited.then == 'function' ){
-                inited.then( ( opt ) => {
-                    if (!width) {
-                        width = _dom.offsetWidth; // + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
-                    };
-                    if (!height) {
-                        height = _dom.offsetHeight; // + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
-                    };
-                    resolve({
-                        contentElement : _dom,
-                        width          : parseInt(width),
-                        height         : parseInt(height)
-                    });
-                } );
-            } else {
+            let _handle = () => {
                 if (!width) {
                     width = _dom.offsetWidth; // + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
                 };
@@ -1525,7 +1504,15 @@ class RelationBase extends GraphsBase {
                     contentElement : _dom,
                     width          : parseInt(width),
                     height         : parseInt(height)
-                })
+                });
+            }
+
+            if( inited && typeof inited.then == 'function' ){
+                inited.then( ( opt ) => {
+                    _handle()
+                } );
+            } else {
+                _handle()
             };
         } );
 

@@ -233,6 +233,7 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
             ; //滚轮缩放
 
             if (e.type == "wheel") {
+              //console.log( _deltaY, e.deltaY )
               if (Math.abs(e.deltaY) > Math.abs(_deltaY)) {
                 _deltaY = e.deltaY;
               }
@@ -384,6 +385,7 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
       var me = this;
 
       _.each(this.data.edges, function (edge) {
+        //console.log(edge.points)
         var lineShapeOpt = me._getLineShape(edge, me.line.inflectionRadius);
 
         var key = edge.key.join('_');
@@ -1219,26 +1221,7 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
 
         ;
 
-        if (inited && typeof inited.then == 'function') {
-          inited.then(function () {
-            if (!width) {
-              width = _contentLabel.getTextWidth() + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
-            }
-
-            ;
-
-            if (!height) {
-              height = _contentLabel.getTextHeight() + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
-            }
-
-            ;
-            resolve({
-              contentElement: _contentLabel,
-              width: parseInt(width),
-              height: parseInt(height)
-            });
-          });
-        } else {
+        var _handle = function _handle() {
           if (!width) {
             width = _contentLabel.getTextWidth() + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
           }
@@ -1255,6 +1238,14 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
             width: parseInt(width),
             height: parseInt(height)
           });
+        };
+
+        if (inited && typeof inited.then == 'function') {
+          inited.then(function () {
+            _handle();
+          });
+        } else {
+          _handle();
         }
       });
     }
@@ -1307,26 +1298,7 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
 
         ;
 
-        if (inited && typeof inited.then == 'function') {
-          inited.then(function (opt) {
-            if (!width) {
-              width = _dom.offsetWidth; // + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
-            }
-
-            ;
-
-            if (!height) {
-              height = _dom.offsetHeight; // + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
-            }
-
-            ;
-            resolve({
-              contentElement: _dom,
-              width: parseInt(width),
-              height: parseInt(height)
-            });
-          });
-        } else {
+        var _handle = function _handle() {
           if (!width) {
             width = _dom.offsetWidth; // + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
           }
@@ -1343,6 +1315,14 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
             width: parseInt(width),
             height: parseInt(height)
           });
+        };
+
+        if (inited && typeof inited.then == 'function') {
+          inited.then(function (opt) {
+            _handle();
+          });
+        } else {
+          _handle();
         }
 
         ;

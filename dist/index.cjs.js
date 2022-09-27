@@ -8325,6 +8325,7 @@ var _default = {
       var codeWithoutVariables = code.slice(0, range[0]) + code.slice(range[1]);
       return this._eval(codeWithoutVariables, 'options', 'variables', variables);
     } catch (e) {
+      console.log('parse error');
       return {};
     }
   }
@@ -8387,7 +8388,7 @@ var components = {
   */
 };
 var _default = {
-  chartxVersion: '1.1.120',
+  chartxVersion: '1.1.121',
   create: function create(el, data, opt) {
     var otherOptions = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
     var chart = null;
@@ -28695,6 +28696,7 @@ function scaleSolution(solution, width, height, padding) {
       yRange = bounds.yRange;
 
   if (xRange.max == xRange.min || yRange.max == yRange.min) {
+    console.log("not scaling solution: zero size detected");
     return solution;
   }
 
@@ -29354,7 +29356,9 @@ function computeTextCentres(circles, areas) {
     var centre = computeTextCentre(interior, exterior);
     ret[area] = centre;
 
-    if (centre.disjoint && areas[i].size > 0) ;
+    if (centre.disjoint && areas[i].size > 0) {
+      console.log("WARNING: area " + area + " not represented on screen");
+    }
   }
 
   return ret;
@@ -31472,6 +31476,7 @@ var Progress = /*#__PURE__*/function (_GraphsBase) {
             if (nodeData.endAngle > nodeData.middleAngle) {
               //超过了180度的话要绘制第二条
               allColors = (0, color.gradient)(style.lineargradient[0].color, style.lineargradient.slice(-1)[0].color, parseInt(nodeData.allAngle / 10));
+              console.log(allColors);
               end.color = allColors[17];
             } //let newLineargradient = 
             // let _style = me.ctx.createLinearGradient( nodeData.startOutPoint.x ,nodeData.startOutPoint.y, nodeData.middleOutPoint.x, nodeData.middleOutPoint.y );
@@ -31890,6 +31895,7 @@ function jsonToArrayForRelation(data, options, _childrenField) {
   var label = options.node && options.node.content && options.node.content.field;
 
   if (!checkDataIsJson(data, key, childrenKey)) {
+    console.error('该数据不能正确绘制，请提供数组对象形式的数据！');
     return result;
   }
   var childrens = [];
@@ -35720,7 +35726,9 @@ var _typeof2 = interopRequireDefault(_typeof_1$1);
 
         try {
           return fn();
-        } finally {}
+        } finally {
+          console.log(name + " time: " + (_.now() - start) + "ms");
+        }
       }
 
       function notime(name, fn) {
@@ -45504,6 +45512,8 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
           }
 
           if (e.type == "wheel") {
+            console.log(_deltaY, e.deltaY);
+
             if (Math.abs(e.deltaY) > Math.abs(_deltaY)) {
               _deltaY = e.deltaY;
             }
@@ -45906,6 +45916,7 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
       var me = this;
 
       _.each(this.data.edges, function (edge) {
+        console.log(edge.points);
         var key = edge.key.join('_');
 
         if (me.line.isTree && edge.points.length == 3) {
@@ -47880,6 +47891,7 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
             }
 
             if (e.type == "wheel") {
+              //console.log( _deltaY, e.deltaY )
               if (Math.abs(e.deltaY) > Math.abs(_deltaY)) {
                 _deltaY = e.deltaY;
               }
@@ -48015,6 +48027,7 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
       var me = this;
 
       _.each(this.data.edges, function (edge) {
+        //console.log(edge.points)
         var lineShapeOpt = me._getLineShape(edge, me.line.inflectionRadius);
 
         var key = edge.key.join('_');
@@ -48790,22 +48803,7 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
           inited = _this5.node.content.init(node, _contentLabel);
         }
 
-        if (inited && typeof inited.then == 'function') {
-          inited.then(function () {
-            if (!width) {
-              width = _contentLabel.getTextWidth() + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
-            }
-
-            if (!height) {
-              height = _contentLabel.getTextHeight() + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
-            }
-            resolve({
-              contentElement: _contentLabel,
-              width: parseInt(width),
-              height: parseInt(height)
-            });
-          });
-        } else {
+        var _handle = function _handle() {
           if (!width) {
             width = _contentLabel.getTextWidth() + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
           }
@@ -48818,6 +48816,14 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
             width: parseInt(width),
             height: parseInt(height)
           });
+        };
+
+        if (inited && typeof inited.then == 'function') {
+          inited.then(function () {
+            _handle();
+          });
+        } else {
+          _handle();
         }
       });
     }
@@ -48868,22 +48874,7 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
           inited = _this6.node.content.init(node, _dom);
         }
 
-        if (inited && typeof inited.then == 'function') {
-          inited.then(function (opt) {
-            if (!width) {
-              width = _dom.offsetWidth; // + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
-            }
-
-            if (!height) {
-              height = _dom.offsetHeight; // + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
-            }
-            resolve({
-              contentElement: _dom,
-              width: parseInt(width),
-              height: parseInt(height)
-            });
-          });
-        } else {
+        var _handle = function _handle() {
           if (!width) {
             width = _dom.offsetWidth; // + me.getProp(me.node.padding, node) * me.status.transform.scale * 2;
           }
@@ -48896,6 +48887,14 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
             width: parseInt(width),
             height: parseInt(height)
           });
+        };
+
+        if (inited && typeof inited.then == 'function') {
+          inited.then(function (opt) {
+            _handle();
+          });
+        } else {
+          _handle();
         }
       });
     }
@@ -51342,11 +51341,13 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
         //{treeData, nodeLength}这里设置了这两个属性
 
         Object.assign(data, _this4._filterTreeData(data.treeOriginData));
+        console.log(data.nodesLength + '个节点构建树:', new Date().getTime() - t);
         var t1 = new Date().getTime();
 
         _this4._initAllDataSize(data).then(function () {
           //这个时候已经设置好了 treeData 的 size 属性width、height
           //可以开始布局了，布局完就可以设置好 data 的 nodes edges 和 size 属性
+          console.log(data.nodesLength + '个节点计算size:', new Date().getTime() - t1);
           resolve(data);
         });
       });
@@ -51695,6 +51696,7 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
       data.edges.forEach(function (edge) {
         _this10.getEdgePoints(edge);
       });
+      console.log(data.nodesLength + '个节点计算layout:', new Date().getTime() - t1);
       Object.assign(data, {
         size: {
           width: width,
@@ -51981,16 +51983,20 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
               delete node.iconsSp;
             }
           }
-        };
+        }; //绘制的时候一定要准备好conentElement的
 
-        if (!node.contentElement) {
-          //绘制的时候如果发现没有 contentElement，那么就要把 contentElement 初始化了
-          _this11._initcontentElementAndSize(node.rowData).then(function () {
-            drawNode();
-          });
-        } else {
+
+        _this11._initcontentElementAndSize(node.rowData).then(function () {
           drawNode();
-        }
+        }); // if( !node.contentElement ){
+        //     //绘制的时候如果发现没有 contentElement，那么就要把 contentElement 初始化了
+        //     this._initcontentElementAndSize( node.rowData ).then( ()=>{
+        //         drawNode();
+        //     } )
+        // } else {
+        //     drawNode();
+        // }
+
       });
     }
   }, {
@@ -55074,6 +55080,7 @@ var Map = /*#__PURE__*/function (_GraphsBase) {
       this._setNodeStyle(_path, 'select');
 
       nodeData.selected = true;
+      console.log("select:true");
     }
   }, {
     key: "unselectAt",
@@ -55087,6 +55094,7 @@ var Map = /*#__PURE__*/function (_GraphsBase) {
       this._setNodeStyle(_path);
 
       geoGraph.selected = false;
+      console.log("select:false");
 
       if (geoGraph.focused) {
         this.focusAt(adcode);
@@ -57563,6 +57571,7 @@ var Tips = /*#__PURE__*/function (_Component) {
   }, {
     key: "move",
     value: function move(e) {
+      //console.log('tips move')
       if (!this.enabled) return;
 
       if (e.eventInfo) {
@@ -57585,6 +57594,7 @@ var Tips = /*#__PURE__*/function (_Component) {
   }, {
     key: "hide",
     value: function hide(e) {
+      //console.log('tips hide')
       this._hide(e);
 
       this.onhide.apply(this, [e]);
@@ -61760,7 +61770,7 @@ if (projectTheme && projectTheme.length) {
 }
 
 var chartx = {
-  version: '1.1.120',
+  version: '1.1.121',
   options: {}
 };
 

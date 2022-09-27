@@ -175,7 +175,7 @@ class Tips extends Component {
     }
 
     move(e) {
-        console.log('tips move')
+        //console.log('tips move')
         if (!this.enabled) return;
 
         if (e.eventInfo) {
@@ -194,7 +194,7 @@ class Tips extends Component {
     }
     
     hide(e){
-        console.log('tips hide')
+        //console.log('tips hide')
         this._hide(e);
         this.onhide.apply( this, [e] );
     }

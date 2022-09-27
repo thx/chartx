@@ -100,7 +100,9 @@ export default class GraphsBase extends Component
     triggerEvent( e )
     {
         let trigger = e.eventInfo.trigger; //这里要求一定是个字符串
-        if( typeof trigger == 'object' ) console.log('trigger必须是个字符串');
+        if( typeof trigger == 'object' ) {
+            //
+        };
 
         if( typeof trigger == 'string' ){
             if( trigger == 'this' ){

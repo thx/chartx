@@ -131,7 +131,10 @@ var GraphsBase = /*#__PURE__*/function (_Component) {
 
       var trigger = e.eventInfo.trigger; //这里要求一定是个字符串
 
-      if ((0, _typeof2["default"])(trigger) == 'object') {}
+      if ((0, _typeof2["default"])(trigger) == 'object') {//
+      }
+
+      ;
 
       if (typeof trigger == 'string') {
         if (trigger == 'this') {

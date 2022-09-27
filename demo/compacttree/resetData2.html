@@ -62,64 +62,18 @@
 //chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
 //第一行是表头。
 
-var data = [
-    { key: 100     , label: '<div onclick="alert(1)" style="cursor:pointer;width:50px;height:50px;background:red;">一线城市</div>'},
-    { key: "1"       , label: '中国'    },
-    { key: "2"       , label: '湖南'    },
-    { key: "3"       , label: '湖北'    },
-    { key: "4"       , label: '<div style="width:50px;height:30px;background:blue;color:white;">浙江</div>'    },
-    { key: "5"       , label: '长沙'    },
-    { key: "6"       , label: '杭州'    },
-    { key: "666"       , label: '金华'    },
-    { key: "66"       , label: '宁波'    },
-    { key: "7"       , label: '闲林'    },
-    { key: "8"       , label: '北京'    },
-    { key: "9"      , label: '娄底'    },
-    { key: "10"      , label: '<div style="width:50px;height:50px;background:green;">上海</div>' },
-    //{ key: "11"      , label: '武汉'    },
+var data = {
+    key: 1,
+    label: '占位符',
+    width:62,height:30
+}
+var data1 = {
+    key: 1,
+    label: '新建节点',
+    width:110,height:30
+}
 
-    { key: "1,2"   , label: '中国湖南' },
-    { key: "1,3"   , label: '中国湖北' },
-    { key: "1,4"   , label: '中国浙江' },
-    { key: "2,5"   , label: '湖南长沙' },
-    { key: "4,66"   , label: '浙江宁波' },
-    { key: "4,666"   , label: '浙江金华' },
-    { key: "4,6"   , label: '浙江杭州' },
-    { key: "6,7"   , label: '杭州闲林' },
-    { key: "1,8"   , label: '中国北京' },
-    { key: "2,9"   , label: '湖南娄底' },
-    { key: "1,10"  , label: '中国上海' },
-    { key: "10,100", label: '上海一线' },
-    //{ key: "3,11"  , label: '湖北武汉' },
-];
 
-var data1 = [
-    { key: "1"       , label: '中国'    },
-    { key: "2"       , label: '湖南'    },
-    { key: "3"       , label: '湖北'    },
-    { key: "4"       , label: '<div onclick="alert(1)" style="width:100px;height:30px;background:blue;color:white;">浙江1浙江1浙江1</div>'    },
-    { key: "5"       , label: '长沙'    },
-    { key: "6"       , label: '杭州'    },
-    { key: "666"       , label: '金华'    },
-    { key: "66"       , label: '宁波'    },
-    //{ key: "7"       , label: '闲林'    },
-    { key: "8"       , label: '北京'    },
-    { key: "9"      , label: '娄底'    },
-    { key: "10"      , label: '<div onclick="alert(1)"  style="width:50px;height:50px;background:red;">上海1</div>' },
-    //{ key: "11"      , label: '武汉'    },
-
-    { key: "1,2"   , label: '中国湖南' },
-    { key: "1,3"   , label: '中国湖北' },
-    { key: "1,4"   , label: '中国浙江' },
-    { key: "2,5"   , label: '湖南长沙' },
-    { key: "4,66"   , label: '浙江宁波' },
-    { key: "4,666"   , label: '浙江金华' },
-    { key: "4,6"   , label: '浙江杭州' },
-    //{ key: "6,7"   , label: '杭州闲林' },
-    { key: "1,8"   , label: '中国北京' },
-    { key: "2,9"   , label: '湖南娄底' },
-    { key: "1,10"  , label: '中国上海' }
-];
 
 var options = {
     graphs : {
@@ -226,6 +180,7 @@ setTimeout( function(){
         chart.resetData( data1 , {
             origin: '10'
         })
+        return;
         setTimeout(function(){
             chart.resetData( data , {
                 origin: '10'
@@ -248,7 +203,7 @@ setTimeout( function(){
                 </p>
             </div>
             <div  class="test-c">
-                <div id="canvasTest" style='width:800px;height:800px;position:relative;'></div>
+                <div id="canvasTest" style='width:800px;height:400px;position:relative;'></div>
             </div>
 
             </div>
