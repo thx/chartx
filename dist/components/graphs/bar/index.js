@@ -400,6 +400,7 @@ var BarGraphs = /*#__PURE__*/function (_GraphsBase) {
 
                 groupRegion.on(event.types.get(), function (e) {
                   e.eventInfo = {
+                    trigger: me,
                     iNode: this.iNode //TODO:这里设置了的话，会导致多graphs里获取不到别的graphs的nodes信息了
                     //nodes : me.getNodesAt( this.iNode ) 
 

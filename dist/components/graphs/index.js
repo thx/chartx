@@ -129,7 +129,7 @@ var GraphsBase = /*#__PURE__*/function (_Component) {
     value: function triggerEvent(e) {
       var _this2 = this;
 
-      var trigger = e.eventInfo.trigger; //这里要求一定是个字符串
+      var trigger = e.eventInfo.trigger;
 
       if ((0, _typeof2["default"])(trigger) == 'object') {//
       }

@@ -99,7 +99,7 @@ export default class GraphsBase extends Component
     //触发事件, 事件处理函数中的this都指向对应的graphs对象。
     triggerEvent( e )
     {
-        let trigger = e.eventInfo.trigger; //这里要求一定是个字符串
+        let trigger = e.eventInfo.trigger;
         if( typeof trigger == 'object' ) {
             //
         };

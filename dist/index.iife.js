@@ -8326,7 +8326,6 @@ var chartx = (function () {
 	      var codeWithoutVariables = code.slice(0, range[0]) + code.slice(range[1]);
 	      return this._eval(codeWithoutVariables, 'options', 'variables', variables);
 	    } catch (e) {
-	      console.log('parse error');
 	      return {};
 	    }
 	  }
@@ -8389,7 +8388,7 @@ var chartx = (function () {
 	  */
 	};
 	var _default = {
-	  chartxVersion: '1.1.121',
+	  chartxVersion: '1.1.122',
 	  create: function create(el, data, opt) {
 	    var otherOptions = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
 	    var chart = null;
@@ -17212,7 +17211,7 @@ var chartx = (function () {
 	    value: function triggerEvent(e) {
 	      var _this2 = this;
 
-	      var trigger = e.eventInfo.trigger; //这里要求一定是个字符串
+	      var trigger = e.eventInfo.trigger;
 
 	      if ((0, _typeof2["default"])(trigger) == 'object') ;
 
@@ -17700,6 +17699,7 @@ var chartx = (function () {
 
 	                groupRegion.on(event.types.get(), function (e) {
 	                  e.eventInfo = {
+	                    trigger: me,
 	                    iNode: this.iNode //TODO:这里设置了的话，会导致多graphs里获取不到别的graphs的nodes信息了
 	                    //nodes : me.getNodesAt( this.iNode ) 
 
@@ -28697,7 +28697,6 @@ var chartx = (function () {
 	      yRange = bounds.yRange;
 
 	  if (xRange.max == xRange.min || yRange.max == yRange.min) {
-	    console.log("not scaling solution: zero size detected");
 	    return solution;
 	  }
 
@@ -29357,9 +29356,7 @@ var chartx = (function () {
 	    var centre = computeTextCentre(interior, exterior);
 	    ret[area] = centre;
 
-	    if (centre.disjoint && areas[i].size > 0) {
-	      console.log("WARNING: area " + area + " not represented on screen");
-	    }
+	    if (centre.disjoint && areas[i].size > 0) ;
 	  }
 
 	  return ret;
@@ -31477,7 +31474,6 @@ var chartx = (function () {
 	            if (nodeData.endAngle > nodeData.middleAngle) {
 	              //超过了180度的话要绘制第二条
 	              allColors = (0, color.gradient)(style.lineargradient[0].color, style.lineargradient.slice(-1)[0].color, parseInt(nodeData.allAngle / 10));
-	              console.log(allColors);
 	              end.color = allColors[17];
 	            } //let newLineargradient = 
 	            // let _style = me.ctx.createLinearGradient( nodeData.startOutPoint.x ,nodeData.startOutPoint.y, nodeData.middleOutPoint.x, nodeData.middleOutPoint.y );
@@ -31896,7 +31892,6 @@ var chartx = (function () {
 	  var label = options.node && options.node.content && options.node.content.field;
 
 	  if (!checkDataIsJson(data, key, childrenKey)) {
-	    console.error('该数据不能正确绘制，请提供数组对象形式的数据！');
 	    return result;
 	  }
 	  var childrens = [];
@@ -35727,9 +35722,7 @@ var chartx = (function () {
 
 	        try {
 	          return fn();
-	        } finally {
-	          console.log(name + " time: " + (_.now() - start) + "ms");
-	        }
+	        } finally {}
 	      }
 
 	      function notime(name, fn) {
@@ -45513,8 +45506,6 @@ var chartx = (function () {
 	          }
 
 	          if (e.type == "wheel") {
-	            console.log(_deltaY, e.deltaY);
-
 	            if (Math.abs(e.deltaY) > Math.abs(_deltaY)) {
 	              _deltaY = e.deltaY;
 	            }
@@ -45917,7 +45908,6 @@ var chartx = (function () {
 	      var me = this;
 
 	      _.each(this.data.edges, function (edge) {
-	        console.log(edge.points);
 	        var key = edge.key.join('_');
 
 	        if (me.line.isTree && edge.points.length == 3) {
@@ -51342,13 +51332,11 @@ var chartx = (function () {
 	        //{treeData, nodeLength}这里设置了这两个属性
 
 	        Object.assign(data, _this4._filterTreeData(data.treeOriginData));
-	        console.log(data.nodesLength + '个节点构建树:', new Date().getTime() - t);
 	        var t1 = new Date().getTime();
 
 	        _this4._initAllDataSize(data).then(function () {
 	          //这个时候已经设置好了 treeData 的 size 属性width、height
 	          //可以开始布局了，布局完就可以设置好 data 的 nodes edges 和 size 属性
-	          console.log(data.nodesLength + '个节点计算size:', new Date().getTime() - t1);
 	          resolve(data);
 	        });
 	      });
@@ -51697,7 +51685,6 @@ var chartx = (function () {
 	      data.edges.forEach(function (edge) {
 	        _this10.getEdgePoints(edge);
 	      });
-	      console.log(data.nodesLength + '个节点计算layout:', new Date().getTime() - t1);
 	      Object.assign(data, {
 	        size: {
 	          width: width,
@@ -55081,7 +55068,6 @@ var chartx = (function () {
 	      this._setNodeStyle(_path, 'select');
 
 	      nodeData.selected = true;
-	      console.log("select:true");
 	    }
 	  }, {
 	    key: "unselectAt",
@@ -55095,7 +55081,6 @@ var chartx = (function () {
 	      this._setNodeStyle(_path);
 
 	      geoGraph.selected = false;
-	      console.log("select:false");
 
 	      if (geoGraph.focused) {
 	        this.focusAt(adcode);
@@ -61771,7 +61756,7 @@ var chartx = (function () {
 	}
 
 	var chartx = {
-	  version: '1.1.121',
+	  version: '1.1.122',
 	  options: {}
 	};
 
