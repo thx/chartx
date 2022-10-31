@@ -8326,6 +8326,7 @@ var chartx = (function () {
 	      var codeWithoutVariables = code.slice(0, range[0]) + code.slice(range[1]);
 	      return this._eval(codeWithoutVariables, 'options', 'variables', variables);
 	    } catch (e) {
+	      console.log('parse error');
 	      return {};
 	    }
 	  }
@@ -8388,7 +8389,7 @@ var chartx = (function () {
 	  */
 	};
 	var _default = {
-	  chartxVersion: '1.1.122',
+	  chartxVersion: '1.1.123',
 	  create: function create(el, data, opt) {
 	    var otherOptions = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
 	    var chart = null;
@@ -12639,15 +12640,15 @@ var chartx = (function () {
 	          var max = Canvax._.max(ds);
 
 	          var val = "val" in opt ? opt.val : _this2.getValOfInd(opt.ind);
+	          var _origin = _this2.origin;
+	          var origiInRange = !(_origin < min || _origin > max); //如果 origin 并不在这个区间
+
+	          if (!origiInRange) {
+	            _origin = min;
+	          }
 
 	          if (val >= min && val <= max) {
-	            var _origin = _this2.origin;
-	            var origiInRange = !(_origin < min || _origin > max); //如果 origin 并不在这个区间
-
-	            if (!origiInRange) {
-	              _origin = min;
-	            }
-
+	            //origin不在区间内的话，maxGroupDisABS一定是整个区间， 也就是说这个区间的原点在起点min
 	            var maxGroupDisABS = Math.max(Math.abs(max - _origin), Math.abs(_origin - min));
 	            var amountABS = Math.abs(max - min);
 	            var originPos = maxGroupDisABS / amountABS * groupLength;
@@ -12658,17 +12659,23 @@ var chartx = (function () {
 	            }
 
 	            if (origiInRange) {
-	              //origin在区间内的时候，才需要便宜_originTrans
+	              //origin在区间内的时候，才需要偏移_originTrans
 	              pos += _this2._originTrans;
 	            }
-	            return "break";
+	          } else {
+	            //先简单处理下超出边界的行为
+	            if (val > max && i == l - 1) {
+	              pos = me.axisLength;
+	            }
+
+	            if (val < min && i == 0) {
+	              pos = 0;
+	            }
 	          }
 	        };
 
 	        for (var i = 0, l = dsgLen; i < l; i++) {
-	          var _ret2 = _loop2(i, l);
-
-	          if (_ret2 === "break") break;
+	          _loop2(i, l);
 	        }
 	      } else {
 	        if (cellCount == 1) {
@@ -14373,7 +14380,8 @@ var chartx = (function () {
 	        }
 	      }
 
-	      if (!me.width && !('width' in me._opt)) {
+	      if (!('width' in me._opt)) {
+	        var _preWidth = me.width;
 	        me.width = parseInt(me.maxW + me.label.distance);
 
 	        if (me.tickLine.enabled) {
@@ -14382,6 +14390,11 @@ var chartx = (function () {
 
 	        if (me._title) {
 	          me.width += me._title.getTextHeight();
+	        }
+
+	        if (me.width != _preWidth) {
+	          //y轴宽度有变化, 通知整个重新绘制
+	          debugger;
 	        }
 	      }
 	      var _originX = 0;
@@ -21167,6 +21180,8 @@ var chartx = (function () {
 	          fillStyle: null,
 	          color: null,
 	          strokeStyle: null,
+	          lineType: null,
+	          lineDash: null,
 	          strokeAlpha: 1,
 	          lineWidth: 0,
 	          shapeType: null,
@@ -21185,6 +21200,10 @@ var chartx = (function () {
 	        this._setStrokeStyle(nodeLayoutData);
 
 	        this._setLineWidth(nodeLayoutData);
+
+	        this._setLineType(nodeLayoutData);
+
+	        this._setLineDash(nodeLayoutData);
 
 	        this._setStrokeAlpha(nodeLayoutData);
 
@@ -21329,6 +21348,31 @@ var chartx = (function () {
 	      return this;
 	    }
 	  }, {
+	    key: "_setLineType",
+	    value: function _setLineType(nodeLayoutData) {
+	      nodeLayoutData.lineType = this._getProp(this.node.lineType, nodeLayoutData);
+	      return this;
+	    }
+	  }, {
+	    key: "_setLineDash",
+	    value: function _setLineDash(nodeLayoutData) {
+	      var _this2 = this;
+
+	      var _getProp = function _getProp(prop, nodeLayoutData) {
+	        var _prop = prop; // if( _.isArray( prop ) ){
+	        //     _prop = prop[ nodeLayoutData.iGroup ]
+	        // };
+
+	        if (_.isFunction(prop)) {
+	          _prop = prop.apply(_this2, [nodeLayoutData]);
+	        }
+	        return _prop;
+	      };
+
+	      nodeLayoutData.lineDash = _getProp(this.node.lineDash, nodeLayoutData);
+	      return this;
+	    }
+	  }, {
 	    key: "_setNodeType",
 	    value: function _setNodeType(nodeLayoutData) {
 	      var shapeType = this.node.shapeType;
@@ -21351,7 +21395,7 @@ var chartx = (function () {
 	  }, {
 	    key: "_widget",
 	    value: function _widget() {
-	      var _this2 = this;
+	      var _this3 = this;
 
 	      var me = this;
 
@@ -21478,7 +21522,7 @@ var chartx = (function () {
 	        var gi = 0;
 
 	        var _loop = function _loop(_groupKey) {
-	          var _group = _this2._groupData[_groupKey];
+	          var _group = _this3._groupData[_groupKey];
 	          var _groupData = {
 	            name: _groupKey,
 	            iGroup: gi,
@@ -21553,6 +21597,48 @@ var chartx = (function () {
 	          });
 	        }
 	      });
+
+	      if (me.label.enabled) {
+	        for (var i = 0, l = me.data.length; i < l; i++) {
+	          var ind = me.data.length - 1 - i;
+	          var currNodeData = me.data[ind];
+	          var currLabel = me.data[ind].nodeElement.labelElement;
+	          var preNodeData = void 0,
+	              preLabel = void 0;
+
+	          if (ind == me.data.length - 1) {
+	            //第一个肯定要显示
+	            currLabel.context.visible = true;
+	          } else {
+	            var intersect = false;
+
+	            for (var ii = ind + 1, ll = me.data.length - 1; ii <= ll; ii++) {
+	              preNodeData = me.data[ii];
+	              preLabel = me.data[ii].nodeElement.labelElement;
+	              if (!preLabel.context.visible) continue;
+	              var currLeft = currNodeData.x - currLabel.getTextWidth() / 2;
+	              var currRight = currLeft + currLabel.getTextWidth();
+	              var currTop = currNodeData.y - currLabel.getTextHeight() / 2;
+	              var currBottom = currTop + currLabel.getTextHeight();
+	              var preLeft = preNodeData.x - preLabel.getTextWidth() / 2;
+	              var preRight = preLeft + preLabel.getTextWidth();
+	              var preTop = preNodeData.y - preLabel.getTextHeight() / 2;
+	              var preBottom = preTop + preLabel.getTextHeight();
+
+	              if (!(currRight < preLeft || currLeft > preRight || currBottom < preTop || currTop > preBottom)) {
+	                //说明curr 和 pre 两个 label相交了，那么curr要 隐藏掉
+	                intersect = true;
+	              }
+	            }
+
+	            if (intersect) {
+	              currLabel.context.visible = false;
+	            } else {
+	              currLabel.context.visible = true;
+	            }
+	          }
+	        }
+	      }
 	    }
 	  }, {
 	    key: "_getNodeElement",
@@ -21705,6 +21791,8 @@ var chartx = (function () {
 	        strokeStyle: nodeData.strokeStyle,
 	        strokeAlpha: nodeData.strokeAlpha,
 	        lineWidth: nodeData.lineWidth,
+	        lineType: nodeData.lineType,
+	        lineDash: nodeData.lineDash,
 	        fillAlpha: nodeData.fillAlpha,
 	        cursor: "pointer"
 	      };
@@ -21773,9 +21861,9 @@ var chartx = (function () {
 	      var nodeData = this.data[ind];
 	      if (!this.node.focus.enabled || nodeData.focused) return;
 	      var nctx = nodeData.nodeElement.context;
-	      nctx.lineWidth = this.node.focus.lineWidth;
-	      nctx.strokeAlpha = this.node.focus.strokeAlpha;
-	      nctx.fillAlpha = this.node.focus.fillAlpha;
+	      nctx.lineWidth = this._getProp(this.node.focus.lineWidth, nodeData);
+	      nctx.strokeAlpha = this._getProp(this.node.focus.strokeAlpha, nodeData);
+	      nctx.fillAlpha = this._getProp(this.node.focus.fillAlpha, nodeData);
 	      nodeData.focused = true;
 	    }
 	  }, {
@@ -21784,10 +21872,10 @@ var chartx = (function () {
 	      var nodeData = this.data[ind];
 	      if (!this.node.focus.enabled || !nodeData.focused) return;
 	      var nctx = nodeData.nodeElement.context;
-	      nctx.lineWidth = nodeData.lineWidth;
-	      nctx.strokeAlpha = nodeData.strokeAlpha;
-	      nctx.fillAlpha = nodeData.fillAlpha;
-	      nctx.strokeStyle = nodeData.strokeStyle;
+	      nctx.lineWidth = this._getProp(nodeData.lineWidth, nodeData);
+	      nctx.strokeAlpha = this._getProp(nodeData.strokeAlpha, nodeData);
+	      nctx.fillAlpha = this._getProp(nodeData.fillAlpha, nodeData);
+	      nctx.strokeStyle = this._getProp(nodeData.strokeStyle, nodeData);
 	      nodeData.focused = false;
 	    }
 	  }, {
@@ -21796,9 +21884,9 @@ var chartx = (function () {
 	      var nodeData = this.data[ind];
 	      if (!this.node.select.enabled || nodeData.selected) return;
 	      var nctx = nodeData.nodeElement.context;
-	      nctx.lineWidth = this.node.select.lineWidth;
-	      nctx.strokeAlpha = this.node.select.strokeAlpha;
-	      nctx.fillAlpha = this.node.select.fillAlpha;
+	      nctx.lineWidth = this._getProp(this.node.select.lineWidth, nodeData);
+	      nctx.strokeAlpha = this._getProp(this.node.select.strokeAlpha, nodeData);
+	      nctx.fillAlpha = this._getProp(this.node.select.fillAlpha, nodeData);
 	      nodeData.selected = true;
 	    }
 	  }, {
@@ -21810,9 +21898,9 @@ var chartx = (function () {
 
 	      if (nodeData.focused) {
 	        //有e 说明这个函数是事件触发的，鼠标肯定还在node上面
-	        nctx.lineWidth = this.node.focus.lineWidth;
-	        nctx.strokeAlpha = this.node.focus.strokeAlpha;
-	        nctx.fillAlpha = this.node.focus.fillAlpha;
+	        nctx.lineWidth = this._getProp(this.node.focus.lineWidth, nodeData);
+	        nctx.strokeAlpha = this._getProp(this.node.focus.strokeAlpha, nodeData);
+	        nctx.fillAlpha = this._getProp(this.node.focus.fillAlpha, nodeData);
 	      } else {
 	        nctx.lineWidth = nodeData.lineWidth;
 	        nctx.strokeAlpha = nodeData.strokeAlpha;
@@ -21841,6 +21929,11 @@ var chartx = (function () {
 	          "default": null,
 	          documentation: '分组字段，如果area配置enabled为true，那么需要groupField来构建几个area'
 	        },
+	        // sortField: {
+	        //     detail: '排序字段',
+	        //     default: null,
+	        //     documentation: '在需要按照优先级显示label的时候有用'
+	        // },
 	        dataFilter: {
 	          detail: '散点过滤数据',
 	          "default": null,
@@ -21899,6 +21992,14 @@ var chartx = (function () {
 	            lineWidth: {
 	              detail: '节点描边线宽',
 	              "default": 0
+	            },
+	            lineType: {
+	              detail: '描边样式',
+	              "default": 'solid'
+	            },
+	            lineDash: {
+	              detail: '虚线样式',
+	              "default": [2, 6]
 	            },
 	            strokeAlpha: {
 	              detail: '节点描边透明度',
@@ -22260,8 +22361,9 @@ var chartx = (function () {
 	      var me = this;
 	      var sec = me.sectors[node.iNode];
 	      sec.animate({
-	        x: node.outOffsetx,
-	        y: node.outOffsety
+	        //x: node.outOffsetx,
+	        //y: node.outOffsety
+	        r: node.outRadius + node.moveDis
 	      }, {
 	        duration: 100,
 	        onComplete: function onComplete() {
@@ -22277,8 +22379,9 @@ var chartx = (function () {
 	      var me = this;
 	      var sec = me.sectors[node.iNode];
 	      sec.animate({
-	        x: 0,
-	        y: 0
+	        //x: 0,
+	        //y: 0
+	        r: node.outRadius
 	      }, {
 	        duration: 100,
 	        onComplete: function onComplete() {
@@ -23250,7 +23353,7 @@ var chartx = (function () {
 	            },
 	            moveDis: {
 	              detail: 'hover偏移量',
-	              "default": 15,
+	              "default": 8,
 	              documentation: '要预留moveDis位置来hover sector 的时候外扩'
 	            },
 	            fillStyle: {
@@ -28697,6 +28800,7 @@ var chartx = (function () {
 	      yRange = bounds.yRange;
 
 	  if (xRange.max == xRange.min || yRange.max == yRange.min) {
+	    console.log("not scaling solution: zero size detected");
 	    return solution;
 	  }
 
@@ -29356,7 +29460,9 @@ var chartx = (function () {
 	    var centre = computeTextCentre(interior, exterior);
 	    ret[area] = centre;
 
-	    if (centre.disjoint && areas[i].size > 0) ;
+	    if (centre.disjoint && areas[i].size > 0) {
+	      console.log("WARNING: area " + area + " not represented on screen");
+	    }
 	  }
 
 	  return ret;
@@ -31474,6 +31580,7 @@ var chartx = (function () {
 	            if (nodeData.endAngle > nodeData.middleAngle) {
 	              //超过了180度的话要绘制第二条
 	              allColors = (0, color.gradient)(style.lineargradient[0].color, style.lineargradient.slice(-1)[0].color, parseInt(nodeData.allAngle / 10));
+	              console.log(allColors);
 	              end.color = allColors[17];
 	            } //let newLineargradient = 
 	            // let _style = me.ctx.createLinearGradient( nodeData.startOutPoint.x ,nodeData.startOutPoint.y, nodeData.middleOutPoint.x, nodeData.middleOutPoint.y );
@@ -31892,6 +31999,7 @@ var chartx = (function () {
 	  var label = options.node && options.node.content && options.node.content.field;
 
 	  if (!checkDataIsJson(data, key, childrenKey)) {
+	    console.error('该数据不能正确绘制，请提供数组对象形式的数据！');
 	    return result;
 	  }
 	  var childrens = [];
@@ -35722,7 +35830,9 @@ var chartx = (function () {
 
 	        try {
 	          return fn();
-	        } finally {}
+	        } finally {
+	          console.log(name + " time: " + (_.now() - start) + "ms");
+	        }
 	      }
 
 	      function notime(name, fn) {
@@ -45506,6 +45616,8 @@ var chartx = (function () {
 	          }
 
 	          if (e.type == "wheel") {
+	            console.log(_deltaY, e.deltaY);
+
 	            if (Math.abs(e.deltaY) > Math.abs(_deltaY)) {
 	              _deltaY = e.deltaY;
 	            }
@@ -45908,6 +46020,7 @@ var chartx = (function () {
 	      var me = this;
 
 	      _.each(this.data.edges, function (edge) {
+	        console.log(edge.points);
 	        var key = edge.key.join('_');
 
 	        if (me.line.isTree && edge.points.length == 3) {
@@ -51332,11 +51445,13 @@ var chartx = (function () {
 	        //{treeData, nodeLength}这里设置了这两个属性
 
 	        Object.assign(data, _this4._filterTreeData(data.treeOriginData));
+	        console.log(data.nodesLength + '个节点构建树:', new Date().getTime() - t);
 	        var t1 = new Date().getTime();
 
 	        _this4._initAllDataSize(data).then(function () {
 	          //这个时候已经设置好了 treeData 的 size 属性width、height
 	          //可以开始布局了，布局完就可以设置好 data 的 nodes edges 和 size 属性
+	          console.log(data.nodesLength + '个节点计算size:', new Date().getTime() - t1);
 	          resolve(data);
 	        });
 	      });
@@ -51685,6 +51800,7 @@ var chartx = (function () {
 	      data.edges.forEach(function (edge) {
 	        _this10.getEdgePoints(edge);
 	      });
+	      console.log(data.nodesLength + '个节点计算layout:', new Date().getTime() - t1);
 	      Object.assign(data, {
 	        size: {
 	          width: width,
@@ -55068,6 +55184,7 @@ var chartx = (function () {
 	      this._setNodeStyle(_path, 'select');
 
 	      nodeData.selected = true;
+	      console.log("select:true");
 	    }
 	  }, {
 	    key: "unselectAt",
@@ -55081,6 +55198,7 @@ var chartx = (function () {
 	      this._setNodeStyle(_path);
 
 	      geoGraph.selected = false;
+	      console.log("select:false");
 
 	      if (geoGraph.focused) {
 	        this.focusAt(adcode);
@@ -57144,7 +57262,8 @@ var chartx = (function () {
 	  }, {
 	    key: "_calculateProps",
 	    value: function _calculateProps() {
-	      var opt = this._opt; //如果markline有target配置，那么只现在target配置里的字段的 markline, 推荐
+	      var opt = this._opt;
+	      debugger; //如果markline有target配置，那么只现在target配置里的字段的 markline, 推荐
 
 	      var field = opt.markTo;
 
@@ -57197,6 +57316,8 @@ var chartx = (function () {
 	          return _count / _fdata.length;
 	        };
 	      }
+
+	      debugger;
 
 	      if (!isNaN(y)) {
 	        //如果y是个function说明是均值，自动实时计算的，而且不会超过ydatasection的范围
@@ -59148,6 +59269,8 @@ var chartx = (function () {
 	var _ = _canvax["default"]._;
 	var Line = _canvax["default"].Shapes.Line;
 	var Rect = _canvax["default"].Shapes.Rect;
+	var Arrow = _canvax["default"].Shapes.Arrow;
+	var Text = _canvax["default"].Display.Text;
 
 	var Cross = /*#__PURE__*/function (_Component) {
 	  (0, _inherits2["default"])(Cross, _Component);
@@ -59219,6 +59342,178 @@ var chartx = (function () {
 	      } else {
 	        y = _coord._yAxis[0].getPosOfVal(yVal);
 	      }
+
+	      for (var i = 0, l = 4; i < l; i++) {
+	        var _x = 0,
+	            _y = 0,
+	            _w = 0,
+	            _h = 0;
+	        var quadrant = void 0;
+	        var textCtx = {};
+	        var textBackGroundCtx = {};
+
+	        switch (i) {
+	          case 0:
+	            _w = width - x;
+	            _h = height - y;
+	            _x = x;
+	            _y = -height;
+	            quadrant = 'rightTop';
+	            textCtx = {
+	              x: width - 8,
+	              y: _y + 4,
+	              textAlign: 'right',
+	              textBaseline: 'top'
+	            };
+	            textBackGroundCtx = {
+	              x: width,
+	              y: _y
+	            };
+	            break;
+
+	          case 1:
+	            _w = x;
+	            _h = height - y;
+	            _x = 0;
+	            _y = -height;
+	            quadrant = 'leftTop';
+	            textCtx = {
+	              x: _x + 8,
+	              y: _y + 4,
+	              textAlign: 'left',
+	              textBaseline: 'top'
+	            };
+	            textBackGroundCtx = {
+	              x: _x,
+	              y: _y
+	            };
+	            break;
+
+	          case 2:
+	            _w = x;
+	            _h = y;
+	            _x = 0;
+	            _y = -y;
+	            quadrant = 'leftBottom';
+	            textCtx = {
+	              x: 0 + 8,
+	              y: 0 - 4,
+	              textAlign: 'left',
+	              textBaseline: 'bottom'
+	            };
+	            textBackGroundCtx = {
+	              x: 0,
+	              y: 0
+	            };
+	            break;
+
+	          case 3:
+	            _w = width - x;
+	            _h = y;
+	            _x = x;
+	            _y = -y;
+	            quadrant = 'rightBottom';
+	            textCtx = {
+	              x: width - 8,
+	              y: 0 - 4,
+	              textAlign: 'right',
+	              textBaseline: 'bottom'
+	            };
+	            textBackGroundCtx = {
+	              x: width,
+	              y: 0
+	            };
+	            break;
+	        }
+
+	        var quadrantOpt = this.quadrant[quadrant];
+	        var ctx = {
+	          width: _w,
+	          height: _h,
+	          x: _x,
+	          y: _y,
+	          fillStyle: quadrantOpt.fillStyle,
+	          fillAlpha: quadrantOpt.fillAlpha
+	        };
+	        var quadrantId = '_quadrant_' + i;
+
+	        if (this[quadrantId]) {
+	          Object.assign(this[quadrantId].context, ctx);
+	        } else {
+	          this[quadrantId] = new Rect({
+	            id: quadrantId,
+	            context: ctx
+	          });
+	          me.sprite.addChild(this[quadrantId]);
+	        } //象限文本和象限文本背景的是否显示
+
+
+	        var visible = true;
+
+	        if (!_w || !_h || !quadrantOpt.label.text) {
+	          visible = false;
+	        } //设置象限文本
+
+
+	        textCtx.fillStyle = quadrantOpt.label.fontColor;
+	        textCtx.fontSize = quadrantOpt.label.fontSize;
+	        textCtx.visible = visible; //textCtx.x = 0;
+	        //textCtx.y = 0;
+
+	        var quadrantTextId = '_quadrant_text' + i;
+
+	        if (this[quadrantTextId]) {
+	          Object.assign(this[quadrantTextId].context, textCtx);
+	        } else {
+	          this[quadrantTextId] = new Text(quadrantOpt.label.text, {
+	            id: quadrantTextId,
+	            context: textCtx
+	          });
+	          me.sprite.addChild(this[quadrantTextId]);
+	        } //设置文本的背景
+
+
+	        textBackGroundCtx.fillStyle = quadrantOpt.label.fillStyle;
+	        textBackGroundCtx.fillAlpha = quadrantOpt.label.fillAlpha;
+	        textBackGroundCtx.visible = visible;
+	        Object.assign(textBackGroundCtx, {
+	          width: this[quadrantTextId].getTextWidth() + 16,
+	          height: this[quadrantTextId].getTextHeight() + 8
+	        });
+
+	        switch (i) {
+	          case 0:
+	            textBackGroundCtx.x = textBackGroundCtx.x - textBackGroundCtx.width;
+	            break;
+
+	          case 1:
+	            break;
+
+	          case 2:
+	            textBackGroundCtx.y = textBackGroundCtx.y - textBackGroundCtx.height;
+	            break;
+
+	          case 3:
+	            textBackGroundCtx.x = textBackGroundCtx.x - textBackGroundCtx.width;
+	            textBackGroundCtx.y = textBackGroundCtx.y - textBackGroundCtx.height;
+	            break;
+	        }
+
+	        var quadrantTextBackGroundId = '_quadrant_text_background_' + i;
+
+	        if (this[quadrantTextBackGroundId]) {
+	          Object.assign(this[quadrantTextBackGroundId].context, textBackGroundCtx);
+	        } else {
+	          this[quadrantTextBackGroundId] = new Rect({
+	            id: quadrantTextBackGroundId,
+	            context: textBackGroundCtx
+	          });
+	          me.sprite.addChild(this[quadrantTextBackGroundId]);
+	          this[quadrantTextBackGroundId].toBack(1);
+	        }
+	      } //开始绘制两交叉线
+
+
 	      var _hCtx = {
 	        //横向线条
 	        start: {
@@ -59244,6 +59539,54 @@ var chartx = (function () {
 	        });
 	        me.sprite.addChild(me._hLineElement);
 	      }
+
+	      var _hArrowCtx = {
+	        x: 0,
+	        y: 0,
+	        control: {
+	          x: _hCtx.end.x - 10,
+	          y: _hCtx.end.y
+	        },
+	        point: {
+	          x: _hCtx.end.x,
+	          y: _hCtx.end.y
+	        },
+	        strokeStyle: _hCtx.strokeStyle,
+	        fillStyle: _hCtx.strokeStyle
+	      };
+
+	      if (me._hLineElementArrow) {
+	        Object.assign(me._hLineElementArrow.context.control, _hArrowCtx.control);
+	        Object.assign(me._hLineElementArrow.context.point, _hArrowCtx.point);
+	      } else {
+	        me._hLineElementArrow = new Arrow({
+	          id: '_hArrow',
+	          context: _hArrowCtx
+	        });
+	        me.sprite.addChild(me._hLineElementArrow);
+	      } //h上面的两个label
+
+
+	      ['begin', 'end'].forEach(function (type) {
+	        var _lineLabelCtx = {
+	          x: type == 'begin' ? 4 : width - 4,
+	          y: -y - 4,
+	          fillStyle: me.line.hLabel[type].fontColor,
+	          fontSize: me.line.hLabel[type].fontSize,
+	          textAlign: type == 'begin' ? 'left' : 'right',
+	          textBaseline: 'bottom'
+	        };
+	        var _elm = me['_hLineLabel' + type + 'Ctx'];
+
+	        if (_elm) {
+	          Object.assign(_elm.context, _lineLabelCtx);
+	        } else {
+	          _elm = me['_hLineLabel' + type + 'Ctx'] = new Text(me.line.hLabel[type].text, {
+	            context: _lineLabelCtx
+	          });
+	          me.sprite.addChild(_elm);
+	        }
+	      });
 	      var _vCtx = {
 	        start: {
 	          x: x,
@@ -59269,22 +59612,54 @@ var chartx = (function () {
 	        });
 	        me.sprite.addChild(me._vLineElement);
 	      }
-	      // for( let i=0,l=4; i<l; i++ ){
-	      //     let _x = 0,_y=0;
-	      //     let _width = width - this.aimPoint.xVal;
-	      //     if( i % 2 ){
-	      //         _width = this.aimPoint.xVal;
-	      //     }
-	      //     let _height= height - this.aimPoint.yVal;
-	      //     if( i<2 ){
-	      //         _height= this.aimPoint.yVal;
-	      //     };
-	      //     let rectCtx = {
-	      //         width : _width,
-	      //         height: _height,
-	      //         x     : _x
-	      //     }
-	      // }
+
+	      var _vArrowCtx = {
+	        x: 0,
+	        y: 0,
+	        control: {
+	          x: _vCtx.end.x,
+	          y: _vCtx.end.y + 10
+	        },
+	        point: {
+	          x: _vCtx.end.x,
+	          y: _vCtx.end.y
+	        },
+	        strokeStyle: _vCtx.strokeStyle,
+	        fillStyle: _vCtx.strokeStyle
+	      };
+
+	      if (me._vLineElementArrow) {
+	        Object.assign(me._vLineElementArrow.context.control, _vArrowCtx.control);
+	        Object.assign(me._vLineElementArrow.context.point, _vArrowCtx.point);
+	      } else {
+	        me._vLineElementArrow = new Arrow({
+	          id: '_vArrow',
+	          context: _vArrowCtx
+	        });
+	        me.sprite.addChild(me._vLineElementArrow);
+	      } //v上面的两个label
+
+
+	      ['begin', 'end'].forEach(function (type) {
+	        var _lineLabelCtx = {
+	          x: x - 4,
+	          y: type == 'begin' ? -4 : -height + 4,
+	          fillStyle: me.line.vLabel[type].fontColor,
+	          fontSize: me.line.vLabel[type].fontSize,
+	          textAlign: 'right',
+	          textBaseline: type == 'begin' ? 'bottom' : 'top'
+	        };
+	        var _elm = me['_vLineLabel' + type + 'Ctx'];
+
+	        if (_elm) {
+	          Object.assign(_elm.context, _lineLabelCtx);
+	        } else {
+	          _elm = me['_vLineLabel' + type + 'Ctx'] = new Text(me.line.vLabel[type].text, {
+	            context: _lineLabelCtx
+	          });
+	          me.sprite.addChild(_elm);
+	        }
+	      });
 	    }
 	  }], [{
 	    key: "defaultProps",
@@ -59317,34 +59692,243 @@ var chartx = (function () {
 	            lineType: {
 	              detail: '线样式类型',
 	              "default": 'solid'
+	            },
+	            showArrow: {
+	              detail: '是否显示箭头',
+	              "default": true
+	            },
+	            vLabel: {
+	              detail: '纵向线方向的label',
+	              propertys: {
+	                begin: {
+	                  detail: '开始点label',
+	                  propertys: {
+	                    text: {
+	                      detail: '文本内容',
+	                      "default": ''
+	                    },
+	                    fontColor: {
+	                      detail: '文本颜色',
+	                      "default": '#999'
+	                    },
+	                    fontSize: {
+	                      detail: '文本大小',
+	                      "default": 12
+	                    }
+	                  }
+	                },
+	                end: {
+	                  detail: '结束点label',
+	                  propertys: {
+	                    text: {
+	                      detail: '文本内容',
+	                      "default": ''
+	                    },
+	                    fontColor: {
+	                      detail: '文本颜色',
+	                      "default": '#999'
+	                    },
+	                    fontSize: {
+	                      detail: '文本大小',
+	                      "default": 12
+	                    }
+	                  }
+	                }
+	              }
+	            },
+	            hLabel: {
+	              detail: '横向线方向的label',
+	              propertys: {
+	                begin: {
+	                  detail: '开始点label',
+	                  propertys: {
+	                    text: {
+	                      detail: '文本内容',
+	                      "default": ''
+	                    },
+	                    fontColor: {
+	                      detail: '文本颜色',
+	                      "default": '#999'
+	                    },
+	                    fontSize: {
+	                      detail: '文本大小',
+	                      "default": 12
+	                    }
+	                  }
+	                },
+	                end: {
+	                  detail: '结束点label',
+	                  propertys: {
+	                    text: {
+	                      detail: '文本内容',
+	                      "default": ''
+	                    },
+	                    fontColor: {
+	                      detail: '文本颜色',
+	                      "default": '#999'
+	                    },
+	                    fontSize: {
+	                      detail: '文本大小',
+	                      "default": 12
+	                    }
+	                  }
+	                }
+	              }
 	            }
 	          }
 	        },
 	        quadrant: {
-	          detail: '背景设置，按照被cross分割的4个象限来设置背景(右上，左上，左下，右下)',
+	          detail: '4象限设置',
 	          propertys: {
-	            fillStyle: {
-	              detail: '填充颜色，可以是数组（右上，左上，左下，右下），也可以是函数',
-	              "default": '#666'
-	            },
-	            fillAlpha: {
-	              detail: '填充透明度，可以是数组（右上，左上，左下，右下），也可以是函数',
-	              "default": 0.1
-	            },
-	            label: {
-	              detail: '象限文本设置',
+	            rightTop: {
+	              detail: '第一象限',
 	              propertys: {
-	                enabled: {
-	                  detail: '是否开启',
-	                  "default": true
+	                fillStyle: {
+	                  detail: '象限区块背景色',
+	                  "default": '#ccc'
 	                },
-	                fontColor: {
-	                  detail: '文本颜色',
-	                  "default": '#666'
+	                fillAlpha: {
+	                  detail: '象限区块背透明度',
+	                  "default": 0.1
 	                },
-	                fontSize: {
-	                  detail: '文本字体大小',
-	                  "default": 14
+	                label: {
+	                  detail: '象限文本设置',
+	                  propertys: {
+	                    text: {
+	                      detail: '文本内容',
+	                      "default": ''
+	                    },
+	                    fontColor: {
+	                      detail: '文本颜色',
+	                      "default": '#666'
+	                    },
+	                    fontSize: {
+	                      detail: '文本字体大小',
+	                      "default": 14
+	                    },
+	                    fillStyle: {
+	                      detail: '文本矩形背景色',
+	                      "default": '#e9e9f8'
+	                    },
+	                    fillAlpha: {
+	                      detail: '文本矩形背景透明度',
+	                      "default": 0.5
+	                    }
+	                  }
+	                }
+	              }
+	            },
+	            leftTop: {
+	              detail: '第二象限',
+	              propertys: {
+	                fillStyle: {
+	                  detail: '象限区块背景色',
+	                  "default": '#ccc'
+	                },
+	                fillAlpha: {
+	                  detail: '象限区块背透明度',
+	                  "default": 0.1
+	                },
+	                label: {
+	                  detail: '象限文本设置',
+	                  propertys: {
+	                    text: {
+	                      detail: '文本内容',
+	                      "default": ''
+	                    },
+	                    fontColor: {
+	                      detail: '文本颜色',
+	                      "default": '#666'
+	                    },
+	                    fontSize: {
+	                      detail: '文本字体大小',
+	                      "default": 14
+	                    },
+	                    fillStyle: {
+	                      detail: '文本矩形背景色',
+	                      "default": '#e9e9f8'
+	                    },
+	                    fillAlpha: {
+	                      detail: '文本矩形背景透明度',
+	                      "default": 0.5
+	                    }
+	                  }
+	                }
+	              }
+	            },
+	            leftBottom: {
+	              detail: '第三象限',
+	              propertys: {
+	                fillStyle: {
+	                  detail: '象限区块背景色',
+	                  "default": '#ccc'
+	                },
+	                fillAlpha: {
+	                  detail: '象限区块背透明度',
+	                  "default": 0.1
+	                },
+	                label: {
+	                  detail: '象限文本设置',
+	                  propertys: {
+	                    text: {
+	                      detail: '文本内容',
+	                      "default": ''
+	                    },
+	                    fontColor: {
+	                      detail: '文本颜色',
+	                      "default": '#666'
+	                    },
+	                    fontSize: {
+	                      detail: '文本字体大小',
+	                      "default": 14
+	                    },
+	                    fillStyle: {
+	                      detail: '文本矩形背景色',
+	                      "default": '#e9e9f8'
+	                    },
+	                    fillAlpha: {
+	                      detail: '文本矩形背景透明度',
+	                      "default": 0.5
+	                    }
+	                  }
+	                }
+	              }
+	            },
+	            rightBottom: {
+	              detail: '第四象限',
+	              propertys: {
+	                fillStyle: {
+	                  detail: '象限区块背景色',
+	                  "default": '#ccc'
+	                },
+	                fillAlpha: {
+	                  detail: '象限区块背透明度',
+	                  "default": 0.1
+	                },
+	                label: {
+	                  detail: '象限文本设置',
+	                  propertys: {
+	                    text: {
+	                      detail: '文本内容',
+	                      "default": ''
+	                    },
+	                    fontColor: {
+	                      detail: '文本颜色',
+	                      "default": '#666'
+	                    },
+	                    fontSize: {
+	                      detail: '文本字体大小',
+	                      "default": 14
+	                    },
+	                    fillStyle: {
+	                      detail: '文本矩形背景色',
+	                      "default": '#e9e9f8'
+	                    },
+	                    fillAlpha: {
+	                      detail: '文本矩形背景透明度',
+	                      "default": 0.5
+	                    }
+	                  }
 	                }
 	              }
 	            }
@@ -61756,7 +62340,7 @@ var chartx = (function () {
 	}
 
 	var chartx = {
-	  version: '1.1.122',
+	  version: '1.1.123',
 	  options: {}
 	};
 

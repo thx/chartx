@@ -51,7 +51,7 @@ class PieGraphs extends GraphsBase
                     },
                     moveDis : {
                         detail: 'hover偏移量',
-                        default: 15,
+                        default: 8,
                         documentation: '要预留moveDis位置来hover sector 的时候外扩'
                     },
                     fillStyle: {

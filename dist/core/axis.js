@@ -650,18 +650,18 @@ var axis = /*#__PURE__*/function () {
           var max = _canvax._.max(ds);
 
           var val = "val" in opt ? opt.val : _this2.getValOfInd(opt.ind);
+          var _origin = _this2.origin;
+          var origiInRange = !(_origin < min || _origin > max); //如果 origin 并不在这个区间
+
+          if (!origiInRange) {
+            _origin = min;
+          } else {//如果刚好在这个区间Group
+          }
+
+          ;
 
           if (val >= min && val <= max) {
-            var _origin = _this2.origin;
-            var origiInRange = !(_origin < min || _origin > max); //如果 origin 并不在这个区间
-
-            if (!origiInRange) {
-              _origin = min;
-            } else {//如果刚好在这个区间Group
-            }
-
-            ; //origin不在区间内的话，maxGroupDisABS一定是整个区间， 也就是说这个区间的原点在起点min
-
+            //origin不在区间内的话，maxGroupDisABS一定是整个区间， 也就是说这个区间的原点在起点min
             var maxGroupDisABS = Math.max(Math.abs(max - _origin), Math.abs(_origin - min));
             var amountABS = Math.abs(max - min);
             var originPos = maxGroupDisABS / amountABS * groupLength;
@@ -674,19 +674,25 @@ var axis = /*#__PURE__*/function () {
             ;
 
             if (origiInRange) {
-              //origin在区间内的时候，才需要便宜_originTrans
+              //origin在区间内的时候，才需要偏移_originTrans
               pos += _this2._originTrans;
             }
 
             ;
-            return "break";
+          } else {
+            //先简单处理下超出边界的行为
+            if (val > max && i == l - 1) {
+              pos = me.axisLength;
+            }
+
+            if (val < min && i == 0) {
+              pos = 0;
+            }
           }
         };
 
         for (var i = 0, l = dsgLen; i < l; i++) {
-          var _ret2 = _loop2(i, l);
-
-          if (_ret2 === "break") break;
+          _loop2(i, l);
         }
       } else {
         if (cellCount == 1) {

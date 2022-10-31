@@ -533,7 +533,8 @@ var yAxis = /*#__PURE__*/function (_Axis) {
 
       ; //没有width，并且用户也没有设置过width
 
-      if (!me.width && !('width' in me._opt)) {
+      if (!('width' in me._opt)) {
+        var _preWidth = me.width;
         me.width = parseInt(me.maxW + me.label.distance);
 
         if (me.tickLine.enabled) {
@@ -542,6 +543,11 @@ var yAxis = /*#__PURE__*/function (_Axis) {
 
         if (me._title) {
           me.width += me._title.getTextHeight();
+        }
+
+        if (me.width != _preWidth) {
+          //y轴宽度有变化, 通知整个重新绘制
+          debugger;
         }
       }
 

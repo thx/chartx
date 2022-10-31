@@ -172,8 +172,9 @@ export default class Pie extends event.Dispatcher
         let sec = me.sectors[ node.iNode ];
 
         sec.animate({
-            x: node.outOffsetx,
-            y: node.outOffsety
+            //x: node.outOffsetx,
+            //y: node.outOffsety
+            r : node.outRadius + node.moveDis
         }, {
             duration: 100,
             onComplete: function () {
@@ -190,8 +191,9 @@ export default class Pie extends event.Dispatcher
 
         let sec = me.sectors[ node.iNode ];
         sec.animate({
-            x: 0,
-            y: 0
+            //x: 0,
+            //y: 0
+            r: node.outRadius
         }, {
             duration: 100,
             onComplete: function () {

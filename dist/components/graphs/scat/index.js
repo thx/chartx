@@ -177,6 +177,8 @@ var ScatGraphs = /*#__PURE__*/function (_GraphsBase) {
           fillStyle: null,
           color: null,
           strokeStyle: null,
+          lineType: null,
+          lineDash: null,
           strokeAlpha: 1,
           lineWidth: 0,
           shapeType: null,
@@ -195,6 +197,10 @@ var ScatGraphs = /*#__PURE__*/function (_GraphsBase) {
         this._setStrokeStyle(nodeLayoutData);
 
         this._setLineWidth(nodeLayoutData);
+
+        this._setLineType(nodeLayoutData);
+
+        this._setLineDash(nodeLayoutData);
 
         this._setStrokeAlpha(nodeLayoutData);
 
@@ -367,6 +373,33 @@ var ScatGraphs = /*#__PURE__*/function (_GraphsBase) {
       return this;
     }
   }, {
+    key: "_setLineType",
+    value: function _setLineType(nodeLayoutData) {
+      nodeLayoutData.lineType = this._getProp(this.node.lineType, nodeLayoutData);
+      return this;
+    }
+  }, {
+    key: "_setLineDash",
+    value: function _setLineDash(nodeLayoutData) {
+      var _this2 = this;
+
+      var _getProp = function _getProp(prop, nodeLayoutData) {
+        var _prop = prop; // if( _.isArray( prop ) ){
+        //     _prop = prop[ nodeLayoutData.iGroup ]
+        // };
+
+        if (_.isFunction(prop)) {
+          _prop = prop.apply(_this2, [nodeLayoutData]);
+        }
+
+        ;
+        return _prop;
+      };
+
+      nodeLayoutData.lineDash = _getProp(this.node.lineDash, nodeLayoutData);
+      return this;
+    }
+  }, {
     key: "_setNodeType",
     value: function _setNodeType(nodeLayoutData) {
       var shapeType = this.node.shapeType;
@@ -395,7 +428,7 @@ var ScatGraphs = /*#__PURE__*/function (_GraphsBase) {
   }, {
     key: "_widget",
     value: function _widget() {
-      var _this2 = this;
+      var _this3 = this;
 
       var me = this;
 
@@ -540,7 +573,7 @@ var ScatGraphs = /*#__PURE__*/function (_GraphsBase) {
         var gi = 0;
 
         var _loop = function _loop(_groupKey) {
-          var _group = _this2._groupData[_groupKey];
+          var _group = _this3._groupData[_groupKey];
           var _groupData = {
             name: _groupKey,
             iGroup: gi,
@@ -621,6 +654,48 @@ var ScatGraphs = /*#__PURE__*/function (_GraphsBase) {
           });
         }
       });
+
+      if (me.label.enabled) {
+        for (var i = 0, l = me.data.length; i < l; i++) {
+          var ind = me.data.length - 1 - i;
+          var currNodeData = me.data[ind];
+          var currLabel = me.data[ind].nodeElement.labelElement;
+          var preNodeData = void 0,
+              preLabel = void 0;
+
+          if (ind == me.data.length - 1) {
+            //第一个肯定要显示
+            currLabel.context.visible = true;
+          } else {
+            var intersect = false;
+
+            for (var ii = ind + 1, ll = me.data.length - 1; ii <= ll; ii++) {
+              preNodeData = me.data[ii];
+              preLabel = me.data[ii].nodeElement.labelElement;
+              if (!preLabel.context.visible) continue;
+              var currLeft = currNodeData.x - currLabel.getTextWidth() / 2;
+              var currRight = currLeft + currLabel.getTextWidth();
+              var currTop = currNodeData.y - currLabel.getTextHeight() / 2;
+              var currBottom = currTop + currLabel.getTextHeight();
+              var preLeft = preNodeData.x - preLabel.getTextWidth() / 2;
+              var preRight = preLeft + preLabel.getTextWidth();
+              var preTop = preNodeData.y - preLabel.getTextHeight() / 2;
+              var preBottom = preTop + preLabel.getTextHeight();
+
+              if (!(currRight < preLeft || currLeft > preRight || currBottom < preTop || currTop > preBottom)) {
+                //说明curr 和 pre 两个 label相交了，那么curr要 隐藏掉
+                intersect = true;
+              }
+            }
+
+            if (intersect) {
+              currLabel.context.visible = false;
+            } else {
+              currLabel.context.visible = true;
+            }
+          }
+        }
+      }
     }
   }, {
     key: "_getNodeElement",
@@ -799,6 +874,8 @@ var ScatGraphs = /*#__PURE__*/function (_GraphsBase) {
         strokeStyle: nodeData.strokeStyle,
         strokeAlpha: nodeData.strokeAlpha,
         lineWidth: nodeData.lineWidth,
+        lineType: nodeData.lineType,
+        lineDash: nodeData.lineDash,
         fillAlpha: nodeData.fillAlpha,
         cursor: "pointer"
       };
@@ -875,9 +952,9 @@ var ScatGraphs = /*#__PURE__*/function (_GraphsBase) {
       var nodeData = this.data[ind];
       if (!this.node.focus.enabled || nodeData.focused) return;
       var nctx = nodeData.nodeElement.context;
-      nctx.lineWidth = this.node.focus.lineWidth;
-      nctx.strokeAlpha = this.node.focus.strokeAlpha;
-      nctx.fillAlpha = this.node.focus.fillAlpha;
+      nctx.lineWidth = this._getProp(this.node.focus.lineWidth, nodeData);
+      nctx.strokeAlpha = this._getProp(this.node.focus.strokeAlpha, nodeData);
+      nctx.fillAlpha = this._getProp(this.node.focus.fillAlpha, nodeData);
       nodeData.focused = true;
     }
   }, {
@@ -886,10 +963,10 @@ var ScatGraphs = /*#__PURE__*/function (_GraphsBase) {
       var nodeData = this.data[ind];
       if (!this.node.focus.enabled || !nodeData.focused) return;
       var nctx = nodeData.nodeElement.context;
-      nctx.lineWidth = nodeData.lineWidth;
-      nctx.strokeAlpha = nodeData.strokeAlpha;
-      nctx.fillAlpha = nodeData.fillAlpha;
-      nctx.strokeStyle = nodeData.strokeStyle;
+      nctx.lineWidth = this._getProp(nodeData.lineWidth, nodeData);
+      nctx.strokeAlpha = this._getProp(nodeData.strokeAlpha, nodeData);
+      nctx.fillAlpha = this._getProp(nodeData.fillAlpha, nodeData);
+      nctx.strokeStyle = this._getProp(nodeData.strokeStyle, nodeData);
       nodeData.focused = false;
     }
   }, {
@@ -898,9 +975,9 @@ var ScatGraphs = /*#__PURE__*/function (_GraphsBase) {
       var nodeData = this.data[ind];
       if (!this.node.select.enabled || nodeData.selected) return;
       var nctx = nodeData.nodeElement.context;
-      nctx.lineWidth = this.node.select.lineWidth;
-      nctx.strokeAlpha = this.node.select.strokeAlpha;
-      nctx.fillAlpha = this.node.select.fillAlpha;
+      nctx.lineWidth = this._getProp(this.node.select.lineWidth, nodeData);
+      nctx.strokeAlpha = this._getProp(this.node.select.strokeAlpha, nodeData);
+      nctx.fillAlpha = this._getProp(this.node.select.fillAlpha, nodeData);
       nodeData.selected = true;
     }
   }, {
@@ -912,9 +989,9 @@ var ScatGraphs = /*#__PURE__*/function (_GraphsBase) {
 
       if (nodeData.focused) {
         //有e 说明这个函数是事件触发的，鼠标肯定还在node上面
-        nctx.lineWidth = this.node.focus.lineWidth;
-        nctx.strokeAlpha = this.node.focus.strokeAlpha;
-        nctx.fillAlpha = this.node.focus.fillAlpha;
+        nctx.lineWidth = this._getProp(this.node.focus.lineWidth, nodeData);
+        nctx.strokeAlpha = this._getProp(this.node.focus.strokeAlpha, nodeData);
+        nctx.fillAlpha = this._getProp(this.node.focus.fillAlpha, nodeData);
       } else {
         nctx.lineWidth = nodeData.lineWidth;
         nctx.strokeAlpha = nodeData.strokeAlpha;
@@ -945,6 +1022,11 @@ var ScatGraphs = /*#__PURE__*/function (_GraphsBase) {
           "default": null,
           documentation: '分组字段，如果area配置enabled为true，那么需要groupField来构建几个area'
         },
+        // sortField: {
+        //     detail: '排序字段',
+        //     default: null,
+        //     documentation: '在需要按照优先级显示label的时候有用'
+        // },
         dataFilter: {
           detail: '散点过滤数据',
           "default": null,
@@ -1003,6 +1085,14 @@ var ScatGraphs = /*#__PURE__*/function (_GraphsBase) {
             lineWidth: {
               detail: '节点描边线宽',
               "default": 0
+            },
+            lineType: {
+              detail: '描边样式',
+              "default": 'solid'
+            },
+            lineDash: {
+              detail: '虚线样式',
+              "default": [2, 6]
             },
             strokeAlpha: {
               detail: '节点描边透明度',

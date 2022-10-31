@@ -604,18 +604,19 @@ class axis {
                 let min = _.min(ds);
                 let max = _.max(ds);
                 let val = "val" in opt ? opt.val : this.getValOfInd(opt.ind);
+
+                let _origin = this.origin;
+                let origiInRange = !(_origin < min || _origin > max);
+                //如果 origin 并不在这个区间
+                if ( !origiInRange ) {
+                    _origin = min;
+                } else {
+                    //如果刚好在这个区间Group
+
+                };
+               
                 if (val >= min && val <= max) {
 
-                    let _origin = this.origin;
-                    let origiInRange = !(_origin < min || _origin > max);
-                    //如果 origin 并不在这个区间
-                    if ( !origiInRange ) {
-                        _origin = min;
-                    } else {
-                        //如果刚好在这个区间Group
-
-                    };
-                    
                     //origin不在区间内的话，maxGroupDisABS一定是整个区间， 也就是说这个区间的原点在起点min
                     let maxGroupDisABS = Math.max(Math.abs(max - _origin), Math.abs(_origin - min));
                     let amountABS = Math.abs(max - min);
@@ -627,11 +628,21 @@ class axis {
                     };
 
                     if( origiInRange ){
-                        //origin在区间内的时候，才需要便宜_originTrans
+                        //origin在区间内的时候，才需要偏移_originTrans
                         pos += this._originTrans;
                     };
 
-                    break;
+                
+                } else {
+
+                    //先简单处理下超出边界的行为
+                    if( val > max && i == l-1 ){
+                        pos = me.axisLength
+                    }
+                    if( val < min && i == 0 ){
+                        pos = 0;
+                    }
+                    
                 }
             }
 

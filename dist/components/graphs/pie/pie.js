@@ -190,8 +190,9 @@ var Pie = /*#__PURE__*/function (_event$Dispatcher) {
       var me = this;
       var sec = me.sectors[node.iNode];
       sec.animate({
-        x: node.outOffsetx,
-        y: node.outOffsety
+        //x: node.outOffsetx,
+        //y: node.outOffsety
+        r: node.outRadius + node.moveDis
       }, {
         duration: 100,
         onComplete: function onComplete() {
@@ -207,8 +208,9 @@ var Pie = /*#__PURE__*/function (_event$Dispatcher) {
       var me = this;
       var sec = me.sectors[node.iNode];
       sec.animate({
-        x: 0,
-        y: 0
+        //x: 0,
+        //y: 0
+        r: node.outRadius
       }, {
         duration: 100,
         onComplete: function onComplete() {

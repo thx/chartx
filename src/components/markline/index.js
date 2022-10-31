@@ -99,7 +99,7 @@ class MarkLine extends Component
     _calculateProps(  ){
 
         let opt = this._opt;
-
+debugger
         //如果markline有target配置，那么只现在target配置里的字段的 markline, 推荐
         let field = opt.markTo;
 
@@ -149,7 +149,7 @@ class MarkLine extends Component
         };
 
         //y = this._getYVal( y );
-
+debugger
         if( !isNaN(y) ) {
             //如果y是个function说明是均值，自动实时计算的，而且不会超过ydatasection的范围
             _yAxis.addValToSection( y );

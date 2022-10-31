@@ -125,8 +125,11 @@ var options = {
                         return "#73ace6"
                     }
                 },
-                fillAlpha : function(  ){
-                    return 0.5
+                lineType: 'dashed',
+                lineWidth: 2,
+                lineDash: [3,5],
+                fillAlpha : function(){
+                    return 0.2
                 },
                 select : {
                     enabled : true
@@ -143,6 +146,10 @@ var options = {
                     console.log("ondblclick")
                 }
 
+            },
+            label:{
+                enabled:true,
+                field: 'text'
             }
         }
     ],
@@ -154,6 +161,54 @@ var options = {
         aimPoint: {
             xVal : 0,
             yVal : 0
+        },
+        line: {
+            hLabel : {
+                begin: {
+                    text: 'uv最低',
+                    //fontColor: 'red'
+                },
+                end: {
+                    text: 'uv最高',
+                    //fontColor: 'blue'
+                }
+            },
+            vLabel : {
+                begin: {
+                    text: 'pv最低',
+                    //fontColor: 'red'
+                },
+                end: {
+                    text: 'pv最高',
+                    //fontColor: 'blue'
+                }
+            }
+        },
+        quadrant: {
+            rightTop: {
+                fillStyle: 'red',
+                label: {
+                    text: '第一象限'
+                }
+            },
+            leftTop: {
+                fillStyle: '#fff',
+                label: {
+                    text: '第二象限'
+                }
+            },
+            leftBottom: {
+                fillStyle: '#fafafa',
+                label: {
+                    text: '第三象限'
+                }
+            },
+            rightBottom: {
+                fillStyle: '#fff',
+                label: {
+                    text: '第四象限'
+                }
+            }
         }
     },
     datazoom: [{

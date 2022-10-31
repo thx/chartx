@@ -24,6 +24,11 @@ class ScatGraphs extends GraphsBase
                 default: null,
                 documentation: '分组字段，如果area配置enabled为true，那么需要groupField来构建几个area'
             },
+            // sortField: {
+            //     detail: '排序字段',
+            //     default: null,
+            //     documentation: '在需要按照优先级显示label的时候有用'
+            // },
             dataFilter: {
                 detail: '散点过滤数据',
                 default: null,
@@ -82,6 +87,14 @@ class ScatGraphs extends GraphsBase
                     lineWidth: {
                         detail: '节点描边线宽',
                         default: 0
+                    },
+                    lineType: {
+                        detail: '描边样式',
+                        default: 'solid'
+                    },
+                    lineDash: {
+                        detail: '虚线样式',
+                        default: [2,6]
                     },
                     strokeAlpha: {
                         detail : '节点描边透明度',
@@ -374,10 +387,12 @@ class ScatGraphs extends GraphsBase
                 selected   : false,
 
                 //下面的属性都单独设置
-                radius     : null,   //这里先不设置，在下面的_setR里单独设置
+                radius     : null,//这里先不设置，在下面的_setR里单独设置
                 fillStyle  : null,
                 color      : null,
                 strokeStyle: null,
+                lineType   : null,
+                lineDash   : null,
                 strokeAlpha: 1,
                 lineWidth  : 0,
                 shapeType  : null,
@@ -392,6 +407,8 @@ class ScatGraphs extends GraphsBase
             this._setFillAlpha( nodeLayoutData );
             this._setStrokeStyle( nodeLayoutData );
             this._setLineWidth( nodeLayoutData );
+            this._setLineType( nodeLayoutData );
+            this._setLineDash( nodeLayoutData );
             this._setStrokeAlpha( nodeLayoutData );
             this._setNodeType( nodeLayoutData );
             this._setText( nodeLayoutData );
@@ -526,7 +543,29 @@ class ScatGraphs extends GraphsBase
         nodeLayoutData.lineWidth = this._getProp( this.node.lineWidth, nodeLayoutData );
         return this;
     }
+    _setLineType( nodeLayoutData )
+    {
+        nodeLayoutData.lineType = this._getProp( this.node.lineType, nodeLayoutData );
+        return this;
+    }
+    _setLineDash( nodeLayoutData )
+    {
+        
+        let _getProp = ( prop, nodeLayoutData )=>{
+            let _prop = prop;
+            // if( _.isArray( prop ) ){
+            //     _prop = prop[ nodeLayoutData.iGroup ]
+            // };
+            if( _.isFunction( prop ) ){
+                _prop = prop.apply( this, [nodeLayoutData] );
+            };
+            return _prop;
+        };
 
+        nodeLayoutData.lineDash = _getProp( this.node.lineDash, nodeLayoutData );
+
+        return this;
+    }
     _setNodeType( nodeLayoutData )
     {
         let shapeType = this.node.shapeType;
@@ -743,6 +782,58 @@ class ScatGraphs extends GraphsBase
                 });
             }
         } );
+
+        if( me.label.enabled ){
+            for( let i=0,l=me.data.length; i<l; i++ ){
+            
+                let ind = me.data.length-1-i;
+                let currNodeData = me.data[ind];
+                let currLabel = me.data[ind].nodeElement.labelElement;
+                let preNodeData,preLabel;
+                if( ind == me.data.length-1 ){
+                    //第一个肯定要显示
+                    currLabel.context.visible = true;
+                } else {
+                    let intersect = false;
+                    for( let ii=ind+1,ll=me.data.length-1; ii<=ll; ii++ ){
+    
+                        preNodeData = me.data[ii];
+                        preLabel = me.data[ii].nodeElement.labelElement;
+                        if( !preLabel.context.visible ) continue;
+    
+                        let currLeft = currNodeData.x - currLabel.getTextWidth()/2;
+                        let currRight= currLeft + currLabel.getTextWidth();
+                        let currTop = currNodeData.y - currLabel.getTextHeight()/2;
+                        let currBottom = currTop + currLabel.getTextHeight();
+    
+                        let preLeft = preNodeData.x - preLabel.getTextWidth()/2;
+                        let preRight= preLeft + preLabel.getTextWidth();
+                        let preTop = preNodeData.y - preLabel.getTextHeight()/2;
+                        let preBottom = preTop + preLabel.getTextHeight();
+    
+                        if( 
+                            !( 
+                                currRight < preLeft || 
+                                currLeft > preRight || 
+                                currBottom < preTop || 
+                                currTop > preBottom 
+                            ) 
+                        ){
+                            //说明curr 和 pre 两个 label相交了，那么curr要 隐藏掉
+                            intersect = true;
+                        } 
+                    }
+    
+                    if( intersect ){
+                        currLabel.context.visible = false;
+                    } else {
+                        currLabel.context.visible = true;
+                    }
+                    
+                }
+            }
+        }
+        
      
     }
 
@@ -879,6 +970,8 @@ class ScatGraphs extends GraphsBase
             strokeStyle : nodeData.strokeStyle,
             strokeAlpha : nodeData.strokeAlpha,
             lineWidth : nodeData.lineWidth,
+            lineType : nodeData.lineType,
+            lineDash : nodeData.lineDash,
             fillAlpha : nodeData.fillAlpha,
             cursor : "pointer"
         };
@@ -941,9 +1034,9 @@ class ScatGraphs extends GraphsBase
         if( !this.node.focus.enabled || nodeData.focused ) return;
 
         let nctx = nodeData.nodeElement.context; 
-        nctx.lineWidth = this.node.focus.lineWidth;
-        nctx.strokeAlpha = this.node.focus.strokeAlpha;
-        nctx.fillAlpha = this.node.focus.fillAlpha;
+        nctx.lineWidth = this._getProp( this.node.focus.lineWidth , nodeData);
+        nctx.strokeAlpha = this._getProp( this.node.focus.strokeAlpha , nodeData);
+        nctx.fillAlpha = this._getProp( this.node.focus.fillAlpha , nodeData);
         nodeData.focused = true;
     }
     
@@ -951,10 +1044,11 @@ class ScatGraphs extends GraphsBase
         let nodeData = this.data[ ind ];
         if( !this.node.focus.enabled || !nodeData.focused ) return;
         let nctx = nodeData.nodeElement.context; 
-        nctx.lineWidth = nodeData.lineWidth;
-        nctx.strokeAlpha = nodeData.strokeAlpha;
-        nctx.fillAlpha = nodeData.fillAlpha;
-        nctx.strokeStyle = nodeData.strokeStyle;
+
+        nctx.lineWidth = this._getProp(nodeData.lineWidth, nodeData);
+        nctx.strokeAlpha = this._getProp(nodeData.strokeAlpha, nodeData);
+        nctx.fillAlpha = this._getProp(nodeData.fillAlpha, nodeData);
+        nctx.strokeStyle = this._getProp(nodeData.strokeStyle, nodeData);
 
         nodeData.focused = false;
     }
@@ -965,9 +1059,9 @@ class ScatGraphs extends GraphsBase
         if( !this.node.select.enabled || nodeData.selected ) return;
         
         let nctx = nodeData.nodeElement.context; 
-        nctx.lineWidth = this.node.select.lineWidth;
-        nctx.strokeAlpha = this.node.select.strokeAlpha;
-        nctx.fillAlpha = this.node.select.fillAlpha;
+        nctx.lineWidth = this._getProp( this.node.select.lineWidth, nodeData );
+        nctx.strokeAlpha = this._getProp( this.node.select.strokeAlpha, nodeData );
+        nctx.fillAlpha = this._getProp( this.node.select.fillAlpha, nodeData);
 
         nodeData.selected = true;
     }
@@ -980,9 +1074,9 @@ class ScatGraphs extends GraphsBase
 
         if( nodeData.focused ) {
             //有e 说明这个函数是事件触发的，鼠标肯定还在node上面
-            nctx.lineWidth = this.node.focus.lineWidth;
-            nctx.strokeAlpha = this.node.focus.strokeAlpha;
-            nctx.fillAlpha = this.node.focus.fillAlpha;
+            nctx.lineWidth = this._getProp(this.node.focus.lineWidth , nodeData);
+            nctx.strokeAlpha = this._getProp(this.node.focus.strokeAlpha, nodeData);
+            nctx.fillAlpha = this._getProp(this.node.focus.fillAlpha, nodeData );
         } else {
             nctx.lineWidth = nodeData.lineWidth;
             nctx.strokeAlpha = nodeData.strokeAlpha;
