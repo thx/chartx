@@ -458,9 +458,8 @@ export default class yAxis extends Axis
                 me.width += me._title.getTextHeight();
             }
             if( me.width != _preWidth ){
-                //y轴宽度有变化, 通知整个重新绘制
+                //y轴宽度有变化, 通知重新绘制,  待实现
 
-                debugger
             }
         };
 
