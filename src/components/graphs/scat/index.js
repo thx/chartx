@@ -80,6 +80,14 @@ class ScatGraphs extends GraphsBase
                         detail: '节点透明度',
                         default: 0.8
                     },
+                    maxFillAlpha: {
+                        detail: '节点最大透明度',
+                        default: 1
+                    },
+                    minFillAlpha: {
+                        detail: '节点最小透明度',
+                        default: 0.2
+                    },
                     strokeStyle: {
                         detail: '节点描边颜色',
                         default: null
@@ -274,6 +282,10 @@ class ScatGraphs extends GraphsBase
         this._rMaxValue = null;
         this._rMinValue = null;
 
+        this._alphaData = null;
+        this._alphaMaxValue = null;
+        this._alphaMinValue = null;
+
         this._groupData = {}; //groupField配置有的情况下会被赋值，在_trimGraphs会被先置空，然后赋值
 
         _.extend( true, this , getDefaultProps( ScatGraphs.defaultProps() ), opt );
@@ -354,6 +366,10 @@ class ScatGraphs extends GraphsBase
         this._rData = null;
         this._rMaxValue = null;
         this._rMinValue = null;
+
+        this._alphaData = null;
+        this._alphaMaxValue = null;
+        this._alphaMinValue = null;
 
         for( let i=0; i<dataLen; i++ ){
             
@@ -497,7 +513,38 @@ class ScatGraphs extends GraphsBase
     }
     _setFillAlpha( nodeLayoutData )
     {
-        nodeLayoutData.fillAlpha = this._getProp( this.node.fillAlpha, nodeLayoutData );
+        // nodeLayoutData.fillAlpha = this._getProp( this.node.fillAlpha, nodeLayoutData );
+        // return this;
+        let alpha;
+        let _alpha = this.node.fillAlpha;
+        let minAlpha = this.node.minFillAlpha;
+        let maxAlpha = this.node.maxFillAlpha;
+        let rowData = nodeLayoutData.rowData;
+
+        if( _alpha != null ){
+            if( _.isString( _alpha ) && rowData[ _alpha ] ){
+                //如果配置了某个字段作为r，那么就要自动计算比例
+                if( !this._alphaData && !this._alphaMaxValue && !this._alphaMinValue ){
+                    this._alphaData = this.dataFrame.getFieldData( _alpha );
+                    this._alphaMaxValue = _.max( this._alphaData );
+                    this._alphaMinValue = _.min( this._alphaData );
+                };
+
+                let rVal = rowData[ _alpha ];
+
+                if( this._alphaMaxValue ==  this._alphaMinValue ){
+                    alpha = minAlpha + ( maxAlpha - minAlpha )/2;
+                } else {
+                    alpha = minAlpha + (rVal-this._alphaMinValue)/( this._alphaMaxValue-this._alphaMinValue ) * ( maxAlpha - minAlpha )
+                };
+            } else {
+                alpha = this._getProp( this.node.fillAlpha, nodeLayoutData );
+            }
+        } else {
+            alpha = 0;
+        }
+        //console.log(alpha)
+        nodeLayoutData.fillAlpha = alpha;
         return this;
     }
 
@@ -623,10 +670,10 @@ class ScatGraphs extends GraphsBase
                      };
             
                      if( e.type == 'mouseover' ){
-                        me.focusAt( this.nodeData.iNode );
+                        me.focusAt( this.nodeData );
                      };
                      if( e.type == 'mouseout' ) {
-                        !this.nodeData.selected && me.unfocusAt( this.nodeData.iNode );
+                        !this.nodeData.selected && me.unfocusAt( this.nodeData );
                      };
 
                      //fire到root上面去的是为了让root去处理tips
@@ -789,6 +836,9 @@ class ScatGraphs extends GraphsBase
                 let ind = me.data.length-1-i;
                 let currNodeData = me.data[ind];
                 let currLabel = me.data[ind].nodeElement.labelElement;
+
+                if( !currLabel ) continue;
+
                 let preNodeData,preLabel;
                 if( ind == me.data.length-1 ){
                     //第一个肯定要显示
@@ -833,6 +883,8 @@ class ScatGraphs extends GraphsBase
                 }
             }
         }
+
+        
         
      
     }
@@ -1029,8 +1081,17 @@ class ScatGraphs extends GraphsBase
     }
 
 
-    focusAt( ind ){
-        let nodeData = this.data[ ind ];
+    focusAt( target ){
+
+        let nodeData;
+        let iNode;
+        if( typeof target == 'object' ){
+            nodeData = target;
+        } else {
+            iNode = target;
+            nodeData = this.data.find( item => item.iNode == iNode );
+        }
+     
         if( !this.node.focus.enabled || nodeData.focused ) return;
 
         let nctx = nodeData.nodeElement.context; 
@@ -1040,8 +1101,16 @@ class ScatGraphs extends GraphsBase
         nodeData.focused = true;
     }
     
-    unfocusAt( ind ){
-        let nodeData = this.data[ ind ];
+    unfocusAt( target ){
+        let nodeData;
+        let iNode;
+        if( typeof target == 'object' ){
+            nodeData = target;
+        } else {
+            iNode = target;
+            nodeData = this.data.find( item => item.iNode == iNode );
+        }
+
         if( !this.node.focus.enabled || !nodeData.focused ) return;
         let nctx = nodeData.nodeElement.context; 
 
@@ -1053,9 +1122,17 @@ class ScatGraphs extends GraphsBase
         nodeData.focused = false;
     }
     
-    selectAt( ind ){
-        
-        let nodeData = this.data[ ind ];
+    selectAt( target ){
+        //let nodeData = this.data[ ind ];
+        let nodeData;
+        let iNode;
+        if( typeof target == 'object' ){
+            nodeData = target;
+        } else {
+            iNode = target;
+            nodeData = this.data.find( item => item.iNode == iNode );
+        }
+
         if( !this.node.select.enabled || nodeData.selected ) return;
         
         let nctx = nodeData.nodeElement.context; 
@@ -1066,8 +1143,17 @@ class ScatGraphs extends GraphsBase
         nodeData.selected = true;
     }
 
-    unselectAt( ind ){
-        let nodeData = this.data[ ind ];
+    unselectAt( target ){
+        //let nodeData = this.data[ ind ];
+        let nodeData;
+        let iNode;
+        if( typeof target == 'object' ){
+            nodeData = target;
+        } else {
+            iNode = target;
+            nodeData = this.data.find( item => item.iNode == iNode );
+        }
+
         if( !this.node.select.enabled || !nodeData.selected ) return;
        
         let nctx = nodeData.nodeElement.context; 

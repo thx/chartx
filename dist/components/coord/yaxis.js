@@ -545,9 +545,7 @@ var yAxis = /*#__PURE__*/function (_Axis) {
           me.width += me._title.getTextHeight();
         }
 
-        if (me.width != _preWidth) {
-          //y轴宽度有变化, 通知整个重新绘制
-          debugger;
+        if (me.width != _preWidth) {//y轴宽度有变化, 通知重新绘制,  待实现
         }
       }
 

@@ -35,7 +35,7 @@ var _data2 = require("./data");
 
 var _zoom = _interopRequireDefault(require("../../../utils/zoom"));
 
-var _index2 = _interopRequireDefault(require("../../../layout/dagre/index"));
+var _dagre = _interopRequireDefault(require("dagre"));
 
 function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
 
@@ -589,7 +589,7 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
     key: "_dagreLayout",
     value: function _dagreLayout(data) {
       //https://github.com/dagrejs/dagre/wiki
-      var layout = _global["default"].layout.dagre || _index2["default"];
+      var layout = _global["default"].layout.dagre || _dagre["default"];
       var g = new layout.graphlib.Graph();
       g.setGraph(this.layoutOpts.graph);
       g.setDefaultEdgeLabel(function () {

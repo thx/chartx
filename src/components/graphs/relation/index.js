@@ -5,7 +5,8 @@ import dataFrame from "../../../core/dataFrame"
 import {getDefaultProps} from "../../../utils/tools"
 import { checkDataIsJson, jsonToArrayForRelation, arrayToTreeJsonForRelation } from './data'
 import Zoom from "../../../utils/zoom"
-import Dagre from "../../../layout/dagre/index"
+//import Dagre from "../../../layout/dagre/index"
+import Dagre from "dagre"
 
 let { _, event } = Canvax;
 let Rect    = Canvax.Shapes.Rect;

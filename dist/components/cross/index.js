@@ -406,7 +406,7 @@ var Cross = /*#__PURE__*/function (_Component) {
           context: _vArrowCtx
         });
         me.sprite.addChild(me._vLineElementArrow);
-      } //v上面的两个label
+      } //v上面的两个label  
 
 
       ['begin', 'end'].forEach(function (type) {
@@ -554,7 +554,7 @@ var Cross = /*#__PURE__*/function (_Component) {
               propertys: {
                 fillStyle: {
                   detail: '象限区块背景色',
-                  "default": '#ccc'
+                  "default": '#fff'
                 },
                 fillAlpha: {
                   detail: '象限区块背透明度',
@@ -592,7 +592,7 @@ var Cross = /*#__PURE__*/function (_Component) {
               propertys: {
                 fillStyle: {
                   detail: '象限区块背景色',
-                  "default": '#ccc'
+                  "default": '#fff'
                 },
                 fillAlpha: {
                   detail: '象限区块背透明度',
@@ -630,7 +630,7 @@ var Cross = /*#__PURE__*/function (_Component) {
               propertys: {
                 fillStyle: {
                   detail: '象限区块背景色',
-                  "default": '#ccc'
+                  "default": '#fff'
                 },
                 fillAlpha: {
                   detail: '象限区块背透明度',
@@ -668,7 +668,7 @@ var Cross = /*#__PURE__*/function (_Component) {
               propertys: {
                 fillStyle: {
                   detail: '象限区块背景色',
-                  "default": '#ccc'
+                  "default": '#fff'
                 },
                 fillAlpha: {
                   detail: '象限区块背透明度',

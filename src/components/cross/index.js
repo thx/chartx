@@ -135,7 +135,7 @@ class Cross extends Component
                         propertys: {
                             fillStyle: {
                                 detail : '象限区块背景色',
-                                default: '#ccc'
+                                default: '#fff'
                             },
                             fillAlpha: {
                                 detail : '象限区块背透明度',
@@ -174,7 +174,7 @@ class Cross extends Component
                         propertys: {
                             fillStyle: {
                                 detail : '象限区块背景色',
-                                default: '#ccc'
+                                default: '#fff'
                             },
                             fillAlpha: {
                                 detail : '象限区块背透明度',
@@ -208,14 +208,12 @@ class Cross extends Component
                         }
                     },
 
-
-
                     leftBottom: {
                         detail: '第三象限',
                         propertys: {
                             fillStyle: {
                                 detail : '象限区块背景色',
-                                default: '#ccc'
+                                default: '#fff'
                             },
                             fillAlpha: {
                                 detail : '象限区块背透明度',
@@ -254,7 +252,7 @@ class Cross extends Component
                         propertys: {
                             fillStyle: {
                                 detail : '象限区块背景色',
-                                default: '#ccc'
+                                default: '#fff'
                             },
                             fillAlpha: {
                                 detail : '象限区块背透明度',
@@ -640,7 +638,7 @@ class Cross extends Component
             });
             me.sprite.addChild( me._vLineElementArrow );
         }
-        //v上面的两个label
+        //v上面的两个label  
         ['begin','end'].forEach( type => {
             let _lineLabelCtx = {
                 x: x-4,

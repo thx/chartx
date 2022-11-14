@@ -7,6 +7,8 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports["default"] = void 0;
 
+var _typeof2 = _interopRequireDefault(require("@babel/runtime/helpers/typeof"));
+
 var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
 var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
@@ -53,6 +55,9 @@ var ScatGraphs = /*#__PURE__*/function (_GraphsBase) {
     _this._rData = null;
     _this._rMaxValue = null;
     _this._rMinValue = null;
+    _this._alphaData = null;
+    _this._alphaMaxValue = null;
+    _this._alphaMinValue = null;
     _this._groupData = {}; //groupField配置有的情况下会被赋值，在_trimGraphs会被先置空，然后赋值
 
     _.extend(true, (0, _assertThisInitialized2["default"])(_this), (0, _tools.getDefaultProps)(ScatGraphs.defaultProps()), opt);
@@ -140,6 +145,9 @@ var ScatGraphs = /*#__PURE__*/function (_GraphsBase) {
       this._rData = null;
       this._rMaxValue = null;
       this._rMinValue = null;
+      this._alphaData = null;
+      this._alphaMaxValue = null;
+      this._alphaMinValue = null;
 
       for (var i = 0; i < dataLen; i++) {
         var rowData = this.dataFrame.getRowDataAt(i);
@@ -309,7 +317,42 @@ var ScatGraphs = /*#__PURE__*/function (_GraphsBase) {
   }, {
     key: "_setFillAlpha",
     value: function _setFillAlpha(nodeLayoutData) {
-      nodeLayoutData.fillAlpha = this._getProp(this.node.fillAlpha, nodeLayoutData);
+      // nodeLayoutData.fillAlpha = this._getProp( this.node.fillAlpha, nodeLayoutData );
+      // return this;
+      var alpha;
+      var _alpha = this.node.fillAlpha;
+      var minAlpha = this.node.minFillAlpha;
+      var maxAlpha = this.node.maxFillAlpha;
+      var rowData = nodeLayoutData.rowData;
+
+      if (_alpha != null) {
+        if (_.isString(_alpha) && rowData[_alpha]) {
+          //如果配置了某个字段作为r，那么就要自动计算比例
+          if (!this._alphaData && !this._alphaMaxValue && !this._alphaMinValue) {
+            this._alphaData = this.dataFrame.getFieldData(_alpha);
+            this._alphaMaxValue = _.max(this._alphaData);
+            this._alphaMinValue = _.min(this._alphaData);
+          }
+
+          ;
+          var rVal = rowData[_alpha];
+
+          if (this._alphaMaxValue == this._alphaMinValue) {
+            alpha = minAlpha + (maxAlpha - minAlpha) / 2;
+          } else {
+            alpha = minAlpha + (rVal - this._alphaMinValue) / (this._alphaMaxValue - this._alphaMinValue) * (maxAlpha - minAlpha);
+          }
+
+          ;
+        } else {
+          alpha = this._getProp(this.node.fillAlpha, nodeLayoutData);
+        }
+      } else {
+        alpha = 0;
+      } //console.log(alpha)
+
+
+      nodeLayoutData.fillAlpha = alpha;
       return this;
     }
   }, {
@@ -473,13 +516,13 @@ var ScatGraphs = /*#__PURE__*/function (_GraphsBase) {
             ;
 
             if (e.type == 'mouseover') {
-              me.focusAt(this.nodeData.iNode);
+              me.focusAt(this.nodeData);
             }
 
             ;
 
             if (e.type == 'mouseout') {
-              !this.nodeData.selected && me.unfocusAt(this.nodeData.iNode);
+              !this.nodeData.selected && me.unfocusAt(this.nodeData);
             }
 
             ; //fire到root上面去的是为了让root去处理tips
@@ -660,6 +703,7 @@ var ScatGraphs = /*#__PURE__*/function (_GraphsBase) {
           var ind = me.data.length - 1 - i;
           var currNodeData = me.data[ind];
           var currLabel = me.data[ind].nodeElement.labelElement;
+          if (!currLabel) continue;
           var preNodeData = void 0,
               preLabel = void 0;
 
@@ -948,8 +992,19 @@ var ScatGraphs = /*#__PURE__*/function (_GraphsBase) {
     }
   }, {
     key: "focusAt",
-    value: function focusAt(ind) {
-      var nodeData = this.data[ind];
+    value: function focusAt(target) {
+      var nodeData;
+      var iNode;
+
+      if ((0, _typeof2["default"])(target) == 'object') {
+        nodeData = target;
+      } else {
+        iNode = target;
+        nodeData = this.data.find(function (item) {
+          return item.iNode == iNode;
+        });
+      }
+
       if (!this.node.focus.enabled || nodeData.focused) return;
       var nctx = nodeData.nodeElement.context;
       nctx.lineWidth = this._getProp(this.node.focus.lineWidth, nodeData);
@@ -959,8 +1014,19 @@ var ScatGraphs = /*#__PURE__*/function (_GraphsBase) {
     }
   }, {
     key: "unfocusAt",
-    value: function unfocusAt(ind) {
-      var nodeData = this.data[ind];
+    value: function unfocusAt(target) {
+      var nodeData;
+      var iNode;
+
+      if ((0, _typeof2["default"])(target) == 'object') {
+        nodeData = target;
+      } else {
+        iNode = target;
+        nodeData = this.data.find(function (item) {
+          return item.iNode == iNode;
+        });
+      }
+
       if (!this.node.focus.enabled || !nodeData.focused) return;
       var nctx = nodeData.nodeElement.context;
       nctx.lineWidth = this._getProp(nodeData.lineWidth, nodeData);
@@ -971,8 +1037,20 @@ var ScatGraphs = /*#__PURE__*/function (_GraphsBase) {
     }
   }, {
     key: "selectAt",
-    value: function selectAt(ind) {
-      var nodeData = this.data[ind];
+    value: function selectAt(target) {
+      //let nodeData = this.data[ ind ];
+      var nodeData;
+      var iNode;
+
+      if ((0, _typeof2["default"])(target) == 'object') {
+        nodeData = target;
+      } else {
+        iNode = target;
+        nodeData = this.data.find(function (item) {
+          return item.iNode == iNode;
+        });
+      }
+
       if (!this.node.select.enabled || nodeData.selected) return;
       var nctx = nodeData.nodeElement.context;
       nctx.lineWidth = this._getProp(this.node.select.lineWidth, nodeData);
@@ -982,8 +1060,20 @@ var ScatGraphs = /*#__PURE__*/function (_GraphsBase) {
     }
   }, {
     key: "unselectAt",
-    value: function unselectAt(ind) {
-      var nodeData = this.data[ind];
+    value: function unselectAt(target) {
+      //let nodeData = this.data[ ind ];
+      var nodeData;
+      var iNode;
+
+      if ((0, _typeof2["default"])(target) == 'object') {
+        nodeData = target;
+      } else {
+        iNode = target;
+        nodeData = this.data.find(function (item) {
+          return item.iNode == iNode;
+        });
+      }
+
       if (!this.node.select.enabled || !nodeData.selected) return;
       var nctx = nodeData.nodeElement.context;
 
@@ -1077,6 +1167,14 @@ var ScatGraphs = /*#__PURE__*/function (_GraphsBase) {
             fillAlpha: {
               detail: '节点透明度',
               "default": 0.8
+            },
+            maxFillAlpha: {
+              detail: '节点最大透明度',
+              "default": 1
+            },
+            minFillAlpha: {
+              detail: '节点最小透明度',
+              "default": 0.2
             },
             strokeStyle: {
               detail: '节点描边颜色',

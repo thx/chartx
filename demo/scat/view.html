@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
+<title>xChart demo -- scat</title>
+
+<script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
+<script type="text/javascript" src="../../dist/index.iife.js"></script>
+<!-- codemirror -->
+<script type="text/javascript" src="../../lib/codemirror/codemirror.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/active-line.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/javascript.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/matchbrackets.js"></script>
+<link rel="stylesheet" href="../../lib/codemirror/codemirror.css">
+<link rel="stylesheet" href="../../lib/codemirror/zenburn.css">
+<link rel="stylesheet" href="../../lib/codemirror/docs.css">
+<!-- codemirror end -->
+<!--bootstrap-->
+<script type="text/javascript" src="../../lib/bootstrap/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap-theme.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/docs.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap.min.css">
+<!--bootstrap end-->
+<script type="text/javascript" src="../../lib/demo.js"></script>
+<link rel="stylesheet" href="../../lib/demo.css">
+</head>
+<body >
+
+<table>
+    <tr>
+        <td id="td-vl">
+            <form><textarea id="code" name="code">
+
+//chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
+var data = [
+    {"id":"1","sellerId":1652554937,"sellerNick":"自然堂旗舰店","industry":"美妆","series":"亮透水光系列","cateLevel1Id":50010788,"cateLevel1Name":"彩妆/香水/美妆工具","cateId":50013794,"cateName":"BB霜","spuName":"BB霜","viewV":1241765,"viewI":84164,"viewE":1,"viewENumerator":47052,"viewEDenominator":47052,"viewW":0.045090537521981,"viewWNumerator":84164,"viewWDenominator":3795,"gmv":9680365.613715967},
+    {"id":"2","sellerId":1652554937,"sellerNick":"自然堂旗舰店","industry":"美妆","series":"凝时系列","cateLevel1Id":50010788,"cateLevel1Name":"彩妆/香水/美妆工具","cateId":50013794,"cateName":"BB霜","spuName":"BB霜","viewV":146305,"viewI":15181,"viewE":0.647877522616562,"viewENumerator":8622,"viewEDenominator":5586,"viewW":0.084711152098017,"viewWNumerator":15181,"viewWDenominator":1286,"gmv":1775320.9251654632},
+    {"id":"3","sellerId":1652554937,"sellerNick":"自然堂旗舰店","industry":"美妆","series":"定妆系列","cateLevel1Id":50010788,"cateLevel1Name":"彩妆/香水/美妆工具","cateId":50010792,"cateName":"蜜粉/散粉","spuName":"冰肌蜜粉","viewV":537196,"viewI":28044,"viewE":0.586377708978328,"viewENumerator":22610,"viewEDenominator":13258,"viewW":0.025032092426187,"viewWNumerator":28044,"viewWDenominator":702,"gmv":1809391.8194194608},
+    {"id":"4","sellerId":1652554937,"sellerNick":"自然堂旗舰店","industry":"美妆","series":"小滴管系列","cateLevel1Id":50010788,"cateLevel1Name":"彩妆/香水/美妆工具","cateId":50010789,"cateName":"粉底液/膏","spuName":"粉底液/膏","viewV":57912,"viewI":1866,"viewE":null,"viewENumerator":null,"viewEDenominator":null,"viewW":0.038585209003215,"viewWNumerator":1866,"viewWDenominator":72,"gmv":223755.7421168745},
+    {"id":"5","sellerId":1652554937,"sellerNick":"自然堂旗舰店","industry":"美妆","series":"未打标","cateLevel1Id":50010788,"cateLevel1Name":"彩妆/香水/美妆工具","cateId":50010789,"cateName":"粉底液/膏","spuName":"未打标","viewV":1454239,"viewI":49569,"viewE":0.503904277223107,"viewENumerator":25741,"viewEDenominator":12971,"viewW":0.079747422784402,"viewWNumerator":49569,"viewWDenominator":3953,"gmv":6385248.797903866},
+    {"id":"6","sellerId":1652554937,"sellerNick":"自然堂旗舰店","industry":"美妆","series":"未打标","cateLevel1Id":50010788,"cateLevel1Name":"彩妆/香水/美妆工具","cateId":50010790,"cateName":"粉饼","spuName":"未打标","viewV":188100,"viewI":5470,"viewE":0.688278130138595,"viewENumerator":4257,"viewEDenominator":2930,"viewW":0.046252285191956,"viewWNumerator":5470,"viewWDenominator":253,"gmv":656224.7403174393},
+    {"id":"7","sellerId":1652554937,"sellerNick":"自然堂旗舰店","industry":"美妆","series":"未打标","cateLevel1Id":50010788,"cateLevel1Name":"彩妆/香水/美妆工具","cateId":50010792,"cateName":"蜜粉/散粉","spuName":"未打标","viewV":89560,"viewI":5731,"viewE":0.681092070868429,"viewENumerator":3443,"viewEDenominator":2345,"viewW":0.070842784854301,"viewWNumerator":5731,"viewWDenominator":406,"gmv":642000.2704427975},
+    {"id":"8","sellerId":1652554937,"sellerNick":"自然堂旗舰店","industry":"美妆","series":"未打标","cateLevel1Id":50010788,"cateLevel1Name":"彩妆/香水/美妆工具","cateId":50010796,"cateName":"眼影","spuName":"未打标","viewV":47599,"viewI":703,"viewE":0.751453488372093,"viewENumerator":688,"viewEDenominator":517,"viewW":0.018492176386913,"viewWNumerator":703,"viewWDenominator":13,"gmv":94870.94430491386},
+    {"id":"9","sellerId":1652554937,"sellerNick":"自然堂旗舰店","industry":"美妆","series":"未打标","cateLevel1Id":50010788,"cateLevel1Name":"彩妆/香水/美妆工具","cateId":50010797,"cateName":"眼线","spuName":"未打标","viewV":11119,"viewI":494,"viewE":0.596153846153846,"viewENumerator":468,"viewEDenominator":279,"viewW":0.020242914979757,"viewWNumerator":494,"viewWDenominator":10,"gmv":38933.30839831609},
+    {"id":"10","sellerId":1652554937,"sellerNick":"自然堂旗舰店","industry":"美妆","series":"未打标","cateLevel1Id":50010788,"cateLevel1Name":"彩妆/香水/美妆工具","cateId":50010798,"cateName":"眉笔/眉粉/眉膏","spuName":"未打标","viewV":32735,"viewI":2996,"viewE":0.631578947368421,"viewENumerator":2983,"viewEDenominator":1884,"viewW":0.043724966622163,"viewWNumerator":2996,"viewWDenominator":131,"gmv":229725.4687730744},
+    {"id":"11","sellerId":1652554937,"sellerNick":"自然堂旗舰店","industry":"美妆","series":"未打标","cateLevel1Id":50010788,"cateLevel1Name":"彩妆/香水/美妆工具","cateId":50010803,"cateName":"遮瑕","spuName":"未打标","viewV":33784,"viewI":644,"viewE":0.809968847352025,"viewENumerator":642,"viewEDenominator":520,"viewW":0.024844720496894,"viewWNumerator":644,"viewWDenominator":16,"gmv":60769.38067280188},
+    {"id":"12","sellerId":1652554937,"sellerNick":"自然堂旗舰店","industry":"美妆","series":"未打标","cateLevel1Id":50010788,"cateLevel1Name":"彩妆/香水/美妆工具","cateId":50010808,"cateName":"唇膏/口红","spuName":"未打标","viewV":136433,"viewI":2054,"viewE":0.572127139364303,"viewENumerator":818,"viewEDenominator":468,"viewW":0.056475170399221,"viewWNumerator":2054,"viewWDenominator":116,"gmv":231724.2519855539},
+    {"id":"13","sellerId":1652554937,"sellerNick":"自然堂旗舰店","industry":"美妆","series":"未打标","cateLevel1Id":50010788,"cateLevel1Name":"彩妆/香水/美妆工具","cateId":50013794,"cateName":"BB霜","spuName":"未打标","viewV":759236,"viewI":55264,"viewE":0.564680480321224,"viewENumerator":26399,"viewEDenominator":14907,"viewW":0.075582657788072,"viewWNumerator":55264,"viewWDenominator":4177,"gmv":6388565.493030671},
+    {"id":"14","sellerId":1652554937,"sellerNick":"自然堂旗舰店","industry":"美妆","series":"未打标","cateLevel1Id":50010788,"cateLevel1Name":"彩妆/香水/美妆工具","cateId":121388007,"cateName":"阴影","spuName":"未打标","viewV":14428,"viewI":430,"viewE":0.669767441860465,"viewENumerator":430,"viewEDenominator":288,"viewW":0.011627906976744,"viewWNumerator":430,"viewWDenominator":5,"gmv":38303.47340318311},
+    {"id":"15","sellerId":1652554937,"sellerNick":"自然堂旗舰店","industry":"美妆","series":"未打标","cateLevel1Id":50010788,"cateLevel1Name":"彩妆/香水/美妆工具","cateId":121396024,"cateName":"男士BB霜","spuName":"未打标","viewV":14193,"viewI":578,"viewE":0.464019851116625,"viewENumerator":403,"viewEDenominator":187,"viewW":0.060553633217993,"viewWNumerator":578,"viewWDenominator":35,"gmv":51401.71433556839},
+    {"id":"16","sellerId":1652554937,"sellerNick":"自然堂旗舰店","industry":"美妆","series":"未打标","cateLevel1Id":50010788,"cateLevel1Name":"彩妆/香水/美妆工具","cateId":121426007,"cateName":"隔离/妆前","spuName":"未打标","viewV":1286088,"viewI":127634,"viewE":0.512468145646702,"viewENumerator":63963,"viewEDenominator":32779,"viewW":0.106100255417835,"viewWNumerator":127634,"viewWDenominator":13542,"gmv":15134850.595199348},
+    {"id":"17","sellerId":1652554937,"sellerNick":"自然堂旗舰店","industry":"美妆","series":"未打标","cateLevel1Id":50010788,"cateLevel1Name":"彩妆/香水/美妆工具","cateId":121448016,"cateName":"男士彩妆套装","spuName":"未打标","viewV":1190,"viewI":7,"viewE":1,"viewENumerator":7,"viewEDenominator":7,"viewW":0,"viewWNumerator":7,"viewWDenominator":"","gmv":919.1500000000001},
+    {"id":"18","sellerId":1652554937,"sellerNick":"自然堂旗舰店","industry":"美妆","series":"未打标","cateLevel1Id":50010788,"cateLevel1Name":"彩妆/香水/美妆工具","cateId":121452004,"cateName":"彩妆套装","spuName":"未打标","viewV":178666,"viewI":11206,"viewE":0.571789883268483,"viewENumerator":5140,"viewEDenominator":2939,"viewW":0.023737283598072,"viewWNumerator":11206,"viewWDenominator":266,"gmv":12933331.298763612},
+    {"id":"19","sellerId":1652554937,"sellerNick":"自然堂旗舰店","industry":"美妆","series":"炫彩系列","cateLevel1Id":50010788,"cateLevel1Name":"彩妆/香水/美妆工具","cateId":50010808,"cateName":"唇膏/口红","spuName":"唇膏/口红","viewV":248890,"viewI":5874,"viewE":0.617523167649537,"viewENumerator":4748,"viewEDenominator":2932,"viewW":0.03779366700715,"viewWNumerator":5874,"viewWDenominator":222,"gmv":511239.9526972782},
+    {"id":"20","sellerId":1652554937,"sellerNick":"自然堂旗舰店","industry":"美妆","series":"眉笔系列","cateLevel1Id":50010788,"cateLevel1Name":"彩妆/香水/美妆工具","cateId":50010798,"cateName":"眉笔/眉粉/眉膏","spuName":"精细眉笔","viewV":117498,"viewI":11982,"viewE":0.470013568521031,"viewENumerator":7370,"viewEDenominator":3464,"viewW":0.133366716741779,"viewWNumerator":11982,"viewWDenominator":1598,"gmv":784776.1453605731},
+    {"id":"21","sellerId":1652554937,"sellerNick":"自然堂旗舰店","industry":"美妆","series":"睫毛膏系列","cateLevel1Id":50010788,"cateLevel1Name":"彩妆/香水/美妆工具","cateId":50010794,"cateName":"睫毛膏","spuName":"纤长睫毛膏","viewV":44991,"viewI":3851,"viewE":0.583382789317507,"viewENumerator":1685,"viewEDenominator":983,"viewW":0.05582965463516,"viewWNumerator":3851,"viewWDenominator":215,"gmv":246967.2906481422},
+    {"id":"22","sellerId":1652554937,"sellerNick":"自然堂旗舰店","industry":"美妆","series":"腮红系列","cateLevel1Id":50010788,"cateLevel1Name":"彩妆/香水/美妆工具","cateId":50010805,"cateName":"腮红/胭脂","spuName":"马卡龙腮红","viewV":18894,"viewI":390,"viewE":0.730769230769231,"viewENumerator":390,"viewEDenominator":285,"viewW":0.005128205128205,"viewWNumerator":390,"viewWDenominator":2,"gmv":45642.07043700154},
+    {"id":"23","sellerId":1652554937,"sellerNick":"自然堂旗舰店","industry":"美妆","series":"雪域系列","cateLevel1Id":50010788,"cateLevel1Name":"彩妆/香水/美妆工具","cateId":50013794,"cateName":"BB霜","spuName":"BB霜","viewV":172443,"viewI":14517,"viewE":0.595973490058772,"viewENumerator":7997,"viewEDenominator":4766,"viewW":0.08403940208032,"viewWNumerator":14517,"viewWDenominator":1220,"gmv":1394264.0598796934},
+    {"id":"24","sellerId":1652554937,"sellerNick":"自然堂旗舰店","industry":"美妆","series":"雪润系列","cateLevel1Id":50010788,"cateLevel1Name":"彩妆/香水/美妆工具","cateId":50013794,"cateName":"BB霜","spuName":"BB霜","viewV":25143,"viewI":636,"viewE":0.721698113207547,"viewENumerator":636,"viewEDenominator":459,"viewW":0.00314465408805,"viewWNumerator":636,"viewWDenominator":2,"gmv":75981.11347361769},
+    {"id":"25","sellerId":1652554937,"sellerNick":"自然堂旗舰店","industry":"美妆","series":"雾感系列","cateLevel1Id":50010788,"cateLevel1Name":"彩妆/香水/美妆工具","cateId":50010807,"cateName":"唇彩/唇蜜/唇釉","spuName":"唇彩/唇蜜/唇釉","viewV":165663,"viewI":996,"viewE":0.698412698412698,"viewENumerator":567,"viewEDenominator":396,"viewW":0.042168674698795,"viewWNumerator":996,"viewWDenominator":42,"gmv":84839.77092507688},
+    {"id":"26","sellerId":1652554937,"sellerNick":"自然堂旗舰店","industry":"美妆","series":"润泽系列","cateLevel1Id":50010788,"cateLevel1Name":"彩妆/香水/美妆工具","cateId":50010808,"cateName":"唇膏/口红","spuName":"小金笔","viewV":437996,"viewI":13286,"viewE":0.521723256663016,"viewENumerator":2739,"viewEDenominator":1429,"viewW":0.042224898389282,"viewWNumerator":13286,"viewWDenominator":561,"gmv":1092808.1405844057}
+];
+
+
+
+//------------------------------
+//为确保js兼容性，以下配置有如下要求
+//    1. 仅支持ES5
+//    2. 仅支持单var声明单变量，严禁多个
+//        good: var a = 1;
+//        bad:  var a, b = 1, 2;
+//------------------------------
+
+// 图表变量，可直接在options中使用，mx-chart组件的variables属性可覆盖以下定义
+var variables = {
+    xField: 'viewI',
+    yField: 'viewE',
+    radiusField: "viewV",
+    labelField:"spuName",
+    alphaField:"viewW",
+
+    nodeColor: function( d ){
+        return '#3E3EFF'
+    },
+    nodeStrokeLineWidth:function(){
+        return 0
+    }, 
+    nodeLineType: function(){
+        return 'solid'
+    },
+    nodeClick:function( e , nodeData ){
+        if( !nodeData.selected ){
+            this.selectAt( nodeData.iNode );
+        } else {
+            this.unselectAt( nodeData.iNode );
+        };
+    },
+    
+    crossPointVal: {
+        x:100000,y:0.6
+    },
+    crossColor: '#CC3158'
+};
+
+var options = {
+    coord: {
+        type : "rect",
+        xAxis : {
+            field :  variables.xField,
+            layoutType : "proportion" //注意：scat的layoutType必须是proportion，位置计算才会对
+        }
+    },
+    graphs : [
+        {
+            type : "scat",
+            field : variables.yField,
+            aniOrigin: "origin",
+            node : {
+                dataKey:'id',
+                radius : variables.radiusField, //r可以配置为某个字段名字，就会自动计算比例
+                fillStyle : variables.nodeColor,
+                lineType: variables.nodeLineType,
+                lineWidth: variables.nodeStrokeLineWidth,
+                lineDash: [3,5],
+                fillAlpha : variables.alphaField,
+                select : {
+                    enabled : true
+                },
+                onclick : variables.nodeClick,
+                minRadius:8
+            },
+            label:{
+                enabled: true,
+                field: variables.labelField,
+                fontColor:"#333"
+            }
+        }
+    ],
+    tips : {
+        pointAnim: false
+    },
+    cross : {
+        //x:y:都是值，不是px
+        aimPoint: {
+            xVal: variables.crossPointVal.x,
+            yVal: variables.crossPointVal.y
+        },
+        line: {
+            strokeStyle:variables.crossColor,
+            lineType:'dashed',
+            hLabel : {
+                begin: {
+                    text: '新客贡献（I）低',
+                    fontColor: variables.crossColor
+                },
+                end: {
+                    text: '新客贡献（I）高',
+                    fontColor: variables.crossColor
+                }
+            },
+            vLabel : {
+                begin: {
+                    text: '流转动销（E）低',
+                    fontColor: variables.crossColor
+                },
+                end: {
+                    text: '流转动销（E）高',
+                    fontColor: variables.crossColor
+                }
+            }
+        }
+    },
+    datazoom: [{
+        width : 200,
+        shapeType: 'triangle',
+        color: '#3E3EFF',
+        bg: {
+            strokeStyle: "#809fff"
+        },
+        range : {
+            alpha: 1,
+            fillStyle: '#f3f5fc'
+        }
+    }]
+};
+
+
+window.scat = chartx.create("canvasTest" , data , options)
+
+            </textarea></form>
+        </td>
+        <td style="padding:0 10px;" id="td-vr">
+            <div id="chartdemo-r">
+            <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
+                <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
+
+                <p>
+                    联系人：@释剑
+                </p>
+                
+            </div>
+            <div  class="test-c">
+                <div id="canvasTest" style='width:100%;height:300px;position:relative;'></div>
+            </div>
+
+            </div>
+        </td>
+    </tr>
+</table>
+
+    
+</body> 
+</html>
+
+
