@@ -263,6 +263,9 @@ var ScatGraphs = /*#__PURE__*/function (_GraphsBase) {
           //如果配置了某个字段作为r，那么就要自动计算比例
           if (!this._rData && !this._rMaxValue && !this._rMinValue) {
             this._rData = this.dataFrame.getFieldData(this.node.radius);
+            this._rData = this._rData.filter(function (item) {
+              return item || item == 0;
+            });
             this._rMaxValue = _.max(this._rData);
             this._rMinValue = _.min(this._rData);
           }
@@ -330,6 +333,9 @@ var ScatGraphs = /*#__PURE__*/function (_GraphsBase) {
           //如果配置了某个字段作为r，那么就要自动计算比例
           if (!this._alphaData && !this._alphaMaxValue && !this._alphaMinValue) {
             this._alphaData = this.dataFrame.getFieldData(_alpha);
+            this._alphaData = this._alphaData.filter(function (item) {
+              return item || item == 0;
+            });
             this._alphaMaxValue = _.max(this._alphaData);
             this._alphaMinValue = _.min(this._alphaData);
           }
