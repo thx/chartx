@@ -36,7 +36,7 @@ var components = {
   */
 };
 var _default = {
-  chartxVersion: '1.1.126',
+  chartxVersion: '1.1.127',
   create: function create(el, data, opt) {
     var otherOptions = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
     var chart = null;
