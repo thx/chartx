@@ -173,7 +173,7 @@ var dataZoom = /*#__PURE__*/function (_Component) {
       cloneEl.style.width = this.width + "px";
       cloneEl.style.height = this.btnHeight + "px"; //app.el.offsetHeight + "px";
 
-      cloneEl.style.top = "10000px";
+      cloneEl.style.top = "-10000px";
       document.body.appendChild(cloneEl); //let opt = _.extend(true, {}, me._opt);
       //_.extend(true, opt, me.getCloneChart() );
       //clone的chart只需要coord 和 graphs 配置就可以了

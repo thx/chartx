@@ -73,8 +73,7 @@ var MarkLine = /*#__PURE__*/function (_Component) {
     key: "_calculateProps",
     value: function _calculateProps() {
       var opt = this._opt;
-      debugger; //如果markline有target配置，那么只现在target配置里的字段的 markline, 推荐
-
+      //如果markline有target配置，那么只现在target配置里的字段的 markline, 推荐
       var field = opt.markTo;
 
       var _coord = this.app.getComponent({
@@ -134,8 +133,6 @@ var MarkLine = /*#__PURE__*/function (_Component) {
       }
 
       ; //y = this._getYVal( y );
-
-      debugger;
 
       if (!isNaN(y)) {
         //如果y是个function说明是均值，自动实时计算的，而且不会超过ydatasection的范围
