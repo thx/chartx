@@ -8387,7 +8387,7 @@ var components = {
   */
 };
 var _default = {
-  chartxVersion: '1.1.127',
+  chartxVersion: '1.1.128',
   create: function create(el, data, opt) {
     var otherOptions = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
     var chart = null;
@@ -59769,7 +59769,7 @@ if (projectTheme && projectTheme.length) {
 }
 
 var chartx = {
-  version: '1.1.127',
+  version: '1.1.128',
   options: {}
 };
 
