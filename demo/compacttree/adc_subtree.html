@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
-<title>xChart demo -- bar</title>
+<title>xChart demo -- ADC</title>
 
 <script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
 <script type="text/javascript" src="../../dist/index.iife.js"></script>
@@ -54,161 +54,125 @@
 <body >
     
     <i class="iconfont">&#xe906;</i>
+<script>
+
+var s = `{"subComponentList":[{"name":"测试节点","collapsed":false,"id":3916002,"style":{"visible":"hidden","width":"","height":"","fontColor":""},"type":"Block"}],"name":"adc","collapsed":false,"id":3916001,"type":"Root","style":{"width":"","height":"","fontColor":""}}`
+let t = new Date().getTime();
+var data = JSON.parse( s );
+console.log( 'adc json串格式化', (new Date().getTime() - t) )
+
+
+</script>
 <table>
     <tr>
         <td id="td-vl">
             <form><textarea id="code" name="code">
 
-//chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
-//第一行是表头。
-
-var data = [
-    { key: 100     , label: '<div onclick="alert(1)" style="cursor:pointer;width:50px;height:50px;background:red;">一线城市</div>'},
-    { key: "1"       , label: '中国'    },
-    { key: "2"       , label: '湖南'    },
-    { key: "3"       , label: '湖北'    },
-    { key: "4"       , label: '<div style="width:50px;height:30px;background:blue;color:white;">浙江</div>'    },
-    { key: "5"       , label: '长沙'    },
-    { key: "6"       , label: '杭州'    },
-    { key: "666"       , label: '金华'    },
-    { key: "66"       , label: '宁波'    },
-    { key: "7"       , label: '闲林'    },
-    { key: "8"       , label: '北京'    },
-    { key: "9"      , label: '娄底'    },
-    { key: "10"      , label: '<div style="width:50px;height:50px;background:green;">上海</div>' },
-    //{ key: "11"      , label: '武汉'    },
-
-    { key: "1,2"   , label: '中国湖南' },
-    { key: "1,3"   , label: '中国湖北' },
-    { key: "1,4"   , label: '中国浙江' },
-    { key: "2,5"   , label: '湖南长沙' },
-    { key: "4,66"   , label: '浙江宁波' },
-    { key: "4,666"   , label: '浙江金华' },
-    { key: "4,6"   , label: '浙江杭州' },
-    { key: "6,7"   , label: '杭州闲林' },
-    { key: "1,8"   , label: '中国北京' },
-    { key: "2,9"   , label: '湖南娄底' },
-    { key: "1,10"  , label: '中国上海' },
-    { key: "10,100", label: '上海一线' },
-    //{ key: "3,11"  , label: '湖北武汉' },
-];
-
-var data1 = [
-
-];
-
 var options = {
     graphs : {
         type     : "compacttree",
-        field    : "key",
+        field    : "id",
+        childrenField: "subComponentList",
         node : {
-            shapeType: function( node ){
-                if(node.rowData.key == 4){
-                    return 'diamond'
-                };
-                return 'rect';
+            onkeydown: function(){
+debugger
             },
+            //width: 100, height:30,
+            strokeStyle: "#a1a9b0",
+            fillStyle: function( node){
+                if( node.depth == 0 ){
+                    return '#577ef7'
+                } else {
+                    return 'rgba(0,0,0,0)'
+                }
+            },
+            shapeType: function( node ){
+                if( node.depth == 0 ){
+                    return 'rect'
+                } else {
+                    return 'underLine'
+                }
+            },
+            lineWidth: 0,
             content : {
-                field : "label",
+                field : "name",
                 init: function(){
+                    
                     return new Promise( resolve => {
                         setTimeout( function(){
                             resolve( {} )
                         } , 50)
                     } )
+
+                },
+                fontColor: function( node ){
+                    if( node.depth == 0 ){
+                        return '#ffffff'
+                    } else {
+                        return '#666666'
+                    }
+                },
+                fontSize: function( node ){
+                    if( node.depth == 0 ){
+                        return 16
+                    } else {
+                        return 14
+                    }
                 }
             },
             select: {
                 enabled: true,
-                list : ['1'],
+                list : [1418001],
                 onbefore: function(node){
-                    debugger
+                    if( this.node.select.list.indexOf( node.key ) > -1 ){
+                        return false
+                    }
+                    this.unselectAll();
                 },
                 onend: function(node){
                     debugger
                 },
-                shadow: {
-                    shadowBlur: 10
-                }
+                fillStyle: function( node ){
+                    if( node.depth == 0 ){
+                        return '#577ef7'
+                    } else {
+                        return 'rgba(87,126,247,0.08)'
+                    }
+                },
+                strokeStyle: "#577ef7",
+                fontColor: "#577ef7"
             },
             focus: {
                 enabled: true,
-                shadow: {
-                    shadowBlur: 5
-                }
+                fillStyle: function( node ){
+                    if( node.depth == 0 ){
+                        return '#577ef7'
+                    } else {
+                        return 'rgba(0,0,0,0)'
+                    }
+                },
+                strokeStyle: "#577ef7"
             },
             collapse: {
                 enabled: true,
                 openCharCode: 'e906',
                 closeCharCode: 'e907',
-                fontColor:"#667894",
-                fontSize: 12
+                fontColor:"#667894"
             }
         },
         line : {
-            isTree:true,
-            shapeType:'brokenLine',
-            onclick: function(){
-                debugger
-            },
-            edgeLabel: {
-                enabled: false
-            },
-            icon: {
-                enabled: true,
-                charCode: 'e798',
-                fontColor: '#333',
-                fontFamily: 'iconfont',
-                onclick: function(){
-                    debugger
-                }
-            },
-            arrow: {
-                offsetX: -2,
-                offsetY: 0
-            },
-            cursor: 'pointer'
-        },
-    
-        layout      : "dagre",
-        layoutOpts  : {
-            graph : {
-                rankdir: "LR",  
-                align: "DL",
-                nodesep: 40,//同级node之间的距离
-                //edgesep: 100,
-                //ranksep: 0, //排与排之间的距离
-                //acyclicer : "greedy",
-                ranker: "tight-tree", //longest-path, tight-tree
-            },
-            node : {
-
-            },
-            edge : {
-
-            }
-           
+            strokeStyle: "#a1a9b0"
         }
       
     },
-    tips    : {}
+    contextmenu: {
+        content: function(){
+            return "<div style=\"cursor:pointer\" onclick=\"alert('df')\">contentmenu</div>"
+        }
+    }
 };
 
-setTimeout( function(){
-    //保证css文件加载好了， 有 iconfont了
-    window.chart = chartx.create("canvasTest" , data , options)
-    
-    setTimeout(function(){
-        chart.resetData( data1 , {
-            origin: '10'
-        })
-        setTimeout(function(){
-            chart.resetData( data , {
-                origin: '10'
-            })
-        }, 2000)
-    }, 2000)
-} , 100)
+window.chart = chartx.create("canvasTest" , data , options)
 
 
             </textarea></form>
@@ -218,12 +182,12 @@ setTimeout( function(){
             <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
                 <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
 
-                <h4>关系图</h4>
-                <p>
+                <h4>ADC树</h4>
+                <p id="name">
                     联系人：@释剑
                 </p>
             </div>
-            <div  class="test-c">
+            <div class="test-c">
                 <div id="canvasTest" style='width:800px;height:800px;position:relative;'></div>
             </div>
 

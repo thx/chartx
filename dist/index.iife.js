@@ -48899,96 +48899,108 @@ var chartx = (function () {
 	      //parent指向的是treeData不是originData，这里要注意下
 
 	      var filter = function filter(treeOriginData, parent, depth, rowInd, treeData) {
-	        Object.assign(treeData, {
-	          depth: depth || 0,
-	          parent: parent,
-	          rowInd: rowInd //在parent中的Index
+	        if (treeOriginData) {
+	          var _treeData$style;
 
-	        }); //resetData的时候，有些节点原本有数据的
+	          Object.assign(treeData, {
+	            depth: depth || 0,
+	            parent: parent,
+	            rowInd: rowInd //在parent中的Index
 
-	        var preChildrenList = treeData[childrenField] || [];
-	        Object.assign(treeData, treeOriginData);
-	        treeData['__originData'] = treeOriginData; //和原数据建立下关系，比如 treeData 中的一些数据便跟了要同步到原数据中去
+	          }); //resetData的时候，有些节点原本有数据的
 
-	        treeData[childrenField] = []; //开始构建nodes
+	          var preChildrenList = treeData[childrenField] || [];
+	          Object.assign(treeData, treeOriginData);
+	          treeData['__originData'] = treeOriginData; //和原数据建立下关系，比如 treeData 中的一些数据便跟了要同步到原数据中去
 
-	        var content = _this5._getContent(treeData); //下面这个判断逻辑主要用在resetData的时候用
+	          treeData[childrenField] = [];
+
+	          if ((treeData === null || treeData === void 0 ? void 0 : (_treeData$style = treeData.style) === null || _treeData$style === void 0 ? void 0 : _treeData$style.visible) == 'hidden') {
+	            return;
+	          } //开始构建nodes
 
 
-	        if (treeData._node && content != treeData._node.content) {
-	          treeData._node = null;
-	          delete treeData._node;
+	          var content = _this5._getContent(treeData); //下面这个判断逻辑主要用在resetData的时候用
 
-	          if (!treeData.style) {
-	            treeData.style = {
-	              width: 0,
-	              height: 0
-	            };
+
+	          if (treeData._node && content != treeData._node.content) {
+	            treeData._node = null;
+	            delete treeData._node;
+
+	            if (!treeData.style) {
+	              treeData.style = {
+	                width: 0,
+	                height: 0
+	              };
+	            }
+
+	            if (!treeOriginData.style || treeOriginData.style && (!treeOriginData.style.width || !treeOriginData.style.height)) {
+	              treeData.style.width = 0;
+	              treeData.style.height = 0;
+	            }
 	          }
 
-	          if (!treeOriginData.style || treeOriginData.style && (!treeOriginData.style.width || !treeOriginData.style.height)) {
-	            treeData.style.width = 0;
-	            treeData.style.height = 0;
-	          }
-	        }
-
-	        var node = _this5.getDefNode({
-	          type: 'tree'
-	        });
-
-	        Object.assign(node, {
-	          iNode: nodes.length,
-	          rowData: treeData,
-	          key: treeData[_this5.field],
-	          content: content,
-	          ctype: _this5._checkHtml(content) ? 'html' : 'canvas',
-	          width: 0,
-	          height: 0,
-	          depth: depth || 0 //深度
-
-	        }); //不能放到assign中去，  getProp的处理中可能依赖node.rowData
-
-	        node.shapeType = _this5.getProp(_this5.node.shapeType, node);
-	        node.preIconCharCode = _this5.getProp(_this5.node.preIcon.charCode, node);
-	        node.iconCharCodes = _this5.getProp(_this5.node.icons.charCode, node) || [];
-	        nodes.push(node);
-	        treeData._node = node;
-
-	        if (!treeData[collapsedField]) {
-	          //如果这个节点未折叠
-	          //检查他的子节点
-	          (treeOriginData[childrenField] || []).forEach(function (child, rowInd) {
-	            var preChildTreeData = preChildrenList.find(function (item) {
-	              return item[_this5.field] == child[_this5.field];
-	            }) || {};
-	            var childTreeData = filter(child, treeData, depth + 1, rowInd, preChildTreeData);
-	            treeData[childrenField].push(childTreeData);
-	            nodesLength++; //开始构建edges
-
-	            var rowData = {};
-	            var content = ''; //this._getContent(rowData);
-
-	            var edge = _this5.getDefNode({
-	              type: 'tree'
-	            });
-
-	            Object.assign(edge, {
-	              isTree: true,
-	              iNode: edges.length,
-	              rowData: rowData,
-	              key: [treeData[_this5.field], childTreeData[_this5.field]],
-	              //treeData[ this.field ]+","+child[ this.field ],
-	              content: content,
-	              ctype: _this5._checkHtml(content) ? 'html' : 'canvas',
-	              //如果是edge，要有source 和 target
-	              source: treeData._node,
-	              target: childTreeData._node,
-	              sourceTreeData: treeData,
-	              targetTreeData: childTreeData
-	            });
-	            edge.shapeType = _this5.getProp(_this5.line.shapeType, edge);
-	            edges.push(edge);
+	          var node = _this5.getDefNode({
+	            type: 'tree'
 	          });
+
+	          Object.assign(node, {
+	            iNode: nodes.length,
+	            rowData: treeData,
+	            key: treeData[_this5.field],
+	            content: content,
+	            ctype: _this5._checkHtml(content) ? 'html' : 'canvas',
+	            width: 0,
+	            height: 0,
+	            depth: depth || 0 //深度
+
+	          }); //不能放到assign中去，  getProp的处理中可能依赖node.rowData
+
+	          node.shapeType = _this5.getProp(_this5.node.shapeType, node);
+	          node.preIconCharCode = _this5.getProp(_this5.node.preIcon.charCode, node);
+	          node.iconCharCodes = _this5.getProp(_this5.node.icons.charCode, node) || [];
+	          nodes.push(node);
+	          treeData._node = node;
+
+	          if (!treeData[collapsedField]) {
+	            //如果这个节点未折叠
+	            //检查他的子节点
+	            (treeOriginData[childrenField] || []).forEach(function (child, rowInd) {
+	              var preChildTreeData = preChildrenList.find(function (item) {
+	                return item[_this5.field] == child[_this5.field];
+	              }) || {};
+	              var childTreeData = filter(child, treeData, depth + 1, rowInd, preChildTreeData);
+
+	              if (childTreeData) {
+	                treeData[childrenField].push(childTreeData);
+	                nodesLength++; //开始构建edges
+
+	                var rowData = {};
+	                var _content = ''; //this._getContent(rowData);
+
+	                var edge = _this5.getDefNode({
+	                  type: 'tree'
+	                });
+
+	                Object.assign(edge, {
+	                  isTree: true,
+	                  iNode: edges.length,
+	                  rowData: rowData,
+	                  key: [treeData[_this5.field], childTreeData[_this5.field]],
+	                  //treeData[ this.field ]+","+child[ this.field ],
+	                  content: _content,
+	                  ctype: _this5._checkHtml(_content) ? 'html' : 'canvas',
+	                  //如果是edge，要有source 和 target
+	                  source: treeData._node,
+	                  target: childTreeData._node,
+	                  sourceTreeData: treeData,
+	                  targetTreeData: childTreeData
+	                });
+	                edge.shapeType = _this5.getProp(_this5.line.shapeType, edge);
+	                edges.push(edge);
+	              }
+	            });
+	          }
 	        }
 
 	        return treeData;
