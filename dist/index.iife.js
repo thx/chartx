@@ -8388,7 +8388,7 @@ var chartx = (function () {
 	  */
 	};
 	var _default = {
-	  chartxVersion: '1.1.128',
+	  chartxVersion: '1.1.129',
 	  create: function create(el, data, opt) {
 	    var otherOptions = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
 	    var chart = null;
@@ -17749,8 +17749,8 @@ var chartx = (function () {
 	            if (isNaN(nodeData.value)) {
 	              rectHeight = 0;
 	            } else {
-	              if (Math.abs(rectHeight) < me.node.minHeight) {
-	                rectHeight = me.node.minHeight;
+	              if (Math.abs(rectHeight) < Math.abs(me.node.minHeight)) {
+	                rectHeight = -me.node.minHeight;
 	              }
 	            }
 	            nodeData.rectHeight = rectHeight;
@@ -59770,7 +59770,7 @@ var chartx = (function () {
 	}
 
 	var chartx = {
-	  version: '1.1.128',
+	  version: '1.1.129',
 	  options: {}
 	};
 

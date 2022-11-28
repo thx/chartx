@@ -449,8 +449,8 @@ var BarGraphs = /*#__PURE__*/function (_GraphsBase) {
             if (isNaN(nodeData.value)) {
               rectHeight = 0;
             } else {
-              if (Math.abs(rectHeight) < me.node.minHeight) {
-                rectHeight = me.node.minHeight;
+              if (Math.abs(rectHeight) < Math.abs(me.node.minHeight)) {
+                rectHeight = -me.node.minHeight;
               }
             }
 
