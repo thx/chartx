@@ -79,7 +79,7 @@ class RelationBase extends GraphsBase {
                         default: 4
                     },
                     includedAngle: {
-                        detail: 'shapeType为diamond(菱形)的时候生效,x方向的夹角',
+                        detail: 'shapeType为 diamond (菱形)的时候生效,x方向的夹角',
                         default: 60
                     },
                     fillStyle: {
@@ -457,7 +457,7 @@ class RelationBase extends GraphsBase {
         }
     }
 
-    constructor(opt, app) {
+    constructor(opt, app, preComp) {
         super(opt, app);
         this.type = "relation";
 
@@ -466,10 +466,10 @@ class RelationBase extends GraphsBase {
         this.domContainer = app.canvax.domView;
         this.induce = null;
 
-        this.init();
+        this.init( preComp );
     }
 
-    init() {
+    init( preComp ) {
         this._initInduce();
 
         this.nodesSp = new Canvax.Display.Sprite({
@@ -506,7 +506,13 @@ class RelationBase extends GraphsBase {
         this.graphsView.addChild(this.graphsSp);
         this.sprite.addChild(this.graphsView);
 
-        this.zoom = new Zoom();
+        if( preComp.zoom ){
+            this.preGraphsSpPosition = preComp.graphsSpPosition;
+            this.zoom = preComp.zoom;
+            this.offset()
+        } else {
+            this.zoom = new Zoom();
+        }
 
     }
 
@@ -631,7 +637,27 @@ class RelationBase extends GraphsBase {
      
                                 if( me.status.transform.wheelAction == 'offset' ){
                                     //移动的话用offset,偏移多少像素
-                                    let {x,y} = me.zoom.offset( {x:-e.deltaX*2, y:-e.deltaY*2} ); //me.zoom.move( {x:zx, y:zy} );
+                                    let offsetPoint = {x:-e.deltaX*2, y:-e.deltaY*2};
+                                    let leftDiss = parseInt(me.graphsView.context.x + me.graphsSp.context.x + me.data.viewPort.maxLeft + offsetPoint.x + me.app.padding.left);
+                                    if( leftDiss < 0 ){
+                                        offsetPoint.x = parseInt(offsetPoint.x - leftDiss)
+                                    }
+                                    let rightDiss = parseInt(me.graphsView.context.x + me.graphsSp.context.x + me.data.viewPort.maxRight + offsetPoint.x + me.app.padding.right);
+                                    if( rightDiss >= me.app.width ){
+                                        offsetPoint.x = parseInt(offsetPoint.x - (rightDiss - me.app.width ))
+                                    }
+                                    let topDiss = parseInt(me.graphsView.context.y + me.graphsSp.context.y + me.data.viewPort.maxTop + offsetPoint.y + me.app.padding.top);
+                                    if( topDiss < 0 ){
+                                        offsetPoint.y = parseInt(offsetPoint.y - topDiss)
+                                    }
+                                    let bottomDiss = parseInt(me.graphsView.context.y + me.graphsSp.context.y + me.data.viewPort.maxBottom + offsetPoint.y + me.app.padding.bottom);
+                                    if( bottomDiss >= me.app.height ){
+                                        offsetPoint.y = parseInt(offsetPoint.y - (bottomDiss - me.app.height ))
+                                    }
+
+                                    //console.log( offsetPoint )
+
+                                    let {x,y} = me.zoom.offset( offsetPoint ); //me.zoom.move( {x:zx, y:zy} );
                                     me.graphsView.context.x = x;
                                     me.graphsView.context.y = y;
                                 }
@@ -644,6 +670,7 @@ class RelationBase extends GraphsBase {
                                     me.graphsView.context.scaleY = scale;
                                     me.status.transform.scale = scale;
                                 }
+                                
                                 
                                 _wheelHandleTimeer = null;
                                 _deltaY = 0;
@@ -667,9 +694,6 @@ class RelationBase extends GraphsBase {
 
     }
 
-    
-
-    
 
     _resetData( data, dataTrigger ){
 
@@ -1021,7 +1045,6 @@ class RelationBase extends GraphsBase {
     }
 
 
-
     _drawNode( node ){
         let me = this;
         
@@ -1091,14 +1114,14 @@ class RelationBase extends GraphsBase {
                     //TODO:这里不能
                     let onbefore = me.node.select.onbefore;
                     let onend    = me.node.select.onend;
-                    if( !onbefore || ( typeof onbefore == 'function' && onbefore.apply(me, [this.nodeData]) !== false ) ){
+                    if( !onbefore || ( typeof onbefore == 'function' && onbefore.apply(me, [this.nodeData,e]) !== false ) ){
                         if( this.nodeData.selected ){
                             //说明已经选中了
                             me.unselectAt( this.nodeData );
                         } else {
                             me.selectAt( this.nodeData );
                         }
-                        onend && typeof onend == 'function' && onend.apply( me, [this.nodeData] );
+                        onend && typeof onend == 'function' && onend.apply( me, [this.nodeData,e] );
                     }
                     
                 };
@@ -1130,8 +1153,8 @@ class RelationBase extends GraphsBase {
                 node.contentElement.style.transformOrigin = "left top"; //修改为左上角为旋转中心点来和canvas同步
                 if( node.shapeType == 'diamond' ){
                     //菱形的位置
-                    node.contentElement.style.left = -parseInt(( (node.boundingClientWidth-node._innerBound.width)/2) * me.status.transform.scale) + "px";
-                    node.contentElement.style.top = -parseInt(( (node.height-node._innerBound.height)/2) * me.status.transform.scale) + "px";
+                    node.contentElement.style.left = -parseInt( ((node.boundingClientWidth-node._innerBound.width)/2) * me.status.transform.scale ) + "px";
+                    node.contentElement.style.top = -parseInt( (node.height/2) * me.status.transform.scale ) + "px";
                 };
                 node.contentElement.style.visibility = "visible";
             };
@@ -1175,6 +1198,30 @@ class RelationBase extends GraphsBase {
             ctx.shadowOffsetY = shadowOffsetY;
             ctx.shadowBlur    = shadowBlur;
             ctx.shadowColor   = shadowColor;
+        }
+    }
+
+    //画布偏移量
+    offset( offset={x:0,y:0} ){
+        let { x, y } = this.zoom.offset( offset );
+        this.graphsView.context.x = parseInt(x);
+        this.graphsView.context.y = parseInt(y);
+    }
+
+    //把某个节点移动到居中位置
+    setNodeToCenter( key ){
+        let nodeData = this.getNodeDataAt( key );
+        if( nodeData ){
+            let globalPos = nodeData.shapeElement.localToGlobal();
+            let toGlobalPos = {
+                x : this.app.width/2 - nodeData.width/2,
+                y : this.app.height/2 - nodeData.height/2
+            }
+            let toCenterOffset = {
+                x: parseInt( toGlobalPos.x - globalPos.x ), 
+                y: parseInt( toGlobalPos.y - globalPos.y )
+            };
+            this.offset( toCenterOffset );
         }
     }
 

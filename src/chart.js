@@ -99,6 +99,7 @@ class Chart extends event.Dispatcher
 
     init()
     {
+        
         let me = this;
 
         //init全部用 this._opt
@@ -141,7 +142,9 @@ class Chart extends event.Dispatcher
                 let compModule = me.componentModules.get(compName, comp.type);
                 if( compModule ){
 
-                    let _comp = new compModule( comp, me );
+                    let _preComp = (me._preComponents || []).find( _c => _c.type == comp.type && _c.field == comp.field )
+
+                    let _comp = new compModule( comp, me, (_preComp || {}) );
 
                     //可能用户配置了一个空的coord坐标系，没有type，里面配置了一些fieldsConfig之类的全局配置的时候
                     //就要手动init一下这个空坐标系
@@ -384,6 +387,8 @@ class Chart extends event.Dispatcher
         //因为上面的destroy把 this.coordSprite 和 this.graphsSprite 这两个预设的容器给destroy了
         //所以要重新设置一遍准备好。
         this.setCoord_Graphs_Sp();
+
+        this._preComponents = this.components;
 
         this.components = []; //组件清空
         this.canvax.domView && (this.canvax.domView.innerHTML = "");

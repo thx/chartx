@@ -186,7 +186,11 @@ var Chart = /*#__PURE__*/function (_event$Dispatcher) {
           var compModule = me.componentModules.get(compName, comp.type);
 
           if (compModule) {
-            var _comp = new compModule(comp, me); //可能用户配置了一个空的coord坐标系，没有type，里面配置了一些fieldsConfig之类的全局配置的时候
+            var _preComp = (me._preComponents || []).find(function (_c) {
+              return _c.type == comp.type && _c.field == comp.field;
+            });
+
+            var _comp = new compModule(comp, me, _preComp || {}); //可能用户配置了一个空的coord坐标系，没有type，里面配置了一些fieldsConfig之类的全局配置的时候
             //就要手动init一下这个空坐标系
 
 
@@ -484,6 +488,7 @@ var Chart = /*#__PURE__*/function (_event$Dispatcher) {
       //所以要重新设置一遍准备好。
 
       this.setCoord_Graphs_Sp();
+      this._preComponents = this.components;
       this.components = []; //组件清空
 
       this.canvax.domView && (this.canvax.domView.innerHTML = ""); //清空事件的当前状态

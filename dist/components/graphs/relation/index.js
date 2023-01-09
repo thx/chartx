@@ -633,6 +633,41 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
       this._drawEdges();
 
       this._drawNodes();
+    } //画布偏移量
+
+  }, {
+    key: "offset",
+    value: function offset() {
+      var _offset = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {
+        x: 0,
+        y: 0
+      };
+
+      var _this$zoom$offset = this.zoom.offset(_offset),
+          x = _this$zoom$offset.x,
+          y = _this$zoom$offset.y;
+
+      this.graphsView.context.x = parseInt(x);
+      this.graphsView.context.y = parseInt(y);
+    } //把某个节点移动到居中位置
+
+  }, {
+    key: "setNodeToCenter",
+    value: function setNodeToCenter(key) {
+      var nodeData = this.getNodeDataAt(key);
+
+      if (nodeData) {
+        var globalPos = nodeData.shapeElement.localToGlobal();
+        var toGlobalPos = {
+          x: this.app.width / 2 - nodeData.width / 2,
+          y: this.app.height / 2 - nodeData.height / 2
+        };
+        var toCenterOffset = {
+          x: parseInt(toGlobalPos.x - globalPos.x),
+          y: parseInt(toGlobalPos.y - globalPos.y)
+        };
+        this.offset(toCenterOffset);
+      }
     }
   }, {
     key: "_drawEdges",
@@ -814,14 +849,14 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
             var _textAlign = 'center';
             var _textBaseline = 'middle';
 
-            var _offset = me.getProp(me.line.icon.offset, edge);
+            var _offset2 = me.getProp(me.line.icon.offset, edge);
 
             var offsetX = me.getProp(me.line.icon.offsetX, edge);
             var offsetY = me.getProp(me.line.icon.offsetY, edge);
 
-            if (!_offset) {
+            if (!_offset2) {
               //default 使用edge.x edge.y 也就是edge label的位置
-              _offset = {
+              _offset2 = {
                 x: parseInt(edge.x) + offsetX,
                 y: parseInt(edge.y) + offsetY
               };
@@ -829,8 +864,8 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
 
             ;
             var _iconBackCtx = {
-              x: _offset.x,
-              y: _offset.y - 1,
+              x: _offset2.x,
+              y: _offset2.y - 1,
               r: parseInt(_fontSize * 0.5) + 2,
               fillStyle: background,
               strokeStyle: _strokeStyle,
@@ -861,8 +896,8 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
             if (_edgeIcon) {
               _edgeIcon.resetText(charCode);
 
-              _edgeIcon.context.x = _offset.x;
-              _edgeIcon.context.y = _offset.y;
+              _edgeIcon.context.x = _offset2.x;
+              _edgeIcon.context.y = _offset2.y;
               _edgeIcon.context.fontSize = _fontSize;
               _edgeIcon.context.fillStyle = _fontColor;
               _edgeIcon.context.textAlign = _textAlign;
@@ -873,8 +908,8 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
               _edgeIcon = new _canvax["default"].Display.Text(charCode, {
                 id: edgeIconId,
                 context: {
-                  x: _offset.x,
-                  y: _offset.y,
+                  x: _offset2.x,
+                  y: _offset2.y,
                   fillStyle: _fontColor,
                   cursor: 'pointer',
                   fontSize: _fontSize,

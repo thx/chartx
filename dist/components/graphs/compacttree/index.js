@@ -50,11 +50,11 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
 
   var _super = _createSuper(compactTree);
 
-  function compactTree(opt, app) {
+  function compactTree(opt, app, preComp) {
     var _this;
 
     (0, _classCallCheck2["default"])(this, compactTree);
-    _this = _super.call(this, opt, app);
+    _this = _super.call(this, opt, app, preComp);
     _this.type = "compacttree";
 
     _.extend(true, (0, _assertThisInitialized2["default"])(_this), (0, _tools.getDefaultProps)(compactTree.defaultProps()), opt);
@@ -94,8 +94,20 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
         // });
         // this.graphsSp.addChild( this._bound )
 
-        _this2.graphsSp.context.x = Math.max((_this2.width - _this2.data.size.width) / 2, _this2.app.padding.left);
-        _this2.graphsSp.context.y = _this2.height / 2;
+        if (!_this2.preGraphsSpPosition) {
+          _this2.graphsSpPosition = {
+            x: Math.max((_this2.width - _this2.data.size.width) / 2, _this2.app.padding.left),
+            y: _this2.height / 2
+          };
+        } else {
+          _this2.graphsSpPosition = {
+            x: _this2.preGraphsSpPosition.x,
+            y: _this2.preGraphsSpPosition.y
+          };
+        }
+
+        _this2.graphsSp.context.x = _this2.graphsSpPosition.x;
+        _this2.graphsSp.context.y = _this2.graphsSpPosition.y;
 
         _this2.fire("complete");
       });
@@ -110,7 +122,8 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
       var _this3 = this;
 
       this._resetData(dataFrame, dataTrigger).then(function () {
-        _this3.fire("complete"); // Object.assign( this._bound.context, {
+        _this3.fire("complete"); //test bound
+        // Object.assign( this._bound.context, {
         //     x: this.data.extents.left,
         //     y: this.data.extents.top,
         //     width: this.data.size.width,
@@ -532,6 +545,10 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
           top = 0,
           right = 0,
           bottom = 0;
+      var maxRight = 0,
+          maxLeft = 0,
+          maxTop = 0,
+          maxBottom = 0;
       var width = 0,
           height = 0;
 
@@ -543,9 +560,32 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
         }
 
         ;
+
+        if (node.x <= left) {
+          maxRight = node.x + node.data._node.boundingClientWidth;
+        }
+
+        ;
         left = Math.min(left, node.x);
+
+        if (node.x + node.data._node.boundingClientWidth >= right) {
+          maxLeft = node.x;
+        }
+
+        ;
         right = Math.max(right, node.x + node.data._node.boundingClientWidth);
+
+        if (node.y <= top) {
+          maxBottom = node.y + node.data._node.height;
+        }
+
+        ;
         top = Math.min(top, node.y);
+
+        if (node.y + node.data._node.height + spaceY >= bottom) {
+          maxTop = node.y;
+        }
+
         bottom = Math.max(bottom, node.y + node.data._node.height + spaceY); //node的x y 都是矩形的中心点
 
         node.data._node.x = node.x + node.data._node.boundingClientWidth / 2;
@@ -569,6 +609,12 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
           top: top,
           right: right,
           bottom: bottom
+        },
+        viewPort: {
+          maxRight: maxRight,
+          maxLeft: maxLeft,
+          maxTop: maxTop,
+          maxBottom: maxBottom
         }
       });
     } //可以继承覆盖

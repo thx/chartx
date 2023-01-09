@@ -8387,7 +8387,7 @@ var components = {
   */
 };
 var _default = {
-  chartxVersion: '1.1.129',
+  chartxVersion: '1.1.130',
   create: function create(el, data, opt) {
     var otherOptions = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
     var chart = null;
@@ -11143,7 +11143,11 @@ var Chart = /*#__PURE__*/function (_event$Dispatcher) {
           var compModule = me.componentModules.get(compName, comp.type);
 
           if (compModule) {
-            var _comp = new compModule(comp, me); //可能用户配置了一个空的coord坐标系，没有type，里面配置了一些fieldsConfig之类的全局配置的时候
+            var _preComp = (me._preComponents || []).find(function (_c) {
+              return _c.type == comp.type && _c.field == comp.field;
+            });
+
+            var _comp = new compModule(comp, me, _preComp || {}); //可能用户配置了一个空的coord坐标系，没有type，里面配置了一些fieldsConfig之类的全局配置的时候
             //就要手动init一下这个空坐标系
 
 
@@ -11403,6 +11407,7 @@ var Chart = /*#__PURE__*/function (_event$Dispatcher) {
       //所以要重新设置一遍准备好。
 
       this.setCoord_Graphs_Sp();
+      this._preComponents = this.components;
       this.components = []; //组件清空
 
       this.canvax.domView && (this.canvax.domView.innerHTML = ""); //清空事件的当前状态
@@ -43439,6 +43444,41 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
       this._drawEdges();
 
       this._drawNodes();
+    } //画布偏移量
+
+  }, {
+    key: "offset",
+    value: function offset() {
+      var _offset = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {
+        x: 0,
+        y: 0
+      };
+
+      var _this$zoom$offset = this.zoom.offset(_offset),
+          x = _this$zoom$offset.x,
+          y = _this$zoom$offset.y;
+
+      this.graphsView.context.x = parseInt(x);
+      this.graphsView.context.y = parseInt(y);
+    } //把某个节点移动到居中位置
+
+  }, {
+    key: "setNodeToCenter",
+    value: function setNodeToCenter(key) {
+      var nodeData = this.getNodeDataAt(key);
+
+      if (nodeData) {
+        var globalPos = nodeData.shapeElement.localToGlobal();
+        var toGlobalPos = {
+          x: this.app.width / 2 - nodeData.width / 2,
+          y: this.app.height / 2 - nodeData.height / 2
+        };
+        var toCenterOffset = {
+          x: parseInt(toGlobalPos.x - globalPos.x),
+          y: parseInt(toGlobalPos.y - globalPos.y)
+        };
+        this.offset(toCenterOffset);
+      }
     }
   }, {
     key: "_drawEdges",
@@ -43610,21 +43650,21 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
             var _textAlign = 'center';
             var _textBaseline = 'middle';
 
-            var _offset = me.getProp(me.line.icon.offset, edge);
+            var _offset2 = me.getProp(me.line.icon.offset, edge);
 
             var offsetX = me.getProp(me.line.icon.offsetX, edge);
             var offsetY = me.getProp(me.line.icon.offsetY, edge);
 
-            if (!_offset) {
+            if (!_offset2) {
               //default 使用edge.x edge.y 也就是edge label的位置
-              _offset = {
+              _offset2 = {
                 x: parseInt(edge.x) + offsetX,
                 y: parseInt(edge.y) + offsetY
               };
             }
             var _iconBackCtx = {
-              x: _offset.x,
-              y: _offset.y - 1,
+              x: _offset2.x,
+              y: _offset2.y - 1,
               r: parseInt(_fontSize * 0.5) + 2,
               fillStyle: background,
               strokeStyle: _strokeStyle,
@@ -43653,8 +43693,8 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
             if (_edgeIcon) {
               _edgeIcon.resetText(charCode);
 
-              _edgeIcon.context.x = _offset.x;
-              _edgeIcon.context.y = _offset.y;
+              _edgeIcon.context.x = _offset2.x;
+              _edgeIcon.context.y = _offset2.y;
               _edgeIcon.context.fontSize = _fontSize;
               _edgeIcon.context.fillStyle = _fontColor;
               _edgeIcon.context.textAlign = _textAlign;
@@ -43665,8 +43705,8 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
               _edgeIcon = new _canvax["default"].Display.Text(charCode, {
                 id: edgeIconId,
                 context: {
-                  x: _offset.x,
-                  y: _offset.y,
+                  x: _offset2.x,
+                  y: _offset2.y,
                   fillStyle: _fontColor,
                   cursor: 'pointer',
                   fontSize: _fontSize,
@@ -45255,7 +45295,7 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
 
   var _super = _createSuper(RelationBase);
 
-  function RelationBase(opt, app) {
+  function RelationBase(opt, app, preComp) {
     var _this;
 
     (0, _classCallCheck2["default"])(this, RelationBase);
@@ -45267,14 +45307,14 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
     _this.domContainer = app.canvax.domView;
     _this.induce = null;
 
-    _this.init();
+    _this.init(preComp);
 
     return _this;
   }
 
   (0, _createClass2["default"])(RelationBase, [{
     key: "init",
-    value: function init() {
+    value: function init(preComp) {
       this._initInduce();
 
       this.nodesSp = new _canvax["default"].Display.Sprite({
@@ -45306,7 +45346,14 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
       this.graphsSp.addChild(this.labelsSp);
       this.graphsView.addChild(this.graphsSp);
       this.sprite.addChild(this.graphsView);
-      this.zoom = new _zoom["default"]();
+
+      if (preComp.zoom) {
+        this.preGraphsSpPosition = preComp.graphsSpPosition;
+        this.zoom = preComp.zoom;
+        this.offset();
+      } else {
+        this.zoom = new _zoom["default"]();
+      }
     } //这个node是放在 nodes  和 edges 中的数据结构
 
   }, {
@@ -45429,10 +45476,36 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
                 _wheelHandleTimeer = setTimeout(function () {
                   if (me.status.transform.wheelAction == 'offset') {
                     //移动的话用offset,偏移多少像素
-                    var _me$zoom$offset = me.zoom.offset({
+                    var offsetPoint = {
                       x: -e.deltaX * 2,
                       y: -e.deltaY * 2
-                    }),
+                    };
+                    var leftDiss = parseInt(me.graphsView.context.x + me.graphsSp.context.x + me.data.viewPort.maxLeft + offsetPoint.x + me.app.padding.left);
+
+                    if (leftDiss < 0) {
+                      offsetPoint.x = parseInt(offsetPoint.x - leftDiss);
+                    }
+
+                    var rightDiss = parseInt(me.graphsView.context.x + me.graphsSp.context.x + me.data.viewPort.maxRight + offsetPoint.x + me.app.padding.right);
+
+                    if (rightDiss >= me.app.width) {
+                      offsetPoint.x = parseInt(offsetPoint.x - (rightDiss - me.app.width));
+                    }
+
+                    var topDiss = parseInt(me.graphsView.context.y + me.graphsSp.context.y + me.data.viewPort.maxTop + offsetPoint.y + me.app.padding.top);
+
+                    if (topDiss < 0) {
+                      offsetPoint.y = parseInt(offsetPoint.y - topDiss);
+                    }
+
+                    var bottomDiss = parseInt(me.graphsView.context.y + me.graphsSp.context.y + me.data.viewPort.maxBottom + offsetPoint.y + me.app.padding.bottom);
+
+                    if (bottomDiss >= me.app.height) {
+                      offsetPoint.y = parseInt(offsetPoint.y - (bottomDiss - me.app.height));
+                    } //console.log( offsetPoint )
+
+
+                    var _me$zoom$offset = me.zoom.offset(offsetPoint),
                         _x = _me$zoom$offset.x,
                         _y = _me$zoom$offset.y; //me.zoom.move( {x:zx, y:zy} );
 
@@ -45715,21 +45788,21 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
             var _textAlign = 'center';
             var _textBaseline = 'middle';
 
-            var _offset = me.getProp(me.line.icon.offset, edge);
+            var _offset2 = me.getProp(me.line.icon.offset, edge);
 
             var offsetX = me.getProp(me.line.icon.offsetX, edge);
             var offsetY = me.getProp(me.line.icon.offsetY, edge);
 
-            if (!_offset) {
+            if (!_offset2) {
               //default 使用edge.x edge.y 也就是edge label的位置
-              _offset = {
+              _offset2 = {
                 x: parseInt(edge.x) + offsetX,
                 y: parseInt(edge.y) + offsetY
               };
             }
             var _iconBackCtx = {
-              x: _offset.x,
-              y: _offset.y - 1,
+              x: _offset2.x,
+              y: _offset2.y - 1,
               r: parseInt(_fontSize * 0.5) + 2,
               fillStyle: background,
               strokeStyle: _strokeStyle,
@@ -45758,8 +45831,8 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
             if (_edgeIcon) {
               _edgeIcon.resetText(charCode);
 
-              _edgeIcon.context.x = _offset.x;
-              _edgeIcon.context.y = _offset.y;
+              _edgeIcon.context.x = _offset2.x;
+              _edgeIcon.context.y = _offset2.y;
               _edgeIcon.context.fontSize = _fontSize;
               _edgeIcon.context.fillStyle = _fontColor;
               _edgeIcon.context.textAlign = _textAlign;
@@ -45770,8 +45843,8 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
               _edgeIcon = new _canvax["default"].Display.Text(charCode, {
                 id: edgeIconId,
                 context: {
-                  x: _offset.x,
-                  y: _offset.y,
+                  x: _offset2.x,
+                  y: _offset2.y,
                   fillStyle: _fontColor,
                   cursor: 'pointer',
                   fontSize: _fontSize,
@@ -45929,7 +46002,7 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
             var onbefore = me.node.select.onbefore;
             var onend = me.node.select.onend;
 
-            if (!onbefore || typeof onbefore == 'function' && onbefore.apply(me, [this.nodeData]) !== false) {
+            if (!onbefore || typeof onbefore == 'function' && onbefore.apply(me, [this.nodeData, e]) !== false) {
               if (this.nodeData.selected) {
                 //说明已经选中了
                 me.unselectAt(this.nodeData);
@@ -45937,7 +46010,7 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
                 me.selectAt(this.nodeData);
               }
 
-              onend && typeof onend == 'function' && onend.apply(me, [this.nodeData]);
+              onend && typeof onend == 'function' && onend.apply(me, [this.nodeData, e]);
             }
           }
           me.app.fire(e.type, e);
@@ -45970,7 +46043,7 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
           if (node.shapeType == 'diamond') {
             //菱形的位置
             node.contentElement.style.left = -parseInt((node.boundingClientWidth - node._innerBound.width) / 2 * me.status.transform.scale) + "px";
-            node.contentElement.style.top = -parseInt((node.height - node._innerBound.height) / 2 * me.status.transform.scale) + "px";
+            node.contentElement.style.top = -parseInt(node.height / 2 * me.status.transform.scale) + "px";
           }
           node.contentElement.style.visibility = "visible";
         }
@@ -46032,6 +46105,41 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
         ctx.shadowOffsetY = shadowOffsetY;
         ctx.shadowBlur = shadowBlur;
         ctx.shadowColor = shadowColor;
+      }
+    } //画布偏移量
+
+  }, {
+    key: "offset",
+    value: function offset() {
+      var _offset = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {
+        x: 0,
+        y: 0
+      };
+
+      var _this$zoom$offset = this.zoom.offset(_offset),
+          x = _this$zoom$offset.x,
+          y = _this$zoom$offset.y;
+
+      this.graphsView.context.x = parseInt(x);
+      this.graphsView.context.y = parseInt(y);
+    } //把某个节点移动到居中位置
+
+  }, {
+    key: "setNodeToCenter",
+    value: function setNodeToCenter(key) {
+      var nodeData = this.getNodeDataAt(key);
+
+      if (nodeData) {
+        var globalPos = nodeData.shapeElement.localToGlobal();
+        var toGlobalPos = {
+          x: this.app.width / 2 - nodeData.width / 2,
+          y: this.app.height / 2 - nodeData.height / 2
+        };
+        var toCenterOffset = {
+          x: parseInt(toGlobalPos.x - globalPos.x),
+          y: parseInt(toGlobalPos.y - globalPos.y)
+        };
+        this.offset(toCenterOffset);
       }
     }
   }, {
@@ -46502,7 +46610,7 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
               "default": 4
             },
             includedAngle: {
-              detail: 'shapeType为diamond(菱形)的时候生效,x方向的夹角',
+              detail: 'shapeType为 diamond (菱形)的时候生效,x方向的夹角',
               "default": 60
             },
             fillStyle: {
@@ -48748,11 +48856,11 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
 
   var _super = _createSuper(compactTree);
 
-  function compactTree(opt, app) {
+  function compactTree(opt, app, preComp) {
     var _this;
 
     (0, _classCallCheck2["default"])(this, compactTree);
-    _this = _super.call(this, opt, app);
+    _this = _super.call(this, opt, app, preComp);
     _this.type = "compacttree";
 
     _.extend(true, (0, _assertThisInitialized2["default"])(_this), (0, tools.getDefaultProps)(compactTree.defaultProps()), opt);
@@ -48792,8 +48900,20 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
         // });
         // this.graphsSp.addChild( this._bound )
 
-        _this2.graphsSp.context.x = Math.max((_this2.width - _this2.data.size.width) / 2, _this2.app.padding.left);
-        _this2.graphsSp.context.y = _this2.height / 2;
+        if (!_this2.preGraphsSpPosition) {
+          _this2.graphsSpPosition = {
+            x: Math.max((_this2.width - _this2.data.size.width) / 2, _this2.app.padding.left),
+            y: _this2.height / 2
+          };
+        } else {
+          _this2.graphsSpPosition = {
+            x: _this2.preGraphsSpPosition.x,
+            y: _this2.preGraphsSpPosition.y
+          };
+        }
+
+        _this2.graphsSp.context.x = _this2.graphsSpPosition.x;
+        _this2.graphsSp.context.y = _this2.graphsSpPosition.y;
 
         _this2.fire("complete");
       });
@@ -48808,7 +48928,8 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
       var _this3 = this;
 
       this._resetData(dataFrame, dataTrigger).then(function () {
-        _this3.fire("complete"); // Object.assign( this._bound.context, {
+        _this3.fire("complete"); //test bound
+        // Object.assign( this._bound.context, {
         //     x: this.data.extents.left,
         //     y: this.data.extents.top,
         //     width: this.data.size.width,
@@ -49210,6 +49331,10 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
           top = 0,
           right = 0,
           bottom = 0;
+      var maxRight = 0,
+          maxLeft = 0,
+          maxTop = 0,
+          maxBottom = 0;
       var width = 0,
           height = 0;
 
@@ -49219,9 +49344,26 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
           node.x = node.y;
           node.y = x;
         }
+
+        if (node.x <= left) {
+          maxRight = node.x + node.data._node.boundingClientWidth;
+        }
         left = Math.min(left, node.x);
+
+        if (node.x + node.data._node.boundingClientWidth >= right) {
+          maxLeft = node.x;
+        }
         right = Math.max(right, node.x + node.data._node.boundingClientWidth);
+
+        if (node.y <= top) {
+          maxBottom = node.y + node.data._node.height;
+        }
         top = Math.min(top, node.y);
+
+        if (node.y + node.data._node.height + spaceY >= bottom) {
+          maxTop = node.y;
+        }
+
         bottom = Math.max(bottom, node.y + node.data._node.height + spaceY); //node的x y 都是矩形的中心点
 
         node.data._node.x = node.x + node.data._node.boundingClientWidth / 2;
@@ -49245,6 +49387,12 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
           top: top,
           right: right,
           bottom: bottom
+        },
+        viewPort: {
+          maxRight: maxRight,
+          maxLeft: maxLeft,
+          maxTop: maxTop,
+          maxBottom: maxBottom
         }
       });
     } //可以继承覆盖
@@ -59769,7 +59917,7 @@ if (projectTheme && projectTheme.length) {
 }
 
 var chartx = {
-  version: '1.1.129',
+  version: '1.1.130',
   options: {}
 };
 

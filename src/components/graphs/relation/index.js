@@ -691,6 +691,8 @@ class Relation extends GraphsBase {
         } );
     }
 
+
+
     _destroy( item ){
         
         item.shapeElement && item.shapeElement.destroy();
@@ -935,6 +937,30 @@ class Relation extends GraphsBase {
      
         this._drawEdges();
         this._drawNodes();
+    }
+
+    //画布偏移量
+    offset( offset={x:0,y:0} ){
+        let { x, y } = this.zoom.offset( offset );
+        this.graphsView.context.x = parseInt(x);
+        this.graphsView.context.y = parseInt(y);
+    }
+
+    //把某个节点移动到居中位置
+    setNodeToCenter( key ){
+        let nodeData = this.getNodeDataAt( key );
+        if( nodeData ){
+            let globalPos = nodeData.shapeElement.localToGlobal();
+            let toGlobalPos = {
+                x : this.app.width/2 - nodeData.width/2,
+                y : this.app.height/2 - nodeData.height/2
+            }
+            let toCenterOffset = {
+                x: parseInt( toGlobalPos.x - globalPos.x ), 
+                y: parseInt( toGlobalPos.y - globalPos.y )
+            };
+            this.offset( toCenterOffset );
+        }
     }
 
     _drawEdges(){

@@ -224,8 +224,8 @@ class compactTree extends GraphsBase {
         }
     }
 
-    constructor(opt, app) {
-        super(opt, app);
+    constructor(opt, app, preComp) {
+        super(opt, app, preComp);
         this.type = "compacttree";
         _.extend(true, this, getDefaultProps(compactTree.defaultProps()), opt);
 
@@ -263,8 +263,20 @@ class compactTree extends GraphsBase {
             // this.graphsSp.addChild( this._bound )
 
 
-            this.graphsSp.context.x = Math.max( (this.width - this.data.size.width)/2, this.app.padding.left );
-            this.graphsSp.context.y = this.height/2;
+            if( !this.preGraphsSpPosition ){
+                this.graphsSpPosition = {
+                    x : Math.max( (this.width - this.data.size.width)/2, this.app.padding.left ),
+                    y : this.height/2,
+                }
+            } else {
+                this.graphsSpPosition = {
+                    x : this.preGraphsSpPosition.x,
+                    y : this.preGraphsSpPosition.y,
+                }
+            }
+            
+            this.graphsSp.context.x = this.graphsSpPosition.x;
+            this.graphsSp.context.y = this.graphsSpPosition.y;
 
             this.fire("complete");
 
@@ -280,6 +292,7 @@ class compactTree extends GraphsBase {
         this._resetData( dataFrame, dataTrigger ).then( ()=>{
             this.fire("complete");
 
+            //test bound
             // Object.assign( this._bound.context, {
             //     x: this.data.extents.left,
             //     y: this.data.extents.top,
@@ -669,6 +682,7 @@ class compactTree extends GraphsBase {
         const _layout = layout(_tree);
 
         let left=0,top=0,right=0,bottom=0;
+        let maxRight=0,maxLeft=0,maxTop=0,maxBottom=0;
         let width=0,height=0;
 
         _layout.each(node => {
@@ -678,10 +692,25 @@ class compactTree extends GraphsBase {
                 node.x = node.y;
                 node.y = x;
             };
-
+            
+            if( node.x <= left  ){
+                maxRight = node.x + node.data._node.boundingClientWidth
+            };
             left = Math.min( left, node.x );
+
+            if( node.x + node.data._node.boundingClientWidth >= right ){
+                maxLeft = node.x;
+            };
             right = Math.max( right, node.x + node.data._node.boundingClientWidth );
+
+            if( node.y <= top ){
+                maxBottom = node.y + node.data._node.height;
+            };
             top = Math.min( top, node.y );
+
+            if( node.y + node.data._node.height+ spaceY >= bottom ){
+                maxTop = node.y
+            }
             bottom = Math.max( bottom, node.y + node.data._node.height+ spaceY );
          
             //node的x y 都是矩形的中心点
@@ -707,6 +736,9 @@ class compactTree extends GraphsBase {
             },
             extents: {
                 left, top, right, bottom
+            },
+            viewPort: {
+                maxRight,maxLeft,maxTop,maxBottom
             }
         });
 
