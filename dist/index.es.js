@@ -8385,7 +8385,7 @@ var components = {
   */
 };
 var _default = {
-  chartxVersion: '1.1.130',
+  chartxVersion: '1.1.132',
   create: function create(el, data, opt) {
     var otherOptions = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
     var chart = null;
@@ -11452,8 +11452,13 @@ var Chart = /*#__PURE__*/function (_event$Dispatcher) {
         this._opt = this.polyfill(opt);
       }
 
-      if (!data) {
-        data = [];
+      if (arguments.length == 1) {
+        //如果只传了一个opt配置，就说明数据要用图本身的原数据
+        data = this._data;
+      } else {
+        if (!data) {
+          data = [];
+        }
       }
 
       if (!this.otherOptions.noDataClone) {
@@ -59915,7 +59920,7 @@ if (projectTheme && projectTheme.length) {
 }
 
 var chartx = {
-  version: '1.1.130',
+  version: '1.1.132',
   options: {}
 };
 

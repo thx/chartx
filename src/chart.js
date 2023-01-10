@@ -436,7 +436,16 @@ class Chart extends event.Dispatcher
             this._opt = this.polyfill(opt);
         }
         
-        if( !data ){ data = [] };
+        if( arguments.length == 1 ){
+            //如果只传了一个opt配置，就说明数据要用图本身的原数据
+            data = this._data; 
+        } else {
+            if( !data ){ 
+                data = []
+            };
+        }
+        
+
         if( !this.otherOptions.noDataClone ){
             data = JSON.parse( JSON.stringify( data , function(k,v) {
                 if(v === undefined){
@@ -445,6 +454,7 @@ class Chart extends event.Dispatcher
                 return v
             } ) );
         }
+
         this._data = data; //注意，resetData不能为null，必须是 数组格式
 
         this.dataFrame = this._initDataFrame( this._data, this._opt );
