@@ -77,7 +77,7 @@ class Rect extends coordBase
         };
 
         //根据opt中得Graphs配置，来设置 coord.yAxis
-        let graphsArr = _.flatten( [app._opt.graphs] );
+        let graphsArr = app._opt.graphs ? _.flatten( [app._opt.graphs] ) : [];
         
         //有graphs的就要用找到这个graphs.field来设置coord.yAxis
         for( let i=0; i<graphsArr.length; i++ ){

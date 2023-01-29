@@ -530,7 +530,8 @@ var Chart = /*#__PURE__*/function (_event$Dispatcher) {
   }, {
     key: "reset",
     value: function reset(opt, data) {
-      //opt && (this._opt = opt);
+      opt = _global["default"]._optionsHandle(opt); //opt && (this._opt = opt);
+
       if (opt) {
         this._opt = this.polyfill(opt);
       }

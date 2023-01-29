@@ -53,7 +53,7 @@ export default {
         let Chart = me._getComponentModule('chart');
 
         //try {
-            chart = new Chart( el, data, opt, componentModules, otherOptions );
+            chart = new Chart( el, data, this._optionsHandle(opt), componentModules, otherOptions );
             if( chart ){
                 chart.draw();
                 
@@ -132,7 +132,34 @@ export default {
         if( userOptions ){
             optionsFromChartPark = _.extend( true, optionsFromChartPark, userOptions );
         };
-        return optionsFromChartPark;
+
+        return this._optionsHandle(optionsFromChartPark);
+    },
+
+    _optionsHandle: function( options={} ){
+        //剔除掉所有 enabled为false的组件, 或者组件被设置为null的组件
+        
+        for( let k in options ){
+            let prop = options[k];
+            if( !Array.isArray( prop ) ){
+                if( 'enabled' in prop && !prop.enabled || !prop ){
+                    delete options[ k ]
+                }
+            } else {
+                for( let i=0,l=prop.length; i<l; i++ ){
+                    let comp = prop[i];
+                    if( 'enabled' in comp && !comp.enabled || !comp ){
+                        prop.splice( i, 1 );
+                        i--;
+                        l--;
+                    }
+                }
+                if( !prop.length ){
+                    delete options[ k ]
+                }
+            }
+        }
+        return options;
     },
 
     calculateOptions: function (chartPark_cid, data, variables ) {

@@ -120,9 +120,7 @@ var coordBase = /*#__PURE__*/function (_Component) {
       }
 
       ;
-
-      var graphs = _.flatten([this.app._opt.graphs]);
-
+      var graphs = this.app._opt.graphs ? _.flatten([this.app._opt.graphs]) : [];
       graphs.forEach(function (graph) {
         if (graph.field) {
           var graphFields = _.flatten([graph.field]);

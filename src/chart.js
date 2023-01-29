@@ -430,6 +430,8 @@ class Chart extends event.Dispatcher
      */
     reset(opt, data)
     {
+
+        opt = global._optionsHandle( opt );
         
         //opt && (this._opt = opt);
         if( opt ){

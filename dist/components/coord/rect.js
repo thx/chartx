@@ -98,8 +98,7 @@ var Rect = /*#__PURE__*/function (_coordBase) {
 
       ; //根据opt中得Graphs配置，来设置 coord.yAxis
 
-      var graphsArr = _.flatten([app._opt.graphs]); //有graphs的就要用找到这个graphs.field来设置coord.yAxis
-
+      var graphsArr = app._opt.graphs ? _.flatten([app._opt.graphs]) : []; //有graphs的就要用找到这个graphs.field来设置coord.yAxis
 
       for (var i = 0; i < graphsArr.length; i++) {
         var graphs = graphsArr[i];

@@ -113,7 +113,7 @@ class coordBase extends Component
             } );
         };
         
-        let graphs = _.flatten( [this.app._opt.graphs] );
+        let graphs = this.app._opt.graphs ? _.flatten( [this.app._opt.graphs] ) : [];
         graphs.forEach( graph => {
             if( graph.field ){
                 let graphFields = _.flatten( [graph.field] );
