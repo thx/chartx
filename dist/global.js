@@ -7,6 +7,8 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports["default"] = void 0;
 
+var _typeof2 = _interopRequireDefault(require("@babel/runtime/helpers/typeof"));
+
 var _canvax = _interopRequireDefault(require("canvax"));
 
 var _parse = _interopRequireDefault(require("./core/parse"));
@@ -36,7 +38,7 @@ var components = {
   */
 };
 var _default = {
-  chartxVersion: '1.1.133',
+  chartxVersion: '1.1.134',
   create: function create(el, data, opt) {
     var otherOptions = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
     var chart = null;
@@ -163,14 +165,14 @@ var _default = {
       var prop = options[k];
 
       if (!Array.isArray(prop)) {
-        if ('enabled' in prop && !prop.enabled || !prop) {
+        if ((0, _typeof2["default"])(prop) == 'object' && 'enabled' in prop && !prop.enabled || !prop) {
           delete options[k];
         }
       } else {
         for (var i = 0, l = prop.length; i < l; i++) {
           var comp = prop[i];
 
-          if ('enabled' in comp && !comp.enabled || !comp) {
+          if ((0, _typeof2["default"])(comp) == 'object' && 'enabled' in comp && !comp.enabled || !comp) {
             prop.splice(i, 1);
             i--;
             l--;
