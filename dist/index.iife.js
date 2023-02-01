@@ -8406,7 +8406,7 @@ var chartx = (function () {
 	  */
 	};
 	var _default = {
-	  chartxVersion: '1.1.134',
+	  chartxVersion: '1.1.135',
 	  create: function create(el, data, opt) {
 	    var otherOptions = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
 	    var chart = null;
@@ -8515,33 +8515,8 @@ var chartx = (function () {
 	  },
 	  _optionsHandle: function _optionsHandle() {
 	    var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
 	    //剔除掉所有 enabled为false的组件, 或者组件被设置为null的组件
-	    for (var k in options) {
-	      var prop = options[k];
-
-	      if (!Array.isArray(prop)) {
-	        if ((0, _typeof2["default"])(prop) == 'object' && 'enabled' in prop && !prop.enabled || !prop) {
-	          delete options[k];
-	        }
-	      } else {
-	        for (var i = 0, l = prop.length; i < l; i++) {
-	          var comp = prop[i];
-
-	          if ((0, _typeof2["default"])(comp) == 'object' && 'enabled' in comp && !comp.enabled || !comp) {
-	            prop.splice(i, 1);
-	            i--;
-	            l--;
-	          }
-	        }
-
-	        if (!prop.length) {
-	          delete options[k];
-	        }
-	      }
-	    }
-
-	    return options;
+	    return options; //还有bug，先注释
 	  },
 	  calculateOptions: function calculateOptions(chartPark_cid, data, variables) {
 	    return this.getOptions(chartPark_cid, undefined, data, variables);
@@ -59953,7 +59928,7 @@ var chartx = (function () {
 	}
 
 	var chartx = {
-	  version: '1.1.134',
+	  version: '1.1.135',
 	  options: {}
 	};
 
