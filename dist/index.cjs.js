@@ -8405,7 +8405,7 @@ var components = {
   */
 };
 var _default = {
-  chartxVersion: '1.1.135',
+  chartxVersion: '1.1.136',
   create: function create(el, data, opt) {
     var otherOptions = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
     var chart = null;
@@ -8514,8 +8514,38 @@ var _default = {
   },
   _optionsHandle: function _optionsHandle() {
     var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
     //剔除掉所有 enabled为false的组件, 或者组件被设置为null的组件
-    return options; //还有bug，先注释
+    for (var k in options) {
+      if (k == 'coord') {
+        //坐标系组件不需要处理
+        continue;
+      }
+
+      var prop = options[k];
+
+      if (!Array.isArray(prop)) {
+        if ((0, _typeof2["default"])(prop) == 'object' && 'enabled' in prop && !prop.enabled || !prop) {
+          delete options[k];
+        }
+      } else {
+        for (var i = 0, l = prop.length; i < l; i++) {
+          var comp = prop[i];
+
+          if ((0, _typeof2["default"])(comp) == 'object' && 'enabled' in comp && !comp.enabled || !comp) {
+            prop.splice(i, 1);
+            i--;
+            l--;
+          }
+        }
+
+        if (!prop.length) {
+          delete options[k];
+        }
+      }
+    }
+
+    return options;
   },
   calculateOptions: function calculateOptions(chartPark_cid, data, variables) {
     return this.getOptions(chartPark_cid, undefined, data, variables);
@@ -53872,7 +53902,7 @@ var dataZoom = /*#__PURE__*/function (_Component) {
       });
 
       var opt = {
-        coord: app._opt.coord,
+        coord: Object.assign({}, app._opt.coord),
         graphs: graphsOpt
       };
 
@@ -59927,7 +59957,7 @@ if (projectTheme && projectTheme.length) {
 }
 
 var chartx = {
-  version: '1.1.135',
+  version: '1.1.136',
   options: {}
 };
 

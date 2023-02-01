@@ -138,10 +138,12 @@ export default {
 
     _optionsHandle: function( options={} ){
         //剔除掉所有 enabled为false的组件, 或者组件被设置为null的组件
-
-        return options;  //还有bug，先注释
         
         for( let k in options ){
+            if( k == 'coord' ){
+                //坐标系组件不需要处理
+                continue;
+            }
             let prop = options[k];
             if( !Array.isArray( prop ) ){
                 if( ( typeof prop == 'object' && 'enabled' in prop && !prop.enabled) || !prop ){

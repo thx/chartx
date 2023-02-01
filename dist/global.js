@@ -38,7 +38,7 @@ var components = {
   */
 };
 var _default = {
-  chartxVersion: '1.1.135',
+  chartxVersion: '1.1.136',
   create: function create(el, data, opt) {
     var otherOptions = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
     var chart = null;
@@ -159,10 +159,14 @@ var _default = {
   },
   _optionsHandle: function _optionsHandle() {
     var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-    //剔除掉所有 enabled为false的组件, 或者组件被设置为null的组件
-    return options; //还有bug，先注释
 
+    //剔除掉所有 enabled为false的组件, 或者组件被设置为null的组件
     for (var k in options) {
+      if (k == 'coord') {
+        //坐标系组件不需要处理
+        continue;
+      }
+
       var prop = options[k];
 
       if (!Array.isArray(prop)) {

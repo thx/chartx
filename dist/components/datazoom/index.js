@@ -260,7 +260,7 @@ var dataZoom = /*#__PURE__*/function (_Component) {
       });
 
       var opt = {
-        coord: app._opt.coord,
+        coord: Object.assign({}, app._opt.coord),
         graphs: graphsOpt
       };
 
