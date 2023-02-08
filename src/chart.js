@@ -132,11 +132,17 @@ class Chart extends event.Dispatcher
                     //关系图中是keyField
                     //(compName == "coord" && !comp.type ) || 
                     compName == "graphs" && 
-                    !comp.field && 
-                    !comp.keyField && 
-                    !comp.adcode && 
-                    !comp.geoJson && 
-                    !comp.geoJsonUrl  //地图的话只要有个adcode就可以了
+                    (
+                        (
+                            !comp.field && 
+                            !comp.keyField && 
+                            !comp.adcode && 
+                            !comp.geoJson && 
+                            !comp.geoJsonUrl //地图的话只要有个adcode就可以了
+                        )
+                        || 
+                        ('enabled' in comp && !comp.enabled)
+                    )
                 ) return; 
                 
                 let compModule = me.componentModules.get(compName, comp.type);
@@ -169,7 +175,7 @@ class Chart extends event.Dispatcher
                 }; 
                 _.each( comps, function( comp ){
                     let compModule = me.componentModules.get( _p, comp.type );
-                    if( compModule ){
+                    if( compModule && !('enabled' in comp && !comp.enabled) ){
                         let _comp = new compModule( comp, me );
                         me.components.push( _comp );
                     }

@@ -140,19 +140,19 @@ export default {
         //剔除掉所有 enabled为false的组件, 或者组件被设置为null的组件
         
         for( let k in options ){
-            if( k == 'coord' ){
-                //坐标系组件不需要处理
-                continue;
-            }
+            // if( k == 'coord' ){
+            //     //坐标系组件不需要处理
+            //     continue;
+            // }
             let prop = options[k];
             if( !Array.isArray( prop ) ){
-                if( ( typeof prop == 'object' && 'enabled' in prop && !prop.enabled) || !prop ){
+                if( !prop ){ // ( typeof prop == 'object' && 'enabled' in prop && !prop.enabled) ||
                     delete options[ k ]
                 }
             } else {
                 for( let i=0,l=prop.length; i<l; i++ ){
                     let comp = prop[i];
-                    if( (typeof comp == 'object' && 'enabled' in comp && !comp.enabled) || !comp ){
+                    if( !comp ){ //(typeof comp == 'object' && 'enabled' in comp && !comp.enabled) || 
                         prop.splice( i, 1 );
                         i--;
                         l--;

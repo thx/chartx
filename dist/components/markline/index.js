@@ -72,8 +72,8 @@ var MarkLine = /*#__PURE__*/function (_Component) {
   }, {
     key: "_calculateProps",
     value: function _calculateProps() {
-      var opt = this._opt;
-      //如果markline有target配置，那么只现在target配置里的字段的 markline, 推荐
+      var opt = this._opt; //如果markline有target配置，那么只现在target配置里的字段的 markline, 推荐
+
       var field = opt.markTo;
 
       var _coord = this.app.getComponent({

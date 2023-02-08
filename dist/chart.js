@@ -181,8 +181,8 @@ var Chart = /*#__PURE__*/function (_event$Dispatcher) {
           if ( //没有type的coord和没有field(or keyField)的graphs，都无效，不要创建该组件
           //关系图中是keyField
           //(compName == "coord" && !comp.type ) || 
-          compName == "graphs" && !comp.field && !comp.keyField && !comp.adcode && !comp.geoJson && !comp.geoJsonUrl //地图的话只要有个adcode就可以了
-          ) return;
+          compName == "graphs" && (!comp.field && !comp.keyField && !comp.adcode && !comp.geoJson && !comp.geoJsonUrl //地图的话只要有个adcode就可以了
+          || 'enabled' in comp && !comp.enabled)) return;
           var compModule = me.componentModules.get(compName, comp.type);
 
           if (compModule) {
@@ -222,7 +222,7 @@ var Chart = /*#__PURE__*/function (_event$Dispatcher) {
           _.each(comps, function (comp) {
             var compModule = me.componentModules.get(_p, comp.type);
 
-            if (compModule) {
+            if (compModule && !('enabled' in comp && !comp.enabled)) {
               var _comp = new compModule(comp, me);
 
               me.components.push(_comp);

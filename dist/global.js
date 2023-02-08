@@ -7,8 +7,6 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports["default"] = void 0;
 
-var _typeof2 = _interopRequireDefault(require("@babel/runtime/helpers/typeof"));
-
 var _canvax = _interopRequireDefault(require("canvax"));
 
 var _parse = _interopRequireDefault(require("./core/parse"));
@@ -38,7 +36,7 @@ var components = {
   */
 };
 var _default = {
-  chartxVersion: '1.1.136',
+  chartxVersion: '1.1.137',
   create: function create(el, data, opt) {
     var otherOptions = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
     var chart = null;
@@ -162,22 +160,23 @@ var _default = {
 
     //剔除掉所有 enabled为false的组件, 或者组件被设置为null的组件
     for (var k in options) {
-      if (k == 'coord') {
-        //坐标系组件不需要处理
-        continue;
-      }
-
+      // if( k == 'coord' ){
+      //     //坐标系组件不需要处理
+      //     continue;
+      // }
       var prop = options[k];
 
       if (!Array.isArray(prop)) {
-        if ((0, _typeof2["default"])(prop) == 'object' && 'enabled' in prop && !prop.enabled || !prop) {
+        if (!prop) {
+          // ( typeof prop == 'object' && 'enabled' in prop && !prop.enabled) ||
           delete options[k];
         }
       } else {
         for (var i = 0, l = prop.length; i < l; i++) {
           var comp = prop[i];
 
-          if ((0, _typeof2["default"])(comp) == 'object' && 'enabled' in comp && !comp.enabled || !comp) {
+          if (!comp) {
+            //(typeof comp == 'object' && 'enabled' in comp && !comp.enabled) || 
             prop.splice(i, 1);
             i--;
             l--;

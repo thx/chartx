@@ -27,22 +27,6 @@ var chartx = (function () {
 
 	unwrapExports(interopRequireDefault);
 
-	var _typeof_1 = createCommonjsModule(function (module) {
-	function _typeof(obj) {
-	  "@babel/helpers - typeof";
-
-	  return (module.exports = _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) {
-	    return typeof obj;
-	  } : function (obj) {
-	    return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-	  }, module.exports.__esModule = true, module.exports["default"] = module.exports), _typeof(obj);
-	}
-
-	module.exports = _typeof, module.exports.__esModule = true, module.exports["default"] = module.exports;
-	});
-
-	unwrapExports(_typeof_1);
-
 	function unwrapExports$1 (x) {
 		return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x['default'] : x;
 	}
@@ -141,7 +125,7 @@ var chartx = (function () {
 
 	var _inherits = unwrapExports$1(inherits);
 
-	var _typeof_1$1 = createCommonjsModule$1(function (module) {
+	var _typeof_1 = createCommonjsModule$1(function (module) {
 	function _typeof(obj) {
 	  "@babel/helpers - typeof";
 
@@ -166,10 +150,10 @@ var chartx = (function () {
 	module.exports["default"] = module.exports, module.exports.__esModule = true;
 	});
 
-	var _typeof = unwrapExports$1(_typeof_1$1);
+	var _typeof = unwrapExports$1(_typeof_1);
 
 	var possibleConstructorReturn = createCommonjsModule$1(function (module) {
-	var _typeof = _typeof_1$1["default"];
+	var _typeof = _typeof_1["default"];
 
 
 
@@ -8375,8 +8359,6 @@ var chartx = (function () {
 	});
 	exports["default"] = void 0;
 
-	var _typeof2 = interopRequireDefault(_typeof_1);
-
 	var _canvax = interopRequireDefault(Canvax);
 
 	var _parse = interopRequireDefault(parse);
@@ -8406,7 +8388,7 @@ var chartx = (function () {
 	  */
 	};
 	var _default = {
-	  chartxVersion: '1.1.136',
+	  chartxVersion: '1.1.137',
 	  create: function create(el, data, opt) {
 	    var otherOptions = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
 	    var chart = null;
@@ -8518,22 +8500,23 @@ var chartx = (function () {
 
 	    //剔除掉所有 enabled为false的组件, 或者组件被设置为null的组件
 	    for (var k in options) {
-	      if (k == 'coord') {
-	        //坐标系组件不需要处理
-	        continue;
-	      }
-
+	      // if( k == 'coord' ){
+	      //     //坐标系组件不需要处理
+	      //     continue;
+	      // }
 	      var prop = options[k];
 
 	      if (!Array.isArray(prop)) {
-	        if ((0, _typeof2["default"])(prop) == 'object' && 'enabled' in prop && !prop.enabled || !prop) {
+	        if (!prop) {
+	          // ( typeof prop == 'object' && 'enabled' in prop && !prop.enabled) ||
 	          delete options[k];
 	        }
 	      } else {
 	        for (var i = 0, l = prop.length; i < l; i++) {
 	          var comp = prop[i];
 
-	          if ((0, _typeof2["default"])(comp) == 'object' && 'enabled' in comp && !comp.enabled || !comp) {
+	          if (!comp) {
+	            //(typeof comp == 'object' && 'enabled' in comp && !comp.enabled) || 
 	            prop.splice(i, 1);
 	            i--;
 	            l--;
@@ -8848,6 +8831,22 @@ var chartx = (function () {
 
 	unwrapExports(inherits$1);
 
+	var _typeof_1$1 = createCommonjsModule(function (module) {
+	function _typeof(obj) {
+	  "@babel/helpers - typeof";
+
+	  return (module.exports = _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) {
+	    return typeof obj;
+	  } : function (obj) {
+	    return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+	  }, module.exports.__esModule = true, module.exports["default"] = module.exports), _typeof(obj);
+	}
+
+	module.exports = _typeof, module.exports.__esModule = true, module.exports["default"] = module.exports;
+	});
+
+	unwrapExports(_typeof_1$1);
+
 	var assertThisInitialized$1 = createCommonjsModule(function (module) {
 	function _assertThisInitialized(self) {
 	  if (self === void 0) {
@@ -8863,7 +8862,7 @@ var chartx = (function () {
 	unwrapExports(assertThisInitialized$1);
 
 	var possibleConstructorReturn$1 = createCommonjsModule(function (module) {
-	var _typeof = _typeof_1["default"];
+	var _typeof = _typeof_1$1["default"];
 
 
 
@@ -10487,7 +10486,7 @@ var chartx = (function () {
 	});
 	exports["default"] = void 0;
 
-	var _typeof2 = interopRequireDefault(_typeof_1);
+	var _typeof2 = interopRequireDefault(_typeof_1$1);
 
 	var _defineProperty2 = interopRequireDefault(defineProperty$1);
 
@@ -11174,8 +11173,8 @@ var chartx = (function () {
 	          if ( //没有type的coord和没有field(or keyField)的graphs，都无效，不要创建该组件
 	          //关系图中是keyField
 	          //(compName == "coord" && !comp.type ) || 
-	          compName == "graphs" && !comp.field && !comp.keyField && !comp.adcode && !comp.geoJson && !comp.geoJsonUrl //地图的话只要有个adcode就可以了
-	          ) return;
+	          compName == "graphs" && (!comp.field && !comp.keyField && !comp.adcode && !comp.geoJson && !comp.geoJsonUrl //地图的话只要有个adcode就可以了
+	          || 'enabled' in comp && !comp.enabled)) return;
 	          var compModule = me.componentModules.get(compName, comp.type);
 
 	          if (compModule) {
@@ -11209,7 +11208,7 @@ var chartx = (function () {
 	          _.each(comps, function (comp) {
 	            var compModule = me.componentModules.get(_p, comp.type);
 
-	            if (compModule) {
+	            if (compModule && !('enabled' in comp && !comp.enabled)) {
 	              var _comp = new compModule(comp, me);
 
 	              me.components.push(_comp);
@@ -17145,7 +17144,7 @@ var chartx = (function () {
 	});
 	exports["default"] = void 0;
 
-	var _typeof2 = interopRequireDefault(_typeof_1);
+	var _typeof2 = interopRequireDefault(_typeof_1$1);
 
 	var _classCallCheck2 = interopRequireDefault(classCallCheck$1);
 
@@ -21055,7 +21054,7 @@ var chartx = (function () {
 	});
 	exports["default"] = void 0;
 
-	var _typeof2 = interopRequireDefault(_typeof_1);
+	var _typeof2 = interopRequireDefault(_typeof_1$1);
 
 	var _classCallCheck2 = interopRequireDefault(classCallCheck$1);
 
@@ -51383,7 +51382,7 @@ var chartx = (function () {
 
 	function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
 
-	function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || _typeof_1(obj) !== "object" && typeof obj !== "function") { return { "default": obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj["default"] = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+	function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || _typeof_1$1(obj) !== "object" && typeof obj !== "function") { return { "default": obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj["default"] = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
 	function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
 
@@ -54883,8 +54882,8 @@ var chartx = (function () {
 	  }, {
 	    key: "_calculateProps",
 	    value: function _calculateProps() {
-	      var opt = this._opt;
-	      //如果markline有target配置，那么只现在target配置里的字段的 markline, 推荐
+	      var opt = this._opt; //如果markline有target配置，那么只现在target配置里的字段的 markline, 推荐
+
 	      var field = opt.markTo;
 
 	      var _coord = this.app.getComponent({
@@ -55175,7 +55174,7 @@ var chartx = (function () {
 	});
 	exports["default"] = void 0;
 
-	var _typeof2 = interopRequireDefault(_typeof_1);
+	var _typeof2 = interopRequireDefault(_typeof_1$1);
 
 	var _classCallCheck2 = interopRequireDefault(classCallCheck$1);
 
@@ -59958,7 +59957,7 @@ var chartx = (function () {
 	}
 
 	var chartx = {
-	  version: '1.1.136',
+	  version: '1.1.137',
 	  options: {}
 	};
 
