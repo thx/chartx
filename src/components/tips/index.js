@@ -159,12 +159,14 @@ class Tips extends Component {
             };
             
             let content = this._setContent(e);
-            if ( content ) {
-                this._setPosition(e);
-                this.sprite.toFront();
-            } else {
-                this._hideDialogTips(e);
-            }
+            content.then( (content)=>{
+                if ( content ) {
+                    this._setPosition(e);
+                    this.sprite.toFront();
+                } else {
+                    this._hideDialogTips(e);
+                }
+            } )
         } else {
             this._hideDialogTips(e);
         }
@@ -175,19 +177,22 @@ class Tips extends Component {
     }
 
     move(e) {
-        //console.log('tips move')
+        
         if (!this.enabled) return;
 
         if (e.eventInfo) {
             this.eventInfo = e.eventInfo;
             let content = this._setContent(e);
-            if (content) {
-                this._setPosition(e);
-            } else {
-                //move的时候hide的只有dialogTips, pointer不想要隐藏
-                this._hideDialogTips();
-            }
+            content.then( content => {
+                if (content) {
+                    this._setPosition(e);
+                } else {
+                    //move的时候hide的只有dialogTips, pointer不想要隐藏
+                    this._hideDialogTips();
+                }
+            } );
         };
+
         this._tipsPointerMove(e);
 
         this.onmove.apply( this, [e] );
@@ -273,23 +278,34 @@ class Tips extends Component {
     }
 
     _setContent(e) {
-        let tipxContent = this._getContent(e);
-        if (!tipxContent && tipxContent !== 0) {
-            return;
-        };
-
-        if (!this._tipDom) {
-            this._tipDom = this._creatTipDom(e)
-        };
-
-        //小程序等场景就无法创建_tipDom
-        if( this._tipDom ){
-            this._tipDom.innerHTML = tipxContent;
-            this.dW = this._tipDom.offsetWidth;
-            this.dH = this._tipDom.offsetHeight;
-        };
-        
-        return tipxContent
+        return new Promise( resolve => {
+            let tipxContent = this._getContent(e);
+            if (!tipxContent && tipxContent !== 0) {
+                resolve('');
+                return;
+            };
+    
+            if (!this._tipDom) {
+                this._tipDom = this._creatTipDom(e)
+            };
+    
+            //小程序等场景就无法创建_tipDom
+            if( this._tipDom ){
+                if( tipxContent.then ){
+                    tipxContent.then( tipxContent => {
+                        this._tipDom.innerHTML = tipxContent;
+                        this.dW = this._tipDom.offsetWidth;
+                        this.dH = this._tipDom.offsetHeight;
+                        resolve( tipxContent )
+                    } )
+                } else {
+                    this._tipDom.innerHTML = tipxContent;
+                    this.dW = this._tipDom.offsetWidth;
+                    this.dH = this._tipDom.offsetHeight;
+                    resolve( tipxContent )
+                }
+            };
+        } );
     }
 
     _getContent(e) {
@@ -543,7 +559,7 @@ class Tips extends Component {
 
         if (!this.pointer || !this._tipsPointer) return;
 
-        //console.log("move");
+       
 
         let el = this._tipsPointer;
         let x = _coord.origin.x + e.eventInfo.xAxis.x;

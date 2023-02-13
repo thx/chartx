@@ -8385,7 +8385,7 @@ var components = {
   */
 };
 var _default = {
-  chartxVersion: '1.1.137',
+  chartxVersion: '1.1.138',
   create: function create(el, data, opt) {
     var otherOptions = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
     var chart = null;
@@ -55255,6 +55255,8 @@ var Tips = /*#__PURE__*/function (_Component) {
   (0, _createClass2["default"])(Tips, [{
     key: "show",
     value: function show(e) {
+      var _this2 = this;
+
       if (!this.enabled) return;
 
       if (e.eventInfo) {
@@ -55274,13 +55276,15 @@ var Tips = /*#__PURE__*/function (_Component) {
 
         var content = this._setContent(e);
 
-        if (content) {
-          this._setPosition(e);
+        content.then(function (content) {
+          if (content) {
+            _this2._setPosition(e);
 
-          this.sprite.toFront();
-        } else {
-          this._hideDialogTips(e);
-        }
+            _this2.sprite.toFront();
+          } else {
+            _this2._hideDialogTips(e);
+          }
+        });
       } else {
         this._hideDialogTips(e);
       }
@@ -55292,7 +55296,8 @@ var Tips = /*#__PURE__*/function (_Component) {
   }, {
     key: "move",
     value: function move(e) {
-      //console.log('tips move')
+      var _this3 = this;
+
       if (!this.enabled) return;
 
       if (e.eventInfo) {
@@ -55300,12 +55305,14 @@ var Tips = /*#__PURE__*/function (_Component) {
 
         var content = this._setContent(e);
 
-        if (content) {
-          this._setPosition(e);
-        } else {
-          //move的时候hide的只有dialogTips, pointer不想要隐藏
-          this._hideDialogTips();
-        }
+        content.then(function (content) {
+          if (content) {
+            _this3._setPosition(e);
+          } else {
+            //move的时候hide的只有dialogTips, pointer不想要隐藏
+            _this3._hideDialogTips();
+          }
+        });
       }
 
       this._tipsPointerMove(e);
@@ -55402,22 +55409,36 @@ var Tips = /*#__PURE__*/function (_Component) {
   }, {
     key: "_setContent",
     value: function _setContent(e) {
-      var tipxContent = this._getContent(e);
+      var _this4 = this;
 
-      if (!tipxContent && tipxContent !== 0) {
-        return;
-      }
+      return new Promise(function (resolve) {
+        var tipxContent = _this4._getContent(e);
 
-      if (!this._tipDom) {
-        this._tipDom = this._creatTipDom(e);
-      }
+        if (!tipxContent && tipxContent !== 0) {
+          resolve('');
+          return;
+        }
 
-      if (this._tipDom) {
-        this._tipDom.innerHTML = tipxContent;
-        this.dW = this._tipDom.offsetWidth;
-        this.dH = this._tipDom.offsetHeight;
-      }
-      return tipxContent;
+        if (!_this4._tipDom) {
+          _this4._tipDom = _this4._creatTipDom(e);
+        }
+
+        if (_this4._tipDom) {
+          if (tipxContent.then) {
+            tipxContent.then(function (tipxContent) {
+              _this4._tipDom.innerHTML = tipxContent;
+              _this4.dW = _this4._tipDom.offsetWidth;
+              _this4.dH = _this4._tipDom.offsetHeight;
+              resolve(tipxContent);
+            });
+          } else {
+            _this4._tipDom.innerHTML = tipxContent;
+            _this4.dW = _this4._tipDom.offsetWidth;
+            _this4.dH = _this4._tipDom.offsetHeight;
+            resolve(tipxContent);
+          }
+        }
+      });
     }
   }, {
     key: "_getContent",
@@ -55570,7 +55591,7 @@ var Tips = /*#__PURE__*/function (_Component) {
   }, {
     key: "_tipsPointerShow",
     value: function _tipsPointerShow(e) {
-      var _this2 = this;
+      var _this5 = this;
 
       //legend等组件上面的tips是没有xAxis等轴信息的
       if (!e.eventInfo || !e.eventInfo.xAxis) {
@@ -55587,7 +55608,7 @@ var Tips = /*#__PURE__*/function (_Component) {
 
       e.eventInfo.nodes.forEach(function (node) {
         if (node.type == "bar") {
-          _this2.pointer = "region";
+          _this5.pointer = "region";
         }
       });
       var el = this._tipsPointer;
@@ -55698,8 +55719,7 @@ var Tips = /*#__PURE__*/function (_Component) {
 
 
       if (!_coord || _coord.type != 'rect') return;
-      if (!this.pointer || !this._tipsPointer) return; //console.log("move");
-
+      if (!this.pointer || !this._tipsPointer) return;
       var el = this._tipsPointer;
       var x = _coord.origin.x + e.eventInfo.xAxis.x;
 
@@ -59954,7 +59974,7 @@ if (projectTheme && projectTheme.length) {
 }
 
 var chartx = {
-  version: '1.1.137',
+  version: '1.1.138',
   options: {}
 };
 
