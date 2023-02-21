@@ -224,7 +224,7 @@ function _default(dataOrg, opt) {
       _canvax._.each(dataFrame.fields, function (_field) {
         var _val = rowData[_field];
 
-        if (opt.coord && (opt.coord.xAxis && _field == opt.coord.xAxis.field && opt.coord.xAxis.layoutType != 'proportion' || opt.coord.aAxis && _field == opt.coord.aAxis.field)) {//如果是x轴， 并且轴的layoutType不是 proportion ，这两者就不需要强制转换为number
+        if (opt && opt.coord && (opt.coord.xAxis && _field == opt.coord.xAxis.field && opt.coord.xAxis.layoutType != 'proportion' || opt.coord.aAxis && _field == opt.coord.aAxis.field)) {//如果是x轴， 并且轴的layoutType不是 proportion ，这两者就不需要强制转换为number
         } else {
           //其他数据都需要保证是number
           //如果是可以转换为number的数据就尽量转换为number

@@ -202,6 +202,8 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
           ; //滚轮缩放
 
           if (e.type == "wheel") {
+            console.log(_deltaY, e.deltaY);
+
             if (Math.abs(e.deltaY) > Math.abs(_deltaY)) {
               _deltaY = e.deltaY;
             }
@@ -457,12 +459,12 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
 
         if ((0, _data2.checkDataIsJson)(originData, _this5.field, _this5.childrenField)) {
           _this5.jsonData = (0, _data2.jsonToArrayForRelation)(originData, _this5, _this5.childrenField);
-          _this5.dataFrame = _this5.app.dataFrame = (0, _dataFrame["default"])(_this5.jsonData);
+          _this5.dataFrame = _this5.app.dataFrame = (0, _dataFrame["default"])(_this5.jsonData, _this5);
         } else {
           if (_this5.layout == "tree") {
             //源数据就是图表标准数据，只需要转换成json的Children格式
             //app.dataFrame.jsonOrg ==> [{name: key:} ...] 不是children的树结构
-            _this5.jsonData = (0, _data2.arrayToTreeJsonForRelation)(_this5.app.dataFrame.jsonOrg, _this5);
+            _this5.jsonData = (0, _data2.arrayToTreeJsonForRelation)(JSON.parse(JSON.stringify(_this5.app.dataFrame.jsonOrg)), _this5);
           }
 
           ;
@@ -675,6 +677,7 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
       var me = this;
 
       _.each(this.data.edges, function (edge) {
+        console.log(edge.points);
         var key = edge.key.join('_');
 
         if (me.line.isTree && edge.points.length == 3) {

@@ -269,6 +269,7 @@ var Progress = /*#__PURE__*/function (_GraphsBase) {
             if (nodeData.endAngle > nodeData.middleAngle) {
               //超过了180度的话要绘制第二条
               allColors = (0, _color.gradient)(style.lineargradient[0].color, style.lineargradient.slice(-1)[0].color, parseInt(nodeData.allAngle / 10));
+              console.log(allColors);
               end.color = allColors[17];
             } //let newLineargradient = 
             // let _style = me.ctx.createLinearGradient( nodeData.startOutPoint.x ,nodeData.startOutPoint.y, nodeData.middleOutPoint.x, nodeData.middleOutPoint.y );

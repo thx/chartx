@@ -8326,6 +8326,7 @@ var chartx = (function () {
 	      var codeWithoutVariables = code.slice(0, range[0]) + code.slice(range[1]);
 	      return this._eval(codeWithoutVariables, 'options', 'variables', variables);
 	    } catch (e) {
+	      console.log('parse error');
 	      return {};
 	    }
 	  }
@@ -9087,7 +9088,7 @@ var chartx = (function () {
 	      Canvax._.each(dataFrame.fields, function (_field) {
 	        var _val = rowData[_field];
 
-	        if (opt.coord && (opt.coord.xAxis && _field == opt.coord.xAxis.field && opt.coord.xAxis.layoutType != 'proportion' || opt.coord.aAxis && _field == opt.coord.aAxis.field)) ; else {
+	        if (opt && opt.coord && (opt.coord.xAxis && _field == opt.coord.xAxis.field && opt.coord.xAxis.layoutType != 'proportion' || opt.coord.aAxis && _field == opt.coord.aAxis.field)) ; else {
 	          //其他数据都需要保证是number
 	          //如果是可以转换为number的数据就尽量转换为number
 	          if (!isNaN(_val) && _val !== "" && _val !== null) {
@@ -28940,6 +28941,7 @@ var chartx = (function () {
 	      yRange = bounds.yRange;
 
 	  if (xRange.max == xRange.min || yRange.max == yRange.min) {
+	    console.log("not scaling solution: zero size detected");
 	    return solution;
 	  }
 
@@ -29599,7 +29601,9 @@ var chartx = (function () {
 	    var centre = computeTextCentre(interior, exterior);
 	    ret[area] = centre;
 
-	    if (centre.disjoint && areas[i].size > 0) ;
+	    if (centre.disjoint && areas[i].size > 0) {
+	      console.log("WARNING: area " + area + " not represented on screen");
+	    }
 	  }
 
 	  return ret;
@@ -31717,6 +31721,7 @@ var chartx = (function () {
 	            if (nodeData.endAngle > nodeData.middleAngle) {
 	              //超过了180度的话要绘制第二条
 	              allColors = (0, color.gradient)(style.lineargradient[0].color, style.lineargradient.slice(-1)[0].color, parseInt(nodeData.allAngle / 10));
+	              console.log(allColors);
 	              end.color = allColors[17];
 	            } //let newLineargradient = 
 	            // let _style = me.ctx.createLinearGradient( nodeData.startOutPoint.x ,nodeData.startOutPoint.y, nodeData.middleOutPoint.x, nodeData.middleOutPoint.y );
@@ -32135,6 +32140,7 @@ var chartx = (function () {
 	  var label = options.node && options.node.content && options.node.content.field;
 
 	  if (!checkDataIsJson(data, key, childrenKey)) {
+	    console.error('该数据不能正确绘制，请提供数组对象形式的数据！');
 	    return result;
 	  }
 	  var childrens = [];
@@ -43089,6 +43095,8 @@ var chartx = (function () {
 	          }
 
 	          if (e.type == "wheel") {
+	            console.log(_deltaY, e.deltaY);
+
 	            if (Math.abs(e.deltaY) > Math.abs(_deltaY)) {
 	              _deltaY = e.deltaY;
 	            }
@@ -43322,12 +43330,12 @@ var chartx = (function () {
 
 	        if ((0, data.checkDataIsJson)(originData, _this5.field, _this5.childrenField)) {
 	          _this5.jsonData = (0, data.jsonToArrayForRelation)(originData, _this5, _this5.childrenField);
-	          _this5.dataFrame = _this5.app.dataFrame = (0, _dataFrame["default"])(_this5.jsonData);
+	          _this5.dataFrame = _this5.app.dataFrame = (0, _dataFrame["default"])(_this5.jsonData, _this5);
 	        } else {
 	          if (_this5.layout == "tree") {
 	            //源数据就是图表标准数据，只需要转换成json的Children格式
 	            //app.dataFrame.jsonOrg ==> [{name: key:} ...] 不是children的树结构
-	            _this5.jsonData = (0, data.arrayToTreeJsonForRelation)(_this5.app.dataFrame.jsonOrg, _this5);
+	            _this5.jsonData = (0, data.arrayToTreeJsonForRelation)(JSON.parse(JSON.stringify(_this5.app.dataFrame.jsonOrg)), _this5);
 	          }
 	        }
 
@@ -43526,6 +43534,7 @@ var chartx = (function () {
 	      var me = this;
 
 	      _.each(this.data.edges, function (edge) {
+	        console.log(edge.points);
 	        var key = edge.key.join('_');
 
 	        if (me.line.isTree && edge.points.length == 3) {
@@ -44943,11 +44952,15 @@ var chartx = (function () {
 
 	        if ((0, data.checkDataIsJson)(originData, _this2.field, _this2.childrenField)) {
 	          _this2.jsonData = (0, data.jsonToArrayForRelation)(originData, _this2, _this2.childrenField);
-	          _this2.dataFrame = _this2.app.dataFrame = (0, _dataFrame["default"])(_this2.jsonData);
+	          _this2.dataFrame = _this2.app.dataFrame = (0, _dataFrame["default"])(_this2.jsonData, _this2);
 	        } else {
 	          //源数据就是图表标准数据，只需要转换成json的Children格式
 	          //app.dataFrame.jsonOrg ==> [{name: key:} ...] 不是children的树结构
-	          _this2.jsonData = (0, data.arrayToTreeJsonForRelation)(_this2.app.dataFrame.jsonOrg, _this2);
+	          //this.jsonData = arrayToTreeJsonForRelation(this.app.dataFrame.jsonOrg, this);
+	          //if( this.layout == "tree" ){
+	          //源数据就是图表标准数据，只需要转换成json的Children格式
+	          //app.dataFrame.jsonOrg ==> [{name: key:} ...] 不是children的树结构
+	          _this2.jsonData = (0, data.arrayToTreeJsonForRelation)(JSON.parse(JSON.stringify(_this2.app.dataFrame.jsonOrg)), _this2); //};
 	        }
 
 	        var setData = function setData(list, parentRowData) {
@@ -45009,6 +45022,7 @@ var chartx = (function () {
 	        };
 
 	        setData(_this2.jsonData);
+	        debugger;
 
 	        _this2._initAllDataSize(data$1).then(function (data) {
 	          resolve(data);
@@ -46010,6 +46024,8 @@ var chartx = (function () {
 
 	      if (_boxShape) {
 	        _.extend(_boxShape.context, context);
+
+	        debugger;
 	      } else {
 	        _boxShape = new shape({
 	          id: nodeId,
@@ -46068,6 +46084,8 @@ var chartx = (function () {
 	      }
 
 	      _boxShape.on("transform", function () {
+	        debugger;
+
 	        if (node.ctype == "canvas") {
 	          node.contentElement.context.x = parseInt(node.x - node.boundingClientWidth / 2 + me.node.padding + (node.preIconCharCode ? iconWidth : 0));
 	          node.contentElement.context.y = parseInt(node.y);
@@ -49031,11 +49049,13 @@ var chartx = (function () {
 	        //{treeData, nodeLength}这里设置了这两个属性
 
 	        Object.assign(data, _this4._filterTreeData(data.treeOriginData));
+	        console.log(data.nodesLength + '个节点构建树:', new Date().getTime() - t);
 	        var t1 = new Date().getTime();
 
 	        _this4._initAllDataSize(data).then(function () {
 	          //这个时候已经设置好了 treeData 的 size 属性width、height
 	          //可以开始布局了，布局完就可以设置好 data 的 nodes edges 和 size 属性
+	          console.log(data.nodesLength + '个节点计算size:', new Date().getTime() - t1);
 	          resolve(data);
 	        });
 	      });
@@ -49417,6 +49437,7 @@ var chartx = (function () {
 	      data.edges.forEach(function (edge) {
 	        _this10.getEdgePoints(edge);
 	      });
+	      console.log(data.nodesLength + '个节点计算layout:', new Date().getTime() - t1);
 	      Object.assign(data, {
 	        size: {
 	          width: width,
@@ -52806,6 +52827,7 @@ var chartx = (function () {
 	      this._setNodeStyle(_path, 'select');
 
 	      nodeData.selected = true;
+	      console.log("select:true");
 	    }
 	  }, {
 	    key: "unselectAt",
@@ -52819,6 +52841,7 @@ var chartx = (function () {
 	      this._setNodeStyle(_path);
 
 	      geoGraph.selected = false;
+	      console.log("select:false");
 
 	      if (geoGraph.focused) {
 	        this.focusAt(adcode);

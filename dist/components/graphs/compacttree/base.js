@@ -781,6 +781,8 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
 
       if (_boxShape) {
         _.extend(_boxShape.context, context);
+
+        debugger;
       } else {
         _boxShape = new shape({
           id: nodeId,
@@ -849,6 +851,8 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
       ;
 
       _boxShape.on("transform", function () {
+        debugger;
+
         if (node.ctype == "canvas") {
           node.contentElement.context.x = parseInt(node.x - node.boundingClientWidth / 2 + me.node.padding + (node.preIconCharCode ? iconWidth : 0));
           node.contentElement.context.y = parseInt(node.y);

@@ -91,11 +91,15 @@ var Tree = /*#__PURE__*/function (_GraphsBase) {
 
         if ((0, _data2.checkDataIsJson)(originData, _this2.field, _this2.childrenField)) {
           _this2.jsonData = (0, _data2.jsonToArrayForRelation)(originData, _this2, _this2.childrenField);
-          _this2.dataFrame = _this2.app.dataFrame = (0, _dataFrame["default"])(_this2.jsonData);
+          _this2.dataFrame = _this2.app.dataFrame = (0, _dataFrame["default"])(_this2.jsonData, _this2);
         } else {
           //源数据就是图表标准数据，只需要转换成json的Children格式
           //app.dataFrame.jsonOrg ==> [{name: key:} ...] 不是children的树结构
-          _this2.jsonData = (0, _data2.arrayToTreeJsonForRelation)(_this2.app.dataFrame.jsonOrg, _this2);
+          //this.jsonData = arrayToTreeJsonForRelation(this.app.dataFrame.jsonOrg, this);
+          //if( this.layout == "tree" ){
+          //源数据就是图表标准数据，只需要转换成json的Children格式
+          //app.dataFrame.jsonOrg ==> [{name: key:} ...] 不是children的树结构
+          _this2.jsonData = (0, _data2.arrayToTreeJsonForRelation)(JSON.parse(JSON.stringify(_this2.app.dataFrame.jsonOrg)), _this2); //};
         }
 
         ;
@@ -163,6 +167,7 @@ var Tree = /*#__PURE__*/function (_GraphsBase) {
         };
 
         setData(_this2.jsonData);
+        debugger;
 
         _this2._initAllDataSize(data).then(function (data) {
           resolve(data);

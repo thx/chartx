@@ -764,12 +764,12 @@ class Relation extends GraphsBase {
             let originData = this.app._data;
             if ( checkDataIsJson(originData, this.field, this.childrenField) ) {
                 this.jsonData = jsonToArrayForRelation(originData, this, this.childrenField);
-                this.dataFrame = this.app.dataFrame = dataFrame( this.jsonData );
+                this.dataFrame = this.app.dataFrame = dataFrame( this.jsonData, this );
             } else {
                 if( this.layout == "tree" ){
                     //源数据就是图表标准数据，只需要转换成json的Children格式
                     //app.dataFrame.jsonOrg ==> [{name: key:} ...] 不是children的树结构
-                    this.jsonData = arrayToTreeJsonForRelation(this.app.dataFrame.jsonOrg, this);
+                    this.jsonData = arrayToTreeJsonForRelation( JSON.parse( JSON.stringify(this.app.dataFrame.jsonOrg) ), this);
                 };
             };
 

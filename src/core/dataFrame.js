@@ -63,7 +63,7 @@ function parse2JsonData( list ){
 
 
 export default function( dataOrg, opt ){
-
+    
     let dataFrame  = {        //数据框架集合
         length        : 0,
         org           : [],   //最原始的数据，一定是个行列式，因为如果发现是json格式数据，会自动转换为行列式
@@ -187,7 +187,7 @@ export default function( dataOrg, opt ){
             _.each( dataFrame.fields, function( _field ){
                 let _val = rowData[ _field ];
 
-                if( opt.coord && 
+                if( opt && opt.coord && 
                     ( 
                         (opt.coord.xAxis && _field == opt.coord.xAxis.field && opt.coord.xAxis.layoutType != 'proportion') || 
                         (opt.coord.aAxis && _field == opt.coord.aAxis.field) 
