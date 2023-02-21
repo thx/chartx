@@ -1085,8 +1085,8 @@ class RelationBase extends GraphsBase {
         let _boxShape = me.nodesSp.getChildById( nodeId );
         if( _boxShape ){
             _.extend( _boxShape.context, context );
-            debugger
-
+            _boxShape.nodeData = node;
+            _boxShape.fire('transform');
         } else {
             _boxShape = new shape({
                 id: nodeId,
@@ -1130,9 +1130,9 @@ class RelationBase extends GraphsBase {
 
                 me.app.fire(e.type, e);
             });
+            _boxShape.nodeData = node;
         };
     
-        _boxShape.nodeData = node;
         node.shapeElement = _boxShape;
 
         if( me.node.select.list.indexOf( node.key ) > -1 ){
@@ -1143,7 +1143,7 @@ class RelationBase extends GraphsBase {
         };
 
         _boxShape.on("transform", function() {
-            debugger
+            let node = this.nodeData;
             if (node.ctype == "canvas") {
                 node.contentElement.context.x = parseInt(node.x - node.boundingClientWidth/2 + me.node.padding + (node.preIconCharCode?iconWidth:0) );
                 node.contentElement.context.y = parseInt(node.y);
@@ -1273,6 +1273,9 @@ class RelationBase extends GraphsBase {
         this.data.nodes.forEach(nodeData => {
             this.unselectAt( nodeData );
         });
+
+        //有些被折叠了的selected也要清除干净的话，必须多做一步list = []
+        this.node.select.list = [];
     }
 
     getNodeDataAt( key ){
