@@ -167,7 +167,6 @@ var Tree = /*#__PURE__*/function (_GraphsBase) {
         };
 
         setData(_this2.jsonData);
-        debugger;
 
         _this2._initAllDataSize(data).then(function (data) {
           resolve(data);

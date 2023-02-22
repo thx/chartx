@@ -782,7 +782,9 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
       if (_boxShape) {
         _.extend(_boxShape.context, context);
 
-        debugger;
+        _boxShape.nodeData = node;
+
+        _boxShape.fire('transform');
       } else {
         _boxShape = new shape({
           id: nodeId,
@@ -832,10 +834,11 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
           ;
           me.app.fire(e.type, e);
         });
+
+        _boxShape.nodeData = node;
       }
 
       ;
-      _boxShape.nodeData = node;
       node.shapeElement = _boxShape;
 
       if (me.node.select.list.indexOf(node.key) > -1) {
@@ -851,7 +854,7 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
       ;
 
       _boxShape.on("transform", function () {
-        debugger;
+        var node = this.nodeData;
 
         if (node.ctype == "canvas") {
           node.contentElement.context.x = parseInt(node.x - node.boundingClientWidth / 2 + me.node.padding + (node.preIconCharCode ? iconWidth : 0));
@@ -1037,7 +1040,9 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
 
       this.data.nodes.forEach(function (nodeData) {
         _this4.unselectAt(nodeData);
-      });
+      }); //有些被折叠了的selected也要清除干净的话，必须多做一步list = []
+
+      this.node.select.list = [];
     }
   }, {
     key: "getNodeDataAt",
