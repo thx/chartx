@@ -708,7 +708,10 @@ class RelationBase extends GraphsBase {
             
                 this.layoutData();
 
-                _.each( this._preData.nodes, ( preNode )=>{
+                let _preNodes = (this._preData && this._preData.nodes) || [];
+                let _preEdges = (this._preData && this._preData.edges) || [];
+
+                _.each( _preNodes, ( preNode )=>{
                     let nodeData = _.find( me.data.nodes, ( node )=>{ return preNode.key == node.key } );
                     
                     if( !nodeData ){
@@ -728,7 +731,7 @@ class RelationBase extends GraphsBase {
 
                     }
                 } );
-                _.each( this._preData.edges, ( preEdge )=>{
+                _.each( _preEdges, ( preEdge )=>{
                     if( !_.find( me.data.edges, ( edge )=>{ return preEdge.key.join('_') == edge.key.join('_') } ) ){
                         me._destroy( preEdge );
                     }
@@ -741,7 +744,7 @@ class RelationBase extends GraphsBase {
                     let origin = dataTrigger.origin || (dataTrigger.params || {}).origin; //兼容老的配置里面没有params，直接传origin的情况
                     //钉住某个node为参考点（不移动)
                     if( origin != undefined ){
-                        let preOriginNode = _.find( this._preData.nodes, (node) => { return node.key == origin } );
+                        let preOriginNode = _.find( _preNodes, (node) => { return node.key == origin } );
                         let originNode = _.find( this.data.nodes, (node) => { return node.key == origin } );
                         
                         if( preOriginNode && originNode ){

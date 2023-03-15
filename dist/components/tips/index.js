@@ -297,16 +297,24 @@ var Tips = /*#__PURE__*/function (_Component) {
   }, {
     key: "_getContent",
     value: function _getContent(e) {
-      var tipsContent;
+      var content = '';
 
-      if (this.content) {
-        tipsContent = _.isFunction(this.content) ? this.content(e.eventInfo, e) : this.content;
-      } else {
-        tipsContent = this._getDefaultContent(e.eventInfo);
+      if (e.eventInfo.tipsContent) {
+        content = _.isFunction(e.eventInfo.tipsContent) ? e.eventInfo.tipsContent(e.eventInfo, e) : e.eventInfo.tipsContent;
       }
 
       ;
-      return tipsContent;
+
+      if (!content) {
+        if (this.content) {
+          content = _.isFunction(this.content) ? this.content(e.eventInfo, e) : this.content;
+        } else {
+          content = this._getDefaultContent(e.eventInfo);
+        }
+      }
+
+      ;
+      return content;
     }
   }, {
     key: "_getDefaultContent",
@@ -317,7 +325,7 @@ var Tips = /*#__PURE__*/function (_Component) {
 
       var str = "";
 
-      if (!info.nodes.length && !info.tipsContent) {
+      if (!info.nodes.length) {
         return str;
       }
 
@@ -402,10 +410,6 @@ var Tips = /*#__PURE__*/function (_Component) {
 
       if (!hasNodesContent) {
         str = "";
-      }
-
-      if (info.tipsContent) {
-        str += info.tipsContent;
       }
 
       return str;

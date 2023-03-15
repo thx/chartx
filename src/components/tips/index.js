@@ -279,6 +279,7 @@ class Tips extends Component {
 
     _setContent(e) {
         return new Promise( resolve => {
+            
             let tipxContent = this._getContent(e);
             if (!tipxContent && tipxContent !== 0) {
                 resolve('');
@@ -310,15 +311,20 @@ class Tips extends Component {
 
     _getContent(e) {
 
-        let tipsContent;
-
-        if (this.content) {
-            tipsContent = _.isFunction(this.content) ? this.content(e.eventInfo, e) : this.content;
-        } else {
-            tipsContent = this._getDefaultContent(e.eventInfo);
+        let content = ''
+        if( e.eventInfo.tipsContent ){
+            content = _.isFunction(e.eventInfo.tipsContent) ? e.eventInfo.tipsContent(e.eventInfo, e) : e.eventInfo.tipsContent;
         };
 
-        return tipsContent;
+        if( !content ){
+            if( this.content ){
+                content = _.isFunction(this.content) ? this.content(e.eventInfo, e) : this.content;
+            } else {
+                content = this._getDefaultContent(e.eventInfo);
+            }
+        };
+
+        return content;
     }
 
     _getDefaultContent(info) {
@@ -326,7 +332,7 @@ class Tips extends Component {
         let _coord = this.app.getComponent({name:'coord'});
         
         let str = "";
-        if( !info.nodes.length && !info.tipsContent ){
+        if( !info.nodes.length ){
             return str;
         };
 
@@ -403,9 +409,6 @@ class Tips extends Component {
         }
         if( !hasNodesContent ){
             str = "";
-        }
-        if( info.tipsContent ){
-            str += info.tipsContent;
         }
 
         return str;

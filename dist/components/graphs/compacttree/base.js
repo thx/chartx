@@ -339,7 +339,11 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
 
           _this2.layoutData();
 
-          _.each(_this2._preData.nodes, function (preNode) {
+          var _preNodes = _this2._preData && _this2._preData.nodes || [];
+
+          var _preEdges = _this2._preData && _this2._preData.edges || [];
+
+          _.each(_preNodes, function (preNode) {
             var nodeData = _.find(me.data.nodes, function (node) {
               return preNode.key == node.key;
             });
@@ -361,7 +365,7 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
             }
           });
 
-          _.each(_this2._preData.edges, function (preEdge) {
+          _.each(_preEdges, function (preEdge) {
             if (!_.find(me.data.edges, function (edge) {
               return preEdge.key.join('_') == edge.key.join('_');
             })) {
@@ -376,7 +380,7 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
             //钉住某个node为参考点（不移动)
 
             if (origin != undefined) {
-              var preOriginNode = _.find(_this2._preData.nodes, function (node) {
+              var preOriginNode = _.find(_preNodes, function (node) {
                 return node.key == origin;
               });
 

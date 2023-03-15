@@ -8385,7 +8385,7 @@ var components = {
   */
 };
 var _default = {
-  chartxVersion: '1.1.139',
+  chartxVersion: '1.1.141',
   create: function create(el, data, opt) {
     var otherOptions = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
     var chart = null;
@@ -45599,7 +45599,11 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
 
           _this2.layoutData();
 
-          _.each(_this2._preData.nodes, function (preNode) {
+          var _preNodes = _this2._preData && _this2._preData.nodes || [];
+
+          var _preEdges = _this2._preData && _this2._preData.edges || [];
+
+          _.each(_preNodes, function (preNode) {
             var nodeData = _.find(me.data.nodes, function (node) {
               return preNode.key == node.key;
             });
@@ -45619,7 +45623,7 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
             }
           });
 
-          _.each(_this2._preData.edges, function (preEdge) {
+          _.each(_preEdges, function (preEdge) {
             if (!_.find(me.data.edges, function (edge) {
               return preEdge.key.join('_') == edge.key.join('_');
             })) {
@@ -45634,7 +45638,7 @@ var RelationBase = /*#__PURE__*/function (_GraphsBase) {
             //钉住某个node为参考点（不移动)
 
             if (origin != undefined) {
-              var preOriginNode = _.find(_this2._preData.nodes, function (node) {
+              var preOriginNode = _.find(_preNodes, function (node) {
                 return node.key == origin;
               });
 
@@ -49128,7 +49132,17 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
 
           node.shapeType = _this5.getProp(_this5.node.shapeType, node);
           node.preIconCharCode = _this5.getProp(_this5.node.preIcon.charCode, node);
-          node.iconCharCodes = _this5.getProp(_this5.node.icons.charCode, node) || [];
+          node.icons = _this5.getProp(_this5.node.icons, node) || [];
+
+          if (!Array.isArray(node.icons)) {
+            node.icons = [node.icons];
+          }
+          node.icons.forEach(function (icon) {
+            var _icon = Object.assign({}, _this5.node.iconsDefault, icon);
+
+            _icon.charCode = _this5.getProp(icon.charCode, node);
+            Object.assign(icon, _icon);
+          });
           nodes.push(node);
           treeData._node = node;
 
@@ -49248,8 +49262,8 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
         boundingClientWidth += iconWidth;
       }
 
-      if (node.iconCharCodes && node.iconCharCodes.length) {
-        boundingClientWidth += iconWidth * node.iconCharCodes.length;
+      if (node.icons && node.icons.length) {
+        boundingClientWidth += iconWidth * node.icons.length;
       }
       node.boundingClientWidth = boundingClientWidth;
     }
@@ -49526,9 +49540,8 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
 
               var offsetX = _this11.getProp(_this11.node.collapse.offsetX, node);
 
-              var offsetY = _this11.getProp(_this11.node.collapse.offsetY, node);
+              var offsetY = _this11.getProp(_this11.node.collapse.offsetY, node); //let tipsContent= this.getProp( this.node.collapse.tipsContent , node);
 
-              var tipsContent = _this11.getProp(_this11.node.collapse.tipsContent, node);
 
               var background = _this11.getProp(_this11.node.collapse.background, node);
 
@@ -49594,8 +49607,8 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
                   var trigger = _me.node.collapse;
                   e.eventInfo = {
                     trigger: trigger,
-                    tipsContent: tipsContent,
-                    nodes: [] //node
+                    tipsContent: _me.node.collapse.tipsContent,
+                    nodes: [node] //node
 
                   }; //下面的这个就只在鼠标环境下有就好了
 
@@ -49647,7 +49660,8 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
             var fontFamily = me.getProp(prop.fontFamily, node, charCode);
             var offsetX = me.getProp(prop.offsetX, node, charCode);
             var offsetY = me.getProp(prop.offsetY, node, charCode);
-            var tipsContent = me.getProp(prop.tipsContent, node, charCode);
+            var tipsContent = prop.tipsContent; //tips不需要提前计算，hover的时候计算 //me.getProp( prop.tipsContent, node, charCode);
+
             return {
               iconText: iconText,
               fontSize: fontSize,
@@ -49670,7 +49684,7 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
                 _fontFamily = _getIconStyle.fontFamily,
                 _offsetX = _getIconStyle.offsetX,
                 _offsetY = _getIconStyle.offsetY,
-                _tipsContent = _getIconStyle.tipsContent;
+                tipsContent = _getIconStyle.tipsContent;
 
             var _x = parseInt(node.x - node.boundingClientWidth / 2 + _this11.node.padding + _offsetX);
 
@@ -49702,8 +49716,6 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
 
               _this11.labelsSp.addChild(_preIcon);
             }
-            //collapseIcon的引用就断了
-
             node.preIconEl = _preIcon;
           } else {
             if (node.preIconEl) {
@@ -49713,7 +49725,74 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
           } //绘制icons 待续...
 
 
-          if (node.iconCharCodes && node.iconCharCodes.length) ; else {
+          if (node.icons && node.icons.length) {
+            var iconsSpId = key + "_icons_sp";
+
+            var _iconsSp = _this11.labelsSp.getChildById(iconsSpId);
+
+            if (_iconsSp) {
+              _iconsSp.destroy();
+            }
+            _iconsSp = new _canvax["default"].Display.Sprite({
+              id: iconsSpId
+            });
+
+            _this11.labelsSp.addChild(_iconsSp);
+
+            node.icons.forEach(function (icon, i) {
+              var _getIconStyle2 = getIconStyle(icon, icon.charCode),
+                  iconText = _getIconStyle2.iconText,
+                  fontSize = _getIconStyle2.fontSize,
+                  fontColor = _getIconStyle2.fontColor,
+                  fontFamily = _getIconStyle2.fontFamily,
+                  offsetX = _getIconStyle2.offsetX,
+                  offsetY = _getIconStyle2.offsetY,
+                  tipsContent = _getIconStyle2.tipsContent;
+
+              var x = parseInt(node.x - node.boundingClientWidth / 2 + node.width + offsetX + (node.preIconEl ? iconWidth : 0) - _this11.node.padding / 2);
+              var y = parseInt(node.y + offsetY); //collapseIcon的 位置默认为左右方向的xy
+
+              var iconCtx = {
+                x: x + i * iconWidth,
+                y: y + 1,
+                fontSize: fontSize,
+                fontFamily: fontFamily,
+                fillStyle: fontColor,
+                textAlign: "left",
+                textBaseline: "middle",
+                cursor: 'pointer'
+              };
+
+              var _icon = new _canvax["default"].Display.Text(iconText, {
+                context: iconCtx
+              });
+
+              _iconsSp.addChild(_icon); //这里不能用箭头函数，听我的没错
+
+
+              _icon.on(event.types.get(), function (e) {
+                var trigger = icon;
+                e.eventInfo = {
+                  trigger: trigger,
+                  tipsContent: tipsContent,
+                  nodes: [node] //node
+
+                }; //下面的这个就只在鼠标环境下有就好了
+
+                if (this.context) {
+                  if (e.type == 'mouseover') {
+                    this.context.fontSize += 1;
+                  }
+
+                  if (e.type == 'mouseout') {
+                    this.context.fontSize -= 1;
+                  }
+                }
+                me.app.fire(e.type, e);
+              });
+            });
+            node.iconsSp = _iconsSp;
+          } else {
             if (node.iconsSp) {
               node.iconsSp.destroy();
               delete node.iconsSp;
@@ -49760,6 +49839,7 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
       item.collapseIcon && item.collapseIcon.destroy();
       item.collapseIconBack && item.collapseIconBack.destroy();
       item.preIconEl && item.preIconEl.destroy();
+      item.iconsSp && item.iconsSp.destroy();
 
       if (Array.isArray(item[this.field])) {
         //是个edge的话，要检查下源头是不是没有子节点了， 没有子节点了， 还要把collapseIcon 都干掉
@@ -49990,11 +50070,15 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
               }
             },
             icons: {
+              detail: '相对于preIcon，跟在label后面的一组icon',
+              "default": []
+            },
+            iconsDefault: {
               detail: '内容后面的一组icon，是个数组， 支持函数返回一组icon，单个icon的格式和preIcon保持一致',
               propertys: {
                 charCode: {
                   detail: "icon的iconfont字符串",
-                  "default": []
+                  "default": ''
                 },
                 fontSize: {
                   detail: "icon字号大小",
@@ -55456,14 +55540,20 @@ var Tips = /*#__PURE__*/function (_Component) {
   }, {
     key: "_getContent",
     value: function _getContent(e) {
-      var tipsContent;
+      var content = '';
 
-      if (this.content) {
-        tipsContent = _.isFunction(this.content) ? this.content(e.eventInfo, e) : this.content;
-      } else {
-        tipsContent = this._getDefaultContent(e.eventInfo);
+      if (e.eventInfo.tipsContent) {
+        content = _.isFunction(e.eventInfo.tipsContent) ? e.eventInfo.tipsContent(e.eventInfo, e) : e.eventInfo.tipsContent;
       }
-      return tipsContent;
+
+      if (!content) {
+        if (this.content) {
+          content = _.isFunction(this.content) ? this.content(e.eventInfo, e) : this.content;
+        } else {
+          content = this._getDefaultContent(e.eventInfo);
+        }
+      }
+      return content;
     }
   }, {
     key: "_getDefaultContent",
@@ -55474,7 +55564,7 @@ var Tips = /*#__PURE__*/function (_Component) {
 
       var str = "";
 
-      if (!info.nodes.length && !info.tipsContent) {
+      if (!info.nodes.length) {
         return str;
       }
       var hasNodesContent = false;
@@ -55553,10 +55643,6 @@ var Tips = /*#__PURE__*/function (_Component) {
 
       if (!hasNodesContent) {
         str = "";
-      }
-
-      if (info.tipsContent) {
-        str += info.tipsContent;
       }
 
       return str;
@@ -59987,7 +60073,7 @@ if (projectTheme && projectTheme.length) {
 }
 
 var chartx = {
-  version: '1.1.139',
+  version: '1.1.141',
   options: {}
 };
 

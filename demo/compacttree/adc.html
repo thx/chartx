@@ -70342,6 +70342,50 @@ console.log( 'adc json串格式化', (new Date().getTime() - t) )
                                 fontColor:"#667894",
                                 fontFamily: variables.iconFontFamily
                             },
+                            icons: function(node){
+                                if( node.rowData.name == '东风UD' || node.rowData.name == '工具' || node.rowData.name == '投放账户首页'|| node.rowData.name == '千次展现成本' ){
+                                    return [
+                                    {
+                                        charCode: function(node){
+                                            return 'e636'
+                                        },
+                                        fontFamily: variables.iconFontFamily,
+                                        fontSize: 18,
+                                        fontColor: function(node){
+                                            if( node.rowData.name == '东风UD' ){
+                                                return 'white'
+                                            } else {
+                                                return "#577ef7"
+                                            }
+                                        },
+                                        tipsContent: function(e){
+                                            debugger
+                                            return 'xx'
+                                        },
+                                        onclick: function(e){
+                                            debugger
+                                            console.log(e)
+                                        }
+                                    },
+                                    {
+                                        charCode: function(node){
+                                            return 'e633'
+                                        },
+                                        fontFamily: variables.iconFontFamily,
+                                        fontSize: 18,
+                                        fontColor: function(node){
+                                            if( node.rowData.name == '东风UD' ){
+                                                return 'white'
+                                            } else {
+                                                return "#577ef7"
+                                            }
+                                        }
+                                    },
+                                    ]
+                                } else {
+                                    return []
+                                }
+                            },
                             preIcon: {
                                 charCode: function(node){
                                     if( node.depth == 0 ){
@@ -70391,6 +70435,11 @@ console.log( 'adc json串格式化', (new Date().getTime() - t) )
                     },
                     contextmenu: {
                         content: variables.contextmenuContent
+                    },
+                    tips:{
+                        content: function(){
+                            return ''
+                        }
                     }
                 }
 

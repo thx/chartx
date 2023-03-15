@@ -190,7 +190,7 @@ class Tree extends GraphsBase {
             };
 
             setData( this.jsonData );
-            debugger
+            
             this._initAllDataSize(data).then( data => {
                 resolve( data );
             } );

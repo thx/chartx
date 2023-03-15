@@ -155,11 +155,15 @@ class compactTree extends GraphsBase {
                         }
                     },
                     icons: {
+                        detail: '相对于preIcon，跟在label后面的一组icon',
+                        default: []
+                    },
+                    iconsDefault: {
                         detail: '内容后面的一组icon，是个数组， 支持函数返回一组icon，单个icon的格式和preIcon保持一致',
                         propertys: {
                             charCode: {
                                 detail: "icon的iconfont字符串",
-                                default: []
+                                default: ''
                             },
                             fontSize: {
                                 detail: "icon字号大小",
@@ -441,7 +445,16 @@ class compactTree extends GraphsBase {
                 node.shapeType = this.getProp( this.node.shapeType, node );
 
                 node.preIconCharCode = this.getProp( this.node.preIcon.charCode, node );
-                node.iconCharCodes   = this.getProp( this.node.icons.charCode, node ) || [];
+                
+                node.icons = this.getProp( this.node.icons, node ) || [];
+                if( !Array.isArray( node.icons ) ){
+                    node.icons = [ node.icons ]
+                };
+                node.icons.forEach(icon => {
+                    let _icon = Object.assign( {}, this.node.iconsDefault, icon);
+                    _icon.charCode = this.getProp( icon.charCode, node );
+                    Object.assign( icon, _icon );
+                });
 
                 nodes.push(node);
     
@@ -563,8 +576,8 @@ class compactTree extends GraphsBase {
             boundingClientWidth += iconWidth
         };
 
-        if( node.iconCharCodes && node.iconCharCodes.length ){
-            boundingClientWidth += iconWidth * node.iconCharCodes.length
+        if( node.icons && node.icons.length ){
+            boundingClientWidth += iconWidth * node.icons.length
         };
 
         node.boundingClientWidth = boundingClientWidth;
@@ -817,7 +830,7 @@ class compactTree extends GraphsBase {
                         let fontFamily = this.getProp( this.node.collapse.fontFamily  , node);
                         let offsetX    = this.getProp( this.node.collapse.offsetX     , node);
                         let offsetY    = this.getProp( this.node.collapse.offsetY     , node);
-                        let tipsContent= this.getProp( this.node.collapse.tipsContent , node);
+                        //let tipsContent= this.getProp( this.node.collapse.tipsContent , node);
     
                         let background = this.getProp( this.node.collapse.background  , node);
                         let lineWidth  = this.getProp( this.node.collapse.lineWidth   , node);
@@ -880,8 +893,8 @@ class compactTree extends GraphsBase {
                                 let trigger = me.node.collapse;
                                 e.eventInfo = {
                                     trigger,
-                                    tipsContent,
-                                    nodes: [] //node
+                                    tipsContent : me.node.collapse.tipsContent,
+                                    nodes: [ node ] //node
                                 };
     
                                 //下面的这个就只在鼠标环境下有就好了
@@ -934,7 +947,7 @@ class compactTree extends GraphsBase {
                     let fontFamily = me.getProp( prop.fontFamily, node, charCode);
                     let offsetX    = me.getProp( prop.offsetX, node, charCode);
                     let offsetY    = me.getProp( prop.offsetY, node, charCode);
-                    let tipsContent= me.getProp( prop.tipsContent, node, charCode);
+                    let tipsContent= prop.tipsContent; //tips不需要提前计算，hover的时候计算 //me.getProp( prop.tipsContent, node, charCode);
 
                     return {
                         iconText,
@@ -986,8 +999,6 @@ class compactTree extends GraphsBase {
                         this.labelsSp.addChild( _preIcon );
                     };
 
-                    //TODO: 这个赋值只能在这里处理， 因为resetData的时候， 每次node都是一个新的node数据
-                    //collapseIcon的引用就断了
                     node.preIconEl = _preIcon;
 
                 } else {
@@ -998,8 +1009,75 @@ class compactTree extends GraphsBase {
                 }
 
                 //绘制icons 待续...
-                if( node.iconCharCodes && node.iconCharCodes.length ){
+                if( node.icons && node.icons.length ){
                     let iconsSpId = key+"_icons_sp";
+                    let _iconsSp = this.labelsSp.getChildById( iconsSpId );
+                    if( _iconsSp ){
+                        _iconsSp.destroy();
+                    };
+                    _iconsSp = new Canvax.Display.Sprite({
+                        id: iconsSpId
+                    });
+                    this.labelsSp.addChild( _iconsSp );
+
+                    node.icons.forEach( (icon,i) => {
+                        let { 
+                            iconText,
+                            fontSize,
+                            fontColor,
+                            fontFamily,
+                            offsetX,
+                            offsetY,
+                            tipsContent 
+                        } = getIconStyle( icon, icon.charCode );
+
+                        let x = parseInt(node.x - node.boundingClientWidth/2 + node.width + offsetX + ( node.preIconEl?iconWidth:0 ) - this.node.padding/2);
+                        let y = parseInt(node.y+offsetY);
+                        //collapseIcon的 位置默认为左右方向的xy
+                        let iconCtx = {
+                            x: x + i*iconWidth,
+                            y: y + 1,
+                            fontSize,
+                            fontFamily,
+                            fillStyle: fontColor,
+                            textAlign: "left",
+                            textBaseline: "middle",
+                            cursor: 'pointer'
+                        };
+
+                        let _icon = new Canvax.Display.Text( iconText , {
+                            context: iconCtx
+                        });
+                        _iconsSp.addChild( _icon );
+
+                        //这里不能用箭头函数，听我的没错
+                        _icon.on( event.types.get(), function(e){
+
+                            let trigger = icon;
+                            e.eventInfo = {
+                                trigger,
+                                tipsContent,
+                                nodes: [ node ] //node
+                            };
+
+                            //下面的这个就只在鼠标环境下有就好了
+                            if( this.context ){
+                                if( e.type == 'mouseover' ){
+                                    this.context.fontSize += 1;
+                                }
+                                if( e.type == 'mouseout' ){
+                                    this.context.fontSize -= 1;
+                                }
+                            };
+                           
+                            me.app.fire(e.type, e);
+
+                        });
+
+
+                    });
+
+                    node.iconsSp = _iconsSp;
 
                 } else {
                     if( node.iconsSp ){
@@ -1050,6 +1128,7 @@ class compactTree extends GraphsBase {
         item.collapseIconBack && item.collapseIconBack.destroy();
 
         item.preIconEl        && item.preIconEl.destroy();
+        item.iconsSp          && item.iconsSp.destroy();
 
         if( Array.isArray( item[this.field] ) ){
             //是个edge的话，要检查下源头是不是没有子节点了， 没有子节点了， 还要把collapseIcon 都干掉
