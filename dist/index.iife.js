@@ -8388,7 +8388,7 @@ var chartx = (function () {
 	  */
 	};
 	var _default = {
-	  chartxVersion: '1.1.141',
+	  chartxVersion: '1.1.142',
 	  create: function create(el, data, opt) {
 	    var otherOptions = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
 	    var chart = null;
@@ -60076,7 +60076,7 @@ var chartx = (function () {
 	}
 
 	var chartx = {
-	  version: '1.1.141',
+	  version: '1.1.142',
 	  options: {}
 	};
 
