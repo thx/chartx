@@ -12,6 +12,7 @@ const replace = require('gulp-string-replace');
 const strip = require('@rollup/plugin-strip');
 const fs = require('fs-extra');
 const eslint = require('gulp-eslint');
+const {terser} = require("rollup-plugin-terser");
 
 let time = new Date().getTime();
 let _srcPath = "src/**/*.js";
@@ -105,6 +106,7 @@ let getRollupOpts = ()=>{
             file: './dist/index.iife.js',
             format: 'iife',
             name: ['chartx'],
+            plugins: [terser()],
             globals: {
                 Canvax: 'Canvax'
             }
@@ -113,6 +115,7 @@ let getRollupOpts = ()=>{
             file: './dist/index.es.js',
             format: 'es',
             name: 'chartx',
+            plugins: [terser()],
             globals: {
                 Canvax: 'Canvax'
             }
@@ -121,6 +124,16 @@ let getRollupOpts = ()=>{
             file: './dist/index.cjs.js',
             format: 'cjs',
             name: 'chartx',
+            plugins: [terser()],
+            globals: {
+                Canvax: 'Canvax'
+            }
+        },
+        {
+            file: './dist/index.umd.js',
+            format: 'cjs',
+            name: 'chartx',
+            plugins: [terser()],
             globals: {
                 Canvax: 'Canvax'
             }

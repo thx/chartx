@@ -698,6 +698,7 @@ class compactTree extends GraphsBase {
         let maxRight=0,maxLeft=0,maxTop=0,maxBottom=0;
         let width=0,height=0;
 
+        let nodes = [];
         _layout.each(node => {
 
             if( layoutIsHorizontal ){
@@ -731,6 +732,8 @@ class compactTree extends GraphsBase {
             node.data._node.y = node.y + node.data._node.height/2;
             node.data._node.depth = node.depth;
 
+            nodes.push( node.data._node );
+
         });
 
         width = right - left;
@@ -744,6 +747,7 @@ class compactTree extends GraphsBase {
         console.log( data.nodesLength+'个节点计算layout:', new Date().getTime() - t1 );
         
         Object.assign( data,  {
+            nodes,
             size: {
                 width, height
             },

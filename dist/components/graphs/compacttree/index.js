@@ -563,6 +563,7 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
           maxBottom = 0;
       var width = 0,
           height = 0;
+      var nodes = [];
 
       _layout.each(function (node) {
         if (layoutIsHorizontal) {
@@ -603,6 +604,7 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
         node.data._node.x = node.x + node.data._node.boundingClientWidth / 2;
         node.data._node.y = node.y + node.data._node.height / 2;
         node.data._node.depth = node.depth;
+        nodes.push(node.data._node);
       });
 
       width = right - left;
@@ -612,6 +614,7 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
         _this10.getEdgePoints(edge);
       });
       Object.assign(data, {
+        nodes: nodes,
         size: {
           width: width,
           height: height

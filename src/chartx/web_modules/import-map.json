@@ -1,0 +1,11 @@
+{
+  "imports": {
+    "canvax": "./canvax.js",
+    "d3-force": "./d3-force.js",
+    "d3-hierarchy": "./d3-hierarchy.js",
+    "dagre": "./dagre.js",
+    "fmin": "./fmin.js",
+    "numeral": "./numeral.js",
+    "vec2": "./vec2.js"
+  }
+}
