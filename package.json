@@ -2,7 +2,7 @@
   "name": "chartx",
   "title": "chartx.js",
   "description": "Data Visualization Chart Library",
-  "version": "1.1.151",
+  "version": "1.1.153",
   "homepage": "https://thx.github.io/chartx/",
   "license": "MIT",
   "magixCliConfig": {
@@ -65,6 +65,6 @@
   },
   "scripts": {
     "cdn": "mm cd && gulp cdn && mm publish --nospm",
-    "pub": "npm publish & mm publish -m 'chartx'"
+    "pub": "npm publish && gulp cdn && mm publish -m 'chartx'"
   }
 }

@@ -106,7 +106,7 @@ let getRollupOpts = ()=>{
             file: './dist/index.iife.js',
             format: 'iife',
             name: ['chartx'],
-            plugins: [terser()],
+            //plugins: [terser()],
             globals: {
                 Canvax: 'Canvax'
             }
@@ -115,7 +115,7 @@ let getRollupOpts = ()=>{
             file: './dist/index.es.js',
             format: 'es',
             name: 'chartx',
-            plugins: [terser()],
+            //plugins: [terser()],
             globals: {
                 Canvax: 'Canvax'
             }
@@ -124,7 +124,7 @@ let getRollupOpts = ()=>{
             file: './dist/index.cjs.js',
             format: 'cjs',
             name: 'chartx',
-            plugins: [terser()],
+            //plugins: [terser()],
             globals: {
                 Canvax: 'Canvax'
             }
@@ -133,7 +133,7 @@ let getRollupOpts = ()=>{
             file: './dist/index.umd.js',
             format: 'cjs',
             name: 'chartx',
-            plugins: [terser()],
+            //plugins: [terser()],
             globals: {
                 Canvax: 'Canvax'
             }
@@ -210,7 +210,7 @@ let watchSrc = () => {
 let copyToCdn = ()=> {
     return new Promise( resolve => {
         return pipeline(
-            gulp.src(['./dist/index.iife.js']), //只有iife需要压缩，因为是给到chartpark拼文件用的
+            gulp.src(['./dist/index.iife.js','./dist/index.es.js','./dist/index.cjs.js','./dist/index.umd.js']), //只有iife需要压缩，因为是给到chartpark拼文件用的
             uglify(),
             //rename({ suffix: '.min' }),
             gulp.dest('./cdn/')
