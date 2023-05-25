@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
+<title>xChart demo -- 雷达图</title>
+
+<script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
+<script type="text/javascript" src="../../dist/index.iife.js"></script>
+<!-- codemirror -->
+<script type="text/javascript" src="../../lib/codemirror/codemirror.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/active-line.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/javascript.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/matchbrackets.js"></script>
+<link rel="stylesheet" href="../../lib/codemirror/codemirror.css">
+<link rel="stylesheet" href="../../lib/codemirror/zenburn.css">
+<link rel="stylesheet" href="../../lib/codemirror/docs.css">
+<!-- codemirror end -->
+<!--bootstrap-->
+<script type="text/javascript" src="../../lib/bootstrap/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap-theme.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/docs.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap.min.css">
+<!--bootstrap end-->
+<script type="text/javascript" src="../../lib/demo.js"></script>
+<link rel="stylesheet" href="../../lib/demo.css">
+</head>
+<body >
+
+<table>
+    <tr>
+        <td id="td-vl">
+            <form><textarea id="code" name="code">
+//chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组
+var data= [
+    ["name","uv", "pv"],
+    ["男"  , 200 , 90  ],
+    ["女"  , 30 , 10  ],
+];
+var data= [
+    [ "uv"],
+    [ 180  ]
+];
+var options = {
+    coord : {
+        type       : "polar",
+        allAngle   : 180,
+        startAngle : 180,
+        fieldsConfig: {
+            
+        }
+    },
+    graphs : [
+        {
+            type : "progress",
+            field : "uv",
+            node : {
+                fillStyle : {
+                    lineargradient: [
+                        {
+                            position: 0,
+                            color: "#bdffbd"
+                        },
+                        {
+                            position: 1,
+                            color: "#67e366"
+                        }
+                    ]
+                }
+            }
+        }
+    ],
+    tips : {
+    }
+   
+};
+
+window.chart = chartx.create("canvasTest" , data , options);
+
+
+</textarea></form>
+
+        </td>
+        <td style="padding:0 10px;" id="td-vr">
+            <div id="chartdemo-r">
+            <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
+                <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
+
+                <h4>雷达图</h4>
+                <p>
+                    联系人：@释剑
+                </p>
+            </div>
+            <div  class="test-c">
+                <div id="canvasTest" style='width:400px;height:200px;position:relative;'></div>
+            </div>
+
+            </div>
+        </td>
+    </tr>
+</table>
+
+    
+</body> 
+</html>
+
+

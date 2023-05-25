@@ -113,10 +113,11 @@ var Progress = /*#__PURE__*/function (_GraphsBase) {
         var nodeDatas = [];
 
         _.each(dataOrg, function (val, i) {
+          var targetVal = val;
           val *= scale;
           var preNodeData = nodeDatas.slice(-1)[0];
           var startAngle = preNodeData ? preNodeData.endAngle : _startAngle;
-          var allAngle = _allAngle * (val / 100);
+          var allAngle = _allAngle * (Math.min(val, 100) / 100) * (val / targetVal);
 
           var nodeData = me._getNodeData(startAngle, allAngle, field, val, i);
 
@@ -199,9 +200,13 @@ var Progress = /*#__PURE__*/function (_GraphsBase) {
           var fieldConfig = _coord2.getFieldConfig(field);
 
           if (fieldConfig) {
+            if (nodeData.value.toString().indexOf('.') > -1) {
+              if (nodeData.value.toString().split('.')[1].length > 2) {
+                nodeData.value = nodeData.value.toFixed(2);
+              }
+            }
+
             nodeData.text = fieldConfig.getFormatValue(nodeData.value);
-          } else {
-            nodeData.text = nodeData.value.toFixed(this.label.fixNum);
           }
         }
       }
@@ -484,7 +489,10 @@ var Progress = /*#__PURE__*/function (_GraphsBase) {
           detail: '字段配置',
           "default": null
         },
-        aniEasing: 'Quintic.Out',
+        aniEasing: {
+          detail: '缓动函数',
+          "default": "Quintic.Out"
+        },
         node: {
           detail: '进度条设置',
           propertys: {

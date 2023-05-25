@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
+<title>xChart demo -- bar</title>
+
+<script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
+<script type="text/javascript" src="../../dist/index.iife.js"></script>
+<!-- codemirror -->
+<script type="text/javascript" src="../../lib/codemirror/codemirror.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/active-line.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/javascript.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/matchbrackets.js"></script>
+<link rel="stylesheet" href="../../lib/codemirror/codemirror.css">
+<link rel="stylesheet" href="../../lib/codemirror/zenburn.css">
+<link rel="stylesheet" href="../../lib/codemirror/docs.css">
+<!-- codemirror end -->
+<!--bootstrap-->
+<script type="text/javascript" src="../../lib/bootstrap/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap-theme.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/docs.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap.min.css">
+<!--bootstrap end-->
+<script type="text/javascript" src="../../lib/demo.js"></script>
+<link rel="stylesheet" href="../../lib/demo.css">
+</head>
+<body >
+
+<table>
+    <tr>
+        <td id="td-vl">
+            <form><textarea id="code" name="code">
+
+//chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
+//第一行是表头。
+
+
+var data = [
+{
+    "time": "2023-05-13至2023-06-18",
+    "ctr": 0.005,
+    "alipayInshopAmt": 0,
+    "charge": 7.13,
+    "adPv": 1195,
+    "shopColDirNum": 0,
+    "click": 6,
+    "operationList": [],
+    "thedate": "2023-05-13至2023-06-18",
+    "cartInshopNum": 1,
+    "colNum": 0,
+    "itemColInshopNum": 0,
+    "alipayInShopNum": 0,
+    "ecpc": 1.1883,
+    "cvr": 0,
+    "memberId": 131761900,
+    "itemColInshopCost": 0,
+    "vs_adPv": 22,
+    "vs_click": 0,
+    "vs_charge": 0,
+    "vs_ctr": 0,
+    "vs_ecpc": 0,
+    "vs_alipayInshopAmt": 0,
+    "vs_alipayInShopNum": 0,
+    "vs_cvr": 0,
+    "vs_cartInshopNum": 0,
+    "vs_itemColInshopNum": 0,
+    "vs_shopColDirNum": 0,
+    "vs_colNum": 0,
+    "vs_itemColInshopCost": 0
+},
+{
+    "time": "20230415至20230521",
+    "operationList": [],
+    "thedate": "20230415至20230521",
+    "adPv": 0,
+    "click": 0,
+    "charge": 0,
+    "ctr": 0,
+    "ecpc": 0,
+    "alipayInshopAmt": 0,
+    "alipayInShopNum": 0,
+    "cvr": 0,
+    "cartInshopNum": 0,
+    "itemColInshopNum": 0,
+    "shopColDirNum": 0,
+    "colNum": 0,
+    "itemColInshopCost": 0,
+    "vs_adPv": 0,
+    "vs_click": 0,
+    "vs_charge": 0,
+    "vs_ctr": 0,
+    "vs_ecpc": 0,
+    "vs_alipayInshopAmt": 0,
+    "vs_alipayInShopNum": 0,
+    "vs_cvr": 0,
+    "vs_cartInshopNum": 0,
+    "vs_itemColInshopNum": 0,
+    "vs_shopColDirNum": 0,
+    "vs_colNum": 0,
+    "vs_itemColInshopCost": 0,
+    "memberId": ""
+},
+{
+    "time": "20230422至20230528",
+    "operationList": [],
+    "thedate": "20230422至20230528",
+    "adPv": 0,
+    "click": 0,
+    "charge": 0,
+    "ctr": 0,
+    "ecpc": 0,
+    "alipayInshopAmt": 0,
+    "alipayInShopNum": 0,
+    "cvr": 0,
+    "cartInshopNum": 0,
+    "itemColInshopNum": 0,
+    "shopColDirNum": 0,
+    "colNum": 0,
+    "itemColInshopCost": 0,
+    "vs_adPv": 0,
+    "vs_click": 0,
+    "vs_charge": 0,
+    "vs_ctr": 0,
+    "vs_ecpc": 0,
+    "vs_alipayInshopAmt": 0,
+    "vs_alipayInShopNum": 0,
+    "vs_cvr": 0,
+    "vs_cartInshopNum": 0,
+    "vs_itemColInshopNum": 0,
+    "vs_shopColDirNum": 0,
+    "vs_colNum": 0,
+    "vs_itemColInshopCost": 0,
+    "memberId": ""
+},
+{
+    "time": "20230429至20230604",
+    "operationList": [],
+    "thedate": "20230429至20230604",
+    "adPv": 0,
+    "click": 0,
+    "charge": 0,
+    "ctr": 0,
+    "ecpc": 0,
+    "alipayInshopAmt": 0,
+    "alipayInShopNum": 0,
+    "cvr": 0,
+    "cartInshopNum": 0,
+    "itemColInshopNum": 0,
+    "shopColDirNum": 0,
+    "colNum": 0,
+    "itemColInshopCost": 0,
+    "vs_adPv": 0,
+    "vs_click": 0,
+    "vs_charge": 0,
+    "vs_ctr": 0,
+    "vs_ecpc": 0,
+    "vs_alipayInshopAmt": 0,
+    "vs_alipayInShopNum": 0,
+    "vs_cvr": 0,
+    "vs_cartInshopNum": 0,
+    "vs_itemColInshopNum": 0,
+    "vs_shopColDirNum": 0,
+    "vs_colNum": 0,
+    "vs_itemColInshopCost": 0,
+    "memberId": ""
+},
+{
+    "time": "20230506至20230611",
+    "operationList": [],
+    "thedate": "20230506至20230611",
+    "adPv": 0,
+    "click": 0,
+    "charge": 0,
+    "ctr": 0,
+    "ecpc": 0,
+    "alipayInshopAmt": 0,
+    "alipayInShopNum": 0,
+    "cvr": 0,
+    "cartInshopNum": 0,
+    "itemColInshopNum": 0,
+    "shopColDirNum": 0,
+    "colNum": 0,
+    "itemColInshopCost": 0,
+    "vs_adPv": 0,
+    "vs_click": 0,
+    "vs_charge": 0,
+    "vs_ctr": 0,
+    "vs_ecpc": 0,
+    "vs_alipayInshopAmt": 0,
+    "vs_alipayInShopNum": 0,
+    "vs_cvr": 0,
+    "vs_cartInshopNum": 0,
+    "vs_itemColInshopNum": 0,
+    "vs_shopColDirNum": 0,
+    "vs_colNum": 0,
+    "vs_itemColInshopCost": 0,
+    "memberId": ""
+}
+]
+
+var options =  {
+    "coord": {
+        "type": "rect",
+        "fieldsConfig": {
+            "click": {
+                "name": "点击",
+                "format": "0.0"
+            },
+            "ppc": {
+                "name": "维度",
+                "format": "0.0%"
+            },
+            "adPv": {
+                "name": " 展现量",
+                "format": "0"
+            },
+            "vs_adPv": {
+                "name": " 展现量",
+                "format": "0"
+            }
+        },
+        "xAxis": {
+            "field": "time"
+        },
+        "grid": {
+            "line": {
+                "xDimension": {
+                    "strokeStyle": "rgba(230,230,230,0.4)"
+                }
+            }
+        }
+    },
+    "graphs": [
+        {
+            "type": "line",
+            "field": [
+                "adPv",
+                "vs_adPv"
+            ],
+            "yAxisAlign": "left",
+            "node": {
+                "focus": {
+                    "alpha": 0.5,
+                    "radiusDiff": 8
+                },
+                "enabled": false
+            },
+            "line": {
+                "lineWidth": 2.5,
+                "lineargradientDriction": "leftRight",
+                "curvature": 0.6,
+                "shadowOffsetY": 2,
+                "shadowBlur": 8
+            },
+            "area": {
+                "alpha": 0.5,
+                "lineargradientDriction": "topBottom"
+            }
+        }
+    ],
+    "tips": {
+        "pointerColor": "#999",
+        "pointerLineWidth": 1.5
+    },
+    "theme": [
+        "#4554e5",
+        "#f5714d"
+    ]
+}
+
+try {
+    window.line = chartx.create("canvasTest" , data , options)
+} catch(e){
+
+}
+
+
+            </textarea></form>
+        </td>
+        <td style="padding:0 10px;" id="td-vr">
+            <div id="chartdemo-r">
+            <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
+                <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
+
+                <h4>折线图（bar chart）</h4>
+                <p>
+                    联系人：@释剑
+                </p>
+            </div>
+            <div  class="test-c">
+                <div id="canvasTest" style='width:100%;height:300px;position:relative;'></div>
+            </div>
+
+            </div>
+        </td>
+    </tr>
+</table>
+
+
+</body> 
+</html>
+
+

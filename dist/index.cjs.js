@@ -8387,7 +8387,7 @@ var components = {
   */
 };
 var _default = {
-  chartxVersion: '1.1.153',
+  chartxVersion: '1.1.154',
   create: function create(el, data, opt) {
     var otherOptions = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
     var chart = null;
@@ -13838,8 +13838,9 @@ var xAxis = /*#__PURE__*/function (_Axis) {
       var me = this;
       var arr = me.layoutData;
       var l = arr.length;
-      var textAlign = me.label.textAlign; //如果用户设置不想要做重叠检测
+      var textAlign = me.label.textAlign;
 
+      //如果用户设置不想要做重叠检测
       if (!this.label.evade || me.trimLayout) {
         _.each(arr, function (layoutItem) {
           layoutItem.visible = true;
@@ -31568,10 +31569,11 @@ var Progress = /*#__PURE__*/function (_GraphsBase) {
         var nodeDatas = [];
 
         _.each(dataOrg, function (val, i) {
+          var targetVal = val;
           val *= scale;
           var preNodeData = nodeDatas.slice(-1)[0];
           var startAngle = preNodeData ? preNodeData.endAngle : _startAngle;
-          var allAngle = _allAngle * (val / 100);
+          var allAngle = _allAngle * (Math.min(val, 100) / 100) * (val / targetVal);
 
           var nodeData = me._getNodeData(startAngle, allAngle, field, val, i);
 
@@ -31654,9 +31656,13 @@ var Progress = /*#__PURE__*/function (_GraphsBase) {
           var fieldConfig = _coord2.getFieldConfig(field);
 
           if (fieldConfig) {
+            if (nodeData.value.toString().indexOf('.') > -1) {
+              if (nodeData.value.toString().split('.')[1].length > 2) {
+                nodeData.value = nodeData.value.toFixed(2);
+              }
+            }
+
             nodeData.text = fieldConfig.getFormatValue(nodeData.value);
-          } else {
-            nodeData.text = nodeData.value.toFixed(this.label.fixNum);
           }
         }
       }
@@ -31908,7 +31914,10 @@ var Progress = /*#__PURE__*/function (_GraphsBase) {
           detail: '字段配置',
           "default": null
         },
-        aniEasing: 'Quintic.Out',
+        aniEasing: {
+          detail: '缓动函数',
+          "default": "Quintic.Out"
+        },
         node: {
           detail: '进度条设置',
           propertys: {
@@ -60078,7 +60087,7 @@ if (projectTheme && projectTheme.length) {
 }
 
 var chartx = {
-  version: '1.1.153',
+  version: '1.1.154',
   options: {}
 };
 

@@ -16,7 +16,10 @@ class Progress extends GraphsBase
                 detail:'字段配置',
                 default: null
             },
-            aniEasing: 'Quintic.Out',
+            aniEasing: {
+                detail:'缓动函数',
+                default: "Quintic.Out"
+            },
             node : {
                 detail : '进度条设置',
                 propertys : {
@@ -190,10 +193,11 @@ class Progress extends GraphsBase
             let nodeDatas = [];
 
             _.each( dataOrg, function( val, i ){
+                let targetVal = val;
                 val *= scale;
                 let preNodeData = nodeDatas.slice(-1)[0];
                 let startAngle = preNodeData ? preNodeData.endAngle : _startAngle;
-                let allAngle = _allAngle * (val/100);
+                let allAngle = _allAngle * ( Math.min( val , 100 )/100 ) * ( val/targetVal );
                 let nodeData = me._getNodeData( startAngle, allAngle , field, val,i);
                 nodeData.fillStyle = me._getStyle( nodeData, me.node.fillStyle );
                 nodeDatas.push( nodeData );
@@ -265,9 +269,12 @@ class Progress extends GraphsBase
                 let _coord = me.app.getComponent({name:'coord'});
                 let fieldConfig = _coord.getFieldConfig( field );
                 if(fieldConfig ){
+                    if( nodeData.value.toString().indexOf('.')>-1 ){
+                        if( nodeData.value.toString().split('.')[1].length > 2 ){
+                            nodeData.value = nodeData.value.toFixed( 2 );
+                        }
+                    }
                     nodeData.text = fieldConfig.getFormatValue( nodeData.value );
-                } else {
-                    nodeData.text = nodeData.value.toFixed( this.label.fixNum );
                 }
             }
         };
