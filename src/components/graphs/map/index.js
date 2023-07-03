@@ -222,10 +222,6 @@ class Map extends GraphsBase {
                     transform: {
                         detail: "是否启动拖拽缩放整个画布",
                         propertys: {
-                            fitView: {
-                                detail: "自动缩放",
-                                default: ''     //autoZoom
-                            },
                             enabled: {
                                 detail: "是否开启",
                                 default: true
@@ -305,8 +301,8 @@ class Map extends GraphsBase {
     _initZoom(){
         this.zoom = new Zoom({
             scale    : this.status.transform.scale,
-            scaleMin : this.status.transform.statusMin,
-            scaleMax : this.status.transform.statusMax
+            scaleMin : this.status.transform.scaleMin,
+            scaleMax : this.status.transform.scaleMax
         });
 
         let me = this;

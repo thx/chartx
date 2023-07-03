@@ -391,16 +391,20 @@ class Relation extends GraphsBase {
                     transform: {
                         detail: "是否启动拖拽缩放整个画布",
                         propertys: {
-                            fitView: {
-                                detail: "自动缩放",
-                                default: ''     //autoZoom
-                            },
                             enabled: {
                                 detail: "是否开启",
                                 default: true
                             },
                             scale: {
                                 detail: "缩放值",
+                                default: 1
+                            },
+                            scaleMin: {
+                                detail: "缩放最小值",
+                                default: 0.1
+                            },
+                            scaleMax: {
+                                detail: "缩放最大值",
                                 default: 1
                             },
                             scaleOrigin: {
@@ -498,7 +502,7 @@ class Relation extends GraphsBase {
         this.graphsView.addChild(this.graphsSp);
         this.sprite.addChild(this.graphsView);
 
-        this.zoom = new Zoom();
+        
 
     }
 
@@ -523,6 +527,12 @@ class Relation extends GraphsBase {
         let _wheelHandleTimeer = null;
         let _deltaY = 0;
 
+
+        this.zoom = new Zoom({
+            scale    : this.status.transform.scale,
+            scaleMin : this.status.transform.scaleMin,
+            scaleMax : this.status.transform.scaleMax
+        });
         this.induce.on( event.types.get(), function (e) {
 
             if (me.status.transform.enabled) {
@@ -584,6 +594,71 @@ class Relation extends GraphsBase {
 
             };
 
+        });
+
+    }
+
+    _initZoom(){
+        this.zoom = new Zoom({
+            scale    : this.status.transform.scale,
+            scaleMin : this.status.transform.statusMin,
+            scaleMax : this.status.transform.statusMax
+        });
+
+        let me = this;
+        let _mosedownIng = false;
+        let _preCursor = me.app.canvax.domView ? me.app.canvax.domView.style.cursor : 'default';
+
+        //滚轮缩放相关
+        let _wheelHandleTimeLen = 32; //16 * 2
+        let _wheelHandleTimeer = null;
+        let _deltaY = 0;
+
+        this.sprite.on( event.types.get(), function (e) {
+            if (me.status.transform.enabled) {
+                e.preventDefault();
+      
+                let point = e.target.localToGlobal(e.point, me.sprite);
+                
+                if (e.type == "mousedown") {
+                    _mosedownIng = true;
+                    me.app.canvax.domView && (me.app.canvax.domView.style.cursor = "move");
+                    me.zoom.mouseMoveTo( point );
+                };
+                if (e.type == "mouseup" || e.type == "mouseout") {
+                    _mosedownIng = false;
+                    me.app.canvax.domView && (me.app.canvax.domView.style.cursor = _preCursor);
+                };
+                if (e.type == "mousemove") {
+                    if ( _mosedownIng ) {
+                        let {x,y} = me.zoom.move( point );
+                        me.mapGraphs.context.x = x;
+                        me.mapGraphs.context.y = y;
+                    }
+                };
+                if (e.type == "wheel") {
+                    if (Math.abs(e.deltaY) > Math.abs(_deltaY)) {
+                        _deltaY = e.deltaY;
+                    };
+                    
+                    if (!_wheelHandleTimeer) {
+                        _wheelHandleTimeer = setTimeout(function () {
+
+                            let {scale,x,y} = me.zoom.wheel( e, point );
+                        
+                            me.mapGraphs.context.x = x;
+                            me.mapGraphs.context.y = y;
+                            me.mapGraphs.context.scaleX = scale;
+                            me.mapGraphs.context.scaleY = scale;
+                            me.status.transform.scale = scale;
+
+                            _wheelHandleTimeer = null;
+                            _deltaY = 0;
+
+                        }, _wheelHandleTimeLen);
+                    };
+                };
+            };
         });
 
     }

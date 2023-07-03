@@ -106,8 +106,8 @@ var Map = /*#__PURE__*/function (_GraphsBase) {
     value: function _initZoom() {
       this.zoom = new _zoom["default"]({
         scale: this.status.transform.scale,
-        scaleMin: this.status.transform.statusMin,
-        scaleMax: this.status.transform.statusMax
+        scaleMin: this.status.transform.scaleMin,
+        scaleMax: this.status.transform.scaleMax
       });
       var me = this;
       var _mosedownIng = false;
@@ -748,11 +748,6 @@ var Map = /*#__PURE__*/function (_GraphsBase) {
             transform: {
               detail: "是否启动拖拽缩放整个画布",
               propertys: {
-                fitView: {
-                  detail: "自动缩放",
-                  "default": '' //autoZoom
-
-                },
                 enabled: {
                   detail: "是否开启",
                   "default": true

@@ -141,7 +141,6 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
       this.graphsSp.addChild(this.labelsSp);
       this.graphsView.addChild(this.graphsSp);
       this.sprite.addChild(this.graphsView);
-      this.zoom = new _zoom["default"]();
     }
   }, {
     key: "_initInduce",
@@ -166,6 +165,11 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
 
       var _wheelHandleTimeer = null;
       var _deltaY = 0;
+      this.zoom = new _zoom["default"]({
+        scale: this.status.transform.scale,
+        scaleMin: this.status.transform.scaleMin,
+        scaleMax: this.status.transform.scaleMax
+      });
       this.induce.on(event.types.get(), function (e) {
         if (me.status.transform.enabled) {
           e.preventDefault();
@@ -238,6 +242,90 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
                   me.status.transform.scale = scale;
                 }
 
+                _wheelHandleTimeer = null;
+                _deltaY = 0;
+              }, _wheelHandleTimeLen);
+            }
+
+            ;
+          }
+
+          ;
+        }
+
+        ;
+      });
+    }
+  }, {
+    key: "_initZoom",
+    value: function _initZoom() {
+      this.zoom = new _zoom["default"]({
+        scale: this.status.transform.scale,
+        scaleMin: this.status.transform.statusMin,
+        scaleMax: this.status.transform.statusMax
+      });
+      var me = this;
+      var _mosedownIng = false;
+
+      var _preCursor = me.app.canvax.domView ? me.app.canvax.domView.style.cursor : 'default'; //滚轮缩放相关
+
+
+      var _wheelHandleTimeLen = 32; //16 * 2
+
+      var _wheelHandleTimeer = null;
+      var _deltaY = 0;
+      this.sprite.on(event.types.get(), function (e) {
+        if (me.status.transform.enabled) {
+          e.preventDefault();
+          var point = e.target.localToGlobal(e.point, me.sprite);
+
+          if (e.type == "mousedown") {
+            _mosedownIng = true;
+            me.app.canvax.domView && (me.app.canvax.domView.style.cursor = "move");
+            me.zoom.mouseMoveTo(point);
+          }
+
+          ;
+
+          if (e.type == "mouseup" || e.type == "mouseout") {
+            _mosedownIng = false;
+            me.app.canvax.domView && (me.app.canvax.domView.style.cursor = _preCursor);
+          }
+
+          ;
+
+          if (e.type == "mousemove") {
+            if (_mosedownIng) {
+              var _me$zoom$move2 = me.zoom.move(point),
+                  x = _me$zoom$move2.x,
+                  y = _me$zoom$move2.y;
+
+              me.mapGraphs.context.x = x;
+              me.mapGraphs.context.y = y;
+            }
+          }
+
+          ;
+
+          if (e.type == "wheel") {
+            if (Math.abs(e.deltaY) > Math.abs(_deltaY)) {
+              _deltaY = e.deltaY;
+            }
+
+            ;
+
+            if (!_wheelHandleTimeer) {
+              _wheelHandleTimeer = setTimeout(function () {
+                var _me$zoom$wheel2 = me.zoom.wheel(e, point),
+                    scale = _me$zoom$wheel2.scale,
+                    x = _me$zoom$wheel2.x,
+                    y = _me$zoom$wheel2.y;
+
+                me.mapGraphs.context.x = x;
+                me.mapGraphs.context.y = y;
+                me.mapGraphs.context.scaleX = scale;
+                me.mapGraphs.context.scaleY = scale;
+                me.status.transform.scale = scale;
                 _wheelHandleTimeer = null;
                 _deltaY = 0;
               }, _wheelHandleTimeLen);
@@ -2053,17 +2141,20 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
             transform: {
               detail: "是否启动拖拽缩放整个画布",
               propertys: {
-                fitView: {
-                  detail: "自动缩放",
-                  "default": '' //autoZoom
-
-                },
                 enabled: {
                   detail: "是否开启",
                   "default": true
                 },
                 scale: {
                   detail: "缩放值",
+                  "default": 1
+                },
+                scaleMin: {
+                  detail: "缩放最小值",
+                  "default": 0.1
+                },
+                scaleMax: {
+                  detail: "缩放最大值",
                   "default": 1
                 },
                 scaleOrigin: {
