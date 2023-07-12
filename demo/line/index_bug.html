@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
+<title>xChart demo -- bar</title>
+
+<script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
+<script type="text/javascript" src="../../dist/index.iife.js"></script>
+<!-- codemirror -->
+<script type="text/javascript" src="../../lib/codemirror/codemirror.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/active-line.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/javascript.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/matchbrackets.js"></script>
+<link rel="stylesheet" href="../../lib/codemirror/codemirror.css">
+<link rel="stylesheet" href="../../lib/codemirror/zenburn.css">
+<link rel="stylesheet" href="../../lib/codemirror/docs.css">
+<!-- codemirror end -->
+<!--bootstrap-->
+<script type="text/javascript" src="../../lib/bootstrap/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap-theme.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/docs.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap.min.css">
+<!--bootstrap end-->
+<script type="text/javascript" src="../../lib/demo.js"></script>
+<link rel="stylesheet" href="../../lib/demo.css">
+</head>
+<body >
+
+<table>
+    <tr>
+        <td id="td-vl">
+            <form><textarea id="code" name="code">
+
+//chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
+//第一行是表头。
+var data=  [
+{
+    "time": "2023-07-05",
+    "operationList": [],
+    "thedate": "2023-07-05",
+    "adPv": 0,
+    "click": 0,
+    "charge": 0,
+    "alipayInshopNum": 0,
+    "alipayInshopAmt": 0,
+    "effectPlayNums": 0,
+    "effect25PlayNums": 0,
+    "effect50PlayNums": 0,
+    "effect75PlayNums": 0,
+    "playTotalNums": 0,
+    "prepayDirAmt": 0,
+    "prepayInshopAmt": 0,
+    "gmvInshopAmt": 0,
+    "itemColInshopNum": 0,
+    "shopColDirNum": 0,
+    "cartInshopNum": 0,
+    "cartDirNum": 0,
+    "cartInDirNum": 0,
+    "searchClickInshopNum": 0,
+    "ctr": 0,
+    "ecpm": 0,
+    "ecpc": 0,
+    "calCost": 0,
+    "cartCost": 0,
+    "clickInshopNumCost": 0,
+    "ipvCost": 0,
+    "roi": 0,
+    "alipayInshopCost": 0,
+    "vs_adPv": 0,
+    "vs_click": 0,
+    "vs_charge": 0,
+    "vs_alipayInshopNum": 0,
+    "vs_alipayInshopAmt": 0,
+    "vs_effectPlayNums": 0,
+    "vs_effect25PlayNums": 0,
+    "vs_effect50PlayNums": 0,
+    "vs_effect75PlayNums": 0,
+    "vs_playTotalNums": 0,
+    "vs_prepayDirAmt": 0,
+    "vs_prepayInshopAmt": 0,
+    "vs_gmvInshopAmt": 0,
+    "vs_itemColInshopNum": 0,
+    "vs_shopColDirNum": 0,
+    "vs_cartInshopNum": 0,
+    "vs_cartDirNum": 0,
+    "vs_cartInDirNum": 0,
+    "vs_searchClickInshopNum": 0,
+    "vs_ctr": 0,
+    "vs_ecpm": 0,
+    "vs_ecpc": 0,
+    "vs_calCost": 0,
+    "vs_cartCost": 0,
+    "vs_clickInshopNumCost": 0,
+    "vs_ipvCost": 0,
+    "vs_roi": 0,
+    "vs_alipayInshopCost": 0,
+    "prepayInshopNum": "",
+    "ipvInshopNum": "",
+    "gmvInshopNum": "",
+    "prepayDirNum": "",
+    "memberId": "",
+    "alipayDirAmt": "",
+    "alipayDirNum": "",
+    "alipayInDirNum": "",
+    "alipayInDirAmt": ""
+},
+{
+    "time": "2023-07-06",
+    "operationList": [],
+    "thedate": "2023-07-06",
+    "adPv": 0,
+    "click": 0,
+    "charge": 0,
+    "alipayInshopNum": 0,
+    "alipayInshopAmt": 0,
+    "effectPlayNums": 0,
+    "effect25PlayNums": 0,
+    "effect50PlayNums": 0,
+    "effect75PlayNums": 0,
+    "playTotalNums": 0,
+    "prepayDirAmt": 0,
+    "prepayInshopAmt": 0,
+    "gmvInshopAmt": 0,
+    "itemColInshopNum": 0,
+    "shopColDirNum": 0,
+    "cartInshopNum": 0,
+    "cartDirNum": 0,
+    "cartInDirNum": 0,
+    "searchClickInshopNum": 0,
+    "ctr": 0,
+    "ecpm": 0,
+    "ecpc": 0,
+    "calCost": 0,
+    "cartCost": 0,
+    "clickInshopNumCost": 0,
+    "ipvCost": 0,
+    "roi": 0,
+    "alipayInshopCost": 0,
+    "vs_adPv": 0,
+    "vs_click": 0,
+    "vs_charge": 0,
+    "vs_alipayInshopNum": 0,
+    "vs_alipayInshopAmt": 0,
+    "vs_effectPlayNums": 0,
+    "vs_effect25PlayNums": 0,
+    "vs_effect50PlayNums": 0,
+    "vs_effect75PlayNums": 0,
+    "vs_playTotalNums": 0,
+    "vs_prepayDirAmt": 0,
+    "vs_prepayInshopAmt": 0,
+    "vs_gmvInshopAmt": 0,
+    "vs_itemColInshopNum": 0,
+    "vs_shopColDirNum": 0,
+    "vs_cartInshopNum": 0,
+    "vs_cartDirNum": 0,
+    "vs_cartInDirNum": 0,
+    "vs_searchClickInshopNum": 0,
+    "vs_ctr": 0,
+    "vs_ecpm": 0,
+    "vs_ecpc": 0,
+    "vs_calCost": 0,
+    "vs_cartCost": 0,
+    "vs_clickInshopNumCost": 0,
+    "vs_ipvCost": 0,
+    "vs_roi": 0,
+    "vs_alipayInshopCost": 0,
+    "prepayInshopNum": "",
+    "ipvInshopNum": "",
+    "gmvInshopNum": "",
+    "prepayDirNum": "",
+    "memberId": "",
+    "alipayDirAmt": "",
+    "alipayDirNum": "",
+    "alipayInDirNum": "",
+    "alipayInDirAmt": ""
+},
+{
+    "time": "2023-07-07",
+    "alipayInshopAmt": 0,
+    "prepayInshopNum": 0,
+    "alipayInshopNum": 0,
+    "ipvInshopNum": 3,
+    "cartInDirNum": 0,
+    "effectPlayNums": 1701,
+    "effect25PlayNums": 749,
+    "shopColDirNum": 0,
+    "cartDirNum": 0,
+    "prepayInshopAmt": 0,
+    "roi": 0,
+    "gmvInshopAmt": 0,
+    "operationList": [],
+    "playTotalNums": 193,
+    "thedate": "2023-07-07",
+    "gmvInshopNum": 0,
+    "itemColInshopNum": 0,
+    "prepayDirNum": 0,
+    "memberId": 4718472503,
+    "alipayDirAmt": 0,
+    "ctr": 0.0070052539404553416,
+    "charge": 0.18839999999999998,
+    "adPv": 1142,
+    "prepayDirAmt": 0,
+    "searchClickInshopNum": 0,
+    "alipayDirNum": 0,
+    "click": 8,
+    "ipvCost": 0.0628,
+    "effect75PlayNums": 271,
+    "effect50PlayNums": 474,
+    "alipayInDirNum": 0,
+    "cartInshopNum": 0,
+    "alipayInDirAmt": 0,
+    "ecpm": 0,
+    "ecpc": 0,
+    "calCost": 0,
+    "cartCost": 0,
+    "clickInshopNumCost": 0,
+    "alipayInshopCost": 0,
+    "vs_adPv": 0,
+    "vs_click": 0,
+    "vs_charge": 0,
+    "vs_alipayInshopNum": 0,
+    "vs_alipayInshopAmt": 0,
+    "vs_effectPlayNums": 0,
+    "vs_effect25PlayNums": 0,
+    "vs_effect50PlayNums": 0,
+    "vs_effect75PlayNums": 0,
+    "vs_playTotalNums": 0,
+    "vs_prepayDirAmt": 0,
+    "vs_prepayInshopAmt": 0,
+    "vs_gmvInshopAmt": 0,
+    "vs_itemColInshopNum": 0,
+    "vs_shopColDirNum": 0,
+    "vs_cartInshopNum": 0,
+    "vs_cartDirNum": 0,
+    "vs_cartInDirNum": 0,
+    "vs_searchClickInshopNum": 0,
+    "vs_ctr": 0,
+    "vs_ecpm": 0,
+    "vs_ecpc": 0,
+    "vs_calCost": 0,
+    "vs_cartCost": 0,
+    "vs_clickInshopNumCost": 0,
+    "vs_ipvCost": 0,
+    "vs_roi": 0,
+    "vs_alipayInshopCost": 0
+},
+{
+    "time": "2023-07-08",
+    "alipayInshopAmt": 0,
+    "prepayInshopNum": 0,
+    "alipayInshopNum": 0,
+    "ipvInshopNum": 5,
+    "cartInDirNum": 0,
+    "effectPlayNums": 69,
+    "effect25PlayNums": 43,
+    "shopColDirNum": 0,
+    "cartDirNum": 0,
+    "prepayInshopAmt": 0,
+    "roi": 0,
+    "gmvInshopAmt": 0,
+    "operationList": [],
+    "playTotalNums": 13,
+    "thedate": "2023-07-08",
+    "gmvInshopNum": 0,
+    "itemColInshopNum": 0,
+    "prepayDirNum": 0,
+    "memberId": 4718472503,
+    "alipayDirAmt": 0,
+    "ctr": 0,
+    "charge": 0.006,
+    "adPv": 37,
+    "prepayDirAmt": 0,
+    "searchClickInshopNum": 5,
+    "alipayDirNum": 0,
+    "clickInshopNumCost": 0.0012000000000000001,
+    "click": 0,
+    "ipvCost": 0.0012000000000000001,
+    "effect75PlayNums": 17,
+    "effect50PlayNums": 27,
+    "alipayInDirNum": 0,
+    "cartInshopNum": 0,
+    "alipayInDirAmt": 0,
+    "ecpm": 0,
+    "ecpc": 0,
+    "calCost": 0,
+    "cartCost": 0,
+    "alipayInshopCost": 0,
+    "vs_adPv": 0,
+    "vs_click": 0,
+    "vs_charge": 0,
+    "vs_alipayInshopNum": 0,
+    "vs_alipayInshopAmt": 0,
+    "vs_effectPlayNums": 0,
+    "vs_effect25PlayNums": 0,
+    "vs_effect50PlayNums": 0,
+    "vs_effect75PlayNums": 0,
+    "vs_playTotalNums": 0,
+    "vs_prepayDirAmt": 0,
+    "vs_prepayInshopAmt": 0,
+    "vs_gmvInshopAmt": 0,
+    "vs_itemColInshopNum": 0,
+    "vs_shopColDirNum": 0,
+    "vs_cartInshopNum": 0,
+    "vs_cartDirNum": 0,
+    "vs_cartInDirNum": 0,
+    "vs_searchClickInshopNum": 0,
+    "vs_ctr": 0,
+    "vs_ecpm": 0,
+    "vs_ecpc": 0,
+    "vs_calCost": 0,
+    "vs_cartCost": 0,
+    "vs_clickInshopNumCost": 0,
+    "vs_ipvCost": 0,
+    "vs_roi": 0,
+    "vs_alipayInshopCost": 0
+},
+{
+    "time": "2023-07-09",
+    "alipayInshopAmt": 0,
+    "prepayInshopNum": 0,
+    "alipayInshopNum": 0,
+    "ipvInshopNum": 2,
+    "cartInDirNum": 0,
+    "effectPlayNums": 0,
+    "effect25PlayNums": 0,
+    "shopColDirNum": 0,
+    "cartDirNum": 0,
+    "prepayInshopAmt": 0,
+    "gmvInshopAmt": 0,
+    "operationList": [],
+    "playTotalNums": 0,
+    "thedate": "2023-07-09",
+    "gmvInshopNum": 0,
+    "itemColInshopNum": 0,
+    "prepayDirNum": 0,
+    "memberId": 4718472503,
+    "alipayDirAmt": 0,
+    "charge": 0,
+    "adPv": 0,
+    "prepayDirAmt": 0,
+    "searchClickInshopNum": 1,
+    "alipayDirNum": 0,
+    "clickInshopNumCost": 0,
+    "click": 0,
+    "ipvCost": 0,
+    "effect75PlayNums": 0,
+    "effect50PlayNums": 0,
+    "alipayInDirNum": 0,
+    "cartInshopNum": 0,
+    "alipayInDirAmt": 0,
+    "ctr": 0,
+    "ecpm": 0,
+    "ecpc": 0,
+    "calCost": 0,
+    "cartCost": 0,
+    "roi": 0,
+    "alipayInshopCost": 0,
+    "vs_adPv": 0,
+    "vs_click": 0,
+    "vs_charge": 0,
+    "vs_alipayInshopNum": 0,
+    "vs_alipayInshopAmt": 0,
+    "vs_effectPlayNums": 0,
+    "vs_effect25PlayNums": 0,
+    "vs_effect50PlayNums": 0,
+    "vs_effect75PlayNums": 0,
+    "vs_playTotalNums": 0,
+    "vs_prepayDirAmt": 0,
+    "vs_prepayInshopAmt": 0,
+    "vs_gmvInshopAmt": 0,
+    "vs_itemColInshopNum": 0,
+    "vs_shopColDirNum": 0,
+    "vs_cartInshopNum": 0,
+    "vs_cartDirNum": 0,
+    "vs_cartInDirNum": 0,
+    "vs_searchClickInshopNum": 0,
+    "vs_ctr": 0,
+    "vs_ecpm": 0,
+    "vs_ecpc": 0,
+    "vs_calCost": 0,
+    "vs_cartCost": 0,
+    "vs_clickInshopNumCost": 0,
+    "vs_ipvCost": 0,
+    "vs_roi": 0,
+    "vs_alipayInshopCost": 0
+},
+{
+    "time": "2023-07-10",
+    "operationList": [],
+    "thedate": "2023-07-10",
+    "adPv": 0,
+    "click": 0,
+    "charge": 0,
+    "alipayInshopNum": 0,
+    "alipayInshopAmt": 0,
+    "effectPlayNums": 0,
+    "effect25PlayNums": 0,
+    "effect50PlayNums": 0,
+    "effect75PlayNums": 0,
+    "playTotalNums": 0,
+    "prepayDirAmt": 0,
+    "prepayInshopAmt": 0,
+    "gmvInshopAmt": 0,
+    "itemColInshopNum": 0,
+    "shopColDirNum": 0,
+    "cartInshopNum": 0,
+    "cartDirNum": 0,
+    "cartInDirNum": 0,
+    "searchClickInshopNum": 0,
+    "ctr": 0,
+    "ecpm": 0,
+    "ecpc": 0,
+    "calCost": 0,
+    "cartCost": 0,
+    "clickInshopNumCost": 0,
+    "ipvCost": 0,
+    "roi": 0,
+    "alipayInshopCost": 0,
+    "vs_adPv": 0,
+    "vs_click": 0,
+    "vs_charge": 0,
+    "vs_alipayInshopNum": 0,
+    "vs_alipayInshopAmt": 0,
+    "vs_effectPlayNums": 0,
+    "vs_effect25PlayNums": 0,
+    "vs_effect50PlayNums": 0,
+    "vs_effect75PlayNums": 0,
+    "vs_playTotalNums": 0,
+    "vs_prepayDirAmt": 0,
+    "vs_prepayInshopAmt": 0,
+    "vs_gmvInshopAmt": 0,
+    "vs_itemColInshopNum": 0,
+    "vs_shopColDirNum": 0,
+    "vs_cartInshopNum": 0,
+    "vs_cartDirNum": 0,
+    "vs_cartInDirNum": 0,
+    "vs_searchClickInshopNum": 0,
+    "vs_ctr": 0,
+    "vs_ecpm": 0,
+    "vs_ecpc": 0,
+    "vs_calCost": 0,
+    "vs_cartCost": 0,
+    "vs_clickInshopNumCost": 0,
+    "vs_ipvCost": 0,
+    "vs_roi": 0,
+    "vs_alipayInshopCost": 0,
+    "prepayInshopNum": "",
+    "ipvInshopNum": "",
+    "gmvInshopNum": "",
+    "prepayDirNum": "",
+    "memberId": "",
+    "alipayDirAmt": "",
+    "alipayDirNum": "",
+    "alipayInDirNum": "",
+    "alipayInDirAmt": ""
+}
+];
+
+
+
+var options = {
+    "coord": {
+        "type": "rect",
+        "fieldsConfig": {
+            "click": {
+                "name": " 点击量",
+                "format": "0"
+            },
+            "ppc": {
+                "name": "维度",
+                "format": "0.0%"
+            },
+            "adPv": {
+                "name": " 展现量",
+                "format": "0"
+            },
+            "vs_adPv": {
+                "name": " 展现量",
+                "format": "0"
+            },
+            "vs_click": {
+                "name": " 点击量",
+                "format": "0"
+            }
+        },
+        "xAxis": {
+            "field": "time"
+        },
+        "grid": {
+            "line": {
+                "xDimension": {
+                    "strokeStyle": "rgba(230,230,230,0.4)"
+                }
+            }
+        }
+    },
+    "graphs": [
+        {
+            "type": "line",
+            "field": "adPv",
+            "yAxisAlign": "left",
+            "node": {
+                "focus": {
+                    "alpha": 0.5,
+                    "radiusDiff": 8
+                },
+                "enabled": false
+            },
+            "line": {
+                "lineWidth": 2.5,
+                "shadowBlur": 8,
+                "lineType": "solid"
+            },
+            "area": {
+                "enabled": true
+            }
+        },
+        {
+            "type": "line",
+            "field": "vs_adPv",
+            "yAxisAlign": "left",
+            "node": {
+                "focus": {
+                    "alpha": 0.5,
+                    "radiusDiff": 8
+                },
+                "enabled": false
+            },
+            "line": {
+                "lineWidth": 2.5,
+                "shadowBlur": 8,
+                "lineType": "dashed"
+            },
+            "area": {
+                "enabled": true
+            }
+        },
+        {
+            "type": "line",
+            "field": "click",
+            "yAxisAlign": "right",
+            "node": {
+                "focus": {
+                    "alpha": 0.5,
+                    "radiusDiff": 8
+                },
+                "enabled": false
+            },
+            "line": {
+                "lineWidth": 2.5,
+                "shadowBlur": 8,
+                "lineType": "solid"
+            },
+            "area": {
+                "enabled": true
+            }
+        },
+        {
+            "type": "line",
+            "field": "vs_click",
+            "yAxisAlign": "right",
+            "node": {
+                "focus": {
+                    "alpha": 0.5,
+                    "radiusDiff": 8
+                },
+                "enabled": false
+            },
+            "line": {
+                "lineWidth": 2.5,
+                "shadowBlur": 8,
+                "lineType": "dashed"
+            },
+            "area": {
+                "enabled": true
+            }
+        }
+    ],
+    "tips": {
+        "pointerColor": "#999",
+        "pointerLineWidth": 1.5
+    },
+    "theme": [
+        "#4554e5",
+        "#a2a9f2",
+        "#f5714d",
+        "#fab8a6"
+    ]
+}
+
+try {
+    window.line = chartx.create("canvasTest" , data , options)
+} catch(e){
+
+}
+
+
+setTimeout( function(){
+    return;
+    chartx.create("canvasTest" , data , options)
+} , 3000)
+
+            </textarea></form>
+        </td>
+        <td style="padding:0 10px;" id="td-vr">
+            <div id="chartdemo-r">
+            <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
+                <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
+
+                <h4>折线图（bar chart）</h4>
+                <p>
+                    联系人：@释剑
+                </p>
+            </div>
+            <div  class="test-c">
+                <div id="canvasTest" style='width:100%;height:300px;position:relative;'></div>
+            </div>
+
+            </div>
+        </td>
+    </tr>
+</table>
+
+
+</body> 
+</html>
+
+

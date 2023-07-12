@@ -8388,7 +8388,7 @@ var chartx = (function () {
 	  */
 	};
 	var _default = {
-	  chartxVersion: '1.1.154',
+	  chartxVersion: '1.1.156',
 	  create: function create(el, data, opt) {
 	    var otherOptions = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
 	    var chart = null;
@@ -12360,7 +12360,7 @@ var chartx = (function () {
 	      var _arr = [];
 
 	      for (var i = 0, il = arr.length; i < il; i++) {
-	        if (arr[i] != null && arr[i] != undefined && arr[i] != '') {
+	        if (arr[i] !== null && arr[i] !== undefined && arr[i] !== '') {
 	          _arr.push(arr[i]);
 	        }
 	      }
@@ -60160,7 +60160,7 @@ var chartx = (function () {
 	}
 
 	var chartx = {
-	  version: '1.1.154',
+	  version: '1.1.156',
 	  options: {}
 	};
 

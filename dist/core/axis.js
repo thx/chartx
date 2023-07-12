@@ -270,7 +270,7 @@ var axis = /*#__PURE__*/function () {
       var _arr = [];
 
       for (var i = 0, il = arr.length; i < il; i++) {
-        if (arr[i] != null && arr[i] != undefined && arr[i] != '') {
+        if (arr[i] !== null && arr[i] !== undefined && arr[i] !== '') {
           _arr.push(arr[i]);
         }
       }

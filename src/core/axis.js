@@ -292,7 +292,7 @@ class axis {
  
         let _arr = [];
         for (let i = 0, il = arr.length; i < il; i++) {
-            if( arr[i] != null && arr[i] != undefined && arr[i] != ''){
+            if( arr[i] !== null && arr[i] !== undefined && arr[i] !== ''){
                 _arr.push( arr[i] );
             }
         };
