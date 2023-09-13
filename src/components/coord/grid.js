@@ -239,7 +239,9 @@ export default class rectGrid extends event.Dispatcher
                         let pos = _axis.getPosOf({
                             val
                         });
+                        
                         if( range.length == 1 ){
+                            
                             //TODO: 目前轴的计算有bug， 超过的部分返回也是0
                             // if( (
                             //         splitVals.length == 1 || 
@@ -253,13 +255,12 @@ export default class rectGrid extends event.Dispatcher
                             //     pos = self.width;
                             // };
 
-
-                            if( !pos &&  _axis.type == 'xAxis' && _axis.layoutType == 'rule' ){
-                                
+                            if( !pos &&  _axis.type == 'xAxis' ){
+                            
                                 let dataFrame = self._coord.app.dataFrame;
                                 let orgData = _.find( dataFrame.jsonOrg, function(item){
                                     return item[ _axis.field ] == val;
-                                } );
+                                } )
                                 if( orgData ){
                                     let orgIndex = orgData.__index__;
                                     if( orgIndex <= dataFrame.range.start ){
@@ -270,7 +271,11 @@ export default class rectGrid extends event.Dispatcher
                                     }
                                 }
 
-                            };
+                            }
+
+                            if( _axis.layoutType == 'peak' ){
+                                pos += _axis._cellLength/2
+                            }
 
                             range.push( pos );
                             fillRanges.push( range );

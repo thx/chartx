@@ -94,7 +94,11 @@ export default class GraphsBase extends Component
 
     show( field ){}
 
-    getLegendData(){}
+    getLegendData(){
+        // return {
+        //     graph: this
+        // }
+    }
 
     //触发事件, 事件处理函数中的this都指向对应的graphs对象。
     triggerEvent( e )

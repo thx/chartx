@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
+<title>xChart demo -- bar</title>
+
+<script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
+<script type="text/javascript" src="../../dist/index.iife.js"></script>
+<!-- codemirror -->
+<script type="text/javascript" src="../../lib/codemirror/codemirror.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/active-line.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/javascript.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/matchbrackets.js"></script>
+<link rel="stylesheet" href="../../lib/codemirror/codemirror.css">
+<link rel="stylesheet" href="../../lib/codemirror/zenburn.css">
+<link rel="stylesheet" href="../../lib/codemirror/docs.css">
+<!-- codemirror end -->
+<!--bootstrap-->
+<script type="text/javascript" src="../../lib/bootstrap/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap-theme.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/docs.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap.min.css">
+<!--bootstrap end-->
+<script type="text/javascript" src="../../lib/demo.js"></script>
+<link rel="stylesheet" href="../../lib/demo.css">
+</head>
+<body >
+
+<table>
+    <tr>
+        <td id="td-vl">
+            <form><textarea id="code" name="code">
+
+//chart的数据格式，xChart中所有的图表数据格式都是这样的二维数组，
+//第一行是表头。
+var data = [
+    {"time":"2017-03-21","pv":10,"uv":11,"click":12,"ppc":45},
+    {"time":"2017-03-22","pv":20,"uv":32,"click":14,"ppc":34},
+    {"time":"2017-03-23","pv":30,"uv":15,"click":12,"ppc":65},
+    {"time":"2017-03-24","pv":15,"uv":23,"click":21,"ppc":23},
+    {"time":"2017-03-25","pv":28,"uv":15,"click":15,"ppc":12}
+];
+
+//对比折线模板
+var variables = {
+    xField: 'time',
+    yLeftField: ['uv'],
+    yRightField: [],
+    theme: ['#365ACC', '#a3aaf0'],
+    fieldsConfig: {
+        uv: {
+            name: '行业UV',
+            format: '0,0.00'
+        }
+    },
+    xAxis: {
+        enabled: true,
+    },
+    yLeftAxis:{
+        enabled: true ,
+    },
+    yRightAxis:{
+        enabled: true ,
+    },
+    grid:{
+        enabled: true ,
+        xDimension: {
+            enabled: true,
+            splitVals: ['2017-03-22', '2017-03-23', '2017-03-25'],
+            splitLabels: ['冷启期', '成长期', '爆品期'],
+            fillStyle: ['#FFA53D', '#08BF81', '#FF4D4D'],
+            alpha: 0.1,
+            fontColor: ['#FFA53D', '#08BF81', '#FF4D4D'],
+        },
+    },
+    tips: {
+        enabled: true, 
+        content: undefined
+    },
+    
+}
+
+//hex -> rgb
+function hexToRgb(hex) {
+  return 'rgb(' + parseInt('0x' + hex.slice(1, 3)) + ',' + parseInt('0x' + hex.slice(3, 5))
+          + ',' + parseInt('0x' + hex.slice(5, 7)) + ')';
+}
+ 
+//hex -> rgba
+function hexToRgba(hex, opacity) {
+  return 'rgba(' + parseInt('0x' + hex.slice(1, 3)) + ',' + parseInt('0x' + hex.slice(3, 5)) + ','
+          + parseInt('0x' + hex.slice(5, 7)) + ',' + opacity + ')';
+}
+
+
+var options = {
+    coord: {
+        type: "rect",
+        fieldsConfig: variables.fieldsConfig,
+        xAxis: {
+            enabled: variables.xAxis.enabled,
+            field: variables.xField,
+            title: {
+                text: variables.xAxis.title
+            }
+        },
+        yAxis: {
+            enabled: variables.yLeftAxis.enabled,
+            title: {
+                text: variables.yLeftAxis.title
+            }
+        },
+        grid: {
+            enabled: variables.grid.enabled,
+            line: {
+                xDimension: {
+                    strokeStyle: "rgba(230,230,230,0.4)"
+                }
+            },
+             fill: {
+                xDimension: variables.grid.xDimension
+            }
+        }
+    },
+
+    graphs: (function () {
+        var getYAxis = function (fields, enabled, align) {
+            
+            if( !Array.isArray( fields ) ){
+                fields = [ fields ];
+            }
+
+            let graphs = [];
+
+            for( var i = 0,l = fields.length; i<l; i++ ){
+
+                var field = fields[ i ];
+                let fieldConfig = {};
+
+                for( var k in variables.fieldsConfig ){
+                    if( field == k ){
+                        fieldConfig = variables.fieldsConfig[k]
+                        break;
+                    }
+                }
+
+                var graph = {
+                    enabled: enabled,
+                    type: "bar",
+                    field: field,
+                    yAxisAlign: align,
+                    node: {
+                        focus: {
+                            alpha: 0.5,
+                            radiusDiff: 8
+                        },
+                        enabled: false
+                    },
+                    line: {
+                        lineWidth: 2.5,
+                        lineType: !!i ? "dashed" : "solid"
+                    },
+                    area: {
+                        alpha:0.3,
+                        lineargradientDriction:"topBottom",
+                        fillStyle: {
+                            lineargradient: [
+                                {
+                                    position: 0,
+                                    color: hexToRgba( variables.theme[ i ] || variables.theme[0] , 1) //'rgba(56, 90, 204, 1)'
+                                },
+                                {
+                                    position: 1,
+                                    color: hexToRgba( variables.theme[ i ] || variables.theme[0] , 0) //'rgba(56, 90, 204, 0)'
+                                }
+                            ]
+                        }
+                    },
+                }
+
+                Object.assign( graph.area, fieldConfig.area ); 
+
+                graphs.push( graph )
+            } 
+            
+            return graphs;
+             
+        }
+        var left = getYAxis(variables.yLeftField, variables.yLeftAxis.enabled, 'left')
+        var right = getYAxis(variables.yRightField, variables.yRightAxis.enabled, 'right');
+
+        return left.concat( right );
+
+    })(),
+    tips: (function () {
+        return !variables.tips.enabled ? undefined :{
+            pointerColor: "#ccc",
+            pointerLineWidth: 1.5,
+            content: variables.tips && variables.tips.content
+        }  
+    })(),
+    theme: variables.theme,
+    legend: variables.legend && variables.legend.enabled ? {} :undefined 
+};
+            
+                
+                window.bar = chartx.create("canvasTest" , data , options)
+                
+                            
+
+            </textarea></form>
+        </td>
+        <td style="padding:0 10px;" id="td-vr">
+            <div id="chartdemo-r">
+            <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
+                <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
+
+                <h4>柱状图（bar chart）</h4>
+                <p>
+                    联系人：@释剑
+                </p>
+            </div>
+            <div  class="test-c">
+                <div id="canvasTest" style='width:100%;height:300px;position:relative;'></div>
+            </div>
+
+            </div>
+        </td>
+    </tr>
+</table>
+
+    
+</body> 
+</html>
+
+

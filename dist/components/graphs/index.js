@@ -122,7 +122,10 @@ var GraphsBase = /*#__PURE__*/function (_Component) {
     value: function show(field) {}
   }, {
     key: "getLegendData",
-    value: function getLegendData() {} //触发事件, 事件处理函数中的this都指向对应的graphs对象。
+    value: function getLegendData() {// return {
+      //     graph: this
+      // }
+    } //触发事件, 事件处理函数中的this都指向对应的graphs对象。
 
   }, {
     key: "triggerEvent",

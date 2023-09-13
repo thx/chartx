@@ -698,7 +698,8 @@ class Chart extends event.Dispatcher
                     ind     : map.ind,
                     color   : map.color,
                     type    : map.type,
-                    yAxis   : map.yAxis
+                    yAxis   : map.yAxis,
+                    graph   : map.graph
                 } );
             }
         });

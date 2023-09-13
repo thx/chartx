@@ -162,7 +162,7 @@ var rectGrid = /*#__PURE__*/function (_event$Dispatcher) {
                 //     ) && pos == 0 ){
                 //     pos = self.width;
                 // };
-                if (!pos && _axis.type == 'xAxis' && _axis.layoutType == 'rule') {
+                if (!pos && _axis.type == 'xAxis') {
                   var dataFrame = self._coord.app.dataFrame;
 
                   var orgData = _.find(dataFrame.jsonOrg, function (item) {
@@ -182,7 +182,10 @@ var rectGrid = /*#__PURE__*/function (_event$Dispatcher) {
                   }
                 }
 
-                ;
+                if (_axis.layoutType == 'peak') {
+                  pos += _axis._cellLength / 2;
+                }
+
                 range.push(pos);
                 fillRanges.push(range);
                 var nextBegin = range[1];

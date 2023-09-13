@@ -604,9 +604,8 @@ var xAxis = /*#__PURE__*/function (_Axis) {
       var me = this;
       var arr = me.layoutData;
       var l = arr.length;
-      var textAlign = me.label.textAlign;
+      var textAlign = me.label.textAlign; //如果用户设置不想要做重叠检测
 
-      //如果用户设置不想要做重叠检测
       if (!this.label.evade || me.trimLayout) {
         _.each(arr, function (layoutItem) {
           layoutItem.visible = true;

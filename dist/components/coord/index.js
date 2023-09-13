@@ -179,7 +179,7 @@ var coordBase = /*#__PURE__*/function (_Component) {
               ;
               var config = me.fieldsConfig[field];
 
-              var fieldItem = _objectSpread({
+              var fieldItem = _objectSpread(_objectSpread({
                 field: field,
                 name: field,
                 //fieldConfig中可能会覆盖
@@ -187,7 +187,9 @@ var coordBase = /*#__PURE__*/function (_Component) {
                 enabled: true,
                 color: color,
                 ind: ind++
-              }, me.fieldsConfig[field] || {});
+              }, me.fieldsConfig[field] || {}), {}, {
+                graph: graph
+              });
 
               fieldItem.getFormatValue = function (value) {
                 return me.getFormatValue(value, config, fieldItem);

@@ -6,6 +6,7 @@ import {getDefaultProps} from "../../utils/tools"
 let { _,event} = Canvax;
 let Circle = Canvax.Shapes.Circle;
 let Rect = Canvax.Shapes.Rect;
+let Line = Canvax.Shapes.Line;
 
 class Legend extends Component
 {
@@ -50,10 +51,6 @@ class Legend extends Component
                     width : {
                         detail : '图标宽',
                         default : 'auto'
-                    },
-                    shapeType : {
-                        detail : '图标的图形类型，目前只实现了圆形',
-                        default: 'circle'
                     },
                     radius : {
                         detail : '图标（circle）半径',
@@ -379,15 +376,25 @@ class Legend extends Component
         let el;
 
         if( obj.type == 'line' ){
-            el = new Rect({
+            let lineType = obj?.graph?.line?.lineType || "solid"
+            
+            el = new Line({
                 id : "legend_field_icon_"+i,
                 context : {
-                    x     : -this.icon.radius,
-                    y     : this.icon.height / 3 - 1 ,
-                    fillStyle : fillStyle,
-                    width : this.icon.radius*2,
-                    height: 2,
-                    cursor: "pointer"
+                    
+                    start : {
+                        x     : -this.icon.radius,
+                        y     : this.icon.height / 3 - 1 ,
+                    },
+                    end : {
+                        x     : -this.icon.radius + this.icon.radius*2,
+                        y     : this.icon.height / 3 - 1 ,
+                    },
+                    strokeStyle : fillStyle,
+                    lineWidth: 2,
+                    cursor: "pointer",
+                    lineType,
+                    lineDash: [2,4]
                 }
             });
         } else if( obj.type == 'bar' ){

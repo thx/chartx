@@ -507,7 +507,7 @@ export default class xAxis extends Axis
         let arr = me.layoutData;
         let l = arr.length;  
         let textAlign = me.label.textAlign; 
-debugger
+
         //如果用户设置不想要做重叠检测
         if( !this.label.evade || me.trimLayout ){
             _.each( arr , function( layoutItem ){

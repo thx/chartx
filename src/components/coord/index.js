@@ -168,7 +168,8 @@ class coordBase extends Component
                         enabled : true,
                         color,
                         ind : ind++,
-                        ...(me.fieldsConfig[ field ] || {})
+                        ...(me.fieldsConfig[ field ] || {}),
+                        graph
                     };
 
                     fieldItem.getFormatValue = ( value )=>{

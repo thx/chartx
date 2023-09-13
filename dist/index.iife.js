@@ -10648,7 +10648,7 @@ var chartx = (function () {
 	              }
 	              var config = me.fieldsConfig[field];
 
-	              var fieldItem = _objectSpread({
+	              var fieldItem = _objectSpread(_objectSpread({
 	                field: field,
 	                name: field,
 	                //fieldConfig中可能会覆盖
@@ -10656,7 +10656,9 @@ var chartx = (function () {
 	                enabled: true,
 	                color: color,
 	                ind: ind++
-	              }, me.fieldsConfig[field] || {});
+	              }, me.fieldsConfig[field] || {}), {}, {
+	                graph: graph
+	              });
 
 	              fieldItem.getFormatValue = function (value) {
 	                return me.getFormatValue(value, config, fieldItem);
@@ -11772,7 +11774,8 @@ var chartx = (function () {
 	            ind: map.ind,
 	            color: map.color,
 	            type: map.type,
-	            yAxis: map.yAxis
+	            yAxis: map.yAxis,
+	            graph: map.graph
 	          });
 	        }
 	      });
@@ -13839,9 +13842,8 @@ var chartx = (function () {
 	      var me = this;
 	      var arr = me.layoutData;
 	      var l = arr.length;
-	      var textAlign = me.label.textAlign;
+	      var textAlign = me.label.textAlign; //如果用户设置不想要做重叠检测
 
-	      //如果用户设置不想要做重叠检测
 	      if (!this.label.evade || me.trimLayout) {
 	        _.each(arr, function (layoutItem) {
 	          layoutItem.visible = true;
@@ -14679,7 +14681,7 @@ var chartx = (function () {
 	                //     ) && pos == 0 ){
 	                //     pos = self.width;
 	                // };
-	                if (!pos && _axis.type == 'xAxis' && _axis.layoutType == 'rule') {
+	                if (!pos && _axis.type == 'xAxis') {
 	                  var dataFrame = self._coord.app.dataFrame;
 
 	                  var orgData = _.find(dataFrame.jsonOrg, function (item) {
@@ -14698,6 +14700,11 @@ var chartx = (function () {
 	                    }
 	                  }
 	                }
+
+	                if (_axis.layoutType == 'peak') {
+	                  pos += _axis._cellLength / 2;
+	                }
+
 	                range.push(pos);
 	                fillRanges.push(range);
 	                var nextBegin = range[1];
@@ -17258,7 +17265,10 @@ var chartx = (function () {
 	    value: function show(field) {}
 	  }, {
 	    key: "getLegendData",
-	    value: function getLegendData() {} //触发事件, 事件处理函数中的this都指向对应的graphs对象。
+	    value: function getLegendData() {// return {
+	      //     graph: this
+	      // }
+	    } //触发事件, 事件处理函数中的this都指向对应的graphs对象。
 
 	  }, {
 	    key: "triggerEvent",
@@ -18162,7 +18172,7 @@ var chartx = (function () {
 	                  preData[i].isLeaf = false;
 	                  return preY;
 	                } else {
-	                  return _getFromY(tempBarData, v - 1, i, val);
+	                  return preY; // _getFromY( tempBarData, v-1, i, val, y );
 	                }
 	              } else {
 	                if (preVal < yBaseNumber) {
@@ -53396,6 +53406,7 @@ var chartx = (function () {
 	    event = _canvax["default"].event;
 	var Circle = _canvax["default"].Shapes.Circle;
 	var Rect = _canvax["default"].Shapes.Rect;
+	var Line = _canvax["default"].Shapes.Line;
 
 	var Legend = /*#__PURE__*/function (_Component) {
 	  (0, _inherits2["default"])(Legend, _Component);
@@ -53665,15 +53676,25 @@ var chartx = (function () {
 	      var el;
 
 	      if (obj.type == 'line') {
-	        el = new Rect({
+	        var _obj$graph, _obj$graph$line;
+
+	        var lineType = (obj === null || obj === void 0 ? void 0 : (_obj$graph = obj.graph) === null || _obj$graph === void 0 ? void 0 : (_obj$graph$line = _obj$graph.line) === null || _obj$graph$line === void 0 ? void 0 : _obj$graph$line.lineType) || "solid";
+	        el = new Line({
 	          id: "legend_field_icon_" + i,
 	          context: {
-	            x: -this.icon.radius,
-	            y: this.icon.height / 3 - 1,
-	            fillStyle: fillStyle,
-	            width: this.icon.radius * 2,
-	            height: 2,
-	            cursor: "pointer"
+	            start: {
+	              x: -this.icon.radius,
+	              y: this.icon.height / 3 - 1
+	            },
+	            end: {
+	              x: -this.icon.radius + this.icon.radius * 2,
+	              y: this.icon.height / 3 - 1
+	            },
+	            strokeStyle: fillStyle,
+	            lineWidth: 2,
+	            cursor: "pointer",
+	            lineType: lineType,
+	            lineDash: [2, 4]
 	          }
 	        });
 	      } else if (obj.type == 'bar') {
@@ -53775,10 +53796,6 @@ var chartx = (function () {
 	            width: {
 	              detail: '图标宽',
 	              "default": 'auto'
-	            },
-	            shapeType: {
-	              detail: '图标的图形类型，目前只实现了圆形',
-	              "default": 'circle'
 	            },
 	            radius: {
 	              detail: '图标（circle）半径',

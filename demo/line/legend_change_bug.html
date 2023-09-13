@@ -78,18 +78,15 @@
                     graphs:[
                         {
                             type:"line",
-                            field:"collect" 
-                        },
-                        {
-                            type:"line",
                             field:"ad_over",
                             line: {
-                                strokeStyle: 'red'
+                                strokeStyle: 'red',
+                                lineType: 'dashed'
                             }
                         },
                         {
                             type:"line",
-                            field:"ad_new" 
+                            field:["ad_new" ,"collect"]
                         }   
                     ],
                     legend:{

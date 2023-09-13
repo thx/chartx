@@ -876,7 +876,7 @@ var BarGraphs = /*#__PURE__*/function (_GraphsBase) {
                   preData[i].isLeaf = false;
                   return preY;
                 } else {
-                  return _getFromY(tempBarData, v - 1, i, val, y);
+                  return preY; // _getFromY( tempBarData, v-1, i, val, y );
                 }
               } else {
                 if (preVal < yBaseNumber) {

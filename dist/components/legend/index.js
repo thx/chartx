@@ -35,6 +35,7 @@ var _ = _canvax["default"]._,
     event = _canvax["default"].event;
 var Circle = _canvax["default"].Shapes.Circle;
 var Rect = _canvax["default"].Shapes.Rect;
+var Line = _canvax["default"].Shapes.Line;
 
 var Legend = /*#__PURE__*/function (_Component) {
   (0, _inherits2["default"])(Legend, _Component);
@@ -350,15 +351,25 @@ var Legend = /*#__PURE__*/function (_Component) {
       var el;
 
       if (obj.type == 'line') {
-        el = new Rect({
+        var _obj$graph, _obj$graph$line;
+
+        var lineType = (obj === null || obj === void 0 ? void 0 : (_obj$graph = obj.graph) === null || _obj$graph === void 0 ? void 0 : (_obj$graph$line = _obj$graph.line) === null || _obj$graph$line === void 0 ? void 0 : _obj$graph$line.lineType) || "solid";
+        el = new Line({
           id: "legend_field_icon_" + i,
           context: {
-            x: -this.icon.radius,
-            y: this.icon.height / 3 - 1,
-            fillStyle: fillStyle,
-            width: this.icon.radius * 2,
-            height: 2,
-            cursor: "pointer"
+            start: {
+              x: -this.icon.radius,
+              y: this.icon.height / 3 - 1
+            },
+            end: {
+              x: -this.icon.radius + this.icon.radius * 2,
+              y: this.icon.height / 3 - 1
+            },
+            strokeStyle: fillStyle,
+            lineWidth: 2,
+            cursor: "pointer",
+            lineType: lineType,
+            lineDash: [2, 4]
           }
         });
       } else if (obj.type == 'bar') {
@@ -466,10 +477,6 @@ var Legend = /*#__PURE__*/function (_Component) {
             width: {
               detail: '图标宽',
               "default": 'auto'
-            },
-            shapeType: {
-              detail: '图标的图形类型，目前只实现了圆形',
-              "default": 'circle'
             },
             radius: {
               detail: '图标（circle）半径',
