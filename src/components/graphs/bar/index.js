@@ -911,7 +911,7 @@ class BarGraphs extends GraphsBase
                                 preData[i].isLeaf = false;
                                 return preY;
                             } else {
-                                return preY// _getFromY( tempBarData, v-1, i, val, y );
+                                return preY;// _getFromY( tempBarData, v-1, i, val, y );
                             }
                         } else {
                             if( preVal < yBaseNumber ){

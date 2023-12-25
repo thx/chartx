@@ -36,11 +36,17 @@
                 <form>
                     <textarea id="code" name="code">
 var data0 = []
-var data = [
+var data1 = [
     ["percent"   ,"self","compete"],
-    ["2017-03-21",1011  ,11],
-    ["2017-03-22",2011  ,32],
-    ["2017-03-23",3011  ,15]
+    ["2017-03-21",1011  ,null],
+    ["2017-03-22",2011  ,null],
+    ["2017-03-23",3011  ,null]
+];
+var data2 = [
+    ["percent"   ,"self","compete"],
+    ["2017-03-21",1011  ,1221],
+    ["2017-03-22",2011  ,3222],
+    ["2017-03-23",3011  ,1225]
 ];
                 
 var options = {
@@ -61,7 +67,7 @@ var options = {
     graphs: [
         {
             type: "bar",
-            field: "self"
+            field: ["self","compete"]
         }
     ]
 }
@@ -69,29 +75,13 @@ var options = {
 window.bar = chartx.create("canvasTest" , data0 , options)
             
 setTimeout(function(){
-    bar.reset({
-        coord: {
-            type: "rect",
-            //horizontal: true,
-            xAxis: {
-                field: "percent",
-                enabled: false,
-                title: "Title"
-            },
-            yAxis: {
-                title: {
-                    text: "yAxis Title"
-                }
-            }
-        },
-        graphs: [
-            {
-                type: "bar",
-                field: "self"
-            }
-        ]
-    }, data );
-} , 2000)
+    bar.resetData( data1 );
+
+    setTimeout(function(){
+        bar.resetData( data2 );
+    } , 1000)
+
+} , 1000)
                        
             
 

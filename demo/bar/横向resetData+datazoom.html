@@ -1,0 +1,1268 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1"
+    />
+    <title>xChart demo -- bar</title>
+
+    <script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
+    <script type="text/javascript" src="../../dist/index.iife.js"></script>
+    <!-- codemirror -->
+    <script type="text/javascript" src="../../lib/codemirror/codemirror.js"></script>
+    <script type="text/javascript" src="../../lib/codemirror/active-line.js"></script>
+    <script type="text/javascript" src="../../lib/codemirror/javascript.js"></script>
+    <script type="text/javascript" src="../../lib/codemirror/matchbrackets.js"></script>
+    <link rel="stylesheet" href="../../lib/codemirror/codemirror.css">
+    <link rel="stylesheet" href="../../lib/codemirror/zenburn.css">
+    <link rel="stylesheet" href="../../lib/codemirror/docs.css">
+    <!-- codemirror end -->
+    <!--bootstrap-->
+    <script type="text/javascript" src="../../lib/bootstrap/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="../../lib/bootstrap/css/docs.min.css">
+    <link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap.min.css">
+    <!--bootstrap end-->
+    <script type="text/javascript" src="../../lib/demo.js"></script>
+    <link rel="stylesheet" href="../../lib/demo.css">
+</head>
+
+<body>
+<script>
+    var data0 = [
+{
+    "id": 80298,
+    "name": "宝贝名称80298",
+    "transforms": [
+        {
+            "statusId": 0,
+            "uv": 9158789,
+            "statusName": "资产总体",
+            "statusDesc": "描述贺丽"
+        },
+        {
+            "statusId": 8001,
+            "uv": 4806054,
+            "statusName": "浅种草",
+            "statusDesc": "描述顾艳"
+        },
+        {
+            "statusId": 8002,
+            "uv": 9199943,
+            "statusName": "深种草",
+            "statusDesc": "描述沈平"
+        },
+        {
+            "statusId": 8003,
+            "uv": 3305741,
+            "statusName": "拉新",
+            "statusDesc": "描述陈磊"
+        },
+        {
+            "statusId": 8004,
+            "uv": 9685955,
+            "statusName": "复购",
+            "statusDesc": "描述袁军"
+        },
+        {
+            "statusId": 8005,
+            "uv": 7673374,
+            "statusName": "连带",
+            "statusDesc": "描述宋敏"
+        }
+    ],
+    "pictUrl": "https://img.alicdn.com/imgextra/i3/O1CN011RCFjc20To6GyeuCa_!!6000000006851-2-tps-122-120.png",
+    "detailUrl": "https://detail.tmall.com/item.htm?id=624139784464",
+    "reservePrice": 100.57,
+    "onlineDays": 20,
+    "itemLabels": [
+        "首购资产转化能力强"
+    ],
+    "showName": "宝贝名称80298\nID: 80298",
+    "uv0": 9158789,
+    "uv8001": 4806054,
+    "uv8002": 9199943,
+    "uv8003": 3305741,
+    "uv8004": 9685955,
+    "uv8005": 7673374
+},
+{
+    "id": 26033,
+    "name": "宝贝名称26033",
+    "transforms": [
+        {
+            "statusId": 0,
+            "uv": 5194867,
+            "statusName": "资产总体",
+            "statusDesc": "描述罗艳"
+        },
+        {
+            "statusId": 8001,
+            "uv": 1123781,
+            "statusName": "浅种草",
+            "statusDesc": "描述孟桂英"
+        },
+        {
+            "statusId": 8002,
+            "uv": 8218584,
+            "statusName": "深种草",
+            "statusDesc": "描述白杰"
+        },
+        {
+            "statusId": 8003,
+            "uv": 4767643,
+            "statusName": "拉新",
+            "statusDesc": "描述秦艳"
+        },
+        {
+            "statusId": 8004,
+            "uv": 9457915,
+            "statusName": "复购",
+            "statusDesc": "描述何强"
+        },
+        {
+            "statusId": 8005,
+            "uv": 1218816,
+            "statusName": "连带",
+            "statusDesc": "描述萧杰"
+        }
+    ],
+    "pictUrl": "https://img.alicdn.com/imgextra/i3/O1CN011RCFjc20To6GyeuCa_!!6000000006851-2-tps-122-120.png",
+    "detailUrl": "https://detail.tmall.com/item.htm?id=624139784464",
+    "reservePrice": 100.32,
+    "onlineDays": 673,
+    "itemLabels": [
+        "首购资产转化能力强"
+    ],
+    "showName": "宝贝名称26033\nID: 26033",
+    "uv0": 5194867,
+    "uv8001": 1123781,
+    "uv8002": 8218584,
+    "uv8003": 4767643,
+    "uv8004": 9457915,
+    "uv8005": 1218816
+},
+{
+    "id": 23213,
+    "name": "宝贝名称23213",
+    "transforms": [
+        {
+            "statusId": 0,
+            "uv": 5184396,
+            "statusName": "资产总体",
+            "statusDesc": "描述林洋"
+        },
+        {
+            "statusId": 8001,
+            "uv": 5861072,
+            "statusName": "浅种草",
+            "statusDesc": "描述朱芳"
+        },
+        {
+            "statusId": 8002,
+            "uv": 3012413,
+            "statusName": "深种草",
+            "statusDesc": "描述孟秀英"
+        },
+        {
+            "statusId": 8003,
+            "uv": 7165713,
+            "statusName": "拉新",
+            "statusDesc": "描述蔡丽"
+        },
+        {
+            "statusId": 8004,
+            "uv": 5078737,
+            "statusName": "复购",
+            "statusDesc": "描述黄秀兰"
+        },
+        {
+            "statusId": 8005,
+            "uv": 6621688,
+            "statusName": "连带",
+            "statusDesc": "描述毛刚"
+        }
+    ],
+    "pictUrl": "https://img.alicdn.com/imgextra/i3/O1CN011RCFjc20To6GyeuCa_!!6000000006851-2-tps-122-120.png",
+    "detailUrl": "https://detail.tmall.com/item.htm?id=624139784464",
+    "reservePrice": 100.55,
+    "onlineDays": 711,
+    "itemLabels": [
+        "首购资产转化能力强"
+    ],
+    "showName": "宝贝名称23213\nID: 23213",
+    "uv0": 5184396,
+    "uv8001": 5861072,
+    "uv8002": 3012413,
+    "uv8003": 7165713,
+    "uv8004": 5078737,
+    "uv8005": 6621688
+},
+{
+    "id": 77639,
+    "name": "宝贝名称77639",
+    "transforms": [
+        {
+            "statusId": 0,
+            "uv": 423306,
+            "statusName": "资产总体",
+            "statusDesc": "描述钱丽"
+        },
+        {
+            "statusId": 8001,
+            "uv": 2842645,
+            "statusName": "浅种草",
+            "statusDesc": "描述康强"
+        },
+        {
+            "statusId": 8002,
+            "uv": 9448736,
+            "statusName": "深种草",
+            "statusDesc": "描述周强"
+        },
+        {
+            "statusId": 8003,
+            "uv": 3378496,
+            "statusName": "拉新",
+            "statusDesc": "描述冯秀英"
+        },
+        {
+            "statusId": 8004,
+            "uv": 7190689,
+            "statusName": "复购",
+            "statusDesc": "描述赵娟"
+        },
+        {
+            "statusId": 8005,
+            "uv": 6209527,
+            "statusName": "连带",
+            "statusDesc": "描述徐静"
+        }
+    ],
+    "pictUrl": "https://img.alicdn.com/imgextra/i3/O1CN011RCFjc20To6GyeuCa_!!6000000006851-2-tps-122-120.png",
+    "detailUrl": "https://detail.tmall.com/item.htm?id=624139784464",
+    "reservePrice": 100.08,
+    "onlineDays": 947,
+    "itemLabels": [
+        "首购资产转化能力强"
+    ],
+    "showName": "宝贝名称77639\nID: 77639",
+    "uv0": 423306,
+    "uv8001": 2842645,
+    "uv8002": 9448736,
+    "uv8003": 3378496,
+    "uv8004": 7190689,
+    "uv8005": 6209527
+},
+{
+    "id": 53740,
+    "name": "宝贝名称53740",
+    "transforms": [
+        {
+            "statusId": 0,
+            "uv": 8469031,
+            "statusName": "资产总体",
+            "statusDesc": "描述彭娜"
+        },
+        {
+            "statusId": 8001,
+            "uv": 2875144,
+            "statusName": "浅种草",
+            "statusDesc": "描述武芳"
+        },
+        {
+            "statusId": 8002,
+            "uv": 1054815,
+            "statusName": "深种草",
+            "statusDesc": "描述武静"
+        },
+        {
+            "statusId": 8003,
+            "uv": 7654280,
+            "statusName": "拉新",
+            "statusDesc": "描述贾秀兰"
+        },
+        {
+            "statusId": 8004,
+            "uv": 8597104,
+            "statusName": "复购",
+            "statusDesc": "描述程刚"
+        },
+        {
+            "statusId": 8005,
+            "uv": 2771951,
+            "statusName": "连带",
+            "statusDesc": "描述易娟"
+        }
+    ],
+    "pictUrl": "https://img.alicdn.com/imgextra/i3/O1CN011RCFjc20To6GyeuCa_!!6000000006851-2-tps-122-120.png",
+    "detailUrl": "https://detail.tmall.com/item.htm?id=624139784464",
+    "reservePrice": 100.45,
+    "onlineDays": 417,
+    "itemLabels": [
+        "首购资产转化能力强"
+    ],
+    "showName": "宝贝名称53740\nID: 53740",
+    "uv0": 8469031,
+    "uv8001": 2875144,
+    "uv8002": 1054815,
+    "uv8003": 7654280,
+    "uv8004": 8597104,
+    "uv8005": 2771951
+},
+{
+    "id": 75335,
+    "name": "宝贝名称75335",
+    "transforms": [
+        {
+            "statusId": 0,
+            "uv": 8287219,
+            "statusName": "资产总体",
+            "statusDesc": "描述史强"
+        },
+        {
+            "statusId": 8001,
+            "uv": 1219831,
+            "statusName": "浅种草",
+            "statusDesc": "描述段明"
+        },
+        {
+            "statusId": 8002,
+            "uv": 8150625,
+            "statusName": "深种草",
+            "statusDesc": "描述汪静"
+        },
+        {
+            "statusId": 8003,
+            "uv": 9021154,
+            "statusName": "拉新",
+            "statusDesc": "描述姜强"
+        },
+        {
+            "statusId": 8004,
+            "uv": 4264578,
+            "statusName": "复购",
+            "statusDesc": "描述梁强"
+        },
+        {
+            "statusId": 8005,
+            "uv": 9254603,
+            "statusName": "连带",
+            "statusDesc": "描述梁勇"
+        }
+    ],
+    "pictUrl": "https://img.alicdn.com/imgextra/i3/O1CN011RCFjc20To6GyeuCa_!!6000000006851-2-tps-122-120.png",
+    "detailUrl": "https://detail.tmall.com/item.htm?id=624139784464",
+    "reservePrice": 100.34,
+    "onlineDays": 906,
+    "itemLabels": [
+        "首购资产转化能力强"
+    ],
+    "showName": "宝贝名称75335\nID: 75335",
+    "uv0": 8287219,
+    "uv8001": 1219831,
+    "uv8002": 8150625,
+    "uv8003": 9021154,
+    "uv8004": 4264578,
+    "uv8005": 9254603
+},
+{
+    "id": 91902,
+    "name": "宝贝名称91902",
+    "transforms": [
+        {
+            "statusId": 0,
+            "uv": 3428623,
+            "statusName": "资产总体",
+            "statusDesc": "描述姚杰"
+        },
+        {
+            "statusId": 8001,
+            "uv": 8385807,
+            "statusName": "浅种草",
+            "statusDesc": "描述何平"
+        },
+        {
+            "statusId": 8002,
+            "uv": 6227358,
+            "statusName": "深种草",
+            "statusDesc": "描述傅丽"
+        },
+        {
+            "statusId": 8003,
+            "uv": 507978,
+            "statusName": "拉新",
+            "statusDesc": "描述侯平"
+        },
+        {
+            "statusId": 8004,
+            "uv": 796273,
+            "statusName": "复购",
+            "statusDesc": "描述钱桂英"
+        },
+        {
+            "statusId": 8005,
+            "uv": 7445676,
+            "statusName": "连带",
+            "statusDesc": "描述姚秀兰"
+        }
+    ],
+    "pictUrl": "https://img.alicdn.com/imgextra/i3/O1CN011RCFjc20To6GyeuCa_!!6000000006851-2-tps-122-120.png",
+    "detailUrl": "https://detail.tmall.com/item.htm?id=624139784464",
+    "reservePrice": 100.38,
+    "onlineDays": 588,
+    "itemLabels": [
+        "首购资产转化能力强"
+    ],
+    "showName": "宝贝名称91902\nID: 91902",
+    "uv0": 3428623,
+    "uv8001": 8385807,
+    "uv8002": 6227358,
+    "uv8003": 507978,
+    "uv8004": 796273,
+    "uv8005": 7445676
+},
+{
+    "id": 3338,
+    "name": "宝贝名称3338",
+    "transforms": [
+        {
+            "statusId": 0,
+            "uv": 4661180,
+            "statusName": "资产总体",
+            "statusDesc": "描述丁霞"
+        },
+        {
+            "statusId": 8001,
+            "uv": 5183209,
+            "statusName": "浅种草",
+            "statusDesc": "描述沈桂英"
+        },
+        {
+            "statusId": 8002,
+            "uv": 8856784,
+            "statusName": "深种草",
+            "statusDesc": "描述邓磊"
+        },
+        {
+            "statusId": 8003,
+            "uv": 3023387,
+            "statusName": "拉新",
+            "statusDesc": "描述江娟"
+        },
+        {
+            "statusId": 8004,
+            "uv": 6519224,
+            "statusName": "复购",
+            "statusDesc": "描述史芳"
+        },
+        {
+            "statusId": 8005,
+            "uv": 7887160,
+            "statusName": "连带",
+            "statusDesc": "描述崔敏"
+        }
+    ],
+    "pictUrl": "https://img.alicdn.com/imgextra/i3/O1CN011RCFjc20To6GyeuCa_!!6000000006851-2-tps-122-120.png",
+    "detailUrl": "https://detail.tmall.com/item.htm?id=624139784464",
+    "reservePrice": 100.55,
+    "onlineDays": 219,
+    "itemLabels": [
+        "首购资产转化能力强"
+    ],
+    "showName": "宝贝名称3338\nID: 3338",
+    "uv0": 4661180,
+    "uv8001": 5183209,
+    "uv8002": 8856784,
+    "uv8003": 3023387,
+    "uv8004": 6519224,
+    "uv8005": 7887160
+},
+{
+    "id": 46140,
+    "name": "宝贝名称46140",
+    "transforms": [
+        {
+            "statusId": 0,
+            "uv": 3944793,
+            "statusName": "资产总体",
+            "statusDesc": "描述高秀兰"
+        },
+        {
+            "statusId": 8001,
+            "uv": 4948621,
+            "statusName": "浅种草",
+            "statusDesc": "描述任超"
+        },
+        {
+            "statusId": 8002,
+            "uv": 6855984,
+            "statusName": "深种草",
+            "statusDesc": "描述秦秀兰"
+        },
+        {
+            "statusId": 8003,
+            "uv": 5609852,
+            "statusName": "拉新",
+            "statusDesc": "描述贾平"
+        },
+        {
+            "statusId": 8004,
+            "uv": 6771285,
+            "statusName": "复购",
+            "statusDesc": "描述傅刚"
+        },
+        {
+            "statusId": 8005,
+            "uv": 5717405,
+            "statusName": "连带",
+            "statusDesc": "描述张平"
+        }
+    ],
+    "pictUrl": "https://img.alicdn.com/imgextra/i3/O1CN011RCFjc20To6GyeuCa_!!6000000006851-2-tps-122-120.png",
+    "detailUrl": "https://detail.tmall.com/item.htm?id=624139784464",
+    "reservePrice": 100.53,
+    "onlineDays": 600,
+    "itemLabels": [
+        "首购资产转化能力强"
+    ],
+    "showName": "宝贝名称46140\nID: 46140",
+    "uv0": 3944793,
+    "uv8001": 4948621,
+    "uv8002": 6855984,
+    "uv8003": 5609852,
+    "uv8004": 6771285,
+    "uv8005": 5717405
+},
+{
+    "id": 13073,
+    "name": "宝贝名称13073",
+    "transforms": [
+        {
+            "statusId": 0,
+            "uv": 949424,
+            "statusName": "资产总体",
+            "statusDesc": "描述王刚"
+        },
+        {
+            "statusId": 8001,
+            "uv": 1606503,
+            "statusName": "浅种草",
+            "statusDesc": "描述宋静"
+        },
+        {
+            "statusId": 8002,
+            "uv": 9328025,
+            "statusName": "深种草",
+            "statusDesc": "描述徐勇"
+        },
+        {
+            "statusId": 8003,
+            "uv": 4552879,
+            "statusName": "拉新",
+            "statusDesc": "描述陆勇"
+        },
+        {
+            "statusId": 8004,
+            "uv": 2546899,
+            "statusName": "复购",
+            "statusDesc": "描述武静"
+        },
+        {
+            "statusId": 8005,
+            "uv": 9164972,
+            "statusName": "连带",
+            "statusDesc": "描述姜娟"
+        }
+    ],
+    "pictUrl": "https://img.alicdn.com/imgextra/i3/O1CN011RCFjc20To6GyeuCa_!!6000000006851-2-tps-122-120.png",
+    "detailUrl": "https://detail.tmall.com/item.htm?id=624139784464",
+    "reservePrice": 100.14,
+    "onlineDays": 412,
+    "itemLabels": [
+        "首购资产转化能力强"
+    ],
+    "showName": "宝贝名称13073\nID: 13073",
+    "uv0": 949424,
+    "uv8001": 1606503,
+    "uv8002": 9328025,
+    "uv8003": 4552879,
+    "uv8004": 2546899,
+    "uv8005": 9164972
+}
+]
+
+var data1 = [
+{
+    "id": 1494,
+    "name": "宝贝名称1494",
+    "transforms": [
+        {
+            "statusId": 0,
+            "uv": 3682849,
+            "statusName": "资产总体",
+            "statusDesc": "描述程芳"
+        },
+        {
+            "statusId": 8001,
+            "uv": 730670,
+            "statusName": "浅种草",
+            "statusDesc": "描述陈艳"
+        },
+        {
+            "statusId": 8002,
+            "uv": 1183934,
+            "statusName": "深种草",
+            "statusDesc": "描述孔艳"
+        },
+        {
+            "statusId": 8003,
+            "uv": 6389554,
+            "statusName": "拉新",
+            "statusDesc": "描述潘磊"
+        },
+        {
+            "statusId": 8004,
+            "uv": 7973894,
+            "statusName": "复购",
+            "statusDesc": "描述田秀兰"
+        },
+        {
+            "statusId": 8005,
+            "uv": 685612,
+            "statusName": "连带",
+            "statusDesc": "描述姚涛"
+        }
+    ],
+    "pictUrl": "https://img.alicdn.com/imgextra/i3/O1CN011RCFjc20To6GyeuCa_!!6000000006851-2-tps-122-120.png",
+    "detailUrl": "https://detail.tmall.com/item.htm?id=624139784464",
+    "reservePrice": 100.65,
+    "onlineDays": 824,
+    "itemLabels": [
+        "首购资产转化能力强"
+    ],
+    "showName": "宝贝名称1494\nID: 1494",
+    "uv0": 3682849,
+    "uv8001": 730670,
+    "uv8002": 1183934,
+    "uv8003": 6389554,
+    "uv8004": 7973894,
+    "uv8005": 685612
+},
+{
+    "id": 45078,
+    "name": "宝贝名称45078",
+    "transforms": [
+        {
+            "statusId": 0,
+            "uv": 5018633,
+            "statusName": "资产总体",
+            "statusDesc": "描述姚平"
+        },
+        {
+            "statusId": 8001,
+            "uv": 7462536,
+            "statusName": "浅种草",
+            "statusDesc": "描述尹伟"
+        },
+        {
+            "statusId": 8002,
+            "uv": 4829613,
+            "statusName": "深种草",
+            "statusDesc": "描述谢静"
+        },
+        {
+            "statusId": 8003,
+            "uv": 2430701,
+            "statusName": "拉新",
+            "statusDesc": "描述方秀英"
+        },
+        {
+            "statusId": 8004,
+            "uv": 5007270,
+            "statusName": "复购",
+            "statusDesc": "描述梁娜"
+        },
+        {
+            "statusId": 8005,
+            "uv": 6647149,
+            "statusName": "连带",
+            "statusDesc": "描述任磊"
+        }
+    ],
+    "pictUrl": "https://img.alicdn.com/imgextra/i3/O1CN011RCFjc20To6GyeuCa_!!6000000006851-2-tps-122-120.png",
+    "detailUrl": "https://detail.tmall.com/item.htm?id=624139784464",
+    "reservePrice": 100.85,
+    "onlineDays": 24,
+    "itemLabels": [
+        "首购资产转化能力强"
+    ],
+    "showName": "宝贝名称45078\nID: 45078",
+    "uv0": 5018633,
+    "uv8001": 7462536,
+    "uv8002": 4829613,
+    "uv8003": 2430701,
+    "uv8004": 5007270,
+    "uv8005": 6647149
+},
+{
+    "id": 90928,
+    "name": "宝贝名称90928",
+    "transforms": [
+        {
+            "statusId": 0,
+            "uv": 6204637,
+            "statusName": "资产总体",
+            "statusDesc": "描述冯桂英"
+        },
+        {
+            "statusId": 8001,
+            "uv": 3136109,
+            "statusName": "浅种草",
+            "statusDesc": "描述孔丽"
+        },
+        {
+            "statusId": 8002,
+            "uv": 9494745,
+            "statusName": "深种草",
+            "statusDesc": "描述彭平"
+        },
+        {
+            "statusId": 8003,
+            "uv": 9644383,
+            "statusName": "拉新",
+            "statusDesc": "描述龙秀英"
+        },
+        {
+            "statusId": 8004,
+            "uv": 5238445,
+            "statusName": "复购",
+            "statusDesc": "描述邱秀英"
+        },
+        {
+            "statusId": 8005,
+            "uv": 4821255,
+            "statusName": "连带",
+            "statusDesc": "描述任明"
+        }
+    ],
+    "pictUrl": "https://img.alicdn.com/imgextra/i3/O1CN011RCFjc20To6GyeuCa_!!6000000006851-2-tps-122-120.png",
+    "detailUrl": "https://detail.tmall.com/item.htm?id=624139784464",
+    "reservePrice": 100.55,
+    "onlineDays": 906,
+    "itemLabels": [
+        "首购资产转化能力强"
+    ],
+    "showName": "宝贝名称90928\nID: 90928",
+    "uv0": 6204637,
+    "uv8001": 3136109,
+    "uv8002": 9494745,
+    "uv8003": 9644383,
+    "uv8004": 5238445,
+    "uv8005": 4821255
+},
+{
+    "id": 33446,
+    "name": "宝贝名称33446",
+    "transforms": [
+        {
+            "statusId": 0,
+            "uv": 6111444,
+            "statusName": "资产总体",
+            "statusDesc": "描述戴娜"
+        },
+        {
+            "statusId": 8001,
+            "uv": 5788744,
+            "statusName": "浅种草",
+            "statusDesc": "描述沈军"
+        },
+        {
+            "statusId": 8002,
+            "uv": 3380697,
+            "statusName": "深种草",
+            "statusDesc": "描述陆娜"
+        },
+        {
+            "statusId": 8003,
+            "uv": 7142656,
+            "statusName": "拉新",
+            "statusDesc": "描述乔军"
+        },
+        {
+            "statusId": 8004,
+            "uv": 5078227,
+            "statusName": "复购",
+            "statusDesc": "描述袁娜"
+        },
+        {
+            "statusId": 8005,
+            "uv": 5687110,
+            "statusName": "连带",
+            "statusDesc": "描述潘洋"
+        }
+    ],
+    "pictUrl": "https://img.alicdn.com/imgextra/i3/O1CN011RCFjc20To6GyeuCa_!!6000000006851-2-tps-122-120.png",
+    "detailUrl": "https://detail.tmall.com/item.htm?id=624139784464",
+    "reservePrice": 100.77,
+    "onlineDays": 192,
+    "itemLabels": [
+        "首购资产转化能力强"
+    ],
+    "showName": "宝贝名称33446\nID: 33446",
+    "uv0": 6111444,
+    "uv8001": 5788744,
+    "uv8002": 3380697,
+    "uv8003": 7142656,
+    "uv8004": 5078227,
+    "uv8005": 5687110
+},
+{
+    "id": 40141,
+    "name": "宝贝名称40141",
+    "transforms": [
+        {
+            "statusId": 0,
+            "uv": 5730812,
+            "statusName": "资产总体",
+            "statusDesc": "描述杜强"
+        },
+        {
+            "statusId": 8001,
+            "uv": 6222107,
+            "statusName": "浅种草",
+            "statusDesc": "描述宋秀兰"
+        },
+        {
+            "statusId": 8002,
+            "uv": 3581353,
+            "statusName": "深种草",
+            "statusDesc": "描述魏军"
+        },
+        {
+            "statusId": 8003,
+            "uv": 6549654,
+            "statusName": "拉新",
+            "statusDesc": "描述崔涛"
+        },
+        {
+            "statusId": 8004,
+            "uv": 5057279,
+            "statusName": "复购",
+            "statusDesc": "描述薛勇"
+        },
+        {
+            "statusId": 8005,
+            "uv": 7643626,
+            "statusName": "连带",
+            "statusDesc": "描述傅磊"
+        }
+    ],
+    "pictUrl": "https://img.alicdn.com/imgextra/i3/O1CN011RCFjc20To6GyeuCa_!!6000000006851-2-tps-122-120.png",
+    "detailUrl": "https://detail.tmall.com/item.htm?id=624139784464",
+    "reservePrice": 100.57,
+    "onlineDays": 847,
+    "itemLabels": [
+        "首购资产转化能力强"
+    ],
+    "showName": "宝贝名称40141\nID: 40141",
+    "uv0": 5730812,
+    "uv8001": 6222107,
+    "uv8002": 3581353,
+    "uv8003": 6549654,
+    "uv8004": 5057279,
+    "uv8005": 7643626
+},
+{
+    "id": 20653,
+    "name": "宝贝名称20653",
+    "transforms": [
+        {
+            "statusId": 0,
+            "uv": 7242933,
+            "statusName": "资产总体",
+            "statusDesc": "描述冯霞"
+        },
+        {
+            "statusId": 8001,
+            "uv": 1074125,
+            "statusName": "浅种草",
+            "statusDesc": "描述薛霞"
+        },
+        {
+            "statusId": 8002,
+            "uv": 6872656,
+            "statusName": "深种草",
+            "statusDesc": "描述许明"
+        },
+        {
+            "statusId": 8003,
+            "uv": 5799085,
+            "statusName": "拉新",
+            "statusDesc": "描述赖杰"
+        },
+        {
+            "statusId": 8004,
+            "uv": 2875227,
+            "statusName": "复购",
+            "statusDesc": "描述蒋平"
+        },
+        {
+            "statusId": 8005,
+            "uv": 8465312,
+            "statusName": "连带",
+            "statusDesc": "描述许洋"
+        }
+    ],
+    "pictUrl": "https://img.alicdn.com/imgextra/i3/O1CN011RCFjc20To6GyeuCa_!!6000000006851-2-tps-122-120.png",
+    "detailUrl": "https://detail.tmall.com/item.htm?id=624139784464",
+    "reservePrice": 100.05,
+    "onlineDays": 361,
+    "itemLabels": [
+        "首购资产转化能力强"
+    ],
+    "showName": "宝贝名称20653\nID: 20653",
+    "uv0": 7242933,
+    "uv8001": 1074125,
+    "uv8002": 6872656,
+    "uv8003": 5799085,
+    "uv8004": 2875227,
+    "uv8005": 8465312
+},
+{
+    "id": 4604,
+    "name": "宝贝名称4604",
+    "transforms": [
+        {
+            "statusId": 0,
+            "uv": 8426624,
+            "statusName": "资产总体",
+            "statusDesc": "描述薛敏"
+        },
+        {
+            "statusId": 8001,
+            "uv": 2790537,
+            "statusName": "浅种草",
+            "statusDesc": "描述魏杰"
+        },
+        {
+            "statusId": 8002,
+            "uv": 9909591,
+            "statusName": "深种草",
+            "statusDesc": "描述徐军"
+        },
+        {
+            "statusId": 8003,
+            "uv": 2844840,
+            "statusName": "拉新",
+            "statusDesc": "描述余丽"
+        },
+        {
+            "statusId": 8004,
+            "uv": 80887,
+            "statusName": "复购",
+            "statusDesc": "描述韩芳"
+        },
+        {
+            "statusId": 8005,
+            "uv": 2361339,
+            "statusName": "连带",
+            "statusDesc": "描述谭超"
+        }
+    ],
+    "pictUrl": "https://img.alicdn.com/imgextra/i3/O1CN011RCFjc20To6GyeuCa_!!6000000006851-2-tps-122-120.png",
+    "detailUrl": "https://detail.tmall.com/item.htm?id=624139784464",
+    "reservePrice": 100.72,
+    "onlineDays": 119,
+    "itemLabels": [
+        "首购资产转化能力强"
+    ],
+    "showName": "宝贝名称4604\nID: 4604",
+    "uv0": 8426624,
+    "uv8001": 2790537,
+    "uv8002": 9909591,
+    "uv8003": 2844840,
+    "uv8004": 80887,
+    "uv8005": 2361339
+},
+{
+    "id": 47615,
+    "name": "宝贝名称47615",
+    "transforms": [
+        {
+            "statusId": 0,
+            "uv": 9830916,
+            "statusName": "资产总体",
+            "statusDesc": "描述曾军"
+        },
+        {
+            "statusId": 8001,
+            "uv": 5132262,
+            "statusName": "浅种草",
+            "statusDesc": "描述任秀英"
+        },
+        {
+            "statusId": 8002,
+            "uv": 9132584,
+            "statusName": "深种草",
+            "statusDesc": "描述余静"
+        },
+        {
+            "statusId": 8003,
+            "uv": 6022294,
+            "statusName": "拉新",
+            "statusDesc": "描述万秀兰"
+        },
+        {
+            "statusId": 8004,
+            "uv": 2565495,
+            "statusName": "复购",
+            "statusDesc": "描述易勇"
+        },
+        {
+            "statusId": 8005,
+            "uv": 8028933,
+            "statusName": "连带",
+            "statusDesc": "描述胡静"
+        }
+    ],
+    "pictUrl": "https://img.alicdn.com/imgextra/i3/O1CN011RCFjc20To6GyeuCa_!!6000000006851-2-tps-122-120.png",
+    "detailUrl": "https://detail.tmall.com/item.htm?id=624139784464",
+    "reservePrice": 100.87,
+    "onlineDays": 225,
+    "itemLabels": [
+        "首购资产转化能力强"
+    ],
+    "showName": "宝贝名称47615\nID: 47615",
+    "uv0": 9830916,
+    "uv8001": 5132262,
+    "uv8002": 9132584,
+    "uv8003": 6022294,
+    "uv8004": 2565495,
+    "uv8005": 8028933
+},
+{
+    "id": 25106,
+    "name": "宝贝名称25106",
+    "transforms": [
+        {
+            "statusId": 0,
+            "uv": 7657446,
+            "statusName": "资产总体",
+            "statusDesc": "描述唐超"
+        },
+        {
+            "statusId": 8001,
+            "uv": 2586894,
+            "statusName": "浅种草",
+            "statusDesc": "描述梁娟"
+        },
+        {
+            "statusId": 8002,
+            "uv": 5648308,
+            "statusName": "深种草",
+            "statusDesc": "描述吕杰"
+        },
+        {
+            "statusId": 8003,
+            "uv": 5111088,
+            "statusName": "拉新",
+            "statusDesc": "描述钱桂英"
+        },
+        {
+            "statusId": 8004,
+            "uv": 2807251,
+            "statusName": "复购",
+            "statusDesc": "描述易静"
+        },
+        {
+            "statusId": 8005,
+            "uv": 2464069,
+            "statusName": "连带",
+            "statusDesc": "描述唐军"
+        }
+    ],
+    "pictUrl": "https://img.alicdn.com/imgextra/i3/O1CN011RCFjc20To6GyeuCa_!!6000000006851-2-tps-122-120.png",
+    "detailUrl": "https://detail.tmall.com/item.htm?id=624139784464",
+    "reservePrice": 100.74,
+    "onlineDays": 274,
+    "itemLabels": [
+        "首购资产转化能力强"
+    ],
+    "showName": "宝贝名称25106\nID: 25106",
+    "uv0": 7657446,
+    "uv8001": 2586894,
+    "uv8002": 5648308,
+    "uv8003": 5111088,
+    "uv8004": 2807251,
+    "uv8005": 2464069
+},
+{
+    "id": 61348,
+    "name": "宝贝名称61348",
+    "transforms": [
+        {
+            "statusId": 0,
+            "uv": 5817394,
+            "statusName": "资产总体",
+            "statusDesc": "描述邱霞"
+        },
+        {
+            "statusId": 8001,
+            "uv": 3968809,
+            "statusName": "浅种草",
+            "statusDesc": "描述潘敏"
+        },
+        {
+            "statusId": 8002,
+            "uv": 4934627,
+            "statusName": "深种草",
+            "statusDesc": "描述彭静"
+        },
+        {
+            "statusId": 8003,
+            "uv": 2974665,
+            "statusName": "拉新",
+            "statusDesc": "描述丁军"
+        },
+        {
+            "statusId": 8004,
+            "uv": 6161631,
+            "statusName": "复购",
+            "statusDesc": "描述毛磊"
+        },
+        {
+            "statusId": 8005,
+            "uv": 429657,
+            "statusName": "连带",
+            "statusDesc": "描述易桂英"
+        }
+    ],
+    "pictUrl": "https://img.alicdn.com/imgextra/i3/O1CN011RCFjc20To6GyeuCa_!!6000000006851-2-tps-122-120.png",
+    "detailUrl": "https://detail.tmall.com/item.htm?id=624139784464",
+    "reservePrice": 100.22,
+    "onlineDays": 364,
+    "itemLabels": [
+        "首购资产转化能力强"
+    ],
+    "showName": "宝贝名称61348\nID: 61348",
+    "uv0": 5817394,
+    "uv8001": 3968809,
+    "uv8002": 4934627,
+    "uv8003": 2974665,
+    "uv8004": 6161631,
+    "uv8005": 429657
+}
+]
+</script>
+    <table>
+        <tr>
+            <td id="td-vl">
+                <form>
+                    <textarea id="code" name="code">
+
+
+
+
+var variables = {
+    "fieldsConfig": {
+        "uv8001": {
+            "name": "浅种草"
+        },
+        "uv8002": {
+            "name": "深种草"
+        },
+        "uv8003": {
+            "name": "拉新"
+        },
+        "uv8004": {
+            "name": "复购"
+        },
+        "uv8005": {
+            "name": "连带"
+        }
+    },
+    "field": [
+        [
+            "uv8001",
+            "uv8002",
+            "uv8003",
+            "uv8004",
+            "uv8005"
+        ]
+    ]
+}
+var options = {
+    coord: {
+        fieldsConfig: variables.fieldsConfig,
+        type: "rect",
+        horizontal: true,
+        xAxis: {
+            field: "showName",
+            label: {
+                fontSize: '12'
+            }
+        }
+    },
+    tips: {},
+    legend: {},
+    graphs: [
+        {
+            type: "bar",
+            field: variables.field,
+            label: {
+                enabled: true,
+                offsetX: -7,
+                offsetY: 40,
+                fontColor: '#333',
+                format: function (val, e) {
+                    if (e.iLay === variables.field[0].length - 1) {
+                        return e.rowData.uv0
+                    }
+
+                }
+            },
+
+            yAxisAlign: "left"
+        }
+    ],
+    datazoom:{
+        position: 'left'
+    }
+};
+
+window.bar = chartx.create("canvasTest" , data0 , options)
+            
+setTimeout(function(){
+    bar.resetData( data1 )
+} , 2000)
+                       
+            
+
+            </textarea>
+                </form>
+            </td>
+            <td style="padding:0 10px;" id="td-vr">
+                <div id="chartdemo-r">
+                    <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
+                        <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
+
+                        <h4>柱状图（bar chart）</h4>
+                        <p>
+                            联系人：@释剑
+                        </p>
+                    </div>
+                    <div class="test-c">
+                        <div id="canvasTest" style='background:#fafafa;width:600px;height:400px;position:relative;'></div>
+                    </div>
+
+                </div>
+            </td>
+        </tr>
+    </table>
+
+
+</body>
+
+</html>

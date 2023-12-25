@@ -232,8 +232,19 @@ var Rect = /*#__PURE__*/function (_coordBase) {
     key: "resetData",
     value: function resetData(dataFrame) {
       var me = this;
-      var _padding = this.app.padding;
+      var _padding = this.app.padding; //let w = this._opt.width || this.app.width;
+
+      var h = this._opt.height || this.app.height;
       var w = this._opt.width || this.app.width;
+
+      if (this.horizontal) {
+        //如果是横向的坐标系统，也就是xy对调，那么高宽也要对调
+        var _num = w;
+        w = h;
+        h = _num;
+      }
+
+      ;
       this.dataFrame = dataFrame; // let _xAxisDataFrame = this.getAxisDataFrame(this.xAxis.field);
       // this._xAxis.resetData( _xAxisDataFrame );
 

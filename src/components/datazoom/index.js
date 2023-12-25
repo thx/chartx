@@ -8,6 +8,10 @@ let Line    = Canvax.Shapes.Line;
 let Rect    = Canvax.Shapes.Rect;
 let Polygon = Canvax.Shapes.Polygon;
 
+/**
+ * 横向直角坐标图不支持position为left or right
+ */
+
 class dataZoom extends Component
 {
     static defaultProps(){
@@ -357,6 +361,7 @@ class dataZoom extends Component
         };
 
         if( opt.coord.horizontal ){
+            this.__rectCoordIsHorizontal = true
             delete opt.coord.horizontal;
         };
 
@@ -453,6 +458,13 @@ class dataZoom extends Component
         if( this.position == 'right' ){
             this.axis = _coord._yAxisRight;
         };
+
+        if( this.__rectCoordIsHorizontal ){
+            if( this.position == 'left' || this.position == 'right' ){
+                this.axis = _xAxis
+            };
+        }
+
         this.axisLayoutType = this.axis.layoutType; //和line bar等得xAxis.layoutType 一一对应
 
         this._computeAttrs();
@@ -910,6 +922,7 @@ class dataZoom extends Component
 
     _setRange( trigger )
     {
+        
         let me = this;
         let _end = me._getRangeEnd();
         let _preDis = _end - me.range.start;

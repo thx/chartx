@@ -37,6 +37,9 @@ var _ = _canvax["default"]._;
 var Line = _canvax["default"].Shapes.Line;
 var Rect = _canvax["default"].Shapes.Rect;
 var Polygon = _canvax["default"].Shapes.Polygon;
+/**
+ * 横向直角坐标图不支持position为left or right
+ */
 
 var dataZoom = /*#__PURE__*/function (_Component) {
   (0, _inherits2["default"])(dataZoom, _Component);
@@ -265,6 +268,7 @@ var dataZoom = /*#__PURE__*/function (_Component) {
       };
 
       if (opt.coord.horizontal) {
+        this.__rectCoordIsHorizontal = true;
         delete opt.coord.horizontal;
       }
 
@@ -370,6 +374,15 @@ var dataZoom = /*#__PURE__*/function (_Component) {
       }
 
       ;
+
+      if (this.__rectCoordIsHorizontal) {
+        if (this.position == 'left' || this.position == 'right') {
+          this.axis = _xAxis;
+        }
+
+        ;
+      }
+
       this.axisLayoutType = this.axis.layoutType; //和line bar等得xAxis.layoutType 一一对应
 
       this._computeAttrs(); //这个组件可以在init的时候就绘制好

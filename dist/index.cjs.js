@@ -8387,7 +8387,7 @@ var components = {
   */
 };
 var _default = {
-  chartxVersion: '1.1.156',
+  chartxVersion: '1.1.157',
   create: function create(el, data, opt) {
     var otherOptions = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
     var chart = null;
@@ -15243,8 +15243,17 @@ var Rect = /*#__PURE__*/function (_coordBase) {
     key: "resetData",
     value: function resetData(dataFrame) {
       var me = this;
-      var _padding = this.app.padding;
+      var _padding = this.app.padding; //let w = this._opt.width || this.app.width;
+
+      var h = this._opt.height || this.app.height;
       var w = this._opt.width || this.app.width;
+
+      if (this.horizontal) {
+        //如果是横向的坐标系统，也就是xy对调，那么高宽也要对调
+        var _num = w;
+        w = h;
+        h = _num;
+      }
       this.dataFrame = dataFrame; // let _xAxisDataFrame = this.getAxisDataFrame(this.xAxis.field);
       // this._xAxis.resetData( _xAxisDataFrame );
 
@@ -53900,6 +53909,9 @@ var _ = _canvax["default"]._;
 var Line = _canvax["default"].Shapes.Line;
 var Rect = _canvax["default"].Shapes.Rect;
 var Polygon = _canvax["default"].Shapes.Polygon;
+/**
+ * 横向直角坐标图不支持position为left or right
+ */
 
 var dataZoom = /*#__PURE__*/function (_Component) {
   (0, _inherits2["default"])(dataZoom, _Component);
@@ -54104,6 +54116,7 @@ var dataZoom = /*#__PURE__*/function (_Component) {
       };
 
       if (opt.coord.horizontal) {
+        this.__rectCoordIsHorizontal = true;
         delete opt.coord.horizontal;
       }
       opt.coord.enabled = false;
@@ -54199,6 +54212,13 @@ var dataZoom = /*#__PURE__*/function (_Component) {
       if (this.position == 'right') {
         this.axis = _coord._yAxisRight;
       }
+
+      if (this.__rectCoordIsHorizontal) {
+        if (this.position == 'left' || this.position == 'right') {
+          this.axis = _xAxis;
+        }
+      }
+
       this.axisLayoutType = this.axis.layoutType; //和line bar等得xAxis.layoutType 一一对应
 
       this._computeAttrs(); //这个组件可以在init的时候就绘制好
@@ -60176,7 +60196,7 @@ if (projectTheme && projectTheme.length) {
 }
 
 var chartx = {
-  version: '1.1.156',
+  version: '1.1.157',
   options: {}
 };
 

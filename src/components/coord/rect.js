@@ -190,7 +190,16 @@ class Rect extends coordBase
     {
         let me = this;
         let _padding = this.app.padding;
+        //let w = this._opt.width || this.app.width;
+        let h = this._opt.height || this.app.height;
         let w = this._opt.width || this.app.width;
+        if( this.horizontal ){
+            //如果是横向的坐标系统，也就是xy对调，那么高宽也要对调
+            let _num = w;
+            w = h;
+            h = _num;
+        };
+
         this.dataFrame = dataFrame;
 
         // let _xAxisDataFrame = this.getAxisDataFrame(this.xAxis.field);
@@ -209,6 +218,7 @@ class Rect extends coordBase
         } );
 
         let xAxisWidth = w - _yAxisWAll - _padding.left - _padding.right;
+        
         this.width = xAxisWidth;
         let _xAxisDataFrame = this.getAxisDataFrame(this.xAxis.field);
         this._xAxis.resetData( _xAxisDataFrame , {
@@ -231,8 +241,9 @@ class Rect extends coordBase
 
     draw( opt )
     {
+        
         //在绘制的时候，要先拿到xAxis的高
-
+        console.log('rect coord draw')
         !opt && (opt ={});
         
         let _padding = this.app.padding;
