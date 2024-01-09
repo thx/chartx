@@ -57,7 +57,7 @@ let babelHandle = ( _src = _srcPath ) => {
                 "@babel/plugin-proposal-class-properties",
                 //"transform-es2015-modules-umd"
                 [ "@babel/plugin-transform-runtime"],
-                //"no-debugging"
+                "no-debugging"
             ]
         }))
         //.pipe(eslint())
