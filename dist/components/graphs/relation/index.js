@@ -206,6 +206,8 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
           ; //滚轮缩放
 
           if (e.type == "wheel") {
+            console.log(_deltaY, e.deltaY);
+
             if (Math.abs(e.deltaY) > Math.abs(_deltaY)) {
               _deltaY = e.deltaY;
             }
@@ -763,6 +765,7 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
       var me = this;
 
       _.each(this.data.edges, function (edge) {
+        console.log(edge.points);
         var key = edge.key.join('_');
 
         if (me.line.isTree && edge.points.length == 3) {

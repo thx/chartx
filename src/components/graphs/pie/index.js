@@ -486,7 +486,7 @@ class PieGraphs extends GraphsBase
     
     unfocusAt( ind ){
         let nodeData = this._pie.data.list[ ind ];
-        if( !nodeData.node.focus.enabled ) return;
+        if( !this.node.focus.enabled ) return;
         this._pie.unfocusOf( nodeData );
     }
     

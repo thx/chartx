@@ -479,7 +479,9 @@ var numeral = (0, _commonjsHelpers308f.a)(function (module) {
       if (typeof val !== 'string') {
         val += '';
 
-        if (console.warn) {}
+        if (console.warn) {
+          console.warn('Numeral.js: Value is not string. It has been co-erced to: ', val);
+        }
       } //trim whitespaces from either sides
 
 

@@ -445,7 +445,7 @@ var PieGraphs = /*#__PURE__*/function (_GraphsBase) {
     key: "unfocusAt",
     value: function unfocusAt(ind) {
       var nodeData = this._pie.data.list[ind];
-      if (!nodeData.node.focus.enabled) return;
+      if (!this.node.focus.enabled) return;
 
       this._pie.unfocusOf(nodeData);
     }

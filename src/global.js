@@ -51,6 +51,7 @@ export default {
 
         //如果用户没有配置coord，说明这个图表是一个默认目标系的图表，比如标签云
         let Chart = me._getComponentModule('chart');
+        
 
         //try {
             chart = new Chart( el, data, this._optionsHandle(opt), componentModules, otherOptions );

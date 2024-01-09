@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="user-scalable=no, width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1, maximum-scale=1" />
+<title>xChart demo -- bar</title>
+
+<script type="text/javascript" src="../../lib/jquery-1.11.1.min.js"></script>
+<script type="text/javascript" src="../../dist/index.iife.js"></script>
+<!-- codemirror -->
+<script type="text/javascript" src="../../lib/codemirror/codemirror.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/active-line.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/javascript.js"></script>
+<script type="text/javascript" src="../../lib/codemirror/matchbrackets.js"></script>
+<link rel="stylesheet" href="../../lib/codemirror/codemirror.css">
+<link rel="stylesheet" href="../../lib/codemirror/zenburn.css">
+<link rel="stylesheet" href="../../lib/codemirror/docs.css">
+<!-- codemirror end -->
+<!--bootstrap-->
+<script type="text/javascript" src="../../lib/bootstrap/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap-theme.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/docs.min.css">
+<link rel="stylesheet" href="../../lib/bootstrap/css/bootstrap.min.css">
+<!--bootstrap end-->
+<script type="text/javascript" src="../../lib/demo.js"></script>
+<link rel="stylesheet" href="../../lib/demo.css">
+</head>
+<body >
+
+<table>
+    <tr>
+        <td id="td-vl">
+            <form><textarea id="code" name="code">
+
+var data = [
+    ["xfield","bottom","top","click"],
+    [111,32,56,333],
+    [112,11,22,333],
+    [113,21,122,333],
+    [114,232,262,333],
+    [115,43,233,333],
+    [116,23,343,333],
+    [117,33,226,333],
+    [118,222,175,333],
+    [119,263,177,333],
+    [120,46,88,333],
+    [121,54,97,333],
+    [122,34,58,333],
+    [123,111,84,333],
+    [124,151,274,333],
+    [125,161,137,333],
+    [126,121,222,333],
+    [127,211,345,333],
+    [128,100,274,333],
+    [129,232,89,333],
+    [130,64,211,333],
+    [131,292,234,333],
+    [132,199,76,333],
+    [133,342,99,333],
+    [134,123,83,333],
+    [135,55,221,333]
+];
+                    
+
+var options = {
+    coord : {
+        type : "rect",
+        xAxis : {
+          field : ["xfield"],
+          posParseToInt : true,
+          label : {
+              rotation : 45
+          }
+      }
+    },
+    graphs : [
+      {
+      type : "bar",
+      field : [["bottom","top"]],
+      node : {
+            fillStyle : ["" , "#90b601"],
+            width : function( dis1 , dis2 ){
+                return dis1-1 ;
+            },
+            radius : 0,
+            filter : function( obj , graphs ){
+                if( obj.field == "bottom" ){
+                    this.context.visible = false
+                } else {
+                    if(obj.xAxis.value == "111" || obj.xAxis.value == "112" || obj.xAxis.value == "113"){
+                        this.context.fillStyle = "#999"
+                    }
+                    if( obj.xAxis.value == "114" ){
+                        this.context.fillStyle = "#f98301"
+                    }
+                }
+            }
+      }
+      }
+    ]
+}
+
+
+window.bar = chartx.create("canvasTest" , data , options)
+
+            </textarea></form>
+        </td>
+        <td style="padding:0 10px;" id="td-vr">
+            <div id="chartdemo-r">
+            <div class="bs-callout bs-callout-warning" style="margin-top:10px;" id="callout-navs-anchor-disabled">
+                <span id="run" class="glyphicon glyphicon-play-circle" title="run"></span>
+
+                <h4>柱状图（bar chart）</h4>
+                <p>
+                    联系人：@释剑
+                </p>
+            </div>
+            <div  class="test-c">
+                <div id="canvasTest" style='width:100%;height:300px;position:relative;'></div>
+            </div>
+
+            </div>
+        </td>
+    </tr>
+</table>
+
+    
+</body> 
+</html>
+
+

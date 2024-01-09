@@ -289,6 +289,7 @@ var Rect = /*#__PURE__*/function (_coordBase) {
     key: "draw",
     value: function draw(opt) {
       //在绘制的时候，要先拿到xAxis的高
+      console.log('rect coord draw');
       !opt && (opt = {});
       var _padding = this.app.padding;
       var h = opt.height || this.app.height;

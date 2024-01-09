@@ -8323,6 +8323,7 @@ var _default = {
       var codeWithoutVariables = code.slice(0, range[0]) + code.slice(range[1]);
       return this._eval(codeWithoutVariables, 'options', 'variables', variables);
     } catch (e) {
+      console.log('parse error');
       return {};
     }
   }
@@ -8385,7 +8386,7 @@ var components = {
   */
 };
 var _default = {
-  chartxVersion: '1.1.158',
+  chartxVersion: '__VERSION__',
   create: function create(el, data, opt) {
     var otherOptions = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
     var chart = null;
@@ -15296,6 +15297,7 @@ var Rect = /*#__PURE__*/function (_coordBase) {
     key: "draw",
     value: function draw(opt) {
       //在绘制的时候，要先拿到xAxis的高
+      console.log('rect coord draw');
       !opt && (opt = {});
       var _padding = this.app.padding;
       var h = opt.height || this.app.height;
@@ -23442,7 +23444,7 @@ var PieGraphs = /*#__PURE__*/function (_GraphsBase) {
     key: "unfocusAt",
     value: function unfocusAt(ind) {
       var nodeData = this._pie.data.list[ind];
-      if (!nodeData.node.focus.enabled) return;
+      if (!this.node.focus.enabled) return;
 
       this._pie.unfocusOf(nodeData);
     }
@@ -28957,6 +28959,7 @@ function scaleSolution(solution, width, height, padding) {
       yRange = bounds.yRange;
 
   if (xRange.max == xRange.min || yRange.max == yRange.min) {
+    console.log("not scaling solution: zero size detected");
     return solution;
   }
 
@@ -29616,7 +29619,9 @@ function computeTextCentres(circles, areas) {
     var centre = computeTextCentre(interior, exterior);
     ret[area] = centre;
 
-    if (centre.disjoint && areas[i].size > 0) ;
+    if (centre.disjoint && areas[i].size > 0) {
+      console.log("WARNING: area " + area + " not represented on screen");
+    }
   }
 
   return ret;
@@ -31739,6 +31744,7 @@ var Progress = /*#__PURE__*/function (_GraphsBase) {
             if (nodeData.endAngle > nodeData.middleAngle) {
               //超过了180度的话要绘制第二条
               allColors = (0, color.gradient)(style.lineargradient[0].color, style.lineargradient.slice(-1)[0].color, parseInt(nodeData.allAngle / 10));
+              console.log(allColors);
               end.color = allColors[17];
             } //let newLineargradient = 
             // let _style = me.ctx.createLinearGradient( nodeData.startOutPoint.x ,nodeData.startOutPoint.y, nodeData.middleOutPoint.x, nodeData.middleOutPoint.y );
@@ -32160,6 +32166,7 @@ function jsonToArrayForRelation(data, options, _childrenField) {
   var label = options.node && options.node.content && options.node.content.field;
 
   if (!checkDataIsJson(data, key, childrenKey)) {
+    console.error('该数据不能正确绘制，请提供数组对象形式的数据！');
     return result;
   }
   var childrens = [];
@@ -43118,6 +43125,8 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
           }
 
           if (e.type == "wheel") {
+            console.log(_deltaY, e.deltaY);
+
             if (Math.abs(e.deltaY) > Math.abs(_deltaY)) {
               _deltaY = e.deltaY;
             }
@@ -43625,6 +43634,7 @@ var Relation = /*#__PURE__*/function (_GraphsBase) {
       var me = this;
 
       _.each(this.data.edges, function (edge) {
+        console.log(edge.points);
         var key = edge.key.join('_');
 
         if (me.line.isTree && edge.points.length == 3) {
@@ -49150,11 +49160,13 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
         //{treeData, nodeLength}这里设置了这两个属性
 
         Object.assign(data, _this4._filterTreeData(data.treeOriginData));
+        console.log(data.nodesLength + '个节点构建树:', new Date().getTime() - t);
         var t1 = new Date().getTime();
 
         _this4._initAllDataSize(data).then(function () {
           //这个时候已经设置好了 treeData 的 size 属性width、height
           //可以开始布局了，布局完就可以设置好 data 的 nodes edges 和 size 属性
+          console.log(data.nodesLength + '个节点计算size:', new Date().getTime() - t1);
           resolve(data);
         });
       });
@@ -49548,6 +49560,7 @@ var compactTree = /*#__PURE__*/function (_GraphsBase) {
       data.edges.forEach(function (edge) {
         _this10.getEdgePoints(edge);
       });
+      console.log(data.nodesLength + '个节点计算layout:', new Date().getTime() - t1);
       Object.assign(data, {
         nodes: nodes,
         size: {
@@ -53008,6 +53021,7 @@ var Map = /*#__PURE__*/function (_GraphsBase) {
       this._setNodeStyle(_path, 'select');
 
       nodeData.selected = true;
+      console.log("select:true");
     }
   }, {
     key: "unselectAt",
@@ -53021,6 +53035,7 @@ var Map = /*#__PURE__*/function (_GraphsBase) {
       this._setNodeStyle(_path);
 
       geoGraph.selected = false;
+      console.log("select:false");
 
       if (geoGraph.focused) {
         this.focusAt(adcode);

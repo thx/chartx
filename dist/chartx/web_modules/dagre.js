@@ -8384,7 +8384,9 @@ function time(name, fn) {
 
   try {
     return fn();
-  } finally {}
+  } finally {
+    console.log(name + " time: " + (lodash_1$1.now() - start) + "ms");
+  }
 }
 
 function notime(name, fn) {
